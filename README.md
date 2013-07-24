@@ -16,3 +16,4 @@ The script uses <a href="http://www.decalage.info/python/olefileio">Philippe Lag
 
 The script was built using <a href="http://www.fileformat.info/format/outlookmsg/index.htm">Peter Fiskerstrand's documentation of the .msg format</a>.
 
+If you have any questions feel free to contact me, Matthew Walker, at mattgwwalker at gmail.com.
