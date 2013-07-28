@@ -16,4 +16,7 @@ The script uses <a href="http://www.decalage.info/python/olefileio">Philippe Lag
 
 The script was built using <a href="http://www.fileformat.info/format/outlookmsg/index.htm">Peter Fiskerstrand's documentation of the .msg format</a>.
 
+There are at least two major issues with version 0.1.  The first is that email messages can be embedded in .msg files---the script doesn't like them at all and will dump a 'raw' directory instead of the normal output.  This directory will contain all you need from the email, but in a less-than-ideal form.  The second issue is that the script cannot extract the date of sent emails (as opposed to received emails).
+
 If you have any questions feel free to contact me, Matthew Walker, at mattgwwalker at gmail.com.
+
