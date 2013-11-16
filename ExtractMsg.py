@@ -323,7 +323,12 @@ class Message(OleFile.OleFileIO):
             dirName = '{0:02d}-{1:02d}-{2:02d}_{3:02d}{4:02d}'.format(*d)
         else:
             dirName = "UnknownDate"
-        subject = "".join(i for i in self.subject if i not in r'\/:*?"<>|')
+            
+        if self.subject is None:
+            subject = "[No subject]"
+        else:
+            subject = "".join(i for i in self.subject if i not in r'\/:*?"<>|')
+
         dirName = dirName + " " + subject
 
 
