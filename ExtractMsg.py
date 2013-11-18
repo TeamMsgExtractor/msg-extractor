@@ -156,15 +156,19 @@ properties = {
     '5FF6': 'To (uncertain)'}
 
 
+def windowsUnicode(string):
+    if string is None:
+        return None
+    return unicode(string, 'utf_16_le')
 
 
 class Attachment:
     def __init__(self, msg, dir):
         # Get long filename
-        self.longFilename = msg._getStream( [dir, '__substg1.0_3707001E'] )
+        self.longFilename = msg._getStringStream( [dir, '__substg1.0_3707'] )
 
         # Get short filename
-        self.shortFilename = msg._getStream( [dir, '__substg1.0_3704001E'] )
+        self.shortFilename = msg._getStringStream( [dir, '__substg1.0_3704'] )
 
         # Get attachment data
         self.data = msg._getStream( [dir, '__substg1.0_37010102'] )
@@ -189,23 +193,48 @@ class Message(OleFile.OleFileIO):
         OleFile.OleFileIO.__init__(self, filename)
 
 
-    def _getStream(self, dir):
-        if self.exists(dir):
-            stream = self.openstream(dir)
+    def _getStream(self, filename):
+        if self.exists(filename):
+            stream = self.openstream(filename)
             return stream.read()
         else:
             return None
 
+    def _getStringStream(self, filename, prefer='unicode'):
+        """Gets a string representation of the requested filename.
+        Checks for both ASCII and Unicode representations and returns
+        a value if possible.  If there are both ASCII and Unicode
+        versions, then the parameter /prefer/ specifies which will be
+        returned.
+
+        """
+
+        if isinstance(filename, list):
+            # Join with slashes to make it easier to append the type
+            filename = "/".join(filename)
+
+        asciiVersion = self._getStream(filename+'001E')
+        unicodeVersion = windowsUnicode(self._getStream(filename+'001F'))
+        if asciiVersion is None:
+            return unicodeVersion
+        elif unicodeVersion is None:
+            return asciiVersion
+        else:
+            if prefer == 'unicode':
+                return unicodeVersion
+            else:
+                return asciiVersion
+
     @property
     def subject(self):
-        return self._getStream('__substg1.0_0037001E')
+        return self._getStringStream('__substg1.0_0037')
 
     @property
     def header(self):
         try:
             return self._header
         except:
-            headerText = self._getStream('__substg1.0_007D001E')
+            headerText = self._getStringStream('__substg1.0_007D')
             if headerText is not None:
                 self._header = EmailParser().parsestr(headerText)
             else:
@@ -237,8 +266,8 @@ class Message(OleFile.OleFileIO):
                     return headerResult
 
             # Extract from other fields
-            text = self._getStream('__substg1.0_0C1A001E')
-            email = self._getStream('__substg1.0_0C1F001E')
+            text = self._getStringStream('__substg1.0_0C1A')
+            email = self._getStringStream('__substg1.0_0C1F')
             result = None
             if text is None:
                 result = email
@@ -265,7 +294,7 @@ class Message(OleFile.OleFileIO):
             # Extract from other fields
             # TODO: This should really extract data from the recip folders, 
             # but how do you know which is to/cc/bcc?
-            display = self._getStream('__substg1.0_0E04001E')
+            display = self._getStringStream('__substg1.0_0E04')
             self._to = display
             return display
 
@@ -285,7 +314,7 @@ class Message(OleFile.OleFileIO):
             # Extract from other fields
             # TODO: This should really extract data from the recip folders, 
             # but how do you know which is to/cc/bcc?
-            display = self._getStream('__substg1.0_0E03001E')
+            display = self._getStringStream('__substg1.0_0E03')
             self._cc = display
             return display
 
@@ -294,7 +323,7 @@ class Message(OleFile.OleFileIO):
     @property
     def body(self):
         # Get the message body
-        return self._getStream('__substg1.0_1000001E')
+        return self._getStringStream('__substg1.0_1000')
 
     @property
     def attachments(self):
@@ -369,7 +398,7 @@ class Message(OleFile.OleFileIO):
             f.write("Subject: "+xstr(self.subject)+"\n")
             f.write("Date: "+xstr(self.date)+"\n")
             f.write("-----------------\n\n")
-            
+
             f.write(self.body)
             f.close()
 
@@ -435,7 +464,7 @@ class Message(OleFile.OleFileIO):
         
     def debug(self):
         for dir in self.listdir():
-            if dir[-1].endswith('001E'):
+            if dir[-1].endswith('001E'): # FIXME: Check for unicode 001F too
                 print "Directory: "+str(dir)
                 print "Contents: "+self._getStream(dir)
 
@@ -446,18 +475,26 @@ if __name__ == "__main__":
     if len(sys.argv) <= 1:
         print __doc__
         print """
-Launched from command line, this script parses Microsoft Outlook Message files and save their contents to the current directory.
+Launched from command line, this script parses Microsoft Outlook Message files and save their contents to the current directory.  On error the script will write out a 'raw' directory will all the details from the file, but in a less-than-desirable format.  To force this mode, the flag '--raw' can be specified.
 
 Usage:  <file> [file2 ...]
+   or:  --raw <file>
 
 """
         sys.exit()
 
+    writeRaw = False
+
     for rawFilename in sys.argv[1:]:
+        if rawFilename == '--raw':
+            writeRaw = True
         for filename in glob.glob(rawFilename):
             msg = Message(filename)
             try:
-                msg.save()
+                if writeRaw:
+                    msg.saveRaw()
+                else:
+                    msg.save()
             except:
                 #msg.debug()
                 print "Error with file '"+filename+"': "+traceback.format_exc()
