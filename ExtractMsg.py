@@ -4,12 +4,12 @@
 ExtractMsg:
     Extracts emails and attachments saved in Microsoft Outlook's .msg files
 
-version 0.1 2013-07-24 Matthew Walker - https://github.com/mattgwwalker/msg-extractor
+https://github.com/mattgwwalker/msg-extractor
 """
 
 __author__  = "Matthew Walker"
-__date__    = "2013-07-24"
-__version__ = '0.1'
+__date__    = "2013-11-19"
+__version__ = '0.2'
 
 #--- LICENSE ------------------------------------------------------------------
 #
