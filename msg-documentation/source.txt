@@ -1,0 +1,1 @@
+Microsoft's documentation of the .msg file format was downloaded from http://msdn.microsoft.com/en-us/library/cc463912%28v=exchg.80%29.aspx (2013-11-27).
