@@ -28,6 +28,7 @@ __version__ = '0.2'
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import sys
 import OleFileIO_PL as OleFile  # Used version 0.25 http://www.decalage.info/python/olefileio
 from email.parser import Parser as EmailParser
 import email.utils
@@ -159,7 +160,10 @@ properties = {
 def windowsUnicode(string):
     if string is None:
         return None
-    return unicode(string, 'utf_16_le')
+    if sys.version_info[0] >= 3:  # Python 3
+        return str(string, 'utf_16_le')
+    else:  # Python 2
+        return unicode(string, 'utf_16_le')
 
 
 class Attachment:
@@ -456,31 +460,31 @@ class Message(OleFile.OleFileIO):
 
     def dump(self):
         # Prints out a summary of the message
-        print 'Message'
-        print 'Subject:', self.subject
-        print 'Date:', self.date
-        print 'Body:'
-        print self.body
+        print('Message')
+        print('Subject:', self.subject)
+        print('Date:', self.date)
+        print('Body:')
+        print(self.body)
         
     def debug(self):
         for dir in self.listdir():
             if dir[-1].endswith('001E'): # FIXME: Check for unicode 001F too
-                print "Directory: "+str(dir)
-                print "Contents: "+self._getStream(dir)
+                print("Directory: "+str(dir))
+                print("Contents: "+self._getStream(dir))
 
 
 if __name__ == "__main__":
     import sys
 
     if len(sys.argv) <= 1:
-        print __doc__
-        print """
+        print(__doc__)
+        print("""
 Launched from command line, this script parses Microsoft Outlook Message files and save their contents to the current directory.  On error the script will write out a 'raw' directory will all the details from the file, but in a less-than-desirable format.  To force this mode, the flag '--raw' can be specified.
 
 Usage:  <file> [file2 ...]
    or:  --raw <file>
 
-"""
+""")
         sys.exit()
 
     writeRaw = False
@@ -497,6 +501,6 @@ Usage:  <file> [file2 ...]
                     msg.save()
             except:
                 #msg.debug()
-                print "Error with file '"+filename+"': "+traceback.format_exc()
+                print("Error with file '"+filename+"': "+traceback.format_exc())
 
 
