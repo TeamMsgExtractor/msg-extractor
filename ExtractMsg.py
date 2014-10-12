@@ -188,7 +188,7 @@ class Attachment:
             import string
             filename = 'UnknownFilename ' + \
                 ''.join(random.choice(string.ascii_uppercase + string.digits)
-                        for _ in range(5))+".bin"
+                        for _ in range(5)) + ".bin"
         f = open(filename, 'wb')
         f.write(self.data)
         f.close()
@@ -217,8 +217,8 @@ class Message(OleFile.OleFileIO):
             # Join with slashes to make it easier to append the type
             filename = "/".join(filename)
 
-        asciiVersion = self._getStream(filename+'001E')
-        unicodeVersion = windowsUnicode(self._getStream(filename+'001F'))
+        asciiVersion = self._getStream(filename + '001E')
+        unicodeVersion = windowsUnicode(self._getStream(filename + '001F'))
         if asciiVersion is None:
             return unicodeVersion
         elif unicodeVersion is None:
@@ -395,11 +395,11 @@ class Message(OleFile.OleFileIO):
             def xstr(s):
                 return '' if s is None else str(s)
 
-            f.write("From: "+xstr(self.sender)+"\n")
-            f.write("To: "+xstr(self.to)+"\n")
-            f.write("CC: "+xstr(self.cc)+"\n")
-            f.write("Subject: "+xstr(self.subject)+"\n")
-            f.write("Date: "+xstr(self.date)+"\n")
+            f.write("From: " + xstr(self.sender) + "\n")
+            f.write("To: " + xstr(self.to) + "\n")
+            f.write("CC: " + xstr(self.cc) + "\n")
+            f.write("Subject: " + xstr(self.subject) + "\n")
+            f.write("Date: " + xstr(self.date) + "\n")
             f.write("-----------------\n\n")
 
             f.write(self.body)
