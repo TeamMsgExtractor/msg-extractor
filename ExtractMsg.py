@@ -389,20 +389,35 @@ class Message(OleFile.OleFileIO):
             os.chdir(dirName)
 
             # Save the message body
-            f = open("message.txt", "w")
+            fext = 'json' if toJson else 'text'
+            f = open("message." + ext, "w")
             # From, to , cc, subject, date
 
             def xstr(s):
                 return '' if s is None else str(s)
 
-            f.write("From: " + xstr(self.sender) + "\n")
-            f.write("To: " + xstr(self.to) + "\n")
-            f.write("CC: " + xstr(self.cc) + "\n")
-            f.write("Subject: " + xstr(self.subject) + "\n")
-            f.write("Date: " + xstr(self.date) + "\n")
-            f.write("-----------------\n\n")
+            if toJson:
+                import json
+                from imapclient import  imapclient
+                self.body = imapclient.decode_utf7(self.body)
 
-            f.write(self.body)
+                emailObj = {'from': xstr(self.sender),
+                            'to': xstr(self.to),
+                            'cc': xstr(self.cc),
+                            'subject': xstr(self.subject),
+                            'date': xstr(self.date),
+                            'body': self.body}
+
+                f.write(json.dumps(emailObj, ensure_ascii=True))
+            else:
+                f.write("From: " + xstr(self.sender) + "\n")
+                f.write("To: " + xstr(self.to) + "\n")
+                f.write("CC: " + xstr(self.cc) + "\n")
+                f.write("Subject: " + xstr(self.subject) + "\n")
+                f.write("Date: " + xstr(self.date) + "\n")
+                f.write("-----------------\n\n")
+                f.write(self.body)
+                
             f.close()
 
             # Save the attachments
@@ -487,6 +502,10 @@ Usage:  <file> [file2 ...]
     for rawFilename in sys.argv[1:]:
         if rawFilename == '--raw':
             writeRaw = True
+
+        if rawFilename == '--json':
+            toJson = True
+
         for filename in glob.glob(rawFilename):
             msg = Message(filename)
             try:
