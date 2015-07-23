@@ -192,6 +192,7 @@ class Attachment:
         f = open(filename, 'wb')
         f.write(self.data)
         f.close()
+        return filename
 
 
 class Message(OleFile.OleFileIO):
