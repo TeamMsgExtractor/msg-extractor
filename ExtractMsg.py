@@ -396,6 +396,11 @@ class Message(OleFile.OleFileIO):
             def xstr(s):
                 return '' if s is None else str(s)
 
+            attachmentNames = []
+            # Save the attachments
+            for attachment in self.attachments:
+                attachmentNames.append(attachment.save())
+
             if toJson:
                 import json
                 from imapclient import  imapclient
@@ -406,6 +411,7 @@ class Message(OleFile.OleFileIO):
                             'cc': xstr(self.cc),
                             'subject': xstr(self.subject),
                             'date': xstr(self.date),
+                            'attachments': attachmentNames,
                             'body': self.body}
 
                 f.write(json.dumps(emailObj, ensure_ascii=True))
@@ -420,9 +426,6 @@ class Message(OleFile.OleFileIO):
                 
             f.close()
 
-            # Save the attachments
-            for attachment in self.attachments:
-                attachment.save()
         except Exception:
             self.saveRaw()
             raise
