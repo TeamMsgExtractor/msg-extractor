@@ -34,7 +34,7 @@ import glob
 import traceback
 from email.parser import Parser as EmailParser
 import email.utils
-import OleFileIO_PL as OleFile
+import olefile as OleFile
 
 # This property information was sourced from
 # http://www.fileformat.info/format/outlookmsg/index.htm
