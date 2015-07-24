@@ -26,3 +26,21 @@ If you are having difficulty with a specific file, or would like to extract more
 
 If you have any questions feel free to contact me, Matthew Walker, at mattgwwalker at gmail.com.
 
+
+Installation
+------------
+
+You can install using pip with:
+```sh
+  pip install https://github.com/mattgwwalker/msg-extractor/zipball/master
+```
+
+or you can include this in your list of python dependencies with:
+```python
+# setup.py
+
+setup(
+    ...
+    dependency_links=['https://github.com/mattgwwalker/msg-extractor/zipball/master'],
+)
+```
