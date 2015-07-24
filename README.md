@@ -23,6 +23,10 @@ If you are having difficulty with a specific file, or would like to extract more
   python ExtractMsg.py --raw example.msg
 ```
 
+Further, a --json flag has been added by Joel Kaufman to specify JSON output:
+```
+  python ExtractMsg.py --json example.msg
+```
 
 If you have any questions feel free to contact me, Matthew Walker, at mattgwwalker at gmail.com.
 
