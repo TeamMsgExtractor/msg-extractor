@@ -1,0 +1,5 @@
+include REQUIREMENTS
+include MANIFEST.in
+include README.md
+include COPYING
+recursive-exclude * *.py[co]
