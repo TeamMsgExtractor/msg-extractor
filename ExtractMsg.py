@@ -167,14 +167,15 @@ def windowsUnicode(string):
 
 class Attachment:
     def __init__(self, msg, dir_):
+
         # Get long filename
-        self.longFilename = msg._getStringStream([dir_, '__substg1.0_3707'])
+        self.longFilename = msg._getStringStream(dir_ + ['__substg1.0_3707'])
 
         # Get short filename
-        self.shortFilename = msg._getStringStream([dir_, '__substg1.0_3704'])
+        self.shortFilename = msg._getStringStream(dir_ + ['__substg1.0_3704'])
 
         # Get attachment data
-        self.data = msg._getStream([dir_, '__substg1.0_37010102'])
+        self.data = msg._getStream(dir_ + ['__substg1.0_37010102'])
 
     def save(self):
         # Use long filename as first preference
@@ -334,10 +335,24 @@ class Message(OleFile.OleFileIO):
         except Exception:
             # Get the attachments
             attachmentDirs = []
-
-            for dir_ in self.listdir():
-                if dir_[0].startswith('__attach') and dir_[0] not in attachmentDirs:
-                    attachmentDirs.append(dir_[0])
+            dirList = self.listdir()
+            """
+            The purpose is to get the most nested attachment dir in order to handle msgs inside msgs
+            In this case, the second message will be in an __attach in "__substg1.0_3701000D"
+                cf fig 3. https://msdn.microsoft.com/en-us/library/ee217698%28v=exchg.80%29.aspx
+            """
+            dirList = sorted(dirList,key=lambda dir: len(dir), reverse=True) # Used to gets the most nested attachment
+            for dir_ in dirList:
+                if dir_[0].startswith('__attach'):
+                    result = [dir_[0]]
+                    for d in dir_[1:]:
+                        if (d == "__substg1.0_3701000D") or (d.startswith('__attach')):
+                           result.append(d)
+                        else:
+                            break
+                    if len([d for d in [''.join(d) for d in attachmentDirs] if d.startswith("".join(result))]) == 0:
+                        # Reject if a more specific dir is known
+                        attachmentDirs.append(result)
 
             self._attachments = []
 
@@ -484,6 +499,7 @@ class Message(OleFile.OleFileIO):
             if dir_[-1].endswith('001E'):  # FIXME: Check for unicode 001F too
                 print("Directory: " + str(dir))
                 print("Contents: " + self._getStream(dir))
+
 
 
 if __name__ == "__main__":
