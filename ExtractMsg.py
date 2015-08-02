@@ -347,23 +347,28 @@ class Message(OleFile.OleFileIO):
             return self._attachments
 
     def save(self, raw=False):
-        # Create a directory based on the date and subject of the message
-        d = self.parsedDate
-        if d is not None:
-            dirName = '{0:02d}-{1:02d}-{2:02d}_{3:02d}{4:02d}'.format(*d)
-        else:
-            dirName = "UnknownDate"
 
-        if self.subject is None:
-            subject = "[No subject]"
+        if useFileName:
+            # strip out the extension
+            dirName = filename.split('/').pop().split('.')[0]
         else:
-            subject = "".join(i for i in self.subject if i not in r'\/:*?"<>|')
+            # Create a directory based on the date and subject of the message
+            d = self.parsedDate
+            if d is not None:
+                dirName = '{0:02d}-{1:02d}-{2:02d}_{3:02d}{4:02d}'.format(*d)
+            else:
+                dirName = "UnknownDate"
 
-        dirName = dirName + " " + subject
+            if self.subject is None:
+                subject = "[No subject]"
+            else:
+                subject = "".join(i for i in self.subject if i not in r'\/:*?"<>|')
+
+            dirName = dirName + " " + subject
 
         def addNumToDir(dirName):
             # Attempt to create the directory with a '(n)' appended
-            dirCreated = False
+
             for i in range(2, 100):
                 try:
                     newDirName = dirName + " (" + str(i) + ")"
@@ -497,11 +502,15 @@ can be specified.
 
 Usage:  <file> [file2 ...]
    or:  --raw <file>
+   or:  --json
+
+   to name the directory as the .msg file, --use-file-name
 """)
         sys.exit()
 
     writeRaw = False
     toJson = False
+    useFileName = False
 
     for rawFilename in sys.argv[1:]:
         if rawFilename == '--raw':
@@ -509,6 +518,9 @@ Usage:  <file> [file2 ...]
 
         if rawFilename == '--json':
             toJson = True
+
+        if rawFilename == '--use-file-name':
+            useFileName = True
 
         for filename in glob.glob(rawFilename):
             msg = Message(filename)
