@@ -391,7 +391,7 @@ class Message(OleFile.OleFileIO):
 
             # Save the message body
             fext = 'json' if toJson else 'text'
-            f = open("message." + ext, "w")
+            f = open("message." + fext, "w")
             # From, to , cc, subject, date
 
             def xstr(s):
@@ -404,8 +404,7 @@ class Message(OleFile.OleFileIO):
 
             if toJson:
                 import json
-                from imapclient import  imapclient
-                self.body = imapclient.decode_utf7(self.body)
+                from imapclient.imapclient import decode_utf7
 
                 emailObj = {'from': xstr(self.sender),
                             'to': xstr(self.to),
@@ -413,7 +412,7 @@ class Message(OleFile.OleFileIO):
                             'subject': xstr(self.subject),
                             'date': xstr(self.date),
                             'attachments': attachmentNames,
-                            'body': self.body}
+                            'body': decode_utf7(self.body)}
 
                 f.write(json.dumps(emailObj, ensure_ascii=True))
             else:
@@ -502,6 +501,7 @@ Usage:  <file> [file2 ...]
         sys.exit()
 
     writeRaw = False
+    toJson = False
 
     for rawFilename in sys.argv[1:]:
         if rawFilename == '--raw':
