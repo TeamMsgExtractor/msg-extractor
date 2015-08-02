@@ -28,6 +28,12 @@ Further, a --json flag has been added by Joel Kaufman to specify JSON output:
   python ExtractMsg.py --json example.msg
 ```
 
+Joel also added a --use-file-name flag, which allows you to specify that the script writes the emails' contents to the names of the .msg files, rather than using the subject and date to name the folder:
+```
+  python ExtractMsg.py --use-file-name example.msg
+```
+
+
 If you have any questions feel free to contact me, Matthew Walker, at mattgwwalker at gmail.com.
 
 
