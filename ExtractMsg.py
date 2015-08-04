@@ -33,8 +33,10 @@ import sys
 import glob
 import traceback
 from email.parser import Parser as EmailParser
+from imapclient.imapclient import decode_utf7
 import email.utils
 import olefile as OleFile
+
 
 # This property information was sourced from
 # http://www.fileformat.info/format/outlookmsg/index.htm
@@ -223,12 +225,12 @@ class Message(OleFile.OleFileIO):
         if asciiVersion is None:
             return unicodeVersion
         elif unicodeVersion is None:
-            return asciiVersion
+            return decode_utf7(asciiVersion)
         else:
             if prefer == 'unicode':
                 return unicodeVersion
             else:
-                return asciiVersion
+                return decode_utf7(asciiVersion)
 
     @property
     def subject(self):
@@ -409,7 +411,6 @@ class Message(OleFile.OleFileIO):
 
             if toJson:
                 import json
-                from imapclient.imapclient import decode_utf7
 
                 emailObj = {'from': xstr(self.sender),
                             'to': xstr(self.to),
@@ -417,7 +418,7 @@ class Message(OleFile.OleFileIO):
                             'subject': xstr(self.subject),
                             'date': xstr(self.date),
                             'attachments': attachmentNames,
-                            'body': decode_utf7(self.body)}
+                            'body': xstr(self.body)}
 
                 f.write(json.dumps(emailObj, ensure_ascii=True))
             else:
