@@ -225,12 +225,18 @@ class Message(OleFile.OleFileIO):
         if asciiVersion is None:
             return unicodeVersion
         elif unicodeVersion is None:
-            return decode_utf7(asciiVersion)
+            try:
+                return decode_utf7(asciiVersion)
+            except Exception:
+                return "".join(map(chr, asciiVersion))
         else:
             if prefer == 'unicode':
                 return unicodeVersion
             else:
-                return decode_utf7(asciiVersion)
+                try:
+                    return decode_utf7(asciiVersion)
+                except Exception:
+                    return "".join(map(chr, asciiVersion))
 
     @property
     def subject(self):
