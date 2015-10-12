@@ -176,8 +176,7 @@ class Attachment:
         self.shortFilename = msg._getStringStream([dir_, '__substg1.0_3704'])
 
         # Get attachment data
-        self.data = msg._getStream([dir_, '__substg1.0_37010102'])
-
+        self.data = msg._getStream([dir_, '__substg1.0_37010102']) or  msg._getStream(['__attach_version1.0_#00000001', '__substg1.0_37010102'])
     def save(self):
         # Use long filename as first preference
         filename = self.longFilename
