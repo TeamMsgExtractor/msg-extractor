@@ -170,13 +170,17 @@ def windowsUnicode(string):
 class Attachment:
     def __init__(self, msg, dir_):
         # Get long filename
-        self.longFilename = msg._getStringStream([dir_, '__substg1.0_3707'])
+        self.longFilename = msg._getStringStream(dir_ + ['__substg1.0_3707'])
 
         # Get short filename
-        self.shortFilename = msg._getStringStream([dir_, '__substg1.0_3704'])
+        self.shortFilename = msg._getStringStream(dir_ + ['__substg1.0_3704'])
+
+        # Get mine type
+        self.mineType = msg._getStream(dir_ + ['__substg1.0_370E001E'])
 
         # Get attachment data
-        self.data = msg._getStream([dir_, '__substg1.0_37010102']) or  msg._getStream(['__attach_version1.0_#00000001', '__substg1.0_37010102'])
+        self.data = msg._getStream(dir_ + ['__substg1.0_37010102'])
+
     def save(self):
         # Use long filename as first preference
         filename = self.longFilename
@@ -188,12 +192,12 @@ class Attachment:
             import random
             import string
             filename = 'UnknownFilename ' + \
-                ''.join(random.choice(string.ascii_uppercase + string.digits)
-                        for _ in range(5)) + ".bin"
+                       ''.join(random.choice(string.ascii_uppercase + string.digits)
+                               for _ in range(5)) + ".bin"
         f = open(filename, 'wb')
         f.write(self.data)
         f.close()
-        return filename
+        return {'name': filename, 'type': "".join(map(chr, self.mineType))}
 
 
 class Message(OleFile.OleFileIO):
@@ -342,9 +346,21 @@ class Message(OleFile.OleFileIO):
             # Get the attachments
             attachmentDirs = []
 
-            for dir_ in self.listdir():
-                if dir_[0].startswith('__attach') and dir_[0] not in attachmentDirs:
-                    attachmentDirs.append(dir_[0])
+            dirList = self.listdir()
+
+            dirList = sorted(dirList, key=lambda dir: len(dir), reverse=True)  # Used to gets the most nested attachment
+
+            for dir_ in dirList:
+                if dir_[0].startswith('__attach'):
+                    result = [dir_[0]]
+                    for d in dir_[1:]:
+                        if (d == "__substg1.0_3701000D") or (d.startswith('__attach')):
+                            result.append(d)
+                        else:
+                            break
+                    if len([d for d in [''.join(d) for d in attachmentDirs] if d.startswith("".join(result))]) == 0:
+                        # Reject if a more specific dir is known
+                        attachmentDirs.append(result)
 
             self._attachments = []
 
@@ -395,7 +411,7 @@ class Message(OleFile.OleFileIO):
                 raise Exception(
                     "Failed to create directory '%s'. Does it already exist?" %
                     dirName
-                    )
+                )
 
         oldDir = os.getcwd()
         try:
@@ -434,7 +450,7 @@ class Message(OleFile.OleFileIO):
                 f.write("Date: " + xstr(self.date) + "\n")
                 f.write("-----------------\n\n")
                 f.write(self.body)
-                
+
             f.close()
 
         except Exception:
