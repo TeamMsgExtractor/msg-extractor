@@ -489,8 +489,7 @@ class Message(OleFile.OleFileIO):
                 print("Directory: " + str(dir))
                 print("Contents: " + self._getStream(dir))
 
-
-if __name__ == "__main__":
+def main():
     if len(sys.argv) <= 1:
         print(__doc__)
         print("""
@@ -533,3 +532,6 @@ Usage:  <file> [file2 ...]
                 # msg.debug()
                 print("Error with file '" + filename + "': " +
                       traceback.format_exc())
+
+if __name__ == "__main__":
+    main()

@@ -43,4 +43,9 @@ setup(
     scripts=[main_script],
     py_modules=[main_module],
     install_requires=dependencies,
+    entry_points={
+          'console_scripts': [
+              'ExtractMsg = ExtractMsg.__main__:main'
+          ]
+      }
 )
