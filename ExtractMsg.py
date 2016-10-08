@@ -346,7 +346,7 @@ class Message(OleFile.OleFileIO):
 
             return self._attachments
 
-    def save(self, raw=False):
+    def save(self, toJson=False, useFileName=False, raw=False):
 
         if useFileName:
             # strip out the extension
@@ -528,7 +528,7 @@ Usage:  <file> [file2 ...]
                 if writeRaw:
                     msg.saveRaw()
                 else:
-                    msg.save()
+                    msg.save(toJson, useFileName)
             except Exception:
                 # msg.debug()
                 print("Error with file '" + filename + "': " +
