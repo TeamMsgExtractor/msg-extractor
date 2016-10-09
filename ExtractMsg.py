@@ -9,7 +9,7 @@ https://github.com/mattgwwalker/msg-extractor
 
 __author__ = "Matthew Walker"
 __date__ = "2013-11-19"
-__version__ = '0.2'
+__version__ = '0.3'
 
 # --- LICENSE -----------------------------------------------------------------
 #
