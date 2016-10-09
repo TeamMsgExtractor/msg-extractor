@@ -347,7 +347,12 @@ class Message(OleFile.OleFileIO):
             return self._attachments
 
     def save(self, toJson=False, useFileName=False, raw=False):
-
+        '''Saves the message body and attachments found in the message.  Setting toJson
+        to true will output the message body as JSON-formatted text.  The body and
+        attachments are stored in a folder.  Setting useFileName to true will mean that
+        the filename is used as the name of the folder; otherwise, the message's date 
+        and subject are used as the folder name.'''
+ 
         if useFileName:
             # strip out the extension
             dirName = filename.split('/').pop().split('.')[0]
@@ -373,7 +378,7 @@ class Message(OleFile.OleFileIO):
                 try:
                     newDirName = dirName + " (" + str(i) + ")"
                     os.makedirs(newDirName)
-                    return dirName
+                    return newDirName
                 except Exception:
                     pass
             return None
