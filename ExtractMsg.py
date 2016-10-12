@@ -350,9 +350,9 @@ class Message(OleFile.OleFileIO):
         '''Saves the message body and attachments found in the message.  Setting toJson
         to true will output the message body as JSON-formatted text.  The body and
         attachments are stored in a folder.  Setting useFileName to true will mean that
-        the filename is used as the name of the folder; otherwise, the message's date 
+        the filename is used as the name of the folder; otherwise, the message's date
         and subject are used as the folder name.'''
- 
+
         if useFileName:
             # strip out the extension
             dirName = filename.split('/').pop().split('.')[0]
@@ -433,7 +433,7 @@ class Message(OleFile.OleFileIO):
                 f.write("Date: " + xstr(self.date) + "\n")
                 f.write("-----------------\n\n")
                 f.write(self.body)
-                
+
             f.close()
 
         except Exception:
@@ -493,6 +493,12 @@ class Message(OleFile.OleFileIO):
             if dir_[-1].endswith('001E'):  # FIXME: Check for unicode 001F too
                 print("Directory: " + str(dir))
                 print("Contents: " + self._getStream(dir))
+
+    def save_attachments(self, raw=False):
+        """Saves only attachments in the same folder.
+        """
+        for attachment in self.attachments:
+            attachment.save()
 
 
 if __name__ == "__main__":
