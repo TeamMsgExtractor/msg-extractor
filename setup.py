@@ -1,4 +1,3 @@
-import glob
 import os
 from setuptools import setup
 import re
@@ -23,7 +22,7 @@ version = match.groupdict()['version']
 
 # read in the dependencies from the virtualenv requirements file
 dependencies = []
-filename = os.path.join("REQUIREMENTS")
+filename = os.path.join("requirements.txt")
 with open(filename, 'r') as stream:
     for line in stream:
         package = line.strip().split('#')[0]
