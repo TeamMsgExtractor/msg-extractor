@@ -10,6 +10,9 @@ install:  ## Install this package as current user in "edit" mode.
 test:  ## Run tests.
 	$(PYTHON) tests.py
 
+upload:  ## Upload source tarball on PYPI. Requires a .pypirc file in the home dir.
+	$(PYTHON) setup.py sdist upload
+
 clean:  ## Remove all build files.
 	rm -rf `find . -type d -name __pycache__ \
 		-o -type f -name \*.bak \
