@@ -405,7 +405,7 @@ class Message(OleFile.OleFileIO):
             # From, to , cc, subject, date
 
             def xstr(s):
-                return '' if s is None else str(s)
+                return '' if s is None else s.encode('utf-8')
 
             attachmentNames = []
             # Save the attachments
