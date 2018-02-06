@@ -176,7 +176,7 @@ class Attachment:
 		self.data = msg._getStream([dir_, '__substg1.0_37010102'])
 
 		# Get Content-ID
-		self.cid = msg._getStringStream([dir_, '__substg1.0_3702001f'])
+		self.cid = msg._getStringStream([dir_, '__substg1.0_3702'])
 
 	def save(self, contentId=False):
 		# Use long filename as first preference
