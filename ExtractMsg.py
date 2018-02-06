@@ -10,7 +10,6 @@ https://github.com/mattgwwalker/msg-extractor
 __author__ = "Matthew Walker"
 __date__ = "2016-10-09"
 __version__ = '0.3'
-
 # --- LICENSE -----------------------------------------------------------------
 #
 #    Copyright 2013 Matthew Walker
@@ -176,9 +175,15 @@ class Attachment:
         # Get attachment data
         self.data = msg._getStream([dir_, '__substg1.0_37010102'])
 
-    def save(self):
+        # Get Content-ID
+        self.cid = msg._getStringStream([dir_, '__substg1.0_3712'])
+
+    def save(self, contentId=False):
         # Use long filename as first preference
         filename = self.longFilename
+        # Check if user wants to save the file under the Content-id
+        if contentId:
+            filename = self.cid
         # Otherwise use the short filename
         if filename is None:
             filename = self.shortFilename
@@ -198,6 +203,7 @@ class Attachment:
 class Message(OleFile.OleFileIO):
     def __init__(self, filename):
         OleFile.OleFileIO.__init__(self, filename)
+        self.filename = filename
 
     def _getStream(self, filename):
         if self.exists(filename):
@@ -304,6 +310,14 @@ class Message(OleFile.OleFileIO):
             return display
 
     @property
+    def compressedRtf(self):
+        try:
+            return self._compressedRtf
+        except Exception:
+            self._compressedRtf = self._getStream('__substg1.0_10090102')
+            return self._compressedRtf
+
+    @property
     def cc(self):
         try:
             return self._cc
@@ -346,7 +360,7 @@ class Message(OleFile.OleFileIO):
 
             return self._attachments
 
-    def save(self, toJson=False, useFileName=False, raw=False):
+    def save(self, toJson=False, useFileName=False, raw=False, ContentId=False):
         '''Saves the message body and attachments found in the message.  Setting toJson
         to true will output the message body as JSON-formatted text.  The body and
         attachments are stored in a folder.  Setting useFileName to true will mean that
@@ -355,7 +369,7 @@ class Message(OleFile.OleFileIO):
 
         if useFileName:
             # strip out the extension
-            dirName = filename.split('/').pop().split('.')[0]
+            dirName = self.filename.split('/').pop().split('.')[0]
         else:
             # Create a directory based on the date and subject of the message
             d = self.parsedDate
@@ -410,7 +424,7 @@ class Message(OleFile.OleFileIO):
             attachmentNames = []
             # Save the attachments
             for attachment in self.attachments:
-                attachmentNames.append(attachment.save())
+                attachmentNames.append(attachment.save(ContentId))
 
             if toJson:
                 import json
@@ -494,11 +508,11 @@ class Message(OleFile.OleFileIO):
                 print("Directory: " + str(dir))
                 print("Contents: " + self._getStream(dir))
 
-    def save_attachments(self, raw=False):
+    def save_attachments(self, ContentId=False):
         """Saves only attachments in the same folder.
         """
         for attachment in self.attachments:
-            attachment.save()
+            attachment.save(ContentId)
 
 
 if __name__ == "__main__":
