@@ -405,12 +405,13 @@ class Message(OleFile.OleFileIO):
             # From, to , cc, subject, date
 
             def xstr(s):
-                return '' if s is None else str(s)
+                return '' if s is None else s.encode('utf-8')
 
             attachmentNames = []
             # Save the attachments
             for attachment in self.attachments:
-                attachmentNames.append(attachment.save())
+                if attachment.data is not None:
+                    attachmentNames.append(attachment.save())
 
             if toJson:
                 import json
@@ -432,7 +433,7 @@ class Message(OleFile.OleFileIO):
                 f.write("Subject: " + xstr(self.subject) + "\n")
                 f.write("Date: " + xstr(self.date) + "\n")
                 f.write("-----------------\n\n")
-                f.write(self.body)
+                f.write(self.body.encode('utf-8'))
 
             f.close()
 
