@@ -164,12 +164,12 @@ def windowsUnicode(string):
         return unicode(string, 'utf_16_le')
     
 def msgEpoch(inp): #WARNING: INCOMPLETE
-    inp = "".join(inp.split(" "));
-    inp2 = "";
+    inp = "".join(inp.split(" "))
+    inp2 = ""
     for x in range(len(inp)/2):
-        inp2 = inp[2 * x: (2 * x) + 2] + inp2;
-    inp = int(inp2,16);
-    return (inp - a)/10000;
+        inp2 = inp[2*x:(2*x)+2] + inp2
+    inp = int(inp2,16)
+    return (inp - a)/10000
 
 class Attachment:
     def __init__(self, msg, dir_):
