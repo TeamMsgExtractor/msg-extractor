@@ -162,7 +162,14 @@ def windowsUnicode(string):
         return str(string, 'utf_16_le')
     else:  # Python 2
         return unicode(string, 'utf_16_le')
-
+    
+def msgEpoch(inp): #WARNING: INCOMPLETE
+    inp = "".join(inp.split(" "));
+    inp2 = "";
+    for x in range(len(inp)/2):
+        inp2 = inp[2 * x: (2 * x) + 2] + inp2;
+    inp = int(inp2,16);
+    return (inp - a)/10000;
 
 class Attachment:
     def __init__(self, msg, dir_):
@@ -400,7 +407,7 @@ class Message(OleFile.OleFileIO):
             return None
 
         try:
-            os.makedirs(dirName)
+            os.makedirs(xdirName)
         except Exception:
             newDirName = addNumToDir(dirName)
             if newDirName is not None:
