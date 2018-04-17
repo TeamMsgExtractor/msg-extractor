@@ -31,14 +31,16 @@ import os
 import sys
 import glob
 import traceback
+import datetime
 from email.parser import Parser as EmailParser
 import email.utils
 import olefile as OleFile
-debug = False
+
 
 # This property information was sourced from
 # http://www.fileformat.info/format/outlookmsg/index.htm
 # on 2013-07-22.
+# It was extened by The Elemental of Creation on 2018-04-03
 properties = {
     '001A': 'Message class',
     '0037': 'Subject',
@@ -156,21 +158,62 @@ properties = {
     '5FF6': 'To (uncertain)'}
 
 
-def windowsUnicode(string):
-    if string is None:
-        return None
-    if sys.version_info[0] >= 3:  # Python 3
+if sys.version_info[0] >= 3:  # Python 3
+    def windowsUnicode(string):
+        if string is None:
+            return None
         return str(string, 'utf_16_le')
-    else:  # Python 2
+else:  # Python 2
+    def windowsUnicode(string):
+        if string is None:
+            return None
         return unicode(string, 'utf_16_le')
-    
+
 def msgEpoch(inp): #WARNING: INCOMPLETE
-    inp = "".join(inp.split(" "))
-    inp2 = ""
-    for x in range(len(inp)/2):
-        inp2 = inp[2*x:(2*x)+2] + inp2
-    inp = int(inp2,16)
-    return (inp - a)/10000
+    ep = 116444736000000000L;
+    return (inp - ep)/10000000.0
+
+def xstr(s):
+    return '' if s is None else str(s)
+
+def properHex(inp):
+    if type(inp) not in [int, long]:
+        a = "".join([hex(ord(inp[x]))[2:].rjust(2, "0") for x in range(len(inp))])
+    elif type(inp) == int:
+        a = hex(inp)[2:]
+    elif type(inp) == long:
+        a = hex(inp)[2:-1]
+    if len(a)%2 != 0:
+        a = "0" + a
+    return a
+
+def readNum(string, val):
+    if len(string) != val:
+        raise Exception("String input must be {0} bytes. Got {1}".format(val, len(string)))
+    a = bytearray(string[::-1])
+    b = 0
+    for x in range(val):
+        b = (b << 8) ^ a[x]
+    return b
+
+def readInt(string):
+    return readNum(string, 4)
+
+def readLong(string):
+    return readNum(string, 8)
+
+def addNumToDir(dirName):
+    # Attempt to create the directory with a '(n)' appended
+    for i in range(2, 100):
+        try:
+            newDirName = dirName + " (" + str(i) + ")"
+            os.makedirs(newDirName)
+            return newDirName
+        except Exception:
+            pass
+    return None
+
+fromTimeStamp = datetime.datetime.fromtimestamp
 
 class Attachment:
     def __init__(self, msg, dir_):
@@ -207,11 +250,107 @@ class Attachment:
         f.close()
         return filename
 
+class Properties:
+    def __init__(self, stream, skip = None):
+        self.__stream = stream
+        self.__pos = 0
+        self.__len = len(stream)
+        self.__props = {}
+        if skip != None:
+            self.__parse(skip)
+        else:
+            # This section of the skip handling is not very good.
+            # While it does work, it is likely to create extra
+            # properties that are created from the properties file's
+            # header data. While that won't actually mess anything
+            # up, it is far from ideal.
+            if len(stream) % 16 == 0:
+                self.__parse(0)
+            elif len(stream) % 8 == 0:
+                self.__parse(8)
+
+    def __parse(self, skip):
+        if self.__pos != 0:
+            return;
+        self.__pos += skip
+        #TODO implement smart header length calculation
+
+        while self.__pos < self.__len:
+            a = Prop(self.__stream[self.__pos:self.__pos + 16])
+            self.__pos += 16
+            self.__props[a.name] = a
+
+    def get(self, name):
+        return(self.__props[name])
+
+    @property
+    def props(self):
+        return self.__props
+
+class Prop:
+    def __init__(self, string):
+        n = string[0:4][::-1]
+        self.__name = properHex(n).upper()
+        self.__value = readLong(string[8:16])
+        self.__type = readInt(string[4:8])
+
+    @property
+    def type(self):
+        return self.__type
+
+    @property
+    def name(self):
+        return self.__name
+
+    @property
+    def value(self):
+        return self.__value
+
+class Recipient:
+    def __init__(self, num, msg):
+        self.__msg = msg #Allows calls to original msg file
+        self.__dir = "__recip_version1.0_#{0}".format(num.rjust(8,"0"))
+        self.__props = Properties(msg._getStream(self.__dir + "/__properties_version1.0"))
+        self.__email = msg._getStringStream(self.__dir + "/__substg1.0_39FE")
+        self.__name = msg._getStringStream(self.__dir + "/__substg1.0_3001")
+        self.__type = self.__props.get("0C150003").value
+        self.__formatted = "{0} <{1}>".format(self.__name, self.__email)
+
+    @property
+    def type(self):
+        return self.__type
+
+    @property
+    def name(self):
+        return self.__name
+
+    @property
+    def email(self):
+        return self.__email
+
+    @property
+    def formatted(self):
+        return self.__formatted
+
+    @property
+    def props(self):
+        return self.__props
 
 class Message(OleFile.OleFileIO):
     def __init__(self, filename):
         OleFile.OleFileIO.__init__(self, filename)
         self.filename = filename
+        # Initialize properties in the order that is least likely to cause bugs.
+        # TODO have each function check for initialization of needed data so these
+        # lines will be unnecessary.
+        self.mainProperties
+        self.recipients
+        self.attachments
+        self.to
+        self.cc
+        self.sender
+        self.header
+        self.date
 
     def _getStream(self, filename):
         if self.exists(filename):
@@ -246,7 +385,11 @@ class Message(OleFile.OleFileIO):
 
     @property
     def subject(self):
-        return self._getStringStream('__substg1.0_0037')
+        try:
+            return self._subject
+        except:
+            self._subject = self._getStringStream('__substg1.0_0037')
+            return self._subject
 
     @property
     def header(self):
@@ -256,19 +399,41 @@ class Message(OleFile.OleFileIO):
             headerText = self._getStringStream('__substg1.0_007D')
             if headerText is not None:
                 self._header = EmailParser().parsestr(headerText)
+                self._header['date'] = self.date
             else:
-                if debug:
-                    print("Error: Msg file does not contain a header. Attempting to compile manually...")
-                #TODO implement manual search for header data across multiple files
+                header = {
+                    'date': self.date,
+                    'from': self.sender,
+                    'to': self.to,
+                    'cc': self.cc
+                }
+                self._header = header
             return self._header
+
+    def headerInit(self):
+        try:
+            self._header
+            return True
+        except:
+            return False
+
+    @property
+    def mainProperties(self):
+        try:
+            return self._prop
+        except:
+            self._prop = Properties(self._getStream("__properties_version1.0"), 16)
+            return self._prop
 
     @property
     def date(self):
         # Get the message's header and extract the date
-        if self.header is None:
-            return None
-        else:
-            return self.header['date']
+        try:
+            return self._date
+        except:
+            self._date = fromTimeStamp(msgEpoch(self._prop.get('00390040').value)).__format__("%a, %d %b %Y %H:%M:%S %Z")
+            return self._date
+
 
     @property
     def parsedDate(self):
@@ -280,15 +445,14 @@ class Message(OleFile.OleFileIO):
             return self._sender
         except Exception:
             # Check header first
-            if self.header is not None:
-                headerResult = self.header["from"]
+            if self.headerInit():
+                headerResult = self.header['from']
                 if headerResult is not None:
                     self._sender = headerResult
                     return headerResult
-
             # Extract from other fields
             text = self._getStringStream('__substg1.0_0C1A')
-            email = self._getStringStream('__substg1.0_0C1F')
+            email = self._getStringStream('__substg1.0_5D01') #Will not give an email address sometimes. Seems to exclude the email address if YOU are the sender.
             result = None
             if text is None:
                 result = email
@@ -306,18 +470,24 @@ class Message(OleFile.OleFileIO):
             return self._to
         except Exception:
             # Check header first
-            if self.header is not None:
+            if self.headerInit():
                 headerResult = self.header["to"]
                 if headerResult is not None:
                     self._to = headerResult
-                    return headerResult
-
-            # Extract from other fields
-            # TODO: This should really extract data from the recip folders,
-            # but how do you know which is to/cc/bcc?
-            display = self._getStringStream('__substg1.0_0E04')
-            self._to = display
-            return display
+            else:
+                f = []
+                for x in self.recipients:
+                    if x.type & 0x0000000f == 1:
+                        f.append(x.formatted)
+                if len(f) > 0:
+                    st = f[0]
+                    if len(f) > 1:
+                        for x in range(1, len(f)):
+                            st = st + "; {0}".format(f[x])
+                    self._to = st
+                else:
+                    self._to = None
+            return self._to
 
     @property
     def compressedRtf(self):
@@ -328,23 +498,37 @@ class Message(OleFile.OleFileIO):
             return self._compressedRtf
 
     @property
+    def htmlBody(self):
+        try:
+            return self._htmlBody
+        except Exception:
+            self._htmlBody = self._getStream('__substg1.0_10130102')
+            return self._htmlBody
+
+    @property
     def cc(self):
         try:
             return self._cc
         except Exception:
             # Check header first
-            if self.header is not None:
+            if self.headerInit():
                 headerResult = self.header["cc"]
                 if headerResult is not None:
                     self._cc = headerResult
-                    return headerResult
-
-            # Extract from other fields
-            # TODO: This should really extract data from the recip folders,
-            # but how do you know which is to/cc/bcc?
-            display = self._getStringStream('__substg1.0_0E03')
-            self._cc = display
-            return display
+            else:
+                f = []
+                for x in self.recipients:
+                    if x.type & 0x0000000f == 2:
+                        f.append(x.formatted)
+                if len(f) > 0:
+                    st = f[0]
+                    if len(f) > 1:
+                        for x in range(1, len(f)):
+                            st = st + "; {0}".format(f[x])
+                    self._cc = st
+                else:
+                    self._cc = None
+            return self._cc
 
     @property
     def body(self):
@@ -369,6 +553,25 @@ class Message(OleFile.OleFileIO):
                 self._attachments.append(Attachment(self, attachmentDir))
 
             return self._attachments
+
+    @property
+    def recipients(self):
+        try:
+            return self._recipients
+        except Exception:
+            # Get the recipients
+            recipientDirs = []
+
+            for dir_ in self.listdir():
+                if dir_[0].startswith('__recip') and dir_[0] not in recipientDirs:
+                    recipientDirs.append(dir_[0])
+
+            self._recipients = []
+
+            for recipientDir in recipientDirs:
+                self._recipients.append(Recipient(recipientDir.split("#")[-1], self))
+
+            return self._recipients
 
     def save(self, toJson=False, useFileName=False, raw=False, ContentId=False):
         '''Saves the message body and attachments found in the message.  Setting toJson
@@ -395,20 +598,8 @@ class Message(OleFile.OleFileIO):
 
             dirName = dirName + " " + subject
 
-        def addNumToDir(dirName):
-            # Attempt to create the directory with a '(n)' appended
-
-            for i in range(2, 100):
-                try:
-                    newDirName = dirName + " (" + str(i) + ")"
-                    os.makedirs(newDirName)
-                    return newDirName
-                except Exception:
-                    pass
-            return None
-
         try:
-            os.makedirs(xdirName)
+            os.makedirs(dirName)
         except Exception:
             newDirName = addNumToDir(dirName)
             if newDirName is not None:
@@ -428,8 +619,7 @@ class Message(OleFile.OleFileIO):
             f = open("message." + fext, "w")
             # From, to , cc, subject, date
 
-            def xstr(s):
-                return '' if s is None else str(s)
+
 
             attachmentNames = []
             # Save the attachments
@@ -514,7 +704,7 @@ class Message(OleFile.OleFileIO):
 
     def debug(self):
         for dir_ in self.listdir():
-            if dir_[-1].endswith('001E'):  # FIXME: Check for unicode 001F too
+            if dir_[-1].endswith('001E') or dir_[-1].endswith('001F'):
                 print("Directory: " + str(dir))
                 print("Contents: " + self._getStream(dir))
 
