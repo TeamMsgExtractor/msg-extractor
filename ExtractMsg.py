@@ -8,8 +8,8 @@ https://github.com/mattgwwalker/msg-extractor
 """
 
 __author__ = "Matthew Walker & The Elemental of Creation"
-__date__ = "2018-04-17"
-__version__ = '0.5'
+__date__ = "2018-05-07"
+__version__ = '0.51'
 # --- LICENSE -----------------------------------------------------------------
 #
 #    Copyright 2013 Matthew Walker
@@ -31,10 +31,15 @@ import os
 import sys
 import glob
 import traceback
+import struct
 import datetime
 from email.parser import Parser as EmailParser
 import email.utils
 import olefile as OleFile
+import json
+from imapclient.imapclient import decode_utf7
+import random
+import string
 
 
 # This property information was sourced from
@@ -70,6 +75,8 @@ properties = {
     '0E29': 'Recvd account2 (uncertain)',
     '1000': 'Message body',
     '1008': 'RTF sync body tag',
+    '1009': 'Compressed RTF body',
+    '1013': 'HTML body',
     '1035': 'Message ID (uncertain)',
     '1046': 'Sender email (uncertain)',
     '3001': 'Display name',
@@ -169,7 +176,7 @@ else:  # Python 2
             return None
         return unicode(string, 'utf_16_le')
 
-def msgEpoch(inp): #WARNING: INCOMPLETE
+def msgEpoch(inp):
     ep = 116444736000000000L;
     return (inp - ep)/10000000.0
 
@@ -177,7 +184,7 @@ def xstr(s):
     return '' if s is None else str(s)
 
 def properHex(inp):
-    if type(inp) not in [int, long]:
+    if type(inp) in [str, unicode]:
         a = "".join([hex(ord(inp[x]))[2:].rjust(2, "0") for x in range(len(inp))])
     elif type(inp) == int:
         a = hex(inp)[2:]
@@ -197,10 +204,10 @@ def readNum(string, val):
     return b
 
 def readInt(string):
-    return readNum(string, 4)
+    return struct.unpack("<I", string)[0]
 
 def readLong(string):
-    return readNum(string, 8)
+    return struct.unpack("<Q",string)[0]
 
 def addNumToDir(dirName):
     # Attempt to create the directory with a '(n)' appended
@@ -240,8 +247,6 @@ class Attachment:
             filename = self.shortFilename
         # Otherwise just make something up!
         if filename is None:
-            import random
-            import string
             filename = 'UnknownFilename ' + \
                 ''.join(random.choice(string.ascii_uppercase + string.digits)
                         for _ in range(5)) + ".bin"
@@ -431,7 +436,7 @@ class Message(OleFile.OleFileIO):
         try:
             return self._date
         except:
-            self._date = fromTimeStamp(msgEpoch(self._prop.get('00390040').value)).__format__("%a, %d %b %Y %H:%M:%S %Z")
+            self._date = fromTimeStamp(msgEpoch(self._prop.get('00390040').value)).__format__("%a, %d %b %Y %H:%M:%S GMT %z")
             return self._date
 
 
@@ -627,8 +632,6 @@ class Message(OleFile.OleFileIO):
                 attachmentNames.append(attachment.save(ContentId))
 
             if toJson:
-                import json
-                from imapclient.imapclient import decode_utf7
 
                 emailObj = {'from': xstr(self.sender),
                             'to': xstr(self.to),
