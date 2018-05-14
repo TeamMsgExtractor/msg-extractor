@@ -8,6 +8,7 @@ https://github.com/mattgwwalker/msg-extractor
 """
 
 __author__ = "Matthew Walker"
+__pull_request_update__ = "Albert Priego"
 __date__ = "2016-10-09"
 __version__ = '0.3'
 
@@ -429,10 +430,10 @@ class Message(OleFile.OleFileIO):
                 f.write("From: " + xstr(self.sender) + "\n")
                 f.write("To: " + xstr(self.to) + "\n")
                 f.write("CC: " + xstr(self.cc) + "\n")
-                f.write("Subject: " + xstr(self.subject) + "\n")
+                f.write("Subject: " + ((self.subject)).encode('utf-8'))
                 f.write("Date: " + xstr(self.date) + "\n")
                 f.write("-----------------\n\n")
-                f.write(self.body)
+                f.write((self.body).encode('utf-8'))
 
             f.close()
 
