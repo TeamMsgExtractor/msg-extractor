@@ -9,7 +9,7 @@ https://github.com/mattgwwalker/msg-extractor
 
 __author__ = 'Matthew Walker & The Elemental of Creation'
 __date__ = '2018-05-22'
-__version__ = '0.8'
+__version__ = '0.9'
 # --- LICENSE -----------------------------------------------------------------
 #
 #    Copyright 2013 Matthew Walker
@@ -28,6 +28,7 @@ __version__ = '0.8'
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import copy
 import re
 import sys
 import glob
@@ -247,24 +248,28 @@ fromTimeStamp = datetime.datetime.fromtimestamp
 class Attachment:
     def __init__(self, msg, dir_):
         self.msg = msg
+        self.__dir = dir_
         # Get long filename
         self.longFilename = msg._getStringStream([dir_, '__substg1.0_3707'])
 
         # Get short filename
         self.shortFilename = msg._getStringStream([dir_, '__substg1.0_3704'])
 
+        # Get Content-ID
+        self.cid = msg._getStringStream([dir_, '__substg1.0_3712'])
+
         # Get attachment data
         if msg.Exists([dir_, '__substg1.0_37010102']):
             self.__type = 'data'
             self.data = msg._getStream([dir_, '__substg1.0_37010102'])
         elif msg.Exists([dir_, '__substg1.0_3701000D']):
+            if (self.props['37050003'].value & 0x7) != 0x5:
+                raise NotImplementedError('Current version of ExtractMsg.py does not support extraction of containers that are not embeded msg files.')
+                #TODO add implementation
             self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
             self.__type = 'msg'
         else:
             raise Exception('Unknown file type')
-
-        # Get Content-ID
-        self.cid = msg._getStringStream([dir_, '__substg1.0_3712'])
 
     def saveEmbededMessage(self, contentId = False, json = False, useFileName = False, raw = False):
         """
@@ -297,6 +302,14 @@ class Attachment:
             self.saveEmbededMessage(contentId, json, useFileName, raw)
         return filename
 
+    @property
+    def props(self):
+        try:
+            return self.__props
+        except:
+            self.__props = Properties(self.msg._getStream(self.msg.prefixList + [self.__dir, '__properties_version1.0']))
+            return self.__props
+
 class Properties:
     def __init__(self, stream, skip = None):
         self.__stream = stream
@@ -310,11 +323,9 @@ class Properties:
             # While it does work, it is likely to create extra
             # properties that are created from the properties file's
             # header data. While that won't actually mess anything
-            # up, it is far from ideal.
-            if len(stream) % 16 == 0:
-                self.__parse(0)
-            elif len(stream) % 8 == 0:
-                self.__parse(8)
+            # up, it is far from ideal. Basically, this is the dumb
+            # skip length calculation
+            self.__parse(len(stream) % 16)
 
     def __parse(self, skip):
         if self.__pos != 0:
@@ -328,11 +339,53 @@ class Properties:
             self.__props[a.name] = a
 
     def get(self, name):
-        return(self.__props[name])
+        return self.props[name]
+
+    def has_key(self, key):
+        self.props.has_key(key)
+
+    def items(self):
+        return self.props.items()
+
+    def iteritems(self):
+        return self.props.iteritems()
+
+    def iterkeys(self):
+        return self.props.iterkeys()
+
+    def itervalues(self):
+        return self.props.itervalues()
+
+    def keys(self):
+        return self.props.keys()
+
+    def values(self):
+        return self.props.values()
+
+    def viewitems(self):
+        return self.props.viewitems()
+
+    def viewkeys(self):
+        return self.props.viewkeys()
+
+    def viewvalues(self):
+        return self.props.viewvalues()
+
+    def __contains__(self, key):
+        self.props.__contains__(key)
+
+    def __iter__(self):
+        return self.props.__iter__()
+
+    def __getitem__(self, key):
+        return self.props.__getitem__(key)
+
+    def __len__(self):
+        return len(self.__props)
 
     @property
     def props(self):
-        return self.__props
+        return copy.deepcopy(self.__props)
 
 class Prop:
     def __init__(self, string):
@@ -396,6 +449,7 @@ class Message(OleFile.OleFileIO):
             are doing.
 
         """
+        print(prefix)
         #WARNING DO NOT MANUALLY MODIFY PREFIX. Let the program set it.
         self.__path = filename
         self.__attachmentClass = attachmentClass
@@ -511,7 +565,7 @@ class Message(OleFile.OleFileIO):
         try:
             return self._subject
         except:
-            self._subject = self._getStringStream('__substg1.0_0037')
+            self._subject = encode(self._getStringStream('__substg1.0_0037'))
             return self._subject
 
     @property
