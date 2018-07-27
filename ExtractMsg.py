@@ -35,6 +35,7 @@ import traceback
 from email.parser import Parser as EmailParser
 import email.utils
 import olefile as OleFile
+from codecs import open
 
 # This property information was sourced from
 # http://www.fileformat.info/format/outlookmsg/index.htm
@@ -401,7 +402,7 @@ class Message(OleFile.OleFileIO):
 
             # Save the message body
             fext = 'json' if toJson else 'text'
-            f = open("message." + fext, "w")
+            f = open("message." + fext, "w", 'utf8')
             # From, to , cc, subject, date
 
             def xstr(s):
