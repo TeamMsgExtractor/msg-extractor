@@ -9,7 +9,7 @@ https://github.com/mattgwwalker/msg-extractor
 
 __author__ = 'Matthew Walker & The Elemental of Creation'
 __date__ = '2018-05-22'
-__version__ = '0.9'
+__version__ = '0.8'
 # --- LICENSE -----------------------------------------------------------------
 #
 #    Copyright 2013 Matthew Walker
@@ -217,21 +217,6 @@ def msgEpoch(inp):
 def xstr(s):
     return '' if s is None else str(s)
 
-def readNum(string, val):
-    if len(string) != val:
-        raise Exception('String input must be {0} bytes. Got {1}'.format(val, len(string)))
-    a = bytearray(string[::-1])
-    b = 0
-    for x in range(val):
-        b = (b << 8) ^ a[x]
-    return b
-
-def readInt(string):
-    return struct.unpack('<I', string)[0]
-
-def readLong(string):
-    return struct.unpack('<Q',string)[0]
-
 def addNumToDir(dirName):
     # Attempt to create the directory with a '(n)' appended
     for i in range(2, 100):
@@ -391,8 +376,7 @@ class Prop:
     def __init__(self, string):
         n = string[0:4][::-1]
         self.__name = properHex(n).upper()
-        self.__value = readLong(string[8:16])
-        self.__type = readInt(string[4:8])
+        self.__type, self.__value = struct.unpack('<IQ', string[4:16])
 
     @property
     def type(self):
