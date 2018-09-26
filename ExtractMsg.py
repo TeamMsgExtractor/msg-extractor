@@ -399,13 +399,13 @@ class Message(OleFile.OleFileIO):
         try:
             os.chdir(dirName)
 
-            # Save the message body
-            fext = 'json' if toJson else 'text'
+            # Save the message body fext = 'json' if toJson else 'text'
+            fext = 'json' if toJson else 'text' 
             f = open("message." + fext, "w")
             # From, to , cc, subject, date
 
             def xstr(s):
-                return '' if s is None else str(s)
+                return ''.encode('utf-8') if s is None else (s.encode('utf-8'))
 
             attachmentNames = []
             # Save the attachments
