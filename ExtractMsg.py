@@ -399,7 +399,7 @@ class Message(OleFile.OleFileIO):
         try:
             os.chdir(dirName)
 
-            # Save the message body fext = 'json' if toJson else 'text'
+            # Save the message body
             fext = 'json' if toJson else 'text' 
             f = open("message." + fext, "w")
             # From, to , cc, subject, date
