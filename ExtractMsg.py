@@ -167,42 +167,52 @@ properties = {
     '5FF6': 'To (uncertain)'}
 
 
-if sys.version_info[0] >= 3:  # Python 3
+if sys.version_info[0] >= 3: # Python 3
+    def xstr(s):
+        return '' if s is None else str(s)
+
     def windowsUnicode(string):
         if string is None:
             return None
         return str(string, 'utf_16_le')
 
-    stri = [str]
+    stri = (str,)
 
     def properHex(inp):
         a = ''
-        if type(inp) in stri:
+        if isinstance(inp, stri):
             a = ''.join([hex(ord(inp[x]))[2:].rjust(2, '0') for x in range(len(inp))])
-        if type(inp) == bytes:
+        if isinstance(inp, bytes):
             a = inp.hex()
-        elif type(inp) == int:
+        elif isinstance(inp, int):
             a = hex(inp)[2:]
         if len(a)%2 != 0:
             a = '0' + a
         return a
+
     def encode(inp):
         return inp
 else:  # Python 2
+    def xstr(s):
+        if isinstance(s, unicode):
+            return s.encode('utf-8')
+        else:
+            return '' if s is None else str(s)
+
     def windowsUnicode(string):
         if string is None:
             return None
         return unicode(string, 'utf_16_le')
 
-    stri = [str, unicode]
+    stri = (str, unicode)
 
     def properHex(inp):
         a = ''
-        if type(inp) in stri:
+        if isinstance(inp, stri):
             a = ''.join([hex(ord(inp[x]))[2:].rjust(2, '0') for x in range(len(inp))])
-        elif type(inp) == int:
+        elif isinstance(inp, int):
             a = hex(inp)[2:]
-        elif type(inp) == long:
+        elif isinstance(inp, long):
             a = hex(inp)[2:-1]
         if len(a)%2 != 0:
             a = '0' + a
@@ -213,9 +223,6 @@ else:  # Python 2
 def msgEpoch(inp):
     ep = 116444736000000000
     return (inp - ep)/10000000.0
-
-def xstr(s):
-    return '' if s is None else str(s)
 
 def addNumToDir(dirName):
     # Attempt to create the directory with a '(n)' appended
@@ -440,7 +447,7 @@ class Message(OleFile.OleFileIO):
         OleFile.OleFileIO.__init__(self, filename)
         prefixl = []
         if prefix != '':
-            if type(prefix) not in stri:
+            if not isinstance(prefix, stri):
                 try:
                     prefix = '/'.join(prefix)
                 except:
