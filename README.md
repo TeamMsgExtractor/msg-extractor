@@ -34,7 +34,7 @@ Joel also added a --use-file-name flag, which allows you to specify that the scr
 ```
 
 
-If you have any questions feel free to contact me, Matthew Walker, at mattgwwalker at gmail.com.
+If you have any questions feel free to contact me, Matthew Walker, at mattgwwalker@gmail.com.
 
 
 Installation
