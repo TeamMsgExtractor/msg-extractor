@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: latin-1 -*-
+# Date Format: YYYY-MM-DD
 """
 ExtractMsg:
     Extracts emails and attachments saved in Microsoft Outlook's .msg files
@@ -10,6 +11,7 @@ https://github.com/mattgwwalker/msg-extractor
 __author__ = 'Matthew Walker & The Elemental of Creation'
 __date__ = '2018-05-22'
 __version__ = '0.8'
+
 # --- LICENSE -----------------------------------------------------------------
 #
 #    Copyright 2013 Matthew Walker
@@ -47,10 +49,31 @@ import string
 # This property information was sourced from
 # http://www.fileformat.info/format/outlookmsg/index.htm
 # on 2013-07-22.
-# It was extened by The Elemental of Creation on 2018-04-03
+# It was extened by The Elemental of Creation on 2018-10-12
 properties = {
+    '0001': 'Template data',
+    '0002': 'Alternate recipient allowed',
+    '0004001F': 'Auto forward comment',
+    '00040102': 'Script data',
+    '0005': 'Auto forwarded',
+    '000F': 'Deferred delivery time',
+	'0010': 'Deliver time',
+    '0015': 'Expiry time',
+    '0017': 'Importance',
     '001A': 'Message class',
+    '0023': 'Originator delivery report requested',
+    '0025': 'Parent key',
+    '0026': 'Priority',
+    '0029': 'Read receipt requested',
+    '002A': 'Receipt time',
+	'002B': 'Recipient reassignment prohibited',
+    '002E': 'Original sensitivity',
+    '0030': 'Reply time',
+    '0031': 'Report tag',
+    '0032': 'Report time',
+    '0036': 'Sensitivity',
     '0037': 'Subject',
+	'0039': 'Client Submit Time',
     '003D': 'Subject prefix',
     '0040': 'Received by name',
     '0042': 'Sent repr name',
@@ -164,7 +187,8 @@ properties = {
     '3FFC': 'To email (uncertain)',
     '403D': 'To adrtype (uncertain)',
     '403E': 'To email (uncertain)',
-    '5FF6': 'To (uncertain)'}
+    '5FF6': 'To (uncertain)'
+}
 
 
 if sys.version_info[0] >= 3: # Python 3
@@ -304,6 +328,7 @@ class Attachment:
 
 class Properties:
     def __init__(self, stream, skip = None):
+        # TODO Make the properties file A LOT better
         self.__stream = stream
         self.__pos = 0
         self.__len = len(stream)
@@ -317,7 +342,8 @@ class Properties:
             # header data. While that won't actually mess anything
             # up, it is far from ideal. Basically, this is the dumb
             # skip length calculation
-            self.__parse(len(stream) % 16)
+            self.__parse(self.__len % 16)
+        self.__pl = len(self.__props)
 
     def __parse(self, skip):
         if self.__pos != 0:
@@ -373,7 +399,7 @@ class Properties:
         return self.props.__getitem__(key)
 
     def __len__(self):
-        return len(self.__props)
+        return self.__pl
 
     @property
     def props(self):
@@ -903,13 +929,16 @@ Usage:  <file> [file2 ...]
    or:  --raw <file>
    or:  --json
 
-   to name the directory as the .msg file, --use-file-name
+Additionally, use the flag '--use-content-id' to save files by their content ID (should they have one)
+
+To name the directory as the .msg file, --use-file-name
 """)
         sys.exit()
 
     writeRaw = False
     toJson = False
     useFileName = False
+    useContentId = False
 
     for rawFilename in sys.argv[1:]:
         if rawFilename == '--raw':
@@ -921,13 +950,16 @@ Usage:  <file> [file2 ...]
         if rawFilename == '--use-file-name':
             useFileName = True
 
+        if rawFilename == '--use-content-id':
+            useContentId = True
+
         for filename in glob.glob(rawFilename):
             msg = Message(filename)
             try:
                 if writeRaw:
                     msg.saveRaw()
                 else:
-                    msg.save(toJson, useFileName)
+                    msg.save(toJson, useFileName, False, useContentId)
             except Exception as e:
                 # msg.debug()
                 print("Error with file '" + filename + "': " +
