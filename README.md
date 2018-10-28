@@ -31,6 +31,11 @@ Joel also added a --use-file-name flag, which allows you to specify that the scr
   python ExtractMsg.py --use-file-name example.msg
 ```
 
+Creation also added a --use-content-id flag, which allows you to specify that attachments should be saved under the name of their content id, should they have one. This can be useful for mathich attachments to the names used in the HTML body, and can be done like so:
+```
+  python ExtractMsg.py --use-content-id example.msg
+```
+
 
 If you have any questions feel free to contact me, Matthew Walker, at mattgwwalker@gmail.com.
 
