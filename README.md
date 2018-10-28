@@ -38,6 +38,7 @@ Creation also added a --use-content-id flag, which allows you to specify that at
 
 
 If you have any questions feel free to contact me, Matthew Walker, at mattgwwalker@gmail.com.
+NOTE: Due to time constraints,  <a href="https://github.com/TheElementalOfCreation">The Elemental of Creation</a> has been added as a contributer to help manage the project. As such, it may be helpful to send emails to arceusthe@gmail.com as well.
 
 
 Installation
