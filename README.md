@@ -16,8 +16,6 @@ The script uses <a href="http://www.decalage.info/python/olefileio">Philippe Lag
 
 The script was built using <a href="http://www.fileformat.info/format/outlookmsg/index.htm">Peter Fiskerstrand's documentation of the .msg format</a>.  <a href="http://www.dimastr.com/redemption/utils.htm">Redemption's discussion of the different property types used within Extended MAPI</a> was also useful.  For future reference, I note that Microsoft have opened up <a href="http://msdn.microsoft.com/en-us/library/cc463912%28v=exchg.80%29.aspx">their documentation of the file format</a>.
 
-There are at least two major issues with version 0.2.  The first is that .msg files can be embedded in .msg files---the script doesn't like them at all and will dump a 'raw' directory instead of the normal output.  This directory will contain all you need from the email, but in a less-than-ideal form.  The second issue is that the script cannot extract the date of sent emails (as opposed to received emails).
-
 If you are having difficulty with a specific file, or would like to extract more than is currently automated, then the --raw flag may be useful:
 ```
   python ExtractMsg.py --raw example.msg
