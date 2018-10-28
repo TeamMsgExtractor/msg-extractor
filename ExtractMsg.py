@@ -9,7 +9,7 @@ https://github.com/mattgwwalker/msg-extractor
 """
 
 __author__ = 'Matthew Walker & The Elemental of Creation'
-__date__ = '2018-05-22'
+__date__ = '2018-10-27'
 __version__ = '0.9'
 
 # --- LICENSE -----------------------------------------------------------------
