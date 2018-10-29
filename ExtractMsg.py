@@ -713,6 +713,7 @@ class Message(OleFile.OleFileIO):
 
     @property
     def compressedRtf(self):
+        # Get the compressed RTF stream, if it exists
         try:
             return self._compressedRtf
         except Exception:
@@ -721,6 +722,7 @@ class Message(OleFile.OleFileIO):
 
     @property
     def htmlBody(self):
+        # Get the get the html body, if it exists
         try:
             return self._htmlBody
         except Exception:
@@ -764,6 +766,17 @@ class Message(OleFile.OleFileIO):
                 if re.search('\r\n', self._body) != None:
                     self.__crlf = '\r\n'
             return self._body
+
+    @property
+    def crlf(self):
+        # Returns the value of self.__crlf, should you need it for whatever reason
+        self.body
+        return self.__crlf
+
+    @property
+    def attachmentClass(self):
+        # Returns the Attachment class being used, should you need to use it externally for whatever reason
+        return self.__attachmentClass
 
     @property
     def attachments(self):
