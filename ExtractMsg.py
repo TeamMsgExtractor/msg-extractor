@@ -10,7 +10,7 @@ https://github.com/mattgwwalker/msg-extractor
 
 __author__ = 'Matthew Walker & The Elemental of Creation'
 __date__ = '2018-05-22'
-__version__ = '0.10'
+__version__ = '0.11'
 debug = False
 
 # --- LICENSE -----------------------------------------------------------------
@@ -263,8 +263,14 @@ def addNumToDir(dirName):
 fromTimeStamp = datetime.datetime.fromtimestamp
 
 class Attachment:
+    """
+    Stores the attachment data of a Message instance.
+    Should the attachment be an embeded message, the
+    class used to create it will be the same as the
+    Message class used to create the attachment.
+    """
     def __init__(self, msg, dir_):
-        self.msg = msg
+        self.__msg = msg
         self.__dir = dir_
         # Get long filename
         self.longFilename = msg._getStringStream([dir_, '__substg1.0_3707'])
@@ -278,23 +284,24 @@ class Attachment:
         # Get attachment data
         if msg.Exists([dir_, '__substg1.0_37010102']):
             self.__type = 'data'
-            self.data = msg._getStream([dir_, '__substg1.0_37010102'])
+            self.__data = msg._getStream([dir_, '__substg1.0_37010102'])
         elif msg.Exists([dir_, '__substg1.0_3701000D']):
             if (self.props['37050003'].value & 0x7) != 0x5:
                 raise NotImplementedError('Current version of ExtractMsg.py does not support extraction of containers that are not embeded msg files.')
                 #TODO add implementation
-            self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
-            self.__type = 'msg'
+            else:
+                self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
+                self.__type = 'msg'
+                self.__data = msg.__class__(self.msg.path, self.__prefix, self.__class__)
         else:
             raise Exception('Unknown file type')
 
     def saveEmbededMessage(self, contentId = False, json = False, useFileName = False, raw = False):
         """
         Seperate function from save to allow it to
-        easily be overridden by a subclass
+        easily be overridden by a subclass.
         """
-        msg = Message(self.msg.path, self.__prefix)
-        msg.save(json, useFileName, raw, contentId)
+        self.data.save(json, useFileName, raw, contentId)
 
     def save(self, contentId = False, json = False, useFileName = False, raw = False):
         # Use long filename as first preference
@@ -313,7 +320,7 @@ class Attachment:
 
         if self.__type == "data":
             f = open(filename, 'wb')
-            f.write(self.data)
+            f.write(self.__data)
             f.close()
         else:
             self.saveEmbededMessage(contentId, json, useFileName, raw)
@@ -327,9 +334,27 @@ class Attachment:
             self.__props = Properties(self.msg._getStream(self.msg.prefixList + [self.__dir, '__properties_version1.0']))
             return self.__props
 
+    @property
+    def data(self):
+        return self.__data
+
+    @property
+    def type(self):
+        """
+        Returns the type of the data.
+        """
+        return self.__type
+
+    @property
+    def msg(self):
+        """
+        Returns the msg file the attachment belongs to.
+        """
+        return self.__msg
+
 class Properties:
     def __init__(self, stream, skip = None):
-        # TODO Make the properties file A LOT better
+        # TODO Make the properties class A LOT better
         self.__stream = stream
         self.__pos = 0
         self.__len = len(stream)
@@ -544,7 +569,8 @@ class Message(OleFile.OleFileIO):
             return None
 
     def _getStringStream(self, filename, prefer = 'unicode', prefix = True):
-        """Gets a string representation of the requested filename.
+        """
+        Gets a string representation of the requested filename.
         Checks for both ASCII and Unicode representations and returns
         a value if possible.  If there are both ASCII and Unicode
         versions, then the parameter /prefer/ specifies which will be
