@@ -5,7 +5,10 @@ Extracts emails and attachments saved in Microsoft Outlook's .msg files
 
 The python script ExtractMsg.py automates the extraction of key email data (from, to, cc, date, subject, body) and the email's attachments.
 
-To use it
+Usage
+------------
+
+**To use it as a command-line script**:
 ```
   python ExtractMsg.py example.msg
 ```
@@ -35,6 +38,24 @@ Creation also added a --use-content-id flag, which allows you to specify that at
 ```
   python ExtractMsg.py --use-content-id example.msg
 ```
+
+**To use this in your own script**, start by using:
+```
+  import ExtractMsg
+```
+
+From there, initialize an instance of the Message class:
+```
+  msg = ExtractMsg.Message("path/to/msg/file.msg")
+```
+
+If you want to override the default attachment class and use one of your own, simply change the code to:
+```
+  msg = ExtractMsg.Message("path/to/msg/file.msg", attachmentClass = CustomAttachmentClass)
+```
+where `CustomAttachmentClass` is your custom class.
+
+#TODO: Finish this section
 
 
 If you have any questions feel free to contact me, Matthew Walker, at mattgwwalker@gmail.com.
