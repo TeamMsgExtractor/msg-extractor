@@ -9,8 +9,9 @@ https://github.com/mattgwwalker/msg-extractor
 """
 
 __author__ = 'Matthew Walker & The Elemental of Creation'
-__date__ = '2018-10-27'
-__version__ = '0.9'
+__date__ = '2018-05-22'
+__version__ = '0.8'
+debug = False
 
 # --- LICENSE -----------------------------------------------------------------
 #
@@ -466,8 +467,9 @@ class Message(OleFile.OleFileIO):
             are doing.
 
         """
-        print(prefix)
         #WARNING DO NOT MANUALLY MODIFY PREFIX. Let the program set it.
+        if debug:
+            print(prefix)
         self.__path = filename
         self.__attachmentClass = attachmentClass
         OleFile.OleFileIO.__init__(self, filename)
@@ -477,7 +479,7 @@ class Message(OleFile.OleFileIO):
                 try:
                     prefix = '/'.join(prefix)
                 except:
-                    raise TypeException('invalid prefix type {}'.format(type(prefix)))
+                    raise TypeException('Invalid prefix type: ' + type(prefix) + '\n(This was probably caused by you setting it manually)')
             prefix = prefix.replace('\\', '/')
             g = prefix.split("/")
             if g[-1] == '':
