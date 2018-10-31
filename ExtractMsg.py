@@ -10,7 +10,7 @@ https://github.com/mattgwwalker/msg-extractor
 
 __author__ = 'Matthew Walker & The Elemental of Creation'
 __date__ = '2018-05-22'
-__version__ = '0.13'
+__version__ = '0.14'
 debug = False
 
 # --- LICENSE -----------------------------------------------------------------
@@ -387,7 +387,7 @@ class Properties:
         return self.props[name]
 
     def has_key(self, key):
-        self.props.has_key(key)
+        return self.props.has_key(key)
 
     def items(self):
         return self.props.items()
@@ -437,10 +437,15 @@ class Properties:
         try:
             return self.__date
         except:
-            try:
-                self.__date = self.get('00390040').value
-            except:
-                print('Warning: Error retrieving date. Setting as "Unknown"')
+            if self.has_key('00390040'):
+                self.__date = fromTimeStamp(msgEpoch(self.get('00390040').value)).__format__('%a, %d %b %Y %H:%M:%S GMT %z')
+            elif self.has_key('30080040'):
+                self.__date = fromTimeStamp(msgEpoch(self.get('30080040').value)).__format__('%a, %d %b %Y %H:%M:%S GMT %z')
+            elif self.has_key('30070040'):
+                self.__date = fromTimeStamp(msgEpoch(self.get('30070040').value)).__format__('%a, %d %b %Y %H:%M:%S GMT %z')
+            else:
+                print('Warning: Error retrieving date. Setting as "Unknown". Please send the following list to the developer:')
+                print(self.keys())
                 self.__date = 'Unknown'
             return self.__date
 
@@ -666,7 +671,7 @@ class Message(OleFile.OleFileIO):
         try:
             return self._date
         except:
-            self._date = fromTimeStamp(msgEpoch(self._prop.date)).__format__('%a, %d %b %Y %H:%M:%S GMT %z')
+            self._date = self._prop.date
             return self._date
 
 
