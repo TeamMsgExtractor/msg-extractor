@@ -10,7 +10,7 @@ https://github.com/mattgwwalker/msg-extractor
 
 __author__ = 'Matthew Walker & The Elemental of Creation'
 __date__ = '2018-05-22'
-__version__ = '0.12'
+__version__ = '0.13'
 debug = False
 
 # --- LICENSE -----------------------------------------------------------------
@@ -108,6 +108,7 @@ properties = {
     '3001': 'Display name',
     '3002': 'Address type',
     '3003': 'Email address',
+    '3007': 'Creation date',
     '39FE': '7-bit email (uncertain)',
     '39FF': '7-bit display name',
 
@@ -431,6 +432,18 @@ class Properties:
     def props(self):
         return copy.deepcopy(self.__props)
 
+    @property
+    def date(self):
+        try:
+            return self.__date
+        except:
+            try:
+                self.__date = self.get('00390040').value
+            except:
+                print('Warning: Error retrieving date. Setting as "Unknown"')
+                self.__date = 'Unknown'
+            return self.__date
+
 class Prop:
     def __init__(self, string):
         n = string[0:4][::-1]
@@ -448,18 +461,6 @@ class Prop:
     @property
     def value(self):
         return self.__value
-
-	@property
-	def date(self):
-		try:
-			return self.__date
-		except:
-			try:
-				self.__date = self.get('00390040').value
-			except:
-				print('Warning: Error retrieving date. Setting as "Unknown"')
-				self.__date = 'Unknown'
-			return self.__date
 
 class Recipient:
     def __init__(self, num, msg):
