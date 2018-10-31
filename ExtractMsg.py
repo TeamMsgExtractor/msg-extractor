@@ -10,7 +10,7 @@ https://github.com/mattgwwalker/msg-extractor
 
 __author__ = 'Matthew Walker & The Elemental of Creation'
 __date__ = '2018-05-22'
-__version__ = '0.11'
+__version__ = '0.12'
 debug = False
 
 # --- LICENSE -----------------------------------------------------------------
@@ -449,6 +449,18 @@ class Prop:
     def value(self):
         return self.__value
 
+	@property
+	def date(self):
+		try:
+			return self.__date
+		except:
+			try:
+				self.__date = self.get('00390040').value
+			except:
+				print('Warning: Error retrieving date. Setting as "Unknown"')
+				self.__date = 'Unknown'
+			return self.__date
+
 class Recipient:
     def __init__(self, num, msg):
         self.__msg = msg #Allows calls to original msg file
@@ -653,7 +665,7 @@ class Message(OleFile.OleFileIO):
         try:
             return self._date
         except:
-            self._date = fromTimeStamp(msgEpoch(self._prop.get('00390040').value)).__format__('%a, %d %b %Y %H:%M:%S GMT %z')
+            self._date = fromTimeStamp(msgEpoch(self._prop.date)).__format__('%a, %d %b %Y %H:%M:%S GMT %z')
             return self._date
 
 
