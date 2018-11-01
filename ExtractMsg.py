@@ -10,7 +10,7 @@ https://github.com/mattgwwalker/msg-extractor
 
 __author__ = 'Matthew Walker & The Elemental of Creation'
 __date__ = '2018-05-22'
-__version__ = '0.14'
+__version__ = '0.15'
 debug = False
 
 # --- LICENSE -----------------------------------------------------------------
@@ -387,7 +387,7 @@ class Properties:
         return self.props[name]
 
     def has_key(self, key):
-        return self.props.has_key(key)
+        return key in self.props
 
     def items(self):
         return self.props.items()
