@@ -34,7 +34,7 @@ Joel also added a --use-file-name flag, which allows you to specify that the scr
   python ExtractMsg.py --use-file-name example.msg
 ```
 
-Creation also added a --use-content-id flag, which allows you to specify that attachments should be saved under the name of their content id, should they have one. This can be useful for mathich attachments to the names used in the HTML body, and can be done like so:
+Creation also added a --use-content-id flag, which allows you to specify that attachments should be saved under the name of their content id, should they have one.  This can be useful for mathich attachments to the names used in the HTML body, and can be done like so:
 ```
   python ExtractMsg.py --use-content-id example.msg
 ```
@@ -48,6 +48,10 @@ From there, initialize an instance of the Message class:
 ```
   msg = ExtractMsg.Message("path/to/msg/file.msg")
 ```
+or
+```
+  msg = ExtractMsg.Message(msg_data_stream)
+```
 
 If you want to override the default attachment class and use one of your own, simply change the code to:
 ```
@@ -59,8 +63,14 @@ where `CustomAttachmentClass` is your custom class.
 
 
 If you have any questions feel free to contact me, Matthew Walker, at mattgwwalker at gmail.com.
-NOTE: Due to time constraints,  <a href="https://github.com/TheElementalOfCreation">The Elemental of Creation</a> has been added as a contributer to help manage the project. As such, it may be helpful to send emails to arceusthe@gmail.com as well.
-
+NOTE: Due to time constraints, <a href="https://github.com/TheElementalOfCreation">The Elemental of Creation</a> has been added as a contributer to help manage the project.  As such, it may be helpful to send emails to arceusthe@gmail.com as well.
+Error Reporting
+------------
+Should you encounter an error that has not already been reported, please do the following when reporting it:
+* Make sure you are using the latest version of ExtractMsg.
+* State your Python version.
+* Include the code, if any, that you used.
+* Include a copy of the traceback.
 
 Installation
 ------------
