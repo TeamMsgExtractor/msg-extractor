@@ -49,6 +49,12 @@ From there, initialize an instance of the Message class:
   msg = ExtractMsg.Message("path/to/msg/file.msg")
 ```
 
+Alternatively, if you wish to send a msg binary string instead of a file to the ExtractMsg.Message Method:
+```
+  msg_raw = b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1\x0 ... \x00x00x00'
+  msg = ExtractMsg.Message(msg_raw)
+```
+
 If you want to override the default attachment class and use one of your own, simply change the code to:
 ```
   msg = ExtractMsg.Message("path/to/msg/file.msg", attachmentClass = CustomAttachmentClass)
