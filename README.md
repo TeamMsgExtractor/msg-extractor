@@ -64,6 +64,7 @@ where `CustomAttachmentClass` is your custom class.
 
 If you have any questions feel free to contact me, Matthew Walker, at mattgwwalker at gmail.com.
 NOTE: Due to time constraints, <a href="https://github.com/TheElementalOfCreation">The Elemental of Creation</a> has been added as a contributer to help manage the project.  As such, it may be helpful to send emails to arceusthe@gmail.com as well.
+
 Error Reporting
 ------------
 Should you encounter an error that has not already been reported, please do the following when reporting it:
