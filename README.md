@@ -78,7 +78,7 @@ Installation
 
 You can install using pip with:
 ```sh
-  pip install https://github.com/mattgwwalker/msg-extractor/zipball/master
+  pip install git+https://github.com/mattgwwalker/msg-extractor
 ```
 
 or you can include this in your list of python dependencies with:
