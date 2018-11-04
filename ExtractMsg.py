@@ -10,8 +10,10 @@ https://github.com/mattgwwalker/msg-extractor
 
 __author__ = 'Matthew Walker & The Elemental of Creation'
 __date__ = '2018-05-22'
-__version__ = '0.15'
+__version__ = '0.16'
 debug = False
+
+
 
 # --- LICENSE -----------------------------------------------------------------
 #
@@ -45,6 +47,13 @@ import json
 from imapclient.imapclient import decode_utf7
 import random
 import string
+
+# DEFINE CONSTANTS
+INTELLIGENCE_SMART = True
+INTELLIGENCE_DUMB  = False
+TYPE_MESSAGE       = 0
+TYPE_ATTACHMENT    = 1
+TYPE_RECIPIENT     = 1
 
 
 # This property information was sourced from
@@ -205,6 +214,9 @@ if sys.version_info[0] >= 3: # Python 3
     stri = (str,)
 
     def properHex(inp):
+        """
+        Taken (with permission) from https://github.com/TheElementalOfCreation/creatorUtils
+        """
         a = ''
         if isinstance(inp, stri):
             a = ''.join([hex(ord(inp[x]))[2:].rjust(2, '0') for x in range(len(inp))])
@@ -233,6 +245,9 @@ else:  # Python 2
     stri = (str, unicode)
 
     def properHex(inp):
+        """
+        Taken (with permission) from https://github.com/TheElementalOfCreation/creatorUtils
+        """
         a = ''
         if isinstance(inp, stri):
             a = ''.join([hex(ord(inp[x]))[2:].rjust(2, '0') for x in range(len(inp))])
@@ -247,8 +262,24 @@ else:  # Python 2
         return inp.encode('utf8')
 
 def msgEpoch(inp):
+    """
+    Taken (with permission) from https://github.com/TheElementalOfCreation/creatorUtils
+    """
     ep = 116444736000000000
     return (inp - ep)/10000000.0
+
+def divide(string, length):
+    """
+    Taken (with permission) from https://github.com/TheElementalOfCreation/creatorUtils
+
+    Divides a string into multiple substrings of equal length
+
+    Example:
+    >>>> a = divide('Hello World!', 2)
+    >>>> print(a)
+    ['He', 'll', 'o ', 'Wo', 'rl', 'd!']
+    """
+    return [string[length*x:length*(x+1)] for x in range(int(len(string)/length))]
 
 def addNumToDir(dirName):
     # Attempt to create the directory with a '(n)' appended
@@ -274,13 +305,13 @@ class Attachment:
         self.__msg = msg
         self.__dir = dir_
         # Get long filename
-        self.longFilename = msg._getStringStream([dir_, '__substg1.0_3707'])
+        self.__longFilename = msg._getStringStream([dir_, '__substg1.0_3707'])
 
         # Get short filename
-        self.shortFilename = msg._getStringStream([dir_, '__substg1.0_3704'])
+        self.__shortFilename = msg._getStringStream([dir_, '__substg1.0_3704'])
 
         # Get Content-ID
-        self.cid = msg._getStringStream([dir_, '__substg1.0_3712'])
+        self.__cid = msg._getStringStream([dir_, '__substg1.0_3712'])
 
         # Get attachment data
         if msg.Exists([dir_, '__substg1.0_37010102']):
@@ -306,13 +337,13 @@ class Attachment:
 
     def save(self, contentId = False, json = False, useFileName = False, raw = False):
         # Use long filename as first preference
-        filename = self.longFilename
+        filename = self.__longFilename
         # Check if user wants to save the file under the Content-id
         if contentId:
-            filename = self.cid
+            filename = self.__cid
         # Otherwise use the short filename
         if filename is None:
-            filename = self.shortFilename
+            filename = self.__shortFilename
         # Otherwise just make something up!
         if filename is None:
             filename = 'UnknownFilename ' + \
@@ -328,23 +359,30 @@ class Attachment:
         return filename
 
     @property
-    def props(self):
-        try:
-            return self.__props
-        except:
-            self.__props = Properties(self.msg._getStream(self.msg.prefixList + [self.__dir, '__properties_version1.0']))
-            return self.__props
+    def cid(self):
+        """
+        Returns the content ID of the attachment, if it exists.
+        """
+        return self.__cid
+
+    @property
+    def contend_id(self):
+        """
+        Returns the content ID of the attachment, if it exists.
+        """
+        return self.__cid
 
     @property
     def data(self):
         return self.__data
 
     @property
-    def type(self):
-        """
-        Returns the type of the data.
-        """
-        return self.__type
+    def dir(self):
+        return self.__dir
+
+    @property
+    def longFilename(self):
+        return self.__longFilename
 
     @property
     def msg(self):
@@ -353,38 +391,70 @@ class Attachment:
         """
         return self.__msg
 
+    @property
+    def props(self):
+        try:
+            return self.__props
+        except:
+            self.__props = Properties(self.msg._getStream(self.msg.prefixList + [self.__dir, '__properties_version1.0']), TYPE_ATTACHMENT)
+            return self.__props
+
+    @property
+    def shortFilename(self):
+        return self.__shortFilename
+
+    @property
+    def type(self):
+        """
+        Returns the type of the data.
+        """
+        return self.__type
+
 class Properties:
-    def __init__(self, stream, skip = None):
-        # TODO Make the properties class A LOT better
+    def __init__(self, stream, type = None, skip = None):
         self.__stream = stream
         self.__pos = 0
         self.__len = len(stream)
         self.__props = {}
-        if skip != None:
-            self.__parse(skip)
+        self.__naid = None
+        self.__nrid = None
+        self.__ac = None
+        self.__rc = None
+        if type != None:
+            self.__intel = INTELLIGENCE_SMART
+            if type == TYPE_MESSAGE:
+                skip = 32
+                self.__naid, self.__nrid, self.__ac, self.__rc = struct.unpack('<8x4I', self.__stream[:24])
+            else:
+                skip = 8
         else:
-            # This section of the skip handling is not very good.
-            # While it does work, it is likely to create extra
-            # properties that are created from the properties file's
-            # header data. While that won't actually mess anything
-            # up, it is far from ideal. Basically, this is the dumb
-            # skip length calculation
-            self.__parse(self.__len % 16)
+            self.__intel = INTELLIGENCE_DUMB
+            if skip == None:
+                # This section of the skip handling is not very good.
+                # While it does work, it is likely to create extra
+                # properties that are created from the properties file's
+                # header data. While that won't actually mess anything
+                # up, it is far from ideal. Basically, this is the dumb
+                # skip length calculation. Preferably, we want the type
+                # to have been specified so all of the additional fields
+                # will have been filled out
+                skip = self.__len % 16
+                if skip == 0:
+                    skip = 32
+        streams = divide(self.__stream[skip:], 16)
+        for st in streams:
+            a = Prop(st)
+            self.__props[a.name] = a
         self.__pl = len(self.__props)
 
-    def __parse(self, skip):
-        if self.__pos != 0:
-            return
-        self.__pos += skip
-        #TODO implement smart header length calculation
-
-        while self.__pos < self.__len:
-            a = Prop(self.__stream[self.__pos:self.__pos + 16])
-            self.__pos += 16
-            self.__props[a.name] = a
-
     def get(self, name):
-        return self.props[name]
+        try:
+            return self.props[name]
+        except:
+            if debug:
+                print(properHex(self.__stream))
+                print(self.__props)
+            raise
 
     def has_key(self, key):
         return key in self.props
@@ -419,18 +489,14 @@ class Properties:
     def __contains__(self, key):
         self.props.__contains__(key)
 
-    def __iter__(self):
-        return self.props.__iter__()
-
     def __getitem__(self, key):
         return self.props.__getitem__(key)
 
+    def __iter__(self):
+        return self.props.__iter__()
+
     def __len__(self):
         return self.__pl
-
-    @property
-    def props(self):
-        return copy.deepcopy(self.__props)
 
     @property
     def date(self):
@@ -444,20 +510,49 @@ class Properties:
             elif self.has_key('30070040'):
                 self.__date = fromTimeStamp(msgEpoch(self.get('30070040').value)).__format__('%a, %d %b %Y %H:%M:%S GMT %z')
             else:
-                print('Warning: Error retrieving date. Setting as "Unknown". Please send the following list to the developer:')
+                print('Warning: Error retrieving date. Setting as "Unknown". Please send the following data to developer:\n--------------------')
+                print(properHex(self.__stream))
                 print(self.keys())
+                print('--------------------')
                 self.__date = 'Unknown'
             return self.__date
+
+    @property
+    def intelligence(self):
+        return self.__intel
+
+    @property
+    def props(self):
+        return copy.deepcopy(self.__props)
+
+    @property
+    def stream(self):
+        return self.__stream
 
 class Prop:
     def __init__(self, string):
         n = string[0:4][::-1]
         self.__name = properHex(n).upper()
-        self.__type, self.__value = struct.unpack('<IQ', string[4:16])
+        self.__flags, self.__value = struct.unpack('<IQ', string[4:16])
+        self.__fm = self.__flags & 1
+        self.__fr = self.__flags & 2
+        self.__fw = self.__flags & 4
 
     @property
-    def type(self):
-        return self.__type
+    def flag_mandatory(self):
+        return self.__fm
+
+    @property
+    def flag_readable(self):
+        return self.__fr
+
+    @property
+    def flag_writable(self):
+        return self.__fw
+
+    @property
+    def flags(self):
+        return self.__flags
 
     @property
     def name(self):
@@ -471,7 +566,7 @@ class Recipient:
     def __init__(self, num, msg):
         self.__msg = msg #Allows calls to original msg file
         self.__dir = '__recip_version1.0_#{0}'.format(num.rjust(8,'0'))
-        self.__props = Properties(msg._getStream(self.__dir + '/__properties_version1.0'))
+        self.__props = Properties(msg._getStream(self.__dir + '/__properties_version1.0'), TYPE_RECIPIENT)
         self.__email = msg._getStringStream(self.__dir + '/__substg1.0_39FE')
         self.__name = msg._getStringStream(self.__dir + '/__substg1.0_3001')
         self.__type = self.__props.get('0C150003').value
@@ -498,7 +593,7 @@ class Recipient:
         return self.__props
 
 class Message(OleFile.OleFileIO):
-    def __init__(self, filename, prefix = '', attachmentClass = Attachment):
+    def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None):
         """
         `prefix` is used for extracting embeded msg files
             inside the main one. Do not set manually unless
@@ -513,9 +608,9 @@ class Message(OleFile.OleFileIO):
         #WARNING DO NOT MANUALLY MODIFY PREFIX. Let the program set it.
         if debug:
             print(prefix)
-        self.__path = filename
+        self.__path = path
         self.__attachmentClass = attachmentClass
-        OleFile.OleFileIO.__init__(self, filename)
+        OleFile.OleFileIO.__init__(self, path)
         prefixl = []
         if prefix != '':
             if not isinstance(prefix, stri):
@@ -533,7 +628,13 @@ class Message(OleFile.OleFileIO):
             filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix = False)
         self.__prefix = prefix
         self.__prefixList = prefixl
-        self.filename = filename
+        if filename != None:
+            self.filename = filename
+        elif len(path) < 1536:
+            self.filename = path
+        else:
+            self.filename = None
+
         # Initialize properties in the order that is least likely to cause bugs.
         # TODO have each function check for initialization of needed data so these
         # lines will be unnecessary.
@@ -662,7 +763,7 @@ class Message(OleFile.OleFileIO):
         try:
             return self._prop
         except:
-            self._prop = Properties(self._getStream('__properties_version1.0'))
+            self._prop = Properties(self._getStream('__properties_version1.0'), TYPE_MESSAGE)
             return self._prop
 
     @property
@@ -843,7 +944,10 @@ class Message(OleFile.OleFileIO):
 
         if useFileName:
             # strip out the extension
-            dirName = self.filename.split('/').pop().split('.')[0]
+            if self.filename != None:
+                dirName = self.filename.split('/').pop().split('.')[0]
+            else:
+                ValueError('Filename must be specified, or path must have been an actual path, to save using filename')
         else:
             # Create a directory based on the date and subject of the message
             d = self.parsedDate
