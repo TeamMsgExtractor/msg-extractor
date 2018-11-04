@@ -10,7 +10,7 @@ https://github.com/mattgwwalker/msg-extractor
 
 __author__ = 'Matthew Walker & The Elemental of Creation'
 __date__ = '2018-05-22'
-__version__ = '0.16'
+__version__ = '0.17'
 debug = False
 
 
@@ -499,6 +499,12 @@ class Properties:
         return self.__pl
 
     @property
+    def attachment_count(self):
+        if self.__ac == None:
+            raise TypeError('Properties instance must be intelligent and of type TYPE_MESSAGE to get attachment count.')
+        return self.__ac
+
+    @property
     def date(self):
         try:
             return self.__date
@@ -522,8 +528,26 @@ class Properties:
         return self.__intel
 
     @property
+    def next_attachment_id(self):
+        if self.__naid == None:
+            raise TypeError('Properties instance must be intelligent and of type TYPE_MESSAGE to get next attachment id.')
+        return self.__naid
+
+    @property
+    def next_recipient_id(self):
+        if self.__nrid == None:
+            raise TypeError('Properties instance must be intelligent and of type TYPE_MESSAGE to get next recipient id.')
+        return self.__nrid
+
+    @property
     def props(self):
         return copy.deepcopy(self.__props)
+
+    @property
+    def recipient_count(self):
+        if self.__rc == None:
+            raise TypeError('Properties instance must be intelligent and of type TYPE_MESSAGE to get recipient count.')
+        return self.__rc
 
     @property
     def stream(self):
