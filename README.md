@@ -104,3 +104,4 @@ Here is a list of things that are currently on our todo list:
 * Finish writing a usage guide
 * Improve the intelligence of the saving functions
 * Create a Pypi package
+* Provide way to save attachments and messages into a custom location under a custom name
