@@ -96,3 +96,11 @@ setup(
     dependency_links=['https://github.com/mattgwwalker/msg-extractor/zipball/master'],
 )
 ```
+
+Todo
+------------
+Here is a list of things that are currently on our todo list:
+* Tests (ie. unittest)
+* Finish writing a usage guide
+* Improve the intelligence of the saving functions
+* Create a Pypi package
