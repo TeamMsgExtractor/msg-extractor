@@ -115,23 +115,23 @@ Here is a list of things that are currently on our todo list:
 
 Coming Soon
 ------------
-Version 0.20 - The Documentation Update
+#### Version 0.20 - The Documentation Update ####
 * Addes documentation to most functions
 * Improves the speed and efficiency of many parts of the program
 * Improves the intelligence of several parts of the program
 
-Version 0.21 - The Saving Update
+#### Version 0.21 - The Saving Update ####
 * Improves save mechanics of the `Message` class and the `Attachment` class to make saving files to a custom path and/or saving files under a custom name possible
 
-Version 0.25 - The Debugger Update
+#### Version 0.25 - The Debugger Update ####
 * Make the changing of `ExtractMsg.debug` to `True` output A LOT more information that should help to make bug fixes much faster
 
-Version 0.30 - The Intelligence Update
+#### Version 0.30 - The Intelligence Update ####
 * Majorly increase the intelligence of nearly all of the classes
 
-Version 0.50 - The Testing Update
+#### Version 0.50 - The Testing Update ####
 * Added tests for most platforms (win, mac, linux)
 
-Version 1.00 - The Release Update
+#### Version 1.00 - The Release Update ####
 * ExtractMsg is fully ready for its first full release
 
