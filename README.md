@@ -71,6 +71,8 @@ where `CustomAttachmentClass` is your custom class.
 If you have any questions feel free to contact me, Matthew Walker, at mattgwwalker at gmail.com.
 NOTE: Due to time constraints, <a href="https://github.com/TheElementalOfCreation">The Elemental of Creation</a> has been added as a contributer to help manage the project.  As such, it may be helpful to send emails to arceusthe@gmail.com as well.
 
+If you have issues, it would be best to get help for them by opening a new github issue.
+
 Error Reporting
 ------------
 Should you encounter an error that has not already been reported, please do the following when reporting it:
@@ -101,8 +103,35 @@ Todo
 ------------
 Here is a list of things that are currently on our todo list:
 * Tests (ie. unittest)
+  * Coming in version 0.50
 * Finish writing a usage guide
 * Improve the intelligence of the saving functions
 * Create a Pypi package
 * Provide way to save attachments and messages into a custom location under a custom name
+  * Coming in version 0.21
 * Implement better property handling that will convert each type into a python equivelent if possible
+  * Coming in version 0.30
+
+
+Coming Soon
+------------
+Version 0.20 - The Documentation Update
+* Addes documentation to most functions
+* Improves the speed and efficiency of many parts of the program
+* Improves the intelligence of several parts of the program
+
+Version 0.21 - The Saving Update
+* Improves save mechanics of the `Message` class and the `Attachment` class to make saving files to a custom path and/or saving files under a custom name possible
+
+Version 0.25 - The Debugger Update
+* Make the changing of `ExtractMsg.debug` to `True` output A LOT more information that should help to make bug fixes much faster
+
+Version 0.30 - The Intelligence Update
+* Majorly increase the intelligence of nearly all of the classes
+
+Version 0.50 - The Testing Update
+* Added tests for most platforms (win, mac, linux)
+
+Version 1.00 - The Release Update
+* ExtractMsg is fully ready for its first full release
+
