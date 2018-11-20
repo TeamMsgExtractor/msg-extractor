@@ -10,7 +10,7 @@ https://github.com/mattgwwalker/msg-extractor
 
 __author__ = 'Matthew Walker & The Elemental of Creation'
 __date__ = '2018-05-22'
-__version__ = '0.18'
+__version__ = '0.19'
 debug = False
 
 
@@ -841,6 +841,8 @@ class Message(OleFile.OleFileIO):
 
         asciiVersion = self._getStream(filename + '001E', prefix)
         unicodeVersion = windowsUnicode(self._getStream(filename + '001F', prefix))
+        if debug:
+            print('DEBUG: _getStringSteam called for {}. Ascii version found: {}. Unicode version found: {}.'.format(filename, asciiVersion != None, unicodeVersion != None))
         if asciiVersion is None:
             return unicodeVersion
         elif unicodeVersion is None:
