@@ -1,4 +1,3 @@
-import glob
 import os
 from setuptools import setup
 import re
@@ -23,7 +22,7 @@ version = match.groupdict()['version']
 
 # read in the dependencies from the virtualenv requirements file
 dependencies = []
-filename = os.path.join("REQUIREMENTS")
+filename = os.path.join("requirements.txt")
 with open(filename, 'r') as stream:
     for line in stream:
         package = line.strip().split('#')[0]
@@ -37,8 +36,8 @@ setup(
     long_description=long_description,
     url=github_url,
     download_url="%s/archives/master" % github_url,
-    author='Matthew Walker',
-    author_email='mattgwwalker at gmail.com',
+    author='Matthew Walker & The Elemental of Creation',
+    author_email='mattgwwalker@gmail.com, arceusthe@gmail.com',
     license='GPL',
     scripts=[main_script],
     py_modules=[main_module],
