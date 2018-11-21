@@ -10,9 +10,9 @@ https://github.com/mattgwwalker/msg-extractor
 
 __author__ = 'Matthew Walker & The Elemental of Creation'
 __date__ = '2018-05-22'
-__version__ = '0.19'
-debug = False
+__version__ = '0.20'
 
+debug = False
 
 
 # --- LICENSE -----------------------------------------------------------------
@@ -32,29 +32,70 @@ debug = False
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
 import copy
-import re
-import sys
-import glob
-import traceback
-import struct
 import datetime
-from email.parser import Parser as EmailParser
 import email.utils
-import olefile as OleFile
+import glob
 import json
-from imapclient.imapclient import decode_utf7
+import olefile as OleFile
+import os
+import pprint
 import random
+import re
 import string
+import struct
+import sys
+import traceback
+import tzlocal
+from email.parser import Parser as EmailParser
+from imapclient.imapclient import decode_utf7
 
 # DEFINE CONSTANTS
-INTELLIGENCE_SMART = True
-INTELLIGENCE_DUMB  = False
-TYPE_MESSAGE       = 0
-TYPE_ATTACHMENT    = 1
-TYPE_RECIPIENT     = 1
+# WARNING DO NOT CHANGE ANY OF THESE VALUES UNLESS YOU KNOW
+# WHAT YOU ARE DOING! FAILURE TO FOLLOW THIS INSTRUCTION
+# CAN AND WILL BREAK THIS SCRIPT!
 
+INTELLIGENCE_DUMB  = 0
+INTELLIGENCE_SMART = 1
+INTELLIGENCE_DICT = {
+    INTELLIGENCE_DUMB:  'INTELLIGENCE_DUMB',
+    INTELLIGENCE_SMART: 'INTELLIGENCE_SMART',
+}
+
+TYPE_MESSAGE       = 0
+TYPE_MESSAGE_EMBED = 1
+TYPE_ATTACHMENT    = 2
+TYPE_RECIPIENT     = 3
+TYPE_DICT = {
+    TYPE_MESSAGE:       'TYPE_MESSAGE',
+    TYPE_MESSAGE_EMBED: 'TYPE_MESSAGE_EMBED',
+    TYPE_ATTACHMENT:    'TYPE_ATTACHMENT',
+    TYPE_RECIPIENT:     'TYPE_RECIPIENT',
+}
+
+
+RECIPIENT_SENDER   = 0
+RECIPIENT_TO       = 1
+RECIPIENT_CC       = 2
+RECIPIENT_BCC      = 3
+RECIPIENT_DICT = {
+    RECIPIENT_SENDER:   'RECIPIENT_SENDER',
+    RECIPIENT_TO:       'RECIPIENT_TO',
+    RECIPIENT_CC:       'RECIPIENT_CC',
+    RECIPIENT_BCC:      'RECIPIENT_BCC',
+}
+
+# Define pre-compiled structs to make unpacking slightly faster
+ST1                = struct.Struct('<8x4I')
+ST2                = struct.Struct('<H2xI8s')
+ST3                = struct.Struct('<Q')
+STI16              = struct.Struct('<h6x')
+STI32              = struct.Struct('<i4x')
+STI64              = struct.Struct('<q')
+STF32              = struct.Struct('<f4x')
+STF64              = struct.Struct('<d')
+
+# END CONSTANTS
 
 # This property information was sourced from
 # http://www.fileformat.info/format/outlookmsg/index.htm
@@ -194,6 +235,7 @@ TYPE_RECIPIENT     = 1
 #     '37020102': '',
 #     '3703001F': 'Attachment extension',
 #     '3704001F': 'Attachment short filename',
+#     '37050003': 'Attachment attach method',
 #     '3707001F': 'Attachment long filename',
 #     '370E001F': 'Attachment mime tag',
 #     '3712001F': 'Attachment ID (uncertain)',
@@ -271,41 +313,40 @@ TYPE_RECIPIENT     = 1
 #     '5FF6': 'To (uncertain)'
 # }
 
-# types = {
-#     '0000': 'PtypUnspecified',
-#     '0001': 'PtypNull',
-#     '0002': 'PtypInteger16', # Signed short
-#     '0003': 'PtypInteger32', # Signed int
-#     '0004': 'PtypFloating32', # Float
-#     '0005': 'PtypFloating64', # Double
-#     '0006': 'PtypCurrency',
-#     '0007': 'PtypFloatingTime',
-#     '000A': 'PtypErrorCode',
-#     '000B': 'PtypBoolean',
-#     '000D': 'PtypObject/PtypEmbeddedTable',
-#     '0014': 'PtypInteger64', # Signed longlong
-#     '001E': 'PtypString8',
-#     '001F': 'PtypString',
-#     '0040': 'PtypTime', # Use msgEpoch to convert to unix time stamp
-#     '0048': 'PtypGuid',
-#     '00FB': 'PtypServerId',
-#     '00FD': 'PtypRestriction',
-#     '00FE': 'PtypRuleAction',
-#     '0102': 'PtypBinary',
-#     '1002': 'PtypMultipleInteger16',
-#     '1003': 'PtypMultipleInteger32',
-#     '1004': 'PtypMultipleFloating32',
-#     '1005': 'PtypMultipleFloating64',
-#     '1006': 'PtypMultipleCurrency',
-#     '1007': 'PtypMultipleFloatingTime',
-#     '0014': 'PtypMultipleInteger64',
-#     '101E': 'PtypMultipleString8',
-#     '101F': 'PtypMultipleString',
-#     '1040': 'PtypMultipleTime',
-#     '1048': 'PtypMultipleGuid',
-#     '1102': 'PtypMultipleBinary',
-# }
-
+types = {
+    0x0000: 'PtypUnspecified',
+    0x0001: 'PtypNull',
+    0x0002: 'PtypInteger16', # Signed short
+    0x0003: 'PtypInteger32', # Signed int
+    0x0004: 'PtypFloating32', # Float
+    0x0005: 'PtypFloating64', # Double
+    0x0006: 'PtypCurrency',
+    0x0007: 'PtypFloatingTime',
+    0x000A: 'PtypErrorCode',
+    0x000B: 'PtypBoolean',
+    0x000D: 'PtypObject/PtypEmbeddedTable',
+    0x0014: 'PtypInteger64', # Signed longlong
+    0x001E: 'PtypString8',
+    0x001F: 'PtypString',
+    0x0040: 'PtypTime', # Use msgEpoch to convert to unix time stamp
+    0x0048: 'PtypGuid',
+    0x00FB: 'PtypServerId',
+    0x00FD: 'PtypRestriction',
+    0x00FE: 'PtypRuleAction',
+    0x0102: 'PtypBinary',
+    0x1002: 'PtypMultipleInteger16',
+    0x1003: 'PtypMultipleInteger32',
+    0x1004: 'PtypMultipleFloating32',
+    0x1005: 'PtypMultipleFloating64',
+    0x1006: 'PtypMultipleCurrency',
+    0x1007: 'PtypMultipleFloatingTime',
+    0x1014: 'PtypMultipleInteger64',
+    0x101E: 'PtypMultipleString8',
+    0x101F: 'PtypMultipleString',
+    0x1040: 'PtypMultipleTime',
+    0x1048: 'PtypMultipleGuid',
+    0x1102: 'PtypMultipleBinary',
+}
 
 if sys.version_info[0] >= 3: # Python 3
     def xstr(s):
@@ -364,7 +405,87 @@ else:  # Python 2
             a = '0' + a
         return a
     def encode(inp):
-        return inp.encode('utf8')
+        return inp.encode('utf-8')
+
+def int_to_recipient_type(integer):
+    return RECIPIENT_DICT[integer]
+
+def int_to_data_type(integer):
+    return TYPE_DICT[integer]
+
+def int_to_intelligence(integer):
+    return INTELLIGENCE_DICT[integer]
+
+def parse_type(type, stream):
+    """
+    Converts the data in :param stream: to a
+    much more accurate type, specified by
+    :param type:, if possible.
+
+    Some types require that :param prop_value: be specified. This can be retrieved from the Properties instance.
+
+    WARNING: Not done. Do not try to implement anywhere where it is not already implemented
+    """
+    #WARNING Not done. Do not try to implement anywhere where it is not already implemented
+    value = stream
+    if type == 0x0000: #PtypUnspecified
+        pass;
+    elif type == 0x0001: #PtypNull
+        if value != b'\x00\x00\x00\x00\x00\x00\x00\x00':
+            print('Warning: Property type is PtypNull, but is not equal to 0.')
+        value = None
+    elif type == 0x0002: #PtypInteger16
+        value = STI16.unpack(value)[0]
+    elif type == 0x0003: #PtypInteger32
+        value = STI32.unpack(value)[0]
+    elif type == 0x0004: #PtypFloating32
+        value = STF32.unpack(value)[0]
+    elif type == 0x0005: #PtypFloating64
+        value = STF64.unpack(value)[0]
+    elif type == 0x0006: #PtypCurrency
+        value = (STI64.unpack(value)[0])/10000.0
+    elif type == 0x0007: #PtypFloatingTime
+        value = STF64.unpack(value)[0]
+        #TODO parsing for this
+        pass;
+    elif type == 0x000A: #PtypErrorCode
+        value = STI32.unpack(value)[0]
+        #TODO parsing for this
+        pass;
+    elif type == 0x000B: #PtypBoolean
+        value = bool(ST3.unpack(value)[0])
+    elif type == 0x000D: #PtypObject/PtypEmbeddedTable
+        #TODO parsing for this
+        pass;
+    elif type == 0x0014: #PtypInteger64
+        value = STI64.unpack(value)[0]
+    elif type == 0x001E: #PtypString8
+        #TODO parsing for this
+        pass;
+    elif type == 0x001F: #PtypString
+        value = value.decode('utf_16_le')
+    elif type == 0x0040: #PtypTime
+        value = ST3.unpack(value)[0]
+    elif type == 0x0048: #PtypGuid
+        #TODO parsing for this
+        pass;
+    elif type == 0x00FB: #PtypServerId
+        #TODO parsing for this
+        pass;
+    elif type == 0x00FD: #PtypRestriction
+        #TODO parsing for this
+        pass;
+    elif type == 0x00FE: #PtypRuleAction
+        #TODO parsing for this
+        pass;
+    elif type == 0x0102: #PtypBinary
+        #TODO parsing for this
+        # Smh, how on earth am I going to code this???
+        pass;
+    elif type & 0x1000 == 0x1000: #PtypMultiple
+        #TODO parsing for `multiple` types
+        pass;
+    return value;
 
 def msgEpoch(inp):
     """
@@ -378,6 +499,9 @@ def divide(string, length):
     Taken (with permission) from https://github.com/TheElementalOfCreation/creatorUtils
 
     Divides a string into multiple substrings of equal length
+    :param string: string to be divided.
+    :param length: length of each division.
+    :returns: list containing the divided strings.
 
     Example:
     >>>> a = divide('Hello World!', 2)
@@ -387,6 +511,9 @@ def divide(string, length):
     return [string[length*x:length*(x+1)] for x in range(int(len(string)/length))]
 
 def has_len(obj):
+    """
+    Checks if :param obj: has a __len__ attribute.
+    """
     try:
         obj.__len__
         return True
@@ -394,7 +521,9 @@ def has_len(obj):
         return False
 
 def addNumToDir(dirName):
-    # Attempt to create the directory with a '(n)' appended
+    """
+    Attempt to create the directory with a '(n)' appended
+    """
     for i in range(2, 100):
         try:
             newDirName = dirName + ' (' + str(i) + ')'
@@ -404,7 +533,8 @@ def addNumToDir(dirName):
             pass
     return None
 
-fromTimeStamp = datetime.datetime.fromtimestamp
+def fromTimeStamp(stamp):
+    return datetime.datetime.fromtimestamp(stamp, tzlocal.get_localzone())
 
 class Attachment:
     """
@@ -414,6 +544,10 @@ class Attachment:
     Message class used to create the attachment.
     """
     def __init__(self, msg, dir_):
+        """
+        :param msg: the Message instance that the attachment belongs to.
+        :param dir_: the directory inside the msg file where the attachment is located.
+        """
         self.__msg = msg
         self.__dir = dir_
         # Get long filename
@@ -431,8 +565,20 @@ class Attachment:
             self.__data = msg._getStream([dir_, '__substg1.0_37010102'])
         elif msg.Exists([dir_, '__substg1.0_3701000D']):
             if (self.props['37050003'].value & 0x7) != 0x5:
-                raise NotImplementedError('Current version of ExtractMsg.py does not support extraction of containers that are not embeded msg files.')
-                #TODO add implementation
+                if not debug:
+                    raise NotImplementedError('Current version of ExtractMsg.py does not support extraction of containers that are not embeded msg files.')
+                    #TODO add implementation
+                else:
+                    print('DEBUG: Debugging is true, ignoring NotImplementedError and printing debug info...')
+                    print('DEBUG: _dir = {}'.format(_dir))
+                    print('DEBUG: Writing properties stream to output:')
+                    print('DEBUG: --------Start-Properties-Stream--------')
+                    print(properHex(self.props.stream))
+                    print('DEBUG: ---------End-Properties-Stream---------')
+                    print('DEBUG: Writing directory contents to output:')
+                    print('DEBUG: --------Start-Directory-Content--------')
+                    for x in msg.listDir(True, True): print(x)
+                    print('DEBUG: ---------End-Directory-Content---------')
             else:
                 self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
                 self.__type = 'msg'
@@ -440,34 +586,42 @@ class Attachment:
         else:
             raise Exception('Unknown file type')
 
-    def saveEmbededMessage(self, contentId = False, json = False, useFileName = False, raw = False):
+    def saveEmbededMessage(self, contentId = False, json = False, useFileName = False, raw = False, customPath = None, customFilename = None):
         """
         Seperate function from save to allow it to
         easily be overridden by a subclass.
         """
-        self.data.save(json, useFileName, raw, contentId)
+        self.data.save(json, useFileName, raw, contentId, customPath, customFilename)
 
-    def save(self, contentId = False, json = False, useFileName = False, raw = False):
-        # Use long filename as first preference
-        filename = self.__longFilename
-        # Check if user wants to save the file under the Content-id
-        if contentId:
-            filename = self.__cid
-        # Otherwise use the short filename
-        if filename is None:
-            filename = self.__shortFilename
-        # Otherwise just make something up!
-        if filename is None:
-            filename = 'UnknownFilename ' + \
-                ''.join(random.choice(string.ascii_uppercase + string.digits)
-                        for _ in range(5)) + '.bin'
+    def save(self, contentId = False, json = False, useFileName = False, raw = False, customPath = None, customFilename = None):
+        # Check if the user has specified a custom filename
+        if customFilename != None and customFilename != '':
+            filename = customFilename
+        else:
+            # If not...
+            # Check if user wants to save the file under the Content-id
+            if contentId:
+                filename = self.__cid
+            # If filename is None at this point, use long filename as first preference
+            filename = self.__longFilename
+            # Otherwise use the short filename
+            if filename is None:
+                filename = self.__shortFilename
+            # Otherwise just make something up!
+            if filename is None:
+                filename = 'UnknownFilename ' + \
+                    ''.join(random.choice(string.ascii_uppercase + string.digits)
+                            for _ in range(5)) + '.bin'
+
+        if custom_path:
+            filename = customPath + filename
 
         if self.__type == "data":
             f = open(filename, 'wb')
             f.write(self.__data)
             f.close()
         else:
-            self.saveEmbededMessage(contentId, json, useFileName, raw)
+            self.saveEmbededMessage(contentId, json, useFileName, raw, customPath, customFilename)
         return filename
 
     @property
@@ -477,34 +631,41 @@ class Attachment:
         """
         return self.__cid
 
-    @property
-    def contend_id(self):
-        """
-        Returns the content ID of the attachment, if it exists.
-        """
-        return self.__cid
+    contend_id = cid
 
     @property
     def data(self):
+        """
+        Returns the attachment data.
+        """
         return self.__data
 
     @property
     def dir(self):
+        """
+        Returns the directory inside the msg file where the attachment is located.
+        """
         return self.__dir
 
     @property
     def longFilename(self):
+        """
+        Returns the long file name of the attachment, if it exists.
+        """
         return self.__longFilename
 
     @property
     def msg(self):
         """
-        Returns the msg file the attachment belongs to.
+        Returns the Message instance the attachment belongs to.
         """
         return self.__msg
 
     @property
     def props(self):
+        """
+        Returns the Properties instance of the attachment.
+        """
         try:
             return self.__props
         except:
@@ -513,6 +674,9 @@ class Attachment:
 
     @property
     def shortFilename(self):
+        """
+        Returns the short file name of the attachment, if it exists.
+        """
         return self.__shortFilename
 
     @property
@@ -523,6 +687,9 @@ class Attachment:
         return self.__type
 
 class Properties:
+    """
+    Parser for msg properties files.
+    """
     def __init__(self, stream, type = None, skip = None):
         self.__stream = stream
         self.__pos = 0
@@ -536,7 +703,10 @@ class Properties:
             self.__intel = INTELLIGENCE_SMART
             if type == TYPE_MESSAGE:
                 skip = 32
-                self.__naid, self.__nrid, self.__ac, self.__rc = struct.unpack('<8x4I', self.__stream[:24])
+                self.__naid, self.__nrid, self.__ac, self.__rc = ST1.unpack(self.__stream[:24])
+            elif type == TYPE_MESSAGE_EMBED:
+                skip = 24
+                self.__naid, self.__nrid, self.__ac, self.__rc = ST1.unpack(self.__stream[:24])
             else:
                 skip = 8
         else:
@@ -560,55 +730,79 @@ class Properties:
         self.__pl = len(self.__props)
 
     def get(self, name):
+        """
+        Retrieve the property of :param name:.
+        """
         try:
-            return self.props[name]
+            return self.__props[name]
         except:
             if debug:
+                print('DEBUG:')
                 print(properHex(self.__stream))
                 print(self.__props)
             raise
 
     def has_key(self, key):
-        return key in self.props
+        """
+        Checks if :param key: is a key in the properties dictionary.
+        """
+        return key in self.__props
 
     def items(self):
-        return self.props.items()
+        return self.__props.items()
 
     def iteritems(self):
-        return self.props.iteritems()
+        return self.__props.iteritems()
 
     def iterkeys(self):
-        return self.props.iterkeys()
+        return self.__props.iterkeys()
 
     def itervalues(self):
-        return self.props.itervalues()
+        return self.__props.itervalues()
 
     def keys(self):
-        return self.props.keys()
+        return self.__props.keys()
 
     def values(self):
-        return self.props.values()
+        return self.__props.values()
 
     def viewitems(self):
-        return self.props.viewitems()
+        return self.__props.viewitems()
 
     def viewkeys(self):
-        return self.props.viewkeys()
+        return self.__props.viewkeys()
 
     def viewvalues(self):
-        return self.props.viewvalues()
+        return self.__props.viewvalues()
 
     def __contains__(self, key):
-        self.props.__contains__(key)
+        self.__props.__contains__(key)
 
     def __getitem__(self, key):
-        return self.props.__getitem__(key)
+        return self.__props.__getitem__(key)
 
     def __iter__(self):
-        return self.props.__iter__()
+        return self.__props.__iter__()
 
     def __len__(self):
+        """
+        Returns the number of properties.
+        """
         return self.__pl
+
+    @property
+    def __repr__(self):
+        return self.__props.__repr__
+
+    items.__doc__         = dict.items.__doc__
+    iteritems.__doc__     = dict.iteritems.__doc__
+    iterkeys.__doc__      = dict.iterkeys.__doc__
+    itervalues.__doc__    = dict.itervalues.__doc__
+    keys.__doc__          = dict.keys.__doc__
+    values.__doc__        = dict.values.__doc__
+    viewitems.__doc__     = dict.viewitems.__doc__
+    viewkeys.__doc__      = dict.viewkeys.__doc__
+    viewvalues.__doc__    = dict.viewvalues.__doc__
 
     @property
     def attachment_count(self):
@@ -618,6 +812,9 @@ class Properties:
 
     @property
     def date(self):
+        """
+        Returns the send date contained in the Properties file.
+        """
         try:
             return self.__date
         except:
@@ -637,6 +834,9 @@ class Properties:
 
     @property
     def intelligence(self):
+        """
+        Returns the inteligence level of the Properties instance.
+        """
         return self.__intel
 
     @property
@@ -653,6 +853,9 @@ class Properties:
 
     @property
     def props(self):
+        """
+        Returns a copy of the internal properties dict.
+        """
         return copy.deepcopy(self.__props)
 
     @property
@@ -663,45 +866,153 @@ class Properties:
 
     @property
     def stream(self):
+        """
+        Returns the data stream used to generate this Properties instance.
+        """
         return self.__stream
 
 class Prop:
+    """
+    Class to contain the data for a single property.
+
+    Currently a work in progress.
+    """
     def __init__(self, string):
-        n = string[0:4][::-1]
+        n = string[:4][::-1]
+        self.__raw = string
         self.__name = properHex(n).upper()
-        self.__flags, self.__value = struct.unpack('<IQ', string[4:16])
-        self.__fm = self.__flags & 1
-        self.__fr = self.__flags & 2
-        self.__fw = self.__flags & 4
+        self.__type, self.__flags, self.__value = ST2.unpack(string)
+        self.__value = self.parse_type(self.__type, self.__value)
+        self.__fm = self.__flags & 1 == 1
+        self.__fr = self.__flags & 2 == 2
+        self.__fw = self.__flags & 4 == 4
+
+    def parse_type(self, type, stream):
+        """
+        Converts the data in :param stream: to a
+        much more accurate type, specified by
+        :param type:, if possible.
+
+        WARNING: Not done.
+        """
+        #WARNING Not done.
+        value = stream
+        if type == 0x0000: #PtypUnspecified
+            pass;
+        elif type == 0x0001: #PtypNull
+            if value != b'\x00\x00\x00\x00\x00\x00\x00\x00':
+                print('Warning: Property type is PtypNull, but is not equal to 0.')
+            value = None
+        elif type == 0x0002: #PtypInteger16
+            value = STI16.unpack(value)[0]
+        elif type == 0x0003: #PtypInteger32
+            value = STI32.unpack(value)[0]
+        elif type == 0x0004: #PtypFloating32
+            value = STF32.unpack(value)[0]
+        elif type == 0x0005: #PtypFloating64
+            value = STF64.unpack(value)[0]
+        elif type == 0x0006: #PtypCurrency
+            value = (STI64.unpack(value))[0]/10000.0
+        elif type == 0x0007: #PtypFloatingTime
+            value = STF64.unpack(value)[0]
+            #TODO parsing for this
+            pass;
+        elif type == 0x000A: #PtypErrorCode
+            value = STI32.unpack(value)[0]
+            #TODO parsing for this
+            pass;
+        elif type == 0x000B: #PtypBoolean
+            value = bool(ST3.unpack(value)[0])
+        elif type == 0x000D: #PtypObject/PtypEmbeddedTable
+            #TODO parsing for this
+            pass;
+        elif type == 0x0014: #PtypInteger64
+            value = STI64.unpack(value)[0]
+        elif type == 0x001E: #PtypString8
+            #TODO parsing for this
+            pass;
+        elif type == 0x001F: #PtypString
+            #TODO parsing for this
+            pass;
+        elif type == 0x0040: #PtypTime
+            value = ST3.unpack(value)[0]
+        elif type == 0x0048: #PtypGuid
+            #TODO parsing for this
+            pass;
+        elif type == 0x00FB: #PtypServerId
+            #TODO parsing for this
+            pass;
+        elif type == 0x00FD: #PtypRestriction
+            #TODO parsing for this
+            pass;
+        elif type == 0x00FE: #PtypRuleAction
+            #TODO parsing for this
+            pass;
+        elif type == 0x0102: #PtypBinary
+            #TODO parsing for this
+            # Smh, how on earth am I going to code this???
+            pass;
+        elif type & 0x1000 == 0x1000: #PtypMultiple
+            #TODO parsing for `multiple` types
+            pass;
+        return value;
 
     @property
     def flag_mandatory(self):
+        """
+        Boolean, is the "mandatory" flag set?
+        """
         return self.__fm
 
     @property
     def flag_readable(self):
+        """
+        Boolean, is the "readable" flag set?
+        """
         return self.__fr
 
     @property
     def flag_writable(self):
+        """
+        Boolean, is the "writable" flag set?
+        """
         return self.__fw
 
     @property
     def flags(self):
+        """
+        Integer that contains property flags.
+        """
         return self.__flags
 
     @property
     def name(self):
+        """
+        Property "name".
+        """
         return self.__name
 
     @property
+    def raw(self):
+        """
+        Raw binary string that defined the property.
+        """
+        return self.__raw
+
+    @property
     def value(self):
+        """
+        Property value.
+        """
         return self.__value
 
 class Recipient:
+    """
+    Contains the data of one or the recipients in an msg file.
+    """
     def __init__(self, num, msg):
         self.__msg = msg #Allows calls to original msg file
-        self.__dir = '__recip_version1.0_#{0}'.format(num.rjust(8,'0'))
+        self.__dir = '__recip_version1.0_#' + num.rjust(8,'0')
         self.__props = Properties(msg._getStream(self.__dir + '/__properties_version1.0'), TYPE_RECIPIENT)
         self.__email = msg._getStringStream(self.__dir + '/__substg1.0_39FE')
         self.__name = msg._getStringStream(self.__dir + '/__substg1.0_3001')
@@ -709,41 +1020,62 @@ class Recipient:
         self.__formatted = '{0} <{1}>'.format(self.__name, self.__email)
 
     @property
-    def type(self):
-        return self.__type
-
-    @property
-    def name(self):
-        return self.__name
-
-    @property
     def email(self):
+        """
+        Returns the recipient's email.
+        """
         return self.__email
 
     @property
     def formatted(self):
+        """
+        Returns the formatted recipient string.
+        """
         return self.__formatted
 
     @property
+    def name(self):
+        """
+        Returns the recipient's name.
+        """
+        return self.__name
+
+    @property
     def props(self):
+        """
+        Returns the Properties instance of the recipient.
+        """
         return self.__props
+
+    @property
+    def type(self):
+        """
+        Returns the recipient type.
+        Sender if `type & 0xf == 0`
+        To if `type & 0xf == 1`
+        Cc if `type & 0xf == 2`
+        Bcc if `type & 0xf == 3`
+        """
+        return self.__type
+
+
 
 class Message(OleFile.OleFileIO):
     def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None):
         """
-        `prefix` is used for extracting embeded msg files
+        :param path: path to the msg file in the system or is the raw msg file.
+        :param prefix: used for extracting embeded msg files
             inside the main one. Do not set manually unless
             you know what you are doing.
-
-        `attachmentClass` is the class the Message object
+        :param attachmentClass: optional, the class the Message object
             will use for attachments. You probably should
             not change this value unless you know what you
             are doing.
-
+        :param filename: optional, the filename to be used by default when saving.
         """
         #WARNING DO NOT MANUALLY MODIFY PREFIX. Let the program set it.
         if debug:
-            print(prefix)
+            print('DEBUG: prefix: {}'.format(prefix))
         self.__path = path
         self.__attachmentClass = attachmentClass
         OleFile.OleFileIO.__init__(self, path)
@@ -753,7 +1085,7 @@ class Message(OleFile.OleFileIO):
                 try:
                     prefix = '/'.join(prefix)
                 except:
-                    raise TypeException('Invalid prefix type: ' + type(prefix) + '\n(This was probably caused by you setting it manually)')
+                    raise TypeException('Invalid prefix type: ' + type(prefix) + '\n(This was probably caused by you setting it manually).')
             prefix = prefix.replace('\\', '/')
             g = prefix.split("/")
             if g[-1] == '':
@@ -789,6 +1121,9 @@ class Message(OleFile.OleFileIO):
         self.body
 
     def listDir(self, streams = True, storages = False):
+        """
+        Replacement for OleFileIO.listdir that runs at the current prefix directory.
+        """
         temp = self.listdir(streams, storages)
         if self.__prefix == '':
             return temp
@@ -809,6 +1144,9 @@ class Message(OleFile.OleFileIO):
         return out
 
     def Exists(self, inp):
+        """
+        Checks if :param inp: exists in the msg file.
+        """
         if isinstance(inp, list):
             inp = self.__prefixList + inp
         else:
@@ -831,7 +1169,7 @@ class Message(OleFile.OleFileIO):
         Gets a string representation of the requested filename.
         Checks for both ASCII and Unicode representations and returns
         a value if possible.  If there are both ASCII and Unicode
-        versions, then the parameter /prefer/ specifies which will be
+        versions, then :param prefer: specifies which will be
         returned.
         """
 
@@ -855,18 +1193,34 @@ class Message(OleFile.OleFileIO):
 
     @property
     def path(self):
+        """
+        Returns the message path if generated from a file,
+        otherwise returns the data used to generate the
+        Message instance.
+        """
         return self.__path
 
     @property
     def prefix(self):
+        """
+        Returns the prefix of the Message instance.
+        Intended for developer use.
+        """
         return self.__prefix
 
     @property
     def prefixList(self):
+        """
+        Returns the prefix list of the Message instance.
+        Intended for developer use.
+        """
         return self.__prefixList
 
     @property
     def subject(self):
+        """
+        Returns the message subject, if it exists.
+        """
         try:
             return self._subject
         except:
@@ -875,6 +1229,9 @@ class Message(OleFile.OleFileIO):
 
     @property
     def header(self):
+        """
+        Returns the message header, if it exists. Otherwise it will generate one.
+        """
         try:
             return self._header
         except Exception:
@@ -893,6 +1250,9 @@ class Message(OleFile.OleFileIO):
             return self._header
 
     def headerInit(self):
+        """
+        Checks whether the header has been initialized.
+        """
         try:
             self._header
             return True
@@ -901,15 +1261,20 @@ class Message(OleFile.OleFileIO):
 
     @property
     def mainProperties(self):
+        """
+        Returns the Properties instance used by the Message instance.
+        """
         try:
             return self._prop
         except:
-            self._prop = Properties(self._getStream('__properties_version1.0'), TYPE_MESSAGE)
+            self._prop = Properties(self._getStream('__properties_version1.0'), TYPE_MESSAGE if self.__prefix == '' else TYPE_MESSAGE_EMBED)
             return self._prop
 
     @property
     def date(self):
-        # Get the message's header and extract the date
+        """
+        Returns the send date, if it exists.
+        """
         try:
             return self._date
         except:
@@ -923,6 +1288,9 @@ class Message(OleFile.OleFileIO):
 
     @property
     def sender(self):
+        """
+        Returns the message sender, if it exists.
+        """
         try:
             return self._sender
         except Exception:
@@ -941,13 +1309,16 @@ class Message(OleFile.OleFileIO):
             else:
                 result = text
                 if email is not None:
-                    result = result + ' <' + email + '>'
+                    result += ' <' + email + '>'
 
             self._sender = result
             return result
 
     @property
     def to(self):
+        """
+        Returns the to field, if it exists.
+        """
         try:
             return self._to
         except Exception:
@@ -965,7 +1336,7 @@ class Message(OleFile.OleFileIO):
                     st = f[0]
                     if len(f) > 1:
                         for x in range(1, len(f)):
-                            st = st + '; {0}'.format(f[x])
+                            st += '; {0}'.format(f[x])
                     self._to = st
                 else:
                     self._to = None
@@ -973,7 +1344,9 @@ class Message(OleFile.OleFileIO):
 
     @property
     def compressedRtf(self):
-        # Get the compressed RTF stream, if it exists
+        """
+        Returns the compressed RTF stream, if it exists.
+        """
         try:
             return self._compressedRtf
         except Exception:
@@ -982,7 +1355,9 @@ class Message(OleFile.OleFileIO):
 
     @property
     def htmlBody(self):
-        # Get the get the html body, if it exists
+        """
+        Returns the html body, if it exists.
+        """
         try:
             return self._htmlBody
         except Exception:
@@ -991,6 +1366,9 @@ class Message(OleFile.OleFileIO):
 
     @property
     def cc(self):
+        """
+        Returns the cc field, if it exists.
+        """
         try:
             return self._cc
         except Exception:
@@ -1008,7 +1386,7 @@ class Message(OleFile.OleFileIO):
                     st = f[0]
                     if len(f) > 1:
                         for x in range(1, len(f)):
-                            st = st + '; {0}'.format(f[x])
+                            st += '; {0}'.format(f[x])
                     self._cc = st
                 else:
                     self._cc = None
@@ -1016,7 +1394,9 @@ class Message(OleFile.OleFileIO):
 
     @property
     def body(self):
-        # Get the message body
+        """
+        Returns the message body, if it exists.
+        """
         try:
             return self._body
         except Exception:
@@ -1029,17 +1409,24 @@ class Message(OleFile.OleFileIO):
 
     @property
     def crlf(self):
-        # Returns the value of self.__crlf, should you need it for whatever reason
+        """
+        Returns the value of self.__crlf, should you need it for whatever reason.
+        """
         self.body
         return self.__crlf
 
     @property
     def attachmentClass(self):
-        # Returns the Attachment class being used, should you need to use it externally for whatever reason
+        """
+        Returns the Attachment class being used, should you need to use it externally for whatever reason.
+        """
         return self.__attachmentClass
 
     @property
     def attachments(self):
+        """
+        Returns a list of all attachments.
+        """
         try:
             return self._attachments
         except Exception:
@@ -1059,6 +1446,9 @@ class Message(OleFile.OleFileIO):
 
     @property
     def recipients(self):
+        """
+        Returns a list of all recipients.
+        """
         try:
             return self._recipients
         except Exception:
@@ -1076,12 +1466,16 @@ class Message(OleFile.OleFileIO):
 
             return self._recipients
 
-    def save(self, toJson=False, useFileName=False, raw=False, ContentId=False):
-        '''Saves the message body and attachments found in the message.  Setting toJson
-        to true will output the message body as JSON-formatted text.  The body and
-        attachments are stored in a folder.  Setting useFileName to true will mean that
+    def save(self, toJson=False, useFileName=False, raw=False, ContentId=False, customPath = None, customFilename = None):
+        """
+        Saves the message body and attachments found in the message. Setting toJson
+        to true will output the message body as JSON-formatted text. The body and
+        attachments are stored in a folder. Setting useFileName to true will mean that
         the filename is used as the name of the folder; otherwise, the message's date
-        and subject are used as the folder name.'''
+        and subject are used as the folder name.
+
+        Currently, :param customPath: and :param customFilename: don't do anything.
+        """
 
         if useFileName:
             # strip out the extension
@@ -1199,7 +1593,9 @@ class Message(OleFile.OleFileIO):
             os.chdir(oldDir)
 
     def dump(self):
-        # Prints out a summary of the message
+        """
+        Prints out a summary of the message
+        """
         print('Message')
         print('Subject:', self.subject)
         print('Date:', self.date)
@@ -1210,13 +1606,14 @@ class Message(OleFile.OleFileIO):
         for dir_ in self.listDir():
             if dir_[-1].endswith('001E') or dir_[-1].endswith('001F'):
                 print('Directory: ' + str(dir_[:-1]))
-                print('Contents: ' + self._getStream(dir_))
+                print('Contents: {}'.format(self._getStream(dir_)))
 
-    def save_attachments(self, contentId = False, json = False, useFileName = False, raw = False):
-        """Saves only attachments in the same folder.
+    def save_attachments(self, contentId = False, json = False, useFileName = False, raw = False, customPath = None):
+        """
+        Saves only attachments in the same folder.
         """
         for attachment in self.attachments:
-            attachment.save(contentId, json, useFileName, raw)
+            attachment.save(contentId, json, useFileName, raw, customPath)
 
 
 if __name__ == '__main__':
@@ -1224,7 +1621,7 @@ if __name__ == '__main__':
         print(__doc__)
         print("""
 Launched from command line, this script parses Microsoft Outlook Message files
-and save their contents to the current directory.  On error the script will
+and save their contents to the current directory. On error the script will
 write out a 'raw' directory will all the details from the file, but in a
 less-than-desirable format. To force this mode, the flag '--raw'
 can be specified.
@@ -1235,7 +1632,9 @@ Usage:  <file> [file2 ...]
 
 Additionally, use the flag '--use-content-id' to save files by their content ID (should they have one)
 
-To name the directory as the .msg file, --use-file-name
+To name the directory as the .msg file, use the flag '--use-file-name'
+
+To turn on the printing of debugging information, use the flag '--debug'
 """)
         sys.exit()
 
@@ -1256,6 +1655,9 @@ To name the directory as the .msg file, --use-file-name
 
         if rawFilename == '--use-content-id':
             useContentId = True
+
+        if rawFilename == '--debug':
+            debug = True
 
         for filename in glob.glob(rawFilename):
             msg = Message(filename)
