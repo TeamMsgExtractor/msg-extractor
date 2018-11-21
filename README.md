@@ -111,15 +111,11 @@ Here is a list of things that are currently on our todo list:
   * Coming in version 0.21
 * Implement better property handling that will convert each type into a python equivelent if possible
   * Coming in version 0.30
+* Implement handling of named properties
 
 
 Coming Soon
 ------------
-#### Version 0.20 - The Documentation Update ####
-* Addes documentation to most functions
-* Improves the speed and efficiency of many parts of the program
-* Improves the intelligence of several parts of the program
-
 #### Version 0.21 - The Saving Update ####
 * Improves save mechanics of the `Message` class and the `Attachment` class to make saving files to a custom path and/or saving files under a custom name possible
 
