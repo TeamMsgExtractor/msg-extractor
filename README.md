@@ -5,7 +5,10 @@ Extracts emails and attachments saved in Microsoft Outlook's .msg files
 
 The python script ExtractMsg.py automates the extraction of key email data (from, to, cc, date, subject, body) and the email's attachments.
 
-To use it
+Usage
+------------
+
+**To use it as a command-line script**:
 ```
   python ExtractMsg.py example.msg
 ```
@@ -15,8 +18,6 @@ This will produce a new folder named according to the date, time and subject of 
 The script uses <a href="http://www.decalage.info/python/olefileio">Philippe Lagadec's Python module</a> that reads Microsoft OLE2 files (also called Structured Storage, Compound File Binary Format or Compound Document File Format).  This is the underlying format of Outlook's .msg files.  This library currently supports up to Python 2.7 and 3.4. 
 
 The script was built using <a href="http://www.fileformat.info/format/outlookmsg/index.htm">Peter Fiskerstrand's documentation of the .msg format</a>.  <a href="http://www.dimastr.com/redemption/utils.htm">Redemption's discussion of the different property types used within Extended MAPI</a> was also useful.  For future reference, I note that Microsoft have opened up <a href="http://msdn.microsoft.com/en-us/library/cc463912%28v=exchg.80%29.aspx">their documentation of the file format</a>.
-
-There are at least two major issues with version 0.2.  The first is that .msg files can be embedded in .msg files---the script doesn't like them at all and will dump a 'raw' directory instead of the normal output.  This directory will contain all you need from the email, but in a less-than-ideal form.  The second issue is that the script cannot extract the date of sent emails (as opposed to received emails).
 
 If you are having difficulty with a specific file, or would like to extract more than is currently automated, then the --raw flag may be useful:
 ```
@@ -33,16 +34,59 @@ Joel also added a --use-file-name flag, which allows you to specify that the scr
   python ExtractMsg.py --use-file-name example.msg
 ```
 
+Creation also added a --use-content-id flag, which allows you to specify that attachments should be saved under the name of their content id, should they have one.  This can be useful for mathich attachments to the names used in the HTML body, and can be done like so:
+```
+  python ExtractMsg.py --use-content-id example.msg
+```
+
+**To use this in your own script**, start by using:
+```
+  import ExtractMsg
+```
+
+From there, initialize an instance of the Message class:
+```
+  msg = ExtractMsg.Message("path/to/msg/file.msg")
+```
+or
+```
+  msg = ExtractMsg.Message(msg_data_stream)
+```
+
+Alternatively, if you wish to send a msg binary string instead of a file to the ExtractMsg.Message Method:
+```
+  msg_raw = b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1\x0 ... \x00x00x00'
+  msg = ExtractMsg.Message(msg_raw)
+```
+
+If you want to override the default attachment class and use one of your own, simply change the code to:
+```
+  msg = ExtractMsg.Message("path/to/msg/file.msg", attachmentClass = CustomAttachmentClass)
+```
+where `CustomAttachmentClass` is your custom class.
+
+#TODO: Finish this section
+
 
 If you have any questions feel free to contact me, Matthew Walker, at mattgwwalker at gmail.com.
+NOTE: Due to time constraints, <a href="https://github.com/TheElementalOfCreation">The Elemental of Creation</a> has been added as a contributer to help manage the project.  As such, it may be helpful to send emails to arceusthe@gmail.com as well.
 
+If you have issues, it would be best to get help for them by opening a new github issue.
+
+Error Reporting
+------------
+Should you encounter an error that has not already been reported, please do the following when reporting it:
+* Make sure you are using the latest version of ExtractMsg.
+* State your Python version.
+* Include the code, if any, that you used.
+* Include a copy of the traceback.
 
 Installation
 ------------
 
 You can install using pip with:
 ```sh
-  pip install https://github.com/mattgwwalker/msg-extractor/zipball/master
+  pip install git+https://github.com/mattgwwalker/msg-extractor
 ```
 
 or you can include this in your list of python dependencies with:
@@ -54,3 +98,36 @@ setup(
     dependency_links=['https://github.com/mattgwwalker/msg-extractor/zipball/master'],
 )
 ```
+
+Todo
+------------
+Here is a list of things that are currently on our todo list:
+* Tests (ie. unittest)
+  * Coming in version 0.50
+* Finish writing a usage guide
+* Improve the intelligence of the saving functions
+* Create a Pypi package
+* Provide way to save attachments and messages into a custom location under a custom name
+  * Coming in version 0.21
+* Implement better property handling that will convert each type into a python equivelent if possible
+  * Coming in version 0.30
+* Implement handling of named properties
+
+
+Coming Soon
+------------
+#### Version 0.21 - The Saving Update ####
+* Improves save mechanics of the `Message` class and the `Attachment` class to make saving files to a custom path and/or saving files under a custom name possible
+
+#### Version 0.25 - The Debugger Update ####
+* Make the changing of `ExtractMsg.debug` to `True` output A LOT more information that should help to make bug fixes much faster
+
+#### Version 0.30 - The Intelligence Update ####
+* Majorly increase the intelligence of nearly all of the classes
+
+#### Version 0.50 - The Testing Update ####
+* Added tests for most platforms (win, mac, linux)
+
+#### Version 1.00 - The Release Update ####
+* ExtractMsg is fully ready for its first full release
+
