@@ -1,16 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: latin-1 -*-
 # Date Format: YYYY-MM-DD
-"""
-extract_msg:
-    Extracts emails and attachments saved in Microsoft Outlook's .msg files
 
-https://github.com/mattgwwalker/msg-extractor
-"""
-
-__author__ = 'Matthew Walker & The Elemental of Creation'
-__date__ = '2018-05-22'
-__version__ = '0.20.1'
 
 debug = False
 
@@ -49,51 +40,8 @@ import traceback
 import tzlocal
 from email.parser import Parser as EmailParser
 from imapclient.imapclient import decode_utf7
+import extract_msg.constants
 
-# DEFINE CONSTANTS
-# WARNING DO NOT CHANGE ANY OF THESE VALUES UNLESS YOU KNOW
-# WHAT YOU ARE DOING! FAILURE TO FOLLOW THIS INSTRUCTION
-# CAN AND WILL BREAK THIS SCRIPT!
-
-INTELLIGENCE_DUMB  = 0
-INTELLIGENCE_SMART = 1
-INTELLIGENCE_DICT = {
-    INTELLIGENCE_DUMB:  'INTELLIGENCE_DUMB',
-    INTELLIGENCE_SMART: 'INTELLIGENCE_SMART',
-}
-
-TYPE_MESSAGE       = 0
-TYPE_MESSAGE_EMBED = 1
-TYPE_ATTACHMENT    = 2
-TYPE_RECIPIENT     = 3
-TYPE_DICT = {
-    TYPE_MESSAGE:       'TYPE_MESSAGE',
-    TYPE_MESSAGE_EMBED: 'TYPE_MESSAGE_EMBED',
-    TYPE_ATTACHMENT:    'TYPE_ATTACHMENT',
-    TYPE_RECIPIENT:     'TYPE_RECIPIENT',
-}
-
-
-RECIPIENT_SENDER   = 0
-RECIPIENT_TO       = 1
-RECIPIENT_CC       = 2
-RECIPIENT_BCC      = 3
-RECIPIENT_DICT = {
-    RECIPIENT_SENDER:   'RECIPIENT_SENDER',
-    RECIPIENT_TO:       'RECIPIENT_TO',
-    RECIPIENT_CC:       'RECIPIENT_CC',
-    RECIPIENT_BCC:      'RECIPIENT_BCC',
-}
-
-# Define pre-compiled structs to make unpacking slightly faster
-ST1                = struct.Struct('<8x4I')
-ST2                = struct.Struct('<H2xI8s')
-ST3                = struct.Struct('<Q')
-STI16              = struct.Struct('<h6x')
-STI32              = struct.Struct('<i4x')
-STI64              = struct.Struct('<q')
-STF32              = struct.Struct('<f4x')
-STF64              = struct.Struct('<d')
 
 # END CONSTANTS
 
@@ -313,40 +261,6 @@ STF64              = struct.Struct('<d')
 #     '5FF6': 'To (uncertain)'
 # }
 
-types = {
-    0x0000: 'PtypUnspecified',
-    0x0001: 'PtypNull',
-    0x0002: 'PtypInteger16', # Signed short
-    0x0003: 'PtypInteger32', # Signed int
-    0x0004: 'PtypFloating32', # Float
-    0x0005: 'PtypFloating64', # Double
-    0x0006: 'PtypCurrency',
-    0x0007: 'PtypFloatingTime',
-    0x000A: 'PtypErrorCode',
-    0x000B: 'PtypBoolean',
-    0x000D: 'PtypObject/PtypEmbeddedTable',
-    0x0014: 'PtypInteger64', # Signed longlong
-    0x001E: 'PtypString8',
-    0x001F: 'PtypString',
-    0x0040: 'PtypTime', # Use msgEpoch to convert to unix time stamp
-    0x0048: 'PtypGuid',
-    0x00FB: 'PtypServerId',
-    0x00FD: 'PtypRestriction',
-    0x00FE: 'PtypRuleAction',
-    0x0102: 'PtypBinary',
-    0x1002: 'PtypMultipleInteger16',
-    0x1003: 'PtypMultipleInteger32',
-    0x1004: 'PtypMultipleFloating32',
-    0x1005: 'PtypMultipleFloating64',
-    0x1006: 'PtypMultipleCurrency',
-    0x1007: 'PtypMultipleFloatingTime',
-    0x1014: 'PtypMultipleInteger64',
-    0x101E: 'PtypMultipleString8',
-    0x101F: 'PtypMultipleString',
-    0x1040: 'PtypMultipleTime',
-    0x1048: 'PtypMultipleGuid',
-    0x1102: 'PtypMultipleBinary',
-}
 
 if sys.version_info[0] >= 3: # Python 3
     def xstr(s):
@@ -407,18 +321,6 @@ else:  # Python 2
     def encode(inp):
         return inp.encode('utf-8')
 
-def int_to_recipient_type(integer):
-    """
-    Returns the name of the recipient type constant has the value of :param integer:
-    """
-    return RECIPIENT_DICT[integer]
-
-def int_to_data_type(integer):
-    return TYPE_DICT[integer]
-
-def int_to_intelligence(integer):
-    return INTELLIGENCE_DICT[integer]
-
 def parse_type(type, stream):
     """
     Converts the data in :param stream: to a
@@ -438,37 +340,37 @@ def parse_type(type, stream):
             print('Warning: Property type is PtypNull, but is not equal to 0.')
         value = None
     elif type == 0x0002: #PtypInteger16
-        value = STI16.unpack(value)[0]
+        value = constants.STI16.unpack(value)[0]
     elif type == 0x0003: #PtypInteger32
-        value = STI32.unpack(value)[0]
+        value = constants.STI32.unpack(value)[0]
     elif type == 0x0004: #PtypFloating32
-        value = STF32.unpack(value)[0]
+        value = constants.STF32.unpack(value)[0]
     elif type == 0x0005: #PtypFloating64
-        value = STF64.unpack(value)[0]
+        value = constants.STF64.unpack(value)[0]
     elif type == 0x0006: #PtypCurrency
-        value = (STI64.unpack(value)[0])/10000.0
+        value = (constants.STI64.unpack(value)[0])/10000.0
     elif type == 0x0007: #PtypFloatingTime
-        value = STF64.unpack(value)[0]
+        value = constants.STF64.unpack(value)[0]
         #TODO parsing for this
         pass;
     elif type == 0x000A: #PtypErrorCode
-        value = STI32.unpack(value)[0]
+        value = constants.STI32.unpack(value)[0]
         #TODO parsing for this
         pass;
     elif type == 0x000B: #PtypBoolean
-        value = bool(ST3.unpack(value)[0])
+        value = bool(constants.ST3.unpack(value)[0])
     elif type == 0x000D: #PtypObject/PtypEmbeddedTable
         #TODO parsing for this
         pass;
     elif type == 0x0014: #PtypInteger64
-        value = STI64.unpack(value)[0]
+        value = constants.STI64.unpack(value)[0]
     elif type == 0x001E: #PtypString8
         #TODO parsing for this
         pass;
     elif type == 0x001F: #PtypString
         value = value.decode('utf_16_le')
     elif type == 0x0040: #PtypTime
-        value = ST3.unpack(value)[0]
+        value = constants.ST3.unpack(value)[0]
     elif type == 0x0048: #PtypGuid
         #TODO parsing for this
         pass;
@@ -674,7 +576,7 @@ class Attachment:
         try:
             return self.__props
         except:
-            self.__props = Properties(self.msg._getStream(self.msg.prefixList + [self.__dir, '__properties_version1.0']), TYPE_ATTACHMENT)
+            self.__props = Properties(self.msg._getStream(self.msg.prefixList + [self.__dir, '__properties_version1.0']), constants.TYPE_ATTACHMENT)
             return self.__props
 
     @property
@@ -705,17 +607,17 @@ class Properties:
         self.__ac = None
         self.__rc = None
         if type != None:
-            self.__intel = INTELLIGENCE_SMART
-            if type == TYPE_MESSAGE:
+            self.__intel = constants.INTELLIGENCE_SMART
+            if type == constants.TYPE_MESSAGE:
                 skip = 32
-                self.__naid, self.__nrid, self.__ac, self.__rc = ST1.unpack(self.__stream[:24])
-            elif type == TYPE_MESSAGE_EMBED:
+                self.__naid, self.__nrid, self.__ac, self.__rc = constants.ST1.unpack(self.__stream[:24])
+            elif type == constants.TYPE_MESSAGE_EMBED:
                 skip = 24
-                self.__naid, self.__nrid, self.__ac, self.__rc = ST1.unpack(self.__stream[:24])
+                self.__naid, self.__nrid, self.__ac, self.__rc = constants.ST1.unpack(self.__stream[:24])
             else:
                 skip = 8
         else:
-            self.__intel = INTELLIGENCE_DUMB
+            self.__intel = constants.INTELLIGENCE_DUMB
             if skip == None:
                 # This section of the skip handling is not very good.
                 # While it does work, it is likely to create extra
@@ -862,7 +764,7 @@ class Prop:
         n = string[:4][::-1]
         self.__raw = string
         self.__name = properHex(n).upper()
-        self.__type, self.__flags, self.__value = ST2.unpack(string)
+        self.__type, self.__flags, self.__value = constants.ST2.unpack(string)
         self.__value = self.parse_type(self.__type, self.__value)
         self.__fm = self.__flags & 1 == 1
         self.__fr = self.__flags & 2 == 2
@@ -885,30 +787,30 @@ class Prop:
                 print('Warning: Property type is PtypNull, but is not equal to 0.')
             value = None
         elif type == 0x0002: #PtypInteger16
-            value = STI16.unpack(value)[0]
+            value = constants.STI16.unpack(value)[0]
         elif type == 0x0003: #PtypInteger32
-            value = STI32.unpack(value)[0]
+            value = constants.STI32.unpack(value)[0]
         elif type == 0x0004: #PtypFloating32
-            value = STF32.unpack(value)[0]
+            value = constants.STF32.unpack(value)[0]
         elif type == 0x0005: #PtypFloating64
-            value = STF64.unpack(value)[0]
+            value = constants.STF64.unpack(value)[0]
         elif type == 0x0006: #PtypCurrency
-            value = (STI64.unpack(value))[0]/10000.0
+            value = (constants.STI64.unpack(value))[0]/10000.0
         elif type == 0x0007: #PtypFloatingTime
-            value = STF64.unpack(value)[0]
+            value = constants.STF64.unpack(value)[0]
             #TODO parsing for this
             pass;
         elif type == 0x000A: #PtypErrorCode
-            value = STI32.unpack(value)[0]
+            value = constants.STI32.unpack(value)[0]
             #TODO parsing for this
             pass;
         elif type == 0x000B: #PtypBoolean
-            value = bool(ST3.unpack(value)[0])
+            value = bool(constants.ST3.unpack(value)[0])
         elif type == 0x000D: #PtypObject/PtypEmbeddedTable
             #TODO parsing for this
             pass;
         elif type == 0x0014: #PtypInteger64
-            value = STI64.unpack(value)[0]
+            value = constants.STI64.unpack(value)[0]
         elif type == 0x001E: #PtypString8
             #TODO parsing for this
             pass;
@@ -916,7 +818,7 @@ class Prop:
             #TODO parsing for this
             pass;
         elif type == 0x0040: #PtypTime
-            value = ST3.unpack(value)[0]
+            value = constants.ST3.unpack(value)[0]
         elif type == 0x0048: #PtypGuid
             #TODO parsing for this
             pass;
@@ -994,7 +896,7 @@ class Recipient:
     def __init__(self, num, msg):
         self.__msg = msg #Allows calls to original msg file
         self.__dir = '__recip_version1.0_#' + num.rjust(8,'0')
-        self.__props = Properties(msg._getStream(self.__dir + '/__properties_version1.0'), TYPE_RECIPIENT)
+        self.__props = Properties(msg._getStream(self.__dir + '/__properties_version1.0'), constants.TYPE_RECIPIENT)
         self.__email = msg._getStringStream(self.__dir + '/__substg1.0_39FE')
         self.__name = msg._getStringStream(self.__dir + '/__substg1.0_3001')
         self.__type = self.__props.get('0C150003').value
@@ -1248,7 +1150,7 @@ class Message(OleFile.OleFileIO):
         try:
             return self._prop
         except:
-            self._prop = Properties(self._getStream('__properties_version1.0'), TYPE_MESSAGE if self.__prefix == '' else TYPE_MESSAGE_EMBED)
+            self._prop = Properties(self._getStream('__properties_version1.0'), constants.TYPE_MESSAGE if self.__prefix == '' else constants.TYPE_MESSAGE_EMBED)
             return self._prop
 
     @property
