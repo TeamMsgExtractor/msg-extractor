@@ -2,7 +2,7 @@
 # -*- coding: latin-1 -*-
 # Date Format: YYYY-MM-DD
 """
-extract_msg:
+ExtractMsg:
     Extracts emails and attachments saved in Microsoft Outlook's .msg files
 
 https://github.com/mattgwwalker/msg-extractor
@@ -584,7 +584,7 @@ class Attachment:
             if (self.props['37050003'].value & 0x7) != 0x5:
                 if not debug:
                     raise NotImplementedError(
-                        'Current version of extract_msg.py does not support extraction of containers that are not embeded msg files.')
+                        'Current version of msg_extractor.py does not support extraction of containers that are not embeded msg files.')
                     # TODO add implementation
                 else:
                     print('DEBUG: Debugging is true, ignoring NotImplementedError and printing debug info...')
