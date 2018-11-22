@@ -1,4 +1,3 @@
-import glob
 import os
 from setuptools import setup
 import re
@@ -38,7 +37,7 @@ setup(
     url=github_url,
     download_url="%s/archives/master" % github_url,
     author='Matthew Walker & The Elemental of Creation',
-    author_email='mattgwwalker at gmail.com, arceusthe@gmail.com',
+    author_email='mattgwwalker@gmail.com, arceusthe@gmail.com',
     license='GPL',
     scripts=[main_script],
     py_modules=[main_module],
