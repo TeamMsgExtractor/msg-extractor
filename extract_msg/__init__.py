@@ -9,4 +9,5 @@ __author__ = 'Matthew Walker & The Elemental of Creation'
 __date__ = '2018-05-22'
 __version__ = '0.20.1'
 
-from extract_msg.extract_msg import Attachment, Properties, Props, Recipient, Message, msg_epoch, fromdatetime, constants, parse_type, properHex
+from extract_msg.extract_msg import Attachment, Properties, Props, Recipient, Message, msg_epoch, parse_type, properHex
+from extract_msg import constants
