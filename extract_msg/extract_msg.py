@@ -2,7 +2,7 @@
 # -*- coding: latin-1 -*-
 # Date Format: YYYY-MM-DD
 """
-ExtractMsg:
+extract_msg:
     Extracts emails and attachments saved in Microsoft Outlook's .msg files
 
 https://github.com/mattgwwalker/msg-extractor
@@ -10,7 +10,7 @@ https://github.com/mattgwwalker/msg-extractor
 
 __author__ = 'Matthew Walker & The Elemental of Creation'
 __date__ = '2018-05-22'
-__version__ = '0.20'
+__version__ = '0.20.1'
 
 debug = False
 
@@ -408,6 +408,9 @@ else:  # Python 2
         return inp.encode('utf-8')
 
 def int_to_recipient_type(integer):
+    """
+    Returns the name of the recipient type constant has the value of :param integer:
+    """
     return RECIPIENT_DICT[integer]
 
 def int_to_data_type(integer):
@@ -566,7 +569,7 @@ class Attachment:
         elif msg.Exists([dir_, '__substg1.0_3701000D']):
             if (self.props['37050003'].value & 0x7) != 0x5:
                 if not debug:
-                    raise NotImplementedError('Current version of ExtractMsg.py does not support extraction of containers that are not embeded msg files.')
+                    raise NotImplementedError('Current version of extract_msg does not support extraction of containers that are not embeded msg files.')
                     #TODO add implementation
                 else:
                     print('DEBUG: Debugging is true, ignoring NotImplementedError and printing debug info...')
@@ -613,7 +616,9 @@ class Attachment:
                     ''.join(random.choice(string.ascii_uppercase + string.digits)
                             for _ in range(5)) + '.bin'
 
-        if custom_path:
+        if customPath != None and customPath != '':
+            if customPath[-1] != '/' or customPath[-1] != '\\':
+                customPath += '/'
             filename = customPath + filename
 
         if self.__type == "data":
@@ -751,29 +756,11 @@ class Properties:
     def items(self):
         return self.__props.items()
 
-    def iteritems(self):
-        return self.__props.iteritems()
-
-    def iterkeys(self):
-        return self.__props.iterkeys()
-
-    def itervalues(self):
-        return self.__props.itervalues()
-
     def keys(self):
         return self.__props.keys()
 
     def values(self):
         return self.__props.values()
-
-    def viewitems(self):
-        return self.__props.viewitems()
-
-    def viewkeys(self):
-        return self.__props.viewkeys()
-
-    def viewvalues(self):
-        return self.__props.viewvalues()
 
     def __contains__(self, key):
         self.__props.__contains__(key)
@@ -794,15 +781,9 @@ class Properties:
     def __repr__(self):
         return self.__props.__repr__
 
-    items.__doc__         = dict.items.__doc__
-    iteritems.__doc__     = dict.iteritems.__doc__
-    iterkeys.__doc__      = dict.iterkeys.__doc__
-    itervalues.__doc__    = dict.itervalues.__doc__
-    keys.__doc__          = dict.keys.__doc__
-    values.__doc__        = dict.values.__doc__
-    viewitems.__doc__     = dict.viewitems.__doc__
-    viewkeys.__doc__      = dict.viewkeys.__doc__
-    viewvalues.__doc__    = dict.viewvalues.__doc__
+    items.__doc__  = dict.items.__doc__
+    keys.__doc__   = dict.keys.__doc__
+    values.__doc__ = dict.values.__doc__
 
     @property
     def attachment_count(self):
@@ -1474,30 +1455,39 @@ class Message(OleFile.OleFileIO):
         the filename is used as the name of the folder; otherwise, the message's date
         and subject are used as the folder name.
 
-        Currently, :param customPath: and :param customFilename: don't do anything.
+        Here is the absolute order of prioity for the name of the folder:
+            1. customFilename
+            2. self.filename if useFileName
+            3. {date} {subject}
         """
-
-        if useFileName:
-            # strip out the extension
-            if self.filename != None:
-                dirName = self.filename.split('/').pop().split('.')[0]
-            else:
-                ValueError('Filename must be specified, or path must have been an actual path, to save using filename')
+        if customFilename != None and customFilename != '':
+            dirName = customFilename
         else:
-            # Create a directory based on the date and subject of the message
-            d = self.parsedDate
-            if d is not None:
-                dirName = '{0:02d}-{1:02d}-{2:02d}_{3:02d}{4:02d}'.format(*d)
+            if useFileName:
+                # strip out the extension
+                if self.filename != None:
+                    dirName = self.filename.split('/').pop().split('.')[0]
+                else:
+                    ValueError('Filename must be specified, or path must have been an actual path, to save using filename')
             else:
-                dirName = 'UnknownDate'
+                # Create a directory based on the date and subject of the message
+                d = self.parsedDate
+                if d is not None:
+                    dirName = '{0:02d}-{1:02d}-{2:02d}_{3:02d}{4:02d}'.format(*d)
+                else:
+                    dirName = 'UnknownDate'
 
-            if self.subject is None:
-                subject = '[No subject]'
-            else:
-                subject = ''.join(i for i in self.subject if i not in r'\/:*?"<>|')
+                if self.subject is None:
+                    subject = '[No subject]'
+                else:
+                    subject = ''.join(i for i in self.subject if i not in r'\/:*?"<>|')
 
-            dirName = dirName + ' ' + subject
+                dirName = dirName + ' ' + subject
 
+        if customPath != None and customPath != '':
+            if customPath[-1] != '/' or customPath[-1] != '\\':
+                customPath += '/'
+            dirName = customPath + dirName
         try:
             os.makedirs(dirName)
         except Exception:
@@ -1613,7 +1603,7 @@ class Message(OleFile.OleFileIO):
         Saves only attachments in the same folder.
         """
         for attachment in self.attachments:
-            attachment.save(contentId, json, useFileName, raw, customPath)
+            attachment.save(contentId, json, useFileName, raw, custom)
 
 
 if __name__ == '__main__':
