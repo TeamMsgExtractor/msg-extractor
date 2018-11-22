@@ -39,11 +39,9 @@ import sys
 import traceback
 import tzlocal
 from email.parser import Parser as EmailParser
+from extract_msg import constants
 from imapclient.imapclient import decode_utf7
-import extract_msg.constants
 
-
-# END CONSTANTS
 
 # This property information was sourced from
 # http://www.fileformat.info/format/outlookmsg/index.htm
