@@ -13,7 +13,7 @@ with open("README.md") as stream:
     long_description = stream.read()
 
 # get the version from the ExtractMsg script. This can not be directly
-# imported because ExtractMsg imports olefile, which isn't installed yet
+# imported because ExtractMsg imports olefile, which may not be installed yet
 version_re = re.compile("__version__ = '(?P<version>[0-9\.]*)'")
 with open(main_script, 'r') as stream:
     contents = stream.read()

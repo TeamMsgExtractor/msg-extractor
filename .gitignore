@@ -2,6 +2,6 @@
 /build/
 *.egg-info/
 /dist/
- .idea/*
- # Ignore pypi creds file
- .pypirc
+.idea/*
+# Ignore pypi creds file
+.pypirc
