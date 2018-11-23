@@ -9,7 +9,7 @@ https://github.com/mattgwwalker/msg-extractor
 """
 
 __author__ = 'Matthew Walker & The Elemental of Creation'
-__date__ = '2018-05-22'
+__date__ = '2018-11-23'
 __version__ = '0.20.1'
 
 debug = False
@@ -48,7 +48,6 @@ import tzlocal
 from email.parser import Parser as EmailParser
 from extract_msg import constants
 from imapclient.imapclient import decode_utf7
-
 
 # This property information was sourced from
 # http://www.fileformat.info/format/outlookmsg/index.htm
@@ -383,62 +382,62 @@ def parse_type(type, stream):
     # WARNING Not done. Do not try to implement anywhere where it is not already implemented
     value = stream
     if type == 0x0000:  # PtypUnspecified
-        pass;
+        pass
     elif type == 0x0001:  # PtypNull
         if value != b'\x00\x00\x00\x00\x00\x00\x00\x00':
             print('Warning: Property type is PtypNull, but is not equal to 0.')
         value = None
-    elif type == 0x0002: #PtypInteger16
+    elif type == 0x0002:  # PtypInteger16
         value = constants.STI16.unpack(value)[0]
-    elif type == 0x0003: #PtypInteger32
+    elif type == 0x0003:  # PtypInteger32
         value = constants.STI32.unpack(value)[0]
-    elif type == 0x0004: #PtypFloating32
+    elif type == 0x0004:  # PtypFloating32
         value = constants.STF32.unpack(value)[0]
-    elif type == 0x0005: #PtypFloating64
+    elif type == 0x0005:  # PtypFloating64
         value = constants.STF64.unpack(value)[0]
-    elif type == 0x0006: #PtypCurrency
-        value = (constants.STI64.unpack(value)[0])/10000.0
-    elif type == 0x0007: #PtypFloatingTime
+    elif type == 0x0006:  # PtypCurrency
+        value = (constants.STI64.unpack(value)[0]) / 10000.0
+    elif type == 0x0007:  # PtypFloatingTime
         value = constants.STF64.unpack(value)[0]
-        #TODO parsing for this
-        pass;
-    elif type == 0x000A: #PtypErrorCode
+        # TODO parsing for this
+        pass
+    elif type == 0x000A:  # PtypErrorCode
         value = constants.STI32.unpack(value)[0]
-        #TODO parsing for this
-        pass;
-    elif type == 0x000B: #PtypBoolean
+        # TODO parsing for this
+        pass
+    elif type == 0x000B:  # PtypBoolean
         value = bool(constants.ST3.unpack(value)[0])
-    elif type == 0x000D: #PtypObject/PtypEmbeddedTable
-        #TODO parsing for this
-        pass;
-    elif type == 0x0014: #PtypInteger64
+    elif type == 0x000D:  # PtypObject/PtypEmbeddedTable
+        # TODO parsing for this
+        pass
+    elif type == 0x0014:  # PtypInteger64
         value = constants.STI64.unpack(value)[0]
-    elif type == 0x001E: #PtypString8
-        #TODO parsing for this
-        pass;
+    elif type == 0x001E:  # PtypString8
+        # TODO parsing for this
+        pass
     elif type == 0x001F:  # PtypString
         value = value.decode('utf_16_le')
-    elif type == 0x0040: #PtypTime
+    elif type == 0x0040:  # PtypTime
         value = constants.ST3.unpack(value)[0]
-    elif type == 0x0048: #PtypGuid
-        #TODO parsing for this
-        pass;
+    elif type == 0x0048:  # PtypGuid
+        # TODO parsing for this
+        pass
     elif type == 0x00FB:  # PtypServerId
         # TODO parsing for this
-        pass;
+        pass
     elif type == 0x00FD:  # PtypRestriction
         # TODO parsing for this
-        pass;
+        pass
     elif type == 0x00FE:  # PtypRuleAction
         # TODO parsing for this
-        pass;
+        pass
     elif type == 0x0102:  # PtypBinary
         # TODO parsing for this
         # Smh, how on earth am I going to code this???
-        pass;
+        pass
     elif type & 0x1000 == 0x1000:  # PtypMultiple
         # TODO parsing for `multiple` types
-        pass;
+        pass
     return value;
 
 
@@ -632,7 +631,9 @@ class Attachment:
         try:
             return self.__props
         except:
-            self.__props = Properties(self.msg._getStream(self.msg.prefixList + [self.__dir, '__properties_version1.0']), constants.TYPE_ATTACHMENT)
+            self.__props = Properties(
+                self.msg._getStream(self.msg.prefixList + [self.__dir, '__properties_version1.0']),
+                constants.TYPE_ATTACHMENT)
             return self.__props
 
     @property
@@ -871,7 +872,7 @@ class Prop:
         # WARNING Not done.
         value = stream
         if type == 0x0000:  # PtypUnspecified
-            pass;
+            pass
         elif type == 0x0001:  # PtypNull
             if value != b'\x00\x00\x00\x00\x00\x00\x00\x00':
                 print('Warning: Property type is PtypNull, but is not equal to 0.')
@@ -889,46 +890,46 @@ class Prop:
         elif type == 0x0007:  # PtypFloatingTime
             value = constants.STF64.unpack(value)[0]
             # TODO parsing for this
-            pass;
+            pass
         elif type == 0x000A:  # PtypErrorCode
             value = constants.STI32.unpack(value)[0]
             # TODO parsing for this
-            pass;
+            pass
         elif type == 0x000B:  # PtypBoolean
             value = bool(constants.ST3.unpack(value)[0])
         elif type == 0x000D:  # PtypObject/PtypEmbeddedTable
             # TODO parsing for this
-            pass;
+            pass
         elif type == 0x0014:  # PtypInteger64
             value = constants.STI64.unpack(value)[0]
         elif type == 0x001E:  # PtypString8
             # TODO parsing for this
-            pass;
+            pass
         elif type == 0x001F:  # PtypString
             # TODO parsing for this
-            pass;
+            pass
         elif type == 0x0040:  # PtypTime
             value = constants.ST3.unpack(value)[0]
         elif type == 0x0048:  # PtypGuid
             # TODO parsing for this
-            pass;
+            pass
         elif type == 0x00FB:  # PtypServerId
             # TODO parsing for this
-            pass;
+            pass
         elif type == 0x00FD:  # PtypRestriction
             # TODO parsing for this
-            pass;
+            pass
         elif type == 0x00FE:  # PtypRuleAction
             # TODO parsing for this
-            pass;
+            pass
         elif type == 0x0102:  # PtypBinary
             # TODO parsing for this
             # Smh, how on earth am I going to code this???
-            pass;
+            pass
         elif type & 0x1000 == 0x1000:  # PtypMultiple
             # TODO parsing for `multiple` types
-            pass;
-        return value;
+            pass
+        return value
 
     @property
     def flag_mandatory(self):
