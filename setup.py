@@ -6,7 +6,7 @@ import re
 # a handful of variables that are used a couple of times
 github_url = 'https://github.com/mattgwwalker/msg-extractor'
 main_module = 'extract_msg'
-main_script = main_module + '.py'
+main_script = 'extract_msg/" + main_module + '.py'
 
 # read in the description from README
 with open("README.md") as stream:
