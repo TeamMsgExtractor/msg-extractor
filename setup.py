@@ -5,7 +5,7 @@ import re
 
 # a handful of variables that are used a couple of times
 github_url = 'https://github.com/mattgwwalker/msg-extractor'
-main_module = 'extract_msg/extract_msg'
+main_module = 'extract_msg/base'
 main_script = main_module + '.py'
 
 # read in the description from README
@@ -15,7 +15,7 @@ with open("README.md") as stream:
 # get the version from the ExtractMsg script. This can not be directly
 # imported because ExtractMsg imports olefile, which may not be installed yet
 version_re = re.compile("__version__ = '(?P<version>[0-9\.]*)'")
-with open(main_script, 'r') as stream:
+with open('extract_msg/__init__.py', 'r') as stream:
     contents = stream.read()
 match = version_re.search(contents)
 version = match.groupdict()['version']

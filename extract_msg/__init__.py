@@ -12,7 +12,7 @@ __version__ = '0.20.2'
 import glob
 import sys
 import traceback
-from extract_msg.base import Attachment, Properties, Props, Recipient, Message, msg_epoch, parse_type, properHex
+from extract_msg.base import Attachment, Properties, Prop, Recipient, Message, parse_type, properHex
 from extract_msg import constants
 
 if __name__ == '__main__':
