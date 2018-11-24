@@ -6,7 +6,7 @@ Extracts emails and attachments saved in Microsoft Outlook's .msg files
 The python package extract_msg automates the extraction of key email data (from, to, cc, date, subject, body) and the email's attachments.
 
 Usage
-------------
+-----
 
 **To use it as a command-line script**:
 ```
