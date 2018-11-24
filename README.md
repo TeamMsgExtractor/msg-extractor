@@ -3,14 +3,14 @@ msg-extractor
 
 Extracts emails and attachments saved in Microsoft Outlook's .msg files
 
-The python script ExtractMsg.py automates the extraction of key email data (from, to, cc, date, subject, body) and the email's attachments.
+The python package extract_msg automates the extraction of key email data (from, to, cc, date, subject, body) and the email's attachments.
 
 Usage
 ------------
 
 **To use it as a command-line script**:
 ```
-  python ExtractMsg.py example.msg
+  python extract_msg example.msg
 ```
 
 This will produce a new folder named according to the date, time and subject of the message (for example "2013-07-24_0915 Example").  The email itself can be found inside the new folder along with the attachments.  As of version 0.2, it is capable of extracting both ASCII and Unicode data.
@@ -21,47 +21,47 @@ The script was built using <a href="http://www.fileformat.info/format/outlookmsg
 
 If you are having difficulty with a specific file, or would like to extract more than is currently automated, then the --raw flag may be useful:
 ```
-  python ExtractMsg.py --raw example.msg
+  python extract_msg --raw example.msg
 ```
 
 Further, a --json flag has been added by Joel Kaufman to specify JSON output:
 ```
-  python ExtractMsg.py --json example.msg
+  python extract_msg --json example.msg
 ```
 
 Joel also added a --use-file-name flag, which allows you to specify that the script writes the emails' contents to the names of the .msg files, rather than using the subject and date to name the folder:
 ```
-  python ExtractMsg.py --use-file-name example.msg
+  python extract_msg --use-file-name example.msg
 ```
 
 Creation also added a --use-content-id flag, which allows you to specify that attachments should be saved under the name of their content id, should they have one.  This can be useful for mathich attachments to the names used in the HTML body, and can be done like so:
 ```
-  python ExtractMsg.py --use-content-id example.msg
+  python extract_msg --use-content-id example.msg
 ```
 
 **To use this in your own script**, start by using:
 ```
-  import ExtractMsg
+  import extract_msg
 ```
 
 From there, initialize an instance of the Message class:
 ```
-  msg = ExtractMsg.Message("path/to/msg/file.msg")
+  msg = extract_msg.Message("path/to/msg/file.msg")
 ```
 or
 ```
-  msg = ExtractMsg.Message(msg_data_stream)
+  msg = extract_msg.Message(msg_data_stream)
 ```
 
 Alternatively, if you wish to send a msg binary string instead of a file to the ExtractMsg.Message Method:
 ```
   msg_raw = b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1\x0 ... \x00x00x00'
-  msg = ExtractMsg.Message(msg_raw)
+  msg = extract_msg.Message(msg_raw)
 ```
 
 If you want to override the default attachment class and use one of your own, simply change the code to:
 ```
-  msg = ExtractMsg.Message("path/to/msg/file.msg", attachmentClass = CustomAttachmentClass)
+  msg = extract_msg.Message("path/to/msg/file.msg", attachmentClass = CustomAttachmentClass)
 ```
 where `CustomAttachmentClass` is your custom class.
 
@@ -76,7 +76,7 @@ If you have issues, it would be best to get help for them by opening a new githu
 Error Reporting
 ------------
 Should you encounter an error that has not already been reported, please do the following when reporting it:
-* Make sure you are using the latest version of ExtractMsg.
+* Make sure you are using the latest version of extract_msg.
 * State your Python version.
 * Include the code, if any, that you used.
 * Include a copy of the traceback.
