@@ -6,7 +6,7 @@ import re
 # a handful of variables that are used a couple of times
 github_url = 'https://github.com/mattgwwalker/msg-extractor'
 main_module = 'extract_msg'
-main_script = 'extract_msg/__init__.py'
+# main_script = main_module + '.py'
 
 # read in the description from README
 with open("README.md") as stream:
@@ -22,7 +22,7 @@ version = match.groupdict()['version']
 
 # read in the dependencies from the virtualenv requirements file
 dependencies = []
-filename = os.path.join("REQUIREMENTS")
+filename = os.path.join("requirements.txt")
 with open(filename, 'r') as stream:
     for line in stream:
         package = line.strip().split('#')[0]
@@ -39,7 +39,8 @@ setup(
     author='Matthew Walker & The Elemental of Creation',
     author_email='mattgwwalker@gmail.com, arceusthe@gmail.com',
     license='GPL',
-    scripts=[main_script],
+    #scripts=[main_script],
+    packages=[main_module],
     py_modules=[main_module],
     install_requires=dependencies,
 )

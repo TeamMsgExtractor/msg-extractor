@@ -5,7 +5,6 @@
 
 debug = False
 
-
 # --- LICENSE -----------------------------------------------------------------
 #
 #    Copyright 2013 Matthew Walker
@@ -39,9 +38,8 @@ import sys
 import traceback
 import tzlocal
 from email.parser import Parser as EmailParser
-from extract_msg import constants
+import constants
 from imapclient.imapclient import decode_utf7
-
 
 # This property information was sourced from
 # http://www.fileformat.info/format/outlookmsg/index.htm
@@ -260,16 +258,19 @@ from imapclient.imapclient import decode_utf7
 # }
 
 
-if sys.version_info[0] >= 3: # Python 3
+if sys.version_info[0] >= 3:  # Python 3
     def xstr(s):
         return '' if s is None else str(s)
+
 
     def windowsUnicode(string):
         if string is None:
             return None
         return str(string, 'utf_16_le')
 
+
     stri = (str,)
+
 
     def properHex(inp):
         """
@@ -282,9 +283,10 @@ if sys.version_info[0] >= 3: # Python 3
             a = inp.hex()
         elif isinstance(inp, int):
             a = hex(inp)[2:]
-        if len(a)%2 != 0:
+        if len(a) % 2 != 0:
             a = '0' + a
         return a
+
 
     def encode(inp):
         return inp
@@ -295,12 +297,15 @@ else:  # Python 2
         else:
             return '' if s is None else str(s)
 
+
     def windowsUnicode(string):
         if string is None:
             return None
         return unicode(string, 'utf_16_le')
 
+
     stri = (str, unicode)
+
 
     def properHex(inp):
         """
@@ -313,11 +318,14 @@ else:  # Python 2
             a = hex(inp)[2:]
         elif isinstance(inp, long):
             a = hex(inp)[2:-1]
-        if len(a)%2 != 0:
+        if len(a) % 2 != 0:
             a = '0' + a
         return a
+
+
     def encode(inp):
         return inp.encode('utf-8')
+
 
 def parse_type(type, stream):
     """
@@ -329,73 +337,75 @@ def parse_type(type, stream):
 
     WARNING: Not done. Do not try to implement anywhere where it is not already implemented
     """
-    #WARNING Not done. Do not try to implement anywhere where it is not already implemented
+    # WARNING Not done. Do not try to implement anywhere where it is not already implemented
     value = stream
-    if type == 0x0000: #PtypUnspecified
+    if type == 0x0000:  # PtypUnspecified
         pass;
-    elif type == 0x0001: #PtypNull
+    elif type == 0x0001:  # PtypNull
         if value != b'\x00\x00\x00\x00\x00\x00\x00\x00':
             print('Warning: Property type is PtypNull, but is not equal to 0.')
         value = None
-    elif type == 0x0002: #PtypInteger16
+    elif type == 0x0002:  # PtypInteger16
         value = constants.STI16.unpack(value)[0]
-    elif type == 0x0003: #PtypInteger32
+    elif type == 0x0003:  # PtypInteger32
         value = constants.STI32.unpack(value)[0]
-    elif type == 0x0004: #PtypFloating32
+    elif type == 0x0004:  # PtypFloating32
         value = constants.STF32.unpack(value)[0]
-    elif type == 0x0005: #PtypFloating64
+    elif type == 0x0005:  # PtypFloating64
         value = constants.STF64.unpack(value)[0]
-    elif type == 0x0006: #PtypCurrency
-        value = (constants.STI64.unpack(value)[0])/10000.0
-    elif type == 0x0007: #PtypFloatingTime
+    elif type == 0x0006:  # PtypCurrency
+        value = (constants.STI64.unpack(value)[0]) / 10000.0
+    elif type == 0x0007:  # PtypFloatingTime
         value = constants.STF64.unpack(value)[0]
-        #TODO parsing for this
+        # TODO parsing for this
         pass;
-    elif type == 0x000A: #PtypErrorCode
+    elif type == 0x000A:  # PtypErrorCode
         value = constants.STI32.unpack(value)[0]
-        #TODO parsing for this
+        # TODO parsing for this
         pass;
-    elif type == 0x000B: #PtypBoolean
+    elif type == 0x000B:  # PtypBoolean
         value = bool(constants.ST3.unpack(value)[0])
-    elif type == 0x000D: #PtypObject/PtypEmbeddedTable
-        #TODO parsing for this
+    elif type == 0x000D:  # PtypObject/PtypEmbeddedTable
+        # TODO parsing for this
         pass;
-    elif type == 0x0014: #PtypInteger64
+    elif type == 0x0014:  # PtypInteger64
         value = constants.STI64.unpack(value)[0]
-    elif type == 0x001E: #PtypString8
-        #TODO parsing for this
+    elif type == 0x001E:  # PtypString8
+        # TODO parsing for this
         pass;
-    elif type == 0x001F: #PtypString
+    elif type == 0x001F:  # PtypString
         value = value.decode('utf_16_le')
-    elif type == 0x0040: #PtypTime
+    elif type == 0x0040:  # PtypTime
         value = constants.ST3.unpack(value)[0]
-    elif type == 0x0048: #PtypGuid
-        #TODO parsing for this
+    elif type == 0x0048:  # PtypGuid
+        # TODO parsing for this
         pass;
-    elif type == 0x00FB: #PtypServerId
-        #TODO parsing for this
+    elif type == 0x00FB:  # PtypServerId
+        # TODO parsing for this
         pass;
-    elif type == 0x00FD: #PtypRestriction
-        #TODO parsing for this
+    elif type == 0x00FD:  # PtypRestriction
+        # TODO parsing for this
         pass;
-    elif type == 0x00FE: #PtypRuleAction
-        #TODO parsing for this
+    elif type == 0x00FE:  # PtypRuleAction
+        # TODO parsing for this
         pass;
-    elif type == 0x0102: #PtypBinary
-        #TODO parsing for this
+    elif type == 0x0102:  # PtypBinary
+        # TODO parsing for this
         # Smh, how on earth am I going to code this???
         pass;
-    elif type & 0x1000 == 0x1000: #PtypMultiple
-        #TODO parsing for `multiple` types
+    elif type & 0x1000 == 0x1000:  # PtypMultiple
+        # TODO parsing for `multiple` types
         pass;
     return value;
+
 
 def msgEpoch(inp):
     """
     Taken (with permission) from https://github.com/TheElementalOfCreation/creatorUtils
     """
     ep = 116444736000000000
-    return (inp - ep)/10000000.0
+    return (inp - ep) / 10000000.0
+
 
 def divide(string, length):
     """
@@ -411,7 +421,8 @@ def divide(string, length):
     >>>> print(a)
     ['He', 'll', 'o ', 'Wo', 'rl', 'd!']
     """
-    return [string[length*x:length*(x+1)] for x in range(int(len(string)/length))]
+    return [string[length * x:length * (x + 1)] for x in range(int(len(string) / length))]
+
 
 def has_len(obj):
     """
@@ -422,6 +433,7 @@ def has_len(obj):
         return True
     except:
         return False
+
 
 def addNumToDir(dirName):
     """
@@ -436,8 +448,10 @@ def addNumToDir(dirName):
             pass
     return None
 
+
 def fromTimeStamp(stamp):
     return datetime.datetime.fromtimestamp(stamp, tzlocal.get_localzone())
+
 
 class Attachment:
     """
@@ -446,6 +460,7 @@ class Attachment:
     class used to create it will be the same as the
     Message class used to create the attachment.
     """
+
     def __init__(self, msg, dir_):
         """
         :param msg: the Message instance that the attachment belongs to.
@@ -469,8 +484,9 @@ class Attachment:
         elif msg.Exists([dir_, '__substg1.0_3701000D']):
             if (self.props['37050003'].value & 0x7) != 0x5:
                 if not debug:
-                    raise NotImplementedError('Current version of extract_msg does not support extraction of containers that are not embeded msg files.')
-                    #TODO add implementation
+                    raise NotImplementedError(
+                        'Current version of extract_msg does not support extraction of containers that are not embeded msg files.')
+                    # TODO add implementation
                 else:
                     print('DEBUG: Debugging is true, ignoring NotImplementedError and printing debug info...')
                     print('DEBUG: _dir = {}'.format(_dir))
@@ -489,14 +505,15 @@ class Attachment:
         else:
             raise Exception('Unknown file type')
 
-    def saveEmbededMessage(self, contentId = False, json = False, useFileName = False, raw = False, customPath = None, customFilename = None):
+    def saveEmbededMessage(self, contentId=False, json=False, useFileName=False, raw=False, customPath=None,
+                           customFilename=None):
         """
         Seperate function from save to allow it to
         easily be overridden by a subclass.
         """
         self.data.save(json, useFileName, raw, contentId, customPath, customFilename)
 
-    def save(self, contentId = False, json = False, useFileName = False, raw = False, customPath = None, customFilename = None):
+    def save(self, contentId=False, json=False, useFileName=False, raw=False, customPath=None, customFilename=None):
         # Check if the user has specified a custom filename
         if customFilename != None and customFilename != '':
             filename = customFilename
@@ -513,8 +530,8 @@ class Attachment:
             # Otherwise just make something up!
             if filename is None:
                 filename = 'UnknownFilename ' + \
-                    ''.join(random.choice(string.ascii_uppercase + string.digits)
-                            for _ in range(5)) + '.bin'
+                           ''.join(random.choice(string.ascii_uppercase + string.digits)
+                                   for _ in range(5)) + '.bin'
 
         if customPath != None and customPath != '':
             if customPath[-1] != '/' or customPath[-1] != '\\':
@@ -574,7 +591,9 @@ class Attachment:
         try:
             return self.__props
         except:
-            self.__props = Properties(self.msg._getStream(self.msg.prefixList + [self.__dir, '__properties_version1.0']), constants.TYPE_ATTACHMENT)
+            self.__props = Properties(
+                self.msg._getStream(self.msg.prefixList + [self.__dir, '__properties_version1.0']),
+                constants.TYPE_ATTACHMENT)
             return self.__props
 
     @property
@@ -591,11 +610,13 @@ class Attachment:
         """
         return self.__type
 
+
 class Properties:
     """
     Parser for msg properties files.
     """
-    def __init__(self, stream, type = None, skip = None):
+
+    def __init__(self, stream, type=None, skip=None):
         self.__stream = stream
         self.__pos = 0
         self.__len = len(stream)
@@ -681,8 +702,8 @@ class Properties:
     def __repr__(self):
         return self.__props.__repr__
 
-    items.__doc__  = dict.items.__doc__
-    keys.__doc__   = dict.keys.__doc__
+    items.__doc__ = dict.items.__doc__
+    keys.__doc__ = dict.keys.__doc__
     values.__doc__ = dict.values.__doc__
 
     @property
@@ -700,13 +721,17 @@ class Properties:
             return self.__date
         except:
             if self.has_key('00390040'):
-                self.__date = fromTimeStamp(msgEpoch(self.get('00390040').value)).__format__('%a, %d %b %Y %H:%M:%S GMT %z')
+                self.__date = fromTimeStamp(msgEpoch(self.get('00390040').value)).__format__(
+                    '%a, %d %b %Y %H:%M:%S GMT %z')
             elif self.has_key('30080040'):
-                self.__date = fromTimeStamp(msgEpoch(self.get('30080040').value)).__format__('%a, %d %b %Y %H:%M:%S GMT %z')
+                self.__date = fromTimeStamp(msgEpoch(self.get('30080040').value)).__format__(
+                    '%a, %d %b %Y %H:%M:%S GMT %z')
             elif self.has_key('30070040'):
-                self.__date = fromTimeStamp(msgEpoch(self.get('30070040').value)).__format__('%a, %d %b %Y %H:%M:%S GMT %z')
+                self.__date = fromTimeStamp(msgEpoch(self.get('30070040').value)).__format__(
+                    '%a, %d %b %Y %H:%M:%S GMT %z')
             else:
-                print('Warning: Error retrieving date. Setting as "Unknown". Please send the following data to developer:\n--------------------')
+                print(
+                    'Warning: Error retrieving date. Setting as "Unknown". Please send the following data to developer:\n--------------------')
                 print(properHex(self.__stream))
                 print(self.keys())
                 print('--------------------')
@@ -723,13 +748,15 @@ class Properties:
     @property
     def next_attachment_id(self):
         if self.__naid == None:
-            raise TypeError('Properties instance must be intelligent and of type TYPE_MESSAGE to get next attachment id.')
+            raise TypeError(
+                'Properties instance must be intelligent and of type TYPE_MESSAGE to get next attachment id.')
         return self.__naid
 
     @property
     def next_recipient_id(self):
         if self.__nrid == None:
-            raise TypeError('Properties instance must be intelligent and of type TYPE_MESSAGE to get next recipient id.')
+            raise TypeError(
+                'Properties instance must be intelligent and of type TYPE_MESSAGE to get next recipient id.')
         return self.__nrid
 
     @property
@@ -752,12 +779,14 @@ class Properties:
         """
         return self.__stream
 
+
 class Prop:
     """
     Class to contain the data for a single property.
 
     Currently a work in progress.
     """
+
     def __init__(self, string):
         n = string[:4][::-1]
         self.__raw = string
@@ -776,65 +805,65 @@ class Prop:
 
         WARNING: Not done.
         """
-        #WARNING Not done.
+        # WARNING Not done.
         value = stream
-        if type == 0x0000: #PtypUnspecified
+        if type == 0x0000:  # PtypUnspecified
             pass;
-        elif type == 0x0001: #PtypNull
+        elif type == 0x0001:  # PtypNull
             if value != b'\x00\x00\x00\x00\x00\x00\x00\x00':
                 print('Warning: Property type is PtypNull, but is not equal to 0.')
             value = None
-        elif type == 0x0002: #PtypInteger16
+        elif type == 0x0002:  # PtypInteger16
             value = constants.STI16.unpack(value)[0]
-        elif type == 0x0003: #PtypInteger32
+        elif type == 0x0003:  # PtypInteger32
             value = constants.STI32.unpack(value)[0]
-        elif type == 0x0004: #PtypFloating32
+        elif type == 0x0004:  # PtypFloating32
             value = constants.STF32.unpack(value)[0]
-        elif type == 0x0005: #PtypFloating64
+        elif type == 0x0005:  # PtypFloating64
             value = constants.STF64.unpack(value)[0]
-        elif type == 0x0006: #PtypCurrency
-            value = (constants.STI64.unpack(value))[0]/10000.0
-        elif type == 0x0007: #PtypFloatingTime
+        elif type == 0x0006:  # PtypCurrency
+            value = (constants.STI64.unpack(value))[0] / 10000.0
+        elif type == 0x0007:  # PtypFloatingTime
             value = constants.STF64.unpack(value)[0]
-            #TODO parsing for this
+            # TODO parsing for this
             pass;
-        elif type == 0x000A: #PtypErrorCode
+        elif type == 0x000A:  # PtypErrorCode
             value = constants.STI32.unpack(value)[0]
-            #TODO parsing for this
+            # TODO parsing for this
             pass;
-        elif type == 0x000B: #PtypBoolean
+        elif type == 0x000B:  # PtypBoolean
             value = bool(constants.ST3.unpack(value)[0])
-        elif type == 0x000D: #PtypObject/PtypEmbeddedTable
-            #TODO parsing for this
+        elif type == 0x000D:  # PtypObject/PtypEmbeddedTable
+            # TODO parsing for this
             pass;
-        elif type == 0x0014: #PtypInteger64
+        elif type == 0x0014:  # PtypInteger64
             value = constants.STI64.unpack(value)[0]
-        elif type == 0x001E: #PtypString8
-            #TODO parsing for this
+        elif type == 0x001E:  # PtypString8
+            # TODO parsing for this
             pass;
-        elif type == 0x001F: #PtypString
-            #TODO parsing for this
+        elif type == 0x001F:  # PtypString
+            # TODO parsing for this
             pass;
-        elif type == 0x0040: #PtypTime
+        elif type == 0x0040:  # PtypTime
             value = constants.ST3.unpack(value)[0]
-        elif type == 0x0048: #PtypGuid
-            #TODO parsing for this
+        elif type == 0x0048:  # PtypGuid
+            # TODO parsing for this
             pass;
-        elif type == 0x00FB: #PtypServerId
-            #TODO parsing for this
+        elif type == 0x00FB:  # PtypServerId
+            # TODO parsing for this
             pass;
-        elif type == 0x00FD: #PtypRestriction
-            #TODO parsing for this
+        elif type == 0x00FD:  # PtypRestriction
+            # TODO parsing for this
             pass;
-        elif type == 0x00FE: #PtypRuleAction
-            #TODO parsing for this
+        elif type == 0x00FE:  # PtypRuleAction
+            # TODO parsing for this
             pass;
-        elif type == 0x0102: #PtypBinary
-            #TODO parsing for this
+        elif type == 0x0102:  # PtypBinary
+            # TODO parsing for this
             # Smh, how on earth am I going to code this???
             pass;
-        elif type & 0x1000 == 0x1000: #PtypMultiple
-            #TODO parsing for `multiple` types
+        elif type & 0x1000 == 0x1000:  # PtypMultiple
+            # TODO parsing for `multiple` types
             pass;
         return value;
 
@@ -887,13 +916,15 @@ class Prop:
         """
         return self.__value
 
+
 class Recipient:
     """
     Contains the data of one or the recipients in an msg file.
     """
+
     def __init__(self, num, msg):
-        self.__msg = msg #Allows calls to original msg file
-        self.__dir = '__recip_version1.0_#' + num.rjust(8,'0')
+        self.__msg = msg  # Allows calls to original msg file
+        self.__dir = '__recip_version1.0_#' + num.rjust(8, '0')
         self.__props = Properties(msg._getStream(self.__dir + '/__properties_version1.0'), constants.TYPE_RECIPIENT)
         self.__email = msg._getStringStream(self.__dir + '/__substg1.0_39FE')
         self.__name = msg._getStringStream(self.__dir + '/__substg1.0_3001')
@@ -940,9 +971,8 @@ class Recipient:
         return self.__type
 
 
-
 class Message(OleFile.OleFileIO):
-    def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None):
+    def __init__(self, path, prefix='', attachmentClass=Attachment, filename=None):
         """
         :param path: path to the msg file in the system or is the raw msg file.
         :param prefix: used for extracting embeded msg files
@@ -954,7 +984,7 @@ class Message(OleFile.OleFileIO):
             are doing.
         :param filename: optional, the filename to be used by default when saving.
         """
-        #WARNING DO NOT MANUALLY MODIFY PREFIX. Let the program set it.
+        # WARNING DO NOT MANUALLY MODIFY PREFIX. Let the program set it.
         if debug:
             print('DEBUG: prefix: {}'.format(prefix))
         self.__path = path
@@ -966,7 +996,8 @@ class Message(OleFile.OleFileIO):
                 try:
                     prefix = '/'.join(prefix)
                 except:
-                    raise TypeException('Invalid prefix type: ' + type(prefix) + '\n(This was probably caused by you setting it manually).')
+                    raise TypeException('Invalid prefix type: ' + type(
+                        prefix) + '\n(This was probably caused by you setting it manually).')
             prefix = prefix.replace('\\', '/')
             g = prefix.split("/")
             if g[-1] == '':
@@ -974,7 +1005,7 @@ class Message(OleFile.OleFileIO):
             prefixl = g
             if prefix[-1] != '/':
                 prefix += '/'
-            filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix = False)
+            filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix=False)
         self.__prefix = prefix
         self.__prefixList = prefixl
         if filename != None:
@@ -998,10 +1029,10 @@ class Message(OleFile.OleFileIO):
         self.sender
         self.header
         self.date
-        self.__crlf = '\n' #This variable keeps track of what the new line character should be
+        self.__crlf = '\n'  # This variable keeps track of what the new line character should be
         self.body
 
-    def listDir(self, streams = True, storages = False):
+    def listDir(self, streams=True, storages=False):
         """
         Replacement for OleFileIO.listdir that runs at the current prefix directory.
         """
@@ -1034,7 +1065,7 @@ class Message(OleFile.OleFileIO):
             inp = self.__prefix + inp
         return self.exists(inp)
 
-    def _getStream(self, filename, prefix = True):
+    def _getStream(self, filename, prefix=True):
         if isinstance(filename, list):
             filename = '/'.join(filename)
         if prefix:
@@ -1045,7 +1076,7 @@ class Message(OleFile.OleFileIO):
         else:
             return None
 
-    def _getStringStream(self, filename, prefer = 'unicode', prefix = True):
+    def _getStringStream(self, filename, prefer='unicode', prefix=True):
         """
         Gets a string representation of the requested filename.
         Checks for both ASCII and Unicode representations and returns
@@ -1061,7 +1092,8 @@ class Message(OleFile.OleFileIO):
         asciiVersion = self._getStream(filename + '001E', prefix)
         unicodeVersion = windowsUnicode(self._getStream(filename + '001F', prefix))
         if debug:
-            print('DEBUG: _getStringSteam called for {}. Ascii version found: {}. Unicode version found: {}.'.format(filename, asciiVersion != None, unicodeVersion != None))
+            print('DEBUG: _getStringSteam called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
+                filename, asciiVersion != None, unicodeVersion != None))
         if asciiVersion is None:
             return unicodeVersion
         elif unicodeVersion is None:
@@ -1148,7 +1180,8 @@ class Message(OleFile.OleFileIO):
         try:
             return self._prop
         except:
-            self._prop = Properties(self._getStream('__properties_version1.0'), constants.TYPE_MESSAGE if self.__prefix == '' else constants.TYPE_MESSAGE_EMBED)
+            self._prop = Properties(self._getStream('__properties_version1.0'),
+                                    constants.TYPE_MESSAGE if self.__prefix == '' else constants.TYPE_MESSAGE_EMBED)
             return self._prop
 
     @property
@@ -1161,7 +1194,6 @@ class Message(OleFile.OleFileIO):
         except:
             self._date = self._prop.date
             return self._date
-
 
     @property
     def parsedDate(self):
@@ -1183,7 +1215,8 @@ class Message(OleFile.OleFileIO):
                     return headerResult
             # Extract from other fields
             text = self._getStringStream('__substg1.0_0C1A')
-            email = self._getStringStream('__substg1.0_5D01') #Will not give an email address sometimes. Seems to exclude the email address if YOU are the sender.
+            email = self._getStringStream(
+                '__substg1.0_5D01')  # Will not give an email address sometimes. Seems to exclude the email address if YOU are the sender.
             result = None
             if text is None:
                 result = email
@@ -1315,7 +1348,8 @@ class Message(OleFile.OleFileIO):
             attachmentDirs = []
 
             for dir_ in self.listDir():
-                if dir_[len(self.__prefixList)].startswith('__attach') and dir_[len(self.__prefixList)] not in attachmentDirs:
+                if dir_[len(self.__prefixList)].startswith('__attach') and dir_[
+                    len(self.__prefixList)] not in attachmentDirs:
                     attachmentDirs.append(dir_[len(self.__prefixList)])
 
             self._attachments = []
@@ -1337,7 +1371,8 @@ class Message(OleFile.OleFileIO):
             recipientDirs = []
 
             for dir_ in self.listDir():
-                if dir_[len(self.__prefixList)].startswith('__recip') and dir_[len(self.__prefixList)] not in recipientDirs:
+                if dir_[len(self.__prefixList)].startswith('__recip') and dir_[
+                    len(self.__prefixList)] not in recipientDirs:
                     recipientDirs.append(dir_[len(self.__prefixList)])
 
             self._recipients = []
@@ -1347,7 +1382,7 @@ class Message(OleFile.OleFileIO):
 
             return self._recipients
 
-    def save(self, toJson=False, useFileName=False, raw=False, ContentId=False, customPath = None, customFilename = None):
+    def save(self, toJson=False, useFileName=False, raw=False, ContentId=False, customPath=None, customFilename=None):
         """
         Saves the message body and attachments found in the message. Setting toJson
         to true will output the message body as JSON-formatted text. The body and
@@ -1368,7 +1403,8 @@ class Message(OleFile.OleFileIO):
                 if self.filename != None:
                     dirName = self.filename.split('/').pop().split('.')[0]
                 else:
-                    ValueError('Filename must be specified, or path must have been an actual path, to save using filename')
+                    ValueError(
+                        'Filename must be specified, or path must have been an actual path, to save using filename')
             else:
                 # Create a directory based on the date and subject of the message
                 d = self.parsedDate
@@ -1398,7 +1434,7 @@ class Message(OleFile.OleFileIO):
                 raise Exception(
                     "Failed to create directory '%s'. Does it already exist?" %
                     dirName
-                    )
+                )
 
         oldDir = os.getcwd()
         try:
@@ -1408,8 +1444,6 @@ class Message(OleFile.OleFileIO):
             fext = 'json' if toJson else 'text'
             f = open('message.' + fext, 'w')
             # From, to , cc, subject, date
-
-
 
             attachmentNames = []
             # Save the attachments
@@ -1498,7 +1532,7 @@ class Message(OleFile.OleFileIO):
                 print('Directory: ' + str(dir_[:-1]))
                 print('Contents: {}'.format(self._getStream(dir_)))
 
-    def save_attachments(self, contentId = False, json = False, useFileName = False, raw = False, customPath = None):
+    def save_attachments(self, contentId=False, json=False, useFileName=False, raw=False, customPath=None):
         """
         Saves only attachments in the same folder.
         """
