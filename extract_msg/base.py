@@ -1,16 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: latin-1 -*-
 # Date Format: YYYY-MM-DD
-"""
-extract_msg:
-    Extracts emails and attachments saved in Microsoft Outlook's .msg files
 
-https://github.com/mattgwwalker/msg-extractor
-"""
-
-__author__ = 'Matthew Walker & The Elemental of Creation'
-__date__ = '2018-11-23'
-__version__ = '0.20.1'
 
 debug = False
 
@@ -38,6 +29,7 @@ import glob
 import json
 import olefile as OleFile
 import os
+import pprint
 import random
 import re
 import string
@@ -46,7 +38,7 @@ import sys
 import traceback
 import tzlocal
 from email.parser import Parser as EmailParser
-from extract_msg import constants
+import constants
 from imapclient.imapclient import decode_utf7
 
 # This property information was sourced from
@@ -265,40 +257,6 @@ from imapclient.imapclient import decode_utf7
 #     '5FF6': 'To (uncertain)'
 # }
 
-types = {
-    0x0000: 'PtypUnspecified',
-    0x0001: 'PtypNull',
-    0x0002: 'PtypInteger16',  # Signed short
-    0x0003: 'PtypInteger32',  # Signed int
-    0x0004: 'PtypFloating32',  # Float
-    0x0005: 'PtypFloating64',  # Double
-    0x0006: 'PtypCurrency',
-    0x0007: 'PtypFloatingTime',
-    0x000A: 'PtypErrorCode',
-    0x000B: 'PtypBoolean',
-    0x000D: 'PtypObject/PtypEmbeddedTable',
-    0x0014: 'PtypInteger64',  # Signed longlong
-    0x001E: 'PtypString8',
-    0x001F: 'PtypString',
-    0x0040: 'PtypTime',  # Use msgEpoch to convert to unix time stamp
-    0x0048: 'PtypGuid',
-    0x00FB: 'PtypServerId',
-    0x00FD: 'PtypRestriction',
-    0x00FE: 'PtypRuleAction',
-    0x0102: 'PtypBinary',
-    0x1002: 'PtypMultipleInteger16',
-    0x1003: 'PtypMultipleInteger32',
-    0x1004: 'PtypMultipleFloating32',
-    0x1005: 'PtypMultipleFloating64',
-    0x1006: 'PtypMultipleCurrency',
-    0x1007: 'PtypMultipleFloatingTime',
-    0x1014: 'PtypMultipleInteger64',
-    0x101E: 'PtypMultipleString8',
-    0x101F: 'PtypMultipleString',
-    0x1040: 'PtypMultipleTime',
-    0x1048: 'PtypMultipleGuid',
-    0x1102: 'PtypMultipleBinary',
-}
 
 if sys.version_info[0] >= 3:  # Python 3
     def xstr(s):
@@ -382,7 +340,7 @@ def parse_type(type, stream):
     # WARNING Not done. Do not try to implement anywhere where it is not already implemented
     value = stream
     if type == 0x0000:  # PtypUnspecified
-        pass
+        pass;
     elif type == 0x0001:  # PtypNull
         if value != b'\x00\x00\x00\x00\x00\x00\x00\x00':
             print('Warning: Property type is PtypNull, but is not equal to 0.')
@@ -400,44 +358,44 @@ def parse_type(type, stream):
     elif type == 0x0007:  # PtypFloatingTime
         value = constants.STF64.unpack(value)[0]
         # TODO parsing for this
-        pass
+        pass;
     elif type == 0x000A:  # PtypErrorCode
         value = constants.STI32.unpack(value)[0]
         # TODO parsing for this
-        pass
+        pass;
     elif type == 0x000B:  # PtypBoolean
         value = bool(constants.ST3.unpack(value)[0])
     elif type == 0x000D:  # PtypObject/PtypEmbeddedTable
         # TODO parsing for this
-        pass
+        pass;
     elif type == 0x0014:  # PtypInteger64
         value = constants.STI64.unpack(value)[0]
     elif type == 0x001E:  # PtypString8
         # TODO parsing for this
-        pass
+        pass;
     elif type == 0x001F:  # PtypString
         value = value.decode('utf_16_le')
     elif type == 0x0040:  # PtypTime
         value = constants.ST3.unpack(value)[0]
     elif type == 0x0048:  # PtypGuid
         # TODO parsing for this
-        pass
+        pass;
     elif type == 0x00FB:  # PtypServerId
         # TODO parsing for this
-        pass
+        pass;
     elif type == 0x00FD:  # PtypRestriction
         # TODO parsing for this
-        pass
+        pass;
     elif type == 0x00FE:  # PtypRuleAction
         # TODO parsing for this
-        pass
+        pass;
     elif type == 0x0102:  # PtypBinary
         # TODO parsing for this
         # Smh, how on earth am I going to code this???
-        pass
+        pass;
     elif type & 0x1000 == 0x1000:  # PtypMultiple
         # TODO parsing for `multiple` types
-        pass
+        pass;
     return value;
 
 
@@ -527,7 +485,7 @@ class Attachment:
             if (self.props['37050003'].value & 0x7) != 0x5:
                 if not debug:
                     raise NotImplementedError(
-                        'Current version of msg_extractor.py does not support extraction of containers that are not embeded msg files.')
+                        'Current version of extract_msg does not support extraction of containers that are not embeded msg files.')
                     # TODO add implementation
                 else:
                     print('DEBUG: Debugging is true, ignoring NotImplementedError and printing debug info...')
@@ -575,7 +533,9 @@ class Attachment:
                            ''.join(random.choice(string.ascii_uppercase + string.digits)
                                    for _ in range(5)) + '.bin'
 
-        if custom_path:
+        if customPath != None and customPath != '':
+            if customPath[-1] != '/' or customPath[-1] != '\\':
+                customPath += '/'
             filename = customPath + filename
 
         if self.__type == "data":
@@ -717,29 +677,11 @@ class Properties:
     def items(self):
         return self.__props.items()
 
-    def iteritems(self):
-        return self.__props.iteritems()
-
-    def iterkeys(self):
-        return self.__props.iterkeys()
-
-    def itervalues(self):
-        return self.__props.itervalues()
-
     def keys(self):
         return self.__props.keys()
 
     def values(self):
         return self.__props.values()
-
-    def viewitems(self):
-        return self.__props.viewitems()
-
-    def viewkeys(self):
-        return self.__props.viewkeys()
-
-    def viewvalues(self):
-        return self.__props.viewvalues()
 
     def __contains__(self, key):
         self.__props.__contains__(key)
@@ -761,14 +703,8 @@ class Properties:
         return self.__props.__repr__
 
     items.__doc__ = dict.items.__doc__
-    iteritems.__doc__ = dict.iteritems.__doc__
-    iterkeys.__doc__ = dict.iterkeys.__doc__
-    itervalues.__doc__ = dict.itervalues.__doc__
     keys.__doc__ = dict.keys.__doc__
     values.__doc__ = dict.values.__doc__
-    viewitems.__doc__ = dict.viewitems.__doc__
-    viewkeys.__doc__ = dict.viewkeys.__doc__
-    viewvalues.__doc__ = dict.viewvalues.__doc__
 
     @property
     def attachment_count(self):
@@ -872,7 +808,7 @@ class Prop:
         # WARNING Not done.
         value = stream
         if type == 0x0000:  # PtypUnspecified
-            pass
+            pass;
         elif type == 0x0001:  # PtypNull
             if value != b'\x00\x00\x00\x00\x00\x00\x00\x00':
                 print('Warning: Property type is PtypNull, but is not equal to 0.')
@@ -890,46 +826,46 @@ class Prop:
         elif type == 0x0007:  # PtypFloatingTime
             value = constants.STF64.unpack(value)[0]
             # TODO parsing for this
-            pass
+            pass;
         elif type == 0x000A:  # PtypErrorCode
             value = constants.STI32.unpack(value)[0]
             # TODO parsing for this
-            pass
+            pass;
         elif type == 0x000B:  # PtypBoolean
             value = bool(constants.ST3.unpack(value)[0])
         elif type == 0x000D:  # PtypObject/PtypEmbeddedTable
             # TODO parsing for this
-            pass
+            pass;
         elif type == 0x0014:  # PtypInteger64
             value = constants.STI64.unpack(value)[0]
         elif type == 0x001E:  # PtypString8
             # TODO parsing for this
-            pass
+            pass;
         elif type == 0x001F:  # PtypString
             # TODO parsing for this
-            pass
+            pass;
         elif type == 0x0040:  # PtypTime
             value = constants.ST3.unpack(value)[0]
         elif type == 0x0048:  # PtypGuid
             # TODO parsing for this
-            pass
+            pass;
         elif type == 0x00FB:  # PtypServerId
             # TODO parsing for this
-            pass
+            pass;
         elif type == 0x00FD:  # PtypRestriction
             # TODO parsing for this
-            pass
+            pass;
         elif type == 0x00FE:  # PtypRuleAction
             # TODO parsing for this
-            pass
+            pass;
         elif type == 0x0102:  # PtypBinary
             # TODO parsing for this
             # Smh, how on earth am I going to code this???
-            pass
+            pass;
         elif type & 0x1000 == 0x1000:  # PtypMultiple
             # TODO parsing for `multiple` types
-            pass
-        return value
+            pass;
+        return value;
 
     @property
     def flag_mandatory(self):
@@ -1060,8 +996,8 @@ class Message(OleFile.OleFileIO):
                 try:
                     prefix = '/'.join(prefix)
                 except:
-                    raise TypeException('Invalid prefix type: ' + type(prefix) +
-                                        '\n(This was probably caused by you setting it manually).')
+                    raise TypeException('Invalid prefix type: ' + type(
+                        prefix) + '\n(This was probably caused by you setting it manually).')
             prefix = prefix.replace('\\', '/')
             g = prefix.split("/")
             if g[-1] == '':
@@ -1381,7 +1317,7 @@ class Message(OleFile.OleFileIO):
             self._body = encode(self._getStringStream('__substg1.0_1000'))
             a = re.search('\n', self._body)
             if a != None:
-                if re.search('\r\n', self._body) is not None:
+                if re.search('\r\n', self._body) != None:
                     self.__crlf = '\r\n'
             return self._body
 
@@ -1454,30 +1390,40 @@ class Message(OleFile.OleFileIO):
         the filename is used as the name of the folder; otherwise, the message's date
         and subject are used as the folder name.
 
-        Currently, :param customPath: and :param customFilename: don't do anything.
+        Here is the absolute order of prioity for the name of the folder:
+            1. customFilename
+            2. self.filename if useFileName
+            3. {date} {subject}
         """
-
-        if useFileName:
-            # strip out the extension
-            if self.filename != None:
-                dirName = self.filename.split('/').pop().split('.')[0]
-            else:
-                ValueError('Filename must be specified, or path must have been an actual path, to save using filename')
+        if customFilename != None and customFilename != '':
+            dirName = customFilename
         else:
-            # Create a directory based on the date and subject of the message
-            d = self.parsedDate
-            if d is not None:
-                dirName = '{0:02d}-{1:02d}-{2:02d}_{3:02d}{4:02d}'.format(*d)
+            if useFileName:
+                # strip out the extension
+                if self.filename != None:
+                    dirName = self.filename.split('/').pop().split('.')[0]
+                else:
+                    ValueError(
+                        'Filename must be specified, or path must have been an actual path, to save using filename')
             else:
-                dirName = 'UnknownDate'
+                # Create a directory based on the date and subject of the message
+                d = self.parsedDate
+                if d is not None:
+                    dirName = '{0:02d}-{1:02d}-{2:02d}_{3:02d}{4:02d}'.format(*d)
+                else:
+                    dirName = 'UnknownDate'
 
-            if self.subject is None:
-                subject = '[No subject]'
-            else:
-                subject = ''.join(i for i in self.subject if i not in r'\/:*?"<>|')
+                if self.subject is None:
+                    subject = '[No subject]'
+                else:
+                    subject = ''.join(i for i in self.subject if i not in r'\/:*?"<>|')
 
-            dirName = dirName + ' ' + subject
+                dirName = dirName + ' ' + subject
 
+        if customPath != None and customPath != '':
+            if customPath[-1] != '/' or customPath[-1] != '\\':
+                customPath += '/'
+            dirName = customPath + dirName
         try:
             os.makedirs(dirName)
         except Exception:
@@ -1591,4 +1537,4 @@ class Message(OleFile.OleFileIO):
         Saves only attachments in the same folder.
         """
         for attachment in self.attachments:
-            attachment.save(contentId, json, useFileName, raw, customPath)
+            attachment.save(contentId, json, useFileName, raw, custom)
