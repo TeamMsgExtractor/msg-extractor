@@ -38,7 +38,7 @@ import sys
 import traceback
 import tzlocal
 from email.parser import Parser as EmailParser
-from extract_msg import constants
+import constants
 from imapclient.imapclient import decode_utf7
 
 # This property information was sourced from
