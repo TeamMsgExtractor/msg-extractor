@@ -1,6 +1,6 @@
-from . import constants
-from .debug import debug
-from .utils import properHex
+from extract_msg import constants
+from extract_msg.debug import debug
+from extract_msg.utils import properHex
 
 
 

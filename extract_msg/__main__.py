@@ -1,9 +1,9 @@
 import glob
 import sys
 import traceback
-from .__doc__ import __doc__
-from .debug import debug
-from .base import Message
+from extract_msg.__doc__ import __doc__
+from extract_msg.debug import debug
+from extract_msg.message import Message
 
 
 

@@ -1,18 +1,19 @@
 import email.utils
 import json
-import olefile as OleFile
+import olefile
 import os
 import re
 from email.parser import Parser as EmailParser
+from extract_msg import constants
+from extract_msg.attachment import Attachment
+from extract_msg.debug import debug
+from extract_msg.properties import Properties
+from extract_msg.utils import addNumToDir, encode, has_len, stri, windowsUnicode, xstr
 from imapclient.imapclient import decode_utf7
-from . import constants
-from .Attachment import Attachment
-from .debug import debug
-from .Properties import Properties
 
 
 
-class Message(OleFile.OleFileIO):
+class Message(olefile.OleFileIO):
     def __init__(self, path, prefix='', attachmentClass=Attachment, filename=None):
         """
         :param path: path to the msg file in the system or is the raw msg file.
@@ -30,14 +31,14 @@ class Message(OleFile.OleFileIO):
             print('DEBUG: prefix: {}'.format(prefix))
         self.__path = path
         self.__attachmentClass = attachmentClass
-        OleFile.OleFileIO.__init__(self, path)
+        olefile.OleFileIO.__init__(self, path)
         prefixl = []
         if prefix != '':
             if not isinstance(prefix, stri):
                 try:
                     prefix = '/'.join(prefix)
                 except:
-                    raise TypeException('Invalid prefix type: ' + type(prefix) +
+                    raise TypeException('Invalid prefix type: ' + str(type(prefix)) +
                         '\n(This was probably caused by you setting it manually).')
             prefix = prefix.replace('\\', '/')
             g = prefix.split("/")
@@ -256,8 +257,8 @@ class Message(OleFile.OleFileIO):
                     return headerResult
             # Extract from other fields
             text = self._getStringStream('__substg1.0_0C1A')
-            email = self._getStringStream(
-                '__substg1.0_5D01')  # Will not give an email address sometimes. Seems to exclude the email address if YOU are the sender.
+            email = self._getStringStream('__substg1.0_5D01')
+			# Will not give an email address sometimes. Seems to exclude the email address if YOU are the sender.
             result = None
             if text is None:
                 result = email
@@ -533,10 +534,9 @@ class Message(OleFile.OleFileIO):
             # Loop through all the directories
             for dir_ in self.listdir():
                 sysdir = '/'.join(dir_)
-                code = dir_[-1][-8:-4]
-                global properties
-                if code in properties:
-                    sysdir = sysdir + ' - ' + properties[code]
+                code = dir_[-1][-8:]
+                if code in constants.PROPERTIES:
+                    sysdir = sysdir + ' - ' + constants.PROPERTIES[code]
                 os.makedirs(sysdir)
                 os.chdir(sysdir)
 

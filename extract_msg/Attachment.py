@@ -1,9 +1,9 @@
 import random
 import string
-from . import constants
-from .debug import debug
-from .Properties import Properties
-from .utils import properHex
+from extract_msg import constants
+from extract_msg.debug import debug
+from extract_msg.properties import Properties
+from extract_msg.utils import properHex
 
 
 

@@ -2,7 +2,7 @@ import datetime
 import os
 import sys
 import tzlocal
-from . import constants
+from extract_msg import constants
 
 
 

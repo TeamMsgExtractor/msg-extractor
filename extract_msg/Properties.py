@@ -1,8 +1,8 @@
 import copy
-from . import constants
-from .debug import debug
-from .Prop import Prop
-from .utils import divide, fromTimeStamp, msgEpoch, properHex
+from extract_msg import constants
+from extract_msg.debug import debug
+from extract_msg.prop import Prop
+from extract_msg.utils import divide, fromTimeStamp, msgEpoch, properHex
 
 
 
