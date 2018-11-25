@@ -116,11 +116,11 @@ def msgEpoch(inp):
     """
     return (inp - 116444736000000000) / 10000000.0
 
-def parse_type(type, stream):
+def parse_type(_type, stream):
     """
     Converts the data in :param stream: to a
     much more accurate type, specified by
-    :param type:, if possible.
+    :param _type:, if possible.
 
     Some types require that :param prop_value: be specified. This can be retrieved from the Properties instance.
 
@@ -128,61 +128,61 @@ def parse_type(type, stream):
     """
     # WARNING Not done. Do not try to implement anywhere where it is not already implemented
     value = stream
-    if type == 0x0000:  # PtypUnspecified
+    if _type == 0x0000:  # PtypUnspecified
         pass;
-    elif type == 0x0001:  # PtypNull
+    elif _type == 0x0001:  # PtypNull
         if value != b'\x00\x00\x00\x00\x00\x00\x00\x00':
             print('Warning: Property type is PtypNull, but is not equal to 0.')
         value = None
-    elif type == 0x0002:  # PtypInteger16
+    elif _type == 0x0002:  # PtypInteger16
         value = constants.STI16.unpack(value)[0]
-    elif type == 0x0003:  # PtypInteger32
+    elif _type == 0x0003:  # PtypInteger32
         value = constants.STI32.unpack(value)[0]
-    elif type == 0x0004:  # PtypFloating32
+    elif _type == 0x0004:  # PtypFloating32
         value = constants.STF32.unpack(value)[0]
-    elif type == 0x0005:  # PtypFloating64
+    elif _type == 0x0005:  # PtypFloating64
         value = constants.STF64.unpack(value)[0]
-    elif type == 0x0006:  # PtypCurrency
+    elif _type == 0x0006:  # PtypCurrency
         value = (constants.STI64.unpack(value)[0]) / 10000.0
-    elif type == 0x0007:  # PtypFloatingTime
+    elif _type == 0x0007:  # PtypFloatingTime
         value = constants.STF64.unpack(value)[0]
         # TODO parsing for this
         pass;
-    elif type == 0x000A:  # PtypErrorCode
+    elif _type == 0x000A:  # PtypErrorCode
         value = constants.STI32.unpack(value)[0]
         # TODO parsing for this
         pass;
-    elif type == 0x000B:  # PtypBoolean
+    elif _type == 0x000B:  # PtypBoolean
         value = bool(constants.ST3.unpack(value)[0])
-    elif type == 0x000D:  # PtypObject/PtypEmbeddedTable
+    elif _type == 0x000D:  # PtypObject/PtypEmbeddedTable
         # TODO parsing for this
         pass;
-    elif type == 0x0014:  # PtypInteger64
+    elif _type == 0x0014:  # PtypInteger64
         value = constants.STI64.unpack(value)[0]
-    elif type == 0x001E:  # PtypString8
+    elif _type == 0x001E:  # PtypString8
         # TODO parsing for this
         pass;
-    elif type == 0x001F:  # PtypString
+    elif _type == 0x001F:  # PtypString
         value = value.decode('utf_16_le')
-    elif type == 0x0040:  # PtypTime
+    elif _type == 0x0040:  # PtypTime
         value = constants.ST3.unpack(value)[0]
-    elif type == 0x0048:  # PtypGuid
+    elif _type == 0x0048:  # PtypGuid
         # TODO parsing for this
         pass;
-    elif type == 0x00FB:  # PtypServerId
+    elif _type == 0x00FB:  # PtypServerId
         # TODO parsing for this
         pass;
-    elif type == 0x00FD:  # PtypRestriction
+    elif _type == 0x00FD:  # PtypRestriction
         # TODO parsing for this
         pass;
-    elif type == 0x00FE:  # PtypRuleAction
+    elif _type == 0x00FE:  # PtypRuleAction
         # TODO parsing for this
         pass;
-    elif type == 0x0102:  # PtypBinary
+    elif _type == 0x0102:  # PtypBinary
         # TODO parsing for this
         # Smh, how on earth am I going to code this???
         pass;
-    elif type & 0x1000 == 0x1000:  # PtypMultiple
+    elif _type & 0x1000 == 0x1000:  # PtypMultiple
         # TODO parsing for `multiple` types
         pass;
     return value;
