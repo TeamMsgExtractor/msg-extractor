@@ -143,7 +143,7 @@ class Attachment:
         """
         try:
             return self.__props
-        except:
+        except AttributeError:
             self.__props = Properties(
                 self.msg._getStream(self.msg.prefixList + [self.__dir, '__properties_version1.0']),
                 constants.TYPE_ATTACHMENT)

@@ -56,7 +56,7 @@ class Properties:
         """
         try:
             return self.__props[name]
-        except:
+        except KeyError:
             if debug:
                 print('DEBUG:')
                 print(properHex(self.__stream))
@@ -114,7 +114,7 @@ class Properties:
         """
         try:
             return self.__date
-        except:
+        except AttributeError:
             if self.has_key('00390040'):
                 self.__date = fromTimeStamp(msgEpoch(self.get('00390040').value)).__format__(
                     '%a, %d %b %Y %H:%M:%S GMT %z')

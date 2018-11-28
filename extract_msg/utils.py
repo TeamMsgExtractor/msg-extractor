@@ -107,7 +107,7 @@ def has_len(obj):
     try:
         obj.__len__
         return True
-    except:
+    except AttributeError:
         return False
 
 def msgEpoch(inp):

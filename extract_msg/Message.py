@@ -1,3 +1,4 @@
+import copy
 import email.utils
 import json
 import olefile
@@ -169,7 +170,7 @@ class Message(olefile.OleFileIO):
         Returns the prefix list of the Message instance.
         Intended for developer use.
         """
-        return self.__prefixList
+        return copy.deepcopy(self.__prefixList)
 
     @property
     def subject(self):
@@ -178,7 +179,7 @@ class Message(olefile.OleFileIO):
         """
         try:
             return self._subject
-        except:
+        except AttributeError:
             self._subject = encode(self._getStringStream('__substg1.0_0037'))
             return self._subject
 
@@ -189,18 +190,21 @@ class Message(olefile.OleFileIO):
         """
         try:
             return self._header
-        except Exception:
+        except AttributeError:
             headerText = self._getStringStream('__substg1.0_007D')
             if headerText is not None:
                 self._header = EmailParser().parsestr(headerText)
                 self._header['date'] = self.date
             else:
-                header = {
-                    'date': self.date,
-                    'from': self.sender,
-                    'to': self.to,
-                    'cc': self.cc
-                }
+                header = EmailParser().parsestr()
+                header.add_header('date', self.date)
+                header.add_header('from', self.sender)
+                header.add_header('to', self.to)
+                header.add_header('cc', self.cc)
+                header.add_header('message-id', self.message_id)
+                #TODO find authentication results outside of header
+                header.add_header('authenitcation-results', None)
+
                 self._header = header
             return self._header
 
@@ -211,7 +215,7 @@ class Message(olefile.OleFileIO):
         try:
             self._header
             return True
-        except:
+        except AttributeError:
             return False
 
     @property
@@ -221,7 +225,7 @@ class Message(olefile.OleFileIO):
         """
         try:
             return self._prop
-        except:
+        except AttributeError:
             self._prop = Properties(self._getStream('__properties_version1.0'),
                                     constants.TYPE_MESSAGE if self.__prefix == '' else constants.TYPE_MESSAGE_EMBED)
             return self._prop
@@ -233,7 +237,7 @@ class Message(olefile.OleFileIO):
         """
         try:
             return self._date
-        except:
+        except AttributeError:
             self._date = self._prop.date
             return self._date
 
@@ -248,7 +252,7 @@ class Message(olefile.OleFileIO):
         """
         try:
             return self._sender
-        except Exception:
+        except AttributeError:
             # Check header first
             if self.headerInit():
                 headerResult = self.header['from']
@@ -258,7 +262,7 @@ class Message(olefile.OleFileIO):
             # Extract from other fields
             text = self._getStringStream('__substg1.0_0C1A')
             email = self._getStringStream('__substg1.0_5D01')
-			# Will not give an email address sometimes. Seems to exclude the email address if YOU are the sender.
+            # Will not give an email address sometimes. Seems to exclude the email address if YOU are the sender.
             result = None
             if text is None:
                 result = email
@@ -277,7 +281,7 @@ class Message(olefile.OleFileIO):
         """
         try:
             return self._to
-        except Exception:
+        except AttributeError:
             # Check header first
             if self.headerInit():
                 headerResult = self.header['to']
@@ -305,7 +309,7 @@ class Message(olefile.OleFileIO):
         """
         try:
             return self._compressedRtf
-        except Exception:
+        except AttributeError:
             self._compressedRtf = self._getStream('__substg1.0_10090102')
             return self._compressedRtf
 
@@ -316,7 +320,7 @@ class Message(olefile.OleFileIO):
         """
         try:
             return self._htmlBody
-        except Exception:
+        except AttributeError:
             self._htmlBody = self._getStream('__substg1.0_10130102')
             return self._htmlBody
 
@@ -327,7 +331,7 @@ class Message(olefile.OleFileIO):
         """
         try:
             return self._cc
-        except Exception:
+        except AttributeError:
             # Check header first
             if self.headerInit():
                 headerResult = self.header['cc']
@@ -349,13 +353,32 @@ class Message(olefile.OleFileIO):
             return self._cc
 
     @property
+    def message_id(self):
+        try:
+            return self._message_id
+        except AttributeError:
+            if self.headerInit():
+                self._message_idself._header['message-id']
+            else:
+                self._message_id = self._getStringStream('__substg1.0_1035')
+            return self._message_id
+
+    @property
+    def reply_to(self):
+        try:
+            return self._reply_to
+        except AttributeError:
+            self._reply_to = self._getStringStream('__substg1.0_1042')
+            return self._reply_to
+
+    @property
     def body(self):
         """
         Returns the message body, if it exists.
         """
         try:
             return self._body
-        except Exception:
+        except AttributeError:
             self._body = encode(self._getStringStream('__substg1.0_1000'))
             a = re.search('\n', self._body)
             if a != None:
@@ -385,7 +408,7 @@ class Message(olefile.OleFileIO):
         """
         try:
             return self._attachments
-        except Exception:
+        except AttributeError:
             # Get the attachments
             attachmentDirs = []
 
@@ -408,7 +431,7 @@ class Message(olefile.OleFileIO):
         """
         try:
             return self._recipients
-        except Exception:
+        except AttributeError:
             # Get the recipients
             recipientDirs = []
 
