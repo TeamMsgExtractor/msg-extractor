@@ -12,6 +12,7 @@ class Prop(object):
     """
 
     def __init__(self, string):
+		object.__init__(self)
         n = string[:4][::-1]
         self.__raw = string
         self.__name = properHex(n).upper()
