@@ -7,7 +7,7 @@ from extract_msg.utils import properHex
 
 
 
-class Attachment:
+class Attachment(object):
     """
     Stores the attachment data of a Message instance.
     Should the attachment be an embeded message, the

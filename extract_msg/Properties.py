@@ -6,7 +6,7 @@ from extract_msg.utils import divide, fromTimeStamp, msgEpoch, properHex
 
 
 
-class Properties:
+class Properties(object):
     """
     Parser for msg properties files.
     """

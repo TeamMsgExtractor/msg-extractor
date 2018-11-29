@@ -4,7 +4,7 @@ from extract_msg.properties import Properties
 
 
 
-class Recipient:
+class Recipient(object):
     """
     Contains the data of one or the recipients in an msg file.
     """

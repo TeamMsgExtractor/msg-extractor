@@ -4,7 +4,7 @@ from extract_msg.utils import properHex
 
 
 
-class Prop:
+class Prop(object):
     """
     Class to contain the data for a single property.
 
