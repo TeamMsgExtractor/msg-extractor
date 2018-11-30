@@ -10,7 +10,7 @@ class Recipient(object):
     """
 
     def __init__(self, num, msg):
-		object.__init__(self)
+        object.__init__(self)
         self.__msg = msg  # Allows calls to original msg file
         self.__dir = '__recip_version1.0_#' + num.rjust(8, '0')
         self.__props = Properties(msg._getStream(self.__dir + '/__properties_version1.0'), constants.TYPE_RECIPIENT)
