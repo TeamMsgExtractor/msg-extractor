@@ -12,7 +12,7 @@ class Properties(object):
     """
 
     def __init__(self, stream, type=None, skip=None):
-		object.__init__(self)
+        object.__init__(self)
         self.__stream = stream
         self.__pos = 0
         self.__len = len(stream)
