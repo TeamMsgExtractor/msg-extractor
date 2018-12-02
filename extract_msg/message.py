@@ -9,6 +9,7 @@ from extract_msg import constants
 from extract_msg.attachment import Attachment
 from extract_msg.debug import debug
 from extract_msg.properties import Properties
+from extract_msg.recipient import Recipient
 from extract_msg.utils import addNumToDir, encode, has_len, stri, windowsUnicode, xstr
 from imapclient.imapclient import decode_utf7
 
@@ -199,14 +200,14 @@ class Message(olefile.OleFileIO):
                 self._header = EmailParser().parsestr(headerText)
                 self._header['date'] = self.date
             else:
-                header = EmailParser().parsestr()
-                header.add_header('date', self.date)
-                header.add_header('from', self.sender)
-                header.add_header('to', self.to)
-                header.add_header('cc', self.cc)
-                header.add_header('message-id', self.message_id)
+                header = EmailParser().parsestr('')
+                header.add_header('Date', self.date)
+                header.add_header('From', self.sender)
+                header.add_header('To', self.to)
+                header.add_header('Cc', self.cc)
+                header.add_header('Message-Id', self.message_id)
                 #TODO find authentication results outside of header
-                header.add_header('authenitcation-results', None)
+                header.add_header('Authenitcation-Results', None)
 
                 self._header = header
             return self._header
