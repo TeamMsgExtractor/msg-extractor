@@ -5,3 +5,5 @@
 .idea/*
 # Ignore pypi creds file
 .pypirc
+*.pyc
+*.pyo
