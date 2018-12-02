@@ -290,10 +290,11 @@ class Message(olefile.OleFileIO):
             return self._to
         except AttributeError:
             # Check header first
+            headerResult = None
             if self.headerInit():
                 headerResult = self.header['to']
-                if headerResult is not None:
-                    self._to = headerResult
+            if headerResult is not None:
+                self._to = headerResult
             else:
                 f = []
                 for x in self.recipients:
@@ -340,10 +341,11 @@ class Message(olefile.OleFileIO):
             return self._cc
         except AttributeError:
             # Check header first
+			headerResult = None
             if self.headerInit():
                 headerResult = self.header['cc']
-                if headerResult is not None:
-                    self._cc = headerResult
+            if headerResult is not None:
+                self._cc = headerResult
             else:
                 f = []
                 for x in self.recipients:
