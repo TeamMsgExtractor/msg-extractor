@@ -13,6 +13,44 @@ import struct
 # WHAT YOU ARE DOING! FAILURE TO FOLLOW THIS INSTRUCTION
 # CAN AND WILL BREAK THIS SCRIPT!
 
+FIXED_LENGTH_PROPS = (
+    0x0000,
+    0x0001,
+    0x0002,
+    0x0003,
+    0x0004,
+    0x0005,
+    0x0006,
+    0x0007,
+    0x000A,
+    0x000B,
+    0x0014,
+    0x0040,
+    0x0048,
+)
+
+VARIABLE_LENGTH_PROPS = (
+    0x000D,
+    0x001E,
+    0x001F,
+    0x00FB,
+    0x00FD,
+    0x00FE,
+    0X0102,
+    0x1002,
+    0x1003,
+    0x1004,
+    0x1005,
+    0x1006,
+    0x1007,
+    0x1014,
+    0x101E,
+    0x101F,
+    0x1040,
+    0x1048,
+    0x1102,
+)
+
 INTELLIGENCE_DUMB = 0
 INTELLIGENCE_SMART = 1
 INTELLIGENCE_DICT = {
@@ -44,8 +82,12 @@ RECIPIENT_DICT = {
 
 # Define pre-compiled structs to make unpacking slightly faster
 ST1 = struct.Struct('<8x4I')
-ST2 = struct.Struct('<H2xI8s')
+ST2 = struct.Struct('<H2xI8x')
 ST3 = struct.Struct('<Q')
+
+STFIX = struct.Struct('<8x8s')
+STVAR = struct.Struct('<8xi4s')
+
 STI16 = struct.Struct('<h6x')
 STI32 = struct.Struct('<i4x')
 STI64 = struct.Struct('<q')
@@ -63,7 +105,7 @@ PTYPES = {
     0x0007: 'PtypFloatingTime',
     0x000A: 'PtypErrorCode',
     0x000B: 'PtypBoolean',
-    0x000D: 'PtypObject/PtypEmbeddedTable',
+    0x000D: 'PtypObject/PtypEmbeddedTable/Storage',
     0x0014: 'PtypInteger64',  # Signed longlong
     0x001E: 'PtypString8',
     0x001F: 'PtypString',
@@ -300,7 +342,7 @@ PROPERTIES = {
     '3FFC': 'To email (uncertain)',
     '403D': 'To adrtype (uncertain)',
     '403E': 'To email (uncertain)',
-    '5FF6': 'To (uncertain)'
+    '5FF6': 'To (uncertain)',
 }
 
 

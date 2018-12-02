@@ -1,7 +1,7 @@
 import copy
 from extract_msg import constants
 from extract_msg.debug import debug
-from extract_msg.prop import Prop
+from extract_msg.prop import create_prop
 from extract_msg.utils import divide, fromTimeStamp, msgEpoch, properHex
 
 
@@ -47,7 +47,7 @@ class Properties(object):
                     skip = 32
         streams = divide(self.__stream[skip:], 16)
         for st in streams:
-            a = Prop(st)
+            a = create_prop(st)
             self.__props[a.name] = a
         self.__pl = len(self.__props)
 
@@ -59,6 +59,7 @@ class Properties(object):
             return self.__props[name]
         except KeyError:
             if debug:
+                # DEBUG
                 print('DEBUG:')
                 print(properHex(self.__stream))
                 print(self.__props)
@@ -126,6 +127,7 @@ class Properties(object):
                 self.__date = fromTimeStamp(msgEpoch(self.get('30070040').value)).__format__(
                     '%a, %d %b %Y %H:%M:%S GMT %z')
             else:
+                # DEBUG
                 print('Warning: Error retrieving date. Setting as "Unknown". Please send the following data to developer:\n--------------------')
                 print(properHex(self.__stream))
                 print(self.keys())

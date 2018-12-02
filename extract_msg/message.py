@@ -19,6 +19,7 @@ class Message(olefile.OleFileIO):
     """
     Parser for Microsoft Outlook message files.
     """
+
     def __init__(self, path, prefix='', attachmentClass=Attachment, filename=None):
         """
         :param path: path to the msg file in the system or is the raw msg file.
@@ -33,6 +34,7 @@ class Message(olefile.OleFileIO):
         """
         # WARNING DO NOT MANUALLY MODIFY PREFIX. Let the program set it.
         if debug:
+            # DEBUG
             print('DEBUG: prefix: {}'.format(prefix))
         self.__path = path
         self.__attachmentClass = attachmentClass
@@ -43,7 +45,7 @@ class Message(olefile.OleFileIO):
                 try:
                     prefix = '/'.join(prefix)
                 except:
-                    raise TypeException('Invalid prefix type: ' + str(type(prefix)) +
+                    raise TypeError('Invalid prefix type: ' + str(type(prefix)) +
                         '\n(This was probably caused by you setting it manually).')
             prefix = prefix.replace('\\', '/')
             g = prefix.split("/")
@@ -69,12 +71,12 @@ class Message(olefile.OleFileIO):
         # TODO have each function check for initialization of needed data so these
         # lines will be unnecessary.
         self.mainProperties
+        self.header
         self.recipients
         self.attachments
         self.to
         self.cc
         self.sender
-        self.header
         self.date
         self.__crlf = '\n'  # This variable keeps track of what the new line character should be
         self.body
@@ -139,6 +141,7 @@ class Message(olefile.OleFileIO):
         asciiVersion = self._getStream(filename + '001E', prefix)
         unicodeVersion = windowsUnicode(self._getStream(filename + '001F', prefix))
         if debug:
+            # DEBUG
             print('DEBUG: _getStringSteam called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
                 filename, asciiVersion != None, unicodeVersion != None))
         if asciiVersion is None:
@@ -574,9 +577,8 @@ class Message(olefile.OleFileIO):
                     filename = 'contents'
 
                 # Save contents of directory
-                f = open(filename, 'wb')
-                f.write(self._getStream(dir_))
-                f.close()
+                with open(filename, 'wb') as f:
+                    f.write(self._getStream(dir_))
 
                 # Return to base directory
                 os.chdir(sysRawDir)

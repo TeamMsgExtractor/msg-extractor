@@ -23,6 +23,9 @@ class Attachment(object):
         object.__init__(self)
         self.__msg = msg
         self.__dir = dir_
+        self.__props = Properties(
+            self.msg._getStream(self.msg.prefixList + [self.__dir, '__properties_version1.0']),
+            constants.TYPE_ATTACHMENT)
         # Get long filename
         self.__longFilename = msg._getStringStream([dir_, '__substg1.0_3707'])
 
@@ -43,6 +46,7 @@ class Attachment(object):
                         'Current version of extract_msg does not support extraction of containers that are not embeded msg files.')
                     # TODO add implementation
                 else:
+                    # DEBUG
                     print('DEBUG: Debugging is true, ignoring NotImplementedError and printing debug info...')
                     print('DEBUG: _dir = {}'.format(_dir))
                     print('DEBUG: Writing properties stream to output:')
@@ -58,7 +62,7 @@ class Attachment(object):
                 self.__type = 'msg'
                 self.__data = msg.__class__(self.msg.path, self.__prefix, self.__class__)
         else:
-            raise Exception('Unknown file type.')
+            raise TypeError('Unknown attachment type.')
 
     def save(self, contentId=False, json=False, useFileName=False, raw=False, customPath=None, customFilename=None):
         # Check if the user has specified a custom filename
@@ -142,13 +146,7 @@ class Attachment(object):
         """
         Returns the Properties instance of the attachment.
         """
-        try:
-            return self.__props
-        except AttributeError:
-            self.__props = Properties(
-                self.msg._getStream(self.msg.prefixList + [self.__dir, '__properties_version1.0']),
-                constants.TYPE_ATTACHMENT)
-            return self.__props
+        return self.__props
 
     @property
     def shortFilename(self):

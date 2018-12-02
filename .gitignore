@@ -7,3 +7,4 @@
 .pypirc
 *.pyc
 *.pyo
+__pycache__/

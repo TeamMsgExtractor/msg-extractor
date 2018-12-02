@@ -74,7 +74,7 @@ else:  # Python 2
 
 def addNumToDir(dirName):
     """
-    Attempt to create the directory with a '(n)' appended
+    Attempt to create the directory with a '(n)' appended.
     """
     for i in range(2, 100):
         try:
@@ -136,6 +136,7 @@ def parse_type(_type, stream):
         pass;
     elif _type == 0x0001:  # PtypNull
         if value != b'\x00\x00\x00\x00\x00\x00\x00\x00':
+            # DEBUG
             print('Warning: Property type is PtypNull, but is not equal to 0.')
         value = None
     elif _type == 0x0002:  # PtypInteger16

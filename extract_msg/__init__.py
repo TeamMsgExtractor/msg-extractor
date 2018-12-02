@@ -2,6 +2,13 @@
 # -*- coding: latin-1 -*-
 # Date Format: YYYY-MM-DD
 
+"""
+extract_msg:
+    Extracts emails and attachments saved in Microsoft Outlook's .msg files
+
+https://github.com/mattgwwalker/msg-extractor
+"""
+
 # --- LICENSE -----------------------------------------------------------------
 #
 #    Copyright 2013 Matthew Walker
@@ -20,15 +27,14 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 __author__ = 'Matthew Walker & The Elemental of Creation'
-__date__ = '2018-05-22'
-__version__ = '0.20.3'
+__date__ = '2018-12-04'
+__version__ = '0.20.6'
 
 from extract_msg import constants
-from extract_msg.__doc__ import __doc__
 from extract_msg.attachment import Attachment
 from extract_msg.debug import debug
 from extract_msg.message import Message
-from extract_msg.prop import Prop
+from extract_msg.prop import create_prop
 from extract_msg.properties import Properties
 from extract_msg.recipient import Recipient
 from extract_msg.utils import parse_type, properHex
