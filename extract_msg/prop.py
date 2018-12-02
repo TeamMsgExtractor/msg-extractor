@@ -88,7 +88,7 @@ class FixedLengthProp(PropBase):
 
     def __init__(self, string):
         super(FixedLengthProp, self).__init__(string)
-        self.__value = self.parse_type(self.type, constants.STFIX.unpack(string))
+        self.__value = self.parse_type(self.type, constants.STFIX.unpack(string)[0])
 
     def parse_type(self, _type, stream):
         """
