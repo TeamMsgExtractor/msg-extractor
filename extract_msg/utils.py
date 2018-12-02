@@ -1,3 +1,7 @@
+"""
+Utility functions of extract_msg.
+"""
+
 import datetime
 import os
 import sys

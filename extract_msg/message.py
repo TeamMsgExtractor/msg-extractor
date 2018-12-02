@@ -15,6 +15,9 @@ from imapclient.imapclient import decode_utf7
 
 
 class Message(olefile.OleFileIO):
+	"""
+	Parser for Microsoft Outlook message files.
+	"""
     def __init__(self, path, prefix='', attachmentClass=Attachment, filename=None):
         """
         :param path: path to the msg file in the system or is the raw msg file.

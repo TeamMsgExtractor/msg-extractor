@@ -1,3 +1,9 @@
+"""
+The constants used in extract_msg. If you modify any of these
+without explicit instruction to do so from one of the
+contributers, please do not complain about bugs.
+"""
+
 import struct
 
 

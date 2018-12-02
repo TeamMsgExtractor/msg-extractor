@@ -6,7 +6,7 @@ from extract_msg.properties import Properties
 
 class Recipient(object):
     """
-    Contains the data of one or the recipients in an msg file.
+    Contains the data of one of the recipients in an msg file.
     """
 
     def __init__(self, num, msg):
