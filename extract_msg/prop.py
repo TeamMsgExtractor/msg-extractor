@@ -151,13 +151,13 @@ class VariableLengthProp(PropBase):
     """
 
     def __init__(self, string):
-        super(FixedLengthProp, self).__init__(string)
-        self.__length, self.__reserved = contants.STVAR.unpack(string)
+        super(VariableLengthProp, self).__init__(string)
+        self.__length, self.__reserved = constants.STVAR.unpack(string)
         if self.type == 0x001E:
             self.__realLength = self.__length - 1
         elif self.type == 0x001F:
             self.__realLength = self.__length - 2
-        elif selt.type == 0x000D:
+        elif self.type == 0x000D:
             self.__realLength = None
         else:
             self.__realLength = self.__length
