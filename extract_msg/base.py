@@ -1022,12 +1022,12 @@ class Message(OleFile.OleFileIO):
         # TODO have each function check for initialization of needed data so these
         # lines will be unnecessary.
         self.mainProperties
+        self.header
         self.recipients
         self.attachments
         self.to
         self.cc
         self.sender
-        self.header
         self.date
         self.__crlf = '\n'  # This variable keeps track of what the new line character should be
         self.body
