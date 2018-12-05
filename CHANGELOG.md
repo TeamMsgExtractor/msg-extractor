@@ -1,3 +1,7 @@
+**v0.20.8**
+* Fixed a tab issue and parameter type in messages.py
+
+
 **v0.20.7:**
 
 * Separated classes into their own files to make things more manageable.
