@@ -609,4 +609,4 @@ class Message(olefile.OleFileIO):
         Saves only attachments in the same folder.
         """
         for attachment in self.attachments:
-            attachment.save(contentId, json, useFileName, raw, custom)
+            attachment.save(contentId, json, useFileName, raw, customPath)
