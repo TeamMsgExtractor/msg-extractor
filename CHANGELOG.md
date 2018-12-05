@@ -1,4 +1,4 @@
-**v0.20.6:**
+**v0.20.7:**
 
 * Separated classes into their own files to make things more manageable.
 * Placed `__doc__` back inside of `__init__.py`.
