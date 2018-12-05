@@ -1,7 +1,11 @@
 import glob
 import sys
 import traceback
-from extract_msg.base import Message
+from extract_msg import __doc__
+from extract_msg import debug
+from extract_msg import Message
+
+
 
 if __name__ == '__main__':
     if len(sys.argv) <= 1:

@@ -39,7 +39,7 @@ setup(
     author='Matthew Walker & The Elemental of Creation',
     author_email='mattgwwalker@gmail.com, arceusthe@gmail.com',
     license='GPL',
-    #scripts=[main_script],
+    # scripts=[main_script],
     packages=[main_module],
     py_modules=[main_module],
     install_requires=dependencies,
