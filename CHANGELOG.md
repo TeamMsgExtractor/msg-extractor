@@ -1,4 +1,5 @@
-Version 0.20.6:
+**v0.20.6:**
+
 * Separated classes into their own files to make things more manageable.
 * Placed `__doc__` back inside of `__init__.py`.
 * Rewrote the `Prop` class to be two different classes that extend from a base class.
