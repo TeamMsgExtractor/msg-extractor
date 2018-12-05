@@ -1,9 +1,17 @@
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![PyPI3](https://img.shields.io/badge/pypi-0.20.6-blue.svg)](https://pypi.org/project/extract-msg/0.20.6/)
+[![PyPI1](https://img.shields.io/badge/python-2.7+-brightgreen.svg)](https://www.python.org/downloads/release/python-2715/)
+[![PyPI2](https://img.shields.io/badge/python-3.6+-brightgreen.svg)](https://www.python.org/downloads/release/python-367/)
+
+
 msg-extractor
 =============
 
 Extracts emails and attachments saved in Microsoft Outlook's .msg files
 
 The python package extract_msg automates the extraction of key email data (from, to, cc, date, subject, body) and the email's attachments.
+
+* [Changelog](CHANGELOG.md)
 
 Usage
 -----
@@ -12,6 +20,7 @@ Usage
 ```
   python extract_msg example.msg
 ```
+
 
 This will produce a new folder named according to the date, time and subject of the message (for example "2013-07-24_0915 Example").  The email itself can be found inside the new folder along with the attachments.  As of version 0.2, it is capable of extracting both ASCII and Unicode data.
 
@@ -80,7 +89,14 @@ Should you encounter an error that has not already been reported, please do the 
 Installation
 ------------
 
-You can install using pip with:
+You can install using pip:
+
+* Pypi
+```bash
+    pip install extract-msg
+```
+
+* Github
 ```sh
   pip install git+https://github.com/mattgwwalker/msg-extractor
 ```
