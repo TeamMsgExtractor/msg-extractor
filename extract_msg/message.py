@@ -341,7 +341,7 @@ class Message(olefile.OleFileIO):
             return self._cc
         except AttributeError:
             # Check header first
-			headerResult = None
+            headerResult = None
             if self.headerInit():
                 headerResult = self.header['cc']
             if headerResult is not None:
@@ -609,4 +609,4 @@ class Message(olefile.OleFileIO):
         Saves only attachments in the same folder.
         """
         for attachment in self.attachments:
-            attachment.save(contentId, json, useFileName, raw, custom)
+            attachment.save(contentId, json, useFileName, raw, customPath)
