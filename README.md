@@ -15,7 +15,7 @@ Usage
 
 This will produce a new folder named according to the date, time and subject of the message (for example "2013-07-24_0915 Example").  The email itself can be found inside the new folder along with the attachments.  As of version 0.2, it is capable of extracting both ASCII and Unicode data.
 
-The script uses <a href="http://www.decalage.info/python/olefileio">Philippe Lagadec's Python module</a> that reads Microsoft OLE2 files (also called Structured Storage, Compound File Binary Format or Compound Document File Format).  This is the underlying format of Outlook's .msg files.  This library currently supports up to Python 2.7 and 3.4. 
+The script uses <a href="http://www.decalage.info/python/olefileio">Philippe Lagadec's Python module</a> that reads Microsoft OLE2 files (also called Structured Storage, Compound File Binary Format or Compound Document File Format).  This is the underlying format of Outlook's .msg files.  This library currently supports up to Python 2.7 and 3.4.
 
 The script was built using <a href="http://www.fileformat.info/format/outlookmsg/index.htm">Peter Fiskerstrand's documentation of the .msg format</a>.  <a href="http://www.dimastr.com/redemption/utils.htm">Redemption's discussion of the different property types used within Extended MAPI</a> was also useful.  For future reference, I note that Microsoft have opened up <a href="http://msdn.microsoft.com/en-us/library/cc463912%28v=exchg.80%29.aspx">their documentation of the file format</a>.
 
@@ -34,7 +34,7 @@ Joel also added a --use-file-name flag, which allows you to specify that the scr
   python extract_msg --use-file-name example.msg
 ```
 
-Creation also added a --use-content-id flag, which allows you to specify that attachments should be saved under the name of their content id, should they have one.  This can be useful for mathich attachments to the names used in the HTML body, and can be done like so:
+Creation also added a --use-content-id flag, which allows you to specify that attachments should be saved under the name of their content id, should they have one.  This can be useful for matching attachments to the names used in the HTML body, and can be done like so:
 ```
   python extract_msg --use-content-id example.msg
 ```
@@ -47,10 +47,6 @@ Creation also added a --use-content-id flag, which allows you to specify that at
 From there, initialize an instance of the Message class:
 ```
   msg = extract_msg.Message("path/to/msg/file.msg")
-```
-or
-```
-  msg = extract_msg.Message(msg_data_stream)
 ```
 
 Alternatively, if you wish to send a msg binary string instead of a file to the ExtractMsg.Message Method:
@@ -69,7 +65,7 @@ where `CustomAttachmentClass` is your custom class.
 
 
 If you have any questions feel free to contact me, Matthew Walker, at mattgwwalker at gmail.com.
-NOTE: Due to time constraints, <a href="https://github.com/TheElementalOfCreation">The Elemental of Creation</a> has been added as a contributer to help manage the project.  As such, it may be helpful to send emails to arceusthe@gmail.com as well.
+NOTE: Due to time constraints, <a href="https://github.com/TheElementalOfCreation">The Elemental of Creation</a> has been added as a contributor to help manage the project.  As such, it may be helpful to send emails to arceusthe@gmail.com as well.
 
 If you have issues, it would be best to get help for them by opening a new github issue.
 
@@ -103,31 +99,9 @@ Todo
 ------------
 Here is a list of things that are currently on our todo list:
 * Tests (ie. unittest)
-  * Coming in version 0.50
 * Finish writing a usage guide
 * Improve the intelligence of the saving functions
 * Create a Pypi package
 * Provide way to save attachments and messages into a custom location under a custom name
-  * Coming in version 0.21
 * Implement better property handling that will convert each type into a python equivelent if possible
-  * Coming in version 0.30
 * Implement handling of named properties
-
-
-Coming Soon
-------------
-#### Version 0.21 - The Saving Update ####
-* Improves save mechanics of the `Message` class and the `Attachment` class to make saving files to a custom path and/or saving files under a custom name possible
-
-#### Version 0.25 - The Debugger Update ####
-* Make the changing of `ExtractMsg.debug` to `True` output A LOT more information that should help to make bug fixes much faster
-
-#### Version 0.30 - The Intelligence Update ####
-* Majorly increase the intelligence of nearly all of the classes
-
-#### Version 0.50 - The Testing Update ####
-* Added tests for most platforms (win, mac, linux)
-
-#### Version 1.00 - The Release Update ####
-* ExtractMsg is fully ready for its first full release
-
