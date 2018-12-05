@@ -341,7 +341,7 @@ class Message(olefile.OleFileIO):
             return self._cc
         except AttributeError:
             # Check header first
-			headerResult = None
+            headerResult = None
             if self.headerInit():
                 headerResult = self.header['cc']
             if headerResult is not None:
