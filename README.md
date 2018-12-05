@@ -1,4 +1,4 @@
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE.txt)
 [![PyPI3](https://img.shields.io/badge/pypi-0.20.6-blue.svg)](https://pypi.org/project/extract-msg/0.20.6/)
 [![PyPI1](https://img.shields.io/badge/python-2.7+-brightgreen.svg)](https://www.python.org/downloads/release/python-2715/)
 [![PyPI2](https://img.shields.io/badge/python-3.6+-brightgreen.svg)](https://www.python.org/downloads/release/python-367/)
