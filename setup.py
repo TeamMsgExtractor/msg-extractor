@@ -9,7 +9,7 @@ main_module = 'extract_msg'
 # main_script = main_module + '.py'
 
 # read in the description from README
-with open("README.md") as stream:
+with open("README.rst") as stream:
     long_description = stream.read()
 
 # get the version from the ExtractMsg script. This can not be directly
