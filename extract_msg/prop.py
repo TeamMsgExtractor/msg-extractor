@@ -1,5 +1,5 @@
 from extract_msg import constants
-from extract_msg.debug import debug
+from extract_msg.debug import debug, logger
 from extract_msg.utils import properHex
 
 

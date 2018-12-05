@@ -1,5 +1,5 @@
 from extract_msg import constants
-from extract_msg.debug import debug
+from extract_msg.debug import debug, logger
 
 # TODO
 class Named(object):

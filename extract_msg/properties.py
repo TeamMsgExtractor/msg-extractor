@@ -1,6 +1,6 @@
 import copy
 from extract_msg import constants
-from extract_msg.debug import debug
+from extract_msg.debug import debug, logger
 from extract_msg.prop import create_prop
 from extract_msg.utils import divide, fromTimeStamp, msgEpoch, properHex
 

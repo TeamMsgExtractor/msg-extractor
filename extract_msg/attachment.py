@@ -1,7 +1,7 @@
 import random
 import string
 from extract_msg import constants
-from extract_msg.debug import debug
+from extract_msg.debug import debug, logger
 from extract_msg.properties import Properties
 from extract_msg.utils import properHex
 
@@ -47,14 +47,14 @@ class Attachment(object):
                     # TODO add implementation
                 else:
                     # DEBUG
-                    print('DEBUG: Debugging is true, ignoring NotImplementedError and printing debug info...')
-                    print('DEBUG: _dir = {}'.format(_dir))
-                    print('DEBUG: Writing properties stream to output:')
-                    print('DEBUG: --------Start-Properties-Stream--------')
-                    print(properHex(self.props.stream))
-                    print('DEBUG: ---------End-Properties-Stream---------')
-                    print('DEBUG: Writing directory contents to output:')
-                    print('DEBUG: --------Start-Directory-Content--------')
+                    logger.debug('Debugging is true, ignoring NotImplementedError and printing debug info...')
+                    logger.debug('_dir = {}'.format(_dir))
+                    logger.debug('Writing properties stream to output:')
+                    logger.debug('--------Start-Properties-Stream--------\n' \
+                    	properHex(self.props.stream)) \
+                    	'\n---------End-Properties-Stream---------')
+                    print('Writing directory contents to output:')
+                    print('--------Start-Directory-Content--------')
                     for x in msg.listDir(True, True): print(x)
                     print('DEBUG: ---------End-Directory-Content---------')
             else:
