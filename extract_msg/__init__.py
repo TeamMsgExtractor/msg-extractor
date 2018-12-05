@@ -32,7 +32,7 @@ __version__ = '0.20.8'
 
 from extract_msg import constants
 from extract_msg.attachment import Attachment
-from extract_msg.debug import debug
+from extract_msg.debug import debug, logger
 from extract_msg.message import Message
 from extract_msg.prop import create_prop
 from extract_msg.properties import Properties

@@ -51,12 +51,12 @@ class Attachment(object):
                     logger.debug('_dir = {}'.format(_dir))
                     logger.debug('Writing properties stream to output:')
                     logger.debug('--------Start-Properties-Stream--------\n' \
-                    	properHex(self.props.stream)) \
-                    	'\n---------End-Properties-Stream---------')
-                    print('Writing directory contents to output:')
-                    print('--------Start-Directory-Content--------')
-                    for x in msg.listDir(True, True): print(x)
-                    print('DEBUG: ---------End-Directory-Content---------')
+                        properHex(self.props.stream)) \
+                        '\n---------End-Properties-Stream---------')
+                    logger.debug('Writing directory contents to output:')
+                    logger.debug('--------Start-Directory-Content--------')
+                    logger.debug('\n'.join([x for x in msg.listDir(True, True)]))
+                    logger.debug('---------End-Directory-Content---------')
             else:
                 self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
                 self.__type = 'msg'
@@ -90,9 +90,8 @@ class Attachment(object):
             filename = customPath + filename
 
         if self.__type == "data":
-            f = open(filename, 'wb')
-            f.write(self.__data)
-            f.close()
+            with open(filename, 'wb') as f:
+                f.write(self.__data)
         else:
             self.saveEmbededMessage(contentId, json, useFileName, raw, customPath, customFilename)
         return filename

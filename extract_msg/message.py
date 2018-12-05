@@ -7,7 +7,7 @@ import re
 from email.parser import Parser as EmailParser
 from extract_msg import constants
 from extract_msg.attachment import Attachment
-from extract_msg.debug import debug
+from extract_msg.debug import debug, logger
 from extract_msg.properties import Properties
 from extract_msg.recipient import Recipient
 from extract_msg.utils import addNumToDir, encode, has_len, stri, windowsUnicode, xstr
@@ -35,7 +35,7 @@ class Message(olefile.OleFileIO):
         # WARNING DO NOT MANUALLY MODIFY PREFIX. Let the program set it.
         if debug:
             # DEBUG
-            print('DEBUG: prefix: {}'.format(prefix))
+            logger.debug('prefix: {}'.format(prefix))
         self.__path = path
         self.__attachmentClass = attachmentClass
         olefile.OleFileIO.__init__(self, path)
@@ -123,6 +123,7 @@ class Message(olefile.OleFileIO):
             stream = self.openstream(filename)
             return stream.read()
         else:
+            logger.info('Stream "{}" was requested but could not be found. Returning `None`.'.format(filename))
             return None
 
     def _getStringStream(self, filename, prefer='unicode', prefix=True):
@@ -142,7 +143,7 @@ class Message(olefile.OleFileIO):
         unicodeVersion = windowsUnicode(self._getStream(filename + '001F', prefix))
         if debug:
             # DEBUG
-            print('DEBUG: _getStringSteam called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
+            logger.debug('_getStringSteam called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
                 filename, asciiVersion != None, unicodeVersion != None))
         if asciiVersion is None:
             return unicodeVersion
@@ -203,6 +204,7 @@ class Message(olefile.OleFileIO):
                 self._header = EmailParser().parsestr(headerText)
                 self._header['date'] = self.date
             else:
+                logger.info('Header is empty or not found. Header will be generated from other streams.')
                 header = EmailParser().parsestr('')
                 header.add_header('Date', self.date)
                 header.add_header('From', self.sender)
@@ -266,6 +268,7 @@ class Message(olefile.OleFileIO):
                 if headerResult is not None:
                     self._sender = headerResult
                     return headerResult
+                logger.info('Header found, but "sender" is not included. Will be generated from other streams.')
             # Extract from other fields
             text = self._getStringStream('__substg1.0_0C1A')
             email = self._getStringStream('__substg1.0_5D01')
@@ -296,6 +299,7 @@ class Message(olefile.OleFileIO):
             if headerResult is not None:
                 self._to = headerResult
             else:
+                logger.info('Header found, but "to" is not included. Will be generated from other streams.')
                 f = []
                 for x in self.recipients:
                     if x.type & 0x0000000f == 1:
@@ -347,6 +351,7 @@ class Message(olefile.OleFileIO):
             if headerResult is not None:
                 self._cc = headerResult
             else:
+                logger.info('Header found, but "cc" is not included. Will be generated from other streams.')
                 f = []
                 for x in self.recipients:
                     if x.type & 0x0000000f == 2:
@@ -367,8 +372,11 @@ class Message(olefile.OleFileIO):
             return self._message_id
         except AttributeError:
             if self.headerInit():
-                self._message_idself._header['message-id']
+                headerResult = self._header['message-id']
+            if headerResult is not None:
+                self._message_id = headerResult
             else:
+                logger.info('Header found, but "Message-Id" is not included. Will be generated from other streams.')
                 self._message_id = self._getStringStream('__substg1.0_1035')
             return self._message_id
 

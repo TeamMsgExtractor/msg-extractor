@@ -60,9 +60,9 @@ class Properties(object):
         except KeyError:
             if debug:
                 # DEBUG
-                print('DEBUG:')
-                print(properHex(self.__stream))
-                print(self.__props)
+                logger.debug('KeyError exception.')
+                logger.debug(properHex(self.__stream))
+                logger.debug(self.__props)
             raise
 
     def has_key(self, key):
@@ -128,10 +128,10 @@ class Properties(object):
                     '%a, %d %b %Y %H:%M:%S GMT %z')
             else:
                 # DEBUG
-                print('Warning: Error retrieving date. Setting as "Unknown". Please send the following data to developer:\n--------------------')
-                print(properHex(self.__stream))
-                print(self.keys())
-                print('--------------------')
+                logger.warn('Error retrieving date. Setting as "Unknown". Please send the following data to developer:\n--------------------')
+                logger.warn(properHex(self.__stream))
+                logger.warn(self.keys())
+                logger.warn('--------------------')
                 self.__date = 'Unknown'
             return self.__date
 
