@@ -9,7 +9,7 @@ extract_msg:
 https://github.com/mattgwwalker/msg-extractor
 """
 
-# --- LICENSE -----------------------------------------------------------------
+# --- LICENSE.txt -----------------------------------------------------------------
 #
 #    Copyright 2013 Matthew Walker
 #

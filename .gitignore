@@ -1,10 +1,32 @@
+# Mac
 .DS_Store
+
+# build files and folders
 /build/
 *.egg-info/
 /dist/
+/extract_msg.egg-info/
 .idea/*
 # Ignore pypi creds file
 .pypirc
+
+# Runtime artifacts
 *.pyc
 *.pyo
 __pycache__/
+
+# Ignore new .msg files added from testing
+
+/example-msg-files/expected-outputs/
+/example-msg-files/*.msg
+
+# Preserve some of our example files
+!/example-msg-files/expected-outputs/2013-11-18_0026 Test for TIF files/
+!/example-msg-files/expected-outputs/2016-02-23_0657 MSG Test File/
+!/example-msg-files/strangeDate.msg
+!/example-msg-files/unicode.msg
+
+# Reserved Folders
+/output
+/raw
+
