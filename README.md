@@ -1,5 +1,5 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE.txt)
-[![PyPI3](https://img.shields.io/badge/pypi-0.20.8-blue.svg)](https://pypi.org/project/extract-msg/0.20.8/)
+[![PyPI3](https://img.shields.io/badge/pypi-0.20.9-blue.svg)](https://pypi.org/project/extract-msg/0.20.9/)
 [![PyPI1](https://img.shields.io/badge/python-2.7+-brightgreen.svg)](https://www.python.org/downloads/release/python-2715/)
 [![PyPI2](https://img.shields.io/badge/python-3.6+-brightgreen.svg)](https://www.python.org/downloads/release/python-367/)
 
@@ -117,7 +117,6 @@ Here is a list of things that are currently on our todo list:
 * Tests (ie. unittest)
 * Finish writing a usage guide
 * Improve the intelligence of the saving functions
-* Create a Pypi package
 * Provide way to save attachments and messages into a custom location under a custom name
-* Implement better property handling that will convert each type into a python equivelent if possible
+* Implement better property handling that will convert each type into a python equivalent if possible
 * Implement handling of named properties
