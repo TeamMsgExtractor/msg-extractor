@@ -2,6 +2,7 @@
 * [#7](https://github.com/Syncurity/msg-extractor/issues/7) Changed debug code to use logging module.
 * [#](https://github.com/Syncurity/msg-extractor/issues/) Added `header_dict` property to the `Message` class.
 * General minor bug fixes
+* Fixed a section in the `Recipient` class that I have no idea why I did it that way. If errors start randomly occurring with it, this fix is why.
 
 **v0.20.8**
 * Fixed a tab issue and parameter type in `messages.py`.
