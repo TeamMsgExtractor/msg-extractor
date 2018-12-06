@@ -1,12 +1,21 @@
 from extract_msg import constants
-from extract_msg.debug import debug, logger
+from extract_msg.debug import _debug, logger
+from extract_msg.utils import divide#, round_up
 
-# TODO move this function to utils:
+# TODO move this function to utils.py:
 def round_up(inp, mult):
     """
     Rounds :param inp: up to the nearest multiple of :param mult:.
     """
     return inp + (mult - inp) % mult
+
+# Temporary class code to make references like `constants.CONSTANT` work:
+class constants(object):
+    # Structs used by named.py
+    STNP_NAM = struct.Struct('<i')
+    STNP_ENT = struct.Struct('<IHH')
+    # TODO move these out of the class and into constants.py:
+
 
 
 
@@ -22,6 +31,15 @@ class Named(object):
         nl = len(names_stream)
         # TODO guid stream parsing
         # TODO entry_stream parsing
+        entries = []
+        for x in divide(entry_stream, 8):
+            tmp = constants.STNP_ENT.unpack(x)
+            entries.append({
+                'id': tmp[0],
+                'pid': tmp[2],
+                'guid': tmp[1] >> 1,
+                'pkind': tmp[1] & 1,
+                })
         names = []
         pos = 0
         while pos < nl:

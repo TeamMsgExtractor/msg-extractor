@@ -2,7 +2,7 @@ import glob
 import sys
 import traceback
 from extract_msg import __doc__
-from extract_msg import debug
+from extract_msg import _debug
 from extract_msg import Message
 
 
@@ -48,7 +48,7 @@ To turn on the printing of debugging information, use the flag '--debug'
             useContentId = True
 
         if rawFilename == '--debug':
-            debug = True
+            _debug = True
 
         for filename in glob.glob(rawFilename):
             msg = Message(filename)

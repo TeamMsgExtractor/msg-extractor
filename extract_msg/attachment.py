@@ -1,7 +1,7 @@
 import random
 import string
 from extract_msg import constants
-from extract_msg.debug import debug, logger
+from extract_msg.debug import _debug, logger
 from extract_msg.properties import Properties
 from extract_msg.utils import properHex
 
@@ -41,7 +41,7 @@ class Attachment(object):
             self.__data = msg._getStream([dir_, '__substg1.0_37010102'])
         elif msg.Exists([dir_, '__substg1.0_3701000D']):
             if (self.props['37050003'].value & 0x7) != 0x5:
-                if not debug:
+                if not _debug:
                     raise NotImplementedError(
                         'Current version of extract_msg does not support extraction of containers that are not embeded msg files.')
                     # TODO add implementation
@@ -50,8 +50,8 @@ class Attachment(object):
                     logger.debug('Debugging is true, ignoring NotImplementedError and printing debug info...')
                     logger.debug('_dir = {}'.format(_dir))
                     logger.debug('Writing properties stream to output:')
-                    logger.debug('--------Start-Properties-Stream--------\n' \
-                        properHex(self.props.stream)) \
+                    logger.debug('--------Start-Properties-Stream--------\n' +
+                        properHex(self.props.stream) +
                         '\n---------End-Properties-Stream---------')
                     logger.debug('Writing directory contents to output:')
                     logger.debug('--------Start-Directory-Content--------')

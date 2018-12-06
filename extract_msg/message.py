@@ -7,7 +7,7 @@ import re
 from email.parser import Parser as EmailParser
 from extract_msg import constants
 from extract_msg.attachment import Attachment
-from extract_msg.debug import debug, logger
+from extract_msg.debug import _debug, logger
 from extract_msg.properties import Properties
 from extract_msg.recipient import Recipient
 from extract_msg.utils import addNumToDir, encode, has_len, stri, windowsUnicode, xstr
@@ -33,7 +33,7 @@ class Message(olefile.OleFileIO):
         :param filename: optional, the filename to be used by default when saving.
         """
         # WARNING DO NOT MANUALLY MODIFY PREFIX. Let the program set it.
-        if debug:
+        if _debug:
             # DEBUG
             logger.debug('prefix: {}'.format(prefix))
         self.__path = path
@@ -141,7 +141,7 @@ class Message(olefile.OleFileIO):
 
         asciiVersion = self._getStream(filename + '001E', prefix)
         unicodeVersion = windowsUnicode(self._getStream(filename + '001F', prefix))
-        if debug:
+        if _debug:
             # DEBUG
             logger.debug('_getStringSteam called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
                 filename, asciiVersion != None, unicodeVersion != None))
@@ -218,7 +218,7 @@ class Message(olefile.OleFileIO):
             return self._header
 
     @property
-    def header_dict:
+    def header_dict(self):
         """
         Returns a dictionary of the entries in the header
         """

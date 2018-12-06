@@ -7,4 +7,11 @@ import logging
 
 
 
-debug = False
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
+_debug = False
+
+def toggle_debug():
+	global _debug
+	_debug = bool(_debug ^ 1)
