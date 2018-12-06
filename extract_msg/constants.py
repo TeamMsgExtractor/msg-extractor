@@ -81,15 +81,14 @@ RECIPIENT_DICT = {
 }
 
 # Define pre-compiled structs to make unpacking slightly faster
+# General structs
 ST1 = struct.Struct('<8x4I')
 ST2 = struct.Struct('<H2xI8x')
 ST3 = struct.Struct('<Q')
-
+# Structs used by prop.py
 STFIX = struct.Struct('<8x8s')
 STVAR = struct.Struct('<8xi4s')
-
-STNP_NAM = struct.Struct('<i')
-
+# Structs to help with email type to python type conversions
 STI16 = struct.Struct('<h6x')
 STI32 = struct.Struct('<i4x')
 STI64 = struct.Struct('<q')
