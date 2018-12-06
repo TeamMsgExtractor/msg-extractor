@@ -1,5 +1,10 @@
+**v0.20.9**
+* [#7](https://github.com/Syncurity/msg-extractor/issues/7) Changed debug code to use logging module.
+* [#](https://github.com/Syncurity/msg-extractor/issues/) Added `header_dict` property to the `Message` class.
+* General minor bug fixes
+
 **v0.20.8**
-* Fixed a tab issue and parameter type in messages.py
+* Fixed a tab issue and parameter type in `messages.py`.
 
 
 **v0.20.7:**
@@ -17,4 +22,4 @@
 * Fixed a major bug that was causing the header to generate after things like "to" and "cc" which would force those fields to not use the header.
 * Fixed the debug variable.
 * Fixed many small bugs in many of the classes.
-* [#11](https://github.com/Syncurity/msg-extractor/issues/11) Various loose ends to enhance the workflow in the repo. 
+* [#11](https://github.com/Syncurity/msg-extractor/issues/11) Various loose ends to enhance the workflow in the repo.
