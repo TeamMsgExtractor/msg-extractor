@@ -217,6 +217,18 @@ class Message(olefile.OleFileIO):
                 self._header = header
             return self._header
 
+    @property
+    def header_dict:
+        """
+        Returns a dictionary of the entries in the header
+        """
+        try:
+            return self._header_dict
+        except AttributeError:
+            self._header_dict = dict(self.header._header)
+            self._header_dict.pop('Received')
+            return self._header_dict
+
     def headerInit(self):
         """
         Checks whether the header has been initialized.
