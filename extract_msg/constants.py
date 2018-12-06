@@ -88,6 +88,8 @@ ST3 = struct.Struct('<Q')
 STFIX = struct.Struct('<8x8s')
 STVAR = struct.Struct('<8xi4s')
 
+STNP_NAM = struct.Struct('<i')
+
 STI16 = struct.Struct('<h6x')
 STI32 = struct.Struct('<i4x')
 STI64 = struct.Struct('<q')
