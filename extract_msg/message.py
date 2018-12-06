@@ -472,7 +472,7 @@ class Message(olefile.OleFileIO):
             self._recipients = []
 
             for recipientDir in recipientDirs:
-                self._recipients.append(Recipient(recipientDir.split('#')[-1], self))
+                self._recipients.append(Recipient(recipientDir, self))
 
             return self._recipients
 
