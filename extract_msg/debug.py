@@ -13,5 +13,9 @@ logger.addHandler(logging.NullHandler())
 _debug = False
 
 def toggle_debug():
-	global _debug
-	_debug = bool(_debug ^ 1)
+    global _debug
+    _debug = bool(_debug ^ 1)
+    if _debug:
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.INFO)
