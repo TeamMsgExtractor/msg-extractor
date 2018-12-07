@@ -31,10 +31,14 @@ __date__ = '2018-12-05'
 __version__ = '0.20.9'
 
 from extract_msg import constants
+from extract_msg import debug
 from extract_msg.attachment import Attachment
-from extract_msg.debug import _debug, logger, toggle_debug
 from extract_msg.message import Message
 from extract_msg.prop import create_prop
 from extract_msg.properties import Properties
 from extract_msg.recipient import Recipient
 from extract_msg.utils import parse_type, properHex
+
+_debug = debug._debug
+logger = debug.logger
+toggle_debug = debug.toggle_debug

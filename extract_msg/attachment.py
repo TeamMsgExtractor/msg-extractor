@@ -1,7 +1,7 @@
 import random
 import string
 from extract_msg import constants
-from extract_msg.debug import _debug, logger
+from extract_msg import debug
 from extract_msg.properties import Properties
 from extract_msg.utils import properHex
 
@@ -41,22 +41,22 @@ class Attachment(object):
             self.__data = msg._getStream([dir_, '__substg1.0_37010102'])
         elif msg.Exists([dir_, '__substg1.0_3701000D']):
             if (self.props['37050003'].value & 0x7) != 0x5:
-                if not _debug:
+                if not debug._debug:
                     raise NotImplementedError(
                         'Current version of extract_msg does not support extraction of containers that are not embeded msg files.')
                     # TODO add implementation
                 else:
                     # DEBUG
-                    logger.debug('Debugging is true, ignoring NotImplementedError and printing debug info...')
-                    logger.debug('_dir = {}'.format(_dir))
-                    logger.debug('Writing properties stream to output:')
-                    logger.debug('--------Start-Properties-Stream--------\n' +
+                    debug.logger.debug('Debugging is true, ignoring NotImplementedError and printing debug info...')
+                    debug.logger.debug('dir_ = {}'.format(dir_))
+                    debug.logger.debug('Writing properties stream to output:')
+                    debug.logger.debug('--------Start-Properties-Stream--------\n' +
                         properHex(self.props.stream) +
                         '\n---------End-Properties-Stream---------')
-                    logger.debug('Writing directory contents to output:')
-                    logger.debug('--------Start-Directory-Content--------')
-                    logger.debug('\n'.join([x for x in msg.listDir(True, True)]))
-                    logger.debug('---------End-Directory-Content---------')
+                    debug.logger.debug('Writing directory contents to output:')
+                    debug.logger.debug('--------Start-Directory-Content--------')
+                    debug.logger.debug('\n'.join([repr(x) for x in msg.listDir(True, True)]))
+                    debug.logger.debug('---------End-Directory-Content---------')
             else:
                 self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
                 self.__type = 'msg'

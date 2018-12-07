@@ -1,5 +1,5 @@
 from extract_msg import constants
-from extract_msg.debug import _debug, logger
+from extract_msg import debug
 from extract_msg.utils import divide#, round_up
 
 # TODO move this function to utils.py:

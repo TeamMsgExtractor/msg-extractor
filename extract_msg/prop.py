@@ -1,5 +1,5 @@
 from extract_msg import constants
-from extract_msg.debug import _debug, logger
+from extract_msg import debug
 from extract_msg.utils import properHex
 
 
@@ -11,7 +11,7 @@ def create_prop(string):
     else:
         if temp not in constants.VARIABLE_LENGTH_PROPS:
             # DEBUG
-            logger.warn('Unknown property type: {}'.format(properHex(temp)))
+            debug.logger.warn('Unknown property type: {}'.format(properHex(temp)))
         return VariableLengthProp(string)
 
 
@@ -105,7 +105,7 @@ class FixedLengthProp(PropBase):
         elif _type == 0x0001:  # PtypNull
             if value != b'\x00\x00\x00\x00\x00\x00\x00\x00':
                 # DEBUG
-                logger.warn('Property type is PtypNull, but is not equal to 0.')
+                debug.logger.warn('Property type is PtypNull, but is not equal to 0.')
             value = None
         elif _type == 0x0002:  # PtypInteger16
             value = constants.STI16.unpack(value)[0]
