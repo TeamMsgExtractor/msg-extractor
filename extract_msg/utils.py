@@ -192,3 +192,10 @@ def parse_type(_type, stream):
         # TODO parsing for `multiple` types
         pass;
     return value;
+
+def getPyFileDir(_file_):
+    """
+    Takes in the value of `__file__` from a python script and get the
+    containing directory. This function assumes the path is correct.
+    """
+    return '/'.join(_file_.replace('\\', '/').split('/')[:-1])

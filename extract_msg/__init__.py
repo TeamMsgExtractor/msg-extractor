@@ -39,6 +39,7 @@ from extract_msg.properties import Properties
 from extract_msg.recipient import Recipient
 from extract_msg.utils import parse_type, properHex
 
-_debug = debug._debug
+
+
 logger = debug.logger
 toggle_debug = debug.toggle_debug
