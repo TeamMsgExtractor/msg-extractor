@@ -3,6 +3,7 @@ Utility functions of extract_msg.
 """
 
 import datetime
+import logging
 import os
 import sys
 import tzlocal
@@ -10,6 +11,9 @@ from extract_msg import constants
 from extract_msg import debug
 
 
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 if sys.version_info[0] >= 3:  # Python 3
     stri = (str,)
@@ -138,7 +142,7 @@ def parse_type(_type, stream):
     elif _type == 0x0001:  # PtypNull
         if value != b'\x00\x00\x00\x00\x00\x00\x00\x00':
             # DEBUG
-            debug.logger.warn('Property type is PtypNull, but is not equal to 0.')
+            logger.warn('Property type is PtypNull, but is not equal to 0.')
         value = None
     elif _type == 0x0002:  # PtypInteger16
         value = constants.STI16.unpack(value)[0]
@@ -192,10 +196,3 @@ def parse_type(_type, stream):
         # TODO parsing for `multiple` types
         pass;
     return value;
-
-def getPyFileDir(_file_):
-    """
-    Takes in the value of `__file__` from a python script and get the
-    containing directory. This function assumes the path is correct.
-    """
-    return '/'.join(_file_.replace('\\', '/').split('/')[:-1])

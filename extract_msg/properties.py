@@ -1,10 +1,14 @@
 import copy
+import logging
 from extract_msg import constants
 from extract_msg import debug
 from extract_msg.prop import create_prop
 from extract_msg.utils import divide, fromTimeStamp, msgEpoch, properHex
 
 
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 class Properties(object):
     """
@@ -60,9 +64,9 @@ class Properties(object):
         except KeyError:
             if debug._debug:
                 # DEBUG
-                debug.logger.debug('KeyError exception.')
-                debug.logger.debug(properHex(self.__stream))
-                debug.logger.debug(self.__props)
+                logger.debug('KeyError exception.')
+                logger.debug(properHex(self.__stream))
+                logger.debug(self.__props)
             raise
 
     def has_key(self, key):
@@ -128,10 +132,10 @@ class Properties(object):
                     '%a, %d %b %Y %H:%M:%S GMT %z')
             else:
                 # DEBUG
-                debug.logger.warn('Error retrieving date. Setting as "Unknown". Please send the following data to developer:\n--------------------')
-                debug.logger.warn(properHex(self.__stream))
-                debug.logger.warn(self.keys())
-                debug.logger.warn('--------------------')
+                logger.warn('Error retrieving date. Setting as "Unknown". Please send the following data to developer:\n--------------------')
+                logger.warn(properHex(self.__stream))
+                logger.warn(self.keys())
+                logger.warn('--------------------')
                 self.__date = 'Unknown'
             return self.__date
 

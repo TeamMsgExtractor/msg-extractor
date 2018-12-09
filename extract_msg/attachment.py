@@ -1,3 +1,4 @@
+import logging
 import random
 import string
 from extract_msg import constants
@@ -6,6 +7,9 @@ from extract_msg.properties import Properties
 from extract_msg.utils import properHex
 
 
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 class Attachment(object):
     """
@@ -47,16 +51,16 @@ class Attachment(object):
                     # TODO add implementation
                 else:
                     # DEBUG
-                    debug.logger.debug('Debugging is true, ignoring NotImplementedError and printing debug info...')
-                    debug.logger.debug('dir_ = {}'.format(dir_))
-                    debug.logger.debug('Writing properties stream to output:')
-                    debug.logger.debug('--------Start-Properties-Stream--------\n' +
+                    logger.debug('Debugging is true, ignoring NotImplementedError and printing debug info...')
+                    logger.debug('dir_ = {}'.format(dir_))
+                    logger.debug('Writing properties stream to output:')
+                    logger.debug('--------Start-Properties-Stream--------\n' +
                         properHex(self.props.stream) +
                         '\n---------End-Properties-Stream---------')
-                    debug.logger.debug('Writing directory contents to output:')
-                    debug.logger.debug('--------Start-Directory-Content--------')
-                    debug.logger.debug('\n'.join([repr(x) for x in msg.listDir(True, True)]))
-                    debug.logger.debug('---------End-Directory-Content---------')
+                    logger.debug('Writing directory contents to output:')
+                    logger.debug('--------Start-Directory-Content--------')
+                    logger.debug('\n'.join([repr(x) for x in msg.listDir(True, True)]))
+                    logger.debug('---------End-Directory-Content---------')
             else:
                 self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
                 self.__type = 'msg'

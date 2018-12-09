@@ -1,6 +1,12 @@
+import logging
 from extract_msg import constants
 from extract_msg import debug
 from extract_msg.utils import divide#, round_up
+
+
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 # TODO move this function to utils.py:
 def round_up(inp, mult):

@@ -1,6 +1,7 @@
 import copy
 import email.utils
 import json
+import logging
 import olefile
 import os
 import re
@@ -14,6 +15,9 @@ from extract_msg.utils import addNumToDir, encode, has_len, stri, windowsUnicode
 from imapclient.imapclient import decode_utf7
 
 
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 class Message(olefile.OleFileIO):
     """
@@ -35,7 +39,7 @@ class Message(olefile.OleFileIO):
         # WARNING DO NOT MANUALLY MODIFY PREFIX. Let the program set it.
         if debug._debug:
             # DEBUG
-            debug.logger.debug('prefix: {}'.format(prefix))
+            logger.debug('prefix: {}'.format(prefix))
         self.__path = path
         self.__attachmentClass = attachmentClass
         olefile.OleFileIO.__init__(self, path)
@@ -123,7 +127,7 @@ class Message(olefile.OleFileIO):
             stream = self.openstream(filename)
             return stream.read()
         else:
-            debug.logger.info('Stream "{}" was requested but could not be found. Returning `None`.'.format(filename))
+            logger.info('Stream "{}" was requested but could not be found. Returning `None`.'.format(filename))
             return None
 
     def _getStringStream(self, filename, prefer='unicode', prefix=True):
@@ -143,7 +147,7 @@ class Message(olefile.OleFileIO):
         unicodeVersion = windowsUnicode(self._getStream(filename + '001F', prefix))
         if debug._debug:
             # DEBUG
-            debug.logger.debug('_getStringSteam called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
+            logger.debug('_getStringSteam called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
                 filename, asciiVersion != None, unicodeVersion != None))
         if asciiVersion is None:
             return unicodeVersion
@@ -204,7 +208,7 @@ class Message(olefile.OleFileIO):
                 self._header = EmailParser().parsestr(headerText)
                 self._header['date'] = self.date
             else:
-                debug.logger.info('Header is empty or not found. Header will be generated from other streams.')
+                logger.info('Header is empty or was not found. Header will be generated from other streams.')
                 header = EmailParser().parsestr('')
                 header.add_header('Date', self.date)
                 header.add_header('From', self.sender)
@@ -280,7 +284,7 @@ class Message(olefile.OleFileIO):
                 if headerResult is not None:
                     self._sender = headerResult
                     return headerResult
-                debug.logger.info('Header found, but "sender" is not included. Will be generated from other streams.')
+                logger.info('Header found, but "sender" is not included. Will be generated from other streams.')
             # Extract from other fields
             text = self._getStringStream('__substg1.0_0C1A')
             email = self._getStringStream('__substg1.0_5D01')
@@ -311,7 +315,8 @@ class Message(olefile.OleFileIO):
             if headerResult is not None:
                 self._to = headerResult
             else:
-                debug.logger.info('Header found, but "to" is not included. Will be generated from other streams.')
+                if self.headerInit():
+                    logger.info('Header found, but "to" is not included. Will be generated from other streams.')
                 f = []
                 for x in self.recipients:
                     if x.type & 0x0000000f == 1:
@@ -363,7 +368,8 @@ class Message(olefile.OleFileIO):
             if headerResult is not None:
                 self._cc = headerResult
             else:
-                debug.logger.info('Header found, but "cc" is not included. Will be generated from other streams.')
+                if self.headerInit():
+                    logger.info('Header found, but "cc" is not included. Will be generated from other streams.')
                 f = []
                 for x in self.recipients:
                     if x.type & 0x0000000f == 2:
@@ -383,12 +389,14 @@ class Message(olefile.OleFileIO):
         try:
             return self._message_id
         except AttributeError:
+            headerResult = None
             if self.headerInit():
                 headerResult = self._header['message-id']
             if headerResult is not None:
                 self._message_id = headerResult
             else:
-                debug.logger.info('Header found, but "Message-Id" is not included. Will be generated from other streams.')
+                if self.headerInit():
+                    logger.info('Header found, but "Message-Id" is not included. Will be generated from other streams.')
                 self._message_id = self._getStringStream('__substg1.0_1035')
             return self._message_id
 
