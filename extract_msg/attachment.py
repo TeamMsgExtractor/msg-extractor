@@ -3,7 +3,6 @@ import random
 import string
 
 from extract_msg import constants
-from extract_msg import debug
 from extract_msg.properties import Properties
 from extract_msg.utils import properHex
 

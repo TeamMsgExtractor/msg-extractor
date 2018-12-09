@@ -4,12 +4,12 @@ Utility functions of extract_msg.
 
 import datetime
 import logging
+import json
 import os
 import sys
 import tzlocal
 
 from extract_msg import constants
-
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -210,6 +210,7 @@ def parse_type(_type, stream):
         pass
     return value
 
+
 def setup_logging(default_path=None, default_level=logging.WARN, env_key='EXTRACT_MSG_LOG_CFG'):
     """Setup logging configuration
 
@@ -221,5 +222,43 @@ def setup_logging(default_path=None, default_level=logging.WARN, env_key='EXTRAC
     Returns:
         bool: True if the configuration file was found and applied, False otherwise
     """
+    # Find logging.json if not provided
+    if default_path:
+        default_path = default_path
+    else:
+        default_path = '/home/irflow/irflow-integrations/integrations/logging.json'
 
+    paths = [
+        default_path,
+        '../logging.json',
+    ]
 
+    path = None
+
+    for config_path in paths:
+        if os.path.exists(config_path):
+            path = config_path
+            break
+
+    if path is None:
+        print('Unable to find logging.json configuration file')
+        print('Make sure a valid logging.json in in the extract_msg root directory')
+        print(str(paths[1:]))
+        logging.basicConfig(level=default_level)
+        logger.warning('No logging.json found, using a basic configuration.')
+        return False
+
+    value = os.getenv(env_key, None)
+    if value and os.path.exists(value):
+        path = value
+
+    with open(path, 'rt') as f:
+        config = json.load(f)
+
+    try:
+        logging.config.dictConfig(config)
+    except ValueError as e:
+        print('Failed to find file - make sure your integrations log file is properly configured')
+        print(e)
+
+    return True
