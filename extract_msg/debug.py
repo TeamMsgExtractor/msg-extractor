@@ -7,7 +7,6 @@ import json
 import logging
 import logging.config
 import os
-import sys
 
 
 
@@ -95,8 +94,7 @@ def setup_logging(default_path=None, default_level=logging.WARN, env_key='EXTRAC
                 tmp = getContFileDir(tmp)
                 if not os.path.exists(tmp):
                     os.makedirs(tmp)
-    except:
-        print('except')
+    except Exception:
         pass
     try:
         logging.config.dictConfig(config)

@@ -37,9 +37,7 @@ class Message(olefile.OleFileIO):
         :param filename: optional, the filename to be used by default when saving.
         """
         # WARNING DO NOT MANUALLY MODIFY PREFIX. Let the program set it.
-        if debug._debug:
-            # DEBUG
-            logger.debug('prefix: {}'.format(prefix))
+        logger.debug('prefix: {}'.format(prefix))
         self.__path = path
         self.__attachmentClass = attachmentClass
         olefile.OleFileIO.__init__(self, path)
@@ -145,10 +143,8 @@ class Message(olefile.OleFileIO):
 
         asciiVersion = self._getStream(filename + '001E', prefix)
         unicodeVersion = windowsUnicode(self._getStream(filename + '001F', prefix))
-        if debug._debug:
-            # DEBUG
-            logger.debug('_getStringSteam called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
-                filename, asciiVersion != None, unicodeVersion != None))
+        logger.debug('_getStringSteam called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
+            filename, asciiVersion != None, unicodeVersion != None))
         if asciiVersion is None:
             return unicodeVersion
         elif unicodeVersion is None:

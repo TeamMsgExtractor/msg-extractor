@@ -48,8 +48,8 @@ To turn on the printing of debugging information, use the flag '--debug'
             useContentId = True
 
         if rawFilename == '--debug':
-			debug.toggle_debug()
-			debug.setup_logging()
+            debug.toggle_debug()
+            debug.setup_logging()
 
         for filename in glob.glob(rawFilename):
             msg = Message(filename)
