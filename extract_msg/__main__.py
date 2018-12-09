@@ -1,11 +1,9 @@
 import glob
+import logging
 import sys
 import traceback
 from extract_msg import __doc__
-from extract_msg import debug
-from extract_msg import Message
-
-
+from extract_msg.message import Message
 
 if __name__ == '__main__':
     if len(sys.argv) <= 1:
@@ -27,12 +25,16 @@ To name the directory as the .msg file, use the flag '--use-file-name'
 
 To turn on the printing of debugging information, use the flag '--debug'
 """)
-        sys.exit()
+        sys.exit(1)
+
+    # Setup logging to stdout, indicate running from cli
+    CLI_LOGGING = 'extract_msg_cli'
 
     writeRaw = False
     toJson = False
     useFileName = False
     useContentId = False
+    debug = False
 
     for rawFilename in sys.argv[1:]:
         if rawFilename == '--raw':
@@ -47,9 +49,16 @@ To turn on the printing of debugging information, use the flag '--debug'
         if rawFilename == '--use-content-id':
             useContentId = True
 
+        if rawFilename == '--use-logging-json':
+            log_config = '../logging.json'
+
         if rawFilename == '--debug':
-            debug.toggle_debug()
-            debug.setup_logging()
+            debug = True
+            logging.getLogger(CLI_LOGGING).setLevel(logging.DEBUG)
+        elif rawFilename == '--verbose':
+            logging.getLogger(CLI_LOGGING).setLevel(logging.INFO)
+        else:
+            logging.getLogger(CLI_LOGGING).setLevel(logging.WARNING)
 
         for filename in glob.glob(rawFilename):
             msg = Message(filename)

@@ -30,11 +30,7 @@ __author__ = 'Matthew Walker & The Elemental of Creation'
 __date__ = '2018-12-05'
 __version__ = '0.20.9'
 
-from extract_msg import constants
-from extract_msg import debug
-from extract_msg.attachment import Attachment
-from extract_msg.message import Message
-from extract_msg.prop import create_prop
-from extract_msg.properties import Properties
-from extract_msg.recipient import Recipient
-from extract_msg.utils import parse_type, properHex
+# import logging
+#
+# logger = logging.getLogger(__name__)
+# logger.addHandler(logging.NullHandler())

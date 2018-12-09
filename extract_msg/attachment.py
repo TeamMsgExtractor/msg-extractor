@@ -1,15 +1,15 @@
 import logging
 import random
 import string
+
 from extract_msg import constants
 from extract_msg import debug
 from extract_msg.properties import Properties
 from extract_msg.utils import properHex
 
-
-
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
 
 class Attachment(object):
     """
@@ -45,7 +45,7 @@ class Attachment(object):
             self.__data = msg._getStream([dir_, '__substg1.0_37010102'])
         elif msg.Exists([dir_, '__substg1.0_3701000D']):
             if (self.props['37050003'].value & 0x7) != 0x5:
-                if not debug._debug:
+                if not debug:
                     raise NotImplementedError(
                         'Current version of extract_msg does not support extraction of containers that are not embeded msg files.')
                     # TODO add implementation
@@ -55,8 +55,8 @@ class Attachment(object):
                     logger.debug('dir_ = {}'.format(dir_))
                     logger.debug('Writing properties stream to output:')
                     logger.debug('--------Start-Properties-Stream--------\n' +
-                        properHex(self.props.stream) +
-                        '\n---------End-Properties-Stream---------')
+                                 properHex(self.props.stream) +
+                                 '\n---------End-Properties-Stream---------')
                     logger.debug('Writing directory contents to output:')
                     logger.debug('--------Start-Directory-Content--------')
                     logger.debug('\n'.join([repr(x) for x in msg.listDir(True, True)]))
@@ -70,7 +70,7 @@ class Attachment(object):
 
     def save(self, contentId=False, json=False, useFileName=False, raw=False, customPath=None, customFilename=None):
         # Check if the user has specified a custom filename
-        if customFilename != None and customFilename != '':
+        if customFilename is not None and customFilename != '':
             filename = customFilename
         else:
             # If not...
@@ -88,7 +88,7 @@ class Attachment(object):
                            ''.join(random.choice(string.ascii_uppercase + string.digits)
                                    for _ in range(5)) + '.bin'
 
-        if customPath != None and customPath != '':
+        if customPath is not None and customPath != '':
             if customPath[-1] != '/' or customPath[-1] != '\\':
                 customPath += '/'
             filename = customPath + filename
@@ -100,7 +100,8 @@ class Attachment(object):
             self.saveEmbededMessage(contentId, json, useFileName, raw, customPath, customFilename)
         return filename
 
-    def saveEmbededMessage(self, contentId=False, json=False, useFileName=False, raw=False, customPath=None, customFilename=None):
+    def saveEmbededMessage(self, contentId=False, json=False, useFileName=False, raw=False, customPath=None,
+                           customFilename=None):
         """
         Seperate function from save to allow it to
         easily be overridden by a subclass.

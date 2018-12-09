@@ -2,22 +2,25 @@ import copy
 import email.utils
 import json
 import logging
-import olefile
 import os
 import re
+
+from imapclient.imapclient import decode_utf7
+import olefile
+from extract_msg.exceptions import InvalidFileFormat
+
 from email.parser import Parser as EmailParser
 from extract_msg import constants
-from extract_msg import debug
 from extract_msg.attachment import Attachment
 from extract_msg.properties import Properties
 from extract_msg.recipient import Recipient
 from extract_msg.utils import addNumToDir, encode, has_len, stri, windowsUnicode, xstr
-from imapclient.imapclient import decode_utf7
 
 
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
 
 class Message(olefile.OleFileIO):
     """
@@ -40,7 +43,11 @@ class Message(olefile.OleFileIO):
         logger.debug('prefix: {}'.format(prefix))
         self.__path = path
         self.__attachmentClass = attachmentClass
-        olefile.OleFileIO.__init__(self, path)
+        try:
+            olefile.OleFileIO.__init__(self, path)
+        except OSError as e:
+            logger.error(e)
+            raise InvalidFileFormat
         prefixl = []
         if prefix != '':
             if not isinstance(prefix, stri):
@@ -211,7 +218,7 @@ class Message(olefile.OleFileIO):
                 header.add_header('To', self.to)
                 header.add_header('Cc', self.cc)
                 header.add_header('Message-Id', self.message_id)
-                #TODO find authentication results outside of header
+                # TODO find authentication results outside of header
                 header.add_header('Authenitcation-Results', None)
 
                 self._header = header

@@ -7,9 +7,8 @@ import logging
 import os
 import sys
 import tzlocal
-from extract_msg import constants
-from extract_msg import debug
 
+from extract_msg import constants
 
 
 logger = logging.getLogger(__name__)
@@ -18,8 +17,10 @@ logger.addHandler(logging.NullHandler())
 if sys.version_info[0] >= 3:  # Python 3
     stri = (str,)
 
+
     def encode(inp):
         return inp
+
 
     def properHex(inp):
         """
@@ -36,10 +37,12 @@ if sys.version_info[0] >= 3:  # Python 3
             a = '0' + a
         return a
 
+
     def windowsUnicode(string):
         if string is None:
             return None
         return str(string, 'utf_16_le')
+
 
     def xstr(s):
         return '' if s is None else str(s)
@@ -47,8 +50,10 @@ if sys.version_info[0] >= 3:  # Python 3
 else:  # Python 2
     stri = (str, unicode)
 
+
     def encode(inp):
         return inp.encode('utf-8')
+
 
     def properHex(inp):
         """
@@ -65,10 +70,12 @@ else:  # Python 2
             a = '0' + a
         return a
 
+
     def windowsUnicode(string):
         if string is None:
             return None
         return unicode(string, 'utf_16_le')
+
 
     def xstr(s):
         if isinstance(s, unicode):
@@ -90,6 +97,7 @@ def addNumToDir(dirName):
             pass
     return None
 
+
 def divide(string, length):
     """
     Taken (with permission) from https://github.com/TheElementalOfCreation/creatorUtils
@@ -106,8 +114,10 @@ def divide(string, length):
     """
     return [string[length * x:length * (x + 1)] for x in range(int(len(string) / length))]
 
+
 def fromTimeStamp(stamp):
     return datetime.datetime.fromtimestamp(stamp, tzlocal.get_localzone())
+
 
 def has_len(obj):
     """
@@ -119,17 +129,20 @@ def has_len(obj):
     except AttributeError:
         return False
 
+
 def msgEpoch(inp):
     """
     Taken (with permission) from https://github.com/TheElementalOfCreation/creatorUtils
     """
     return (inp - 116444736000000000) / 10000000.0
 
+
 def parse_type(_type, stream):
     """
     Converts the data in :param stream: to a
     much more accurate type, specified by
     :param _type:, if possible.
+    :param stream # TODO what is stream?
 
     Some types require that :param prop_value: be specified. This can be retrieved from the Properties instance.
 
@@ -138,11 +151,11 @@ def parse_type(_type, stream):
     # WARNING Not done. Do not try to implement anywhere where it is not already implemented
     value = stream
     if _type == 0x0000:  # PtypUnspecified
-        pass;
+        pass
     elif _type == 0x0001:  # PtypNull
         if value != b'\x00\x00\x00\x00\x00\x00\x00\x00':
             # DEBUG
-            logger.warn('Property type is PtypNull, but is not equal to 0.')
+            logger.warning('Property type is PtypNull, but is not equal to 0.')
         value = None
     elif _type == 0x0002:  # PtypInteger16
         value = constants.STI16.unpack(value)[0]
@@ -157,42 +170,56 @@ def parse_type(_type, stream):
     elif _type == 0x0007:  # PtypFloatingTime
         value = constants.STF64.unpack(value)[0]
         # TODO parsing for this
-        pass;
+        pass
     elif _type == 0x000A:  # PtypErrorCode
         value = constants.STI32.unpack(value)[0]
         # TODO parsing for this
-        pass;
+        pass
     elif _type == 0x000B:  # PtypBoolean
         value = bool(constants.ST3.unpack(value)[0])
     elif _type == 0x000D:  # PtypObject/PtypEmbeddedTable
         # TODO parsing for this
-        pass;
+        pass
     elif _type == 0x0014:  # PtypInteger64
         value = constants.STI64.unpack(value)[0]
     elif _type == 0x001E:  # PtypString8
         # TODO parsing for this
-        pass;
+        pass
     elif _type == 0x001F:  # PtypString
         value = value.decode('utf_16_le')
     elif _type == 0x0040:  # PtypTime
         value = constants.ST3.unpack(value)[0]
     elif _type == 0x0048:  # PtypGuid
         # TODO parsing for this
-        pass;
+        pass
     elif _type == 0x00FB:  # PtypServerId
         # TODO parsing for this
-        pass;
+        pass
     elif _type == 0x00FD:  # PtypRestriction
         # TODO parsing for this
-        pass;
+        pass
     elif _type == 0x00FE:  # PtypRuleAction
         # TODO parsing for this
-        pass;
+        pass
     elif _type == 0x0102:  # PtypBinary
         # TODO parsing for this
         # Smh, how on earth am I going to code this???
-        pass;
+        pass
     elif _type & 0x1000 == 0x1000:  # PtypMultiple
         # TODO parsing for `multiple` types
-        pass;
-    return value;
+        pass
+    return value
+
+def setup_logging(default_path=None, default_level=logging.WARN, env_key='EXTRACT_MSG_LOG_CFG'):
+    """Setup logging configuration
+
+    Args:
+        default_path (str): Default path to use for the logging configuration file
+        default_level (int): Default logging level
+        env_key (str): Environment variable name to search for, for setting logfile path
+
+    Returns:
+        bool: True if the configuration file was found and applied, False otherwise
+    """
+
+

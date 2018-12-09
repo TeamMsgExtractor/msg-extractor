@@ -1,12 +1,12 @@
 import logging
-from extract_msg import constants
-from extract_msg import debug
-from extract_msg.properties import Properties
 
+from extract_msg import constants
+from extract_msg.properties import Properties
 
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
 
 class Recipient(object):
     """
