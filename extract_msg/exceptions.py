@@ -1,10 +1,16 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 """
 requests.exceptions
 ~~~~~~~~~~~~~~~~~~~
 This module contains the set of msg_extractor's exceptions.
 """
+
+# add logger bus
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class InvalidFileFormat(OSError):

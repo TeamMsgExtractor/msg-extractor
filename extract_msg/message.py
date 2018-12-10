@@ -45,10 +45,7 @@ class Message(olefile.OleFileIO):
 
         try:
             olefile.OleFileIO.__init__(self, path)
-        except OSError as e:    # py3
-            logger.error(e)
-            raise InvalidFileFormat
-        except IOError as e:    # py2
+        except IOError as e:    # py2 and py3 compatible
             logger.error(e)
             raise InvalidFileFormat
 
