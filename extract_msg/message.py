@@ -48,7 +48,7 @@ class Message(olefile.OleFileIO):
         except IOError as e:    # py2 and py3 compatible
             logger.error(e)
             if e.message == 'not an OLE2 structured storage file':
-                raise InvalidFileFormat
+                raise InvalidFileFormat(e)
             else:
                 raise
 
