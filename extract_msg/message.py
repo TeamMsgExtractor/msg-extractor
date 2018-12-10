@@ -7,7 +7,7 @@ import re
 
 from imapclient.imapclient import decode_utf7
 import olefile
-from extract_msg.exceptions import InvalidFileFormat
+
 
 from email.parser import Parser as EmailParser
 from extract_msg import constants
@@ -15,6 +15,7 @@ from extract_msg.attachment import Attachment
 from extract_msg.properties import Properties
 from extract_msg.recipient import Recipient
 from extract_msg.utils import addNumToDir, encode, has_len, stri, windowsUnicode, xstr
+from extract_msg.exceptions import InvalidFileFormat
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -41,11 +42,16 @@ class Message(olefile.OleFileIO):
         logger.debug('prefix: {}'.format(prefix))
         self.__path = path
         self.__attachmentClass = attachmentClass
+
         try:
             olefile.OleFileIO.__init__(self, path)
-        except OSError as e:
+        except OSError as e:    # py3
             logger.error(e)
             raise InvalidFileFormat
+        except IOError as e:    # py2
+            logger.error(e)
+            raise InvalidFileFormat
+
         prefixl = []
         if prefix != '':
             if not isinstance(prefix, stri):
@@ -58,13 +64,13 @@ class Message(olefile.OleFileIO):
             g = prefix.split("/")
             if g[-1] == '':
                 g.pop()
-            prefixl = g
+            prefix = g
             if prefix[-1] != '/':
                 prefix += '/'
             filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix=False)
         self.__prefix = prefix
         self.__prefixList = prefixl
-        if filename != None:
+        if filename is not None:
             self.filename = filename
         elif has_len(path):
             if len(path) < 1536:
@@ -149,7 +155,7 @@ class Message(olefile.OleFileIO):
         asciiVersion = self._getStream(filename + '001E', prefix)
         unicodeVersion = windowsUnicode(self._getStream(filename + '001F', prefix))
         logger.debug('_getStringSteam called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
-            filename, asciiVersion != None, unicodeVersion != None))
+            filename, asciiVersion is not None, unicodeVersion is not None))
         if asciiVersion is None:
             return unicodeVersion
         elif unicodeVersion is None:
@@ -504,7 +510,7 @@ class Message(olefile.OleFileIO):
         else:
             if useFileName:
                 # strip out the extension
-                if self.filename != None:
+                if self.filename is not None:
                     dirName = self.filename.split('/').pop().split('.')[0]
                 else:
                     ValueError(
