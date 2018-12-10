@@ -16,8 +16,6 @@ from extract_msg.properties import Properties
 from extract_msg.recipient import Recipient
 from extract_msg.utils import addNumToDir, encode, has_len, stri, windowsUnicode, xstr
 
-
-
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
@@ -55,7 +53,7 @@ class Message(olefile.OleFileIO):
                     prefix = '/'.join(prefix)
                 except:
                     raise TypeError('Invalid prefix type: ' + str(type(prefix)) +
-                        '\n(This was probably caused by you setting it manually).')
+                                    '\n(This was probably caused by you setting it manually).')
             prefix = prefix.replace('\\', '/')
             g = prefix.split("/")
             if g[-1] == '':
@@ -420,9 +418,10 @@ class Message(olefile.OleFileIO):
             return self._body
         except AttributeError:
             self._body = encode(self._getStringStream('__substg1.0_1000'))
-            a = re.search('\n', self._body)
-            if a != None:
-                if re.search('\r\n', self._body) != None:
+            if self._body:
+                a = re.search('\n', self._body)
+            if a is not None:
+                if re.search('\r\n', self._body) is not None:
                     self.__crlf = '\r\n'
             return self._body
 

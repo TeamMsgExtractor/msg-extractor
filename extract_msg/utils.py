@@ -2,6 +2,7 @@
 Utility functions of extract_msg.
 """
 
+import argparse
 import datetime
 import logging
 import json
@@ -118,6 +119,36 @@ def divide(string, length):
 def fromTimeStamp(stamp):
     return datetime.datetime.fromtimestamp(stamp, tzlocal.get_localzone())
 
+
+def get_command_args():
+    """Parse command-line arguments"""
+
+    parser = argparse.ArgumentParser(description='MS MAPI/OLE formatted email parser')
+
+    parser.add_argument('-V', '--version', dest='version', required=False, action='store_false',
+                        help='Print version and exit')
+    parser.add_argument('-v', '--verbose', dest='verbose', required=False, action='store_false',
+                        help='Enable verbose (e.g. INFO) logging')
+    parser.add_argument('-s', '--server', dest='address', required=False, action='store',
+                        help='IR-Flow server address')
+    parser.add_argument('-u', '--api_user', dest='api_user', required=False, action='store',
+                        help='IR-Flow API User')
+    parser.add_argument('-k', '--api_key', dest='api_key', required=False, action='store',
+                        help='IR-Flow API Key')
+    parser.add_argument('-P', '--protocol', dest='protocol', required=False, action='store', default='https',
+                        help='Configure http or https - defaults to https')
+    parser.add_argument('-i', '--irflow_config', dest='irflow_config', required=False, action='store',
+                        default='../irflow_api.conf',
+                        help='Path to a valid IR-Flow configuration file')
+
+    # Output flags
+    parser.add_argument('--regex', dest='regex', required=False, action='store', default="True",
+                        help='Return values to stdout for regex parsing')
+    parser.add_argument('--debug', dest='debug', required=False, action='store_true',
+                        help='Enable debug logging level')
+
+    options = parser.parse_args()
+    return options
 
 def has_len(obj):
     """

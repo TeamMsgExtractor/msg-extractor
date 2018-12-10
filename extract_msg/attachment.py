@@ -27,7 +27,7 @@ class Attachment(object):
         self.__msg = msg
         self.__dir = dir_
         self.__props = Properties(
-            self.msg._getStream(self.msg.prefixList + [self.__dir, '__properties_version1.0']),
+            self.msg._getStream([self.__dir, '__properties_version1.0']),
             constants.TYPE_ATTACHMENT)
         # Get long filename
         self.__longFilename = msg._getStringStream([dir_, '__substg1.0_3707'])

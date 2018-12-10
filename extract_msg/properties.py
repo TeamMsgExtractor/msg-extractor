@@ -24,7 +24,7 @@ class Properties(object):
         self.__nrid = None
         self.__ac = None
         self.__rc = None
-        if type != None:
+        if type is not None:
             self.__intel = constants.INTELLIGENCE_SMART
             if type == constants.TYPE_MESSAGE:
                 skip = 32
@@ -36,7 +36,7 @@ class Properties(object):
                 skip = 8
         else:
             self.__intel = constants.INTELLIGENCE_DUMB
-            if skip == None:
+            if skip is None:
                 # This section of the skip handling is not very good.
                 # While it does work, it is likely to create extra
                 # properties that are created from the properties file's
@@ -107,7 +107,7 @@ class Properties(object):
 
     @property
     def attachment_count(self):
-        if self.__ac == None:
+        if self.__ac is None:
             raise TypeError('Properties instance must be intelligent and of type TYPE_MESSAGE to get attachment count.')
         return self.__ac
 
@@ -147,14 +147,14 @@ class Properties(object):
 
     @property
     def next_attachment_id(self):
-        if self.__naid == None:
+        if self.__naid is None:
             raise TypeError(
                 'Properties instance must be intelligent and of type TYPE_MESSAGE to get next attachment id.')
         return self.__naid
 
     @property
     def next_recipient_id(self):
-        if self.__nrid == None:
+        if self.__nrid is None:
             raise TypeError(
                 'Properties instance must be intelligent and of type TYPE_MESSAGE to get next recipient id.')
         return self.__nrid
@@ -168,7 +168,7 @@ class Properties(object):
 
     @property
     def recipient_count(self):
-        if self.__rc == None:
+        if self.__rc is None:
             raise TypeError('Properties instance must be intelligent and of type TYPE_MESSAGE to get recipient count.')
         return self.__rc
 

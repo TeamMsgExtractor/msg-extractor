@@ -98,6 +98,7 @@ class FixedLengthProp(PropBase):
         Converts the data in :param stream: to a
         much more accurate type, specified by
         :param _type:, if possible.
+        :param stream: #TODO what is stream for?
 
         WARNING: Not done.
         """

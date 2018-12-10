@@ -6,6 +6,9 @@ from extract_msg import __doc__
 from extract_msg.message import Message
 
 if __name__ == '__main__':
+
+    # command_args = get_cmd_args()
+
     if len(sys.argv) <= 1:
         print(__doc__)
         print("""
