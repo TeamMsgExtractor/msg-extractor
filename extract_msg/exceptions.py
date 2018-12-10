@@ -5,7 +5,7 @@ import logging
 """
 requests.exceptions
 ~~~~~~~~~~~~~~~~~~~
-This module contains the set of msg_extractor's exceptions.
+This module contains the set of msg_extractor exceptions.
 """
 
 # add logger bus
