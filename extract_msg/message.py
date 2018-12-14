@@ -558,7 +558,7 @@ class Message(olefile.OleFileIO):
             attachmentNames = []
             # Save the attachments
             for attachment in self.attachments:
-                attachmentNames.append(attachment.save(ContentId))
+                attachmentNames.append(attachment.save(ContentId, toJson))
 
             if toJson:
 
