@@ -3,7 +3,7 @@
 import logging
 
 """
-requests.exceptions
+extract_msg.exceptions
 ~~~~~~~~~~~~~~~~~~~
 This module contains the set of msg_extractor exceptions.
 """
