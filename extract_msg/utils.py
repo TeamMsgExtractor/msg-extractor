@@ -30,7 +30,7 @@ if sys.version_info[0] >= 3:  # Python 3
         a = ''
         if isinstance(inp, stri):
             a = ''.join([hex(ord(inp[x]))[2:].rjust(2, '0') for x in range(len(inp))])
-        if isinstance(inp, bytes):
+        elif isinstance(inp, bytes):
             a = inp.hex()
         elif isinstance(inp, int):
             a = hex(inp)[2:]
