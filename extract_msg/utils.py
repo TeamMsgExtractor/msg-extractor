@@ -141,7 +141,7 @@ def get_command_args():
                         help = 'Enables file logging.')
     # --verbose
     parser.add_argument('--verbose', dest = 'verbose', action = 'store_true',
-                        help = 'Turns on console logging.')
+                        help = 'Turns on console logging. Implies --verbose')
     # --log PATH
     parser.add_argument('--log', dest = 'log',
                         help = 'Set the path to write the file log to.')
@@ -162,7 +162,7 @@ def get_command_args():
                         help = 'An msg file to be parsed')
 
     options = parser.parse_args()
-    if options.dev:
+    if options.dev or options.file_logging:
         options.verbose = True
     file_args = options.msgs
     file_tables = [] # This is where we will store the separated files and their arguments
