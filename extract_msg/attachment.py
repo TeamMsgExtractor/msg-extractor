@@ -77,7 +77,8 @@ class Attachment(object):
             if contentId:
                 filename = self.__cid
             # If filename is None at this point, use long filename as first preference
-            filename = self.__longFilename
+            if filename is None:
+                filename = self.__longFilename
             # Otherwise use the short filename
             if filename is None:
                 filename = self.__shortFilename

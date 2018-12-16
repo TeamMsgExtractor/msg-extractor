@@ -39,7 +39,6 @@ class Message(olefile.OleFileIO):
         :param filename: optional, the filename to be used by default when saving.
         """
         # WARNING DO NOT MANUALLY MODIFY PREFIX. Let the program set it.
-        logger.debug('prefix: {}'.format(prefix))
         self.__path = path
         self.__attachmentClass = attachmentClass
 
