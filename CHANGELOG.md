@@ -1,9 +1,9 @@
 **v0.20.9**
-* [#7](https://github.com/Syncurity/msg-extractor/issues/7) Changed debug code to use logging module.
-* [#26](https://github.com/Syncurity/msg-extractor/issues/26) Fixed Attachment class using wrong properties file location in embedded msg files.
-* [#4](https://github.com/Syncurity/msg-extractor/issues/4) Improved handling of command line arguments using argparse module.
-* [#24](https://github.com/Syncurity/msg-extractor/issues/24) Started work on moving developer code into its own script.
-* [#63](https://github.com/mattgwwalker/msg-extractor/issues/63) Fixed json saving not applying to embedded msg files.
+* [Syncurity#7](https://github.com/Syncurity/msg-extractor/issues/7) Changed debug code to use logging module.
+* [Syncurity#26](https://github.com/Syncurity/msg-extractor/issues/26) Fixed Attachment class using wrong properties file location in embedded msg files.
+* [Syncurity#4](https://github.com/Syncurity/msg-extractor/issues/4) Improved handling of command line arguments using argparse module.
+* [Syncurity#24](https://github.com/Syncurity/msg-extractor/issues/24) Started work on moving developer code into its own script.
+* [mattgwwalker#63](https://github.com/mattgwwalker/msg-extractor/issues/63) Fixed json saving not applying to embedded msg files.
 * Added `header_dict` property to the `Message` class.
 * General minor bug fixes
 * Fixed a section in the `Recipient` class that I have no idea why I did it that way. If errors start randomly occurring with it, this fix is why.
