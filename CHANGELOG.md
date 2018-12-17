@@ -3,8 +3,6 @@
 * [#26](https://github.com/Syncurity/msg-extractor/issues/26) Fixed Attachment class using wrong properties file location in embedded msg files.
 * [#4](https://github.com/Syncurity/msg-extractor/issues/4) Improved handling of command line arguments using argparse module.
 * [#24](https://github.com/Syncurity/msg-extractor/issues/24) Started work on moving developer code into its own script.
-* Fixes [#63](https://github.com/mattgwwalker/msg-extractor/issues/63)
-* Fixes: [#63](https://github.com/mattgwwalker/msg-extractor/issues/63)
 * [#63](https://github.com/mattgwwalker/msg-extractor/issues/63) Fixed json saving not applying to embedded msg files.
 * Added `header_dict` property to the `Message` class.
 * General minor bug fixes
