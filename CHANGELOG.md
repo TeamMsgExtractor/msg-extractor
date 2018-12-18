@@ -1,9 +1,9 @@
 **v0.20.9**
-* [Syncurity#7](https://github.com/Syncurity/msg-extractor/issues/7) Changed debug code to use logging module.
-* [Syncurity#26](https://github.com/Syncurity/msg-extractor/issues/26) Fixed Attachment class using wrong properties file location in embedded msg files.
-* [Syncurity#4](https://github.com/Syncurity/msg-extractor/issues/4) Improved handling of command line arguments using argparse module.
-* [Syncurity#24](https://github.com/Syncurity/msg-extractor/issues/24) Started work on moving developer code into its own script.
-* [mattgwwalker#63](https://github.com/mattgwwalker/msg-extractor/issues/63) Fixed json saving not applying to embedded msg files.
+* [[Syncurity#7](https://github.com/Syncurity/msg-extractor/issues/7)] Changed debug code to use logging module.
+* [[Syncurity#26](https://github.com/Syncurity/msg-extractor/issues/26)] Fixed Attachment class using wrong properties file location in embedded msg files.
+* [[Syncurity#4](https://github.com/Syncurity/msg-extractor/issues/4)] Improved handling of command line arguments using argparse module.
+* [[Syncurity#24](https://github.com/Syncurity/msg-extractor/issues/24)] Started work on moving developer code into its own script.
+* [[mattgwwalker#63](https://github.com/mattgwwalker/msg-extractor/issues/63)] Fixed json saving not applying to embedded msg files.
 * Added `header_dict` property to the `Message` class.
 * General minor bug fixes
 * Fixed a section in the `Recipient` class that I have no idea why I did it that way. If errors start randomly occurring with it, this fix is why.
@@ -27,4 +27,4 @@
 * Fixed a major bug that was causing the header to generate after things like "to" and "cc" which would force those fields to not use the header.
 * Fixed the debug variable.
 * Fixed many small bugs in many of the classes.
-* [Syncurity#11](https://github.com/Syncurity/msg-extractor/issues/11) Various loose ends to enhance the workflow in the repo.
+* [[Syncurity#11](https://github.com/Syncurity/msg-extractor/issues/11)] Various loose ends to enhance the workflow in the repo.
