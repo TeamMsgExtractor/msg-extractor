@@ -27,4 +27,4 @@
 * Fixed a major bug that was causing the header to generate after things like "to" and "cc" which would force those fields to not use the header.
 * Fixed the debug variable.
 * Fixed many small bugs in many of the classes.
-* [#11](https://github.com/Syncurity/msg-extractor/issues/11) Various loose ends to enhance the workflow in the repo.
+* [Syncurity#11](https://github.com/Syncurity/msg-extractor/issues/11) Various loose ends to enhance the workflow in the repo.
