@@ -4,6 +4,7 @@
 * [[Syncurity #4](https://github.com/Syncurity/msg-extractor/issues/4)] Improved handling of command line arguments using argparse module.
 * [[Syncurity #24](https://github.com/Syncurity/msg-extractor/issues/24)] Started work on moving developer code into its own script.
 * [[mattgwwalker #63](https://github.com/mattgwwalker/msg-extractor/issues/63)] Fixed json saving not applying to embedded msg files.
+* [[mattgwwalker #55](https://github.com/mattgwwalker/msg-extractor/issues/55)] Added fix for recipient sometimes missing email address.
 * Added `header_dict` property to the `Message` class.
 * General minor bug fixes
 * Fixed a section in the `Recipient` class that I have no idea why I did it that way. If errors start randomly occurring with it, this fix is why.

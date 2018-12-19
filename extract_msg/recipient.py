@@ -19,6 +19,8 @@ class Recipient(object):
         self.__dir = _dir
         self.__props = Properties(msg._getStream(self.__dir + '/__properties_version1.0'), constants.TYPE_RECIPIENT)
         self.__email = msg._getStringStream(self.__dir + '/__substg1.0_39FE')
+        if not self.__email:
+            self.__email = msg._getStringStream(self.__dir + '/__substg1.0_3003')
         self.__name = msg._getStringStream(self.__dir + '/__substg1.0_3001')
         self.__type = self.__props.get('0C150003').value
         self.__formatted = '{0} <{1}>'.format(self.__name, self.__email)
