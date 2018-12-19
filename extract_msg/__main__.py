@@ -1,7 +1,7 @@
-import glob
 import logging
 import os
 import traceback
+
 from extract_msg import __doc__, utils
 from extract_msg.message import Message
 

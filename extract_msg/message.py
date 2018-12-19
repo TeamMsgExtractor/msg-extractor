@@ -8,7 +8,6 @@ import re
 from imapclient.imapclient import decode_utf7
 import olefile
 
-
 from email.parser import Parser as EmailParser
 from extract_msg import constants
 from extract_msg.attachment import Attachment
