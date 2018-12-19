@@ -1,5 +1,5 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE.txt)
-[![PyPI3](https://img.shields.io/badge/pypi-0.20.9-blue.svg)](https://pypi.org/project/extract-msg/0.20.9/)
+[![PyPI3](https://img.shields.io/badge/pypi-0.21.0-blue.svg)](https://pypi.org/project/extract-msg/0.21.0/)
 [![PyPI1](https://img.shields.io/badge/python-2.7+-brightgreen.svg)](https://www.python.org/downloads/release/python-2715/)
 [![PyPI2](https://img.shields.io/badge/python-3.6+-brightgreen.svg)](https://www.python.org/downloads/release/python-367/)
 
@@ -28,12 +28,7 @@ The script uses <a href="http://www.decalage.info/python/olefileio">Philippe Lag
 
 The script was built using <a href="http://www.fileformat.info/format/outlookmsg/index.htm">Peter Fiskerstrand's documentation of the .msg format</a>.  <a href="http://www.dimastr.com/redemption/utils.htm">Redemption's discussion of the different property types used within Extended MAPI</a> was also useful.  For future reference, I note that Microsoft have opened up <a href="http://msdn.microsoft.com/en-us/library/cc463912%28v=exchg.80%29.aspx">their documentation of the file format</a>.
 
-If you are having difficulty with a specific file, or would like to extract more than is currently automated, then the --raw flag may be useful:
-```
-  python extract_msg --raw example.msg
-```
-
-Further, a --json flag has been added by Joel Kaufman to specify JSON output:
+A --json flag has been added by Joel Kaufman to specify JSON output:
 ```
   python extract_msg --json example.msg
 ```
@@ -120,3 +115,6 @@ Here is a list of things that are currently on our todo list:
 * Provide way to save attachments and messages into a custom location under a custom name
 * Implement better property handling that will convert each type into a python equivalent if possible
 * Implement handling of named properties
+* Add a FAQ
+* Update and improve docstrings
+* Reimplement the developer code
