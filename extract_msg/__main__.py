@@ -1,7 +1,6 @@
 import glob
 import logging
 import os
-import sys
 import traceback
 from extract_msg import __doc__, utils
 from extract_msg.message import Message
@@ -26,8 +25,12 @@ if __name__ == '__main__':
         out = currentdir
 
     for x in args.msgs:
-        msg = Message(x[0])
-        #Right here we should still be in the path in currentdir
-        os.chdir(out)
-        msg.save(toJson = args.json, useFileName = args.use_filename, ContentId = args.cid)
+        try:
+            msg = Message(x[0])
+            #Right here we should still be in the path in currentdir
+            os.chdir(out)
+            msg.save(toJson = args.json, useFileName = args.use_filename, ContentId = args.cid)
+        except Exception as e:
+            print("Error with file '" + filename + "': " +
+                  traceback.format_exc())
         os.chdir(currentdir)
