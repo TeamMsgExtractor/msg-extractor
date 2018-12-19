@@ -26,10 +26,10 @@ if __name__ == '__main__':
 
     for x in args.msgs:
         try:
-            msg = Message(x[0])
-            #Right here we should still be in the path in currentdir
-            os.chdir(out)
-            msg.save(toJson = args.json, useFileName = args.use_filename, ContentId = args.cid)
+            with Message(x[0]) as msg:
+                #Right here we should still be in the path in currentdir
+                os.chdir(out)
+                msg.save(toJson = args.json, useFileName = args.use_filename, ContentId = args.cid)
         except Exception as e:
             print("Error with file '" + filename + "': " +
                   traceback.format_exc())
