@@ -14,10 +14,10 @@ class Recipient(object):
         self.__msg = msg  # Allows calls to original msg file
         self.__dir = '__recip_version1.0_#' + num.rjust(8, '0')
         self.__props = Properties(msg._getStream(self.__dir + '/__properties_version1.0'), constants.TYPE_RECIPIENT)
-        self.__email = msg._getStringStream(self.__dir + '/__substg1.0_39FE')
+        self.__email = msg._getStringStream(self.__dir + '/__substg1.0_3003')
         self.__name = msg._getStringStream(self.__dir + '/__substg1.0_3001')
         self.__type = self.__props.get('0C150003').value
-        self.__formatted = '{0} <{1}>'.format(self.__name, self.__email)
+        self.__formatted = u'{0} <{1}>'.format(self.__name, self.__email)
 
     @property
     def email(self):
