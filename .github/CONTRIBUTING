@@ -9,15 +9,16 @@ Please note we have a [code of conduct](CODE_OF_CONDUCT.md), please follow it in
 
 ## Pull Request Process
 
-1. Ensure any install or build dependencies are removed before the end of the layer when doing a
+1. Ensure an issue already exists for what you are fixing and link to it in your pull.
+2. Ensure any install or build dependencies are removed before the end of the layer when doing a
    build.
-2. Update the [CHANGELOG](CHANGELOG.md) with details of changes to the codebase, this includes new functionality,
+3. Update the [CHANGELOG](CHANGELOG.md) with details of changes to the codebase, this includes new functionality,
    deprecated featrues, or any other material changes.
-3. Increase the version numbers in any examples files and the README.md to the new version that this
+4. Increase the version numbers in any examples files and the README.md to the new version that this
    Pull Request would represent. The versioning scheme we use is [SemVer](http://semver.org/). (Usually done by the
    maintainers.
-4. Submit tests with your pull request.
-4. You may merge the Pull Request in once you have the sign-off of one or more other developers, or if you
+5. Submit tests with your pull request.
+6. You may merge the Pull Request in once you have the sign-off of one or more other developers, or if you
    do not have permission to do that, you may request the second reviewer to merge it for you.
 
 ## Code of Conduct
@@ -66,4 +67,3 @@ permanently any contributor for other behaviors that they deem inappropriate,
 threatening, offensive, or harmful.
 
 See our [Code of Conduct](CODE_OF_CONDUCT.md) for more info.
-
