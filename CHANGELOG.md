@@ -5,9 +5,10 @@
 * [[Syncurity #24](https://github.com/Syncurity/msg-extractor/issues/24)] Started work on moving developer code into its own script.
 * [[mattgwwalker #63](https://github.com/mattgwwalker/msg-extractor/issues/63)] Fixwed json saving not applying to embedded msg files.
 * [[mattgwwalker #55](https://github.com/mattgwwalker/msg-extractor/issues/55)] Added fix for recipient sometimes missing email address.
+* [[mattgwwalker #65](https://github.com/mattgwwalker/msg-extractor/issues/65)] Added fix for special characters in recipient names.
 * Module now raises a custom exception (instead of just `IOError`) if the input is not a valid OLE file.
 * Added `header_dict` property to the `Message` class.
-* General minor bug fixes
+* General minor bug fixes.
 * Fixed a section in the `Recipient` class that I have no idea why I did it that way. If errors start randomly occurring with it, this fix is why.
 
 **v0.20.8**

@@ -23,7 +23,7 @@ class Recipient(object):
             self.__email = msg._getStringStream(self.__dir + '/__substg1.0_3003')
         self.__name = msg._getStringStream(self.__dir + '/__substg1.0_3001')
         self.__type = self.__props.get('0C150003').value
-        self.__formatted = '{0} <{1}>'.format(self.__name, self.__email)
+        self.__formatted = u'{0} <{1}>'.format(self.__name, self.__email)
 
     @property
     def email(self):
