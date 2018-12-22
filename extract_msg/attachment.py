@@ -69,6 +69,7 @@ class Attachment(object):
 
     def save(self, contentId=False, json=False, useFileName=False, raw=False, customPath=None, customFilename=None):
         # Check if the user has specified a custom filename
+        filename = None
         if customFilename is not None and customFilename != '':
             filename = customFilename
         else:
