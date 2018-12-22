@@ -9,10 +9,6 @@ if __name__ == '__main__':
     # Setup logging to stdout, indicate running from cli
     CLI_LOGGING = 'extract_msg_cli'
 
-    writeRaw = False
-    toJson = False
-    useFileName = False
-    useContentId = False
     args = utils.get_command_args()
     level = logging.INFO if args.verbose else logging.WARNING
     utils.setup_logging(args.config_path, level, args.log, args.file_logging)
