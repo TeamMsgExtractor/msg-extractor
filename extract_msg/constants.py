@@ -80,6 +80,15 @@ RECIPIENT_DICT = {
     RECIPIENT_BCC: 'RECIPIENT_BCC',
 }
 
+# Constants used for argparse stuff
+KNOWN_FILE_FLAGS = [
+    '--out-name',
+]
+NEEDS_ARG = [
+    '--out-name',
+]
+MAINDOC = "extract_msg:\n\tExtracts emails and attachments saved in Microsoft Outlook's .msg files.\n\nhttps://github.com/mattgwwalker/msg-extractor"
+
 # Define pre-compiled structs to make unpacking slightly faster
 # General structs
 ST1 = struct.Struct('<8x4I')

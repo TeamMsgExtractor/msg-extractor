@@ -8,7 +8,6 @@ import re
 from imapclient.imapclient import decode_utf7
 import olefile
 
-
 from email.parser import Parser as EmailParser
 from extract_msg import constants
 from extract_msg.attachment import Attachment
@@ -39,7 +38,6 @@ class Message(olefile.OleFileIO):
         :param filename: optional, the filename to be used by default when saving.
         """
         # WARNING DO NOT MANUALLY MODIFY PREFIX. Let the program set it.
-        logger.debug('prefix: {}'.format(prefix))
         self.__path = path
         self.__attachmentClass = attachmentClass
 

@@ -5,7 +5,7 @@ import logging
 """
 extract_msg.exceptions
 ~~~~~~~~~~~~~~~~~~~
-This module contains the set of msg_extractor exceptions.
+This module contains the set of extract_msg exceptions.
 """
 
 # add logger bus
@@ -14,5 +14,7 @@ logger.addHandler(logging.NullHandler())
 
 
 class InvalidFileFormat(OSError):
-    """A Invalid File Format Error occurred"""
+    """
+    A Invalid File Format Error occurred
+    """
     pass
