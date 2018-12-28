@@ -4,9 +4,9 @@ Utility functions of extract_msg.
 
 import argparse
 import datetime
+import json
 import logging
 import logging.config
-import json
 import os
 import sys
 
@@ -20,10 +20,8 @@ logger.addHandler(logging.NullHandler())
 if sys.version_info[0] >= 3:  # Python 3
     stri = (str,)
 
-
     def encode(inp):
         return inp
-
 
     def properHex(inp):
         """
@@ -40,12 +38,10 @@ if sys.version_info[0] >= 3:  # Python 3
             a = '0' + a
         return a
 
-
     def windowsUnicode(string):
         if string is None:
             return None
         return str(string, 'utf_16_le')
-
 
     def xstr(s):
         return '' if s is None else str(s)
@@ -53,10 +49,8 @@ if sys.version_info[0] >= 3:  # Python 3
 else:  # Python 2
     stri = (str, unicode)
 
-
     def encode(inp):
         return inp.encode('utf-8')
-
 
     def properHex(inp):
         """
@@ -73,19 +67,16 @@ else:  # Python 2
             a = '0' + a
         return a
 
-
     def windowsUnicode(string):
         if string is None:
             return None
         return unicode(string, 'utf_16_le')
-
 
     def xstr(s):
         if isinstance(s, unicode):
             return s.encode('utf-8')
         else:
             return '' if s is None else str(s)
-
 
 def addNumToDir(dirName):
     """
@@ -99,7 +90,6 @@ def addNumToDir(dirName):
         except Exception as e:
             pass
     return None
-
 
 def divide(string, length):
     """
@@ -117,10 +107,8 @@ def divide(string, length):
     """
     return [string[length * x:length * (x + 1)] for x in range(int(len(string) / length))]
 
-
 def fromTimeStamp(stamp):
     return datetime.datetime.fromtimestamp(stamp, tzlocal.get_localzone())
-
 
 def get_command_args():
     """
