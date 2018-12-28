@@ -318,7 +318,7 @@ def setup_logging(default_path=None, default_level=logging.WARN, logfile = None,
               'of the following file-paths:')
         print(str(paths[1:]))
         logging.basicConfig(level=default_level)
-        logger.warning('The extract_msg logging configuration was not found - using a basic configuration.'
+        logging.warning('The extract_msg logging configuration was not found - using a basic configuration.'
                        'Please check the extract_msg installation directory for "logging-{}.json".'.format(os.name))
         return False
 

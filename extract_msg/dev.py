@@ -9,7 +9,15 @@ Module for collecting data to be sent to the developer.
 
 
 import logging
+
 from extract_msg import dev_classes
+from extract_msg import utils
+
+
+
+def setup_dev_logger(default_path=None, logfile = None, env_key='EXTRACT_MSG_LOG_CFG'):
+    utils.setup_logging(default_path, 5, logfile, True, env_key)
+	
 
 
 

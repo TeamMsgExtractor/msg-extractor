@@ -1,5 +1,6 @@
 import logging
 
+from dev_classes.logger_dev import logger_dev
 
 
 class Attachment(object):

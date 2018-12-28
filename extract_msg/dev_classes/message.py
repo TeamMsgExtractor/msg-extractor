@@ -1,6 +1,8 @@
 import logging
 import olefile
+
 from dev_classes.attachment import Attachment
+from dev_classes.logger_dev import logger_dev
 from dev_classes.recipient import Recipient
 from extract_msg import constants
 from extract_msg.properties import Properties
@@ -27,7 +29,7 @@ class Message(olefile.OleFileIO):
             are doing.
         :param filename: optional, the filename to be used by default when saving.
         """
-        logger.debug('prefix: {}'.format(prefix))
+        logger.log(5, 'prefix: {}'.format(prefix))
         self.__path = path
         olefile.OleFileIO.__init__(self, path)
         prefixl = []
@@ -134,7 +136,7 @@ class Message(olefile.OleFileIO):
         unicodeVersion = windowsUnicode(self._getStream(filename + '001F', prefix))
         if debug._debug:
             # DEBUG
-            logger.debug('_getStringSteam called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
+            logger.log(5, '_getStringSteam called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
                 filename, asciiVersion != None, unicodeVersion != None))
         if asciiVersion is None:
             return unicodeVersion
