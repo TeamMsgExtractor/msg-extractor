@@ -1,3 +1,7 @@
+**v0.22.0**
+* [[Syncurity #30](https://github.com/Syncurity/msg-extractor/issues/30)] Added `--validate` option.
+* [[Syncurity #24](https://github.com/Syncurity/msg-extractor/issues/24)] Moved all dev code into its own scripts. Use `--dev` to use from the command line.
+
 **v0.21.0**
 * [[Syncurity #7](https://github.com/Syncurity/msg-extractor/issues/7)] Changed debug code to use logging module.
 * [[Syncurity #26](https://github.com/Syncurity/msg-extractor/issues/26)] Fixed Attachment class using wrong properties file location in embedded msg files.
