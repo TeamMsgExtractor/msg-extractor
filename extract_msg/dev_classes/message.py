@@ -49,15 +49,14 @@ class Message(olefile.OleFileIO):
         self.__prefix = prefix
         self.__prefixList = prefixl
 
-        if filename != None:
-            self.filename = filename
-        elif has_len(path):
+        logger.log(5, ':param path: has __len__ attribute?: {}'.format(has_len(path)))
+        if has_len(path):
             if len(path) < 1536:
                 self.filename = path
+                logger.log(5, ':param path: length is {}; Using :param path: as file path'.format(len(path)))
             else:
+                logger.log(5, ':param path: length is {}; Using :param path: as raw msg stream'.format(len(path)))
                 self.filename = None
-        else:
-            self.filename = None
 
         self.mainProperties
         recipientDirs = []
