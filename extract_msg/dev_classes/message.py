@@ -2,7 +2,6 @@ import logging
 import olefile
 
 from dev_classes.attachment import Attachment
-from dev_classes.logger_dev import logger_dev
 from dev_classes.recipient import Recipient
 from extract_msg import constants
 from extract_msg.properties import Properties
