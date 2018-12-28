@@ -1,4 +1,4 @@
-**v0.20.9**
+**v0.21.0**
 * [[Syncurity #7](https://github.com/Syncurity/msg-extractor/issues/7)] Changed debug code to use logging module.
 * [[Syncurity #26](https://github.com/Syncurity/msg-extractor/issues/26)] Fixed Attachment class using wrong properties file location in embedded msg files.
 * [[Syncurity #4](https://github.com/Syncurity/msg-extractor/issues/4)] Improved handling of command line arguments using argparse module.
