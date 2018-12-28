@@ -44,22 +44,9 @@ class Attachment(object):
             self.__data = msg._getStream([dir_, '__substg1.0_37010102'])
         elif msg.Exists([dir_, '__substg1.0_3701000D']):
             if (self.props['37050003'].value & 0x7) != 0x5:
-                if not debug:
-                    raise NotImplementedError(
-                        'Current version of extract_msg does not support extraction of containers that are not embeded msg files.')
-                    # TODO add implementation
-                else:
-                    # DEBUG
-                    logger.debug('Debugging is true, ignoring NotImplementedError and printing debug info...')
-                    logger.debug('dir_ = {}'.format(dir_))
-                    logger.debug('Writing properties stream to output:')
-                    logger.debug('--------Start-Properties-Stream--------\n' +
-                                 properHex(self.props.stream) +
-                                 '\n---------End-Properties-Stream---------')
-                    logger.debug('Writing directory contents to output:')
-                    logger.debug('--------Start-Directory-Content--------')
-                    logger.debug('\n'.join([repr(x) for x in msg.listDir(True, True)]))
-                    logger.debug('---------End-Directory-Content---------')
+                raise NotImplementedError(
+                    'Current version of extract_msg does not support extraction of containers that are not embeded msg files.')
+                # TODO add implementation
             else:
                 self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
                 self.__type = 'msg'

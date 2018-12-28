@@ -17,9 +17,9 @@ from extract_msg import utils
 
 def setup_dev_logger(default_path=None, logfile = None, env_key='EXTRACT_MSG_LOG_CFG'):
     utils.setup_logging(default_path, 5, logfile, True, env_key)
-	
+
 
 
 
 def main(args):
-    pass;
+    setup_dev_logger(args.config_path, args.log)
