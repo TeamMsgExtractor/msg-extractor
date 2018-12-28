@@ -80,14 +80,24 @@ RECIPIENT_DICT = {
     RECIPIENT_BCC: 'RECIPIENT_BCC',
 }
 
+# Constants used for argparse stuff
+KNOWN_FILE_FLAGS = [
+    '--out-name',
+]
+NEEDS_ARG = [
+    '--out-name',
+]
+MAINDOC = "extract_msg:\n\tExtracts emails and attachments saved in Microsoft Outlook's .msg files.\n\nhttps://github.com/mattgwwalker/msg-extractor"
+
 # Define pre-compiled structs to make unpacking slightly faster
+# General structs
 ST1 = struct.Struct('<8x4I')
 ST2 = struct.Struct('<H2xI8x')
 ST3 = struct.Struct('<Q')
-
+# Structs used by prop.py
 STFIX = struct.Struct('<8x8s')
 STVAR = struct.Struct('<8xi4s')
-
+# Structs to help with email type to python type conversions
 STI16 = struct.Struct('<h6x')
 STI32 = struct.Struct('<i4x')
 STI64 = struct.Struct('<q')
