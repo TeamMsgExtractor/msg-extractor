@@ -4,7 +4,7 @@
 
 """
 extract_msg:
-    Extracts emails and attachments saved in Microsoft Outlook's .msg files
+    Extracts emails and attachments saved in Microsoft Outlook's .msg files.
 
 https://github.com/mattgwwalker/msg-extractor
 """
@@ -28,11 +28,10 @@ https://github.com/mattgwwalker/msg-extractor
 
 __author__ = 'Matthew Walker & The Elemental of Creation'
 __date__ = '2018-12-05'
-__version__ = '0.20.8'
+__version__ = '0.21.0'
 
 from extract_msg import constants
 from extract_msg.attachment import Attachment
-from extract_msg.debug import debug
 from extract_msg.message import Message
 from extract_msg.prop import create_prop
 from extract_msg.properties import Properties

@@ -1,63 +1,32 @@
-import glob
-import sys
+import logging
+import os
 import traceback
-from extract_msg import __doc__
-from extract_msg import debug
-from extract_msg import Message
 
-
+from extract_msg import __doc__, utils
+from extract_msg.message import Message
 
 if __name__ == '__main__':
-    if len(sys.argv) <= 1:
-        print(__doc__)
-        print("""
-Launched from command line, this script parses Microsoft Outlook Message files
-and save their contents to the current directory. On error the script will
-write out a 'raw' directory will all the details from the file, but in a
-less-than-desirable format. To force this mode, the flag '--raw'
-can be specified.
+    # Setup logging to stdout, indicate running from cli
+    CLI_LOGGING = 'extract_msg_cli'
 
-Usage:  <file> [file2 ...]
-   or:  --raw <file>
-   or:  --json
+    args = utils.get_command_args()
+    level = logging.INFO if args.verbose else logging.WARNING
+    utils.setup_logging(args.config_path, level, args.log, args.file_logging)
+    currentdir = os.getcwd() # Store this just in case the paths that have been given are relative
+    if args.out_path:
+        if not os.path.exists(args.out_path):
+            os.makedirs(args.out_path)
+        out = args.out_path
+    else:
+        out = currentdir
 
-Additionally, use the flag '--use-content-id' to save files by their content ID (should they have one)
-
-To name the directory as the .msg file, use the flag '--use-file-name'
-
-To turn on the printing of debugging information, use the flag '--debug'
-""")
-        sys.exit()
-
-    writeRaw = False
-    toJson = False
-    useFileName = False
-    useContentId = False
-
-    for rawFilename in sys.argv[1:]:
-        if rawFilename == '--raw':
-            writeRaw = True
-
-        if rawFilename == '--json':
-            toJson = True
-
-        if rawFilename == '--use-file-name':
-            useFileName = True
-
-        if rawFilename == '--use-content-id':
-            useContentId = True
-
-        if rawFilename == '--debug':
-            debug = True
-
-        for filename in glob.glob(rawFilename):
-            msg = Message(filename)
-            try:
-                if writeRaw:
-                    msg.saveRaw()
-                else:
-                    msg.save(toJson, useFileName, False, useContentId)
-            except Exception as e:
-                # msg.debug()
-                print("Error with file '" + filename + "': " +
-                      traceback.format_exc())
+    for x in args.msgs:
+        try:
+            with Message(x[0]) as msg:
+                #Right here we should still be in the path in currentdir
+                os.chdir(out)
+                msg.save(toJson = args.json, useFileName = args.use_filename, ContentId = args.cid)
+        except Exception as e:
+            print("Error with file '" + filename + "': " +
+                  traceback.format_exc())
+        os.chdir(currentdir)

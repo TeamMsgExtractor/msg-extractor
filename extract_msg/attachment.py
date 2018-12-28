@@ -1,10 +1,13 @@
+import logging
 import random
 import string
+
 from extract_msg import constants
-from extract_msg.debug import debug
 from extract_msg.properties import Properties
 from extract_msg.utils import properHex
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class Attachment(object):
@@ -24,7 +27,7 @@ class Attachment(object):
         self.__msg = msg
         self.__dir = dir_
         self.__props = Properties(
-            self.msg._getStream(self.msg.prefixList + [self.__dir, '__properties_version1.0']),
+            self.msg._getStream([self.__dir, '__properties_version1.0']),
             constants.TYPE_ATTACHMENT)
         # Get long filename
         self.__longFilename = msg._getStringStream([dir_, '__substg1.0_3707'])
@@ -47,16 +50,16 @@ class Attachment(object):
                     # TODO add implementation
                 else:
                     # DEBUG
-                    print('DEBUG: Debugging is true, ignoring NotImplementedError and printing debug info...')
-                    print('DEBUG: _dir = {}'.format(_dir))
-                    print('DEBUG: Writing properties stream to output:')
-                    print('DEBUG: --------Start-Properties-Stream--------')
-                    print(properHex(self.props.stream))
-                    print('DEBUG: ---------End-Properties-Stream---------')
-                    print('DEBUG: Writing directory contents to output:')
-                    print('DEBUG: --------Start-Directory-Content--------')
-                    for x in msg.listDir(True, True): print(x)
-                    print('DEBUG: ---------End-Directory-Content---------')
+                    logger.debug('Debugging is true, ignoring NotImplementedError and printing debug info...')
+                    logger.debug('dir_ = {}'.format(dir_))
+                    logger.debug('Writing properties stream to output:')
+                    logger.debug('--------Start-Properties-Stream--------\n' +
+                                 properHex(self.props.stream) +
+                                 '\n---------End-Properties-Stream---------')
+                    logger.debug('Writing directory contents to output:')
+                    logger.debug('--------Start-Directory-Content--------')
+                    logger.debug('\n'.join([repr(x) for x in msg.listDir(True, True)]))
+                    logger.debug('---------End-Directory-Content---------')
             else:
                 self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
                 self.__type = 'msg'
@@ -66,7 +69,8 @@ class Attachment(object):
 
     def save(self, contentId=False, json=False, useFileName=False, raw=False, customPath=None, customFilename=None):
         # Check if the user has specified a custom filename
-        if customFilename != None and customFilename != '':
+        filename = None
+        if customFilename is not None and customFilename != '':
             filename = customFilename
         else:
             # If not...
@@ -74,7 +78,8 @@ class Attachment(object):
             if contentId:
                 filename = self.__cid
             # If filename is None at this point, use long filename as first preference
-            filename = self.__longFilename
+            if filename is None:
+                filename = self.__longFilename
             # Otherwise use the short filename
             if filename is None:
                 filename = self.__shortFilename
@@ -84,20 +89,20 @@ class Attachment(object):
                            ''.join(random.choice(string.ascii_uppercase + string.digits)
                                    for _ in range(5)) + '.bin'
 
-        if customPath != None and customPath != '':
+        if customPath is not None and customPath != '':
             if customPath[-1] != '/' or customPath[-1] != '\\':
                 customPath += '/'
             filename = customPath + filename
 
         if self.__type == "data":
-            f = open(filename, 'wb')
-            f.write(self.__data)
-            f.close()
+            with open(filename, 'wb') as f:
+                f.write(self.__data)
         else:
             self.saveEmbededMessage(contentId, json, useFileName, raw, customPath, customFilename)
         return filename
 
-    def saveEmbededMessage(self, contentId=False, json=False, useFileName=False, raw=False, customPath=None, customFilename=None):
+    def saveEmbededMessage(self, contentId=False, json=False, useFileName=False, raw=False, customPath=None,
+                           customFilename=None):
         """
         Seperate function from save to allow it to
         easily be overridden by a subclass.

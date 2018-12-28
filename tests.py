@@ -2,7 +2,7 @@ import shutil
 import os
 import unittest
 
-from extract_msg import base
+import extract_msg
 
 TEST_FILE = "example-msg-files/unicode.msg"
 

@@ -1,7 +1,10 @@
+import logging
+
 from extract_msg import constants
-from extract_msg.debug import debug
 from extract_msg.utils import properHex
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 def create_prop(string):
@@ -11,9 +14,8 @@ def create_prop(string):
     else:
         if temp not in constants.VARIABLE_LENGTH_PROPS:
             # DEBUG
-            print('WARNING: Unknown property type: {}'.format(properHex(temp)))
+            logger.warning('Unknown property type: {}'.format(properHex(temp)))
         return VariableLengthProp(string)
-
 
 
 class PropBase(object):
@@ -79,6 +81,7 @@ class PropBase(object):
         """
         return self.__type
 
+
 class FixedLengthProp(PropBase):
     """
     Class to contain the data for a single fixed length property.
@@ -95,17 +98,18 @@ class FixedLengthProp(PropBase):
         Converts the data in :param stream: to a
         much more accurate type, specified by
         :param _type:, if possible.
+        :param stream: #TODO what is stream for?
 
         WARNING: Not done.
         """
         # WARNING Not done.
         value = stream
         if _type == 0x0000:  # PtypUnspecified
-            pass;
+            pass
         elif _type == 0x0001:  # PtypNull
             if value != b'\x00\x00\x00\x00\x00\x00\x00\x00':
                 # DEBUG
-                print('Warning: Property type is PtypNull, but is not equal to 0.')
+                logger.warning('Property type is PtypNull, but is not equal to 0.')
             value = None
         elif _type == 0x0002:  # PtypInteger16
             value = constants.STI16.unpack(value)[0]
@@ -120,11 +124,11 @@ class FixedLengthProp(PropBase):
         elif _type == 0x0007:  # PtypFloatingTime
             value = constants.STF64.unpack(value)[0]
             # TODO parsing for this
-            pass;
+            pass
         elif _type == 0x000A:  # PtypErrorCode
             value = constants.STI32.unpack(value)[0]
             # TODO parsing for this
-            pass;
+            pass
         elif _type == 0x000B:  # PtypBoolean
             value = bool(constants.ST3.unpack(value)[0])
         elif _type == 0x0014:  # PtypInteger64
@@ -133,8 +137,8 @@ class FixedLengthProp(PropBase):
             value = constants.ST3.unpack(value)[0]
         elif _type == 0x0048:  # PtypGuid
             # TODO parsing for this
-            pass;
-        return value;
+            pass
+        return value
 
     @property
     def value(self):
@@ -142,7 +146,6 @@ class FixedLengthProp(PropBase):
         Property value.
         """
         return self.__value
-
 
 
 class VariableLengthProp(PropBase):
