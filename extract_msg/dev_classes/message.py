@@ -1,9 +1,8 @@
 import logging
 import olefile
 
-from dev_classes.attachment import Attachment
-from dev_classes.recipient import Recipient
 from extract_msg import constants
+from extract_msg.dev_classes.attachment import Attachment
 from extract_msg.properties import Properties
 from extract_msg.utils import encode, has_len, stri, windowsUnicode
 

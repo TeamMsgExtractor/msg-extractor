@@ -1,6 +1,5 @@
 import logging
 
-from dev_classes.logger_dev import logger_dev
 from extract_msg import constants
 from extract_msg.properties import Properties
 
