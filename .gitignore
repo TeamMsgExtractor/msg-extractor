@@ -30,3 +30,7 @@ __pycache__/
 /output
 /raw
 
+# End user logging
+logging.json
+
+

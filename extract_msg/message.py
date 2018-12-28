@@ -1,18 +1,23 @@
 import copy
 import email.utils
 import json
-import olefile
+import logging
 import os
 import re
+
+from imapclient.imapclient import decode_utf7
+import olefile
+
 from email.parser import Parser as EmailParser
 from extract_msg import constants
 from extract_msg.attachment import Attachment
-from extract_msg.debug import debug
 from extract_msg.properties import Properties
 from extract_msg.recipient import Recipient
 from extract_msg.utils import addNumToDir, encode, has_len, stri, windowsUnicode, xstr
-from imapclient.imapclient import decode_utf7
+from extract_msg.exceptions import InvalidFileFormat
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class Message(olefile.OleFileIO):
@@ -33,12 +38,18 @@ class Message(olefile.OleFileIO):
         :param filename: optional, the filename to be used by default when saving.
         """
         # WARNING DO NOT MANUALLY MODIFY PREFIX. Let the program set it.
-        if debug:
-            # DEBUG
-            print('DEBUG: prefix: {}'.format(prefix))
         self.__path = path
         self.__attachmentClass = attachmentClass
-        olefile.OleFileIO.__init__(self, path)
+
+        try:
+            olefile.OleFileIO.__init__(self, path)
+        except IOError as e:    # py2 and py3 compatible
+            logger.error(e)
+            if e.message == 'not an OLE2 structured storage file':
+                raise InvalidFileFormat(e)
+            else:
+                raise
+
         prefixl = []
         if prefix != '':
             if not isinstance(prefix, stri):
@@ -46,18 +57,18 @@ class Message(olefile.OleFileIO):
                     prefix = '/'.join(prefix)
                 except:
                     raise TypeError('Invalid prefix type: ' + str(type(prefix)) +
-                        '\n(This was probably caused by you setting it manually).')
+                                    '\n(This was probably caused by you setting it manually).')
             prefix = prefix.replace('\\', '/')
             g = prefix.split("/")
             if g[-1] == '':
                 g.pop()
-            prefixl = g
+            prefix = g
             if prefix[-1] != '/':
                 prefix += '/'
             filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix=False)
         self.__prefix = prefix
         self.__prefixList = prefixl
-        if filename != None:
+        if filename is not None:
             self.filename = filename
         elif has_len(path):
             if len(path) < 1536:
@@ -123,6 +134,7 @@ class Message(olefile.OleFileIO):
             stream = self.openstream(filename)
             return stream.read()
         else:
+            logger.info('Stream "{}" was requested but could not be found. Returning `None`.'.format(filename))
             return None
 
     def _getStringStream(self, filename, prefer='unicode', prefix=True):
@@ -140,10 +152,8 @@ class Message(olefile.OleFileIO):
 
         asciiVersion = self._getStream(filename + '001E', prefix)
         unicodeVersion = windowsUnicode(self._getStream(filename + '001F', prefix))
-        if debug:
-            # DEBUG
-            print('DEBUG: _getStringSteam called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
-                filename, asciiVersion != None, unicodeVersion != None))
+        logger.debug('_getStringSteam called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
+            filename, asciiVersion is not None, unicodeVersion is not None))
         if asciiVersion is None:
             return unicodeVersion
         elif unicodeVersion is None:
@@ -203,17 +213,30 @@ class Message(olefile.OleFileIO):
                 self._header = EmailParser().parsestr(headerText)
                 self._header['date'] = self.date
             else:
+                logger.info('Header is empty or was not found. Header will be generated from other streams.')
                 header = EmailParser().parsestr('')
                 header.add_header('Date', self.date)
                 header.add_header('From', self.sender)
                 header.add_header('To', self.to)
                 header.add_header('Cc', self.cc)
                 header.add_header('Message-Id', self.message_id)
-                #TODO find authentication results outside of header
+                # TODO find authentication results outside of header
                 header.add_header('Authenitcation-Results', None)
 
                 self._header = header
             return self._header
+
+    @property
+    def header_dict(self):
+        """
+        Returns a dictionary of the entries in the header
+        """
+        try:
+            return self._header_dict
+        except AttributeError:
+            self._header_dict = dict(self.header._header)
+            self._header_dict.pop('Received')
+            return self._header_dict
 
     def headerInit(self):
         """
@@ -266,6 +289,7 @@ class Message(olefile.OleFileIO):
                 if headerResult is not None:
                     self._sender = headerResult
                     return headerResult
+                logger.info('Header found, but "sender" is not included. Will be generated from other streams.')
             # Extract from other fields
             text = self._getStringStream('__substg1.0_0C1A')
             email = self._getStringStream('__substg1.0_5D01')
@@ -296,6 +320,8 @@ class Message(olefile.OleFileIO):
             if headerResult is not None:
                 self._to = headerResult
             else:
+                if self.headerInit():
+                    logger.info('Header found, but "to" is not included. Will be generated from other streams.')
                 f = []
                 for x in self.recipients:
                     if x.type & 0x0000000f == 1:
@@ -347,6 +373,8 @@ class Message(olefile.OleFileIO):
             if headerResult is not None:
                 self._cc = headerResult
             else:
+                if self.headerInit():
+                    logger.info('Header found, but "cc" is not included. Will be generated from other streams.')
                 f = []
                 for x in self.recipients:
                     if x.type & 0x0000000f == 2:
@@ -366,9 +394,14 @@ class Message(olefile.OleFileIO):
         try:
             return self._message_id
         except AttributeError:
+            headerResult = None
             if self.headerInit():
-                self._message_idself._header['message-id']
+                headerResult = self._header['message-id']
+            if headerResult is not None:
+                self._message_id = headerResult
             else:
+                if self.headerInit():
+                    logger.info('Header found, but "Message-Id" is not included. Will be generated from other streams.')
                 self._message_id = self._getStringStream('__substg1.0_1035')
             return self._message_id
 
@@ -389,9 +422,10 @@ class Message(olefile.OleFileIO):
             return self._body
         except AttributeError:
             self._body = encode(self._getStringStream('__substg1.0_1000'))
-            a = re.search('\n', self._body)
-            if a != None:
-                if re.search('\r\n', self._body) != None:
+            if self._body:
+                a = re.search('\n', self._body)
+            if a is not None:
+                if re.search('\r\n', self._body) is not None:
                     self.__crlf = '\r\n'
             return self._body
 
@@ -452,7 +486,7 @@ class Message(olefile.OleFileIO):
             self._recipients = []
 
             for recipientDir in recipientDirs:
-                self._recipients.append(Recipient(recipientDir.split('#')[-1], self))
+                self._recipients.append(Recipient(recipientDir, self))
 
             return self._recipients
 
@@ -474,7 +508,7 @@ class Message(olefile.OleFileIO):
         else:
             if useFileName:
                 # strip out the extension
-                if self.filename != None:
+                if self.filename is not None:
                     dirName = self.filename.split('/').pop().split('.')[0]
                 else:
                     ValueError(
@@ -522,7 +556,7 @@ class Message(olefile.OleFileIO):
             attachmentNames = []
             # Save the attachments
             for attachment in self.attachments:
-                attachmentNames.append(attachment.save(ContentId))
+                attachmentNames.append(attachment.save(ContentId, toJson))
 
             if toJson:
 

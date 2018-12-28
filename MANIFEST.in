@@ -3,4 +3,5 @@ include MANIFEST.in
 include README.md
 include LICENSE.txt
 include CHANGELOG.md
+recursive-include extract_msg *
 recursive-exclude * *.py[co]
