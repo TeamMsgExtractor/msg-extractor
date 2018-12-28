@@ -16,6 +16,7 @@ from extract_msg import constants
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+logging.addLevelName(5, 'DEVELOPER')
 
 if sys.version_info[0] >= 3:  # Python 3
     stri = (str,)
