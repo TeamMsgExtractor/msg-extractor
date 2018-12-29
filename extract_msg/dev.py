@@ -13,6 +13,7 @@ import os
 
 from extract_msg import dev_classes
 from extract_msg import utils
+from extract_msg.message import Message
 
 
 
@@ -44,6 +45,7 @@ def main(args, argv):
     logger.log(5, 'ARGV: {}'.format(argv))
     for y, x in enumerate(args.msgs):
         logger.log(5, '---- RUNNING DEVELOPER MODE ON FILE {} ----'.format(x[0]))
+        logger.log(5, 'EXCEPTION CHECK:')
         try:
             with Message(x[0]) as msg:
                 #Right here we should still be in the path in currentdir
@@ -53,6 +55,7 @@ def main(args, argv):
             logger.exception(e)
         else:
             logger.log(5, 'No exceptions raised.')
+        logger.log(5, 'DEVELOPER CLASS OUTPUT:')
         os.chdir(currentdir)
         dev_classes.Message(x[0])
         logger.log(5, '---- END OF DEVELOPER LOG ----')

@@ -4,6 +4,7 @@ import olefile
 from extract_msg import constants
 from extract_msg.dev_classes.attachment import Attachment
 from extract_msg.properties import Properties
+from extract_msg.recipient import Recipient
 from extract_msg.utils import encode, has_len, stri, windowsUnicode
 
 
@@ -21,11 +22,6 @@ class Message(olefile.OleFileIO):
         :param prefix: used for extracting embeded msg files
             inside the main one. Do not set manually unless
             you know what you are doing.
-        :param attachmentClass: optional, the class the Message object
-            will use for attachments. You probably should
-            not change this value unless you know what you
-            are doing.
-        :param filename: optional, the filename to be used by default when saving.
         """
         logger.log(5, 'prefix: {}'.format(prefix))
         self.__path = path
@@ -130,10 +126,8 @@ class Message(olefile.OleFileIO):
 
         asciiVersion = self._getStream(filename + '001E', prefix)
         unicodeVersion = windowsUnicode(self._getStream(filename + '001F', prefix))
-        if debug._debug:
-            # DEBUG
-            logger.log(5, '_getStringSteam called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
-                filename, asciiVersion != None, unicodeVersion != None))
+        logger.log(5, '_getStringSteam called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
+                   filename, asciiVersion != None, unicodeVersion != None))
         if asciiVersion is None:
             return unicodeVersion
         elif unicodeVersion is None:
@@ -186,7 +180,7 @@ class Message(olefile.OleFileIO):
             self._attachments = []
 
             for attachmentDir in attachmentDirs:
-                self._attachments.append(self.__attachmentClass(self, attachmentDir))
+                self._attachments.append(Attachment(self, attachmentDir))
 
             return self._attachments
 
