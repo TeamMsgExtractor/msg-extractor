@@ -344,3 +344,6 @@ def setup_logging(default_path=None, default_level=logging.WARN, logfile = None,
 
     logging.getLogger().setLevel(default_level)
     return True
+
+def get_full_name(inp):
+    return inp.__class__.__module__ + '.' + inp.__class__.__name__
