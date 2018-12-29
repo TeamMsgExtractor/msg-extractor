@@ -9,6 +9,7 @@ Module for collecting data to be sent to the developer.
 
 
 import logging
+import os
 
 from extract_msg import dev_classes
 from extract_msg import utils
@@ -33,6 +34,13 @@ def main(args, argv):
     function.
     """
     setup_dev_logger(args.config_path, args.log)
+    currentdir = os.getcwd() # Store this just in case the paths that have been given are relative
+    if args.out_path:
+        if not os.path.exists(args.out_path):
+            os.makedirs(args.out_path)
+        out = args.out_path
+    else:
+        out = currentdir
     logger.log(5, 'ARGV: {}'.format(argv))
     for y, x in enumerate(args.msgs):
         logger.log(5, '---- RUNNING DEVELOPER MODE ON FILE {} ----'.format(x[0]))

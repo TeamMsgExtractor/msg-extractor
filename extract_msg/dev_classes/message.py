@@ -66,8 +66,7 @@ class Message(olefile.OleFileIO):
                 len(self.__prefixList)] not in recipientDirs:
                 recipientDirs.append(dir_[len(self.__prefixList)])
 
-        for recipientDir in recipientDirs:
-            Properties(self._getStream(self.__dir + '/__properties_version1.0'), constants.TYPE_RECIPIENT)
+        self.recipients
         self.attachments
         self.date
 
