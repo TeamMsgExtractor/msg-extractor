@@ -67,7 +67,7 @@ class Message(olefile.OleFileIO):
                 recipientDirs.append(dir_[len(self.__prefixList)])
 
         for recipientDir in recipientDirs:
-            Properties(msg._getStream(self.__dir + '/__properties_version1.0'), constants.TYPE_RECIPIENT)
+            Properties(self._getStream(self.__dir + '/__properties_version1.0'), constants.TYPE_RECIPIENT)
         self.attachments
         self.date
 
@@ -210,6 +210,6 @@ class Message(olefile.OleFileIO):
             self._recipients = []
 
             for recipientDir in recipientDirs:
-                Properties(msg._getStream(self.__dir + '/__properties_version1.0'), constants.TYPE_RECIPIENT)
+                self._recipients.append(Recipient(recipientDir, self))
 
             return self._recipients

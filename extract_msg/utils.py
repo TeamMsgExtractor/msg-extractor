@@ -111,7 +111,7 @@ def divide(string, length):
 def fromTimeStamp(stamp):
     return datetime.datetime.fromtimestamp(stamp, tzlocal.get_localzone())
 
-def get_command_args():
+def get_command_args(args):
     """
     Parse command-line arguments
     """
@@ -150,7 +150,7 @@ def get_command_args():
     parser.add_argument('msgs', metavar = 'msg', nargs = '+',
                         help = 'An msg file to be parsed')
 
-    options = parser.parse_args()
+    options = parser.parse_args(args)
     if options.dev or options.file_logging:
         options.verbose = True
     file_args = options.msgs
