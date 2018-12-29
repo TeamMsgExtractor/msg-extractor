@@ -33,8 +33,9 @@ def main(args, argv):
     function.
     """
     setup_dev_logger(args.config_path, args.log)
+    logger.log(5, 'ARGV: {}'.format(argv))
     for y, x in enumerate(args.msgs):
-        logger.log(5, 'RUNNING DEVELOPER MODE ON FILE {}'.format(x[0]))
+        logger.log(5, '---- RUNNING DEVELOPER MODE ON FILE {} ----'.format(x[0]))
         try:
             with Message(x[0]) as msg:
                 #Right here we should still be in the path in currentdir
@@ -42,4 +43,15 @@ def main(args, argv):
                 msg.save(toJson = args.json, useFileName = args.use_filename, ContentId = args.cid)
         except Exception as e:
             logger.exception(e)
+        else:
+            logger.log(5, 'No exceptions raised.')
         os.chdir(currentdir)
+        dev_classes.Message(x[0])
+        logger.log(5, '---- END OF DEVELOPER LOG ----')
+        logpath = None;
+        for x in logging.getLogger().handlers:
+            try:
+                logpath = x.baseFilename
+            except AttributeError:
+                pass;
+        print('Logging complete. Log has been saved to {}'.format(logpath))
