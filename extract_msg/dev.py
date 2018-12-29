@@ -49,7 +49,7 @@ def main(args, argv):
         dev_classes.Message(x[0])
         logger.log(5, '---- END OF DEVELOPER LOG ----')
         logpath = None;
-        for x in logging.getLogger().handlers:
+        for x in logging.root.handlers:
             try:
                 logpath = x.baseFilename
             except AttributeError:
