@@ -57,7 +57,7 @@ def validate_msg(instance):
             'not empty': False,
         },
         'body': {
-            'exists': instance.Exists(),
+            'exists': instance.Exists('__substg1.0_') or instance.Exists(),
             'not empty': False,
         },
         'date': instance.date,
@@ -80,7 +80,7 @@ def validate_recipient(message_instance, recipient_instance):
 def validate(msg):
     validation_dict = {
         'input': {
-            'class': get_full_name(msg), # Get the full name of the class
+            'class': get_full_class_name(msg), # Get the full name of the class
             'has_len': has_len(msg), # Does the input have a __len__ attribute?
             'len': len(msg) if has_len(msg) else None, # If input has __len__, put the value here
         },
