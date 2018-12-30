@@ -44,9 +44,6 @@ validation_dict_attachment = {
 
 }
 
-validation_dict_recipient = {
-
-}
 def get_string_details(instance, stream):
     return {
         'exists': instance.sExists(stream),
@@ -70,20 +67,30 @@ def validate_msg(instance):
     return {
         '001F/001E': None,
         'header': get_string_details(instance, '__substg1.0_007D'),
-        'body': get_string_details('__substg1.0_1000'),
-        'html body': get_stream_details('__substg1.0_10130102'),
-        'rtf body': get_stream_details('__substg1.0_10090102'),
+        'body': get_string_details(instance, '__substg1.0_1000'),
+        'html body': get_stream_details(instance, '__substg1.0_10130102'),
+        'rtf body': get_stream_details(instance, '__substg1.0_10090102'),
         'date': instance.date,
         'attachments': {x: validate_attachment(y) for x, y in enumerate instance.attachments},
         'recipients': {x: validate_recipient(y) for x, y in enumerate instance.recipients},
     }
 
 def validate_attachment(instance):
+    temp = {
+        'long filename': get_stream_details(instance, '__substg1.0_3707'),
+        'short filename': get_stream_details(instance, '__substg1.0_3704'),
+        'content id': get_stream_details(instance, '__substg1.0_3712'),
+        'type': instance.type,
+    }
+    if temp['type'] == 'msg':
+        temp['msg'] = validate_msg(instance.data)
+    return temp
 
 def validate_recipient(instance):
     return {
-        '': '',
-        'stream 3003': get_email_details(),
+        'type': instance.type,
+        'stream 3003': get_email_details(instance, '__substg1.0_3003'),
+        'stream 39FE': get_email_details(instance, '__substg1.0_39FE'),
     }
 
 def validate(msg):
