@@ -3,7 +3,7 @@ import copy
 import olefile
 
 from extract_msg.message import Message
-from extract_msg.utils import get_full_name, has_len
+from extract_msg.utils import get_full_class_name, has_len
 
 
 
@@ -34,8 +34,8 @@ def validate_msg(instance):
         'html body': get_stream_details(instance, '__substg1.0_10130102'),
         'rtf body': get_stream_details(instance, '__substg1.0_10090102'),
         'date': instance.date,
-        'attachments': {x: validate_attachment(y) for x, y in enumerate instance.attachments},
-        'recipients': {x: validate_recipient(y) for x, y in enumerate instance.recipients},
+        'attachments': {x: validate_attachment(y) for x, y in enumerate(instance.attachments)},
+        'recipients': {x: validate_recipient(y) for x, y in enumerate(instance.recipients)},
     }
 
 def validate_attachment(instance):
