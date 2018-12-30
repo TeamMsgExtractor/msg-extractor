@@ -5,44 +5,7 @@ import olefile
 from extract_msg.message import Message
 from extract_msg.utils import get_full_name, has_len
 
-'': {
-    'exists': False,
-    'not empty': False,
-},
 
-
-validation_dict_base = {
-    'input': {
-        'class': 'None',
-        'has_len': False,
-        'len': 0,
-    },
-    'olefile': {
-        'valid': False,
-    },
-    'msg': None,
-}
-
-validation_dict_attachment = {
-    'long filename': {
-        'exists': False,
-        'not empty': False,
-    },
-    'short filename': {
-        'exists': False,
-        'not empty': False,
-    },
-    'content id': {
-        'exists': False,
-        'not empty': False,
-    },
-    '': {
-        'exists': False,
-        'not empty': False,
-    },
-    'type': None,
-
-}
 
 def get_string_details(instance, stream):
     return {
