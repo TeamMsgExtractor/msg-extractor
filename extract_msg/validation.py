@@ -105,19 +105,17 @@ def validate(msg):
         },
     }
     if validation_dict['olefile']['valid']:
-        validation_dict['msg'] = {
+        validation_dict['message'] = {
             'initializes': False,
         }
         try:
-            msg_list = [Message(msg)]
-            msg_dicts = []
+            msg_instance = Message(msg)
         except NotImplementedError:
             # Should we have a special procedure for handling it if we get "not implemented"?
             pass
         except:
             pass
         else:
-            validation_dict['msg']['initializes'] = True
-            for x in msg_list:
-                #TODO this needs to be done is some way that makes it so that the msg structure can easily be calculated and the dicts can be properly embedded without using recursive functions
+            validation_dict['message']['initializes'] = True
+            validation_dict['message']['msg'] = validate_msg(msg_instance)
     return validation_dict
