@@ -47,27 +47,32 @@ validation_dict_attachment = {
 validation_dict_recipient = {
 
 }
+def get_string_details(instance, stream):
+    return {
+        'exists': instance.sExists(stream),
+        'not empty': False if not instance.sExists(stream) else len(instance._getStringStream(stream)) > 0,
+    }
 
+def get_stream_details(instance, stream):
+    return {
+        'exists': instance.Exists(stream),
+        'not empty': False if not instance.Exists(stream) else len(instance._getStream(stream)) > 0,
+    }
+
+def get_email_details(instance, stream):
+    return {
+        'exists': instance.sExists(stream),
+        'not empty': False if not instance.sExists(stream) else len(instance._getStringStream(stream)) > 0,
+        'valid email address': False if not instance.sExists(stream) else u'@' in instance._getStringStream(stream),
+    }
 
 def validate_msg(instance):
     return {
         '001F/001E': None,
-        'header': {
-            'exists': instance.sExists('__substg1.0_007D'),
-            'not empty': False,
-        },
-        'body': {
-            'exists': instance.sExists('__substg1.0_1000'),
-            'not empty': False,
-        },
-		'html body': {
-            'exists': instance.Exists('__substg1.0_10130102'),
-            'not empty': False,
-        },
-		'rtf body': {
-			'exists': instance.Exists('__substg1.0_10090102'),
-			'not empty': False,
-		},
+        'header': get_string_details(instance, '__substg1.0_007D'),
+        'body': get_string_details('__substg1.0_1000'),
+        'html body': get_stream_details('__substg1.0_10130102'),
+        'rtf body': get_stream_details('__substg1.0_10090102'),
         'date': instance.date,
         'attachments': {x: validate_attachment(y) for x, y in enumerate instance.attachments},
         'recipients': {x: validate_recipient(y) for x, y in enumerate instance.recipients},
@@ -78,11 +83,7 @@ def validate_attachment(instance):
 def validate_recipient(instance):
     return {
         '': '',
-        'stream 3003': {
-            'exists': instance.sExists('__substg1.0_3003'),
-            'not empty': False,
-            'valid email address':
-        },
+        'stream 3003': get_email_details(),
     }
 
 def validate(msg):

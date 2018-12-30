@@ -26,7 +26,7 @@ class Recipient(object):
         self.__formatted = u'{0} <{1}>'.format(self.__name, self.__email)
 
     def _getStream(self, filename):
-        self.__msg._getSteam([self.__dir, inp])
+        self.__msg._getStream([self.__dir, inp])
 
     def _getStringStream(self, filename):
         """
@@ -36,7 +36,7 @@ class Recipient(object):
         versions, then :param prefer: specifies which will be
         returned.
         """
-        self.__msg._getStringSteam([self.__dir, inp])
+        self.__msg._getStringStream([self.__dir, inp])
 
     def Exists(self, inp):
         """

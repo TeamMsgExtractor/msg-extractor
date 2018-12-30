@@ -163,7 +163,7 @@ class Message(olefile.OleFileIO):
 
         asciiVersion = self._getStream(filename + '001E', prefix = False)
         unicodeVersion = windowsUnicode(self._getStream(filename + '001F', prefix = False))
-        logger.debug('_getStringSteam called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
+        logger.debug('_getStringStream called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
             filename, asciiVersion is not None, unicodeVersion is not None))
         if asciiVersion is None:
             return unicodeVersion
