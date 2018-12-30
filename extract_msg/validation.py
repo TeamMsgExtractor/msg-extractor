@@ -53,13 +53,21 @@ def validate_msg(instance):
     return {
         '001F/001E': None,
         'header': {
-            'exists': False,
+            'exists': instance.sExists('__substg1.0_007D'),
             'not empty': False,
         },
         'body': {
-            'exists': instance.sExists('__substg1.0_')
+            'exists': instance.sExists('__substg1.0_1000'),
             'not empty': False,
         },
+		'html body': {
+            'exists': instance.Exists('__substg1.0_10130102'),
+            'not empty': False,
+        },
+		'rtf body': {
+			'exists': instance.Exists('__substg1.0_10090102'),
+			'not empty': False,
+		},
         'date': instance.date,
         'attachments': {x: validate_attachment(y) for x, y in enumerate instance.attachments},
         'recipients': {x: validate_recipient(y) for x, y in enumerate instance.recipients},
@@ -71,7 +79,7 @@ def validate_recipient(instance):
     return {
         '': '',
         'stream 3003': {
-            'exists': instance.msg.sExists([instance.dir, '__substg1.0_3003']),
+            'exists': instance.sExists('__substg1.0_3003'),
             'not empty': False,
             'valid email address':
         },
