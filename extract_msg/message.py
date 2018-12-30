@@ -144,8 +144,8 @@ class Message(olefile.OleFileIO):
     def _getStream(self, filename, prefix=True):
         filename = self.fix_path(filename, prefix)
         if self.exists(filename):
-            stream = self.openstream(filename)
-            return stream.read()
+            with open self.openstream(filename) as stream:
+            	return stream.read()
         else:
             logger.info('Stream "{}" was requested but could not be found. Returning `None`.'.format(filename))
             return None

@@ -54,7 +54,7 @@ class Attachment(object):
             raise TypeError('Unknown attachment type.')
 
     def _getStream(self, filename):
-        self.__msg._getStream([self.__dir, filename])
+        return self.__msg._getStream([self.__dir, filename])
 
     def _getStringStream(self, filename):
         """
@@ -64,19 +64,19 @@ class Attachment(object):
         versions, then :param prefer: specifies which will be
         returned.
         """
-        self.__msg._getStringStream([self.__dir, filename])
+        return self.__msg._getStringStream([self.__dir, filename])
 
     def Exists(self, filename):
         """
         Checks if stream exists inside the attachment folder.
         """
-        self.__msg.Exists([self.__dir, filename])
+        return self.__msg.Exists([self.__dir, filename])
 
     def sExists(self, filename):
         """
         Checks if the string stream exists inside the attachment folder.
         """
-        self.__msg.sExists([self.__dir, filename])
+        return self.__msg.sExists([self.__dir, filename])
 
     def save(self, contentId=False, json=False, useFileName=False, raw=False, customPath=None, customFilename=None):
         # Check if the user has specified a custom filename
