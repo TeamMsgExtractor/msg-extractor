@@ -119,23 +119,30 @@ class Message(olefile.OleFileIO):
         """
         Checks if :param inp: exists in the msg file.
         """
-        if isinstance(inp, list):
-            inp = self.__prefixList + inp
-        else:
-            inp = self.__prefix + inp
+        inp = fix_path(inp)
         return self.exists(inp)
 
     def sExists(self, inp):
         """
         Checks if string stream :param inp: exists in the msg file.
         """
-        return self.Exists(inp + '001F') or self.Exists(inp + '001E')
+        inp = fix_path(inp)
+        return self.exists(inp + '001F') or self.exists(inp + '001E')
+
+    def fix_path(self, inp, prefix=True):
+        """
+        Changes paths so that they have the proper
+        prefix (should :param prefix: be True) and
+        are strings rather than lists or tuples.
+        """
+        if isinstance(inp, (list, tuple)):
+            inp = '/'.join(inp)
+        if prefix:
+            inp = self.__prefix + inp
+        return inp
 
     def _getStream(self, filename, prefix=True):
-        if isinstance(filename, list):
-            filename = '/'.join(filename)
-        if prefix:
-            filename = self.__prefix + filename
+        filename = fix_path(filename, prefix)
         if self.exists(filename):
             stream = self.openstream(filename)
             return stream.read()
@@ -152,12 +159,10 @@ class Message(olefile.OleFileIO):
         returned.
         """
 
-        if isinstance(filename, list):
-            # Join with slashes to make it easier to append the type
-            filename = '/'.join(filename)
+        filename = fix_path(filename, prefix)
 
-        asciiVersion = self._getStream(filename + '001E', prefix)
-        unicodeVersion = windowsUnicode(self._getStream(filename + '001F', prefix))
+        asciiVersion = self._getStream(filename + '001E', prefix = False)
+        unicodeVersion = windowsUnicode(self._getStream(filename + '001F', prefix = False))
         logger.debug('_getStringSteam called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
             filename, asciiVersion is not None, unicodeVersion is not None))
         if asciiVersion is None:

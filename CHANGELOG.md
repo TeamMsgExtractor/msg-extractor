@@ -1,7 +1,8 @@
 **v0.22.0**
 * [[Syncurity #30](https://github.com/Syncurity/msg-extractor/issues/30)] Added `--validate` option.
 * [[Syncurity #24](https://github.com/Syncurity/msg-extractor/issues/24)] Moved all dev code into its own scripts. Use `--dev` to use from the command line.
-* Added new function to Message class: `Message.sExists`. This function checks if a string stream exists. It's input should be formatted identically to that of `Message._getStringSteam`
+* Added new function to `Message` class: `Message.sExists`. This function checks if a string stream exists. It's input should be formatted identically to that of `Message._getStringSteam`
+* Added new function to `Message` class: `Message.fix_path`. This function will add the proper prefix to the path (if the `prefix` parameter is true) and adjust the path to be a string rather than a list or tuple.
 * Added new function to `utils.py`: `get_full_class_name`. This function returns a string containing the module name and the class name of any instance of any class. It is returned in the format of `{module}.{class}`.
 
 **v0.21.0**

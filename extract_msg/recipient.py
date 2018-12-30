@@ -25,6 +25,19 @@ class Recipient(object):
         self.__type = self.__props.get('0C150003').value
         self.__formatted = u'{0} <{1}>'.format(self.__name, self.__email)
 
+	def _getStream(self, ):
+
+	def _getStringStream():
+
+	def Exists(self, inp):
+		"""
+		Checks if stream exists inside the recipient folder.
+		"""
+		self.__msg.Exists([self.__dir, inp])
+
+	def sExists(self, inp):
+		self.__msg.sExists([self.__dir, inp])
+
     @property
     def email(self):
         """
