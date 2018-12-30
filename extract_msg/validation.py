@@ -5,6 +5,11 @@ import olefile
 from extract_msg.message import Message
 from extract_msg.utils import get_full_name, has_len
 
+'': {
+    'exists': False,
+    'not empty': False,
+},
+
 
 validation_dict_base = {
     'input': {
@@ -18,21 +23,24 @@ validation_dict_base = {
     'msg': None,
 }
 
-validation_dict_msg = {
-    '001F/001E': None,
-    'header': {
-        'exists': False,
-        'not empty': False,
-    },
-    'body': {
-        'exists': False,
-        'not empty': False,
-    },
-    'attachments': None,
-    'recipients': None,
-},
-
 validation_dict_attachment = {
+    'long filename': {
+        'exists': False,
+        'not empty': False,
+    },
+    'short filename': {
+        'exists': False,
+        'not empty': False,
+    },
+    'content id': {
+        'exists': False,
+        'not empty': False,
+    },
+    '': {
+        'exists': False,
+        'not empty': False,
+    },
+    'type': None,
 
 }
 
@@ -42,10 +50,32 @@ validation_dict_recipient = {
 
 
 def validate_msg(instance):
+    return {
+        '001F/001E': None,
+        'header': {
+            'exists': False,
+            'not empty': False,
+        },
+        'body': {
+            'exists': instance.Exists(),
+            'not empty': False,
+        },
+        'date': instance.date,
+        'attachments': {x: validate_attachment(y) for x, y in enumerate instance.attachments},
+        'recipients': {x: validate_recipient(y) for x, y in enumerate instance.recipients},
+    }
 
 def validate_attachment(instance):
 
-def validate_recipient(instance):
+def validate_recipient(message_instance, recipient_instance):
+    return {
+		'': '',
+		'stream 3003': {
+		    'exists': False,
+		    'not empty': False,
+			'valid email address':
+		},
+    }
 
 def validate(msg):
     validation_dict = {
@@ -65,8 +95,11 @@ def validate(msg):
         try:
             msg_list = [Message(msg)]
             msg_dicts = []
+        except NotImplementedError:
+            # Should we have a special procedure for handling it if we get "not implemented"?
+            pass
         except:
-            pass;
+            pass
         else:
             validation_dict['msg']['initializes'] = True
             for x in msg_list:
