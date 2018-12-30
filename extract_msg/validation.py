@@ -65,7 +65,7 @@ def get_email_details(instance, stream):
 
 def validate_msg(instance):
     return {
-        '001F/001E': None,
+        '001F/001E': None, #TODO#TODO#TODO#
         'header': get_string_details(instance, '__substg1.0_007D'),
         'body': get_string_details(instance, '__substg1.0_1000'),
         'html body': get_stream_details(instance, '__substg1.0_10130102'),

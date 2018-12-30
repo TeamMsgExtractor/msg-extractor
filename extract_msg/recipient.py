@@ -26,7 +26,7 @@ class Recipient(object):
         self.__formatted = u'{0} <{1}>'.format(self.__name, self.__email)
 
     def _getStream(self, filename):
-        self.__msg._getStream([self.__dir, inp])
+        self.__msg._getStream([self.__dir, filename])
 
     def _getStringStream(self, filename):
         """
@@ -36,19 +36,19 @@ class Recipient(object):
         versions, then :param prefer: specifies which will be
         returned.
         """
-        self.__msg._getStringStream([self.__dir, inp])
+        self.__msg._getStringStream([self.__dir, filename])
 
-    def Exists(self, inp):
+    def Exists(self, filename):
         """
         Checks if stream exists inside the recipient folder.
         """
-        self.__msg.Exists([self.__dir, inp])
+        self.__msg.Exists([self.__dir, filename])
 
-    def sExists(self, inp):
+    def sExists(self, filename):
         """
         Checks if the string stream exists inside the recipient folder.
         """
-        self.__msg.sExists([self.__dir, inp])
+        self.__msg.sExists([self.__dir, filename])
 
     @property
     def email(self):

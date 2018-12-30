@@ -119,14 +119,14 @@ class Message(olefile.OleFileIO):
         """
         Checks if :param inp: exists in the msg file.
         """
-        inp = fix_path(inp)
+        inp = self.fix_path(inp)
         return self.exists(inp)
 
     def sExists(self, inp):
         """
         Checks if string stream :param inp: exists in the msg file.
         """
-        inp = fix_path(inp)
+        inp = self.fix_path(inp)
         return self.exists(inp + '001F') or self.exists(inp + '001E')
 
     def fix_path(self, inp, prefix=True):
@@ -142,7 +142,7 @@ class Message(olefile.OleFileIO):
         return inp
 
     def _getStream(self, filename, prefix=True):
-        filename = fix_path(filename, prefix)
+        filename = self.fix_path(filename, prefix)
         if self.exists(filename):
             stream = self.openstream(filename)
             return stream.read()
@@ -159,7 +159,7 @@ class Message(olefile.OleFileIO):
         returned.
         """
 
-        filename = fix_path(filename, prefix)
+        filename = self.fix_path(filename, prefix)
 
         asciiVersion = self._getStream(filename + '001E', prefix = False)
         unicodeVersion = windowsUnicode(self._getStream(filename + '001F', prefix = False))
