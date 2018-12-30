@@ -25,9 +25,18 @@ class Recipient(object):
         self.__type = self.__props.get('0C150003').value
         self.__formatted = u'{0} <{1}>'.format(self.__name, self.__email)
 
-    def _getStream(self, ):
+    def _getStream(self, filename):
+        self.__msg._getSteam([self.__dir, inp])
 
-    def _getStringStream():
+    def _getStringStream(self, filename):
+        """
+        Gets a string representation of the requested filename.
+        Checks for both ASCII and Unicode representations and returns
+        a value if possible.  If there are both ASCII and Unicode
+        versions, then :param prefer: specifies which will be
+        returned.
+        """
+        self.__msg._getStringSteam([self.__dir, inp])
 
     def Exists(self, inp):
         """
@@ -36,6 +45,9 @@ class Recipient(object):
         self.__msg.Exists([self.__dir, inp])
 
     def sExists(self, inp):
+        """
+        Checks if the string stream exists inside the recipient folder.
+        """
         self.__msg.sExists([self.__dir, inp])
 
     @property
