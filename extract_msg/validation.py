@@ -57,7 +57,7 @@ def validate_msg(instance):
             'not empty': False,
         },
         'body': {
-            'exists': instance.Exists('__substg1.0_') or instance.Exists(),
+            'exists': instance.sExists('__substg1.0_')
             'not empty': False,
         },
         'date': instance.date,
@@ -67,14 +67,14 @@ def validate_msg(instance):
 
 def validate_attachment(instance):
 
-def validate_recipient(message_instance, recipient_instance):
+def validate_recipient(instance):
     return {
-		'': '',
-		'stream 3003': {
-		    'exists': False,
-		    'not empty': False,
-			'valid email address':
-		},
+        '': '',
+        'stream 3003': {
+            'exists': instance.msg.sExists([instance.dir, '__substg1.0_3003']),
+            'not empty': False,
+            'valid email address':
+        },
     }
 
 def validate(msg):

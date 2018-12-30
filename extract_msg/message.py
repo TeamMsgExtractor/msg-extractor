@@ -125,11 +125,11 @@ class Message(olefile.OleFileIO):
             inp = self.__prefix + inp
         return self.exists(inp)
 
-	def sExists(self, inp):
-		"""
-		Checks if string stream :param inp: exists in the msg file.
-		"""
-		return self.Exists(inp + '001F') or self.Exists(inp + '001E')
+    def sExists(self, inp):
+        """
+        Checks if string stream :param inp: exists in the msg file.
+        """
+        return self.Exists(inp + '001F') or self.Exists(inp + '001E')
 
     def _getStream(self, filename, prefix=True):
         if isinstance(filename, list):
