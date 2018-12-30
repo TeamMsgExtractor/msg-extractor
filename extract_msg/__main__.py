@@ -10,7 +10,7 @@ if __name__ == '__main__':
     # Setup logging to stdout, indicate running from cli
     CLI_LOGGING = 'extract_msg_cli'
 
-    args = utils.get_command_args(sys.argv)
+    args = utils.get_command_args(sys.argv[1:])
     level = logging.INFO if args.verbose else logging.WARNING
     currentdir = os.getcwd() # Store this just in case the paths that have been given are relative
     if args.out_path:
@@ -21,7 +21,22 @@ if __name__ == '__main__':
         out = currentdir
     if args.dev:
         import extract_msg.dev
-        extract_msg.dev.main(args, sys.argv)
+        extract_msg.dev.main(args, sys.argv[1:])
+    elif args.validate:
+        import json
+        import pprint
+        import time
+
+        from extract_msg import validation
+
+        val_results = {x[0]: validation.validate(x[0]) for x in args.msgs}
+        filename = 'validation {}.json'.format(int(time.time()))
+        print('Validation Results:')
+        pprint.pprint(val_results)
+        print('These results have been saved to {}'.format(filename))
+        with open(filename, 'w') as fil:
+            fil.write(json.dumps(val_results))
+        utils.get_input('Press enter to exit...')
     else:
         utils.setup_logging(args.config_path, level, args.log, args.file_logging)
         for x in args.msgs:
@@ -31,6 +46,6 @@ if __name__ == '__main__':
                     os.chdir(out)
                     msg.save(toJson = args.json, useFileName = args.use_filename, ContentId = args.cid)
             except Exception as e:
-                print("Error with file '" + filename + "': " +
+                print("Error with file '" + x[0] + "': " +
                       traceback.format_exc())
             os.chdir(currentdir)

@@ -64,7 +64,7 @@ def validate(msg):
             'len': len(msg) if has_len(msg) else None, # If input has __len__, put the value here
         },
         'olefile': {
-            'valid': olefile.isolefile(msg),
+            'valid': olefile.isOleFile(msg),
         },
     }
     if validation_dict['olefile']['valid']:

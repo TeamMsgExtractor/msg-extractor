@@ -21,6 +21,8 @@ logging.addLevelName(5, 'DEVELOPER')
 if sys.version_info[0] >= 3:  # Python 3
     stri = (str,)
 
+    get_input = input
+
     def encode(inp):
         return inp
 
@@ -49,6 +51,8 @@ if sys.version_info[0] >= 3:  # Python 3
 
 else:  # Python 2
     stri = (str, unicode)
+
+    get_input = raw_input
 
     def encode(inp):
         return inp.encode('utf-8')
@@ -121,7 +125,10 @@ def get_command_args(args):
                         help = 'Save attachments by their Content ID, if they have one. Useful when working with the HTML body.')
     # --dev
     parser.add_argument('--dev', dest = 'dev', action = 'store_true',
-                        help = 'Changes to use developer mode. Automatically enables the --verbose flag.')
+                        help = 'Changes to use developer mode. Automatically enables the --verbose flag. Takes precedence over the --validate flag.')
+    # --validate
+    parser.add_argument('--validate', dest = 'validate', action = 'store_true',
+                        help = 'Turns on file validation mode. Turns off regular file output.')
     # --json
     parser.add_argument('--json', dest = 'json', action = 'store_true',
                         help = 'Changes to write output files as json.')
