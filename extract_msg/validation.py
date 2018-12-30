@@ -19,7 +19,6 @@ validation_dict_base = {
 }
 
 validation_dict_msg = {
-    'initializes': False,
     '001F/001E': None,
     'header': {
         'exists': False,
@@ -42,9 +41,11 @@ validation_dict_recipient = {
 }
 
 
-def attempt_message_init(inp):
-    try:
-        Message.
+def validate_msg(instance):
+
+def validate_attachment(instance):
+
+def validate_recipient(instance):
 
 def validate(msg):
     validation_dict = {
@@ -57,6 +58,17 @@ def validate(msg):
             'valid': olefile.isolefile(msg),
         },
     }
-    if not validation_dict['olefile']['valid']:
-
+    if validation_dict['olefile']['valid']:
+        validation_dict['msg'] = {
+            'initializes': False,
+        }
+        try:
+            msg_list = [Message(msg)]
+            msg_dicts = []
+        except:
+            pass;
+        else:
+            validation_dict['msg']['initializes'] = True
+            for x in msg_list:
+                #TODO this needs to be done is some way that makes it so that the msg structure can easily be calculated and the dicts can be properly embedded without using recursive functions
     return validation_dict
