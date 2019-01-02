@@ -67,7 +67,6 @@ class Message(olefile.OleFileIO):
                 prefix += '/'
             filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix=False)
         self.__prefix = prefix
-        print(type(prefix))
         self.__prefixList = prefixl
         if filename is not None:
             self.filename = filename
