@@ -26,9 +26,17 @@ def get_email_details(instance, stream):
         'valid email address': False if not instance.sExists(stream) else u'@' in instance._getStringStream(stream),
     }
 
+def string_FE(instance):
+	temp = '001F' if instance.mainProperties['340D0003'].value & 0x40000 else '001E'
+	tempnot = '001F' if temp == '001E' else '001E'
+	confirmation = all(x[-1].endswith(temp) for x in instance.listDir())
+	if confirmation:
+		temp += ', but ' + tempnot + ' was detected.'
+	return temp
+
 def validate_msg(instance):
     return {
-        '001F/001E': None, #TODO#TODO#TODO#
+        '001F/001E': string_FE(instance),
         'header': get_string_details(instance, '__substg1.0_007D'),
         'body': get_string_details(instance, '__substg1.0_1000'),
         'html body': get_stream_details(instance, '__substg1.0_10130102'),
