@@ -5,6 +5,7 @@
 * Added new function to `Message` class: `Message.fix_path`. This function will add the proper prefix to the path (if the `prefix` parameter is true) and adjust the path to be a string rather than a list or tuple.
 * Added new function to `utils.py`: `get_full_class_name`. This function returns a string containing the module name and the class name of any instance of any class. It is returned in the format of `{module}.{class}`.
 * Added a sort of alias of `Message._getStream`, `Message._getStringStream`, `Message.Exists`, and `Message.sExists` to `Attachment` and `Recipient`. These functions run inside the associated attachment directory or recipient directory, respectively.
+* Added a fix to an issue introduced in an earlier version caused by accidentally deleting a letter in the code.
 
 **v0.21.0**
 * [[Syncurity #7](https://github.com/Syncurity/msg-extractor/issues/7)] Changed debug code to use logging module.
