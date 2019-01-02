@@ -48,9 +48,9 @@ def validate_msg(instance):
 
 def validate_attachment(instance):
     temp = {
-        'long filename': get_stream_details(instance, '__substg1.0_3707'),
-        'short filename': get_stream_details(instance, '__substg1.0_3704'),
-        'content id': get_stream_details(instance, '__substg1.0_3712'),
+        'long filename': get_string_details(instance, '__substg1.0_3707'),
+        'short filename': get_string_details(instance, '__substg1.0_3704'),
+        'content id': get_string_details(instance, '__substg1.0_3712'),
         'type': instance.type,
     }
     if temp['type'] == 'msg':
