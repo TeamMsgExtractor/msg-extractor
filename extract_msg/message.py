@@ -62,11 +62,12 @@ class Message(olefile.OleFileIO):
             g = prefix.split("/")
             if g[-1] == '':
                 g.pop()
-            prefix = g
+            prefixl = g
             if prefix[-1] != '/':
                 prefix += '/'
             filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix=False)
         self.__prefix = prefix
+        print(type(prefix))
         self.__prefixList = prefixl
         if filename is not None:
             self.filename = filename
@@ -145,7 +146,7 @@ class Message(olefile.OleFileIO):
         filename = self.fix_path(filename, prefix)
         if self.exists(filename):
             with self.openstream(filename) as stream:
-            	return stream.read()
+                return stream.read()
         else:
             logger.info('Stream "{}" was requested but could not be found. Returning `None`.'.format(filename))
             return None
