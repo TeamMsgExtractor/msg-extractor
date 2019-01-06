@@ -7,12 +7,12 @@ import datetime
 import json
 import logging
 import logging.config
-import os
 import sys
 
 import tzlocal
 
 from extract_msg import constants
+from extract_msg.compat import os_ as os
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())

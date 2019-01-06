@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     args = utils.get_command_args(sys.argv[1:])
     level = logging.INFO if args.verbose else logging.WARNING
-    currentdir = os.getcwd() # Store this just in case the paths that have been given are relative
+    currentdir = os.getcwdu() # Store this just in case the paths that have been given are relative
     if args.out_path:
         if not os.path.exists(args.out_path):
             os.makedirs(args.out_path)

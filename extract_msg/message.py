@@ -2,7 +2,6 @@ import copy
 import email.utils
 import json
 import logging
-import os
 import re
 
 from imapclient.imapclient import decode_utf7
@@ -11,6 +10,7 @@ import olefile
 from email.parser import Parser as EmailParser
 from extract_msg import constants
 from extract_msg.attachment import Attachment
+from extract_msg.compat import os_ as os
 from extract_msg.properties import Properties
 from extract_msg.recipient import Recipient
 from extract_msg.utils import addNumToDir, encode, has_len, stri, windowsUnicode, xstr
@@ -555,7 +555,7 @@ class Message(olefile.OleFileIO):
                     dirName
                 )
 
-        oldDir = os.getcwd()
+        oldDir = os.getcwdu()
         try:
             os.chdir(dirName)
 
@@ -601,12 +601,12 @@ class Message(olefile.OleFileIO):
 
     def saveRaw(self):
         # Create a 'raw' folder
-        oldDir = os.getcwd()
+        oldDir = os.getcwdu()
         try:
             rawDir = 'raw'
             os.makedirs(rawDir)
             os.chdir(rawDir)
-            sysRawDir = os.getcwd()
+            sysRawDir = os.getcwdu()
 
             # Loop through all the directories
             for dir_ in self.listdir():
