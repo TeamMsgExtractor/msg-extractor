@@ -55,7 +55,7 @@ else:  # Python 2
     get_input = raw_input
 
     def encode(inp):
-        return inp.encode('utf-8')
+        return inp.encode('utf-8') if inp is not None else None
 
     def properHex(inp):
         """

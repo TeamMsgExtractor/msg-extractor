@@ -1,0 +1,380 @@
+(lp0
+(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/2017  2018 Outstanding Expense.msg
+p1
+cexceptions
+TypeError
+p2
+(S'Unknown attachment type.'
+p3
+tp4
+Rp5
+tp6
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/817 -  KRAFT - 11233260  6794 00.msg
+p7
+cexceptions
+NotImplementedError
+p8
+(S'Current version of extract_msg does not support extraction of containers that are not embedded msg files.'
+p9
+tp10
+Rp11
+tp12
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/817 - FREY FARMS -  CK# 2306  $1500 00.msg
+p13
+g8
+(g9
+tp14
+Rp15
+tp16
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/817 - IDENTIGEN NORTH AMERICA - 995171  1 000.msg
+p17
+g8
+(g9
+tp18
+Rp19
+tp20
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/817- Tsamma Juice (Frey Farm ) July Retainer fee  .msg
+p21
+g8
+(g9
+tp22
+Rp23
+tp24
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/818- Oncor Incentive check - ck# 659486  $ 4481 21.msg
+p25
+g8
+(g9
+tp26
+Rp27
+tp28
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/818-817-819-827-837- BOB EVANS - ACH DEPOSIT - $320 013 09.msg
+p29
+g8
+(g9
+tp30
+Rp31
+tp32
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/ADVANTAGE FRESH - HARMLESS HARVEST   QRT 2 PAYMENT  2.msg
+p33
+g8
+(g9
+tp34
+Rp35
+tp36
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/CrunchPak May 2018 revenue e-mail from Field Ops to Patti.msg
+p37
+g8
+(g9
+tp38
+Rp39
+tp40
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/FW  Advantage Crunch Pak  January and February Commissions  xlsx.msg
+p41
+g8
+(g9
+tp42
+Rp43
+tp44
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/FW  GTS Living Foods  01 .msg
+p45
+g8
+(g9
+tp46
+Rp47
+tp48
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/FW  LOL Changed - From our Call    (9).msg
+p49
+cexceptions
+AttributeError
+p50
+(S"'NoneType' object has no attribute 'encode'"
+p51
+tp52
+Rp53
+tp54
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/FW  LOL Changed - From our Call   .msg
+p55
+g50
+(S"'NoneType' object has no attribute 'encode'"
+p56
+tp57
+Rp58
+tp59
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/FW  Missing 200k (17).msg
+p60
+g8
+(g9
+tp61
+Rp62
+tp63
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/FW  Mochi Journal Entry.msg
+p64
+g50
+(S"'NoneType' object has no attribute 'encode'"
+p65
+tp66
+Rp67
+tp68
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/FW  November 2018 Estimates \u2013 B821 Fresh Kroger \u2013 Due Thurs Nov 1 @ NOON.msg
+p69
+g50
+(S"'NoneType' object has no attribute 'encode'"
+p70
+tp71
+Rp72
+tp73
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/FW  Smithfield brand for 817   .msg
+p74
+g8
+(g9
+tp75
+Rp76
+tp77
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/FW  Smithfield Companies Missing Revenue for May 2018.msg
+p78
+g8
+(g9
+tp79
+Rp80
+tp81
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/FW  Smithfield Support backup   Armour   John Morrell ect  .msg
+p82
+g8
+(g9
+tp83
+Rp84
+tp85
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/GTS Living Foods (MILLEN)  BR 822  june commission check - Yes I see some of my customers on the B U 01.msg
+p86
+g8
+(g9
+tp87
+Rp88
+tp89
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/Hope Foods - ck# 25726  $ 7953 10.msg
+p90
+g8
+(g9
+tp91
+Rp92
+tp93
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/Negative waterfall for Land o Frost  .msg
+p94
+g8
+(g9
+tp95
+Rp96
+tp97
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/Organic Girl  Aging for 818   .msg
+p98
+g8
+(g9
+tp99
+Rp100
+tp101
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/RE  Advantage Crunch Pak  January and February Commissions  xlsx (5).msg
+p102
+g8
+(g9
+tp103
+Rp104
+tp105
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/RE  Dollar & Home Center HQ Sales Daily Summary (2).msg
+p106
+g8
+(g9
+tp107
+Rp108
+tp109
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/RE  Fresh Express.msg
+p110
+g8
+(g9
+tp111
+Rp112
+tp113
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/RE  GTS Living Foods    (2).msg
+p114
+g8
+(g9
+tp115
+Rp116
+tp117
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/RE  GTS Living Foods    (3).msg
+p118
+g8
+(g9
+tp119
+Rp120
+tp121
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/RE  GTS Living Foods   01.msg
+p122
+g8
+(g9
+tp123
+Rp124
+tp125
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/RE  GTS Living Foods (MILLEN)   (15).msg
+p126
+g8
+(g9
+tp127
+Rp128
+tp129
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/RE  GTS Living Foods (MILLEN)   (16).msg
+p130
+g8
+(g9
+tp131
+Rp132
+tp133
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/RE  GTS Living Foods (MILLEN)   (18).msg
+p134
+g8
+(g9
+tp135
+Rp136
+tp137
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/RE  GTS Living Foods (MILLEN)  01.msg
+p138
+g8
+(g9
+tp139
+Rp140
+tp141
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/RE  GTS Living Foods (MILLEN)  BR 822  june commission check - Yes I see some of my customers on the B U 01.msg
+p142
+g8
+(g9
+tp143
+Rp144
+tp145
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/RE  Military invoicing.msg
+p146
+g50
+(S"'NoneType' object has no attribute 'encode'"
+p147
+tp148
+Rp149
+tp150
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/RE  Missing 200k (10).msg
+p151
+g8
+(g9
+tp152
+Rp153
+tp154
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/RE  Missing 200k (12).msg
+p155
+g8
+(g9
+tp156
+Rp157
+tp158
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/RE  Missing 200k (13).msg
+p159
+g8
+(g9
+tp160
+Rp161
+tp162
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/RE  Missing 200k (18).msg
+p163
+g8
+(g9
+tp164
+Rp165
+tp166
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/RE  Missing 200k (20).msg
+p167
+g8
+(g9
+tp168
+Rp169
+tp170
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/RE  Missing 200k (3).msg
+p171
+g8
+(g9
+tp172
+Rp173
+tp174
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/RE  Missing 200k (6).msg
+p175
+g8
+(g9
+tp176
+Rp177
+tp178
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/RE  Missing 200k (7).msg
+p179
+g8
+(g9
+tp180
+Rp181
+tp182
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/RE  Negative waterfall for Land o Frost   (2).msg
+p183
+g8
+(g9
+tp184
+Rp185
+tp186
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/RE  Negative waterfall for Land o Frost  .msg
+p187
+g8
+(g9
+tp188
+Rp189
+tp190
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/RE  Reporting Priorities.msg
+p191
+g8
+(g9
+tp192
+Rp193
+tp194
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/RE  Smithfield companies missing revenue   (Smithfield Packing  Gwaltney  Armour Eckrich and John Morrell are the company names involved )   .msg
+p195
+g8
+(g9
+tp196
+Rp197
+tp198
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/Smithfield brand for 817   .msg
+p199
+g8
+(g9
+tp200
+Rp201
+tp202
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/Smithfield Companies Missing Revenue for May 2018.msg
+p203
+g8
+(g9
+tp204
+Rp205
+tp206
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/Smithfield June 2018 AR Accrue $18 359.msg
+p207
+g8
+(g9
+tp208
+Rp209
+tp210
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/Smithfield Support backup   Armour   John Morrell ect  .msg
+p211
+g8
+(g9
+tp212
+Rp213
+tp214
+a(VC:/Users/Creation/Desktop/New folder (2)/Conv - Copy/Send to kenny/Yahoo!!!!.msg
+p215
+g50
+(S"'NoneType' object has no attribute 'encode'"
+p216
+tp217
+Rp218
+tp219
+a.
