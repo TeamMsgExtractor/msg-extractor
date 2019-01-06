@@ -436,9 +436,9 @@ class Message(olefile.OleFileIO):
             if self._body:
                 self._body = encode(self._body)
                 a = re.search('\n', self._body)
-            if a is not None:
-                if re.search('\r\n', self._body) is not None:
-                    self.__crlf = '\r\n'
+                if a is not None:
+                    if re.search('\r\n', self._body) is not None:
+                        self.__crlf = '\r\n'
             return self._body
 
     @property
