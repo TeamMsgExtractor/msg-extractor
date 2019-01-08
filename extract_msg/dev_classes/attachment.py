@@ -3,6 +3,8 @@ import logging
 from extract_msg import constants
 from extract_msg.properties import Properties
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 class Attachment(object):
     """
