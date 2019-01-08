@@ -1,3 +1,4 @@
+import copy
 import logging
 import olefile
 
@@ -137,6 +138,31 @@ class Message(olefile.OleFileIO):
                 return unicodeVersion
             else:
                 return asciiVersion
+
+    @property
+    def path(self):
+        """
+        Returns the message path if generated from a file,
+        otherwise returns the data used to generate the
+        Message instance.
+        """
+        return self.__path
+
+    @property
+    def prefix(self):
+        """
+        Returns the prefix of the Message instance.
+        Intended for developer use.
+        """
+        return self.__prefix
+
+    @property
+    def prefixList(self):
+        """
+        Returns the prefix list of the Message instance.
+        Intended for developer use.
+        """
+        return copy.deepcopy(self.__prefixList)
 
     @property
     def mainProperties(self):

@@ -27,14 +27,14 @@ def get_email_details(instance, stream):
     }
 
 def string_FE(instance):
-	temp = '001E'
-	if instance.manProperties.has_key('340D0003'):
-		temp = '001F' if instance.mainProperties['340D0003'].value & 0x40000 else '001E'
-	tempnot = '001F' if temp == '001E' else '001E'
-	confirmation = all(not x[-1].endswith(tempnot) for x in instance.listDir())
-	if confirmation:
-		temp += ', but ' + tempnot + ' was detected.'
-	return temp
+    temp = '001E'
+    if instance.manProperties.has_key('340D0003'):
+        temp = '001F' if instance.mainProperties['340D0003'].value & 0x40000 else '001E'
+    tempnot = '001F' if temp == '001E' else '001E'
+    confirmation = all(not x[-1].endswith(tempnot) for x in instance.listDir())
+    if confirmation:
+        temp += ', but ' + tempnot + ' was detected.'
+    return temp
 
 def validate_msg(instance):
     return {
