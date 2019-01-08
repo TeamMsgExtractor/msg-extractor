@@ -51,6 +51,7 @@ class Attachment(object):
                 self.__type = 'msg'
                 self.__data = msg.__class__(self.msg.path, self.__prefix, self.__class__)
         else:
+            # TODO Handling for special attacment types (like 0x00000007)
             raise TypeError('Unknown attachment type.')
 
     def _getStream(self, filename):
