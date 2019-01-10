@@ -1,4 +1,4 @@
-from os import *
+import os
 import sys
 
 if sys.version_info[0] >= 3:

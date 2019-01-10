@@ -7,6 +7,7 @@ from extract_msg.utils import properHex
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
+
 class Attachment(object):
     """
     Developer version of the `extract_msg.attachment.Attachment` class.

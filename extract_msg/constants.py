@@ -87,7 +87,8 @@ KNOWN_FILE_FLAGS = [
 NEEDS_ARG = [
     '--out-name',
 ]
-MAINDOC = "extract_msg:\n\tExtracts emails and attachments saved in Microsoft Outlook's .msg files.\n\nhttps://github.com/mattgwwalker/msg-extractor"
+MAINDOC = "extract_msg:\n\tExtracts emails and attachments saved in Microsoft Outlook's .msg files.\n\n" \
+          "https://github.com/mattgwwalker/msg-extractor"
 
 # Define pre-compiled structs to make unpacking slightly faster
 # General structs
@@ -142,7 +143,7 @@ PTYPES = {
 # This property information was sourced from
 # http://www.fileformat.info/format/outlookmsg/index.htm
 # on 2013-07-22.
-# It was extened by The Elemental of Creation on 2018-10-12
+# It was extended by The Elemental of Creation on 2018-10-12
 PROPERTIES = {
     '00010102': 'Template data',
     '0002000B': 'Alternate recipient allowed',

@@ -468,8 +468,8 @@ class Message(olefile.OleFileIO):
             attachmentDirs = []
 
             for dir_ in self.listDir():
-                if dir_[len(self.__prefixList)].startswith('__attach') and dir_[
-                    len(self.__prefixList)] not in attachmentDirs:
+                if dir_[len(self.__prefixList)].startswith('__attach') and\
+                        dir_[len(self.__prefixList)] not in attachmentDirs:
                     attachmentDirs.append(dir_[len(self.__prefixList)])
 
             self._attachments = []
@@ -491,8 +491,8 @@ class Message(olefile.OleFileIO):
             recipientDirs = []
 
             for dir_ in self.listDir():
-                if dir_[len(self.__prefixList)].startswith('__recip') and dir_[
-                    len(self.__prefixList)] not in recipientDirs:
+                if dir_[len(self.__prefixList)].startswith('__recip') and\
+                        dir_[len(self.__prefixList)] not in recipientDirs:
                     recipientDirs.append(dir_[len(self.__prefixList)])
 
             self._recipients = []

@@ -10,7 +10,7 @@ if __name__ == '__main__':
     # Setup logging to stdout, indicate running from cli
     CLI_LOGGING = 'extract_msg_cli'
 
-    args = utils.get_command_args(sys.argv[1:])
+    args = utils.get_command_args
     level = logging.INFO if args.verbose else logging.WARNING
     currentdir = os.getcwdu() # Store this just in case the paths that have been given are relative
     if args.out_path:
@@ -42,7 +42,7 @@ if __name__ == '__main__':
         for x in args.msgs:
             try:
                 with Message(x[0]) as msg:
-                    #Right here we should still be in the path in currentdir
+                    # Right here we should still be in the path in currentdir
                     os.chdir(out)
                     msg.save(toJson = args.json, useFileName = args.use_filename, ContentId = args.cid)
             except Exception as e:

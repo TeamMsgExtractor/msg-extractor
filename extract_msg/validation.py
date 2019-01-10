@@ -6,12 +6,12 @@ from extract_msg.message import Message
 from extract_msg.utils import get_full_class_name, has_len
 
 
-
 def get_string_details(instance, stream):
     return {
         'exists': instance.sExists(stream),
         'not empty': False if not instance.sExists(stream) else len(instance._getStringStream(stream)) > 0,
     }
+
 
 def get_stream_details(instance, stream):
     return {
@@ -19,12 +19,14 @@ def get_stream_details(instance, stream):
         'not empty': False if not instance.Exists(stream) else len(instance._getStream(stream)) > 0,
     }
 
+
 def get_email_details(instance, stream):
     return {
         'exists': instance.sExists(stream),
         'not empty': False if not instance.sExists(stream) else len(instance._getStringStream(stream)) > 0,
         'valid email address': False if not instance.sExists(stream) else u'@' in instance._getStringStream(stream),
     }
+
 
 def string_FE(instance):
     temp = '001E'
@@ -35,6 +37,7 @@ def string_FE(instance):
     if confirmation:
         temp += ', but ' + tempnot + ' was detected.'
     return temp
+
 
 def validate_msg(instance):
     return {
@@ -48,6 +51,7 @@ def validate_msg(instance):
         'recipients': {x: validate_recipient(y) for x, y in enumerate(instance.recipients)},
     }
 
+
 def validate_attachment(instance):
     temp = {
         'long filename': get_string_details(instance, '__substg1.0_3707'),
@@ -59,12 +63,14 @@ def validate_attachment(instance):
         temp['msg'] = validate_msg(instance.data)
     return temp
 
+
 def validate_recipient(instance):
     return {
         'type': instance.type,
         'stream 3003': get_email_details(instance, '__substg1.0_3003'),
         'stream 39FE': get_email_details(instance, '__substg1.0_39FE'),
     }
+
 
 def validate(msg):
     validation_dict = {

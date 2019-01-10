@@ -8,19 +8,19 @@ from extract_msg.properties import Properties
 from extract_msg.recipient import Recipient
 from extract_msg.utils import encode, has_len, stri, windowsUnicode
 
-
-
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
 
 class Message(olefile.OleFileIO):
     """
     Developer version of the `extract_msg.message.Message` class.
     """
+
     def __init__(self, path, prefix=''):
         """
         :param path: path to the msg file in the system or is the raw msg file.
-        :param prefix: used for extracting embeded msg files
+        :param prefix: used for extracting embedded msg files
             inside the main one. Do not set manually unless
             you know what you are doing.
         """
@@ -34,7 +34,7 @@ class Message(olefile.OleFileIO):
                     prefix = '/'.join(prefix)
                 except:
                     raise TypeError('Invalid prefix type: ' + str(type(prefix)) +
-                        '\n(This was probably caused by you setting it manually).')
+                                    '\n(This was probably caused by you setting it manually).')
             prefix = prefix.replace('\\', '/')
             g = prefix.split("/")
             if g[-1] == '':
@@ -59,8 +59,8 @@ class Message(olefile.OleFileIO):
         recipientDirs = []
 
         for dir_ in self.listDir():
-            if dir_[len(self.__prefixList)].startswith('__recip') and dir_[
-                len(self.__prefixList)] not in recipientDirs:
+            if dir_[len(self.__prefixList)].startswith('__recip') and\
+                    dir_[len(self.__prefixList)] not in recipientDirs:
                 recipientDirs.append(dir_[len(self.__prefixList)])
 
         self.recipients
@@ -128,7 +128,7 @@ class Message(olefile.OleFileIO):
         asciiVersion = self._getStream(filename + '001E', prefix)
         unicodeVersion = windowsUnicode(self._getStream(filename + '001F', prefix))
         logger.log(5, '_getStringStream called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
-                   filename, asciiVersion != None, unicodeVersion != None))
+            filename, asciiVersion is not None, unicodeVersion is not None))
         if asciiVersion is None:
             return unicodeVersion
         elif unicodeVersion is None:
@@ -199,8 +199,8 @@ class Message(olefile.OleFileIO):
             attachmentDirs = []
 
             for dir_ in self.listDir():
-                if dir_[len(self.__prefixList)].startswith('__attach') and dir_[
-                    len(self.__prefixList)] not in attachmentDirs:
+                if dir_[len(self.__prefixList)].startswith('__attach') and\
+                        dir_[len(self.__prefixList)] not in attachmentDirs:
                     attachmentDirs.append(dir_[len(self.__prefixList)])
 
             self._attachments = []
@@ -222,8 +222,8 @@ class Message(olefile.OleFileIO):
             recipientDirs = []
 
             for dir_ in self.listDir():
-                if dir_[len(self.__prefixList)].startswith('__recip') and dir_[
-                    len(self.__prefixList)] not in recipientDirs:
+                if dir_[len(self.__prefixList)].startswith('__recip') and\
+                        dir_[len(self.__prefixList)] not in recipientDirs:
                     recipientDirs.append(dir_[len(self.__prefixList)])
 
             self._recipients = []
