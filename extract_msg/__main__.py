@@ -1,9 +1,9 @@
 import logging
-import os
 import sys
 import traceback
 
 from extract_msg import __doc__, utils
+from extract_msg.compat import os_ as os
 from extract_msg.message import Message
 
 if __name__ == '__main__':
