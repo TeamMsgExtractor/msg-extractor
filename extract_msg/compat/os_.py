@@ -1,5 +1,5 @@
 """
-Compatiability module to ensure that certain functions exist across python versions
+Compatibility module to ensure that certain functions exist across python versions
 """
 
 from os import *
