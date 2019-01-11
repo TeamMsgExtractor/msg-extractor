@@ -37,4 +37,4 @@ from extract_msg.prop import create_prop
 from extract_msg.properties import Properties
 from extract_msg.recipient import Recipient
 from extract_msg.utils import parse_type, properHex
-from extract_msg.compat import _os
+from extract_msg.compat import os_
