@@ -6,7 +6,4 @@ from os import *
 import sys
 
 if sys.version_info[0] >= 3:
-    try:
-		getcwdu
-	except:
-		getcwdu = getcwd
+    getcwdu = getcwd
