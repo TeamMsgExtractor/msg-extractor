@@ -2,7 +2,6 @@ import copy
 import email.utils
 import json
 import logging
-import os
 import re
 
 from imapclient.imapclient import decode_utf7
@@ -11,6 +10,7 @@ import olefile
 from email.parser import Parser as EmailParser
 from extract_msg import constants
 from extract_msg.attachment import Attachment
+from extract_msg.compat import os_ as os
 from extract_msg.properties import Properties
 from extract_msg.recipient import Recipient
 from extract_msg.utils import addNumToDir, encode, has_len, stri, windowsUnicode, xstr
@@ -62,7 +62,7 @@ class Message(olefile.OleFileIO):
             g = prefix.split("/")
             if g[-1] == '':
                 g.pop()
-            prefix = g
+            prefixl = g
             if prefix[-1] != '/':
                 prefix += '/'
             filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix=False)
@@ -119,20 +119,33 @@ class Message(olefile.OleFileIO):
         """
         Checks if :param inp: exists in the msg file.
         """
-        if isinstance(inp, list):
-            inp = self.__prefixList + inp
-        else:
-            inp = self.__prefix + inp
+        inp = self.fix_path(inp)
         return self.exists(inp)
 
-    def _getStream(self, filename, prefix=True):
-        if isinstance(filename, list):
-            filename = '/'.join(filename)
+    def sExists(self, inp):
+        """
+        Checks if string stream :param inp: exists in the msg file.
+        """
+        inp = self.fix_path(inp)
+        return self.exists(inp + '001F') or self.exists(inp + '001E')
+
+    def fix_path(self, inp, prefix=True):
+        """
+        Changes paths so that they have the proper
+        prefix (should :param prefix: be True) and
+        are strings rather than lists or tuples.
+        """
+        if isinstance(inp, (list, tuple)):
+            inp = '/'.join(inp)
         if prefix:
-            filename = self.__prefix + filename
+            inp = self.__prefix + inp
+        return inp
+
+    def _getStream(self, filename, prefix=True):
+        filename = self.fix_path(filename, prefix)
         if self.exists(filename):
-            stream = self.openstream(filename)
-            return stream.read()
+            with self.openstream(filename) as stream:
+                return stream.read()
         else:
             logger.info('Stream "{}" was requested but could not be found. Returning `None`.'.format(filename))
             return None
@@ -146,13 +159,11 @@ class Message(olefile.OleFileIO):
         returned.
         """
 
-        if isinstance(filename, list):
-            # Join with slashes to make it easier to append the type
-            filename = '/'.join(filename)
+        filename = self.fix_path(filename, prefix)
 
-        asciiVersion = self._getStream(filename + '001E', prefix)
-        unicodeVersion = windowsUnicode(self._getStream(filename + '001F', prefix))
-        logger.debug('_getStringSteam called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
+        asciiVersion = self._getStream(filename + '001E', prefix = False)
+        unicodeVersion = windowsUnicode(self._getStream(filename + '001F', prefix = False))
+        logger.debug('_getStringStream called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
             filename, asciiVersion is not None, unicodeVersion is not None))
         if asciiVersion is None:
             return unicodeVersion
@@ -421,12 +432,13 @@ class Message(olefile.OleFileIO):
         try:
             return self._body
         except AttributeError:
-            self._body = encode(self._getStringStream('__substg1.0_1000'))
+            self._body = self._getStringStream('__substg1.0_1000')
             if self._body:
+                self._body = encode(self._body)
                 a = re.search('\n', self._body)
-            if a is not None:
-                if re.search('\r\n', self._body) is not None:
-                    self.__crlf = '\r\n'
+                if a is not None:
+                    if re.search('\r\n', self._body) is not None:
+                        self.__crlf = '\r\n'
             return self._body
 
     @property
@@ -456,8 +468,8 @@ class Message(olefile.OleFileIO):
             attachmentDirs = []
 
             for dir_ in self.listDir():
-                if dir_[len(self.__prefixList)].startswith('__attach') and dir_[
-                    len(self.__prefixList)] not in attachmentDirs:
+                if dir_[len(self.__prefixList)].startswith('__attach') and\
+                        dir_[len(self.__prefixList)] not in attachmentDirs:
                     attachmentDirs.append(dir_[len(self.__prefixList)])
 
             self._attachments = []
@@ -479,8 +491,8 @@ class Message(olefile.OleFileIO):
             recipientDirs = []
 
             for dir_ in self.listDir():
-                if dir_[len(self.__prefixList)].startswith('__recip') and dir_[
-                    len(self.__prefixList)] not in recipientDirs:
+                if dir_[len(self.__prefixList)].startswith('__recip') and\
+                        dir_[len(self.__prefixList)] not in recipientDirs:
                     recipientDirs.append(dir_[len(self.__prefixList)])
 
             self._recipients = []
@@ -544,7 +556,7 @@ class Message(olefile.OleFileIO):
                     dirName
                 )
 
-        oldDir = os.getcwd()
+        oldDir = os.getcwdu()
         try:
             os.chdir(dirName)
 
@@ -590,12 +602,12 @@ class Message(olefile.OleFileIO):
 
     def saveRaw(self):
         # Create a 'raw' folder
-        oldDir = os.getcwd()
+        oldDir = os.getcwdu()
         try:
             rawDir = 'raw'
             os.makedirs(rawDir)
             os.chdir(rawDir)
-            sysRawDir = os.getcwd()
+            sysRawDir = os.getcwdu()
 
             # Loop through all the directories
             for dir_ in self.listdir():

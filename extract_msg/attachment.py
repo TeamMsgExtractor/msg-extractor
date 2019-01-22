@@ -26,46 +26,58 @@ class Attachment(object):
         object.__init__(self)
         self.__msg = msg
         self.__dir = dir_
-        self.__props = Properties(
-            self.msg._getStream([self.__dir, '__properties_version1.0']),
+        self.__props = Properties(self._getStream('__properties_version1.0'),
             constants.TYPE_ATTACHMENT)
         # Get long filename
-        self.__longFilename = msg._getStringStream([dir_, '__substg1.0_3707'])
+        self.__longFilename = self._getStringStream('__substg1.0_3707')
 
         # Get short filename
-        self.__shortFilename = msg._getStringStream([dir_, '__substg1.0_3704'])
+        self.__shortFilename = self._getStringStream('__substg1.0_3704')
 
         # Get Content-ID
-        self.__cid = msg._getStringStream([dir_, '__substg1.0_3712'])
+        self.__cid = self._getStringStream('__substg1.0_3712')
 
         # Get attachment data
-        if msg.Exists([dir_, '__substg1.0_37010102']):
+        if self.Exists('__substg1.0_37010102'):
             self.__type = 'data'
-            self.__data = msg._getStream([dir_, '__substg1.0_37010102'])
-        elif msg.Exists([dir_, '__substg1.0_3701000D']):
-            if (self.props['37050003'].value & 0x7) != 0x5:
-                if not debug:
-                    raise NotImplementedError(
-                        'Current version of extract_msg does not support extraction of containers that are not embeded msg files.')
-                    # TODO add implementation
-                else:
-                    # DEBUG
-                    logger.debug('Debugging is true, ignoring NotImplementedError and printing debug info...')
-                    logger.debug('dir_ = {}'.format(dir_))
-                    logger.debug('Writing properties stream to output:')
-                    logger.debug('--------Start-Properties-Stream--------\n' +
-                                 properHex(self.props.stream) +
-                                 '\n---------End-Properties-Stream---------')
-                    logger.debug('Writing directory contents to output:')
-                    logger.debug('--------Start-Directory-Content--------')
-                    logger.debug('\n'.join([repr(x) for x in msg.listDir(True, True)]))
-                    logger.debug('---------End-Directory-Content---------')
+            self.__data = self._getStream('__substg1.0_37010102')
+        elif self.Exists('__substg1.0_3701000D'):
+            if (self.__props['37050003'].value & 0x7) != 0x5:
+                raise NotImplementedError(
+                    'Current version of extract_msg does not support extraction of containers that are not embedded msg files.')
+                # TODO add implementation
             else:
                 self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
                 self.__type = 'msg'
                 self.__data = msg.__class__(self.msg.path, self.__prefix, self.__class__)
         else:
+            # TODO Handling for special attacment types (like 0x00000007)
             raise TypeError('Unknown attachment type.')
+
+    def _getStream(self, filename):
+        return self.__msg._getStream([self.__dir, filename])
+
+    def _getStringStream(self, filename):
+        """
+        Gets a string representation of the requested filename.
+        Checks for both ASCII and Unicode representations and returns
+        a value if possible.  If there are both ASCII and Unicode
+        versions, then :param prefer: specifies which will be
+        returned.
+        """
+        return self.__msg._getStringStream([self.__dir, filename])
+
+    def Exists(self, filename):
+        """
+        Checks if stream exists inside the attachment folder.
+        """
+        return self.__msg.Exists([self.__dir, filename])
+
+    def sExists(self, filename):
+        """
+        Checks if the string stream exists inside the attachment folder.
+        """
+        return self.__msg.sExists([self.__dir, filename])
 
     def save(self, contentId=False, json=False, useFileName=False, raw=False, customPath=None, customFilename=None):
         # Check if the user has specified a custom filename
