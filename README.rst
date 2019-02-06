@@ -17,7 +17,7 @@ Usage
 
 ::
 
-     python extract_msg example.msg
+     python -m extract_msg example.msg
 
 This will produce a new folder named according to the date, time and
 subject of the message (for example “2013-07-24_0915 Example”). The
@@ -42,14 +42,14 @@ useful:
 
 ::
 
-     python extract_msg --raw example.msg
+     python -m extract_msg --raw example.msg
 
 Further, a –json flag has been added by Joel Kaufman to specify JSON
 output:
 
 ::
 
-     python extract_msg --json example.msg
+     python -m extract_msg --json example.msg
 
 Joel also added a –use-file-name flag, which allows you to specify that
 the script writes the emails’ contents to the names of the .msg files,
@@ -57,7 +57,7 @@ rather than using the subject and date to name the folder:
 
 ::
 
-     python extract_msg --use-file-name example.msg
+     python -m extract_msg --use-file-name example.msg
 
 Creation also added a –use-content-id flag, which allows you to specify
 that attachments should be saved under the name of their content id,
@@ -66,7 +66,7 @@ names used in the HTML body, and can be done like so:
 
 ::
 
-     python extract_msg --use-content-id example.msg
+     python -m extract_msg --use-content-id example.msg
 
 **To use this in your own script**, start by using:
 
