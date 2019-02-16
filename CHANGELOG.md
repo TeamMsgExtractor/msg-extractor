@@ -1,3 +1,7 @@
+**v0.22.1**
+* [[mattgwwalker #69](https://github.com/Syncurity/msg-extractor/issues/69)] Fixed date format not being up to standard.
+* Fixed a minor spelling error in the code
+
 **v0.22.0**
 * [[Syncurity #30](https://github.com/Syncurity/msg-extractor/issues/30)] Added `--validate` option.
 * [[Syncurity #24](https://github.com/Syncurity/msg-extractor/issues/24)] Moved all dev code into its own scripts. Use `--dev` to use from the command line.
