@@ -160,8 +160,8 @@ Here is a list of things that are currently on our todo list:
 
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
-.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.22.0-blue.svg
-   :target: https://pypi.org/project/extract-msg/0.22.0/
+.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.22.1-blue.svg
+   :target: https://pypi.org/project/extract-msg/0.22.1/
 .. |PyPI1| image:: https://img.shields.io/badge/python-2.7+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-2715/
 .. |PyPI2| image:: https://img.shields.io/badge/python-3.6+-brightgreen.svg
