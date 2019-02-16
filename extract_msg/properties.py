@@ -121,13 +121,13 @@ class Properties(object):
         except AttributeError:
             if self.has_key('00390040'):
                 self.__date = fromTimeStamp(msgEpoch(self.get('00390040').value)).__format__(
-                    '%a, %d %b %Y %H:%M:%S GMT %z')
+                    '%a, %d %b %Y %H:%M:%S %z')
             elif self.has_key('30080040'):
                 self.__date = fromTimeStamp(msgEpoch(self.get('30080040').value)).__format__(
-                    '%a, %d %b %Y %H:%M:%S GMT %z')
+                    '%a, %d %b %Y %H:%M:%S %z')
             elif self.has_key('30070040'):
                 self.__date = fromTimeStamp(msgEpoch(self.get('30070040').value)).__format__(
-                    '%a, %d %b %Y %H:%M:%S GMT %z')
+                    '%a, %d %b %Y %H:%M:%S %z')
             else:
                 # DEBUG
                 logger.warning(
