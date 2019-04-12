@@ -3,6 +3,7 @@ import email.utils
 import json
 import logging
 import re
+import chardet
 
 from imapclient.imapclient import decode_utf7
 import olefile
@@ -220,6 +221,10 @@ class Message(olefile.OleFileIO):
             return self._header
         except AttributeError:
             headerText = self._getStringStream('__substg1.0_007D')
+            try:
+                headerText = headerText.decode("utf-8")
+            except AttributeError:
+                pass
             if headerText is not None:
                 self._header = EmailParser().parsestr(headerText)
                 self._header['date'] = self.date
@@ -433,6 +438,15 @@ class Message(olefile.OleFileIO):
             return self._body
         except AttributeError:
             self._body = self._getStringStream('__substg1.0_1000')
+            try:
+                enc = chardet.detect(self._body)["encoding"]
+                self._body = self._body.decode(enc)
+            except AttributeError:
+                pass
+            except TypeError:
+                pass
+            except UnicodeDecodeError:
+                self._body = self._body.decode("latin-1")
             if self._body:
                 self._body = encode(self._body)
                 a = re.search('\n', self._body)
