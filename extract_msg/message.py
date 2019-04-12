@@ -445,8 +445,6 @@ class Message(olefile.OleFileIO):
                 pass
             except TypeError:
                 pass
-            except UnicodeDecodeError:
-                self._body = self._body.decode("latin-1")
             if self._body:
                 self._body = encode(self._body)
                 a = re.search('\n', self._body)
