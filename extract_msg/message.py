@@ -232,7 +232,7 @@ class Message(olefile.OleFileIO):
                 header.add_header('Cc', self.cc)
                 header.add_header('Message-Id', self.message_id)
                 # TODO find authentication results outside of header
-                header.add_header('Authenitcation-Results', None)
+                header.add_header('Authentication-Results', None)
 
                 self._header = header
             return self._header
