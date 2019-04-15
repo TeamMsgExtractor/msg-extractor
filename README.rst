@@ -130,9 +130,13 @@ Credits
 -------
 
 Matthew Walker - Original developer and owner
+
 Ken Peterson (The Elemental of Creation) - Princible programmer, manager, and msg file "expert"
+
 JP Bourget - Senior programmer, readability and organization expert, secondary manager
+
 Philippe Lagadec - Python OleFile module developer
+
 Joel Kaufman - First implementations of the json and filename flags
 
 
