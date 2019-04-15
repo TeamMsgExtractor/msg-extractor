@@ -45,9 +45,7 @@ if sys.version_info[0] >= 3:  # Python 3
 
 
     def windowsUnicode(string):
-        if string is None:
-            return None
-        return str(string, 'utf_16_le')
+        return str(string, 'utf_16_le') if string is not None else None
 
 
     def xstr(s):
@@ -80,9 +78,7 @@ else:  # Python 2
 
 
     def windowsUnicode(string):
-        if string is None:
-            return None
-        return unicode(string, 'utf_16_le')
+        return unicode(string, 'utf_16_le') if string is not None else None
 
 
     def xstr(s):
