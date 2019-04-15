@@ -22,8 +22,7 @@ Usage
 This will produce a new folder named according to the date, time and
 subject of the message (for example “2013-07-24_0915 Example”). The
 email itself can be found inside the new folder along with the
-attachments. As of version 0.2, it is capable of extracting both ASCII
-and Unicode data.
+attachments.
 
 The script uses Philippe Lagadec’s Python module that reads Microsoft
 OLE2 files (also called Structured Storage, Compound File Binary Format
@@ -36,37 +35,8 @@ The script was built using Peter Fiskerstrand’s documentation of the
 used within Extended MAPI was also useful. For future reference, I note
 that Microsoft have opened up their documentation of the file format.
 
-If you are having difficulty with a specific file, or would like to
-extract more than is currently automated, then the –raw flag may be
-useful:
 
-::
-
-     python extract_msg --raw example.msg
-
-Further, a –json flag has been added by Joel Kaufman to specify JSON
-output:
-
-::
-
-     python extract_msg --json example.msg
-
-Joel also added a –use-file-name flag, which allows you to specify that
-the script writes the emails’ contents to the names of the .msg files,
-rather than using the subject and date to name the folder:
-
-::
-
-     python extract_msg --use-file-name example.msg
-
-Creation also added a –use-content-id flag, which allows you to specify
-that attachments should be saved under the name of their content id,
-should they have one. This can be useful for matching attachments to the
-names used in the HTML body, and can be done like so:
-
-::
-
-     python extract_msg --use-content-id example.msg
+#########REWRITE COMMAND LINE USAGE#############
 
 **To use this in your own script**, start by using:
 
@@ -85,7 +55,7 @@ to the ExtractMsg.Message Method:
 
 ::
 
-     msg_raw = b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1\x0 ... \x00x00x00'
+     msg_raw = b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1\x00 ... \x00x00x00'
      msg = extract_msg.Message(msg_raw)
 
 If you want to override the default attachment class and use one of your
@@ -156,6 +126,14 @@ Here is a list of things that are currently on our todo list:
 * Implement better property handling that will convert each type into a python equivalent if possible
 * Implement handling of named properties
 
+Credits
+-------
+
+Matthew Walker - Original developer and owner
+Ken Peterson (The Elemental of Creation) - Princible programmer, manager, and msg file "expert"
+JP Bourget - Senior programmer, readability and organization expert, secondary manager
+Philippe Lagadec - Python OleFile module developer
+Joel Kaufman - First implementations of the json and filename flags
 
 
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
