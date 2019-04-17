@@ -62,8 +62,8 @@ refer to the usage information provided from the program's help dialog:
        --validate            Turns on file validation mode. Turns off regular file
                              output.
        --json                Changes to write output files as json.
-       --file-logging        Enables file logging.
-       --verbose             Turns on console logging. Implies --verbose
+       --file-logging        Enables file logging. Implies --verbose
+       --verbose             Turns on console logging.
        --log LOG             Set the path to write the file log to.
        --config CONFIG_PATH  Set the path to load the logging config from.
        --out OUT_PATH        Set the folder to use for the program output.

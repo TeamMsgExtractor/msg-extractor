@@ -142,10 +142,10 @@ def get_command_args(args):
                         help='Changes to write output files as json.')
     # --file-logging
     parser.add_argument('--file-logging', dest='file_logging', action='store_true',
-                        help='Enables file logging.')
+                        help='Enables file logging. Implies --verbose')
     # --verbose
     parser.add_argument('--verbose', dest='verbose', action='store_true',
-                        help='Turns on console logging. Implies --verbose')
+                        help='Turns on console logging.')
     # --log PATH
     parser.add_argument('--log', dest='log',
                         help='Set the path to write the file log to.')
