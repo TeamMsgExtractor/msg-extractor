@@ -37,6 +37,39 @@ that Microsoft have opened up their documentation of the file format.
 
 
 #########REWRITE COMMAND LINE USAGE#############
+Currently, the README is in the process of being redone. For now, please
+refer to the usage information provided from the program's help dialog:
+::
+     usage: extract_msg [-h] [--use-content-id] [--dev] [--validate] [--json]
+                        [--file-logging] [--verbose] [--log LOG]
+                        [--config CONFIG_PATH] [--out OUT_PATH] [--use-filename]
+                        msg [msg ...]
+
+     extract_msg: Extracts emails and attachments saved in Microsoft Outlook's .msg
+     files. https://github.com/mattgwwalker/msg-extractor
+
+     positional arguments:
+       msg                   An msg file to be parsed
+
+     optional arguments:
+       -h, --help            show this help message and exit
+       --use-content-id, --cid
+                             Save attachments by their Content ID, if they have
+                        one. Useful when working with the HTML body.
+       --dev                 Changes to use developer mode. Automatically enables
+                             the --verbose flag. Takes precedence over the
+                             --validate flag.
+       --validate            Turns on file validation mode. Turns off regular file
+                             output.
+       --json                Changes to write output files as json.
+       --file-logging        Enables file logging.
+       --verbose             Turns on console logging. Implies --verbose
+       --log LOG             Set the path to write the file log to.
+       --config CONFIG_PATH  Set the path to load the logging config from.
+       --out OUT_PATH        Set the folder to use for the program output.
+                             (Default: Current directory)
+       --use-filename        Sets whether the name of each output is based on the
+                             msg filename.
 
 **To use this in your own script**, start by using:
 
