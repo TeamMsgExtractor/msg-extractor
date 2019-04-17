@@ -125,20 +125,23 @@ Here is a list of things that are currently on our todo list:
 * Provide a way to save attachments and messages into a custom location under a custom name
 * Implement better property handling that will convert each type into a python equivalent if possible
 * Implement handling of named properties
+* Improve README
+* Create a wiki for advanced usage information
 
 Credits
 -------
 
-Matthew Walker - Original developer and owner
+`Matthew Walker`_ - Original developer and owner
 
-Ken Peterson (The Elemental of Creation) - Princible programmer, manager, and msg file "expert"
+`Ken Peterson (The Elemental of Creation)`_ - Principle programmer, manager, and msg file "expert"
 
-JP Bourget - Senior programmer, readability and organization expert, secondary manager
+`JP Bourget`_ - Senior programmer, readability and organization expert, secondary manager
 
-Philippe Lagadec - Python OleFile module developer
+`Philippe Lagadec`_ - Python OleFile module developer
 
 Joel Kaufman - First implementations of the json and filename flags
 
+`Dean Malmgren`_ - First implementation of the setup.py script
 
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
@@ -148,3 +151,8 @@ Joel Kaufman - First implementations of the json and filename flags
    :target: https://www.python.org/downloads/release/python-2715/
 .. |PyPI2| image:: https://img.shields.io/badge/python-3.6+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-367/
+.. _Matthew Walker: https://github.com/mattgwwalker
+.. _Ken Peterson (The Elemental of Creation): https://github.com/TheElementalOfCreation
+.. _JP Bourget: https://github.com/punkrokk
+.. _Philippe Lagadec: https://github.com/decalage2
+.. _Dean Malmgren: https://github.com/deanmalmgren
