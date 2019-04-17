@@ -160,7 +160,8 @@ class Message(olefile.OleFileIO):
         if self.areStringsUnicode:
             return windowsUnicode(self._getStream(filename + '001F', prefix = False))
         else:
-            return self._getStream(filename + '001E', prefix = False).decode(self.stringEncoding)
+            tmp = self._getStream(filename + '001E', prefix = False)
+            return None if tmp is None else tmp.decode(self.stringEncoding)
 
     @property
     def path(self):
@@ -302,7 +303,7 @@ class Message(olefile.OleFileIO):
             return self.__bStringsUnicode
         except AttributeError:
             if self.mainProperties.has_key('340D0003'):
-                if (self.mainProperties['340D0003'].value & 0x40000) != 0
+                if (self.mainProperties['340D0003'].value & 0x40000) != 0:
                     self.__bStringsUnicode = True
                     return self.__bStringsUnicode
             self.__bStringsUnicode = False
