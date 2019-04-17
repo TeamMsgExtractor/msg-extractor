@@ -289,7 +289,9 @@ class Message(olefile.OleFileIO):
                     raise Exception('Encoding property not found')
                 enc = self.mainProperties['3FFD0003'].value
                 # Now we just need to translate that value
-                # TODO
+                # Now, this next line SHOULD work, but it is possible that it might not...
+				self.__stringEncoding = str(enc)
+				return self.__stringEncoding
 
     @property
     def areStringsUnicode(self):
