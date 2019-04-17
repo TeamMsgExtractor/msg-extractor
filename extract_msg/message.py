@@ -282,15 +282,29 @@ class Message(olefile.OleFileIO):
             # Let's first check if the encoding will be unicode:
             if self.areStringsUnicode:
                 self.__stringEncoding = "utf-16-le"
+                return self.__stringEncoding
             else:
                 # Well, it's not unicode. Now we have to figure out what it IS.
-
+                if not self.mainProperties.has_key('3FFD0003'):
+                    raise Exception('Encoding property not found')
+                enc = self.mainProperties['3FFD0003'].value
+                # Now we just need to translate that value
+                # TODO
 
     @property
     def areStringsUnicode(self):
         """
         Returns a boolean telling if the strings are unicode encoded.
         """
+        try:
+            return self.__bStringsUnicode
+        except AttributeError:
+            if self.mainProperties.has_key('340D0003'):
+                if (self.mainProperties['340D0003'].value & 0x40000) != 0
+                    self.__bStringsUnicode = True
+                    return self.__bStringsUnicode
+            self.__bStringsUnicode = False
+            return self.__bStringsUnicode
 
     @property
     def sender(self):
