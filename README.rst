@@ -55,7 +55,7 @@ refer to the usage information provided from the program's help dialog:
        -h, --help            show this help message and exit
        --use-content-id, --cid
                              Save attachments by their Content ID, if they have
-                        one. Useful when working with the HTML body.
+                             one. Useful when working with the HTML body.
        --dev                 Changes to use developer mode. Automatically enables
                              the --verbose flag. Takes precedence over the
                              --validate flag.
