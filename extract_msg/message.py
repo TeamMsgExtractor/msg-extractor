@@ -150,30 +150,18 @@ class Message(olefile.OleFileIO):
             logger.info('Stream "{}" was requested but could not be found. Returning `None`.'.format(filename))
             return None
 
-    def _getStringStream(self, filename, prefer='unicode', prefix=True):
+    def _getStringStream(self, filename, prefix=True):
         """
         Gets a string representation of the requested filename.
-        Checks for both ASCII and Unicode representations and returns
-        a value if possible.  If there are both ASCII and Unicode
-        versions, then :param prefer: specifies which will be
-        returned.
+        This should ALWAYS return a string (Unicode in python 2)
         """
 
         filename = self.fix_path(filename, prefix)
-
-        asciiVersion = self._getStream(filename + '001E', prefix = False)
-        unicodeVersion = windowsUnicode(self._getStream(filename + '001F', prefix = False))
-        logger.debug('_getStringStream called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
-            filename, asciiVersion is not None, unicodeVersion is not None))
-        if asciiVersion is None:
-            return unicodeVersion
-        elif unicodeVersion is None:
-            return asciiVersion
+        if self.areStringsUnicode:
+            return windowsUnicode(self._getStream(filename + '001F', prefix = False))
         else:
-            if prefer == 'unicode':
-                return unicodeVersion
-            else:
-                return asciiVersion
+            tmp = self._getStream(filename + '001E', prefix = False)
+            return None if tmp is None else tmp.decode(self.stringEncoding)
 
     @property
     def path(self):
@@ -285,6 +273,41 @@ class Message(olefile.OleFileIO):
     @property
     def parsedDate(self):
         return email.utils.parsedate(self.date)
+
+    @property
+    def stringEncoding(self):
+        try:
+            return self.__stringEncoding
+        except AttributeError:
+            # We need to calculate the encoding
+            # Let's first check if the encoding will be unicode:
+            if self.areStringsUnicode:
+                self.__stringEncoding = "utf-16-le"
+                return self.__stringEncoding
+            else:
+                # Well, it's not unicode. Now we have to figure out what it IS.
+                if not self.mainProperties.has_key('3FFD0003'):
+                    raise Exception('Encoding property not found')
+                enc = self.mainProperties['3FFD0003'].value
+                # Now we just need to translate that value
+                # Now, this next line SHOULD work, but it is possible that it might not...
+                self.__stringEncoding = str(enc)
+                return self.__stringEncoding
+
+    @property
+    def areStringsUnicode(self):
+        """
+        Returns a boolean telling if the strings are unicode encoded.
+        """
+        try:
+            return self.__bStringsUnicode
+        except AttributeError:
+            if self.mainProperties.has_key('340D0003'):
+                if (self.mainProperties['340D0003'].value & 0x40000) != 0:
+                    self.__bStringsUnicode = True
+                    return self.__bStringsUnicode
+            self.__bStringsUnicode = False
+            return self.__bStringsUnicode
 
     @property
     def sender(self):
