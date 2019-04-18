@@ -45,9 +45,7 @@ if sys.version_info[0] >= 3:  # Python 3
 
 
     def windowsUnicode(string):
-        if string is None:
-            return None
-        return str(string, 'utf_16_le')
+        return str(string, 'utf_16_le') if string is not None else None
 
 
     def xstr(s):
@@ -80,9 +78,7 @@ else:  # Python 2
 
 
     def windowsUnicode(string):
-        if string is None:
-            return None
-        return unicode(string, 'utf_16_le')
+        return unicode(string, 'utf_16_le') if string is not None else None
 
 
     def xstr(s):
@@ -146,10 +142,10 @@ def get_command_args(args):
                         help='Changes to write output files as json.')
     # --file-logging
     parser.add_argument('--file-logging', dest='file_logging', action='store_true',
-                        help='Enables file logging.')
+                        help='Enables file logging. Implies --verbose')
     # --verbose
     parser.add_argument('--verbose', dest='verbose', action='store_true',
-                        help='Turns on console logging. Implies --verbose')
+                        help='Turns on console logging.')
     # --log PATH
     parser.add_argument('--log', dest='log',
                         help='Set the path to write the file log to.')
