@@ -51,7 +51,8 @@ class Message(olefile.OleFileIO):
                 raise
 
         prefixl = []
-        if prefix != '':
+        tmp_condition = prefix != ''
+        if tmp_condition:
             if not isinstance(prefix, stri):
                 try:
                     prefix = '/'.join(prefix)
@@ -65,9 +66,10 @@ class Message(olefile.OleFileIO):
             prefixl = g
             if prefix[-1] != '/':
                 prefix += '/'
-            filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix=False)
         self.__prefix = prefix
         self.__prefixList = prefixl
+        if tmp_condition:
+            filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix=False)
         if filename is not None:
             self.filename = filename
         elif has_len(path):
