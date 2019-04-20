@@ -27,7 +27,7 @@ https://github.com/mattgwwalker/msg-extractor
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 __author__ = 'Matthew Walker & The Elemental of Creation'
-__date__ = '2019-04-18'
+__date__ = '2019-04-20'
 __version__ = '0.23.1'
 
 from extract_msg import constants
