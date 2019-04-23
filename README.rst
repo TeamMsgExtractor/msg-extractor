@@ -22,8 +22,7 @@ Usage
 This will produce a new folder named according to the date, time and
 subject of the message (for example “2013-07-24_0915 Example”). The
 email itself can be found inside the new folder along with the
-attachments. As of version 0.2, it is capable of extracting both ASCII
-and Unicode data.
+attachments.
 
 The script uses Philippe Lagadec’s Python module that reads Microsoft
 OLE2 files (also called Structured Storage, Compound File Binary Format
@@ -36,37 +35,41 @@ The script was built using Peter Fiskerstrand’s documentation of the
 used within Extended MAPI was also useful. For future reference, I note
 that Microsoft have opened up their documentation of the file format.
 
-If you are having difficulty with a specific file, or would like to
-extract more than is currently automated, then the –raw flag may be
-useful:
 
+#########REWRITE COMMAND LINE USAGE#############
+Currently, the README is in the process of being redone. For now, please
+refer to the usage information provided from the program's help dialog:
 ::
+     usage: extract_msg [-h] [--use-content-id] [--dev] [--validate] [--json]
+                        [--file-logging] [--verbose] [--log LOG]
+                        [--config CONFIG_PATH] [--out OUT_PATH] [--use-filename]
+                        msg [msg ...]
 
-     python extract_msg --raw example.msg
+     extract_msg: Extracts emails and attachments saved in Microsoft Outlook's .msg
+     files. https://github.com/mattgwwalker/msg-extractor
 
-Further, a –json flag has been added by Joel Kaufman to specify JSON
-output:
+     positional arguments:
+       msg                   An msg file to be parsed
 
-::
-
-     python extract_msg --json example.msg
-
-Joel also added a –use-file-name flag, which allows you to specify that
-the script writes the emails’ contents to the names of the .msg files,
-rather than using the subject and date to name the folder:
-
-::
-
-     python extract_msg --use-file-name example.msg
-
-Creation also added a –use-content-id flag, which allows you to specify
-that attachments should be saved under the name of their content id,
-should they have one. This can be useful for matching attachments to the
-names used in the HTML body, and can be done like so:
-
-::
-
-     python extract_msg --use-content-id example.msg
+     optional arguments:
+       -h, --help            show this help message and exit
+       --use-content-id, --cid
+                             Save attachments by their Content ID, if they have
+                             one. Useful when working with the HTML body.
+       --dev                 Changes to use developer mode. Automatically enables
+                             the --verbose flag. Takes precedence over the
+                             --validate flag.
+       --validate            Turns on file validation mode. Turns off regular file
+                             output.
+       --json                Changes to write output files as json.
+       --file-logging        Enables file logging. Implies --verbose
+       --verbose             Turns on console logging.
+       --log LOG             Set the path to write the file log to.
+       --config CONFIG_PATH  Set the path to load the logging config from.
+       --out OUT_PATH        Set the folder to use for the program output.
+                             (Default: Current directory)
+       --use-filename        Sets whether the name of each output is based on the
+                             msg filename.
 
 **To use this in your own script**, start by using:
 
@@ -85,7 +88,7 @@ to the ExtractMsg.Message Method:
 
 ::
 
-     msg_raw = b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1\x0 ... \x00x00x00'
+     msg_raw = b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1\x00 ... \x00x00x00'
      msg = extract_msg.Message(msg_raw)
 
 If you want to override the default attachment class and use one of your
@@ -152,18 +155,37 @@ Here is a list of things that are currently on our todo list:
 * Tests (ie. unittest)
 * Finish writing a usage guide
 * Improve the intelligence of the saving functions
-* Create a Pypi package
 * Provide a way to save attachments and messages into a custom location under a custom name
 * Implement better property handling that will convert each type into a python equivalent if possible
 * Implement handling of named properties
+* Improve README
+* Create a wiki for advanced usage information
 
+Credits
+-------
 
+`Matthew Walker`_ - Original developer and owner
+
+`Ken Peterson (The Elemental of Creation)`_ - Principle programmer, manager, and msg file "expert"
+
+`JP Bourget`_ - Senior programmer, readability and organization expert, secondary manager
+
+`Philippe Lagadec`_ - Python OleFile module developer
+
+Joel Kaufman - First implementations of the json and filename flags
+
+`Dean Malmgren`_ - First implementation of the setup.py script
 
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
-.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.21.0-blue.svg
-   :target: https://pypi.org/project/extract-msg/0.21.0/
+.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.22.1-blue.svg
+   :target: https://pypi.org/project/extract-msg/0.22.1/
 .. |PyPI1| image:: https://img.shields.io/badge/python-2.7+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-2715/
 .. |PyPI2| image:: https://img.shields.io/badge/python-3.6+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-367/
+.. _Matthew Walker: https://github.com/mattgwwalker
+.. _Ken Peterson (The Elemental of Creation): https://github.com/TheElementalOfCreation
+.. _JP Bourget: https://github.com/punkrokk
+.. _Philippe Lagadec: https://github.com/decalage2
+.. _Dean Malmgren: https://github.com/deanmalmgren

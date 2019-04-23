@@ -39,6 +39,15 @@
             "maxBytes": 10485760,
             "backupCount": 20,
             "encoding": "utf8"
+        },
+        "developer_file_handler": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "level": "DEVELOPER",
+            "formatter": "simple",
+            "filename": "%LOCALAPPDATA%/extract_msg/extract_msg.log",
+            "maxBytes": 10485760,
+            "backupCount": 20,
+            "encoding": "utf8"
         }
     },
     "loggers": {
@@ -49,7 +58,7 @@
         }
     },
     "root": {
-        "level": "DEBUG",
-        "handlers": ["console", "info_file_handler", "error_file_handler", "warning_file_handler"]
+        "level": "DEVELOPER",
+        "handlers": ["console", "info_file_handler", "error_file_handler", "warning_file_handler", "developer_file_handler"]
     }
 }

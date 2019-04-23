@@ -2,7 +2,6 @@ import copy
 import email.utils
 import json
 import logging
-import os
 import re
 
 from imapclient.imapclient import decode_utf7
@@ -11,6 +10,7 @@ import olefile
 from email.parser import Parser as EmailParser
 from extract_msg import constants
 from extract_msg.attachment import Attachment
+from extract_msg.compat import os_ as os
 from extract_msg.properties import Properties
 from extract_msg.recipient import Recipient
 from extract_msg.utils import addNumToDir, encode, has_len, stri, windowsUnicode, xstr
@@ -51,7 +51,8 @@ class Message(olefile.OleFileIO):
                 raise
 
         prefixl = []
-        if prefix != '':
+        tmp_condition = prefix != ''
+        if tmp_condition:
             if not isinstance(prefix, stri):
                 try:
                     prefix = '/'.join(prefix)
@@ -62,12 +63,13 @@ class Message(olefile.OleFileIO):
             g = prefix.split("/")
             if g[-1] == '':
                 g.pop()
-            prefix = g
+            prefixl = g
             if prefix[-1] != '/':
                 prefix += '/'
-            filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix=False)
         self.__prefix = prefix
         self.__prefixList = prefixl
+        if tmp_condition:
+            filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix=False)
         if filename is not None:
             self.filename = filename
         elif has_len(path):
@@ -119,50 +121,49 @@ class Message(olefile.OleFileIO):
         """
         Checks if :param inp: exists in the msg file.
         """
-        if isinstance(inp, list):
-            inp = self.__prefixList + inp
-        else:
-            inp = self.__prefix + inp
+        inp = self.fix_path(inp)
         return self.exists(inp)
 
-    def _getStream(self, filename, prefix=True):
-        if isinstance(filename, list):
-            filename = '/'.join(filename)
+    def sExists(self, inp):
+        """
+        Checks if string stream :param inp: exists in the msg file.
+        """
+        inp = self.fix_path(inp)
+        return self.exists(inp + '001F') or self.exists(inp + '001E')
+
+    def fix_path(self, inp, prefix=True):
+        """
+        Changes paths so that they have the proper
+        prefix (should :param prefix: be True) and
+        are strings rather than lists or tuples.
+        """
+        if isinstance(inp, (list, tuple)):
+            inp = '/'.join(inp)
         if prefix:
-            filename = self.__prefix + filename
+            inp = self.__prefix + inp
+        return inp
+
+    def _getStream(self, filename, prefix=True):
+        filename = self.fix_path(filename, prefix)
         if self.exists(filename):
-            stream = self.openstream(filename)
-            return stream.read()
+            with self.openstream(filename) as stream:
+                return stream.read()
         else:
             logger.info('Stream "{}" was requested but could not be found. Returning `None`.'.format(filename))
             return None
 
-    def _getStringStream(self, filename, prefer='unicode', prefix=True):
+    def _getStringStream(self, filename, prefix=True):
         """
         Gets a string representation of the requested filename.
-        Checks for both ASCII and Unicode representations and returns
-        a value if possible.  If there are both ASCII and Unicode
-        versions, then :param prefer: specifies which will be
-        returned.
+        This should ALWAYS return a string (Unicode in python 2)
         """
 
-        if isinstance(filename, list):
-            # Join with slashes to make it easier to append the type
-            filename = '/'.join(filename)
-
-        asciiVersion = self._getStream(filename + '001E', prefix)
-        unicodeVersion = windowsUnicode(self._getStream(filename + '001F', prefix))
-        logger.debug('_getStringSteam called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
-            filename, asciiVersion is not None, unicodeVersion is not None))
-        if asciiVersion is None:
-            return unicodeVersion
-        elif unicodeVersion is None:
-            return asciiVersion
+        filename = self.fix_path(filename, prefix)
+        if self.areStringsUnicode:
+            return windowsUnicode(self._getStream(filename + '001F', prefix = False))
         else:
-            if prefer == 'unicode':
-                return unicodeVersion
-            else:
-                return asciiVersion
+            tmp = self._getStream(filename + '001E', prefix = False)
+            return None if tmp is None else tmp.decode(self.stringEncoding)
 
     @property
     def path(self):
@@ -221,7 +222,7 @@ class Message(olefile.OleFileIO):
                 header.add_header('Cc', self.cc)
                 header.add_header('Message-Id', self.message_id)
                 # TODO find authentication results outside of header
-                header.add_header('Authenitcation-Results', None)
+                header.add_header('Authentication-Results', None)
 
                 self._header = header
             return self._header
@@ -274,6 +275,41 @@ class Message(olefile.OleFileIO):
     @property
     def parsedDate(self):
         return email.utils.parsedate(self.date)
+
+    @property
+    def stringEncoding(self):
+        try:
+            return self.__stringEncoding
+        except AttributeError:
+            # We need to calculate the encoding
+            # Let's first check if the encoding will be unicode:
+            if self.areStringsUnicode:
+                self.__stringEncoding = "utf-16-le"
+                return self.__stringEncoding
+            else:
+                # Well, it's not unicode. Now we have to figure out what it IS.
+                if not self.mainProperties.has_key('3FFD0003'):
+                    raise Exception('Encoding property not found')
+                enc = self.mainProperties['3FFD0003'].value
+                # Now we just need to translate that value
+                # Now, this next line SHOULD work, but it is possible that it might not...
+                self.__stringEncoding = str(enc)
+                return self.__stringEncoding
+
+    @property
+    def areStringsUnicode(self):
+        """
+        Returns a boolean telling if the strings are unicode encoded.
+        """
+        try:
+            return self.__bStringsUnicode
+        except AttributeError:
+            if self.mainProperties.has_key('340D0003'):
+                if (self.mainProperties['340D0003'].value & 0x40000) != 0:
+                    self.__bStringsUnicode = True
+                    return self.__bStringsUnicode
+            self.__bStringsUnicode = False
+            return self.__bStringsUnicode
 
     @property
     def sender(self):
@@ -421,12 +457,13 @@ class Message(olefile.OleFileIO):
         try:
             return self._body
         except AttributeError:
-            self._body = encode(self._getStringStream('__substg1.0_1000'))
+            self._body = self._getStringStream('__substg1.0_1000')
             if self._body:
+                self._body = encode(self._body)
                 a = re.search('\n', self._body)
-            if a is not None:
-                if re.search('\r\n', self._body) is not None:
-                    self.__crlf = '\r\n'
+                if a is not None:
+                    if re.search('\r\n', self._body) is not None:
+                        self.__crlf = '\r\n'
             return self._body
 
     @property
@@ -456,8 +493,8 @@ class Message(olefile.OleFileIO):
             attachmentDirs = []
 
             for dir_ in self.listDir():
-                if dir_[len(self.__prefixList)].startswith('__attach') and dir_[
-                    len(self.__prefixList)] not in attachmentDirs:
+                if dir_[len(self.__prefixList)].startswith('__attach') and\
+                        dir_[len(self.__prefixList)] not in attachmentDirs:
                     attachmentDirs.append(dir_[len(self.__prefixList)])
 
             self._attachments = []
@@ -479,8 +516,8 @@ class Message(olefile.OleFileIO):
             recipientDirs = []
 
             for dir_ in self.listDir():
-                if dir_[len(self.__prefixList)].startswith('__recip') and dir_[
-                    len(self.__prefixList)] not in recipientDirs:
+                if dir_[len(self.__prefixList)].startswith('__recip') and\
+                        dir_[len(self.__prefixList)] not in recipientDirs:
                     recipientDirs.append(dir_[len(self.__prefixList)])
 
             self._recipients = []
@@ -544,7 +581,7 @@ class Message(olefile.OleFileIO):
                     dirName
                 )
 
-        oldDir = os.getcwd()
+        oldDir = os.getcwdu()
         try:
             os.chdir(dirName)
 
@@ -590,12 +627,12 @@ class Message(olefile.OleFileIO):
 
     def saveRaw(self):
         # Create a 'raw' folder
-        oldDir = os.getcwd()
+        oldDir = os.getcwdu()
         try:
             rawDir = 'raw'
             os.makedirs(rawDir)
             os.chdir(rawDir)
-            sysRawDir = os.getcwd()
+            sysRawDir = os.getcwdu()
 
             # Loop through all the directories
             for dir_ in self.listdir():
