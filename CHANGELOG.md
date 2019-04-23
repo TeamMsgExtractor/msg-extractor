@@ -1,3 +1,6 @@
+**v0.23.1**
+* Fixed issue with embedded msg files caused by the changes in v0.23.0.
+
 **v0.23.0**
 * [[mattgwwalker #75](https://github.com/Syncurity/msg-extractor/issues/75)] & [[Syncurity #39](https://github.com/Syncurity/msg-extractor/issues/39)] Completely rewrote the function `Message._getStringStream`. This was done for two reasons. The first was to make it actually work with msg files that have their strings encoded in a non-Unicode encoding. The second reason was to make it so that it better reflected msg specification which says that ALL strings in a file will be either Unicode or non-Unicode, but not both. Because of the second part, the `prefer` option has been removed.
 * As part of fixing the two issues in the previous change, we have added two new properties:
