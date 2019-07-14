@@ -9,8 +9,8 @@ main_module = 'extract_msg'
 # main_script = main_module + '.py'
 
 # read in the description from README
-with open("README.rst") as stream:
-    long_description = stream.read()
+with open("README.rst", 'rb') as stream:
+    long_description = stream.read().decode('utf-8')
 
 # get the version from the ExtractMsg script. This can not be directly
 # imported because ExtractMsg imports olefile, which may not be installed yet
