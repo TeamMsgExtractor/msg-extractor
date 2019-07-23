@@ -157,13 +157,14 @@ class Message(olefile.OleFileIO):
         Gets a string representation of the requested filename.
         This should ALWAYS return a string (Unicode in python 2)
         """
-
         filename = self.fix_path(filename, prefix)
+        data = self._getStream(filename + '001E', prefix=False)
+        if data is None:
+            return
         if self.areStringsUnicode:
-            return windowsUnicode(self._getStream(filename + '001F', prefix = False))
+            return windowsUnicode(data)
         else:
-            tmp = self._getStream(filename + '001E', prefix = False)
-            return None if tmp is None else tmp.decode(self.stringEncoding)
+            return data.decode(self.stringEncoding)
 
     @property
     def path(self):
@@ -201,14 +202,18 @@ class Message(olefile.OleFileIO):
             self._subject = encode(self._getStringStream('__substg1.0_0037'))
             return self._subject
 
+    def headerInit(self):
+        """
+        Checks whether the header has been initialized.
+        """
+        return hasattr(self, '_header')
+
     @property
     def header(self):
         """
         Returns the message header, if it exists. Otherwise it will generate one.
         """
-        try:
-            return self._header
-        except AttributeError:
+        if not self.headerInit():
             headerText = self._getStringStream('__substg1.0_007D')
             if headerText is not None:
                 self._header = EmailParser().parsestr(headerText)
@@ -225,7 +230,7 @@ class Message(olefile.OleFileIO):
                 header.add_header('Authentication-Results', None)
 
                 self._header = header
-            return self._header
+        return self._header
 
     @property
     def header_dict(self):
@@ -238,16 +243,6 @@ class Message(olefile.OleFileIO):
             self._header_dict = dict(self.header._header)
             self._header_dict.pop('Received')
             return self._header_dict
-
-    def headerInit(self):
-        """
-        Checks whether the header has been initialized.
-        """
-        try:
-            self._header
-            return True
-        except AttributeError:
-            return False
 
     @property
     def mainProperties(self):
@@ -278,14 +273,11 @@ class Message(olefile.OleFileIO):
 
     @property
     def stringEncoding(self):
-        try:
-            return self.__stringEncoding
-        except AttributeError:
+        if not hasattr(self, '_stringEncoding'):
             # We need to calculate the encoding
             # Let's first check if the encoding will be unicode:
             if self.areStringsUnicode:
-                self.__stringEncoding = "utf-16-le"
-                return self.__stringEncoding
+                self._stringEncoding = "utf-16-le"
             else:
                 # Well, it's not unicode. Now we have to figure out what it IS.
                 if not self.mainProperties.has_key('3FFD0003'):
@@ -293,23 +285,20 @@ class Message(olefile.OleFileIO):
                 enc = self.mainProperties['3FFD0003'].value
                 # Now we just need to translate that value
                 # Now, this next line SHOULD work, but it is possible that it might not...
-                self.__stringEncoding = str(enc)
-                return self.__stringEncoding
+                self._stringEncoding = str(enc)
+        return self._stringEncoding    
 
     @property
     def areStringsUnicode(self):
         """
         Returns a boolean telling if the strings are unicode encoded.
         """
-        try:
-            return self.__bStringsUnicode
-        except AttributeError:
+        if not hasattr(self, '_areStringsUnicode'):
+            self._areStringsUnicode = False
             if self.mainProperties.has_key('340D0003'):
                 if (self.mainProperties['340D0003'].value & 0x40000) != 0:
-                    self.__bStringsUnicode = True
-                    return self.__bStringsUnicode
-            self.__bStringsUnicode = False
-            return self.__bStringsUnicode
+                    self._areStringsUnicode = True 
+        return self._areStringsUnicode
 
     @property
     def sender(self):
