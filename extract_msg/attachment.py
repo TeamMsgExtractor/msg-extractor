@@ -24,38 +24,39 @@ class Attachment(object):
         :param dir_: the directory inside the msg file where the attachment is located.
         """
         object.__init__(self)
-        self.__msg = msg
-        self.__dir = dir_
-        self.__props = Properties(self._getStream('__properties_version1.0'),
+        self.msg = msg
+        self.dir = dir_
+        self.props = Properties(self._getStream('__properties_version1.0'),
             constants.TYPE_ATTACHMENT)
         # Get long filename
-        self.__longFilename = self._getStringStream('__substg1.0_3707')
+        self.longFilename = self._getStringStream('__substg1.0_3707')
 
         # Get short filename
-        self.__shortFilename = self._getStringStream('__substg1.0_3704')
+        self.shortFilename = self._getStringStream('__substg1.0_3704')
 
         # Get Content-ID
-        self.__cid = self._getStringStream('__substg1.0_3712')
+        self.cid = self._getStringStream('__substg1.0_3712')
+        self.contend_id = self.cid
 
         # Get attachment data
         if self.Exists('__substg1.0_37010102'):
-            self.__type = 'data'
-            self.__data = self._getStream('__substg1.0_37010102')
+            self.type = 'data'
+            self.data = self._getStream('__substg1.0_37010102')
         elif self.Exists('__substg1.0_3701000D'):
-            if (self.__props['37050003'].value & 0x7) != 0x5:
+            if (self.props['37050003'].value & 0x7) != 0x5:
                 raise NotImplementedError(
                     'Current version of extract_msg does not support extraction of containers that are not embedded msg files.')
                 # TODO add implementation
             else:
-                self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
-                self.__type = 'msg'
-                self.__data = msg.__class__(self.msg.path, self.__prefix, self.__class__)
+                self.prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
+                self.type = 'msg'
+                self.data = msg.__class__(self.msg.path, self.prefix, self.__class__)
         else:
             # TODO Handling for special attacment types (like 0x00000007)
             raise TypeError('Unknown attachment type.')
 
     def _getStream(self, filename):
-        return self.__msg._getStream([self.__dir, filename])
+        return self.msg._getStream([self.dir, filename])
 
     def _getStringStream(self, filename):
         """
@@ -65,19 +66,19 @@ class Attachment(object):
         versions, then :param prefer: specifies which will be
         returned.
         """
-        return self.__msg._getStringStream([self.__dir, filename])
+        return self.msg._getStringStream([self.dir, filename])
 
     def Exists(self, filename):
         """
         Checks if stream exists inside the attachment folder.
         """
-        return self.__msg.Exists([self.__dir, filename])
+        return self.msg.Exists([self.dir, filename])
 
     def sExists(self, filename):
         """
         Checks if the string stream exists inside the attachment folder.
         """
-        return self.__msg.sExists([self.__dir, filename])
+        return self.msg.sExists([self.dir, filename])
 
     def save(self, contentId=False, json=False, useFileName=False, raw=False, customPath=None, customFilename=None):
         # Check if the user has specified a custom filename
@@ -88,13 +89,13 @@ class Attachment(object):
             # If not...
             # Check if user wants to save the file under the Content-id
             if contentId:
-                filename = self.__cid
+                filename = self.cid
             # If filename is None at this point, use long filename as first preference
             if filename is None:
-                filename = self.__longFilename
+                filename = self.longFilename
             # Otherwise use the short filename
             if filename is None:
-                filename = self.__shortFilename
+                filename = self.shortFilename
             # Otherwise just make something up!
             if filename is None:
                 filename = 'UnknownFilename ' + \
@@ -106,9 +107,9 @@ class Attachment(object):
                 customPath += '/'
             filename = customPath + filename
 
-        if self.__type == "data":
+        if self.type == "data":
             with open(filename, 'wb') as f:
-                f.write(self.__data)
+                f.write(self.data)
         else:
             self.saveEmbededMessage(contentId, json, useFileName, raw, customPath, customFilename)
         return filename
@@ -120,61 +121,3 @@ class Attachment(object):
         easily be overridden by a subclass.
         """
         self.data.save(json, useFileName, raw, contentId, customPath, customFilename)
-
-    @property
-    def cid(self):
-        """
-        Returns the content ID of the attachment, if it exists.
-        """
-        return self.__cid
-
-    contend_id = cid
-
-    @property
-    def data(self):
-        """
-        Returns the attachment data.
-        """
-        return self.__data
-
-    @property
-    def dir(self):
-        """
-        Returns the directory inside the msg file where the attachment is located.
-        """
-        return self.__dir
-
-    @property
-    def longFilename(self):
-        """
-        Returns the long file name of the attachment, if it exists.
-        """
-        return self.__longFilename
-
-    @property
-    def msg(self):
-        """
-        Returns the Message instance the attachment belongs to.
-        """
-        return self.__msg
-
-    @property
-    def props(self):
-        """
-        Returns the Properties instance of the attachment.
-        """
-        return self.__props
-
-    @property
-    def shortFilename(self):
-        """
-        Returns the short file name of the attachment, if it exists.
-        """
-        return self.__shortFilename
-
-    @property
-    def type(self):
-        """
-        Returns the type of the data.
-        """
-        return self.__type
