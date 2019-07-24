@@ -80,6 +80,16 @@ class Attachment(object):
         """
         return self.msg.sExists([self.dir, filename])
 
+    def getDefaultFilename(self):
+        # If filename is None at this point, use long filename as first preference  
+        if self.longFilename:
+            return self.longFilename
+        # Otherwise use the short filename
+        if self.shortFilename:
+            return self.shortFilename
+        # Otherwise just make something up!
+        return 'UnknownFilename %s.bin' % self.dir
+
     def save(self, contentId=False, json=False, useFileName=False, raw=False, customPath=None, customFilename=None):
         # Check if the user has specified a custom filename
         filename = None
@@ -90,17 +100,8 @@ class Attachment(object):
             # Check if user wants to save the file under the Content-id
             if contentId:
                 filename = self.cid
-            # If filename is None at this point, use long filename as first preference
             if filename is None:
-                filename = self.longFilename
-            # Otherwise use the short filename
-            if filename is None:
-                filename = self.shortFilename
-            # Otherwise just make something up!
-            if filename is None:
-                filename = 'UnknownFilename ' + \
-                           ''.join(random.choice(string.ascii_uppercase + string.digits)
-                                   for _ in range(5)) + '.bin'
+                filename = self.getDefaultFilename()
 
         if customPath is not None and customPath != '':
             if customPath[-1] != '/' or customPath[-1] != '\\':
@@ -111,10 +112,10 @@ class Attachment(object):
             with open(filename, 'wb') as f:
                 f.write(self.data)
         else:
-            self.saveEmbededMessage(contentId, json, useFileName, raw, customPath, customFilename)
+            self.saveEmbeddedMessage(contentId, json, useFileName, raw, customPath, customFilename)
         return filename
 
-    def saveEmbededMessage(self, contentId=False, json=False, useFileName=False, raw=False, customPath=None,
+    def saveEmbeddedMessage(self, contentId=False, json=False, useFileName=False, raw=False, customPath=None,
                            customFilename=None):
         """
         Seperate function from save to allow it to
