@@ -1,20 +1,26 @@
+**v0.23.3**
+* Fixed issues in readme.
+* [[Syncurity #50](https://github.com/Syncurity/msg-extractor/issues/50)] Updated `dev_classes.Message` to better match the current `Message` class.
+* Fixed bad links in changelog.
+* [[mattgwwalker #95](https://github.com/mattgwwalker/msg-extractor/issues/95)] Added falback encoding as well as manual encoding change to `dev_classes.Message`.
+
 **v0.23.1**
 * Fixed issue with embedded msg files caused by the changes in v0.23.0.
 
 **v0.23.0**
-* [[mattgwwalker #75](https://github.com/Syncurity/msg-extractor/issues/75)] & [[Syncurity #39](https://github.com/Syncurity/msg-extractor/issues/39)] Completely rewrote the function `Message._getStringStream`. This was done for two reasons. The first was to make it actually work with msg files that have their strings encoded in a non-Unicode encoding. The second reason was to make it so that it better reflected msg specification which says that ALL strings in a file will be either Unicode or non-Unicode, but not both. Because of the second part, the `prefer` option has been removed.
+* [[mattgwwalker #75](https://github.com/mattgwwalker/msg-extractor/issues/75)] & [[Syncurity #39](https://github.com/Syncurity/msg-extractor/issues/39)] Completely rewrote the function `Message._getStringStream`. This was done for two reasons. The first was to make it actually work with msg files that have their strings encoded in a non-Unicode encoding. The second reason was to make it so that it better reflected msg specification which says that ALL strings in a file will be either Unicode or non-Unicode, but not both. Because of the second part, the `prefer` option has been removed.
 * As part of fixing the two issues in the previous change, we have added two new properties:
     1. a boolean `Message.areStringsUnicode` which tells if the strings are unicode encoded
     2. A string `Message.stringEncoding` which tells what the encoding is. This is used by the `Message._getStringStream` to determine how to decode the data into a string.
 
 **v0.22.1**
-* [[mattgwwalker #69](https://github.com/Syncurity/msg-extractor/issues/69)] Fixed date format not being up to standard.
+* [[mattgwwalker #69](https://github.com/mattgwwalker/msg-extractor/issues/69)] Fixed date format not being up to standard.
 * Fixed a minor spelling error in the code.
 
 **v0.22.0**
 * [[Syncurity #30](https://github.com/Syncurity/msg-extractor/issues/30)] Added `--validate` option.
 * [[Syncurity #24](https://github.com/Syncurity/msg-extractor/issues/24)] Moved all dev code into its own scripts. Use `--dev` to use from the command line.
-* [[mattgwwalker #67](https://github.com/Syncurity/msg-extractor/issues/67)] Added compatability module to enforce unicode os functions.
+* [[mattgwwalker #67](https://github.com/mattgwwalker/msg-extractor/issues/67)] Added compatability module to enforce unicode os functions.
 * Added new function to `Message` class: `Message.sExists`. This function checks if a string stream exists. It's input should be formatted identically to that of `Message._getStringSteam`.
 * Added new function to `Message` class: `Message.fix_path`. This function will add the proper prefix to the path (if the `prefix` parameter is true) and adjust the path to be a string rather than a list or tuple.
 * Added new function to `utils.py`: `get_full_class_name`. This function returns a string containing the module name and the class name of any instance of any class. It is returned in the format of `{module}.{class}`.
