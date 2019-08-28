@@ -15,6 +15,7 @@ logger.addHandler(logging.NullHandler())
 class Message(olefile.OleFileIO):
     """
     Developer version of the `extract_msg.message.Message` class.
+    Useful for malformed msg files.
     """
 
     def __init__(self, path, prefix=''):
@@ -99,6 +100,25 @@ class Message(olefile.OleFileIO):
         else:
             inp = self.__prefix + inp
         return self.exists(inp)
+    
+    def sExists(self, inp):
+        """
+        Checks if string stream :param inp: exists in the msg file.
+        """
+        inp = self.fix_path(inp)
+        return self.exists(inp + '001F') or self.exists(inp + '001E')
+    
+    def fix_path(self, inp, prefix=True):
+        """
+        Changes paths so that they have the proper
+        prefix (should :param prefix: be True) and
+        are strings rather than lists or tuples.
+        """
+        if isinstance(inp, (list, tuple)):
+            inp = '/'.join(inp)
+        if prefix:
+            inp = self.__prefix + inp
+        return inp
 
     def _getStream(self, filename, prefix=True):
         if isinstance(filename, list):
@@ -115,29 +135,15 @@ class Message(olefile.OleFileIO):
     def _getStringStream(self, filename, prefer='unicode', prefix=True):
         """
         Gets a string representation of the requested filename.
-        Checks for both ASCII and Unicode representations and returns
-        a value if possible.  If there are both ASCII and Unicode
-        versions, then :param prefer: specifies which will be
-        returned.
+        This should ALWAYS return a string (Unicode in python 2)
         """
 
-        if isinstance(filename, list):
-            # Join with slashes to make it easier to append the type
-            filename = '/'.join(filename)
-
-        asciiVersion = self._getStream(filename + '001E', prefix)
-        unicodeVersion = windowsUnicode(self._getStream(filename + '001F', prefix))
-        logger.log(5, '_getStringStream called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
-            filename, asciiVersion is not None, unicodeVersion is not None))
-        if asciiVersion is None:
-            return unicodeVersion
-        elif unicodeVersion is None:
-            return asciiVersion
+        filename = self.fix_path(filename, prefix)
+        if self.areStringsUnicode:
+            return windowsUnicode(self._getStream(filename + '001F', prefix = False))
         else:
-            if prefer == 'unicode':
-                return unicodeVersion
-            else:
-                return asciiVersion
+            tmp = self._getStream(filename + '001E', prefix = False)
+            return None if tmp is None else tmp.decode(self.stringEncoding)
 
     @property
     def path(self):
@@ -176,6 +182,47 @@ class Message(olefile.OleFileIO):
                                     constants.TYPE_MESSAGE if self.__prefix == '' else constants.TYPE_MESSAGE_EMBED)
             return self._prop
 
+    @property
+    def stringEncoding(self):
+        try:
+            return self.__stringEncoding
+        except AttributeError:
+            # We need to calculate the encoding
+            # Let's first check if the encoding will be unicode:
+            if self.areStringsUnicode:
+                self.__stringEncoding = "utf-16-le"
+                return self.__stringEncoding
+            else:
+                # Well, it's not unicode. Now we have to figure out what it IS.
+                if not self.mainProperties.has_key('3FFD0003'):
+                    logger.error("String encoding is not unicode, but was also not specified. Malformed MSG file detected. Defaulting to utf-8")
+                    self.__stringEncoding = 'utf-8'
+                    return self.__stringEncoding
+                enc = self.mainProperties['3FFD0003'].value
+                # Now we just need to translate that value
+                # Now, this next line SHOULD work, but it is possible that it might not...
+                self.__stringEncoding = str(enc)
+                return self.__stringEncoding
+    
+    @stringEncoding.setter
+    def stringEncoding(self, enc):
+        self.__stringEncoding = enc
+        
+    @property
+    def areStringsUnicode(self):
+        """
+        Returns a boolean telling if the strings are unicode encoded.
+        """
+        try:
+            return self.__bStringsUnicode
+        except AttributeError:
+            if self.mainProperties.has_key('340D0003'):
+                if (self.mainProperties['340D0003'].value & 0x40000) != 0:
+                    self.__bStringsUnicode = True
+                    return self.__bStringsUnicode
+            self.__bStringsUnicode = False
+            return self.__bStringsUnicode
+        
     @property
     def date(self):
         """
