@@ -1,3 +1,6 @@
+**v0.23.3**
+* Add option to set stringEncoding of Message explicitly.
+
 **v0.23.1**
 * Fixed issue with embedded msg files caused by the changes in v0.23.0.
 
