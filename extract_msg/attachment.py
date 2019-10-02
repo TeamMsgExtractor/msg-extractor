@@ -49,7 +49,7 @@ class Attachment(object):
             else:
                 self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
                 self.__type = 'msg'
-                self.__data = msg.__class__(self.msg.path, self.__prefix, self.__class__)
+                self.__data = msg.__class__(self.msg.path, self.__prefix, self.__class__, stringEncoding = msg.__attachmentEncoding))
         else:
             # TODO Handling for special attacment types (like 0x00000007)
             raise TypeError('Unknown attachment type.')
