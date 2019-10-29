@@ -121,10 +121,7 @@ class Message(olefile.OleFileIO):
         return inp
 
     def _getStream(self, filename, prefix=True):
-        if isinstance(filename, list):
-            filename = '/'.join(filename)
-        if prefix:
-            filename = self.__prefix + filename
+        filename = self.fix_path(filename, prefix)
         if self.exists(filename):
             stream = self.openstream(filename)
             return stream.read()
