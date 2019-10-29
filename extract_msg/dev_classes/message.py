@@ -223,7 +223,7 @@ class Message(olefile.OleFileIO):
                     return self.__bStringsUnicode
             self.__bStringsUnicode = False
             return self.__bStringsUnicode
-        
+
     @property
     def date(self):
         """
