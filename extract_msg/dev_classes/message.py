@@ -18,7 +18,7 @@ class Message(olefile.OleFileIO):
     Useful for malformed msg files.
     """
 
-    def __init__(self, path, prefix=''):
+    def __init__(self, path, prefix='', filename=None):
         """
         :param path: path to the msg file in the system or is the raw msg file.
         :param prefix: used for extracting embedded msg files
@@ -29,7 +29,8 @@ class Message(olefile.OleFileIO):
         self.__path = path
         olefile.OleFileIO.__init__(self, path)
         prefixl = []
-        if prefix != '':
+        tmp_condition = prefix != ''
+        if tmp_condition:
             if not isinstance(prefix, stri):
                 try:
                     prefix = '/'.join(prefix)
@@ -37,23 +38,29 @@ class Message(olefile.OleFileIO):
                     raise TypeError('Invalid prefix type: ' + str(type(prefix)) +
                                     '\n(This was probably caused by you setting it manually).')
             prefix = prefix.replace('\\', '/')
-            g = prefix.split("/")
+            g = prefix.split('/')
             if g[-1] == '':
                 g.pop()
             prefixl = g
             if prefix[-1] != '/':
                 prefix += '/'
-            filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix=False)
         self.__prefix = prefix
         self.__prefixList = prefixl
-
-        logger.log(5, ':param path: has __len__ attribute?: {}'.format(has_len(path)))
-        if has_len(path):
-            if len(path) < 1536:
-                self.filename = path
-                logger.log(5, ':param path: length is {}; Using :param path: as file path'.format(len(path)))
+        
+        if tmp_condition:
+            filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix=False)
+        if filename is not None:
+            self.filename = filename
+        else:
+            logger.log(5, ':param path: has __len__ attribute?: {}'.format(has_len(path)))
+            if has_len(path):
+                if len(path) < 1536:
+                    self.filename = path
+                    logger.log(5, ':param path: length is {}; Using :param path: as file path'.format(len(path)))
+                else:
+                    logger.log(5, ':param path: length is {}; Using :param path: as raw msg stream'.format(len(path)))
+                    self.filename = None
             else:
-                logger.log(5, ':param path: length is {}; Using :param path: as raw msg stream'.format(len(path)))
                 self.filename = None
 
         self.mainProperties
@@ -91,34 +98,31 @@ class Message(olefile.OleFileIO):
                 out.append(x)
         return out
 
-    def Exists(self, inp):
+    def Exists(self, filename):
         """
-        Checks if :param inp: exists in the msg file.
+        Checks if :param filename: exists in the msg file.
         """
-        if isinstance(inp, list):
-            inp = self.__prefixList + inp
-        else:
-            inp = self.__prefix + inp
-        return self.exists(inp)
+        filename = self.fix_path(filename)
+        return self.exists(filename)
     
-    def sExists(self, inp):
+    def sExists(self, filename):
         """
-        Checks if string stream :param inp: exists in the msg file.
+        Checks if string stream :param filename: exists in the msg file.
         """
-        inp = self.fix_path(inp)
-        return self.exists(inp + '001F') or self.exists(inp + '001E')
+        filename = self.fix_path(filename)
+        return self.exists(filename + '001F') or self.exists(filename + '001E')
     
-    def fix_path(self, inp, prefix=True):
+    def fix_path(self, filename, prefix=True):
         """
         Changes paths so that they have the proper
         prefix (should :param prefix: be True) and
         are strings rather than lists or tuples.
         """
-        if isinstance(inp, (list, tuple)):
-            inp = '/'.join(inp)
+        if isinstance(filename, (list, tuple)):
+            filename = '/'.join(filename)
         if prefix:
-            inp = self.__prefix + inp
-        return inp
+            filename = self.__prefix + filename
+        return filename
 
     def _getStream(self, filename, prefix=True):
         filename = self.fix_path(filename, prefix)
