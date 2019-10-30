@@ -15,9 +15,10 @@ logger.addHandler(logging.NullHandler())
 class Message(olefile.OleFileIO):
     """
     Developer version of the `extract_msg.message.Message` class.
+    Useful for malformed msg files.
     """
 
-    def __init__(self, path, prefix=''):
+    def __init__(self, path, prefix='', filename=None):
         """
         :param path: path to the msg file in the system or is the raw msg file.
         :param prefix: used for extracting embedded msg files
@@ -28,7 +29,8 @@ class Message(olefile.OleFileIO):
         self.__path = path
         olefile.OleFileIO.__init__(self, path)
         prefixl = []
-        if prefix != '':
+        tmp_condition = prefix != ''
+        if tmp_condition:
             if not isinstance(prefix, stri):
                 try:
                     prefix = '/'.join(prefix)
@@ -36,23 +38,29 @@ class Message(olefile.OleFileIO):
                     raise TypeError('Invalid prefix type: ' + str(type(prefix)) +
                                     '\n(This was probably caused by you setting it manually).')
             prefix = prefix.replace('\\', '/')
-            g = prefix.split("/")
+            g = prefix.split('/')
             if g[-1] == '':
                 g.pop()
             prefixl = g
             if prefix[-1] != '/':
                 prefix += '/'
-            filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix=False)
         self.__prefix = prefix
         self.__prefixList = prefixl
-
-        logger.log(5, ':param path: has __len__ attribute?: {}'.format(has_len(path)))
-        if has_len(path):
-            if len(path) < 1536:
-                self.filename = path
-                logger.log(5, ':param path: length is {}; Using :param path: as file path'.format(len(path)))
+        
+        if tmp_condition:
+            filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix=False)
+        if filename is not None:
+            self.filename = filename
+        else:
+            logger.log(5, ':param path: has __len__ attribute?: {}'.format(has_len(path)))
+            if has_len(path):
+                if len(path) < 1536:
+                    self.filename = path
+                    logger.log(5, ':param path: length is {}; Using :param path: as file path'.format(len(path)))
+                else:
+                    logger.log(5, ':param path: length is {}; Using :param path: as raw msg stream'.format(len(path)))
+                    self.filename = None
             else:
-                logger.log(5, ':param path: length is {}; Using :param path: as raw msg stream'.format(len(path)))
                 self.filename = None
 
         self.mainProperties
@@ -90,21 +98,34 @@ class Message(olefile.OleFileIO):
                 out.append(x)
         return out
 
-    def Exists(self, inp):
+    def Exists(self, filename):
         """
-        Checks if :param inp: exists in the msg file.
+        Checks if :param filename: exists in the msg file.
         """
-        if isinstance(inp, list):
-            inp = self.__prefixList + inp
-        else:
-            inp = self.__prefix + inp
-        return self.exists(inp)
-
-    def _getStream(self, filename, prefix=True):
-        if isinstance(filename, list):
+        filename = self.fix_path(filename)
+        return self.exists(filename)
+    
+    def sExists(self, filename):
+        """
+        Checks if string stream :param filename: exists in the msg file.
+        """
+        filename = self.fix_path(filename)
+        return self.exists(filename + '001F') or self.exists(filename + '001E')
+    
+    def fix_path(self, filename, prefix=True):
+        """
+        Changes paths so that they have the proper
+        prefix (should :param prefix: be True) and
+        are strings rather than lists or tuples.
+        """
+        if isinstance(filename, (list, tuple)):
             filename = '/'.join(filename)
         if prefix:
             filename = self.__prefix + filename
+        return filename
+
+    def _getStream(self, filename, prefix=True):
+        filename = self.fix_path(filename, prefix)
         if self.exists(filename):
             stream = self.openstream(filename)
             return stream.read()
@@ -115,29 +136,15 @@ class Message(olefile.OleFileIO):
     def _getStringStream(self, filename, prefer='unicode', prefix=True):
         """
         Gets a string representation of the requested filename.
-        Checks for both ASCII and Unicode representations and returns
-        a value if possible.  If there are both ASCII and Unicode
-        versions, then :param prefer: specifies which will be
-        returned.
+        This should ALWAYS return a string (Unicode in python 2)
         """
 
-        if isinstance(filename, list):
-            # Join with slashes to make it easier to append the type
-            filename = '/'.join(filename)
-
-        asciiVersion = self._getStream(filename + '001E', prefix)
-        unicodeVersion = windowsUnicode(self._getStream(filename + '001F', prefix))
-        logger.log(5, '_getStringStream called for {}. Ascii version found: {}. Unicode version found: {}.'.format(
-            filename, asciiVersion is not None, unicodeVersion is not None))
-        if asciiVersion is None:
-            return unicodeVersion
-        elif unicodeVersion is None:
-            return asciiVersion
+        filename = self.fix_path(filename, prefix)
+        if self.areStringsUnicode:
+            return windowsUnicode(self._getStream(filename + '001F', prefix = False))
         else:
-            if prefer == 'unicode':
-                return unicodeVersion
-            else:
-                return asciiVersion
+            tmp = self._getStream(filename + '001E', prefix = False)
+            return None if tmp is None else tmp.decode(self.stringEncoding)
 
     @property
     def path(self):
@@ -175,6 +182,47 @@ class Message(olefile.OleFileIO):
             self._prop = Properties(self._getStream('__properties_version1.0'),
                                     constants.TYPE_MESSAGE if self.__prefix == '' else constants.TYPE_MESSAGE_EMBED)
             return self._prop
+
+    @property
+    def stringEncoding(self):
+        try:
+            return self.__stringEncoding
+        except AttributeError:
+            # We need to calculate the encoding
+            # Let's first check if the encoding will be unicode:
+            if self.areStringsUnicode:
+                self.__stringEncoding = "utf-16-le"
+                return self.__stringEncoding
+            else:
+                # Well, it's not unicode. Now we have to figure out what it IS.
+                if not self.mainProperties.has_key('3FFD0003'):
+                    logger.error("String encoding is not unicode, but was also not specified. Malformed MSG file detected. Defaulting to utf-8")
+                    self.__stringEncoding = 'utf-8'
+                    return self.__stringEncoding
+                enc = self.mainProperties['3FFD0003'].value
+                # Now we just need to translate that value
+                # Now, this next line SHOULD work, but it is possible that it might not...
+                self.__stringEncoding = str(enc)
+                return self.__stringEncoding
+    
+    @stringEncoding.setter
+    def stringEncoding(self, enc):
+        self.__stringEncoding = enc
+        
+    @property
+    def areStringsUnicode(self):
+        """
+        Returns a boolean telling if the strings are unicode encoded.
+        """
+        try:
+            return self.__bStringsUnicode
+        except AttributeError:
+            if self.mainProperties.has_key('340D0003'):
+                if (self.mainProperties['340D0003'].value & 0x40000) != 0:
+                    self.__bStringsUnicode = True
+                    return self.__bStringsUnicode
+            self.__bStringsUnicode = False
+            return self.__bStringsUnicode
 
     @property
     def date(self):

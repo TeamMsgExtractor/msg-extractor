@@ -17,7 +17,7 @@ Usage
 
 ::
 
-     python extract_msg example.msg
+     python -m extract_msg example.msg
 
 This will produce a new folder named according to the date, time and
 subject of the message (for example "2013-07-24_0915 Example"). The
@@ -40,36 +40,37 @@ that Microsoft have opened up their documentation of the file format.
 Currently, the README is in the process of being redone. For now, please
 refer to the usage information provided from the program's help dialog:
 ::
-     usage: extract_msg [-h] [--use-content-id] [--dev] [--validate] [--json]
-                        [--file-logging] [--verbose] [--log LOG]
-                        [--config CONFIG_PATH] [--out OUT_PATH] [--use-filename]
-                        msg [msg ...]
 
-     extract_msg: Extracts emails and attachments saved in Microsoft Outlook's .msg
-     files. https://github.com/mattgwwalker/msg-extractor
+    usage: extract_msg [-h] [--use-content-id] [--dev] [--validate] [--json]
+                    [--file-logging] [--verbose] [--log LOG]
+                    [--config CONFIG_PATH] [--out OUT_PATH] [--use-filename]
+                    msg [msg ...]
 
-     positional arguments:
-       msg                   An msg file to be parsed
+    extract_msg: Extracts emails and attachments saved in Microsoft Outlook's .msg
+    files. https://github.com/mattgwwalker/msg-extractor
 
-     optional arguments:
-       -h, --help            show this help message and exit
-       --use-content-id, --cid
-                             Save attachments by their Content ID, if they have
-                             one. Useful when working with the HTML body.
-       --dev                 Changes to use developer mode. Automatically enables
-                             the --verbose flag. Takes precedence over the
-                             --validate flag.
-       --validate            Turns on file validation mode. Turns off regular file
-                             output.
-       --json                Changes to write output files as json.
-       --file-logging        Enables file logging. Implies --verbose
-       --verbose             Turns on console logging.
-       --log LOG             Set the path to write the file log to.
-       --config CONFIG_PATH  Set the path to load the logging config from.
-       --out OUT_PATH        Set the folder to use for the program output.
-                             (Default: Current directory)
-       --use-filename        Sets whether the name of each output is based on the
-                             msg filename.
+    positional arguments:
+    msg                   An msg file to be parsed
+
+    optional arguments:
+    -h, --help            show this help message and exit
+    --use-content-id, --cid
+                         Save attachments by their Content ID, if they have
+                         one. Useful when working with the HTML body.
+    --dev                 Changes to use developer mode. Automatically enables
+                         the --verbose flag. Takes precedence over the
+                         --validate flag.
+    --validate            Turns on file validation mode. Turns off regular file
+                         output.
+    --json                Changes to write output files as json.
+    --file-logging        Enables file logging. Implies --verbose
+    --verbose             Turns on console logging.
+    --log LOG             Set the path to write the file log to.
+    --config CONFIG_PATH  Set the path to load the logging config from.
+    --out OUT_PATH        Set the folder to use for the program output.
+                         (Default: Current directory)
+    --use-filename        Sets whether the name of each output is based on the
+                         msg filename.
 
 **To use this in your own script**, start by using:
 
@@ -88,7 +89,7 @@ to the ExtractMsg.Message Method:
 
 ::
 
-     msg_raw = b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1\x00 ... \x00x00x00'
+     msg_raw = b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1\x00 ... \x00\x00\x00'
      msg = extract_msg.Message(msg_raw)
 
 If you want to override the default attachment class and use one of your
@@ -179,8 +180,8 @@ Joel Kaufman - First implementations of the json and filename flags
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
 
-.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.23.2-blue.svg
-   :target: https://pypi.org/project/extract-msg/0.23.2/
+.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.23.3-blue.svg
+   :target: https://pypi.org/project/extract-msg/0.23.3/
 
 .. |PyPI1| image:: https://img.shields.io/badge/python-2.7+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-2715/
