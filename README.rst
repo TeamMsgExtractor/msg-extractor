@@ -17,7 +17,7 @@ Usage
 
 ::
 
-     python extract_msg example.msg
+     python -m extract_msg example.msg
 
 This will produce a new folder named according to the date, time and
 subject of the message (for example "2013-07-24_0915 Example"). The
@@ -89,7 +89,7 @@ to the ExtractMsg.Message Method:
 
 ::
 
-     msg_raw = b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1\x00 ... \x00x00x00'
+     msg_raw = b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1\x00 ... \x00\x00\x00'
      msg = extract_msg.Message(msg_raw)
 
 If you want to override the default attachment class and use one of your
@@ -180,8 +180,8 @@ Joel Kaufman - First implementations of the json and filename flags
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
 
-.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.23.2-blue.svg
-   :target: https://pypi.org/project/extract-msg/0.23.2/
+.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.23.3-blue.svg
+   :target: https://pypi.org/project/extract-msg/0.23.3/
 
 .. |PyPI1| image:: https://img.shields.io/badge/python-2.7+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-2715/
