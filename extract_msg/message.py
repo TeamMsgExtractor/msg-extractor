@@ -181,6 +181,37 @@ class Message(olefile.OleFileIO):
                 value = self._getStream(streamID)
             setattr(self, variable, value)
             return value
+        
+     def _genRecipient(self, recipientType, recipientInt):
+        """
+        Returns the specified recipient field
+        """
+        private = '_' + recipientType
+        try:
+            return getattr(self, private)
+        except AttributeError:
+            # Check header first
+            headerResult = None
+            if self.headerInit():
+                headerResult = self.header[recipientType]
+            if headerResult is not None:
+                setattr(self, private, headerResult)
+            else:
+                if self.headerInit():
+                    logger.info('Header found, but "{}" is not included. Will be generated from other streams.'.format(recipientType))
+                f = []
+                for x in self.recipients:
+                    if x.type & 0x0000000f == recipientInt:
+                        f.append(x.formatted)
+                if len(f) > 0:
+                    st = f[0]
+                    if len(f) > 1:
+                        for x in range(1, len(f)):
+                            st += ', {0}'.format(f[x])
+                    self._cc = st
+                else:
+                    setattr(self, private, None)
+            return return getattr(self, private)
 
     @property
     def path(self):
@@ -359,31 +390,7 @@ class Message(olefile.OleFileIO):
         """
         Returns the to field, if it exists.
         """
-        try:
-            return self._to
-        except AttributeError:
-            # Check header first
-            headerResult = None
-            if self.headerInit():
-                headerResult = self.header['to']
-            if headerResult is not None:
-                self._to = headerResult
-            else:
-                if self.headerInit():
-                    logger.info('Header found, but "to" is not included. Will be generated from other streams.')
-                f = []
-                for x in self.recipients:
-                    if x.type & 0x0000000f == 1:
-                        f.append(x.formatted)
-                if len(f) > 0:
-                    st = f[0]
-                    if len(f) > 1:
-                        for x in range(1, len(f)):
-                            st += '; {0}'.format(f[x])
-                    self._to = st
-                else:
-                    self._to = None
-            return self._to
+        return self._genRecipient('to', 1)
 
     @property
     def compressedRtf(self):
@@ -404,31 +411,7 @@ class Message(olefile.OleFileIO):
         """
         Returns the cc field, if it exists.
         """
-        try:
-            return self._cc
-        except AttributeError:
-            # Check header first
-            headerResult = None
-            if self.headerInit():
-                headerResult = self.header['cc']
-            if headerResult is not None:
-                self._cc = headerResult
-            else:
-                if self.headerInit():
-                    logger.info('Header found, but "cc" is not included. Will be generated from other streams.')
-                f = []
-                for x in self.recipients:
-                    if x.type & 0x0000000f == 2:
-                        f.append(x.formatted)
-                if len(f) > 0:
-                    st = f[0]
-                    if len(f) > 1:
-                        for x in range(1, len(f)):
-                            st += '; {0}'.format(f[x])
-                    self._cc = st
-                else:
-                    self._cc = None
-            return self._cc
+        return self._genRecipient('cc', 2)
 
     @property
     def message_id(self):
