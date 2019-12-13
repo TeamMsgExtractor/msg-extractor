@@ -164,6 +164,23 @@ class Message(olefile.OleFileIO):
         else:
             tmp = self._getStream(filename + '001E', prefix = False)
             return None if tmp is None else tmp.decode(self.stringEncoding)
+        
+    def _ensureSet(self, variable, streamID, stingstream = True):
+        """
+        Ensures that the variable exists, otherwise will set it using the specified stream.
+        After that, return said variable.
+
+        If the specified stream is not a string stream, make sure to set :param string stream: to False.
+        """
+        try:
+            return getattr(self, variable)
+        except AttributeError:
+            if stringStream:
+                value = self._getStringStream(streamID)
+            else:
+                value = self._getStream(streamID)
+            setattr(self, variable, value)
+            return value
 
     @property
     def path(self):
@@ -195,11 +212,7 @@ class Message(olefile.OleFileIO):
         """
         Returns the message subject, if it exists.
         """
-        try:
-            return self._subject
-        except AttributeError:
-            self._subject = encode(self._getStringStream('__substg1.0_0037'))
-            return self._subject
+        return self._ensureSet('_subject', '__substg1.0_0037')
 
     @property
     def header(self):
@@ -377,22 +390,14 @@ class Message(olefile.OleFileIO):
         """
         Returns the compressed RTF stream, if it exists.
         """
-        try:
-            return self._compressedRtf
-        except AttributeError:
-            self._compressedRtf = self._getStream('__substg1.0_10090102')
-            return self._compressedRtf
+        return self._ensureSet('_compressedRtf', '__substg1.0_10090102', False)
 
     @property
     def htmlBody(self):
         """
         Returns the html body, if it exists.
         """
-        try:
-            return self._htmlBody
-        except AttributeError:
-            self._htmlBody = self._getStream('__substg1.0_10130102')
-            return self._htmlBody
+        return self._ensureSet('_htmlBody', '__substg1.0_10130102', False)
 
     @property
     def cc(self):
@@ -443,11 +448,9 @@ class Message(olefile.OleFileIO):
 
     @property
     def reply_to(self):
-        try:
-            return self._reply_to
-        except AttributeError:
-            self._reply_to = self._getStringStream('__substg1.0_1042')
-            return self._reply_to
+        """
+        """
+        return self._ensureSet('_reply_to', '__substg1.0_1042')
 
     @property
     def body(self):
