@@ -430,10 +430,10 @@ class Message(olefile.OleFileIO):
             return self._message_id
 
     @property
-    def reply_to(self):
+    def inReplyTo(self):
         """
         """
-        return self._ensureSet('_reply_to', '__substg1.0_1042')
+        return self._ensureSet('_in_reply_to', '__substg1.0_1042')
 
     @property
     def body(self):
