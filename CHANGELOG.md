@@ -1,8 +1,9 @@
 **v0.23.3**
+* [[mattgwwalker #112](https://github.com/mattgwwalker/msg-extractor/issues/112)] Fixed issue caused by a difference in the method to get the message of an exception between Python 2 and Python 3
 * Fixed issues in readme.
 * [[Syncurity #50](https://github.com/Syncurity/msg-extractor/issues/50)] Updated `dev_classes.Message` to better match the current `Message` class.
 * Fixed bad links in changelog.
-* [[mattgwwalker #95](https://github.com/mattgwwalker/msg-extractor/issues/95)] Added falback encoding as well as manual encoding change to `dev_classes.Message`.
+* [[mattgwwalker #95](https://github.com/mattgwwalker/msg-extractor/issues/95)] Added fallback encoding as well as manual encoding change to `dev_classes.Message`.
 
 **v0.23.1**
 * Fixed issue with embedded msg files caused by the changes in v0.23.0.
