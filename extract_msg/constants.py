@@ -359,13 +359,6 @@ PROPERTIES = {
 
 # END CONSTANTS
 
-def int_to_recipient_type(integer):
-    """
-    Returns the name of the recipient type constant that has the value of :param integer:
-    """
-    return RECIPIENT_DICT[integer]
-
-
 def int_to_data_type(integer):
     """
     Returns the name of the data type constant that has the value of :param integer:
@@ -378,3 +371,9 @@ def int_to_intelligence(integer):
     Returns the name of the intelligence level constant that has the value of :param integer:
     """
     return INTELLIGENCE_DICT[integer]
+
+def int_to_recipient_type(integer):
+    """
+    Returns the name of the recipient type constant that has the value of :param integer:
+    """
+    return RECIPIENT_DICT[integer]
