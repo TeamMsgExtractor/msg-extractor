@@ -171,17 +171,17 @@ class VariableLengthProp(PropBase):
         The length field of the variable length property.
         """
         return self.__length
-
-    @property
-    def reserved_flags(self):
-        """
-        The reserved flags field of the variable length property.
-        """
-        return self.__reserved
-
+    
     @property
     def real_length(self):
         """
         The ACTUAL length of the stream that this property corresponds to.
         """
         return self.__realLength
+    
+    @property
+    def reserved_flags(self):
+        """
+        The reserved flags field of the variable length property.
+        """
+        return self.__reserved
