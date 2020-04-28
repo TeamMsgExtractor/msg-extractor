@@ -19,7 +19,6 @@ from extract_msg.exceptions import InvalidFileFormat
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
-
 class Message(olefile.OleFileIO):
     """
     Parser for Microsoft Outlook message files.
@@ -45,7 +44,7 @@ class Message(olefile.OleFileIO):
             olefile.OleFileIO.__init__(self, path)
         except IOError as e:    # py2 and py3 compatible
             logger.error(e)
-            if e.message == 'not an OLE2 structured storage file':
+            if str(e) == 'not an OLE2 structured storage file':
                 raise InvalidFileFormat(e)
             else:
                 raise
@@ -93,6 +92,127 @@ class Message(olefile.OleFileIO):
         self.date
         self.__crlf = '\n'  # This variable keeps track of what the new line character should be
         self.body
+        
+    def _ensureSet(self, variable, streamID, stingstream = True):
+        """
+        Ensures that the variable exists, otherwise will set it using the specified stream.
+        After that, return said variable.
+        If the specified stream is not a string stream, make sure to set :param string stream: to False.
+        """
+        try:
+            return getattr(self, variable)
+        except AttributeError:
+            if stringStream:
+                value = self._getStringStream(streamID)
+            else:
+                value = self._getStream(streamID)
+            setattr(self, variable, value)
+            return value
+
+     def _genRecipient(self, recipientType, recipientInt):
+        """
+        Returns the specified recipient field
+        """
+        private = '_' + recipientType
+        try:
+            return getattr(self, private)
+        except AttributeError:
+            # Check header first
+            headerResult = None
+            if self.headerInit():
+                headerResult = self.header[recipientType]
+            if headerResult is not None:
+                setattr(self, private, headerResult)
+            else:
+                if self.headerInit():
+                    logger.info('Header found, but "{}" is not included. Will be generated from other streams.'.format(recipientType))
+                f = []
+                for x in self.recipients:
+                    if x.type & 0x0000000f == recipientInt:
+                        f.append(x.formatted)
+                if len(f) > 0:
+                    st = f[0]
+                    if len(f) > 1:
+                        for x in range(1, len(f)):
+                            st += ', {0}'.format(f[x])
+                    self._cc = st
+                else:
+                    setattr(self, private, None)
+            return return getattr(self, private)
+
+    def _getStream(self, filename, prefix=True):
+        filename = self.fix_path(filename, prefix)
+        if self.exists(filename):
+            with self.openstream(filename) as stream:
+                return stream.read()
+        else:
+            logger.info('Stream "{}" was requested but could not be found. Returning `None`.'.format(filename))
+            return None
+
+    def _getStringStream(self, filename, prefix=True):
+        """
+        Gets a string representation of the requested filename.
+        This should ALWAYS return a string (Unicode in python 2)
+        """
+
+        filename = self.fix_path(filename, prefix)
+        if self.areStringsUnicode:
+            return windowsUnicode(self._getStream(filename + '001F', prefix = False))
+        else:
+            tmp = self._getStream(filename + '001E', prefix = False)
+            return None if tmp is None else tmp.decode(self.stringEncoding)
+
+    def debug(self):
+        for dir_ in self.listDir():
+            if dir_[-1].endswith('001E') or dir_[-1].endswith('001F'):
+                print('Directory: ' + str(dir_[:-1]))
+                print('Contents: {}'.format(self._getStream(dir_)))
+
+    def dump(self):
+        """
+        Prints out a summary of the message
+        """
+        print('Message')
+        print('Subject:', self.subject)
+        print('Date:', self.date)
+        print('Body:')
+        print(self.body)
+    
+    def Exists(self, inp):
+        """
+        Checks if :param inp: exists in the msg file. Does not always go to the top, starts at specified point
+        """
+        inp = self.fix_path(inp)
+        return self.exists(inp)
+    
+    def sExists(self, inp):
+        """
+        Checks if string stream :param inp: exists in the msg file.
+        """
+        inp = self.fix_path(inp)
+        return self.exists(inp + '001F') or self.exists(inp + '001E')
+
+    def fix_path(self, inp, prefix=True):
+        """
+        Changes paths so that they have the proper
+        prefix (should :param prefix: be True) and
+        are strings rather than lists or tuples.
+        """
+        if isinstance(inp, (list, tuple)):
+            inp = '/'.join(inp)
+        if prefix:
+            inp = self.__prefix + inp
+        return inp
+
+    def headerInit(self):
+        """
+        Checks whether the header has been initialized.
+        """
+        try:
+            self._header
+            return True
+        except AttributeError:
+            return False
 
     def listDir(self, streams=True, storages=False):
         """
@@ -117,416 +237,6 @@ class Message(olefile.OleFileIO):
                 out.append(x)
         return out
 
-    def Exists(self, inp):
-        """
-        Checks if :param inp: exists in the msg file.
-        """
-        inp = self.fix_path(inp)
-        return self.exists(inp)
-
-    def sExists(self, inp):
-        """
-        Checks if string stream :param inp: exists in the msg file.
-        """
-        inp = self.fix_path(inp)
-        return self.exists(inp + '001F') or self.exists(inp + '001E')
-
-    def fix_path(self, inp, prefix=True):
-        """
-        Changes paths so that they have the proper
-        prefix (should :param prefix: be True) and
-        are strings rather than lists or tuples.
-        """
-        if isinstance(inp, (list, tuple)):
-            inp = '/'.join(inp)
-        if prefix:
-            inp = self.__prefix + inp
-        return inp
-
-    def _getStream(self, filename, prefix=True):
-        filename = self.fix_path(filename, prefix)
-        if self.exists(filename):
-            with self.openstream(filename) as stream:
-                return stream.read()
-        else:
-            logger.info('Stream "{}" was requested but could not be found. Returning `None`.'.format(filename))
-            return None
-
-    def _getStringStream(self, filename, prefix=True):
-        """
-        Gets a string representation of the requested filename.
-        This should ALWAYS return a string (Unicode in python 2)
-        """
-
-        filename = self.fix_path(filename, prefix)
-        if self.areStringsUnicode:
-            return windowsUnicode(self._getStream(filename + '001F', prefix = False))
-        else:
-            tmp = self._getStream(filename + '001E', prefix = False)
-            return None if tmp is None else tmp.decode(self.stringEncoding)
-
-    @property
-    def path(self):
-        """
-        Returns the message path if generated from a file,
-        otherwise returns the data used to generate the
-        Message instance.
-        """
-        return self.__path
-
-    @property
-    def prefix(self):
-        """
-        Returns the prefix of the Message instance.
-        Intended for developer use.
-        """
-        return self.__prefix
-
-    @property
-    def prefixList(self):
-        """
-        Returns the prefix list of the Message instance.
-        Intended for developer use.
-        """
-        return copy.deepcopy(self.__prefixList)
-
-    @property
-    def subject(self):
-        """
-        Returns the message subject, if it exists.
-        """
-        try:
-            return self._subject
-        except AttributeError:
-            self._subject = encode(self._getStringStream('__substg1.0_0037'))
-            return self._subject
-
-    @property
-    def header(self):
-        """
-        Returns the message header, if it exists. Otherwise it will generate one.
-        """
-        try:
-            return self._header
-        except AttributeError:
-            headerText = self._getStringStream('__substg1.0_007D')
-            if headerText is not None:
-                self._header = EmailParser().parsestr(headerText)
-                self._header['date'] = self.date
-            else:
-                logger.info('Header is empty or was not found. Header will be generated from other streams.')
-                header = EmailParser().parsestr('')
-                header.add_header('Date', self.date)
-                header.add_header('From', self.sender)
-                header.add_header('To', self.to)
-                header.add_header('Cc', self.cc)
-                header.add_header('Message-Id', self.message_id)
-                # TODO find authentication results outside of header
-                header.add_header('Authentication-Results', None)
-
-                self._header = header
-            return self._header
-
-    @property
-    def header_dict(self):
-        """
-        Returns a dictionary of the entries in the header
-        """
-        try:
-            return self._header_dict
-        except AttributeError:
-            self._header_dict = dict(self.header._header)
-            self._header_dict.pop('Received')
-            return self._header_dict
-
-    def headerInit(self):
-        """
-        Checks whether the header has been initialized.
-        """
-        try:
-            self._header
-            return True
-        except AttributeError:
-            return False
-
-    @property
-    def mainProperties(self):
-        """
-        Returns the Properties instance used by the Message instance.
-        """
-        try:
-            return self._prop
-        except AttributeError:
-            self._prop = Properties(self._getStream('__properties_version1.0'),
-                                    constants.TYPE_MESSAGE if self.__prefix == '' else constants.TYPE_MESSAGE_EMBED)
-            return self._prop
-
-    @property
-    def date(self):
-        """
-        Returns the send date, if it exists.
-        """
-        try:
-            return self._date
-        except AttributeError:
-            self._date = self._prop.date
-            return self._date
-
-    @property
-    def parsedDate(self):
-        return email.utils.parsedate(self.date)
-
-    @property
-    def stringEncoding(self):
-        try:
-            return self.__stringEncoding
-        except AttributeError:
-            # We need to calculate the encoding
-            # Let's first check if the encoding will be unicode:
-            if self.areStringsUnicode:
-                self.__stringEncoding = "utf-16-le"
-                return self.__stringEncoding
-            else:
-                # Well, it's not unicode. Now we have to figure out what it IS.
-                if not self.mainProperties.has_key('3FFD0003'):
-                    raise Exception('Encoding property not found')
-                enc = self.mainProperties['3FFD0003'].value
-                # Now we just need to translate that value
-                # Now, this next line SHOULD work, but it is possible that it might not...
-                self.__stringEncoding = str(enc)
-                return self.__stringEncoding
-
-    @property
-    def areStringsUnicode(self):
-        """
-        Returns a boolean telling if the strings are unicode encoded.
-        """
-        try:
-            return self.__bStringsUnicode
-        except AttributeError:
-            if self.mainProperties.has_key('340D0003'):
-                if (self.mainProperties['340D0003'].value & 0x40000) != 0:
-                    self.__bStringsUnicode = True
-                    return self.__bStringsUnicode
-            self.__bStringsUnicode = False
-            return self.__bStringsUnicode
-
-    @property
-    def sender(self):
-        """
-        Returns the message sender, if it exists.
-        """
-        try:
-            return self._sender
-        except AttributeError:
-            # Check header first
-            if self.headerInit():
-                headerResult = self.header['from']
-                if headerResult is not None:
-                    self._sender = headerResult
-                    return headerResult
-                logger.info('Header found, but "sender" is not included. Will be generated from other streams.')
-            # Extract from other fields
-            text = self._getStringStream('__substg1.0_0C1A')
-            email = self._getStringStream('__substg1.0_5D01')
-            # Will not give an email address sometimes. Seems to exclude the email address if YOU are the sender.
-            result = None
-            if text is None:
-                result = email
-            else:
-                result = text
-                if email is not None:
-                    result += ' <' + email + '>'
-
-            self._sender = result
-            return result
-
-    @property
-    def to(self):
-        """
-        Returns the to field, if it exists.
-        """
-        try:
-            return self._to
-        except AttributeError:
-            # Check header first
-            headerResult = None
-            if self.headerInit():
-                headerResult = self.header['to']
-            if headerResult is not None:
-                self._to = headerResult
-            else:
-                if self.headerInit():
-                    logger.info('Header found, but "to" is not included. Will be generated from other streams.')
-                f = []
-                for x in self.recipients:
-                    if x.type & 0x0000000f == 1:
-                        f.append(x.formatted)
-                if len(f) > 0:
-                    st = f[0]
-                    if len(f) > 1:
-                        for x in range(1, len(f)):
-                            st += '; {0}'.format(f[x])
-                    self._to = st
-                else:
-                    self._to = None
-            return self._to
-
-    @property
-    def compressedRtf(self):
-        """
-        Returns the compressed RTF stream, if it exists.
-        """
-        try:
-            return self._compressedRtf
-        except AttributeError:
-            self._compressedRtf = self._getStream('__substg1.0_10090102')
-            return self._compressedRtf
-
-    @property
-    def htmlBody(self):
-        """
-        Returns the html body, if it exists.
-        """
-        try:
-            return self._htmlBody
-        except AttributeError:
-            self._htmlBody = self._getStream('__substg1.0_10130102')
-            return self._htmlBody
-
-    @property
-    def cc(self):
-        """
-        Returns the cc field, if it exists.
-        """
-        try:
-            return self._cc
-        except AttributeError:
-            # Check header first
-            headerResult = None
-            if self.headerInit():
-                headerResult = self.header['cc']
-            if headerResult is not None:
-                self._cc = headerResult
-            else:
-                if self.headerInit():
-                    logger.info('Header found, but "cc" is not included. Will be generated from other streams.')
-                f = []
-                for x in self.recipients:
-                    if x.type & 0x0000000f == 2:
-                        f.append(x.formatted)
-                if len(f) > 0:
-                    st = f[0]
-                    if len(f) > 1:
-                        for x in range(1, len(f)):
-                            st += '; {0}'.format(f[x])
-                    self._cc = st
-                else:
-                    self._cc = None
-            return self._cc
-
-    @property
-    def message_id(self):
-        try:
-            return self._message_id
-        except AttributeError:
-            headerResult = None
-            if self.headerInit():
-                headerResult = self._header['message-id']
-            if headerResult is not None:
-                self._message_id = headerResult
-            else:
-                if self.headerInit():
-                    logger.info('Header found, but "Message-Id" is not included. Will be generated from other streams.')
-                self._message_id = self._getStringStream('__substg1.0_1035')
-            return self._message_id
-
-    @property
-    def reply_to(self):
-        try:
-            return self._reply_to
-        except AttributeError:
-            self._reply_to = self._getStringStream('__substg1.0_1042')
-            return self._reply_to
-
-    @property
-    def body(self):
-        """
-        Returns the message body, if it exists.
-        """
-        try:
-            return self._body
-        except AttributeError:
-            self._body = self._getStringStream('__substg1.0_1000')
-            if self._body:
-                self._body = encode(self._body)
-                a = re.search('\n', self._body)
-                if a is not None:
-                    if re.search('\r\n', self._body) is not None:
-                        self.__crlf = '\r\n'
-            return self._body
-
-    @property
-    def crlf(self):
-        """
-        Returns the value of self.__crlf, should you need it for whatever reason.
-        """
-        self.body
-        return self.__crlf
-
-    @property
-    def attachmentClass(self):
-        """
-        Returns the Attachment class being used, should you need to use it externally for whatever reason.
-        """
-        return self.__attachmentClass
-
-    @property
-    def attachments(self):
-        """
-        Returns a list of all attachments.
-        """
-        try:
-            return self._attachments
-        except AttributeError:
-            # Get the attachments
-            attachmentDirs = []
-
-            for dir_ in self.listDir():
-                if dir_[len(self.__prefixList)].startswith('__attach') and\
-                        dir_[len(self.__prefixList)] not in attachmentDirs:
-                    attachmentDirs.append(dir_[len(self.__prefixList)])
-
-            self._attachments = []
-
-            for attachmentDir in attachmentDirs:
-                self._attachments.append(self.__attachmentClass(self, attachmentDir))
-
-            return self._attachments
-
-    @property
-    def recipients(self):
-        """
-        Returns a list of all recipients.
-        """
-        try:
-            return self._recipients
-        except AttributeError:
-            # Get the recipients
-            recipientDirs = []
-
-            for dir_ in self.listDir():
-                if dir_[len(self.__prefixList)].startswith('__recip') and\
-                        dir_[len(self.__prefixList)] not in recipientDirs:
-                    recipientDirs.append(dir_[len(self.__prefixList)])
-
-            self._recipients = []
-
-            for recipientDir in recipientDirs:
-                self._recipients.append(Recipient(recipientDir, self))
-
-            return self._recipients
-
     def save(self, toJson=False, useFileName=False, raw=False, ContentId=False, customPath=None, customFilename=None):
         """
         Saves the message body and attachments found in the message. Setting toJson
@@ -534,7 +244,6 @@ class Message(olefile.OleFileIO):
         attachments are stored in a folder. Setting useFileName to true will mean that
         the filename is used as the name of the folder; otherwise, the message's date
         and subject are used as the folder name.
-
         Here is the absolute order of prioity for the name of the folder:
             1. customFilename
             2. self.filename if useFileName
@@ -625,6 +334,13 @@ class Message(olefile.OleFileIO):
             # Return to previous directory
             os.chdir(oldDir)
 
+    def save_attachments(self, contentId=False, json=False, useFileName=False, raw=False, customPath=None):
+        """
+        Saves only attachments in the same folder.
+        """
+        for attachment in self.attachments:
+            attachment.save(contentId, json, useFileName, raw, customPath)
+
     def saveRaw(self):
         # Create a 'raw' folder
         oldDir = os.getcwdu()
@@ -659,25 +375,292 @@ class Message(olefile.OleFileIO):
         finally:
             os.chdir(oldDir)
 
-    def dump(self):
+    @property
+    def areStringsUnicode(self):
         """
-        Prints out a summary of the message
+        Returns a boolean telling if the strings are unicode encoded.
         """
-        print('Message')
-        print('Subject:', self.subject)
-        print('Date:', self.date)
-        print('Body:')
-        print(self.body)
+        try:
+            return self.__bStringsUnicode
+        except AttributeError:
+            if self.mainProperties.has_key('340D0003'):
+                if (self.mainProperties['340D0003'].value & 0x40000) != 0:
+                    self.__bStringsUnicode = True
+                    return self.__bStringsUnicode
+            self.__bStringsUnicode = False
+            return self.__bStringsUnicode
 
-    def debug(self):
-        for dir_ in self.listDir():
-            if dir_[-1].endswith('001E') or dir_[-1].endswith('001F'):
-                print('Directory: ' + str(dir_[:-1]))
-                print('Contents: {}'.format(self._getStream(dir_)))
+    @property
+    def attachmentClass(self):
+        """
+        Returns the Attachment class being used, should you need to use it externally for whatever reason.
+        """
+        return self.__attachmentClass
 
-    def save_attachments(self, contentId=False, json=False, useFileName=False, raw=False, customPath=None):
+    @property
+    def attachments(self):
         """
-        Saves only attachments in the same folder.
+        Returns a list of all attachments.
         """
-        for attachment in self.attachments:
-            attachment.save(contentId, json, useFileName, raw, customPath)
+        try:
+            return self._attachments
+        except AttributeError:
+            # Get the attachments
+            attachmentDirs = []
+
+            for dir_ in self.listDir():
+                if dir_[len(self.__prefixList)].startswith('__attach') and\
+                        dir_[len(self.__prefixList)] not in attachmentDirs:
+                    attachmentDirs.append(dir_[len(self.__prefixList)])
+
+            self._attachments = []
+
+            for attachmentDir in attachmentDirs:
+                self._attachments.append(self.__attachmentClass(self, attachmentDir))
+
+            return self._attachments
+
+    @property
+    def body(self):
+        """
+        Returns the message body, if it exists.
+        """
+        try:
+            return self._body
+        except AttributeError:
+            self._body = self._getStringStream('__substg1.0_1000')
+            if self._body:
+                self._body = encode(self._body)
+                a = re.search('\n', self._body)
+                if a is not None:
+                    if re.search('\r\n', self._body) is not None:
+                        self.__crlf = '\r\n'
+            return self._body
+
+    @property
+    def cc(self):
+        """
+        Returns the cc field, if it exists.
+        """
+        return self._genRecipient('cc', 2)
+
+    @property
+    def compressedRtf(self):
+        """
+        Returns the compressed RTF stream, if it exists.
+        """
+        return self._ensureSet('_compressedRtf', '__substg1.0_10090102', False)
+
+    @property
+    def crlf(self):
+        """
+        Returns the value of self.__crlf, should you need it for whatever reason.
+        """
+        self.body
+        return self.__crlf
+
+    @property
+    def date(self):
+        """
+        Returns the send date, if it exists.
+        """
+        try:
+            return self._date
+        except AttributeError:
+            self._date = self._prop.date
+            return self._date
+
+    @property
+    def header(self):
+        """
+        Returns the message header, if it exists. Otherwise it will generate one.
+        """
+        try:
+            return self._header
+        except AttributeError:
+            headerText = self._getStringStream('__substg1.0_007D')
+            if headerText is not None:
+                self._header = EmailParser().parsestr(headerText)
+                self._header['date'] = self.date
+            else:
+                logger.info('Header is empty or was not found. Header will be generated from other streams.')
+                header = EmailParser().parsestr('')
+                header.add_header('Date', self.date)
+                header.add_header('From', self.sender)
+                header.add_header('To', self.to)
+                header.add_header('Cc', self.cc)
+                header.add_header('Message-Id', self.message_id)
+                # TODO find authentication results outside of header
+                header.add_header('Authentication-Results', None)
+
+                self._header = header
+            return self._header
+
+    @property
+    def header_dict(self):
+        """
+        Returns a dictionary of the entries in the header
+        """
+        try:
+            return self._header_dict
+        except AttributeError:
+            self._header_dict = dict(self.header._header)
+            self._header_dict.pop('Received')
+            return self._header_dict
+
+    @property
+    def htmlBody(self):
+        """
+        Returns the html body, if it exists.
+        """
+        return self._ensureSet('_htmlBody', '__substg1.0_10130102', False)
+
+    @property
+    def inReplyTo(self):
+        """
+        """
+        return self._ensureSet('_in_reply_to', '__substg1.0_1042')
+
+    @property
+    def mainProperties(self):
+        """
+        Returns the Properties instance used by the Message instance.
+        """
+        try:
+            return self._prop
+        except AttributeError:
+            self._prop = Properties(self._getStream('__properties_version1.0'),
+                                    constants.TYPE_MESSAGE if self.__prefix == '' else constants.TYPE_MESSAGE_EMBED)
+            return self._prop
+
+    @property
+    def message_id(self):
+        try:
+            return self._message_id
+        except AttributeError:
+            headerResult = None
+            if self.headerInit():
+                headerResult = self._header['message-id']
+            if headerResult is not None:
+                self._message_id = headerResult
+            else:
+                if self.headerInit():
+                    logger.info('Header found, but "Message-Id" is not included. Will be generated from other streams.')
+                self._message_id = self._getStringStream('__substg1.0_1035')
+            return self._message_id
+
+    @property
+    def parsedDate(self):
+        return email.utils.parsedate(self.date)
+
+    @property
+    def path(self):
+        """
+        Returns the message path if generated from a file,
+        otherwise returns the data used to generate the
+        Message instance.
+        """
+        return self.__path
+
+    @property
+    def prefix(self):
+        """
+        Returns the prefix of the Message instance.
+        Intended for developer use.
+        """
+        return self.__prefix
+
+    @property
+    def prefixList(self):
+        """
+        Returns the prefix list of the Message instance.
+        Intended for developer use.
+        """
+        return copy.deepcopy(self.__prefixList)
+
+    @property
+    def recipients(self):
+        """
+        Returns a list of all recipients.
+        """
+        try:
+            return self._recipients
+        except AttributeError:
+            # Get the recipients
+            recipientDirs = []
+
+            for dir_ in self.listDir():
+                if dir_[len(self.__prefixList)].startswith('__recip') and\
+                        dir_[len(self.__prefixList)] not in recipientDirs:
+                    recipientDirs.append(dir_[len(self.__prefixList)])
+
+            self._recipients = []
+
+            for recipientDir in recipientDirs:
+                self._recipients.append(Recipient(recipientDir, self))
+
+            return self._recipients
+
+    @property
+    def sender(self):
+        """
+        Returns the message sender, if it exists.
+        """
+        try:
+            return self._sender
+        except AttributeError:
+            # Check header first
+            if self.headerInit():
+                headerResult = self.header['from']
+                if headerResult is not None:
+                    self._sender = headerResult
+                    return headerResult
+                logger.info('Header found, but "sender" is not included. Will be generated from other streams.')
+            # Extract from other fields
+            text = self._getStringStream('__substg1.0_0C1A')
+            email = self._getStringStream('__substg1.0_5D01')
+            # Will not give an email address sometimes. Seems to exclude the email address if YOU are the sender.
+            result = None
+            if text is None:
+                result = email
+            else:
+                result = text
+                if email is not None:
+                    result += ' <' + email + '>'
+
+            self._sender = result
+            return result
+
+    @property
+    def subject(self):
+        """
+        Returns the message subject, if it exists.
+        """
+        return self._ensureSet('_subject', '__substg1.0_0037')
+
+    @property
+    def stringEncoding(self):
+        try:
+            return self.__stringEncoding
+        except AttributeError:
+            # We need to calculate the encoding
+            # Let's first check if the encoding will be unicode:
+            if self.areStringsUnicode:
+                self.__stringEncoding = "utf-16-le"
+                return self.__stringEncoding
+            else:
+                # Well, it's not unicode. Now we have to figure out what it IS.
+                if not self.mainProperties.has_key('3FFD0003'):
+                    raise Exception('Encoding property not found')
+                enc = self.mainProperties['3FFD0003'].value
+                # Now we just need to translate that value
+                # Now, this next line SHOULD work, but it is possible that it might not...
+                self.__stringEncoding = str(enc)
+                return self.__stringEncoding
+
+    @property
+    def to(self):
+        """
+        Returns the to field, if it exists.
+        """
+        return self._genRecipient('to', 1)

@@ -20,13 +20,10 @@ logging.addLevelName(5, 'DEVELOPER')
 
 if sys.version_info[0] >= 3:  # Python 3
     stri = (str,)
-
     get_input = input
-
 
     def encode(inp):
         return inp
-
 
     def properHex(inp):
         """
@@ -43,23 +40,18 @@ if sys.version_info[0] >= 3:  # Python 3
             a = '0' + a
         return a
 
-
     def windowsUnicode(string):
         return str(string, 'utf_16_le') if string is not None else None
-
 
     def xstr(s):
         return '' if s is None else str(s)
 
 else:  # Python 2
     stri = (str, unicode)
-
     get_input = raw_input
-
 
     def encode(inp):
         return inp.encode('utf-8') if inp is not None else None
-
 
     def properHex(inp):
         """
@@ -76,17 +68,14 @@ else:  # Python 2
             a = '0' + a
         return a
 
-
     def windowsUnicode(string):
         return unicode(string, 'utf_16_le') if string is not None else None
-
 
     def xstr(s):
         if isinstance(s, unicode):
             return s.encode('utf-8')
         else:
             return '' if s is None else str(s)
-
 
 def addNumToDir(dirName):
     """
@@ -100,7 +89,6 @@ def addNumToDir(dirName):
         except Exception as e:
             pass
     return None
-
 
 def divide(string, length):
     """
@@ -118,10 +106,8 @@ def divide(string, length):
     """
     return [string[length * x:length * (x + 1)] for x in range(int(len(string) / length))]
 
-
 def fromTimeStamp(stamp):
     return datetime.datetime.fromtimestamp(stamp, tzlocal.get_localzone())
-
 
 def get_command_args(args):
     """
@@ -190,6 +176,14 @@ def get_command_args(args):
     options.msgs = file_tables
     return options
 
+def getContFileDir(_file_):
+    """
+    Takes in the path to a file and tries to return the containing folder.
+    """
+    return '/'.join(_file_.replace('\\', '/').split('/')[:-1])
+
+def get_full_class_name(inp):
+    return inp.__class__.__module__ + '.' + inp.__class__.__name__
 
 def has_len(obj):
     """
@@ -201,13 +195,11 @@ def has_len(obj):
     except AttributeError:
         return False
 
-
 def msgEpoch(inp):
     """
     Taken (with permission) from https://github.com/TheElementalOfCreation/creatorUtils
     """
     return (inp - 116444736000000000) / 10000000.0
-
 
 def parse_type(_type, stream):
     """
@@ -281,14 +273,6 @@ def parse_type(_type, stream):
         # TODO parsing for `multiple` types
         pass
     return value
-
-
-def getContFileDir(_file_):
-    """
-    Takes in the path to a file and tries to return the containing folder.
-    """
-    return '/'.join(_file_.replace('\\', '/').split('/')[:-1])
-
 
 def setup_logging(default_path=None, default_level=logging.WARN, logfile=None, enable_file_logging=False,
                   env_key='EXTRACT_MSG_LOG_CFG'):
@@ -366,7 +350,3 @@ def setup_logging(default_path=None, default_level=logging.WARN, logfile=None, e
 
     logging.getLogger().setLevel(default_level)
     return True
-
-
-def get_full_class_name(inp):
-    return inp.__class__.__module__ + '.' + inp.__class__.__name__

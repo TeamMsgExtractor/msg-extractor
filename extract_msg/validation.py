@@ -6,20 +6,6 @@ from extract_msg.message import Message
 from extract_msg.utils import get_full_class_name, has_len
 
 
-def get_string_details(instance, stream):
-    return {
-        'exists': instance.sExists(stream),
-        'not empty': False if not instance.sExists(stream) else len(instance._getStringStream(stream)) > 0,
-    }
-
-
-def get_stream_details(instance, stream):
-    return {
-        'exists': instance.Exists(stream),
-        'not empty': False if not instance.Exists(stream) else len(instance._getStream(stream)) > 0,
-    }
-
-
 def get_email_details(instance, stream):
     return {
         'exists': instance.sExists(stream),
@@ -27,6 +13,17 @@ def get_email_details(instance, stream):
         'valid email address': False if not instance.sExists(stream) else u'@' in instance._getStringStream(stream),
     }
 
+def get_stream_details(instance, stream):
+    return {
+        'exists': instance.Exists(stream),
+        'not empty': False if not instance.Exists(stream) else len(instance._getStream(stream)) > 0,
+    }
+
+def get_string_details(instance, stream):
+    return {
+        'exists': instance.sExists(stream),
+        'not empty': False if not instance.sExists(stream) else len(instance._getStringStream(stream)) > 0,
+    }
 
 def string_FE(instance):
     temp = '001E'
@@ -37,39 +34,6 @@ def string_FE(instance):
     if confirmation:
         temp += ', but ' + tempnot + ' was detected.'
     return temp
-
-
-def validate_msg(instance):
-    return {
-        '001F/001E': string_FE(instance),
-        'header': get_string_details(instance, '__substg1.0_007D'),
-        'body': get_string_details(instance, '__substg1.0_1000'),
-        'html body': get_stream_details(instance, '__substg1.0_10130102'),
-        'rtf body': get_stream_details(instance, '__substg1.0_10090102'),
-        'date': instance.date,
-        'attachments': {x: validate_attachment(y) for x, y in enumerate(instance.attachments)},
-        'recipients': {x: validate_recipient(y) for x, y in enumerate(instance.recipients)},
-    }
-
-
-def validate_attachment(instance):
-    temp = {
-        'long filename': get_string_details(instance, '__substg1.0_3707'),
-        'short filename': get_string_details(instance, '__substg1.0_3704'),
-        'content id': get_string_details(instance, '__substg1.0_3712'),
-        'type': instance.type,
-    }
-    if temp['type'] == 'msg':
-        temp['msg'] = validate_msg(instance.data)
-    return temp
-
-
-def validate_recipient(instance):
-    return {
-        'type': instance.type,
-        'stream 3003': get_email_details(instance, '__substg1.0_3003'),
-        'stream 39FE': get_email_details(instance, '__substg1.0_39FE'),
-    }
 
 
 def validate(msg):
@@ -98,3 +62,33 @@ def validate(msg):
             validation_dict['message']['initializes'] = True
             validation_dict['message']['msg'] = validate_msg(msg_instance)
     return validation_dict
+
+def validate_attachment(instance):
+    temp = {
+        'long filename': get_string_details(instance, '__substg1.0_3707'),
+        'short filename': get_string_details(instance, '__substg1.0_3704'),
+        'content id': get_string_details(instance, '__substg1.0_3712'),
+        'type': instance.type,
+    }
+    if temp['type'] == 'msg':
+        temp['msg'] = validate_msg(instance.data)
+    return temp
+
+def validate_msg(instance):
+    return {
+        '001F/001E': string_FE(instance),
+        'header': get_string_details(instance, '__substg1.0_007D'),
+        'body': get_string_details(instance, '__substg1.0_1000'),
+        'html body': get_stream_details(instance, '__substg1.0_10130102'),
+        'rtf body': get_stream_details(instance, '__substg1.0_10090102'),
+        'date': instance.date,
+        'attachments': {x: validate_attachment(y) for x, y in enumerate(instance.attachments)},
+        'recipients': {x: validate_recipient(y) for x, y in enumerate(instance.recipients)},
+    }
+
+def validate_recipient(instance):
+    return {
+        'type': instance.type,
+        'stream 3003': get_email_details(instance, '__substg1.0_3003'),
+        'stream 39FE': get_email_details(instance, '__substg1.0_39FE'),
+    }
