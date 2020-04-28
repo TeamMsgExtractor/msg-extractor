@@ -75,28 +75,27 @@ class Message(olefile.OleFileIO):
         self.attachments
         self.date
 
-    def listDir(self, streams=True, storages=False):
+    def _getStream(self, filename, prefix=True):
+        filename = self.fix_path(filename, prefix)
+        if self.exists(filename):
+            stream = self.openstream(filename)
+            return stream.read()
+        else:
+            logger.info('Stream "{}" was requested but could not be found. Returning `None`.'.format(filename))
+            return None
+
+    def _getStringStream(self, filename, prefer='unicode', prefix=True):
         """
-        Replacement for OleFileIO.listdir that runs at the current prefix directory.
+        Gets a string representation of the requested filename.
+        This should ALWAYS return a string (Unicode in python 2)
         """
-        temp = self.listdir(streams, storages)
-        if self.__prefix == '':
-            return temp
-        prefix = self.__prefix.split('/')
-        if prefix[-1] == '':
-            prefix.pop()
-        out = []
-        for x in temp:
-            good = True
-            if len(x) <= len(prefix):
-                good = False
-            if good:
-                for y in range(len(prefix)):
-                    if x[y] != prefix[y]:
-                        good = False
-            if good:
-                out.append(x)
-        return out
+
+        filename = self.fix_path(filename, prefix)
+        if self.areStringsUnicode:
+            return windowsUnicode(self._getStream(filename + '001F', prefix = False))
+        else:
+            tmp = self._getStream(filename + '001E', prefix = False)
+            return None if tmp is None else tmp.decode(self.stringEncoding)
 
     def Exists(self, filename):
         """
@@ -124,27 +123,89 @@ class Message(olefile.OleFileIO):
             filename = self.__prefix + filename
         return filename
 
-    def _getStream(self, filename, prefix=True):
-        filename = self.fix_path(filename, prefix)
-        if self.exists(filename):
-            stream = self.openstream(filename)
-            return stream.read()
-        else:
-            logger.info('Stream "{}" was requested but could not be found. Returning `None`.'.format(filename))
-            return None
-
-    def _getStringStream(self, filename, prefer='unicode', prefix=True):
+    def listDir(self, streams=True, storages=False):
         """
-        Gets a string representation of the requested filename.
-        This should ALWAYS return a string (Unicode in python 2)
+        Replacement for OleFileIO.listdir that runs at the current prefix directory.
         """
+        temp = self.listdir(streams, storages)
+        if self.__prefix == '':
+            return temp
+        prefix = self.__prefix.split('/')
+        if prefix[-1] == '':
+            prefix.pop()
+        out = []
+        for x in temp:
+            good = True
+            if len(x) <= len(prefix):
+                good = False
+            if good:
+                for y in range(len(prefix)):
+                    if x[y] != prefix[y]:
+                        good = False
+            if good:
+                out.append(x)
+        return out
 
-        filename = self.fix_path(filename, prefix)
-        if self.areStringsUnicode:
-            return windowsUnicode(self._getStream(filename + '001F', prefix = False))
-        else:
-            tmp = self._getStream(filename + '001E', prefix = False)
-            return None if tmp is None else tmp.decode(self.stringEncoding)
+    @property
+    def areStringsUnicode(self):
+        """
+        Returns a boolean telling if the strings are unicode encoded.
+        """
+        try:
+            return self.__bStringsUnicode
+        except AttributeError:
+            if self.mainProperties.has_key('340D0003'):
+                if (self.mainProperties['340D0003'].value & 0x40000) != 0:
+                    self.__bStringsUnicode = True
+                    return self.__bStringsUnicode
+            self.__bStringsUnicode = False
+            return self.__bStringsUnicode
+
+    @property
+    def attachments(self):
+        """
+        Returns a list of all attachments.
+        """
+        try:
+            return self._attachments
+        except AttributeError:
+            # Get the attachments
+            attachmentDirs = []
+
+            for dir_ in self.listDir():
+                if dir_[len(self.__prefixList)].startswith('__attach') and\
+                        dir_[len(self.__prefixList)] not in attachmentDirs:
+                    attachmentDirs.append(dir_[len(self.__prefixList)])
+
+            self._attachments = []
+
+            for attachmentDir in attachmentDirs:
+                self._attachments.append(Attachment(self, attachmentDir))
+
+            return self._attachments
+
+    @property
+    def date(self):
+        """
+        Returns the send date, if it exists.
+        """
+        try:
+            return self._date
+        except AttributeError:
+            self._date = self._prop.date
+            return self._date
+    
+    @property
+    def mainProperties(self):
+        """
+        Returns the Properties instance used by the Message instance.
+        """
+        try:
+            return self._prop
+        except AttributeError:
+            self._prop = Properties(self._getStream('__properties_version1.0'),
+                                    constants.TYPE_MESSAGE if self.__prefix == '' else constants.TYPE_MESSAGE_EMBED)
+            return self._prop
 
     @property
     def path(self):
@@ -172,16 +233,27 @@ class Message(olefile.OleFileIO):
         return copy.deepcopy(self.__prefixList)
 
     @property
-    def mainProperties(self):
+    def recipients(self):
         """
-        Returns the Properties instance used by the Message instance.
+        Returns a list of all recipients.
         """
         try:
-            return self._prop
+            return self._recipients
         except AttributeError:
-            self._prop = Properties(self._getStream('__properties_version1.0'),
-                                    constants.TYPE_MESSAGE if self.__prefix == '' else constants.TYPE_MESSAGE_EMBED)
-            return self._prop
+            # Get the recipients
+            recipientDirs = []
+
+            for dir_ in self.listDir():
+                if dir_[len(self.__prefixList)].startswith('__recip') and\
+                        dir_[len(self.__prefixList)] not in recipientDirs:
+                    recipientDirs.append(dir_[len(self.__prefixList)])
+
+            self._recipients = []
+
+            for recipientDir in recipientDirs:
+                self._recipients.append(Recipient(recipientDir, self))
+
+            return self._recipients
 
     @property
     def stringEncoding(self):
@@ -208,75 +280,3 @@ class Message(olefile.OleFileIO):
     @stringEncoding.setter
     def stringEncoding(self, enc):
         self.__stringEncoding = enc
-        
-    @property
-    def areStringsUnicode(self):
-        """
-        Returns a boolean telling if the strings are unicode encoded.
-        """
-        try:
-            return self.__bStringsUnicode
-        except AttributeError:
-            if self.mainProperties.has_key('340D0003'):
-                if (self.mainProperties['340D0003'].value & 0x40000) != 0:
-                    self.__bStringsUnicode = True
-                    return self.__bStringsUnicode
-            self.__bStringsUnicode = False
-            return self.__bStringsUnicode
-
-    @property
-    def date(self):
-        """
-        Returns the send date, if it exists.
-        """
-        try:
-            return self._date
-        except AttributeError:
-            self._date = self._prop.date
-            return self._date
-
-    @property
-    def attachments(self):
-        """
-        Returns a list of all attachments.
-        """
-        try:
-            return self._attachments
-        except AttributeError:
-            # Get the attachments
-            attachmentDirs = []
-
-            for dir_ in self.listDir():
-                if dir_[len(self.__prefixList)].startswith('__attach') and\
-                        dir_[len(self.__prefixList)] not in attachmentDirs:
-                    attachmentDirs.append(dir_[len(self.__prefixList)])
-
-            self._attachments = []
-
-            for attachmentDir in attachmentDirs:
-                self._attachments.append(Attachment(self, attachmentDir))
-
-            return self._attachments
-
-    @property
-    def recipients(self):
-        """
-        Returns a list of all recipients.
-        """
-        try:
-            return self._recipients
-        except AttributeError:
-            # Get the recipients
-            recipientDirs = []
-
-            for dir_ in self.listDir():
-                if dir_[len(self.__prefixList)].startswith('__recip') and\
-                        dir_[len(self.__prefixList)] not in recipientDirs:
-                    recipientDirs.append(dir_[len(self.__prefixList)])
-
-            self._recipients = []
-
-            for recipientDir in recipientDirs:
-                self._recipients.append(Recipient(recipientDir, self))
-
-            return self._recipients
