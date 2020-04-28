@@ -1,5 +1,7 @@
-**v0.23.3**
+**v0.23.4**
 * [[mattgwwalker #112](https://github.com/mattgwwalker/msg-extractor/issues/112)] Changed method used to get the message from an exception to make it compatible with Python 2 and 3
+* [[Syncurity #51](https://github.com/Syncurity/msg-extractor/issues/51)] General cleanup and all around improvements of the code.
+**v0.23.3**
 * Fixed issues in readme.
 * [[Syncurity #50](https://github.com/Syncurity/msg-extractor/issues/50)] Updated `dev_classes.Message` to better match the current `Message` class.
 * Fixed bad links in changelog.
