@@ -15,6 +15,6 @@ logger.addHandler(logging.NullHandler())
 
 class InvalidFileFormat(OSError):
     """
-    A Invalid File Format Error occurred
+    An Invalid File Format Error occurred
     """
     pass
