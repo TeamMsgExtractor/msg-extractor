@@ -109,7 +109,7 @@ class Message(olefile.OleFileIO):
             setattr(self, variable, value)
             return value
 
-     def _genRecipient(self, recipientType, recipientInt):
+    def _genRecipient(self, recipientType, recipientInt):
         """
         Returns the specified recipient field
         """
@@ -138,7 +138,7 @@ class Message(olefile.OleFileIO):
                     self._cc = st
                 else:
                     setattr(self, private, None)
-            return return getattr(self, private)
+            return getattr(self, private)
 
     def _getStream(self, filename, prefix=True):
         filename = self.fix_path(filename, prefix)
