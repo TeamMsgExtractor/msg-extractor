@@ -28,14 +28,6 @@ class Attachment(object):
         self.__dir = dir_
         self.__props = Properties(self._getStream('__properties_version1.0'),
             constants.TYPE_ATTACHMENT)
-        # Get long filename
-        self.__longFilename = self._getStringStream('__substg1.0_3707')
-
-        # Get short filename
-        self.__shortFilename = self._getStringStream('__substg1.0_3704')
-
-        # Get Content-ID
-        self.__cid = self._getStringStream('__substg1.0_3712')
 
         # Get attachment data
         if self.Exists('__substg1.0_37010102'):
@@ -67,6 +59,23 @@ class Attachment(object):
         """
         return self.__msg._getStringStream([self.__dir, filename])
 
+    def _ensureSet(self, variable, streamID, stingstream = True):
+        """
+        Ensures that the variable exists, otherwise will set it using the specified stream.
+        After that, return said variable.
+
+        If the specified stream is not a string stream, make sure to set :param string stream: to False.
+        """
+        try:
+            return getattr(self, variable)
+        except AttributeError:
+            if stringStream:
+                value = self._getStringStream(streamID)
+            else:
+                value = self._getStream(streamID)
+            setattr(self, variable, value)
+            return value
+    
     def Exists(self, filename):
         """
         Checks if stream exists inside the attachment folder.
@@ -88,13 +97,13 @@ class Attachment(object):
             # If not...
             # Check if user wants to save the file under the Content-id
             if contentId:
-                filename = self.__cid
+                filename = self.cid
             # If filename is None at this point, use long filename as first preference
             if filename is None:
-                filename = self.__longFilename
+                filename = self.longFilename
             # Otherwise use the short filename
             if filename is None:
-                filename = self.__shortFilename
+                filename = self.shortFilename
             # Otherwise just make something up!
             if filename is None:
                 filename = 'UnknownFilename ' + \
@@ -124,9 +133,9 @@ class Attachment(object):
     @property
     def cid(self):
         """
-        Returns the content ID of the attachment, if it exists.
+        Returns the Content ID of the attachment, if it exists.
         """
-        return self.__cid
+        return self._ensureSet('_cid', '__substg1.0_3712')
 
     contend_id = cid
 
@@ -149,7 +158,7 @@ class Attachment(object):
         """
         Returns the long file name of the attachment, if it exists.
         """
-        return self.__longFilename
+        return self._ensureSet('_longFilename', '__substg1.0_3707')
 
     @property
     def msg(self):
@@ -170,11 +179,11 @@ class Attachment(object):
         """
         Returns the short file name of the attachment, if it exists.
         """
-        return self.__shortFilename
+        return self._ensureSet('_shortFilename', '__substg1.0_3704')
 
     @property
     def type(self):
         """
-        Returns the type of the data.
+        Returns the (internally used) type of the data.
         """
         return self.__type

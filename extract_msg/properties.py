@@ -54,6 +54,25 @@ class Properties(object):
             self.__props[a.name] = a
         self.__pl = len(self.__props)
 
+    def __contains__(self, key):
+        self.__props.__contains__(key)
+
+    def __getitem__(self, key):
+        return self.__props.__getitem__(key)
+
+    def __iter__(self):
+        return self.__props.__iter__()
+
+    def __len__(self):
+        """
+        Returns the number of properties.
+        """
+        return self.__pl
+
+    @property
+    def __repr__(self):
+        return self.__props.__repr__
+
     def get(self, name):
         """
         Retrieve the property of :param name:.
@@ -81,25 +100,6 @@ class Properties(object):
 
     def values(self):
         return self.__props.values()
-
-    def __contains__(self, key):
-        self.__props.__contains__(key)
-
-    def __getitem__(self, key):
-        return self.__props.__getitem__(key)
-
-    def __iter__(self):
-        return self.__props.__iter__()
-
-    def __len__(self):
-        """
-        Returns the number of properties.
-        """
-        return self.__pl
-
-    @property
-    def __repr__(self):
-        return self.__props.__repr__
 
     items.__doc__ = dict.items.__doc__
     keys.__doc__ = dict.keys.__doc__
