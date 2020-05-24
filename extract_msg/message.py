@@ -4,6 +4,7 @@ import json
 import logging
 import re
 
+import compressed_rtf
 from imapclient.imapclient import decode_utf7
 import olefile
 
@@ -601,6 +602,13 @@ class Message(olefile.OleFileIO):
 
             return self._recipients
 
+    @property
+    def rtfBody(self):
+        """
+        Returns the decompressed Rtf body from the message.
+        """
+        return compressed_rtf.decompress(self.compressedRtf)
+    
     @property
     def sender(self):
         """
