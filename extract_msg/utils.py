@@ -195,6 +195,12 @@ def has_len(obj):
     except AttributeError:
         return False
 
+def isEmptyString(inp):
+    """
+    Returns true if the input is None or is an Empty string.
+    """
+    return (inp == '' or inp is None)
+    
 def msgEpoch(inp):
     """
     Taken (with permission) from https://github.com/TheElementalOfCreation/creatorUtils
