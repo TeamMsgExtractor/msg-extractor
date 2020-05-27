@@ -19,11 +19,7 @@ logger.addHandler(logging.NullHandler())
 logging.addLevelName(5, 'DEVELOPER')
 
 if sys.version_info[0] >= 3:  # Python 3
-    stri = (str,)
     get_input = input
-
-    def encode(inp):
-        return inp
 
     def properHex(inp):
         """
@@ -43,15 +39,8 @@ if sys.version_info[0] >= 3:  # Python 3
     def windowsUnicode(string):
         return str(string, 'utf_16_le') if string is not None else None
 
-    def xstr(s):
-        return '' if s is None else str(s)
-
 else:  # Python 2
-    stri = (str, unicode)
     get_input = raw_input
-
-    def encode(inp):
-        return inp.encode('utf-8') if inp is not None else None
 
     def properHex(inp):
         """
@@ -70,12 +59,6 @@ else:  # Python 2
 
     def windowsUnicode(string):
         return unicode(string, 'utf_16_le') if string is not None else None
-
-    def xstr(s):
-        if isinstance(s, unicode):
-            return s.encode('utf-8')
-        else:
-            return '' if s is None else str(s)
 
 def addNumToDir(dirName):
     """
@@ -144,6 +127,12 @@ def get_command_args(args):
     # --use-filename
     parser.add_argument('--use-filename', dest='use_filename', action='store_true',
                         help='Sets whether the name of each output is based on the msg filename.')
+    # --html
+    parser.add_argument('--html', dest='html', action='store_true',
+                        help='Sets whether the output should be html. If this is not possible, will fallback to plain text')
+    # --rtf
+    parser.add_argument('--rtf', dest='rtf', action='store_true',
+                        help='Sets whether the output should be rtf. If this is not possible, will fallback to plain text')
     # --out-name NAME
     # parser.add_argument('--out-name', dest = 'out_name',
     #                     help = 'Name to be used with saving the file output. Should come immediately after the file name')
@@ -195,6 +184,26 @@ def has_len(obj):
     except AttributeError:
         return False
 
+def inputToBytes(string_input_var, encoding):
+    if isinstance(string_input_var, constants.BYTES):
+        return string_input_var
+    elif isinstance(string_input_var, constants.STRING):
+        return string_input_var.encode(encoding)
+    elif string_input_var is None:
+        return b''
+    else:
+        raise Exception('Cannot convert to BYTES type')
+
+def inputToString(bytes_input_var, encoding):
+    if isinstance(bytes_input_var, constants.STRING):
+        return bytes_input_var
+    elif isinstance(bytes_input_var, constants.BYTES):
+        return bytes_input_var.decode(encoding)
+    elif bytes_input_var is None:
+        return ''
+    else:
+        raise Exception('Cannot convert to STRING type')
+    
 def isEmptyString(inp):
     """
     Returns true if the input is None or is an Empty string.
