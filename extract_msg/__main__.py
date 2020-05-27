@@ -44,7 +44,7 @@ if __name__ == '__main__':
                 with Message(x[0]) as msg:
                     # Right here we should still be in the path in currentdir
                     os.chdir(out)
-                    msg.save(toJson = args.json, useFileName = args.use_filename, ContentId = args.cid)
+                    msg.save(toJson = args.json, useFileName = args.use_filename, ContentId = args.cid, html = args.html, rtf = args.html)
             except Exception as e:
                 print("Error with file '" + x[0] + "': " +
                       traceback.format_exc())
