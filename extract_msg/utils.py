@@ -141,6 +141,17 @@ def get_command_args(args):
                         help='An msg file to be parsed')
 
     options = parser.parse_args(args)
+    # Check if more than one of the following arguments has been specified
+    valid = 0
+    if options.html:
+        valid += 1
+    if options.rtf:
+        valid += 1    
+    if options.json:
+        valid += 1
+    if valid > 1:
+        raise Exception('Only one of these options may be selected at a time: --html, --rtf, --json')
+    
     if options.dev or options.file_logging:
         options.verbose = True
     file_args = options.msgs
