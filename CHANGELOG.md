@@ -1,6 +1,12 @@
+**v0.24.0**
+* [[mattgwwalker # 107](https://github.com/mattgwwalker/msg-extractor/issues/107)] Rewrote the `Messsage.save` function to fix many  errors arising from it and to extend its functionality.
+* Added more options to the command line to allow for saving the body as RTF or HTML. Notice: Html will currently only sometimes work. It requires that the MSG file has an htmlBody to save. In a future update, we will be adding the ability to extract the HTML from the rtfBody.
+* Added new function `isEmptyString` to check if a string passed to it is `None` or is empty.
+
 **v0.23.4**
-* [[mattgwwalker #112](https://github.com/mattgwwalker/msg-extractor/issues/112)] Changed method used to get the message from an exception to make it compatible with Python 2 and 3
+* [[mattgwwalker #112](https://github.com/mattgwwalker/msg-extractor/issues/112)] Changed method used to get the message from an exception to make it compatible with Python 2 and 3.
 * [[TheElementalOfCreation #23](https://github.com/TheElementalOfCreation/msg-extractor/issues/23)] General cleanup and all around improvements of the code.
+
 **v0.23.3**
 * Fixed issues in readme.
 * [[TheElementalOfCreation #22](https://github.com/TheElementalOfCreation/msg-extractor/issues/22)] Updated `dev_classes.Message` to better match the current `Message` class.
@@ -13,7 +19,7 @@
 **v0.23.0**
 * [[mattgwwalker #75](https://github.com/mattgwwalker/msg-extractor/issues/75)] & [[TheElementalOfCreation #19](https://github.com/TheElementalOfCreation/msg-extractor/issues/19)] Completely rewrote the function `Message._getStringStream`. This was done for two reasons. The first was to make it actually work with msg files that have their strings encoded in a non-Unicode encoding. The second reason was to make it so that it better reflected msg specification which says that ALL strings in a file will be either Unicode or non-Unicode, but not both. Because of the second part, the `prefer` option has been removed.
 * As part of fixing the two issues in the previous change, we have added two new properties:
-    1. a boolean `Message.areStringsUnicode` which tells if the strings are unicode encoded
+    1. a boolean `Message.areStringsUnicode` which tells if the strings are unicode encoded.
     2. A string `Message.stringEncoding` which tells what the encoding is. This is used by the `Message._getStringStream` to determine how to decode the data into a string.
 
 **v0.22.1**
