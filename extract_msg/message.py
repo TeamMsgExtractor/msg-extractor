@@ -306,14 +306,14 @@ class Message(olefile.OleFileIO):
             
             useHtml = False
             useRtf = False
-            if html:
-                if self.htmlBody is not None:
-                    useHtml = True
-                    fext = 'html'
-            elif rtf:
-                if self.htmlBody is not None:
-                    useRtf = True
-                    fext = 'rtf'
+            #if html:
+            #    if self.htmlBody is not None:
+            #        useHtml = True
+            #        fext = 'html'
+            #elif rtf:
+            #    if self.htmlBody is not None:
+            #        useRtf = True
+            #        fext = 'rtf'
                  
             with open('message.' + fext, 'wb') as f:
                 if toJson:
