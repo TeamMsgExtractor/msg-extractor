@@ -6,7 +6,7 @@ from extract_msg import constants
 from extract_msg.dev_classes.attachment import Attachment
 from extract_msg.properties import Properties
 from extract_msg.recipient import Recipient
-from extract_msg.utils import encode, has_len, stri, windowsUnicode
+from extract_msg.utils import has_len, windowsUnicode
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -31,12 +31,12 @@ class Message(olefile.OleFileIO):
         prefixl = []
         tmp_condition = prefix != ''
         if tmp_condition:
-            if not isinstance(prefix, stri):
-                try:
-                    prefix = '/'.join(prefix)
-                except:
-                    raise TypeError('Invalid prefix type: ' + str(type(prefix)) +
-                                    '\n(This was probably caused by you setting it manually).')
+            prefix = inputToString(prefix, 'utf-8')
+            try:
+                prefix = '/'.join(prefix)
+            except:
+                raise TypeError('Invalid prefix type: ' + str(type(prefix)) +
+                                '\n(This was probably caused by you setting it manually).')
             prefix = prefix.replace('\\', '/')
             g = prefix.split('/')
             if g[-1] == '':
