@@ -299,7 +299,7 @@ class Message(olefile.OleFileIO):
             attachmentNames = []
             # Save the attachments
             for attachment in self.attachments:
-                attachmentNames.append(attachment.save(ContentId, toJson, useFileName, raw, html = html, rtf = rtf))
+                attachmentNames.append(attachment.save(ContentId, toJson, useFileName, raw))#, html = html, rtf = rtf))
             
             # Save the message body
             fext = 'json' if toJson else 'txt'
