@@ -94,7 +94,7 @@ class Message(olefile.OleFileIO):
         self.__crlf = '\n'  # This variable keeps track of what the new line character should be
         self.body
         
-    def _ensureSet(self, variable, streamID, stingstream = True):
+    def _ensureSet(self, variable, streamID, stringStream = True):
         """
         Ensures that the variable exists, otherwise will set it using the specified stream.
         After that, return said variable.
@@ -238,7 +238,7 @@ class Message(olefile.OleFileIO):
                 out.append(x)
         return out
 
-    def save(self, toJson=False, useFileName=False, raw=False, ContentId=False, customPath=None, customFilename=None, html = False, rtf = False):
+    def save(self, toJson=False, useFileName=False, raw=False, ContentId=False, customPath=None, customFilename=None) #, html = False, rtf = False):
         """
         Saves the message body and attachments found in the message. Setting toJson
         to true will output the message body as JSON-formatted text. The body and
@@ -444,7 +444,7 @@ class Message(olefile.OleFileIO):
         except AttributeError:
             self._body = self._getStringStream('__substg1.0_1000')
             if self._body:
-                self._body = encode(self._body)
+                self._body = inputToString(self._body)
                 a = re.search('\n', self._body)
                 if a is not None:
                     if re.search('\r\n', self._body) is not None:
