@@ -128,11 +128,11 @@ def get_command_args(args):
     parser.add_argument('--use-filename', dest='use_filename', action='store_true',
                         help='Sets whether the name of each output is based on the msg filename.')
     # --html
-    parser.add_argument('--html', dest='html', action='store_true',
-                        help='Sets whether the output should be html. If this is not possible, will fallback to plain text')
+    #parser.add_argument('--html', dest='html', action='store_true',
+    #                    help='Sets whether the output should be html. If this is not possible, will fallback to plain text')
     # --rtf
-    parser.add_argument('--rtf', dest='rtf', action='store_true',
-                        help='Sets whether the output should be rtf. If this is not possible, will fallback to plain text')
+    #parser.add_argument('--rtf', dest='rtf', action='store_true',
+    #                    help='Sets whether the output should be rtf. If this is not possible, will fallback to plain text')
     # --out-name NAME
     # parser.add_argument('--out-name', dest = 'out_name',
     #                     help = 'Name to be used with saving the file output. Should come immediately after the file name')
