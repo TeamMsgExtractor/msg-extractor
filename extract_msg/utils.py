@@ -26,7 +26,7 @@ if sys.version_info[0] >= 3:  # Python 3
         Taken (with permission) from https://github.com/TheElementalOfCreation/creatorUtils
         """
         a = ''
-        if isinstance(inp, stri):
+        if isinstance(inp, str):
             a = ''.join([hex(ord(inp[x]))[2:].rjust(2, '0') for x in range(len(inp))])
         elif isinstance(inp, bytes):
             a = inp.hex()
@@ -47,7 +47,7 @@ else:  # Python 2
         Taken (with permission) from https://github.com/TheElementalOfCreation/creatorUtils
         """
         a = ''
-        if isinstance(inp, stri):
+        if isinstance(inp, (str, unicode)):
             a = ''.join([hex(ord(inp[x]))[2:].rjust(2, '0') for x in range(len(inp))])
         elif isinstance(inp, int):
             a = hex(inp)[2:]
