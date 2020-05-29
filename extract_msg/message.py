@@ -14,7 +14,7 @@ from extract_msg.attachment import Attachment
 from extract_msg.compat import os_ as os
 from extract_msg.properties import Properties
 from extract_msg.recipient import Recipient
-from extract_msg.utils import addNumToDir, has_len, inputToString, windowsUnicode
+from extract_msg.utils import addNumToDir, has_len, inputToBytes, inputToString, windowsUnicode
 from extract_msg.exceptions import InvalidFileFormat
 
 logger = logging.getLogger(__name__)
