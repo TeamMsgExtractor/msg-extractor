@@ -238,7 +238,7 @@ class Message(olefile.OleFileIO):
                 out.append(x)
         return out
 
-    def save(self, toJson=False, useFileName=False, raw=False, ContentId=False, customPath=None, customFilename=None) #, html = False, rtf = False):
+    def save(self, toJson=False, useFileName=False, raw=False, ContentId=False, customPath=None, customFilename=None): #, html = False, rtf = False):
         """
         Saves the message body and attachments found in the message. Setting toJson
         to true will output the message body as JSON-formatted text. The body and
