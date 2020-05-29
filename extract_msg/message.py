@@ -310,7 +310,7 @@ class Message(olefile.OleFileIO):
                 if self.htmlBody is not None:
                     useHtml = True
                     fext = 'html'
-            elseif rtf:
+            elif rtf:
                 if self.htmlBody is not None:
                     useRtf = True
                     fext = 'rtf'
@@ -329,8 +329,10 @@ class Message(olefile.OleFileIO):
                 else:
                     if useHtml:
                         # Do stuff
-                    elseif useRtf:
+                        pass
+                    elif useRtf:
                         # Do stuff
+                        pass
                     else:
                         f.write(b'From: ' + inputToBytes(self.sender, 'utf-8') + crlf)
                         f.write(b'To: ' + inputToBytes(self.to, 'utf-8') + crlf)
