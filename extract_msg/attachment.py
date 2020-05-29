@@ -88,7 +88,7 @@ class Attachment(object):
         """
         return self.__msg.sExists([self.__dir, filename])
 
-    def save(self, contentId=False, json=False, useFileName=False, raw=False, customPath=None, customFilename=None) #, html, rtf):
+    def save(self, contentId=False, json=False, useFileName=False, raw=False, customPath=None, customFilename=None): #, html, rtf):
         # Check if the user has specified a custom filename
         filename = None
         if customFilename is not None and customFilename != '':
