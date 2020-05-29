@@ -93,7 +93,7 @@ class Message(olefile.OleFileIO):
         self.__crlf = '\n'  # This variable keeps track of what the new line character should be
         self.body
         
-    def _ensureSet(self, variable, streamID, stingstream = True):
+    def _ensureSet(self, variable, streamID, stringStream = True):
         """
         Ensures that the variable exists, otherwise will set it using the specified stream.
         After that, return said variable.
