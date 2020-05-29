@@ -1,6 +1,5 @@
 **v0.24.0**
 * [[mattgwwalker # 107](https://github.com/mattgwwalker/msg-extractor/issues/107)] Rewrote the `Messsage.save` function to fix many  errors arising from it and to extend its functionality.
-* Added more options to the command line to allow for saving the body as RTF or HTML. Notice: Html will currently only sometimes work. It requires that the MSG file has an htmlBody to save. In a future update, we will be adding the ability to extract the HTML from the rtfBody.
 * Added new function `isEmptyString` to check if a string passed to it is `None` or is empty.
 
 **v0.23.4**
