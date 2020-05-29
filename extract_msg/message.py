@@ -4,6 +4,7 @@ import json
 import logging
 import re
 
+import compressed_rtf
 from imapclient.imapclient import decode_utf7
 import olefile
 
@@ -13,7 +14,7 @@ from extract_msg.attachment import Attachment
 from extract_msg.compat import os_ as os
 from extract_msg.properties import Properties
 from extract_msg.recipient import Recipient
-from extract_msg.utils import addNumToDir, encode, has_len, stri, windowsUnicode, xstr
+from extract_msg.utils import addNumToDir, has_len, inputToBytes, inputToString, windowsUnicode
 from extract_msg.exceptions import InvalidFileFormat
 
 logger = logging.getLogger(__name__)
@@ -52,12 +53,12 @@ class Message(olefile.OleFileIO):
         prefixl = []
         tmp_condition = prefix != ''
         if tmp_condition:
-            if not isinstance(prefix, stri):
-                try:
-                    prefix = '/'.join(prefix)
-                except:
-                    raise TypeError('Invalid prefix type: ' + str(type(prefix)) +
-                                    '\n(This was probably caused by you setting it manually).')
+            prefix = inputToString(prefix, 'utf-8')
+            try:
+                prefix = '/'.join(prefix)
+            except:
+                raise TypeError('Invalid prefix type: ' + str(type(prefix)) +
+                                '\n(This was probably caused by you setting it manually).')
             prefix = prefix.replace('\\', '/')
             g = prefix.split("/")
             if g[-1] == '':
@@ -93,7 +94,7 @@ class Message(olefile.OleFileIO):
         self.__crlf = '\n'  # This variable keeps track of what the new line character should be
         self.body
         
-    def _ensureSet(self, variable, streamID, stingstream = True):
+    def _ensureSet(self, variable, streamID, stringStream = True):
         """
         Ensures that the variable exists, otherwise will set it using the specified stream.
         After that, return said variable.
@@ -237,7 +238,7 @@ class Message(olefile.OleFileIO):
                 out.append(x)
         return out
 
-    def save(self, toJson=False, useFileName=False, raw=False, ContentId=False, customPath=None, customFilename=None):
+    def save(self, toJson=False, useFileName=False, raw=False, ContentId=False, customPath=None, customFilename=None): #, html = False, rtf = False):
         """
         Saves the message body and attachments found in the message. Setting toJson
         to true will output the message body as JSON-formatted text. The body and
@@ -249,6 +250,8 @@ class Message(olefile.OleFileIO):
             2. self.filename if useFileName
             3. {date} {subject}
         """
+        crlf = inputToBytes(self.__crlf, 'utf-8')
+        
         if customFilename != None and customFilename != '':
             dirName = customFilename
         else:
@@ -293,38 +296,51 @@ class Message(olefile.OleFileIO):
         oldDir = os.getcwdu()
         try:
             os.chdir(dirName)
-
-            # Save the message body
-            fext = 'json' if toJson else 'text'
-            f = open('message.' + fext, 'w')
-            # From, to , cc, subject, date
-
             attachmentNames = []
             # Save the attachments
             for attachment in self.attachments:
-                attachmentNames.append(attachment.save(ContentId, toJson))
+                attachmentNames.append(attachment.save(ContentId, toJson, useFileName, raw))#, html = html, rtf = rtf))
+            
+            # Save the message body
+            fext = 'json' if toJson else 'txt'
+            
+            useHtml = False
+            useRtf = False
+            #if html:
+            #    if self.htmlBody is not None:
+            #        useHtml = True
+            #        fext = 'html'
+            #elif rtf:
+            #    if self.htmlBody is not None:
+            #        useRtf = True
+            #        fext = 'rtf'
+                 
+            with open('message.' + fext, 'wb') as f:
+                if toJson:
+                    emailObj = {'from': inputToString(self.sender, 'utf-8'),
+                                'to': inputToString(self.to, 'utf-8'),
+                                'cc': inputToString(self.cc, 'utf-8'),
+                                'subject': inputToString(self.subject, 'utf-8'),
+                                'date': inputToString(self.date, 'utf-8'),
+                                'attachments': attachmentNames,
+                                'body': decode_utf7(self.body)}
 
-            if toJson:
-
-                emailObj = {'from': xstr(self.sender),
-                            'to': xstr(self.to),
-                            'cc': xstr(self.cc),
-                            'subject': xstr(self.subject),
-                            'date': xstr(self.date),
-                            'attachments': attachmentNames,
-                            'body': decode_utf7(self.body)}
-
-                f.write(json.dumps(emailObj, ensure_ascii=True))
-            else:
-                f.write('From: ' + xstr(self.sender) + self.__crlf)
-                f.write('To: ' + xstr(self.to) + self.__crlf)
-                f.write('CC: ' + xstr(self.cc) + self.__crlf)
-                f.write('Subject: ' + xstr(self.subject) + self.__crlf)
-                f.write('Date: ' + xstr(self.date) + self.__crlf)
-                f.write('-----------------' + self.__crlf + self.__crlf)
-                f.write(self.body)
-
-            f.close()
+                    f.write(inputToBytes(json.dumps(emailObj), 'utf-8'))
+                else:
+                    if useHtml:
+                        # Do stuff
+                        pass
+                    elif useRtf:
+                        # Do stuff
+                        pass
+                    else:
+                        f.write(b'From: ' + inputToBytes(self.sender, 'utf-8') + crlf)
+                        f.write(b'To: ' + inputToBytes(self.to, 'utf-8') + crlf)
+                        f.write(b'CC: ' + inputToBytes(self.cc, 'utf-8') + crlf)
+                        f.write(b'Subject: ' + inputToBytes(self.subject, 'utf-8') + crlf)
+                        f.write(b'Date: ' + inputToBytes(self.date, 'utf-8') + crlf)
+                        f.write(b'-----------------' + crlf + crlf)
+                        f.write(inputToBytes(self.body, 'utf-8'))
 
         except Exception as e:
             self.saveRaw()
@@ -430,7 +446,7 @@ class Message(olefile.OleFileIO):
         except AttributeError:
             self._body = self._getStringStream('__substg1.0_1000')
             if self._body:
-                self._body = encode(self._body)
+                self._body = inputToString(self._body, 'utf-8')
                 a = re.search('\n', self._body)
                 if a is not None:
                     if re.search('\r\n', self._body) is not None:
@@ -601,6 +617,13 @@ class Message(olefile.OleFileIO):
 
             return self._recipients
 
+    @property
+    def rtfBody(self):
+        """
+        Returns the decompressed Rtf body from the message.
+        """
+        return compressed_rtf.decompress(self.compressedRtf)
+    
     @property
     def sender(self):
         """

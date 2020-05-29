@@ -5,7 +5,14 @@ contributers, please do not complain about bugs.
 """
 
 import struct
+import sys
 
+if sys.version_info[0] >= 3:
+    BYTES = bytes
+    STRING = str
+else:
+    BYTES = str
+    STRING = unicode
 
 
 # DEFINE CONSTANTS
