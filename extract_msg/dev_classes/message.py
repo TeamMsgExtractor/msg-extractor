@@ -6,7 +6,7 @@ from extract_msg import constants
 from extract_msg.dev_classes.attachment import Attachment
 from extract_msg.properties import Properties
 from extract_msg.recipient import Recipient
-from extract_msg.utils import has_len, windowsUnicode
+from extract_msg.utils import has_len, inputToString, windowsUnicode
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
