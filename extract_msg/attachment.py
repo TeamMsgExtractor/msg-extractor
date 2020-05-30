@@ -88,7 +88,8 @@ class Attachment(object):
         """
         return self.__msg.sExists([self.__dir, filename])
 
-    def save(self, contentId=False, json=False, useFileName=False, raw=False, customPath=None, customFilename=None): #, html, rtf):
+    def save(self, contentId = False, json = False, useFileName = False, raw = False, customPath = None, customFilename = None,
+             html = False, rtf = False):
         # Check if the user has specified a custom filename
         filename = None
         if customFilename is not None and customFilename != '':
@@ -119,16 +120,16 @@ class Attachment(object):
             with open(filename, 'wb') as f:
                 f.write(self.__data)
         else:
-            self.saveEmbededMessage(contentId, json, useFileName, raw, customPath, customFilename) #, html, rtf)
+            self.saveEmbededMessage(contentId, json, useFileName, raw, customPath, customFilename, html, rtf)
         return filename
 
-    def saveEmbededMessage(self, contentId=False, json=False, useFileName=False, raw=False, customPath=None,
-                           customFilename=None):
+    def saveEmbededMessage(self, contentId = False, json = False, useFileName = False, raw = False, customPath = None,
+                           customFilename = None, html = False, rtf = False):
         """
         Seperate function from save to allow it to
         easily be overridden by a subclass.
         """
-        self.data.save(json, useFileName, raw, contentId, customPath, customFilename)
+        self.data.save(json, useFileName, raw, contentId, customPath, customFilename, html, rtf)
 
     @property
     def cid(self):
