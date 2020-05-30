@@ -25,7 +25,7 @@ class Message(olefile.OleFileIO):
     Parser for Microsoft Outlook message files.
     """
 
-    def __init__(self, path, prefix='', attachmentClass=Attachment, filename=None):
+    def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None):
         """
         :param path: path to the msg file in the system or is the raw msg file.
         :param prefix: used for extracting embeded msg files
@@ -141,7 +141,7 @@ class Message(olefile.OleFileIO):
                     setattr(self, private, None)
             return getattr(self, private)
 
-    def _getStream(self, filename, prefix=True):
+    def _getStream(self, filename, prefix = True):
         filename = self.fix_path(filename, prefix)
         if self.exists(filename):
             with self.openstream(filename) as stream:
@@ -150,7 +150,7 @@ class Message(olefile.OleFileIO):
             logger.info('Stream "{}" was requested but could not be found. Returning `None`.'.format(filename))
             return None
 
-    def _getStringStream(self, filename, prefix=True):
+    def _getStringStream(self, filename, prefix = True):
         """
         Gets a string representation of the requested filename.
         This should ALWAYS return a string (Unicode in python 2)
@@ -193,7 +193,7 @@ class Message(olefile.OleFileIO):
         inp = self.fix_path(inp)
         return self.exists(inp + '001F') or self.exists(inp + '001E')
 
-    def fix_path(self, inp, prefix=True):
+    def fix_path(self, inp, prefix = True):
         """
         Changes paths so that they have the proper
         prefix (should :param prefix: be True) and
@@ -215,7 +215,7 @@ class Message(olefile.OleFileIO):
         except AttributeError:
             return False
 
-    def listDir(self, streams=True, storages=False):
+    def listDir(self, streams = True, storages = False):
         """
         Replacement for OleFileIO.listdir that runs at the current prefix directory.
         """
@@ -238,7 +238,7 @@ class Message(olefile.OleFileIO):
                 out.append(x)
         return out
 
-    def save(self, toJson=False, useFileName=False, raw=False, ContentId=False, customPath=None, customFilename=None): #, html = False, rtf = False):
+    def save(self, toJson = False, useFileName = False, raw = False, ContentId = False, customPath = None, customFilename = None, html = False, rtf = False):
         """
         Saves the message body and attachments found in the message. Setting toJson
         to true will output the message body as JSON-formatted text. The body and
@@ -299,21 +299,21 @@ class Message(olefile.OleFileIO):
             attachmentNames = []
             # Save the attachments
             for attachment in self.attachments:
-                attachmentNames.append(attachment.save(ContentId, toJson, useFileName, raw))#, html = html, rtf = rtf))
+                attachmentNames.append(attachment.save(ContentId, toJson, useFileName, raw, html = html, rtf = rtf))
             
             # Save the message body
             fext = 'json' if toJson else 'txt'
             
             useHtml = False
             useRtf = False
-            #if html:
-            #    if self.htmlBody is not None:
-            #        useHtml = True
-            #        fext = 'html'
-            #elif rtf:
-            #    if self.htmlBody is not None:
-            #        useRtf = True
-            #        fext = 'rtf'
+            if html:
+                if self.htmlBody is not None:
+                    useHtml = True
+                    fext = 'html'
+            elif rtf:
+                if self.htmlBody is not None:
+                    useRtf = True
+                    fext = 'rtf'
                  
             with open('message.' + fext, 'wb') as f:
                 if toJson:
@@ -350,7 +350,7 @@ class Message(olefile.OleFileIO):
             # Return to previous directory
             os.chdir(oldDir)
 
-    def save_attachments(self, contentId=False, json=False, useFileName=False, raw=False, customPath=None):
+    def save_attachments(self, contentId = False, json = False, useFileName = False, raw = False, customPath = None):
         """
         Saves only attachments in the same folder.
         """
