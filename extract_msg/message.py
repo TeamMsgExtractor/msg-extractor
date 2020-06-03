@@ -136,7 +136,7 @@ class Message(olefile.OleFileIO):
                     if len(f) > 1:
                         for x in range(1, len(f)):
                             st += ', {0}'.format(f[x])
-                    self._cc = st
+                    setattr(self, private, st)
                 else:
                     setattr(self, private, None)
             return getattr(self, private)
