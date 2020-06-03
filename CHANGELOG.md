@@ -1,3 +1,6 @@
+**v0.24.2**
+* Fixed bug that somehow escaped detection that caused certain properties to not work.
+
 **v0.24.0**
 * [[mattgwwalker # 107](https://github.com/mattgwwalker/msg-extractor/issues/107)] Rewrote the `Messsage.save` function to fix many  errors arising from it and to extend its functionality.
 * Added new function `isEmptyString` to check if a string passed to it is `None` or is empty.
