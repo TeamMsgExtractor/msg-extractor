@@ -1,5 +1,6 @@
 **v0.24.2**
 * Fixed bug that somehow escaped detection that caused certain properties to not work.
+* Fixed bug with embedded msg files introduced in v0.24.0
 
 **v0.24.0**
 * [[mattgwwalker # 107](https://github.com/mattgwwalker/msg-extractor/issues/107)] Rewrote the `Messsage.save` function to fix many  errors arising from it and to extend its functionality.
