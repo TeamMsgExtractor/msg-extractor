@@ -168,7 +168,7 @@ class Message(olefile.OleFileIO):
     def close(self):
         for attachment in self.attachments:
             if attachment.type == 'msg':
-                attachment.data.closeAll()
+                attachment.data.close()
         olefile.OleFileIO.close(self)
 
     def debug(self):
