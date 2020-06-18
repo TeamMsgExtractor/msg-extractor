@@ -164,6 +164,12 @@ class Message(olefile.OleFileIO):
         else:
             tmp = self._getStream(filename + '001E', prefix = False)
             return None if tmp is None else tmp.decode(self.stringEncoding)
+        
+    def close(self):
+        for attachment in self.attachments:
+            if attachment.type == 'msg':
+                attachment.data.close()
+        olefile.OleFileIO.close(self)
 
     def debug(self):
         for dir_ in self.listDir():
