@@ -513,7 +513,7 @@ class Message(olefile.OleFileIO):
                 header.add_header('From', self.sender)
                 header.add_header('To', self.to)
                 header.add_header('Cc', self.cc)
-                header.add_header('Message-Id', self.message_id)
+                header.add_header('Message-Id', self.messageId)
                 # TODO find authentication results outside of header
                 header.add_header('Authentication-Results', None)
 
@@ -521,16 +521,16 @@ class Message(olefile.OleFileIO):
             return self._header
 
     @property
-    def header_dict(self):
+    def headerDict(self):
         """
         Returns a dictionary of the entries in the header
         """
         try:
-            return self._header_dict
+            return self._headerDict
         except AttributeError:
-            self._header_dict = dict(self.header._header)
-            self._header_dict.pop('Received')
-            return self._header_dict
+            self._headerDict = dict(self.header._header)
+            self._headerDict.pop('Received')
+            return self._headerDict
 
     @property
     def htmlBody(self):
@@ -542,9 +542,17 @@ class Message(olefile.OleFileIO):
     @property
     def inReplyTo(self):
         """
+        Returns the message id that this message is in reply to.
         """
         return self._ensureSet('_in_reply_to', '__substg1.0_1042')
 
+    @property
+    def isRead(self):
+        """
+        Returns if this email has been marked as read.
+        """
+        return bool(self.mainProperties['0E070003'].value & 1)
+        
     @property
     def mainProperties(self):
         """
@@ -558,20 +566,20 @@ class Message(olefile.OleFileIO):
             return self._prop
 
     @property
-    def message_id(self):
+    def messageId(self):
         try:
-            return self._message_id
+            return self._messageId
         except AttributeError:
             headerResult = None
             if self.headerInit():
                 headerResult = self._header['message-id']
             if headerResult is not None:
-                self._message_id = headerResult
+                self._messageId = headerResult
             else:
                 if self.headerInit():
                     logger.info('Header found, but "Message-Id" is not included. Will be generated from other streams.')
-                self._message_id = self._getStringStream('__substg1.0_1035')
-            return self._message_id
+                self._messageId = self._getStringStream('__substg1.0_1035')
+            return self._messageId
 
     @property
     def parsedDate(self):
