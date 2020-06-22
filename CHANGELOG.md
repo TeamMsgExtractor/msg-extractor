@@ -1,3 +1,6 @@
+**v0.24.4**
+* Added new property `Message.isRead` to the class to show whether the email has been marked as read.
+
 **v0.24.3**
 * Added new close function to the `Message` class to ensure that all embedded `Message` instances get closed as well. Not having this was causing issues with trying to modify the msg file after the user thought that it had been closed.
 
