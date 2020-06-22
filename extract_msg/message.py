@@ -542,9 +542,17 @@ class Message(olefile.OleFileIO):
     @property
     def inReplyTo(self):
         """
+        Returns the message id that this message is in reply to.
         """
         return self._ensureSet('_in_reply_to', '__substg1.0_1042')
 
+    @property
+    def isRead(self):
+        """
+        Returns if this email has been marked as read.
+        """
+        return bool(self.mainProperties['0E070003'].value & 1)
+        
     @property
     def mainProperties(self):
         """
