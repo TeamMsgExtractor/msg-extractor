@@ -12,15 +12,16 @@ from email.parser import Parser as EmailParser
 from extract_msg import constants
 from extract_msg.attachment import Attachment
 from extract_msg.compat import os_ as os
+from extract_msg.exceptions import InvalidFileFormat
+from extract_msg.msg import MSGFile
 from extract_msg.properties import Properties
 from extract_msg.recipient import Recipient
 from extract_msg.utils import addNumToDir, has_len, inputToBytes, inputToString, windowsUnicode
-from extract_msg.exceptions import InvalidFileFormat
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
-class Message(olefile.OleFileIO):
+class Message(MSGFile):
     """
     Parser for Microsoft Outlook message files.
     """
@@ -37,51 +38,7 @@ class Message(olefile.OleFileIO):
             are doing.
         :param filename: optional, the filename to be used by default when saving.
         """
-        # WARNING DO NOT MANUALLY MODIFY PREFIX. Let the program set it.
-        self.__path = path
-        self.__attachmentClass = attachmentClass
-
-        try:
-            olefile.OleFileIO.__init__(self, path)
-        except IOError as e:    # py2 and py3 compatible
-            logger.error(e)
-            if str(e) == 'not an OLE2 structured storage file':
-                raise InvalidFileFormat(e)
-            else:
-                raise
-
-        prefixl = []
-        tmp_condition = prefix != ''
-        if tmp_condition:
-            try:
-                prefix = inputToString(prefix, 'utf-8')
-            except:
-                try:
-                    prefix = '/'.join(prefix)
-                except:
-                    raise TypeError('Invalid prefix type: ' + str(type(prefix)) +
-                                    '\n(This was probably caused by you setting it manually).')
-            prefix = prefix.replace('\\', '/')
-            g = prefix.split("/")
-            if g[-1] == '':
-                g.pop()
-            prefixl = g
-            if prefix[-1] != '/':
-                prefix += '/'
-        self.__prefix = prefix
-        self.__prefixList = prefixl
-        if tmp_condition:
-            filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix=False)
-        if filename is not None:
-            self.filename = filename
-        elif has_len(path):
-            if len(path) < 1536:
-                self.filename = path
-            else:
-                self.filename = None
-        else:
-            self.filename = None
-
+        MSGFile.__init__(self, path, prefix, attachmentClass, filename)
         # Initialize properties in the order that is least likely to cause bugs.
         # TODO have each function check for initialization of needed data so these
         # lines will be unnecessary.
@@ -95,22 +52,6 @@ class Message(olefile.OleFileIO):
         self.date
         self.__crlf = '\n'  # This variable keeps track of what the new line character should be
         self.body
-        
-    def _ensureSet(self, variable, streamID, stringStream = True):
-        """
-        Ensures that the variable exists, otherwise will set it using the specified stream.
-        After that, return said variable.
-        If the specified stream is not a string stream, make sure to set :param string stream: to False.
-        """
-        try:
-            return getattr(self, variable)
-        except AttributeError:
-            if stringStream:
-                value = self._getStringStream(streamID)
-            else:
-                value = self._getStream(streamID)
-            setattr(self, variable, value)
-            return value
 
     def _genRecipient(self, recipientType, recipientInt):
         """
@@ -142,40 +83,12 @@ class Message(olefile.OleFileIO):
                 else:
                     setattr(self, private, None)
             return getattr(self, private)
-
-    def _getStream(self, filename, prefix = True):
-        filename = self.fix_path(filename, prefix)
-        if self.exists(filename):
-            with self.openstream(filename) as stream:
-                return stream.read()
-        else:
-            logger.info('Stream "{}" was requested but could not be found. Returning `None`.'.format(filename))
-            return None
-
-    def _getStringStream(self, filename, prefix = True):
-        """
-        Gets a string representation of the requested filename.
-        This should ALWAYS return a string (Unicode in python 2)
-        """
-
-        filename = self.fix_path(filename, prefix)
-        if self.areStringsUnicode:
-            return windowsUnicode(self._getStream(filename + '001F', prefix = False))
-        else:
-            tmp = self._getStream(filename + '001E', prefix = False)
-            return None if tmp is None else tmp.decode(self.stringEncoding)
         
     def close(self):
         for attachment in self.attachments:
             if attachment.type == 'msg':
                 attachment.data.close()
         olefile.OleFileIO.close(self)
-
-    def debug(self):
-        for dir_ in self.listDir():
-            if dir_[-1].endswith('001E') or dir_[-1].endswith('001F'):
-                print('Directory: ' + str(dir_[:-1]))
-                print('Contents: {}'.format(self._getStream(dir_)))
 
     def dump(self):
         """
@@ -186,32 +99,6 @@ class Message(olefile.OleFileIO):
         print('Date:', self.date)
         print('Body:')
         print(self.body)
-    
-    def Exists(self, inp):
-        """
-        Checks if :param inp: exists in the msg file. Does not always go to the top, starts at specified point
-        """
-        inp = self.fix_path(inp)
-        return self.exists(inp)
-    
-    def sExists(self, inp):
-        """
-        Checks if string stream :param inp: exists in the msg file.
-        """
-        inp = self.fix_path(inp)
-        return self.exists(inp + '001F') or self.exists(inp + '001E')
-
-    def fix_path(self, inp, prefix = True):
-        """
-        Changes paths so that they have the proper
-        prefix (should :param prefix: be True) and
-        are strings rather than lists or tuples.
-        """
-        if isinstance(inp, (list, tuple)):
-            inp = '/'.join(inp)
-        if prefix:
-            inp = self.__prefix + inp
-        return inp
 
     def headerInit(self):
         """
@@ -222,29 +109,6 @@ class Message(olefile.OleFileIO):
             return True
         except AttributeError:
             return False
-
-    def listDir(self, streams = True, storages = False):
-        """
-        Replacement for OleFileIO.listdir that runs at the current prefix directory.
-        """
-        temp = self.listdir(streams, storages)
-        if self.__prefix == '':
-            return temp
-        prefix = self.__prefix.split('/')
-        if prefix[-1] == '':
-            prefix.pop()
-        out = []
-        for x in temp:
-            good = True
-            if len(x) <= len(prefix):
-                good = False
-            if good:
-                for y in range(len(prefix)):
-                    if x[y] != prefix[y]:
-                        good = False
-            if good:
-                out.append(x)
-        return out
 
     def save(self, toJson = False, useFileName = False, raw = False, ContentId = False, customPath = None, customFilename = None, html = False, rtf = False):
         """
@@ -258,6 +122,15 @@ class Message(olefile.OleFileIO):
             2. self.filename if useFileName
             3. {date} {subject}
         """
+        count = 0
+        count += 1 if toJson else 0
+        count += 1 if html else 0
+        count += 1 if rtf else 0
+        count += 1 if raw else 0
+        
+        if count > 1:
+            raise IncompatibleOptionsException('Only one of the following options may be used at a time: toJSon, raw, html, rtf')
+        
         crlf = inputToBytes(self.__crlf, 'utf-8')
         
         if customFilename != None and customFilename != '':
@@ -398,28 +271,6 @@ class Message(olefile.OleFileIO):
 
         finally:
             os.chdir(oldDir)
-
-    @property
-    def areStringsUnicode(self):
-        """
-        Returns a boolean telling if the strings are unicode encoded.
-        """
-        try:
-            return self.__bStringsUnicode
-        except AttributeError:
-            if self.mainProperties.has_key('340D0003'):
-                if (self.mainProperties['340D0003'].value & 0x40000) != 0:
-                    self.__bStringsUnicode = True
-                    return self.__bStringsUnicode
-            self.__bStringsUnicode = False
-            return self.__bStringsUnicode
-
-    @property
-    def attachmentClass(self):
-        """
-        Returns the Attachment class being used, should you need to use it externally for whatever reason.
-        """
-        return self.__attachmentClass
 
     @property
     def attachments(self):
@@ -586,31 +437,6 @@ class Message(olefile.OleFileIO):
         return email.utils.parsedate(self.date)
 
     @property
-    def path(self):
-        """
-        Returns the message path if generated from a file,
-        otherwise returns the data used to generate the
-        Message instance.
-        """
-        return self.__path
-
-    @property
-    def prefix(self):
-        """
-        Returns the prefix of the Message instance.
-        Intended for developer use.
-        """
-        return self.__prefix
-
-    @property
-    def prefixList(self):
-        """
-        Returns the prefix list of the Message instance.
-        Intended for developer use.
-        """
-        return copy.deepcopy(self.__prefixList)
-
-    @property
     def recipients(self):
         """
         Returns a list of all recipients.
@@ -676,26 +502,6 @@ class Message(olefile.OleFileIO):
         Returns the message subject, if it exists.
         """
         return self._ensureSet('_subject', '__substg1.0_0037')
-
-    @property
-    def stringEncoding(self):
-        try:
-            return self.__stringEncoding
-        except AttributeError:
-            # We need to calculate the encoding
-            # Let's first check if the encoding will be unicode:
-            if self.areStringsUnicode:
-                self.__stringEncoding = "utf-16-le"
-                return self.__stringEncoding
-            else:
-                # Well, it's not unicode. Now we have to figure out what it IS.
-                if not self.mainProperties.has_key('3FFD0003'):
-                    raise Exception('Encoding property not found')
-                enc = self.mainProperties['3FFD0003'].value
-                # Now we just need to translate that value
-                # Now, this next line SHOULD work, but it is possible that it might not...
-                self.__stringEncoding = str(enc)
-                return self.__stringEncoding
 
     @property
     def to(self):
