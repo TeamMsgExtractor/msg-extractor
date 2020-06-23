@@ -198,3 +198,49 @@ class MSGFile(olefile.OleFileIO):
         Returns the Attachment class being used, should you need to use it externally for whatever reason.
         """
         return self.__attachmentClass
+    
+    @property
+    def path(self):
+        """
+        Returns the message path if generated from a file,
+        otherwise returns the data used to generate the
+        Message instance.
+        """
+        return self.__path
+
+    @property
+    def prefix(self):
+        """
+        Returns the prefix of the Message instance.
+        Intended for developer use.
+        """
+        return self.__prefix
+
+    @property
+    def prefixList(self):
+        """
+        Returns the prefix list of the Message instance.
+        Intended for developer use.
+        """
+        return copy.deepcopy(self.__prefixList)
+    
+
+    @property
+    def stringEncoding(self):
+        try:
+            return self.__stringEncoding
+        except AttributeError:
+            # We need to calculate the encoding
+            # Let's first check if the encoding will be unicode:
+            if self.areStringsUnicode:
+                self.__stringEncoding = "utf-16-le"
+                return self.__stringEncoding
+            else:
+                # Well, it's not unicode. Now we have to figure out what it IS.
+                if not self.mainProperties.has_key('3FFD0003'):
+                    raise Exception('Encoding property not found')
+                enc = self.mainProperties['3FFD0003'].value
+                # Now we just need to translate that value
+                # Now, this next line SHOULD work, but it is possible that it might not...
+                self.__stringEncoding = str(enc)
+                return self.__stringEncoding
