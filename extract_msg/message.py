@@ -291,7 +291,7 @@ class Message(MSGFile):
             self._attachments = []
 
             for attachmentDir in attachmentDirs:
-                self._attachments.append(self.__attachmentClass(self, attachmentDir))
+                self._attachments.append(self.attachmentClass(self, attachmentDir))
 
             return self._attachments
 
