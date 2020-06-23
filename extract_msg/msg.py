@@ -20,6 +20,9 @@ from extract_msg.exceptions import InvalidFileFormat
 
 
 class MSGFile(olefile.OleFileIO):
+    """
+    Parser for .msg files
+    """
     def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None):
         """
         :param path: path to the msg file in the system or is the raw msg file.
@@ -76,3 +79,77 @@ class MSGFile(olefile.OleFileIO):
                 self.filename = None
         else:
             self.filename = None
+            
+    def _ensureSet(self, variable, streamID, stringStream = True):
+        """
+        Ensures that the variable exists, otherwise will set it using the specified stream.
+        After that, return said variable.
+        If the specified stream is not a string stream, make sure to set :param string stream: to False.
+        """
+        try:
+            return getattr(self, variable)
+        except AttributeError:
+            if stringStream:
+                value = self._getStringStream(streamID)
+            else:
+                value = self._getStream(streamID)
+            setattr(self, variable, value)
+            return value
+
+    def _getStream(self, filename, prefix = True):
+        """
+        Gets a binary representation of the requested filename.
+        This should ALWAYS return a bytes object (string in python 2)
+        """
+        filename = self.fix_path(filename, prefix)
+        if self.exists(filename):
+            with self.openstream(filename) as stream:
+                return stream.read()
+        else:
+            logger.info('Stream "{}" was requested but could not be found. Returning `None`.'.format(filename))
+            return None
+
+    def _getStringStream(self, filename, prefix = True):
+        """
+        Gets a string representation of the requested filename.
+        This should ALWAYS return a string (Unicode in python 2)
+        """
+
+        filename = self.fix_path(filename, prefix)
+        if self.areStringsUnicode:
+            return windowsUnicode(self._getStream(filename + '001F', prefix = False))
+        else:
+            tmp = self._getStream(filename + '001E', prefix = False)
+            return None if tmp is None else tmp.decode(self.stringEncoding)
+        
+    def debug(self):
+        for dir_ in self.listDir():
+            if dir_[-1].endswith('001E') or dir_[-1].endswith('001F'):
+                print('Directory: ' + str(dir_[:-1]))
+                print('Contents: {}'.format(self._getStream(dir_)))
+                
+    def Exists(self, inp):
+        """
+        Checks if :param inp: exists in the msg file. Does not always go to the top, starts at specified point
+        """
+        inp = self.fix_path(inp)
+        return self.exists(inp)
+    
+    def sExists(self, inp):
+        """
+        Checks if string stream :param inp: exists in the msg file.
+        """
+        inp = self.fix_path(inp)
+        return self.exists(inp + '001F') or self.exists(inp + '001E')
+    
+    def fix_path(self, inp, prefix = True):
+        """
+        Changes paths so that they have the proper
+        prefix (should :param prefix: be True) and
+        are strings rather than lists or tuples.
+        """
+        if isinstance(inp, (list, tuple)):
+            inp = '/'.join(inp)
+        if prefix:
+            inp = self.__prefix + inp
+        return inp
