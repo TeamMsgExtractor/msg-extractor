@@ -153,3 +153,48 @@ class MSGFile(olefile.OleFileIO):
         if prefix:
             inp = self.__prefix + inp
         return inp
+
+    def listDir(self, streams = True, storages = False):
+        """
+        Replacement for OleFileIO.listdir that runs at the current prefix directory.
+        """
+        temp = self.listdir(streams, storages)
+        if self.__prefix == '':
+            return temp
+        prefix = self.__prefix.split('/')
+        if prefix[-1] == '':
+            prefix.pop()
+        out = []
+        for x in temp:
+            good = True
+            if len(x) <= len(prefix):
+                good = False
+            if good:
+                for y in range(len(prefix)):
+                    if x[y] != prefix[y]:
+                        good = False
+            if good:
+                out.append(x)
+        return out
+    
+    @property
+    def areStringsUnicode(self):
+        """
+        Returns a boolean telling if the strings are unicode encoded.
+        """
+        try:
+            return self.__bStringsUnicode
+        except AttributeError:
+            if self.mainProperties.has_key('340D0003'):
+                if (self.mainProperties['340D0003'].value & 0x40000) != 0:
+                    self.__bStringsUnicode = True
+                    return self.__bStringsUnicode
+            self.__bStringsUnicode = False
+            return self.__bStringsUnicode
+        
+    @property
+    def attachmentClass(self):
+        """
+        Returns the Attachment class being used, should you need to use it externally for whatever reason.
+        """
+        return self.__attachmentClass
