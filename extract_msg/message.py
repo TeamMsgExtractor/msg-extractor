@@ -284,9 +284,9 @@ class Message(MSGFile):
             attachmentDirs = []
 
             for dir_ in self.listDir():
-                if dir_[len(self.__prefixList)].startswith('__attach') and\
-                        dir_[len(self.__prefixList)] not in attachmentDirs:
-                    attachmentDirs.append(dir_[len(self.__prefixList)])
+                if dir_[len(self.prefixList)].startswith('__attach') and\
+                        dir_[len(self.prefixList)] not in attachmentDirs:
+                    attachmentDirs.append(dir_[len(self.prefixList)])
 
             self._attachments = []
 
@@ -413,7 +413,7 @@ class Message(MSGFile):
             return self._prop
         except AttributeError:
             self._prop = Properties(self._getStream('__properties_version1.0'),
-                                    constants.TYPE_MESSAGE if self.__prefix == '' else constants.TYPE_MESSAGE_EMBED)
+                                    constants.TYPE_MESSAGE if self.prefix == '' else constants.TYPE_MESSAGE_EMBED)
             return self._prop
 
     @property
@@ -448,9 +448,9 @@ class Message(MSGFile):
             recipientDirs = []
 
             for dir_ in self.listDir():
-                if dir_[len(self.__prefixList)].startswith('__recip') and\
-                        dir_[len(self.__prefixList)] not in recipientDirs:
-                    recipientDirs.append(dir_[len(self.__prefixList)])
+                if dir_[len(self.prefixList)].startswith('__recip') and\
+                        dir_[len(self.prefixList)] not in recipientDirs:
+                    recipientDirs.append(dir_[len(self.prefixList)])
 
             self._recipients = []
 
