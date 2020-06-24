@@ -13,8 +13,14 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-class InvalidFileFormat(OSError):
+class InvalidFileFormatError(OSError):
     """
-    An Invalid File Format Error occurred
+    An Invalid File Format Error occurred.
+    """
+    pass
+
+class MissingEncodingError(Exception):
+    """
+    MSG file is missing an encodng.
     """
     pass

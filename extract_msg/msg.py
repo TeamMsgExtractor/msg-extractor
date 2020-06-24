@@ -15,7 +15,7 @@ from extract_msg.compat import os_ as os
 from extract_msg.properties import Properties
 from extract_msg.recipient import Recipient
 from extract_msg.utils import addNumToDir, has_len, inputToBytes, inputToString, windowsUnicode
-from extract_msg.exceptions import InvalidFileFormat
+from extract_msg.exceptions import InvalidFileFormat, MissingEncodingError
 
 
 
@@ -79,7 +79,7 @@ class MSGFile(olefile.OleFileIO):
                 self.filename = None
         else:
             self.filename = None
-            
+
     def _ensureSet(self, variable, streamID, stringStream = True):
         """
         Ensures that the variable exists, otherwise will set it using the specified stream.
@@ -121,27 +121,27 @@ class MSGFile(olefile.OleFileIO):
         else:
             tmp = self._getStream(filename + '001E', prefix = False)
             return None if tmp is None else tmp.decode(self.stringEncoding)
-        
+
     def debug(self):
         for dir_ in self.listDir():
             if dir_[-1].endswith('001E') or dir_[-1].endswith('001F'):
                 print('Directory: ' + str(dir_[:-1]))
                 print('Contents: {}'.format(self._getStream(dir_)))
-                
+
     def Exists(self, inp):
         """
         Checks if :param inp: exists in the msg file. Does not always go to the top, starts at specified point
         """
         inp = self.fix_path(inp)
         return self.exists(inp)
-    
+
     def sExists(self, inp):
         """
         Checks if string stream :param inp: exists in the msg file.
         """
         inp = self.fix_path(inp)
         return self.exists(inp + '001F') or self.exists(inp + '001E')
-    
+
     def fix_path(self, inp, prefix = True):
         """
         Changes paths so that they have the proper
@@ -176,7 +176,7 @@ class MSGFile(olefile.OleFileIO):
             if good:
                 out.append(x)
         return out
-    
+
     @property
     def areStringsUnicode(self):
         """
@@ -191,14 +191,21 @@ class MSGFile(olefile.OleFileIO):
                     return self.__bStringsUnicode
             self.__bStringsUnicode = False
             return self.__bStringsUnicode
-        
+
     @property
     def attachmentClass(self):
         """
         Returns the Attachment class being used, should you need to use it externally for whatever reason.
         """
         return self.__attachmentClass
-    
+
+    @property
+    def classType(self):
+        """
+        The class type of the MSG file.
+        """
+        return self._ensureSet('_classType', '__substg1.0_001A')
+
     @property
     def path(self):
         """
@@ -223,7 +230,7 @@ class MSGFile(olefile.OleFileIO):
         Intended for developer use.
         """
         return copy.deepcopy(self.__prefixList)
-    
+
 
     @property
     def stringEncoding(self):
@@ -238,7 +245,7 @@ class MSGFile(olefile.OleFileIO):
             else:
                 # Well, it's not unicode. Now we have to figure out what it IS.
                 if not self.mainProperties.has_key('3FFD0003'):
-                    raise Exception('Encoding property not found')
+                    raise MissingEncodingError('Encoding property not found')
                 enc = self.mainProperties['3FFD0003'].value
                 # Now we just need to translate that value
                 # Now, this next line SHOULD work, but it is possible that it might not...
