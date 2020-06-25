@@ -22,7 +22,9 @@ __pycache__/
 
 # Preserve some of our example files
 !/example-msg-files/expected-outputs/2013-11-18_0026 Test for TIF files/
+!/example-msg-files/expected-outputs/2013-11-18_0026 Test for TIF files/*
 !/example-msg-files/expected-outputs/2016-02-23_0657 MSG Test File/
+!/example-msg-files/expected-outputs/2016-02-23_0657 MSG Test File/*
 !/example-msg-files/strangeDate.msg
 !/example-msg-files/unicode.msg
 
@@ -32,5 +34,3 @@ __pycache__/
 
 # End user logging
 logging.json
-
-

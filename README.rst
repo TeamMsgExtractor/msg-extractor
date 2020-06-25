@@ -78,26 +78,26 @@ refer to the usage information provided from the program's help dialog:
 
      import extract_msg
 
-From there, initialize an instance of the Message class:
+From there, open the MSG file:
 
 ::
 
-     msg = extract_msg.Message("path/to/msg/file.msg")
+     msg = extract_msg.openMsg("path/to/msg/file.msg")
 
 Alternatively, if you wish to send a msg binary string instead of a file
-to the ExtractMsg.Message Method:
+to the ``extract_msg.openMsg`` Method:
 
 ::
 
      msg_raw = b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1\x00 ... \x00\x00\x00'
-     msg = extract_msg.Message(msg_raw)
+     msg = extract_msg.openMsg(msg_raw)
 
 If you want to override the default attachment class and use one of your
 own, simply change the code to:
 
 ::
 
-     msg = extract_msg.Message("path/to/msg/file.msg", attachmentClass = CustomAttachmentClass)
+     msg = extract_msg.openMsg("path/to/msg/file.msg", attachmentClass = CustomAttachmentClass)
 
 where ``CustomAttachmentClass`` is your custom class.
 
@@ -180,8 +180,8 @@ Joel Kaufman - First implementations of the json and filename flags
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
 
-.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.24.4-blue.svg
-   :target: https://pypi.org/project/extract-msg/0.24.4/
+.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.25.0-blue.svg
+   :target: https://pypi.org/project/extract-msg/0.25.0/
 
 .. |PyPI1| image:: https://img.shields.io/badge/python-2.7+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-2715/

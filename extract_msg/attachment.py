@@ -4,7 +4,7 @@ import string
 
 from extract_msg import constants
 from extract_msg.properties import Properties
-from extract_msg.utils import properHex
+from extract_msg.utils import openMsg, properHex
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -41,7 +41,7 @@ class Attachment(object):
             else:
                 self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
                 self.__type = 'msg'
-                self.__data = msg.__class__(self.msg.path, self.__prefix, self.__class__)
+                self.__data = openMsg(self.msg.path, self.__prefix, self.__class__)
         else:
             # TODO Handling for special attacment types (like 0x00000007)
             raise TypeError('Unknown attachment type.')
@@ -75,7 +75,7 @@ class Attachment(object):
                 value = self._getStream(streamID)
             setattr(self, variable, value)
             return value
-    
+
     def Exists(self, filename):
         """
         Checks if stream exists inside the attachment folder.
