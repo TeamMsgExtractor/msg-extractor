@@ -13,11 +13,13 @@ from extract_msg import constants
 from extract_msg.attachment import Attachment
 from extract_msg.compat import os_ as os
 from extract_msg.properties import Properties
-from extract_msg.recipient import Recipient
-from extract_msg.utils import addNumToDir, has_len, inputToBytes, inputToString, windowsUnicode
+from extract_msg.utils import has_len, inputToString, windowsUnicode
 from extract_msg.exceptions import InvalidFileFormat, MissingEncodingError
 
 
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 class MSGFile(olefile.OleFileIO):
     """
@@ -29,7 +31,7 @@ class MSGFile(olefile.OleFileIO):
         :param prefix: used for extracting embeded msg files
             inside the main one. Do not set manually unless
             you know what you are doing.
-        :param attachmentClass: optional, the class the Message object
+        :param attachmentClass: optional, the class the MSGFile object
             will use for attachments. You probably should
             not change this value unless you know what you
             are doing.
@@ -205,6 +207,18 @@ class MSGFile(olefile.OleFileIO):
         The class type of the MSG file.
         """
         return self._ensureSet('_classType', '__substg1.0_001A')
+
+    @property
+    def mainProperties(self):
+        """
+        Returns the Properties instance used by the MSGFile instance.
+        """
+        try:
+            return self._prop
+        except AttributeError:
+            self._prop = Properties(self._getStream('__properties_version1.0'),
+                                    constants.TYPE_MESSAGE if self.prefix == '' else constants.TYPE_MESSAGE_EMBED)
+            return self._prop
 
     @property
     def path(self):

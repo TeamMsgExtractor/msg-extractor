@@ -18,6 +18,8 @@ from extract_msg.properties import Properties
 from extract_msg.recipient import Recipient
 from extract_msg.utils import addNumToDir, has_len, inputToBytes, inputToString, windowsUnicode
 
+
+
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
@@ -83,7 +85,7 @@ class Message(MSGFile):
                 else:
                     setattr(self, private, None)
             return getattr(self, private)
-        
+
     def close(self):
         for attachment in self.attachments:
             if attachment.type == 'msg':
@@ -127,12 +129,12 @@ class Message(MSGFile):
         count += 1 if html else 0
         count += 1 if rtf else 0
         count += 1 if raw else 0
-        
+
         if count > 1:
             raise IncompatibleOptionsException('Only one of the following options may be used at a time: toJSon, raw, html, rtf')
-        
+
         crlf = inputToBytes(self.__crlf, 'utf-8')
-        
+
         if customFilename != None and customFilename != '':
             dirName = customFilename
         else:
@@ -181,10 +183,10 @@ class Message(MSGFile):
             # Save the attachments
             for attachment in self.attachments:
                 attachmentNames.append(attachment.save(ContentId, toJson, useFileName, raw, html = html, rtf = rtf))
-            
+
             # Save the message body
             fext = 'json' if toJson else 'txt'
-            
+
             useHtml = False
             useRtf = False
             #if html:
@@ -195,7 +197,7 @@ class Message(MSGFile):
             #    if self.htmlBody is not None:
             #        useRtf = True
             #        fext = 'rtf'
-                 
+
             with open('message.' + fext, 'wb') as f:
                 if toJson:
                     emailObj = {'from': inputToString(self.sender, 'utf-8'),
@@ -403,18 +405,6 @@ class Message(MSGFile):
         Returns if this email has been marked as read.
         """
         return bool(self.mainProperties['0E070003'].value & 1)
-        
-    @property
-    def mainProperties(self):
-        """
-        Returns the Properties instance used by the Message instance.
-        """
-        try:
-            return self._prop
-        except AttributeError:
-            self._prop = Properties(self._getStream('__properties_version1.0'),
-                                    constants.TYPE_MESSAGE if self.prefix == '' else constants.TYPE_MESSAGE_EMBED)
-            return self._prop
 
     @property
     def messageId(self):
@@ -465,7 +455,7 @@ class Message(MSGFile):
         Returns the decompressed Rtf body from the message.
         """
         return compressed_rtf.decompress(self.compressedRtf)
-    
+
     @property
     def sender(self):
         """
