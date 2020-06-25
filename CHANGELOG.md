@@ -1,3 +1,10 @@
+**v0.25.0**
+* Added new class `MSGFile`. The `Message` class now inherits from this. This class is the base for all MSG files, not just `Message`s. It somewhat recently came to our attention that MSG files are used for a variety of things, including the storage of contacts, leading us to the next part of the changelog.
+* [[mattgwwalker #110](https://github.com/mattgwwalker/msg-extractor/issues/110)] Added new class `Contact` for extracting the data from MSG files storing contacts.
+* Added new function `openMsg` to the module to be used to open MSG files in which it is not certain what type of MSG is being opened.
+* Modified the `Attachment` class to use the `openMsg` function to open embedded MSG files.
+* Added option `delayAttachments` to the `Message` class that will stop it from initializing attachments until the user is ready. This allows users to open `Message`s that have unimplemented attachment types without having to worry about the exception stopping them. This is also an option in the new `openMsg` function.
+
 **v0.24.4**
 * Added new property `Message.isRead` to show whether the email has been marked as read.
 * Renamed `Message.header_dict` to `Message.headerDict` to better match naming conventions.
@@ -11,7 +18,7 @@
 * Fixed bug with embedded msg files introduced in v0.24.0
 
 **v0.24.0**
-* [[mattgwwalker # 107](https://github.com/mattgwwalker/msg-extractor/issues/107)] Rewrote the `Messsage.save` function to fix many  errors arising from it and to extend its functionality.
+* [[mattgwwalker #107](https://github.com/mattgwwalker/msg-extractor/issues/107)] Rewrote the `Messsage.save` function to fix many errors arising from it and to extend its functionality.
 * Added new function `isEmptyString` to check if a string passed to it is `None` or is empty.
 
 **v0.23.4**
@@ -30,7 +37,7 @@
 **v0.23.0**
 * [[mattgwwalker #75](https://github.com/mattgwwalker/msg-extractor/issues/75)] & [[TheElementalOfCreation #19](https://github.com/TheElementalOfCreation/msg-extractor/issues/19)] Completely rewrote the function `Message._getStringStream`. This was done for two reasons. The first was to make it actually work with msg files that have their strings encoded in a non-Unicode encoding. The second reason was to make it so that it better reflected msg specification which says that ALL strings in a file will be either Unicode or non-Unicode, but not both. Because of the second part, the `prefer` option has been removed.
 * As part of fixing the two issues in the previous change, we have added two new properties:
-    1. a boolean `Message.areStringsUnicode` which tells if the strings are unicode encoded.
+    1. a boolean `Message.areStringsUnicode` which tells if the strings are Unicode encoded.
     2. A string `Message.stringEncoding` which tells what the encoding is. This is used by the `Message._getStringStream` to determine how to decode the data into a string.
 
 **v0.22.1**
@@ -40,7 +47,7 @@
 **v0.22.0**
 * [[TheElementalOfCreation #18](https://github.com/TheElementalOfCreation/msg-extractor/issues/18)] Added `--validate` option.
 * [[TheElementalOfCreation #16](https://github.com/TheElementalOfCreation/msg-extractor/issues/16)] Moved all dev code into its own scripts. Use `--dev` to use from the command line.
-* [[mattgwwalker #67](https://github.com/mattgwwalker/msg-extractor/issues/67)] Added compatability module to enforce unicode os functions.
+* [[mattgwwalker #67](https://github.com/mattgwwalker/msg-extractor/issues/67)] Added compatibility module to enforce Unicode os functions.
 * Added new function to `Message` class: `Message.sExists`. This function checks if a string stream exists. It's input should be formatted identically to that of `Message._getStringSteam`.
 * Added new function to `Message` class: `Message.fix_path`. This function will add the proper prefix to the path (if the `prefix` parameter is true) and adjust the path to be a string rather than a list or tuple.
 * Added new function to `utils.py`: `get_full_class_name`. This function returns a string containing the module name and the class name of any instance of any class. It is returned in the format of `{module}.{class}`.
@@ -52,7 +59,7 @@
 * [[TheElementalOfCreation #17](https://github.com/TheElementalOfCreation/msg-extractor/issues/17)] Fixed Attachment class using wrong properties file location in embedded msg files.
 * [[TheElementalOfCreation #11](https://github.com/TheElementalOfCreation/msg-extractor/issues/11)] Improved handling of command line arguments using argparse module.
 * [[TheElementalOfCreation #16](https://github.com/TheElementalOfCreation/msg-extractor/issues/16)] Started work on moving developer code into its own script.
-* [[mattgwwalker #63](https://github.com/mattgwwalker/msg-extractor/issues/63)] Fixwed json saving not applying to embedded msg files.
+* [[mattgwwalker #63](https://github.com/mattgwwalker/msg-extractor/issues/63)] Fixed JSON saving not applying to embedded msg files.
 * [[mattgwwalker #55](https://github.com/mattgwwalker/msg-extractor/issues/55)] Added fix for recipient sometimes missing email address.
 * [[mattgwwalker #65](https://github.com/mattgwwalker/msg-extractor/issues/65)] Added fix for special characters in recipient names.
 * Module now raises a custom exception (instead of just `IOError`) if the input is not a valid OLE file.

@@ -28,7 +28,7 @@ class Message(MSGFile):
     Parser for Microsoft Outlook message files.
     """
 
-    def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None):
+    def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None, delayAttachments = False):
         """
         :param path: path to the msg file in the system or is the raw msg file.
         :param prefix: used for extracting embeded msg files
@@ -39,6 +39,9 @@ class Message(MSGFile):
             not change this value unless you know what you
             are doing.
         :param filename: optional, the filename to be used by default when saving.
+        :param delayAttachments: optional, delays the initialization of attachments
+            until the user attempts to retrieve them. Allows MSG files with bad
+            attachments to be initialized so the other data can be retrieved.
         """
         MSGFile.__init__(self, path, prefix, attachmentClass, filename)
         # Initialize properties in the order that is least likely to cause bugs.
@@ -47,7 +50,8 @@ class Message(MSGFile):
         self.mainProperties
         self.header
         self.recipients
-        self.attachments
+        if not delayAttachments:
+            self.attachments
         self.to
         self.cc
         self.sender
@@ -87,10 +91,14 @@ class Message(MSGFile):
             return getattr(self, private)
 
     def close(self):
-        for attachment in self.attachments:
-            if attachment.type == 'msg':
-                attachment.data.close()
-        olefile.OleFileIO.close(self)
+        try:
+            self._attachments
+            for attachment in self.attachments:
+                if attachment.type == 'msg':
+                    attachment.data.close()
+        except AttributeError:
+            pass
+        MSGFile.close(self)
 
     def dump(self):
         """

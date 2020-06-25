@@ -27,8 +27,8 @@ https://github.com/mattgwwalker/msg-extractor
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 __author__ = 'Matthew Walker & The Elemental of Creation'
-__date__ = '2020-06-18'
-__version__ = '0.24.4'
+__date__ = '2020-06-25'
+__version__ = '0.25.0'
 
 import logging
 
@@ -48,7 +48,7 @@ from extract_msg.utils import parse_type, properHex
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
-def openMsg(path, prefix = '', attachmentClass = Attachment, filename = None, strict = True):
+def openMsg(path, prefix = '', attachmentClass = Attachment, filename = None, delayAttachments = False, strict = True):
     """
     Function to automatically open an MSG file and detect what type it is.
 
@@ -61,6 +61,9 @@ def openMsg(path, prefix = '', attachmentClass = Attachment, filename = None, st
         not change this value unless you know what you
         are doing.
     :param filename: optional, the filename to be used by default when saving.
+    :param delayAttachments: optional, delays the initialization of attachments
+        until the user attempts to retrieve them. Allows MSG files with bad
+        attachments to be initialized so the other data can be retrieved.
 
     If :param strict: is set to `True`, this function will raise an exception
     when it cannot identify what MSGFile derivitive to use. Otherwise, it will
