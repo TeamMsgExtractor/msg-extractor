@@ -14,7 +14,7 @@ from extract_msg.attachment import Attachment
 from extract_msg.compat import os_ as os
 from extract_msg.properties import Properties
 from extract_msg.utils import has_len, inputToString, windowsUnicode
-from extract_msg.exceptions import InvalidFileFormat, MissingEncodingError
+from extract_msg.exceptions import InvalidFileFormatError, MissingEncodingError
 
 
 

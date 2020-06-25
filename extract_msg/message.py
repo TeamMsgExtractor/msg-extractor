@@ -12,7 +12,7 @@ from email.parser import Parser as EmailParser
 from extract_msg import constants
 from extract_msg.attachment import Attachment
 from extract_msg.compat import os_ as os
-from extract_msg.exceptions import InvalidFileFormat
+from extract_msg.exceptions import InvalidFileFormatError
 from extract_msg.msg import MSGFile
 from extract_msg.properties import Properties
 from extract_msg.recipient import Recipient
