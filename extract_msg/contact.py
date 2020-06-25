@@ -93,7 +93,7 @@ class Contact(MSGFile):
         """
         The name of the last user to modify the contact file.
         """
-        return self._ensureSet('_lastModifiedBy', '__substg1.0_3A11')
+        return self._ensureSet('_lastModifiedBy', '__substg1.0_3FFA')
 
     @property
     def lastName(self):
