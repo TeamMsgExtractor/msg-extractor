@@ -146,12 +146,12 @@ def get_command_args(args):
     #if options.html:
     #    valid += 1
     #if options.rtf:
-    #    valid += 1    
+    #    valid += 1
     #if options.json:
     #    valid += 1
     #if valid > 1:
     #    raise Exception('Only one of these options may be selected at a time: --html, --rtf, --json')
-    
+
     if options.dev or options.file_logging:
         options.verbose = True
     file_args = options.msgs
@@ -214,18 +214,57 @@ def inputToString(bytes_input_var, encoding):
         return ''
     else:
         raise Exception('Cannot convert to STRING type')
-    
+
 def isEmptyString(inp):
     """
     Returns true if the input is None or is an Empty string.
     """
     return (inp == '' or inp is None)
-    
+
 def msgEpoch(inp):
     """
     Taken (with permission) from https://github.com/TheElementalOfCreation/creatorUtils
     """
     return (inp - 116444736000000000) / 10000000.0
+
+def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAttachments = False, strict = True):
+    """
+    Function to automatically open an MSG file and detect what type it is.
+
+    :param path: path to the msg file in the system or is the raw msg file.
+    :param prefix: used for extracting embeded msg files
+        inside the main one. Do not set manually unless
+        you know what you are doing.
+    :param attachmentClass: optional, the class the Message object
+        will use for attachments. You probably should
+        not change this value unless you know what you
+        are doing.
+    :param filename: optional, the filename to be used by default when saving.
+    :param delayAttachments: optional, delays the initialization of attachments
+        until the user attempts to retrieve them. Allows MSG files with bad
+        attachments to be initialized so the other data can be retrieved.
+
+    If :param strict: is set to `True`, this function will raise an exception
+    when it cannot identify what MSGFile derivitive to use. Otherwise, it will
+    log the error and return a basic MSGFile instance.
+    """
+    from extract_msg.attachment import Attachment
+    from extract_msg.contact import Contact
+    from extract_msg.message import Message
+    from extract_msg.msg import MSGFile
+
+    attachmentClass = Attachment if attachmentClass is None else attachmentClass
+
+    msg = MSGFile(path, prefix, attachmentClass, filename)
+    if msg.classType.startswith('IPM.Contact'):
+        return Contact(path, prefix, attachmentClass, filename)
+    elif msg.classType.startswith('IPM.Note'):
+        return Message(path, prefix, attachmentClass, filename, delayAttachments)
+    elif strict:
+        raise UnrecognizedMSGTypeError('Could not recognize msg class type "{}". It is recommended you report this to the developers.'.format(msg.classType))
+    else:
+        logger.error('Could not recognize msg class type "{}". It is recommended you report this to the developers.'.format(msg.classType))
+        return msg
 
 def parse_type(_type, stream):
     """

@@ -2,9 +2,9 @@ import logging
 import random
 import string
 
-from extract_msg import constants, openMsg
+from extract_msg import constants
 from extract_msg.properties import Properties
-from extract_msg.utils import properHex
+from extract_msg.utils import openMsg, properHex
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
