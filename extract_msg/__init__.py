@@ -35,6 +35,7 @@ import logging
 from extract_msg import constants
 from extract_msg.attachment import Attachment
 from extract_msg.contact import Contact
+from extract_msg.exceptions import UnrecognizedMSGTypeError
 from extract_msg.message import Message
 from extract_msg.msg import MSGFile
 from extract_msg.prop import create_prop
