@@ -180,8 +180,8 @@ Joel Kaufman - First implementations of the json and filename flags
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
 
-.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.25.0-blue.svg
-   :target: https://pypi.org/project/extract-msg/0.25.0/
+.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.25.1-blue.svg
+   :target: https://pypi.org/project/extract-msg/0.25.1/
 
 .. |PyPI1| image:: https://img.shields.io/badge/python-2.7+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-2715/
