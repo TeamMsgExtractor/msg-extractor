@@ -1,22 +1,5 @@
-import copy
-import email.utils
-import json
-import logging
-import re
-
-import compressed_rtf
-from imapclient.imapclient import decode_utf7
-import olefile
-
-from email.parser import Parser as EmailParser
-from extract_msg import constants
 from extract_msg.attachment import Attachment
-from extract_msg.compat import os_ as os
-from extract_msg.exceptions import InvalidFileFormatError
 from extract_msg.msg import MSGFile
-from extract_msg.properties import Properties
-from extract_msg.recipient import Recipient
-from extract_msg.utils import addNumToDir, has_len, inputToBytes, inputToString, windowsUnicode
 
 
 

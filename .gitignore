@@ -1,6 +1,9 @@
 # Mac
 .DS_Store
 
+# PyCharm crud
+/extract_msg/.idea
+
 # build files and folders
 /build/
 *.egg-info/

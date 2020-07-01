@@ -4,7 +4,7 @@ import string
 
 from extract_msg import constants
 from extract_msg.properties import Properties
-from extract_msg.utils import openMsg, properHex
+from extract_msg.utils import openMsg
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
