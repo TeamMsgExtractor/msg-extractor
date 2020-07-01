@@ -1,5 +1,3 @@
-import copy
-
 import olefile
 
 from extract_msg.message import Message

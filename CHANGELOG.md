@@ -1,3 +1,7 @@
+**v0.25.1**
+* [[mattgwwalker #132](https://github.com/mattgwwalker/msg-extractor/issues/110)] Fixed an issue caused by unfinished code being left in the \_\_main\_\_ file.
+* Cleaned up the imports to only be what is needed.
+
 **v0.25.0**
 * Added new class `MSGFile`. The `Message` class now inherits from this. This class is the base for all MSG files, not just `Message`'s. It somewhat recently came to our attention that MSG files are used for a variety of things, including the storage of contacts, leading us to the next part of the changelog.
 * [[mattgwwalker #110](https://github.com/mattgwwalker/msg-extractor/issues/110)] Added new class `Contact` for extracting the data from MSG files storing contacts.

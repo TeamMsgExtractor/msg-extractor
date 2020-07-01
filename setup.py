@@ -34,6 +34,7 @@ setup(
     version=version,
     description="Extracts emails and attachments saved in Microsoft Outlook's .msg files",
     long_description=long_description,
+    long_description_content_type='text/x-rst',
     url=github_url,
     download_url="%s/archives/master" % github_url,
     author='Matthew Walker & The Elemental of Creation',
