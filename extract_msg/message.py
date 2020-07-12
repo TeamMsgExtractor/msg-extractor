@@ -385,7 +385,7 @@ class Message(MSGFile):
         try:
             return self._headerDict
         except AttributeError:
-            self._headerDict = dict(self.header._headerss)
+            self._headerDict = dict(self.header._headers)
             self._headerDict.pop('Received')
             return self._headerDict
 
