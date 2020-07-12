@@ -10,7 +10,7 @@ In the bug template below anything is [square brackets] should be filled out or 
 
 Should you encounter an error that has not already been reported, please do the following when reporting it:
 **Bug Metadata**
-* Version of extract_msg: x.x.x
+* Version of extract_msg: [x.x.x]
 * Your python version: Python [2.7 | 3.6.7]
 * How did you launch extract_msg?
   - [ ] My command line or
