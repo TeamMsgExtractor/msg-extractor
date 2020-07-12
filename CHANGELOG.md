@@ -1,13 +1,18 @@
+**v0.25.2**
+* [[mattgwwalker #134](https://github.com/mattgwwalker/msg-extractor/issues/134)] Fixed a typo that caused `Message.headerDict` to raise an exception.
+* Upgraded code for `Message.headerDict` to avoid accidentally raising a key error if the header is ever missing the "Received" property.
+* Fixed an error in the changelog that caused some issue links to link to the wrong place.
+
 **v0.25.1**
-* [[mattgwwalker #132](https://github.com/mattgwwalker/msg-extractor/issues/110)] Fixed an issue caused by unfinished code being left in the \_\_main\_\_ file.
+* [[mattgwwalker #132](https://github.com/mattgwwalker/msg-extractor/issues/132)] Fixed an issue caused by unfinished code being left in the \_\_main\_\_ file.
 * Cleaned up the imports to only be what is needed.
 
 **v0.25.0**
-* Added new class `MSGFile`. The `Message` class now inherits from this. This class is the base for all MSG files, not just `Message`'s. It somewhat recently came to our attention that MSG files are used for a variety of things, including the storage of contacts, leading us to the next part of the changelog.
+* Added new class `MSGFile`. The `Message` class now inherits from this. This class is the base for all MSG files, not just `Message`s. It somewhat recently came to our attention that MSG files are used for a variety of things, including the storage of contacts, leading us to the next part of the changelog.
 * [[mattgwwalker #110](https://github.com/mattgwwalker/msg-extractor/issues/110)] Added new class `Contact` for extracting the data from MSG files storing contacts.
 * Added new function `openMsg` to the module to be used to open MSG files in which it is not certain what type of MSG is being opened.
 * Modified the `Attachment` class to use the `openMsg` function to open embedded MSG files.
-* Added option `delayAttachments` to the `Message` class that will stop it from initializing attachments until the user is ready. This allows users to open `Message`'s that have unimplemented attachment types without having to worry about the exception stopping them. This is also an option in the new `openMsg` function.
+* Added option `delayAttachments` to the `Message` class that will stop it from initializing attachments until the user is ready. This allows users to open `Message`s that have unimplemented attachment types without having to worry about the exception stopping them. This is also an option in the new `openMsg` function.
 
 **v0.24.4**
 * Added new property `Message.isRead` to show whether the email has been marked as read.

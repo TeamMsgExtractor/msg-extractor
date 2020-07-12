@@ -28,7 +28,7 @@ https://github.com/mattgwwalker/msg-extractor
 
 __author__ = 'Matthew Walker & The Elemental of Creation'
 __date__ = '2020-07-01'
-__version__ = '0.25.1'
+__version__ = '0.25.2'
 
 import logging
 

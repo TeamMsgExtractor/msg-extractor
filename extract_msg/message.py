@@ -385,8 +385,11 @@ class Message(MSGFile):
         try:
             return self._headerDict
         except AttributeError:
-            self._headerDict = dict(self.header._header)
-            self._headerDict.pop('Received')
+            self._headerDict = dict(self.header._headers)
+            try:
+                self._headerDict.pop('Received')
+            except KeyError:
+                pass
             return self._headerDict
 
     @property
