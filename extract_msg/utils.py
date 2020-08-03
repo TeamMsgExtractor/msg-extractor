@@ -13,6 +13,7 @@ import tzlocal
 
 from extract_msg import constants
 from extract_msg.compat import os_ as os
+from extract_msg.exceptions import UnrecognizedMSGTypeError
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
