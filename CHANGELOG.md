@@ -1,3 +1,6 @@
+**v0.25.3**
+* [[mattgwwalker #138](https://github.com/mattgwwalker/msg-extractor/issues/138)] Fixed missing import in extract_msg/utils.py.
+
 **v0.25.2**
 * [[mattgwwalker #134](https://github.com/mattgwwalker/msg-extractor/issues/134)] Fixed a typo that caused `Message.headerDict` to raise an exception.
 * Upgraded code for `Message.headerDict` to avoid accidentally raising a key error if the header is ever missing the "Received" property.
