@@ -105,7 +105,7 @@ where ``CustomAttachmentClass`` is your custom class.
 
 If you have any questions feel free to contact me, Matthew Walker, at
 mattgwwalker at gmail.com. NOTE: Due to time constraints, The Elemental
-of Creation has been added as a contributor to help manage the project.
+of Destruction has been added as a contributor to help manage the project.
 As such, it may be helpful to send emails to arceusthe@gmail.com as
 well.
 
@@ -167,7 +167,7 @@ Credits
 
 `Matthew Walker`_ - Original developer and owner
 
-`Ken Peterson (The Elemental of Creation)`_ - Principle programmer, manager, and msg file "expert"
+`Destiny Peterson (The Elemental of Destruction)`_ - Principle programmer, manager, and msg file "expert"
 
 `JP Bourget`_ - Senior programmer, readability and organization expert, secondary manager
 
@@ -180,15 +180,15 @@ Joel Kaufman - First implementations of the json and filename flags
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
 
-.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.25.3-blue.svg
-   :target: https://pypi.org/project/extract-msg/0.25.3/
+.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.25.2-blue.svg
+   :target: https://pypi.org/project/extract-msg/0.25.2/
 
 .. |PyPI1| image:: https://img.shields.io/badge/python-2.7+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-2715/
 .. |PyPI2| image:: https://img.shields.io/badge/python-3.6+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-367/
 .. _Matthew Walker: https://github.com/mattgwwalker
-.. _Ken Peterson (The Elemental of Creation): https://github.com/TheElementalOfCreation
+.. _Ken Peterson (The Elemental of Destruction): https://github.com/TheElementalOfDestruction
 .. _JP Bourget: https://github.com/punkrokk
 .. _Philippe Lagadec: https://github.com/decalage2
 .. _Dean Malmgren: https://github.com/deanmalmgren

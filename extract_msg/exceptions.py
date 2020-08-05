@@ -12,6 +12,11 @@ This module contains the set of extract_msg exceptions.
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
+class ConversionError(Exception):
+    """
+    An error occured during type conversion.
+    """
+    pass
 
 class InvalidFileFormatError(OSError):
     """
@@ -19,9 +24,21 @@ class InvalidFileFormatError(OSError):
     """
     pass
 
+class InvaildPropertyIdError(Exception):
+    """
+    The provided property ID was invalid.
+    """
+    pass
+
 class MissingEncodingError(Exception):
     """
     MSG file is missing an encodng.
+    """
+    pass
+
+class UnknownTypeError(Exception):
+    """
+    The type specified is not one that is recognized.
     """
     pass
 

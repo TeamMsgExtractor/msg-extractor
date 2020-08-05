@@ -86,6 +86,8 @@ class Message(MSGFile):
                     setattr(self, private, None)
             return getattr(self, private)
 
+    def _registerNamedProperty(self, ):
+
     def close(self):
         try:
             self._attachments
@@ -289,7 +291,7 @@ class Message(MSGFile):
             # Get the attachments
             attachmentDirs = []
 
-            for dir_ in self.listDir():
+            for dir_ in self.listDir(False, True):
                 if dir_[len(self.prefixList)].startswith('__attach') and\
                         dir_[len(self.prefixList)] not in attachmentDirs:
                     attachmentDirs.append(dir_[len(self.prefixList)])

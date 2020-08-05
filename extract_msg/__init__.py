@@ -26,9 +26,9 @@ https://github.com/mattgwwalker/msg-extractor
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Matthew Walker & The Elemental of Creation'
-__date__ = '2020-08-03'
-__version__ = '0.25.3'
+__author__ = 'The Elemental of Destruction & Matthew Walker'
+__date__ = '2020-07-01'
+__version__ = '0.26.0'
 
 import logging
 
@@ -41,4 +41,4 @@ from extract_msg.msg import MSGFile
 from extract_msg.prop import create_prop
 from extract_msg.properties import Properties
 from extract_msg.recipient import Recipient
-from extract_msg.utils import openMsg, parse_type, properHex
+from extract_msg.utils import openMsg, properHex
