@@ -398,20 +398,25 @@ def parseType(_type, stream, encoding, extras):
             if stream != len(extras):
                 logger.warning('Error while parsing multiple type. Expected {} entr{}, got {}. Ignoring.'.format(stream, ('y' if stream == 1 else 'ies'), len(extras)))
             if _type == 0x1002:
+                print(stream, extras)
                 return [constants.STMI16.unpack(x)[0] for x in extras]
             if _type == 0x1003:
-                print(stream, extras)
                 return [constants.STMI32.unpack(x)[0] for x in extras]
             if _type == 0x1004:
+                print(stream, extras)
                 return [constants.STMF32.unpack(x)[0] for x in extras]
             if _type == 0x1005:
+                print(stream, extras)
                 return [constants.STMF64.unpack(x)[0] for x in extras]
             if _type == 0x1007:
+                print(stream, extras)
                 values = [constants.STMF64.unpack(x)[0] for x in extras]
                 raise NotImplementedError('Parsing for type 0x1007 has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType 0x1007"')
             if _type == 0x1040:
+                print(stream, extras)
                 return [msgEpoch(constants.ST3.unpack(x)[0]) for x in extras]
             if _type == 0x1048:
+                print(stream, extras)
                 return [bytesToGuid(x) for x in extras]
         else:
             raise NotImplementedError('Parsing for type {} has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType {}"'.format(_type, _type))

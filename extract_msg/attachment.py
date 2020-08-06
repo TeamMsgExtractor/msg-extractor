@@ -3,6 +3,7 @@ import random
 import string
 
 from extract_msg import constants
+from extract_msg.named import NamedAttachmentProperties
 from extract_msg.prop import FixedLengthProp, VariableLengthProp
 from extract_msg.properties import Properties
 from extract_msg.utils import openMsg

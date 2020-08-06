@@ -56,6 +56,7 @@ class Message(MSGFile):
         self.date
         self.__crlf = '\n'  # This variable keeps track of what the new line character should be
         self.body
+        self.named
 
     def _genRecipient(self, recipientType, recipientInt):
         """

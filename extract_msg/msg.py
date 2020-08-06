@@ -257,7 +257,6 @@ class MSGFile(olefile.OleFileIO):
 
         Because of how this function works, any folder that contains it's own
         "__properties_version1.0" file should have this function called from it's class.
-
         """
         verifyPropertyId(id)
         verifyType(_type)
@@ -268,7 +267,6 @@ class MSGFile(olefile.OleFileIO):
         if location is not None:
             prefixList.append(location)
         prefixList = inputToMsgpath(prefixList)
-        print(len(self.prefixList), len(prefixList))
         usableid = id + _type if _type is not None else id
         found_number = 0
         found_streams = []
