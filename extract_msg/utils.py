@@ -36,7 +36,7 @@ if sys.version_info[0] >= 3:  # Python 3
             a = hex(inp)[2:]
         if len(a) % 2 != 0:
             a = '0' + a
-        return a.rjust(length, '0')
+        return a.rjust(length, '0').upper()
 
     def windowsUnicode(string):
         return str(string, 'utf_16_le') if string is not None else None
@@ -60,7 +60,7 @@ else:  # Python 2
             a = hex(inp)[2:-1]
         if len(a) % 2 != 0:
             a = '0' + a
-        return a.rjust(length, '0')
+        return a.rjust(length, '0').upper()
 
     def windowsUnicode(string):
         return unicode(string, 'utf_16_le') if string is not None else None

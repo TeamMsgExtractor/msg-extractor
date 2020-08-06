@@ -12,7 +12,7 @@ logger.addHandler(logging.NullHandler())
 
 class Named(object):
     __dir = '__nameid_version1.0'
-    def __init__(self, msg): # Temporarily uses the Message instance as the input
+    def __init__(self, msg):
         super(Named, self).__init__()
         self.__msg = msg
         guid_stream = self._getStream('__substg1.0_00020102')
@@ -51,13 +51,14 @@ class Named(object):
         self.entries = entries
         self.__names = names
         self.__guids = guids
-        self.__properties = [StringNamedProperty(entry, names[entry['id']], msg._getTypedData(properHex(0x8000 + entry['pid']))) if entry['pkind'] == constants.STRING_NAMED else NumericalNamedProperty(entry, msg._getTypedData(properHex(0x8000 + entry['pid']))) for entry in entries]
-        self.__propertiesdict = {}
+        #self.__properties = [StringNamedProperty(entry, names[entry['id']], msg._getTypedData(properHex(0x8000 + entry['pid']))) if entry['pkind'] == constants.STRING_NAMED else NumericalNamedProperty(entry, msg._getTypedData(properHex(0x8000 + entry['pid']))) for entry in entries]
+        self.__properties = []
+        for entry in entries:
+            msg._registerNamedProperty(entry, entry['pkind'], names[entry['id']] if entry['pkind'] == constants.STRING_NAMED else None)
+            if entry['pkind']
+        self.__propertiesDict = {}
         for property in self.__properties:
-            if isinstance(property, StringNamedProperty):
-                self.__propertiesdict[property.name] = property
-            else:
-                self.__propertiesdict[property.propertyID] = property
+            self.__propertiesDict[property.name if isinstance(property, StringNamedProperty) else property.propertyID] = property
 
     def _getStream(self, filename):
         return self.__msg._getStream([self.__dir, filename])
@@ -103,17 +104,29 @@ class Named(object):
         """
         Returns a copy of the dictionary containing all the named properties.
         """
-        return copy.deepcopy(self.__propertiesdict)
+        return copy.deepcopy(self.__propertiesDict)
+
+
 
 class NamedAttachmentProperties(object):
+    """
+    The named properties associated with a specific attachment.
+    """
     def __init__(self, attachment):
         self.__attachment = attachment
+        self.__properties = []
+        self.__propertiesDict = {}
 
-    def defineProperty(self, entry, type, name = None):
+    def defineProperty(self, entry, _type, name = None):
         """
         Informs the class of a named property that needs to be loaded.
         """
-
+        streamID = properHex(0x8000 + entry['pid']).upper()
+        if self.__attachment.ExistsTypedProperty(streamID)[0]:
+            data = attachment._getTypedData(streamID)
+            property = StringNamedProperty(entry, name, data) if _type == constants.STRING_NAMED else NumericalNamedProperty(entry, data)
+            self.__properties.append(property)
+            self.__propertiesDict[property.name if isinstance(property, StringNamedProperty) else property.propertyID] = property
 
     @property
     def attachment(self):
@@ -121,6 +134,14 @@ class NamedAttachmentProperties(object):
         The attachment that this NamedAttachmentProperties instance is associated with.
         """
         return self.__attachment
+
+    @property
+    def namedProperties(self):
+        """
+        Returns a copy of the dictionary containing all the named properties.
+        """
+        return copy.deepcopy(self.__propertiesDict)
+
 
 
 class StringNamedProperty(object):

@@ -205,8 +205,15 @@ class MSGFile(olefile.OleFileIO):
                             if self.Exists(x + '-' + properHex(y, 8), False):
                                 extras.append(self._getStream(x + '-' + properHex(y, 8), False))
                 return True, parseType(int(_type, 16), contents, self.stringEncoding, extras)
-
         return False, None # We didn't find the stream.
+
+    def _registerNamedProperty(self, entry, _type, name = None):
+        """
+        FOR INTERNAL USE ONLY! DO NOT CALL MANUALLY!
+
+        Function to allow things like attachments in subclasses to have their own named properties.
+        """
+        pass
 
     def debug(self):
         for dir_ in self.listDir():
