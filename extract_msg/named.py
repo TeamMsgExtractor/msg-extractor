@@ -51,7 +51,6 @@ class Named(object):
         self.entries = entries
         self.__names = names
         self.__guids = guids
-        #self.__properties = [StringNamedProperty(entry, names[entry['id']], msg._getTypedData(properHex(0x8000 + entry['pid']))) if entry['pkind'] == constants.STRING_NAMED else NumericalNamedProperty(entry, msg._getTypedData(properHex(0x8000 + entry['pid']))) for entry in entries]
         self.__properties = []
         for entry in entries:
             streamID = properHex(0x8000 + entry['pid'])

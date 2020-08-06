@@ -28,6 +28,7 @@ class Attachment(object):
         self.__dir = dir_
         self.__props = Properties(self._getStream('__properties_version1.0'),
             constants.TYPE_ATTACHMENT)
+        self.__namedProperties = NamedAttachmentProperties(self)
 
         # Get attachment data
         if self.Exists('__substg1.0_37010102'):
@@ -78,6 +79,9 @@ class Attachment(object):
                 value = self._getStream(streamID)
             setattr(self, variable, value)
             return value
+
+    def _registerNamedProperty(self, entry, _type, name = None):
+        self.__namedProperties.defineProperty(entry, _type, name)
 
     def Exists(self, filename):
         """
@@ -170,6 +174,13 @@ class Attachment(object):
         Returns the Message instance the attachment belongs to.
         """
         return self.__msg
+
+    @property
+    def namedProperties(self):
+        """
+        The NamedAttachmentProperties instance for this attachment.
+        """
+        return self.__namedProperties
 
     @property
     def props(self):

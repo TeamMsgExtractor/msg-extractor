@@ -173,6 +173,11 @@ STI32 = struct.Struct('<i4x')
 STI64 = struct.Struct('<q')
 STF32 = struct.Struct('<f4x')
 STF64 = struct.Struct('<d')
+STMI16 = struct.Struct('<h')
+STMI32 = struct.Struct('<i')
+STMI64 = struct.Struct('<q')
+STMF32 = struct.Struct('<f')
+STMF64 = struct.Struct('<d')
 
 PTYPES = {
     0x0000: 'PtypUnspecified',

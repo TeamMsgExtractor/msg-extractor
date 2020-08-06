@@ -97,7 +97,7 @@ def divide(string, length):
     >>>> print(a)
     ['He', 'll', 'o ', 'Wo', 'rl', 'd!']
     """
-    return [string[length * x:length * (x + 1)] for x in range(len(string) // length))]
+    return [string[length * x:length * (x + 1)] for x in range(len(string) // length)]
 
 def fromTimeStamp(stamp):
     return datetime.datetime.fromtimestamp(stamp, tzlocal.get_localzone())
@@ -293,13 +293,11 @@ def parseType(_type, stream, encoding, extras):
     """
     Converts the data in :param stream: to a
     much more accurate type, specified by
-    :param _type:, if possible.
+    :param _type: the data's type.
     :param stream: is the data to be converted.
     :param encoding: is the encoding to be used for regular strings.
     :param extras: is used in the case of types like PtypMultipleString.
     For that example, extras should be a list of the bytes from rest of the streams.
-
-    Some types require that :param prop_value: be specified. This can be retrieved from the Properties instance.
 
     WARNING: Not done. Do not try to implement anywhere where it is not already implemented
     """
@@ -365,7 +363,7 @@ def parseType(_type, stream, encoding, extras):
         # TODO parsing for this
         raise NotImplementedError('Parsing for type 0x00FE has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType 0x00FE"')
     elif _type == 0x0102:  # PtypBinary
-        pass
+        return value
     elif _type & 0x1000 == 0x1000:  # PtypMultiple
         # TODO parsing for `multiple` types
         if _type in (0x101F, 0x101E):
@@ -388,6 +386,25 @@ def parseType(_type, stream, encoding, extras):
                 if lengths[x] != len(y):
                     logger.warning('Error while parsing multiple type. Expected length {}, got {}. Ignoring.'.format(lengths[x], len(y)))
             return ret
+        elif _type in (0x1002, 0x1003, 0x1004, 0x1005, 0x1007, 0x1040, 0x1048):
+            if stream != len(extras):
+                logger.warning('Error while parsing multiple type. Expected {} entr{}, got {}. Ignoring.'.format(stream, ('y' if stream == 1 else 'ies'), len(extras)))
+            if _type == 0x1002:
+                return [constants.STMI16.unpack(x)[0] for x in extras]
+            if _type == 0x1003:
+                print(stream, extras)
+                return [constants.STMI32.unpack(x)[0] for x in extras]
+            if _type == 0x1004:
+                return [constants.STMF32.unpack(x)[0] for x in extras]
+            if _type == 0x1005:
+                return [constants.STMF64.unpack(x)[0] for x in extras]
+            if _type == 0x1007:
+                values = [constants.STMF64.unpack(x)[0] for x in extras]
+                raise NotImplementedError('Parsing for type 0x1007 has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType 0x1007"')
+            if _type == 0x1040:
+                return [msgEpoch(constants.ST3.unpack(x)[0]) for x in extras]
+            if _type == 0x1048:
+                return [bytesToGuid(x) for x in extras]
         else:
             raise NotImplementedError('Parsing for type {} has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType {}"'.format(_type, _type))
     return value

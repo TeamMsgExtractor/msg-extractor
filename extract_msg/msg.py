@@ -8,7 +8,7 @@ from extract_msg.attachment import Attachment
 from extract_msg.named import Named
 from extract_msg.prop import FixedLengthProp, VariableLengthProp
 from extract_msg.properties import Properties
-from extract_msg.utils import has_len, inputToString, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
+from extract_msg.utils import divide, has_len, inputToString, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
 from extract_msg.exceptions import InvalidFileFormatError, MissingEncodingError
 
 
@@ -216,7 +216,7 @@ class MSGFile(olefile.OleFileIO):
                                 if self.Exists(x + '-' + properHex(y, 8), False):
                                     extras.append(self._getStream(x + '-' + properHex(y, 8), False))
                     elif _type in ('1002', '1003', '1004', '1005', '1007', '1040', '1048'):
-                        extras = divide(contents, (2 if _type == '1002' else 4 if _type in ('1003', '1004') else 8 if type in ('1005', '1007', '1040'), else 16))
+                        extras = divide(contents, (2 if _type == '1002' else 4 if _type in ('1003', '1004') else 8 if type in ('1005', '1007', '1040') else 16))
                         contents = streams
                 return True, parseType(int(_type, 16), contents, self.stringEncoding, extras)
         return False, None # We didn't find the stream.
