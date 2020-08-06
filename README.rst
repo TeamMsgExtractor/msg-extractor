@@ -188,7 +188,7 @@ Joel Kaufman - First implementations of the json and filename flags
 .. |PyPI2| image:: https://img.shields.io/badge/python-3.6+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-367/
 .. _Matthew Walker: https://github.com/mattgwwalker
-.. _Ken Peterson (The Elemental of Destruction): https://github.com/TheElementalOfDestruction
+.. _Destiny Peterson (The Elemental of Destruction): https://github.com/TheElementalOfDestruction
 .. _JP Bourget: https://github.com/punkrokk
 .. _Philippe Lagadec: https://github.com/decalage2
 .. _Dean Malmgren: https://github.com/deanmalmgren
