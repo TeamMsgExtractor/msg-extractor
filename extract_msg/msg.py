@@ -5,6 +5,7 @@ import olefile
 
 from extract_msg import constants
 from extract_msg.attachment import Attachment
+from extract_msg.prop import FixedLengthProp, VariableLengthProp
 from extract_msg.properties import Properties
 from extract_msg.utils import has_len, inputToString, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
 from extract_msg.exceptions import InvalidFileFormatError, MissingEncodingError
@@ -160,8 +161,9 @@ class MSGFile(olefile.OleFileIO):
         verifyType(_type)
         propertyID = propertyID.upper()
         for x in (propertyID + _type,) if _type is not None else self.mainProperties:
-            if x.startswith(id):
-                pass
+            if x.startswith(propertyID):
+                prop = self.mainProperties[x]
+                return prop.value if isinstance(prop, FixedLengthProp) else prop
 
     def _getTypedStream(self, filename, prefix = True, _type = None):
         """

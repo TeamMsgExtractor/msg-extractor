@@ -54,8 +54,10 @@ class Named(object):
         #self.__properties = [StringNamedProperty(entry, names[entry['id']], msg._getTypedData(properHex(0x8000 + entry['pid']))) if entry['pkind'] == constants.STRING_NAMED else NumericalNamedProperty(entry, msg._getTypedData(properHex(0x8000 + entry['pid']))) for entry in entries]
         self.__properties = []
         for entry in entries:
+            streamID = properHex(0x8000 + entry['pid'])
             msg._registerNamedProperty(entry, entry['pkind'], names[entry['id']] if entry['pkind'] == constants.STRING_NAMED else None)
-            if entry['pkind']
+            if msg.ExistsTypedProperty(streamID):
+                self.__properties.append(StringNamedProperty(entry, names[entry['id']], msg._getTypedData(streamID)) if entry['pkind'] == constants.STRING_NAMED else NumericalNamedProperty(entry, msg._getTypedData(streamID)))
         self.__propertiesDict = {}
         for property in self.__properties:
             self.__propertiesDict[property.name if isinstance(property, StringNamedProperty) else property.propertyID] = property
