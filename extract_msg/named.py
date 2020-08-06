@@ -124,7 +124,7 @@ class NamedAttachmentProperties(object):
         """
         streamID = properHex(0x8000 + entry['pid']).upper()
         if self.__attachment.ExistsTypedProperty(streamID)[0]:
-            data = attachment._getTypedData(streamID)
+            data = self.__attachment._getTypedData(streamID)
             property = StringNamedProperty(entry, name, data) if _type == constants.STRING_NAMED else NumericalNamedProperty(entry, data)
             self.__properties.append(property)
             self.__propertiesDict[property.name if isinstance(property, StringNamedProperty) else property.propertyID] = property

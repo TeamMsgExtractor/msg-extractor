@@ -25,7 +25,7 @@ if sys.version_info[0] >= 3:  # Python 3
 
     def properHex(inp, length = 0):
         """
-        Taken (with permission) from https://github.com/TheElementalOfCreation/creatorUtils
+        Taken (with permission) from https://github.com/TheElementalOfDestruction/creatorUtils
         """
         a = ''
         if isinstance(inp, str):
@@ -85,7 +85,7 @@ def bytesToGuid(bytes_input):
 
 def divide(string, length):
     """
-    Taken (with permission) from https://github.com/TheElementalOfCreation/creatorUtils
+    Taken (with permission) from https://github.com/TheElementalOfDestruction/creatorUtils
 
     Divides a string into multiple substrings of equal length
     :param string: string to be divided.
@@ -215,6 +215,15 @@ def inputToBytes(string_input_var, encoding):
     else:
         raise ConversionError('Cannot convert to BYTES type')
 
+def inputToMsgpath(inp):
+    """
+    Converts the input into an msg path.
+    """
+    if isinstance(inp, (list, tuple)):
+        inp = '/'.join(inp)
+    ret = inputToString(inp, 'utf-8').replace('\\', '/').split('/')
+    return ret if ret[0] != '' else []
+
 def inputToString(bytes_input_var, encoding):
     if isinstance(bytes_input_var, constants.STRING):
         return bytes_input_var
@@ -247,7 +256,6 @@ def msgpathToString(inp):
         inp = '/'.join(inp)
     inp.replace('\\', '/')
     return inp
-
 
 def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAttachments = False, strict = True):
     """

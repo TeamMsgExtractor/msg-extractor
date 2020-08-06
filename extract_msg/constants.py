@@ -230,7 +230,7 @@ OP_MARK_AS_READ = 0x0B
 # This property information was sourced from
 # http://www.fileformat.info/format/outlookmsg/index.htm
 # on 2013-07-22.
-# It was extended by The Elemental of Creation on 2018-10-12
+# It was extended by The Elemental of Destruction on 2018-10-12
 PROPERTIES = {
     '00010102': 'Template data',
     '0002000B': 'Alternate recipient allowed',

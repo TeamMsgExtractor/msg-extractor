@@ -8,7 +8,7 @@ from extract_msg.attachment import Attachment
 from extract_msg.named import Named
 from extract_msg.prop import FixedLengthProp, VariableLengthProp
 from extract_msg.properties import Properties
-from extract_msg.utils import divide, has_len, inputToString, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
+from extract_msg.utils import divide, has_len, inputToMsgpath, inputToString, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
 from extract_msg.exceptions import InvalidFileFormatError, MissingEncodingError
 
 
@@ -135,8 +135,7 @@ class MSGFile(olefile.OleFileIO):
         If you know for sure what type the data is before hand,
         you can specify it as being one of the strings in the
         constant FIXED_LENGTH_PROPS_STRING or
-        VARIABLE_LENGTH_PROPS_STRING
-
+        VARIABLE_LENGTH_PROPS_STRING.
         """
         verifyPropertyId(id)
         id = id.upper()
@@ -156,7 +155,7 @@ class MSGFile(olefile.OleFileIO):
         If you know for sure what type the property is before hand,
         you can specify it as being one of the strings in the
         constant FIXED_LENGTH_PROPS_STRING or
-        VARIABLE_LENGTH_PROPS_STRING
+        VARIABLE_LENGTH_PROPS_STRING.
         """
         verifyPropertyId(propertyID)
         verifyType(_type)
@@ -180,7 +179,7 @@ class MSGFile(olefile.OleFileIO):
         If you know for sure what type the stream is before hand,
         you can specify it as being one of the strings in the
         constant FIXED_LENGTH_PROPS_STRING or
-        VARIABLE_LENGTH_PROPS_STRING
+        VARIABLE_LENGTH_PROPS_STRING.
 
         If you have not specified the type, the type this function
         returns in many cases cannot be predicted. As such, when
@@ -249,7 +248,7 @@ class MSGFile(olefile.OleFileIO):
         inp = self.fix_path(inp, prefix)
         return self.exists(inp + '001F') or self.exists(inp + '001E')
 
-    def ExistsTypedProperty(self, id, location = None, _type = None, prefix = True):
+    def ExistsTypedProperty(self, id, location = None, _type = None, prefix = True, propertiesInstance = None):
         """
         Determines if the stream with the provided id exists in the location specified.
         If no location is specified, the root directory is searched. The return of this
@@ -258,19 +257,26 @@ class MSGFile(olefile.OleFileIO):
 
         Because of how this function works, any folder that contains it's own
         "__properties_version1.0" file should have this function called from it's class.
+
         """
         verifyPropertyId(id)
         verifyType(_type)
         id = id.upper()
+        if propertiesInstance is None:
+            propertiesInstance = self.mainProperties
+        prefixList = self.prefixList if prefix else []
+        if location is not None:
+            prefixList.append(location)
+        prefixList = inputToMsgpath(prefixList)
+        print(len(self.prefixList), len(prefixList))
         usableid = id + _type if _type is not None else id
-        location = msgpathToString(location)
         found_number = 0
         found_streams = []
         for item in self.listDir():
-            if item[len(self.prefixList)].startswith('__substg1.0_' + usableid) and item[len(self.prefixList)] not in found_streams:
+            if item[len(prefixList)].startswith('__substg1.0_' + usableid) and item[len(prefixList)] not in found_streams:
                 found_number += 1
-                found_streams.append(item[len(self.prefixList)])
-        for x in self.mainProperties:
+                found_streams.append(item[len(prefixList)])
+        for x in propertiesInstance:
             if x.startswith(usableid):
                 already_found = False
                 for y in found_streams:
