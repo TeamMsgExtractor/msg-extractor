@@ -33,21 +33,21 @@ class PropBase(object):
         self.__fw = self.__flags & 4 == 4
 
     @property
-    def flag_mandatory(self):
+    def flagMandatory(self):
         """
         Boolean, is the "mandatory" flag set?
         """
         return self.__fm
 
     @property
-    def flag_readable(self):
+    def flagReadable(self):
         """
         Boolean, is the "readable" flag set?
         """
         return self.__fr
 
     @property
-    def flag_writable(self):
+    def flagWritable(self):
         """
         Boolean, is the "writable" flag set?
         """
@@ -91,9 +91,9 @@ class FixedLengthProp(PropBase):
 
     def __init__(self, string):
         super(FixedLengthProp, self).__init__(string)
-        self.__value = self.parse_type(self.type, constants.STFIX.unpack(string)[0])
+        self.__value = self.parseType(self.type, constants.STFIX.unpack(string)[0])
 
-    def parse_type(self, _type, stream):
+    def parseType(self, _type, stream):
         """
         Converts the data in :param stream: to a
         much more accurate type, specified by
@@ -160,6 +160,14 @@ class VariableLengthProp(PropBase):
             self.__realLength = self.__length - 1
         elif self.type == 0x001F:
             self.__realLength = self.__length - 2
+        elif self.type == 0x1002:
+            self.__realLength = self.__length // 2
+        elif self.type in (0x1003, 0x1004):
+            self.__realLength = self.__length // 4
+        elif self.type in (0x1005, 0x1007, 0x1040):
+            self.__realLength = self.__length // 8
+        elif self.type == 0x1048:
+            self.__realLength = self.__length // 16
         elif self.type == 0x000D:
             self.__realLength = None
         else:
@@ -171,16 +179,16 @@ class VariableLengthProp(PropBase):
         The length field of the variable length property.
         """
         return self.__length
-    
+
     @property
-    def real_length(self):
+    def realLength(self):
         """
         The ACTUAL length of the stream that this property corresponds to.
         """
         return self.__realLength
-    
+
     @property
-    def reserved_flags(self):
+    def reservedFlags(self):
         """
         The reserved flags field of the variable length property.
         """

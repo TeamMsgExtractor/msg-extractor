@@ -97,7 +97,7 @@ def divide(string, length):
     >>>> print(a)
     ['He', 'll', 'o ', 'Wo', 'rl', 'd!']
     """
-    return [string[length * x:length * (x + 1)] for x in range(int(len(string) / length))]
+    return [string[length * x:length * (x + 1)] for x in range(len(string) // length))]
 
 def fromTimeStamp(stamp):
     return datetime.datetime.fromtimestamp(stamp, tzlocal.get_localzone())
@@ -380,7 +380,7 @@ def parseType(_type, stream, encoding, extras):
             return ret
         elif _type == 0x1102:
             ret = copy.deepcopy(extras)
-            lengths = [struct.unpack('<i', stream[pos*8:(pos+1)*8]) for pos in range(int(len(stream) / 8))]
+            lengths = [struct.unpack('<i', stream[pos*8:(pos+1)*8]) for pos in range(len(stream) // 8)]
             length_lengths = len(lengths)
             if length_lengths > length_extras:
                 logger.warning('Error while parsing multiple type. Expected {} stream{}, got {}. Ignoring.'.format(length_lengths, 's' if length_lengths > 1 or length_lengths == 0 else '', length_extras))

@@ -316,7 +316,7 @@ class Message(MSGFile):
                 self.__waitingProperties
                 if self.__attachmentsDelayed:
                     for attachment in self._attachments:
-                        for prop in self.__waitingProperties
+                        for prop in self.__waitingProperties:
                             attachment._registerNamedProperty(*prop)
             except:
                 pass

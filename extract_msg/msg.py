@@ -5,6 +5,7 @@ import olefile
 
 from extract_msg import constants
 from extract_msg.attachment import Attachment
+from extract_msg.named import Named
 from extract_msg.prop import FixedLengthProp, VariableLengthProp
 from extract_msg.properties import Properties
 from extract_msg.utils import has_len, inputToString, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
@@ -163,7 +164,8 @@ class MSGFile(olefile.OleFileIO):
         for x in (propertyID + _type,) if _type is not None else self.mainProperties:
             if x.startswith(propertyID):
                 prop = self.mainProperties[x]
-                return prop.value if isinstance(prop, FixedLengthProp) else prop
+                return True, (prop.value if isinstance(prop, FixedLengthProp) else prop)
+        return False, None
 
     def _getTypedStream(self, filename, prefix = True, _type = None):
         """
@@ -194,18 +196,28 @@ class MSGFile(olefile.OleFileIO):
                 if len(contents) == 0:
                     return True, None # We found the file, but it was empty.
                 extras = []
+                _type = x[-4:]
                 if x[-4] == '1': # It's a multiple
-                    _type = x[-4:]
                     if _type in ('101F', '101E'):
-                        streams = int(len(contents) / 4) # These lengths are normal.
+                        streams = len(contents) // 4 # These lengths are normal.
                     elif _type == '1102':
-                        streams = int(len(contents) / 8) # These lengths have 4 0x00 bytes at the end for seemingly no reason. They are "reserved" bytes
+                        streams = len(contents) // 8 # These lengths have 4 0x00 bytes at the end for seemingly no reason. They are "reserved" bytes
+                    elif _type in ('1002', '1003', '1004', '1005', '1007', '1040', '1048'):
+                        try:
+                            streams = self.mainProperties[x[-8:]].realLength
+                        except:
+                            logger.error('Could not find matching VariableLengthProp for stream {}'.format(x))
+                            streams = len(contents) // (2 if _type == '1002' else 4 if _type in ('1003', '1004') else 8 if type in ('1005', '1007', '1040') else 16)
                     else:
                         raise NotImplementedError('The stream specified is of type {}. We don\'t currently understand exactly how this type works. If it is mandatory that you have the contents of this stream, please create an issue labled "NotImplementedError: _getTypedStream {}".'.format(_type, _type))
-                    if self.Exists(x + '-00000000', False):
-                        for y in range(streams):
-                            if self.Exists(x + '-' + properHex(y, 8), False):
-                                extras.append(self._getStream(x + '-' + properHex(y, 8), False))
+                    if _type in ('101F', '101E', '1102'):
+                        if self.Exists(x + '-00000000', False):
+                            for y in range(streams):
+                                if self.Exists(x + '-' + properHex(y, 8), False):
+                                    extras.append(self._getStream(x + '-' + properHex(y, 8), False))
+                    elif _type in ('1002', '1003', '1004', '1005', '1007', '1040', '1048'):
+                        extras = divide(contents, (2 if _type == '1002' else 4 if _type in ('1003', '1004') else 8 if type in ('1005', '1007', '1040'), else 16))
+                        contents = streams
                 return True, parseType(int(_type, 16), contents, self.stringEncoding, extras)
         return False, None # We didn't find the stream.
 
@@ -260,13 +272,13 @@ class MSGFile(olefile.OleFileIO):
                 found_streams.append(item[len(self.prefixList)])
         for x in self.mainProperties:
             if x.startswith(usableid):
-                already_exists = False
+                already_found = False
                 for y in found_streams:
                     if y.endswith(x):
                         already_found = True
                         break
                 if not already_found:
-                    found_streams += 1
+                    found_number += 1
         return (found_number > 0), found_number
 
     def fix_path(self, inp, prefix = True):
@@ -350,6 +362,17 @@ class MSGFile(olefile.OleFileIO):
             self._prop = Properties(self._getStream('__properties_version1.0'),
                                     constants.TYPE_MESSAGE if self.prefix == '' else constants.TYPE_MESSAGE_EMBED)
             return self._prop
+
+    @property
+    def named(self):
+        """
+        The main named properties instance for this file.
+        """
+        try:
+            return self.__namedProperties
+        except AttributeError:
+            self.__namedProperties = Named(self)
+            return self.__namedProperties
 
     @property
     def path(self):
