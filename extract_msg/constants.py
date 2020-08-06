@@ -20,6 +20,27 @@ else:
 # WHAT YOU ARE DOING! FAILURE TO FOLLOW THIS INSTRUCTION
 # CAN AND WILL BREAK THIS SCRIPT!
 
+# Constants used by named.py
+NUMERICAL_NAMED = 0
+STRING_NAMED = 1
+GUID_PS_MAPI = '{00020328-0000-0000-C000-000000000046}'
+GUID_PS_PUBLIC_STRINGS = '{00020329-0000-0000-C000-000000000046}'
+GUID_PSETID_COMMON = '{00062008-0000-0000-C000-000000000046}'
+GUID_PSETID_ADDRESS = '{00062004-0000-0000-C000-000000000046}'
+GUID_PS_INTERNET_HEADERS = '{00020386-0000-0000-C000-000000000046}'
+GUID_PSETID_APPOINTMENT = '{00062002-0000-0000-C000-000000000046}'
+GUID_PSETID_MEETING = '{6ED8DA90-450B-101B-98DA-00AA003F1305}'
+GUID_PSETID_LOG = '{0006200A-0000-0000-C000-000000000046}'
+GUID_PSETID_MESSAGING = '{41F28F13-83F4-4114-A584-EEDB5A6B0BFF}'
+GUID_PSETID_NOTE = '{0006200E-0000-0000-C000-000000000046}'
+GUID_PSETID_POSTRSS = '{00062041-0000-0000-C000-000000000046}'
+GUID_PSETID_TASK = '{00062003-0000-0000-C000-000000000046}'
+GUID_PSETID_UNIFIEDMESSAGING = '{4442858E-A9E3-4E80-B900-317A210CC15B}'
+GUID_PSETID_AIRSYNC = '{71035549-0739-4DCB-9163-00F0580DBBDF}'
+GUID_PSETID_SHARING = '{00062040-0000-0000-C000-000000000046}'
+GUID_PSETID_XMLEXTRACTEDENTITIES = '{23239608-685D-4732-9C55-4C95CB4E8E33}'
+GUID_PSETID_ATTACHMENT = '{96357F7F-59E1-47D0-99A7-46515C183B54}'
+
 FIXED_LENGTH_PROPS = (
     0x0000,
     0x0001,
@@ -34,6 +55,22 @@ FIXED_LENGTH_PROPS = (
     0x0014,
     0x0040,
     0x0048,
+)
+
+FIXED_LENGTH_PROPS_STRING = (
+    '0000',
+    '0001',
+    '0002',
+    '0003',
+    '0004',
+    '0005',
+    '0006',
+    '0007',
+    '000A',
+    '000B',
+    '0014',
+    '0040',
+    '0048',
 )
 
 VARIABLE_LENGTH_PROPS = (
@@ -56,6 +93,28 @@ VARIABLE_LENGTH_PROPS = (
     0x1040,
     0x1048,
     0x1102,
+)
+
+VARIABLE_LENGTH_PROPS_STRING = (
+    '000D',
+    '001E',
+    '001F',
+    '00FB',
+    '00FD',
+    '00FE',
+    '0102',
+    '1002',
+    '1003',
+    '1004',
+    '1005',
+    '1006',
+    '1007',
+    '1014',
+    '101E',
+    '101F',
+    '1040',
+    '1048',
+    '1102',
 )
 
 INTELLIGENCE_DUMB = 0
@@ -102,6 +161,9 @@ MAINDOC = "extract_msg:\n\tExtracts emails and attachments saved in Microsoft Ou
 ST1 = struct.Struct('<8x4I')
 ST2 = struct.Struct('<H2xI8x')
 ST3 = struct.Struct('<Q')
+# Structs used by named.py
+STNP_NAM = struct.Struct('<i')
+STNP_ENT = struct.Struct('<IHH') # Struct used for unpacking the entries in the entry stream
 # Structs used by prop.py
 STFIX = struct.Struct('<8x8s')
 STVAR = struct.Struct('<8xi4s')
@@ -111,6 +173,11 @@ STI32 = struct.Struct('<i4x')
 STI64 = struct.Struct('<q')
 STF32 = struct.Struct('<f4x')
 STF64 = struct.Struct('<d')
+STMI16 = struct.Struct('<h')
+STMI32 = struct.Struct('<i')
+STMI64 = struct.Struct('<q')
+STMF32 = struct.Struct('<f')
+STMF64 = struct.Struct('<d')
 
 PTYPES = {
     0x0000: 'PtypUnspecified',
@@ -147,10 +214,23 @@ PTYPES = {
     0x1102: 'PtypMultipleBinary',
 }
 
+# Rule action types
+OP_MOVE = 0x01
+OP_COPY = 0x02
+OP_REPLY = 0x03
+OP_OOF_REPLY = 0x04
+OP_DEFER_ACTION = 0x05
+OP_BOUNCE = 0x06
+OP_FORWARD = 0x07
+OP_DELEGATE = 0x08
+OP_TAG = 0x09
+OP_DELETE = 0x0A
+OP_MARK_AS_READ = 0x0B
+
 # This property information was sourced from
 # http://www.fileformat.info/format/outlookmsg/index.htm
 # on 2013-07-22.
-# It was extended by The Elemental of Creation on 2018-10-12
+# It was extended by The Elemental of Destruction on 2018-10-12
 PROPERTIES = {
     '00010102': 'Template data',
     '0002000B': 'Alternate recipient allowed',

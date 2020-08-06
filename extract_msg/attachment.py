@@ -3,8 +3,10 @@ import random
 import string
 
 from extract_msg import constants
+from extract_msg.named import NamedAttachmentProperties
+from extract_msg.prop import FixedLengthProp, VariableLengthProp
 from extract_msg.properties import Properties
-from extract_msg.utils import openMsg
+from extract_msg.utils import openMsg, verifyPropertyId, verifyType
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -28,6 +30,7 @@ class Attachment(object):
         self.__dir = dir_
         self.__props = Properties(self._getStream('__properties_version1.0'),
             constants.TYPE_ATTACHMENT)
+        self.__namedProperties = NamedAttachmentProperties(self)
 
         # Get attachment data
         if self.Exists('__substg1.0_37010102'):
@@ -42,8 +45,11 @@ class Attachment(object):
                 self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
                 self.__type = 'msg'
                 self.__data = openMsg(self.msg.path, self.__prefix, self.__class__)
+        elif (self.__props['37050003'].value & 0x7) == 0x7:
+            # TODO Handling for special attacment type 0x7
+            self.__type = 'web'
+            raise NotImplementedError('Attachments of type afByWebReference are not currently supported.')
         else:
-            # TODO Handling for special attacment types (like 0x00000007)
             raise TypeError('Unknown attachment type.')
 
     def _getStream(self, filename):
@@ -58,6 +64,69 @@ class Attachment(object):
         returned.
         """
         return self.__msg._getStringStream([self.__dir, filename])
+
+    def _getTypedData(self, id, _type = None):
+        """
+        Gets the data for the specified id as the type that it is
+        supposed to be. :param id: MUST be a 4 digit hexadecimal
+        string.
+
+        If you know for sure what type the data is before hand,
+        you can specify it as being one of the strings in the
+        constant FIXED_LENGTH_PROPS_STRING or
+        VARIABLE_LENGTH_PROPS_STRING.
+        """
+        verifyPropertyId(id)
+        id = id.upper()
+        found, result = self._getTypedStream('__substg1.0_' + id, _type)
+        if found:
+            return result
+        else:
+            found, result = self._getTypedProperty(id, _type)
+            return result if found else None
+
+    def _getTypedProperty(self, propertyID, _type = None):
+        """
+        Gets the property with the specified id as the type that it
+        is supposed to be. :param id: MUST be a 4 digit hexadecimal
+        string.
+
+        If you know for sure what type the property is before hand,
+        you can specify it as being one of the strings in the
+        constant FIXED_LENGTH_PROPS_STRING or
+        VARIABLE_LENGTH_PROPS_STRING.
+        """
+        verifyPropertyId(propertyID)
+        verifyType(_type)
+        propertyID = propertyID.upper()
+        for x in (propertyID + _type,) if _type is not None else self.props:
+            if x.startswith(propertyID):
+                prop = self.props[x]
+                return True, (prop.value if isinstance(prop, FixedLengthProp) else prop)
+        return False, None
+
+    def _getTypedStream(self, filename, _type = None):
+        """
+        Gets the contents of the specified stream as the type that
+        it is supposed to be.
+
+        Rather than the full filename, you should only feed this
+        function the filename sans the type. So if the full name
+        is "__substg1.0_001A001F", the filename this function
+        should receive should be "__substg1.0_001A".
+
+        If you know for sure what type the stream is before hand,
+        you can specify it as being one of the strings in the
+        constant FIXED_LENGTH_PROPS_STRING or
+        VARIABLE_LENGTH_PROPS_STRING.
+
+        If you have not specified the type, the type this function
+        returns in many cases cannot be predicted. As such, when
+        using this function it is best for you to check the type
+        that it returns. If the function returns None, that means
+        it could not find the stream specified.
+        """
+        return self.__msg._getTypedStream([self.__dir, filename], True, _type)
 
     def _ensureSet(self, variable, streamID, stringStream = True):
         """
@@ -76,6 +145,9 @@ class Attachment(object):
             setattr(self, variable, value)
             return value
 
+    def _registerNamedProperty(self, entry, _type, name = None):
+        self.__namedProperties.defineProperty(entry, _type, name)
+
     def Exists(self, filename):
         """
         Checks if stream exists inside the attachment folder.
@@ -87,6 +159,14 @@ class Attachment(object):
         Checks if the string stream exists inside the attachment folder.
         """
         return self.__msg.sExists([self.__dir, filename])
+
+    def ExistsTypedProperty(self, id, _type = None):
+        """
+        Determines if the stream with the provided id exists. The return of this
+        function is 2 values, the first being a boolean for if anything was found,
+        and the second being how many were found.
+        """
+        return self.__msg.ExistsTypedProperty(id, self.__dir, _type, True, self.__props)
 
     def save(self, contentId = False, json = False, useFileName = False, raw = False, customPath = None, customFilename = None,
              html = False, rtf = False):
@@ -167,6 +247,13 @@ class Attachment(object):
         Returns the Message instance the attachment belongs to.
         """
         return self.__msg
+
+    @property
+    def namedProperties(self):
+        """
+        The NamedAttachmentProperties instance for this attachment.
+        """
+        return self.__namedProperties
 
     @property
     def props(self):

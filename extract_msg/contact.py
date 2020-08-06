@@ -6,6 +6,7 @@ from extract_msg.msg import MSGFile
 class Contact(MSGFile):
     def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None):
         MSGFile.__init__(self, path, prefix, attachmentClass, filename)
+        self.named
 
     @property
     def businessPhone(self):

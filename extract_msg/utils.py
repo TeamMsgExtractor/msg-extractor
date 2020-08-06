@@ -7,13 +7,14 @@ import datetime
 import json
 import logging
 import logging.config
+import struct
 import sys
 
 import tzlocal
 
 from extract_msg import constants
 from extract_msg.compat import os_ as os
-from extract_msg.exceptions import UnrecognizedMSGTypeError
+from extract_msg.exceptions import ConversionError, InvaildPropertyIdError, UnknownTypeError, UnrecognizedMSGTypeError
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -22,9 +23,9 @@ logging.addLevelName(5, 'DEVELOPER')
 if sys.version_info[0] >= 3:  # Python 3
     get_input = input
 
-    def properHex(inp):
+    def properHex(inp, length = 0):
         """
-        Taken (with permission) from https://github.com/TheElementalOfCreation/creatorUtils
+        Taken (with permission) from https://github.com/TheElementalOfDestruction/creatorUtils
         """
         a = ''
         if isinstance(inp, str):
@@ -35,7 +36,7 @@ if sys.version_info[0] >= 3:  # Python 3
             a = hex(inp)[2:]
         if len(a) % 2 != 0:
             a = '0' + a
-        return a
+        return a.rjust(length, '0').upper()
 
     def windowsUnicode(string):
         return str(string, 'utf_16_le') if string is not None else None
@@ -43,9 +44,12 @@ if sys.version_info[0] >= 3:  # Python 3
 else:  # Python 2
     get_input = raw_input
 
-    def properHex(inp):
+    def properHex(inp, length = 0):
         """
-        Taken (with permission) from https://github.com/TheElementalOfCreation/creatorUtils
+        Converts the input into a hexadecimal string without the beginning "0x". The string
+        will also always have a length that is a multiple of 2 (unless :param length: has
+        been specified). :param length: only specifies the MINIMUM length that the string
+        will use.
         """
         a = ''
         if isinstance(inp, (str, unicode)):
@@ -56,7 +60,7 @@ else:  # Python 2
             a = hex(inp)[2:-1]
         if len(a) % 2 != 0:
             a = '0' + a
-        return a
+        return a.rjust(length, '0').upper()
 
     def windowsUnicode(string):
         return unicode(string, 'utf_16_le') if string is not None else None
@@ -74,9 +78,14 @@ def addNumToDir(dirName):
             pass
     return None
 
+def bytesToGuid(bytes_input):
+    hexinput = [properHex(byte) for byte in bytes_input]
+    hexs = [hexinput[3] + hexinput[2] + hexinput[1] + hexinput[0], hexinput[5] + hexinput[4], hexinput[7] + hexinput[6], hexinput[8] + hexinput[9], ''.join(hexinput[10:16])]
+    return '{{{}-{}-{}-{}-{}}}'.format(*hexs).upper()
+
 def divide(string, length):
     """
-    Taken (with permission) from https://github.com/TheElementalOfCreation/creatorUtils
+    Taken (with permission) from https://github.com/TheElementalOfDestruction/creatorUtils
 
     Divides a string into multiple substrings of equal length
     :param string: string to be divided.
@@ -88,7 +97,7 @@ def divide(string, length):
     >>>> print(a)
     ['He', 'll', 'o ', 'Wo', 'rl', 'd!']
     """
-    return [string[length * x:length * (x + 1)] for x in range(int(len(string) / length))]
+    return [string[length * x:length * (x + 1)] for x in range(len(string) // length)]
 
 def fromTimeStamp(stamp):
     return datetime.datetime.fromtimestamp(stamp, tzlocal.get_localzone())
@@ -204,7 +213,16 @@ def inputToBytes(string_input_var, encoding):
     elif string_input_var is None:
         return b''
     else:
-        raise Exception('Cannot convert to BYTES type')
+        raise ConversionError('Cannot convert to BYTES type')
+
+def inputToMsgpath(inp):
+    """
+    Converts the input into an msg path.
+    """
+    if isinstance(inp, (list, tuple)):
+        inp = '/'.join(inp)
+    ret = inputToString(inp, 'utf-8').replace('\\', '/').split('/')
+    return ret if ret[0] != '' else []
 
 def inputToString(bytes_input_var, encoding):
     if isinstance(bytes_input_var, constants.STRING):
@@ -214,7 +232,7 @@ def inputToString(bytes_input_var, encoding):
     elif bytes_input_var is None:
         return ''
     else:
-        raise Exception('Cannot convert to STRING type')
+        raise ConversionError('Cannot convert to STRING type')
 
 def isEmptyString(inp):
     """
@@ -224,9 +242,20 @@ def isEmptyString(inp):
 
 def msgEpoch(inp):
     """
-    Taken (with permission) from https://github.com/TheElementalOfCreation/creatorUtils
+    Taken (with permission) from https://github.com/TheElementalOfDestruction/creatorUtils
     """
     return (inp - 116444736000000000) / 10000000.0
+
+def msgpathToString(inp):
+    """
+    Converts an msgpath (one of the internal paths inside an msg file) into a string.
+    """
+    if inp is None:
+        return None
+    if isinstance(inp, (list, tuple)):
+        inp = '/'.join(inp)
+    inp.replace('\\', '/')
+    return inp
 
 def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAttachments = False, strict = True):
     """
@@ -257,9 +286,10 @@ def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAtt
     attachmentClass = Attachment if attachmentClass is None else attachmentClass
 
     msg = MSGFile(path, prefix, attachmentClass, filename)
-    if msg.classType.startswith('IPM.Contact'):
+    classtype = msg.classType
+    if classtype.startswith('IPM.Contact') or classtype.startswith('IPM.DistList'):
         return Contact(path, prefix, attachmentClass, filename)
-    elif msg.classType.startswith('IPM.Note'):
+    elif classtype.startswith('IPM.Note') or classtype.startswith('REPORT'):
         return Message(path, prefix, attachmentClass, filename, delayAttachments)
     elif strict:
         raise UnrecognizedMSGTypeError('Could not recognize msg class type "{}". It is recommended you report this to the developers.'.format(msg.classType))
@@ -267,78 +297,130 @@ def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAtt
         logger.error('Could not recognize msg class type "{}". It is recommended you report this to the developers.'.format(msg.classType))
         return msg
 
-def parse_type(_type, stream):
+def parseType(_type, stream, encoding, extras):
     """
     Converts the data in :param stream: to a
     much more accurate type, specified by
-    :param _type:, if possible.
-    :param stream # TODO what is stream?
-
-    Some types require that :param prop_value: be specified. This can be retrieved from the Properties instance.
+    :param _type: the data's type.
+    :param stream: is the data to be converted.
+    :param encoding: is the encoding to be used for regular strings.
+    :param extras: is used in the case of types like PtypMultipleString.
+    For that example, extras should be a list of the bytes from rest of the streams.
 
     WARNING: Not done. Do not try to implement anywhere where it is not already implemented
     """
     # WARNING Not done. Do not try to implement anywhere where it is not already implemented
     value = stream
+    length_extras = len(extras)
     if _type == 0x0000:  # PtypUnspecified
         pass
     elif _type == 0x0001:  # PtypNull
         if value != b'\x00\x00\x00\x00\x00\x00\x00\x00':
             # DEBUG
             logger.warning('Property type is PtypNull, but is not equal to 0.')
-        value = None
+        return None
     elif _type == 0x0002:  # PtypInteger16
-        value = constants.STI16.unpack(value)[0]
+        return constants.STI16.unpack(value)[0]
     elif _type == 0x0003:  # PtypInteger32
-        value = constants.STI32.unpack(value)[0]
+        return constants.STI32.unpack(value)[0]
     elif _type == 0x0004:  # PtypFloating32
-        value = constants.STF32.unpack(value)[0]
+        return constants.STF32.unpack(value)[0]
     elif _type == 0x0005:  # PtypFloating64
-        value = constants.STF64.unpack(value)[0]
+        return constants.STF64.unpack(value)[0]
     elif _type == 0x0006:  # PtypCurrency
-        value = (constants.STI64.unpack(value)[0]) / 10000.0
+        return (constants.STI64.unpack(value)[0]) / 10000.0
     elif _type == 0x0007:  # PtypFloatingTime
         value = constants.STF64.unpack(value)[0]
         # TODO parsing for this
-        pass
+        # I can't actually find any msg properties that use this, so it should be okay to release this function without support for it.
+        # INFO:
+        # 8 bytes; a 64-bit floating point number in
+        # which the whole number part represents the
+        # number of days since December 30, 1899,
+        # and the fractional part represents the
+        # fraction of a day since midnight
+        raise NotImplementedError('Parsing for type 0x0007 has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType 0x0007"')
     elif _type == 0x000A:  # PtypErrorCode
         value = constants.STI32.unpack(value)[0]
         # TODO parsing for this
-        pass
+        # I can't actually find any msg properties that use this, so it should be okay to release this function without support for it.
+        raise NotImplementedError('Parsing for type 0x000A has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType 0x000A"')
     elif _type == 0x000B:  # PtypBoolean
-        value = bool(constants.ST3.unpack(value)[0])
+        return bool(constants.ST3.unpack(value)[0])
     elif _type == 0x000D:  # PtypObject/PtypEmbeddedTable
         # TODO parsing for this
-        pass
+        # Wait, that's the extension for an attachment folder, so parsing this might not be as easy as we would hope. The function may be released without support for this.
+        raise NotImplementedError('Current version of extract-msg does not support the parsing of PtypObject/PtypEmbeddedTable in this function.')
     elif _type == 0x0014:  # PtypInteger64
-        value = constants.STI64.unpack(value)[0]
+        return constants.STI64.unpack(value)[0]
     elif _type == 0x001E:  # PtypString8
-        # TODO parsing for this
-        pass
+        return value.decode(encoding)
     elif _type == 0x001F:  # PtypString
-        value = value.decode('utf_16_le')
+        return value.decode('utf_16_le')
     elif _type == 0x0040:  # PtypTime
-        value = constants.ST3.unpack(value)[0]
+        return msgEpoch(constants.ST3.unpack(value)[0])
     elif _type == 0x0048:  # PtypGuid
-        # TODO parsing for this
-        pass
+        return bytesToGuid(value)
     elif _type == 0x00FB:  # PtypServerId
         # TODO parsing for this
-        pass
+        raise NotImplementedError('Parsing for type 0x00FB has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType 0x00FB"')
     elif _type == 0x00FD:  # PtypRestriction
         # TODO parsing for this
-        pass
+        raise NotImplementedError('Parsing for type 0x00FD has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType 0x00FD"')
     elif _type == 0x00FE:  # PtypRuleAction
         # TODO parsing for this
-        pass
+        raise NotImplementedError('Parsing for type 0x00FE has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType 0x00FE"')
     elif _type == 0x0102:  # PtypBinary
-        # TODO parsing for this
-        # Smh, how on earth am I going to code this???
-        pass
+        return value
     elif _type & 0x1000 == 0x1000:  # PtypMultiple
         # TODO parsing for `multiple` types
-        pass
+        if _type in (0x101F, 0x101E):
+            ret = [x.decode(encoding) for x in extras]
+            lengths = struct.unpack('<{}i'.format(len(ret)), stream)
+            length_lengths = len(lengths)
+            if length_lengths > length_extras:
+                logger.warning('Error while parsing multiple type. Expected {} stream{}, got {}. Ignoring.'.format(length_lengths, 's' if length_lengths > 1 or length_lengths == 0 else '', length_extras))
+            for x, y in enumerate(extras):
+                if lengths[x] != len(y):
+                    logger.warning('Error while parsing multiple type. Expected length {}, got {}. Ignoring.'.format(lengths[x], len(y)))
+            return ret
+        elif _type == 0x1102:
+            ret = copy.deepcopy(extras)
+            lengths = [struct.unpack('<i', stream[pos*8:(pos+1)*8]) for pos in range(len(stream) // 8)]
+            length_lengths = len(lengths)
+            if length_lengths > length_extras:
+                logger.warning('Error while parsing multiple type. Expected {} stream{}, got {}. Ignoring.'.format(length_lengths, 's' if length_lengths > 1 or length_lengths == 0 else '', length_extras))
+            for x, y in enumerate(extras):
+                if lengths[x] != len(y):
+                    logger.warning('Error while parsing multiple type. Expected length {}, got {}. Ignoring.'.format(lengths[x], len(y)))
+            return ret
+        elif _type in (0x1002, 0x1003, 0x1004, 0x1005, 0x1007, 0x1040, 0x1048):
+            if stream != len(extras):
+                logger.warning('Error while parsing multiple type. Expected {} entr{}, got {}. Ignoring.'.format(stream, ('y' if stream == 1 else 'ies'), len(extras)))
+            if _type == 0x1002:
+                return [constants.STMI16.unpack(x)[0] for x in extras]
+            if _type == 0x1003:
+                return [constants.STMI32.unpack(x)[0] for x in extras]
+            if _type == 0x1004:
+                return [constants.STMF32.unpack(x)[0] for x in extras]
+            if _type == 0x1005:
+                return [constants.STMF64.unpack(x)[0] for x in extras]
+            if _type == 0x1007:
+                values = [constants.STMF64.unpack(x)[0] for x in extras]
+                raise NotImplementedError('Parsing for type 0x1007 has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType 0x1007"')
+            if _type == 0x1040:
+                return [msgEpoch(constants.ST3.unpack(x)[0]) for x in extras]
+            if _type == 0x1048:
+                return [bytesToGuid(x) for x in extras]
+        else:
+            raise NotImplementedError('Parsing for type {} has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType {}"'.format(_type, _type))
     return value
+
+def roundUp(inp, mult):
+    """
+    Rounds :param inp: up to the nearest multiple of :param mult:.
+    """
+    return inp + (mult - inp) % mult
 
 def setup_logging(default_path=None, default_level=logging.WARN, logfile=None, enable_file_logging=False,
                   env_key='EXTRACT_MSG_LOG_CFG'):
@@ -416,3 +498,23 @@ def setup_logging(default_path=None, default_level=logging.WARN, logfile=None, e
 
     logging.getLogger().setLevel(default_level)
     return True
+
+def verifyPropertyId(id):
+    """
+    Determines whether a property ID is valid for the functions that this function
+    is called from. Property IDs MUST be a 4 digit hexadecimal string.
+    """
+    if not isinstance(id, str):
+        raise InvaildPropertyIdError('ID was not a 4 digit hexadecimal string')
+    elif len(id) != 4:
+        raise InvaildPropertyIdError('ID was not a 4 digit hexadecimal string')
+    else:
+        try:
+            int(id, 16)
+        except ValueError:
+            raise InvaildPropertyIdError('ID was not a 4 digit hexadecimal string')
+
+def verifyType(_type):
+    if _type is not None:
+        if (_type not in constants.VARIABLE_LENGTH_PROPS_STRING) and (_type not in constants.FIXED_LENGTH_PROPS_STRING):
+            raise UnknownTypeError('Unknown type {}'.format(_type))

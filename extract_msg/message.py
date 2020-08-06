@@ -40,6 +40,8 @@ class Message(MSGFile):
             attachments to be initialized so the other data can be retrieved.
         """
         MSGFile.__init__(self, path, prefix, attachmentClass, filename)
+        self.__attachmentsDelayed = delayAttachments
+        self.__attachmentsReady = False
         # Initialize properties in the order that is least likely to cause bugs.
         # TODO have each function check for initialization of needed data so these
         # lines will be unnecessary.
@@ -54,6 +56,7 @@ class Message(MSGFile):
         self.date
         self.__crlf = '\n'  # This variable keeps track of what the new line character should be
         self.body
+        self.named
 
     def _genRecipient(self, recipientType, recipientInt):
         """
@@ -85,6 +88,17 @@ class Message(MSGFile):
                 else:
                     setattr(self, private, None)
             return getattr(self, private)
+
+    def _registerNamedProperty(self, entry, _type, name = None):
+        if self.attachmentsDelayed and not self.attachmentsReady:
+            try:
+                self.__waitingProperties
+            except KeyError:
+                self.__waitingProperties = []
+            self.__waitingProperties.append((entry, _type, name))
+        else:
+            for attachment in self.attachments:
+                attachment._registerNamedProperty(entry, _type, name)
 
     def close(self):
         try:
@@ -289,7 +303,7 @@ class Message(MSGFile):
             # Get the attachments
             attachmentDirs = []
 
-            for dir_ in self.listDir():
+            for dir_ in self.listDir(False, True):
                 if dir_[len(self.prefixList)].startswith('__attach') and\
                         dir_[len(self.prefixList)] not in attachmentDirs:
                     attachmentDirs.append(dir_[len(self.prefixList)])
@@ -298,8 +312,32 @@ class Message(MSGFile):
 
             for attachmentDir in attachmentDirs:
                 self._attachments.append(self.attachmentClass(self, attachmentDir))
+            self.__attachmentsReady = True
+            try:
+                self.__waitingProperties
+                if self.__attachmentsDelayed:
+                    for attachment in self._attachments:
+                        for prop in self.__waitingProperties:
+                            attachment._registerNamedProperty(*prop)
+            except:
+                pass
 
             return self._attachments
+
+
+    @property
+    def attachmentsDelayed(self):
+        """
+        Returns True if the attachment initialization was delayed.
+        """
+        return self.__attachmentsDelayed
+
+    @property
+    def attachmentsReady(self):
+        """
+        Returns True if the attachments are ready to be used.
+        """
+        return self.__attachmentsReady
 
     @property
     def body(self):

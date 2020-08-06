@@ -9,8 +9,8 @@ main_module = 'extract_msg'
 # main_script = main_module + '.py'
 
 # read in the description from README
-with open("README.rst", 'rb') as stream:
-    long_description = stream.read().decode('utf-8')
+with open('README.rst', 'rb') as stream:
+    long_description = stream.read().decode('utf-8').replace('\r', '')
 
 # get the version from the ExtractMsg script. This can not be directly
 # imported because ExtractMsg imports olefile, which may not be installed yet
@@ -22,7 +22,7 @@ version = match.groupdict()['version']
 
 # read in the dependencies from the virtualenv requirements file
 dependencies = []
-filename = os.path.join("requirements.txt")
+filename = os.path.join('requirements.txt')
 with open(filename, 'r') as stream:
     for line in stream:
         package = line.strip().split('#')[0]
@@ -36,9 +36,9 @@ setup(
     long_description=long_description,
     long_description_content_type='text/x-rst',
     url=github_url,
-    download_url="%s/archives/master" % github_url,
-    author='Matthew Walker & The Elemental of Creation',
-    author_email='mattgwwalker@gmail.com, arceusthe@gmail.com',
+    download_url='%s/archives/master' % github_url,
+    author='The Elemental of Destruction & Matthew Walker',
+    author_email='arceusthe@gmail.com, mattgwwalker@gmail.com',
     license='GPL',
     packages=[main_module],
     py_modules=[main_module],

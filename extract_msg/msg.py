@@ -5,8 +5,10 @@ import olefile
 
 from extract_msg import constants
 from extract_msg.attachment import Attachment
+from extract_msg.named import Named
+from extract_msg.prop import FixedLengthProp, VariableLengthProp
 from extract_msg.properties import Properties
-from extract_msg.utils import has_len, inputToString, windowsUnicode
+from extract_msg.utils import divide, has_len, inputToMsgpath, inputToString, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
 from extract_msg.exceptions import InvalidFileFormatError, MissingEncodingError
 
 
@@ -94,6 +96,7 @@ class MSGFile(olefile.OleFileIO):
     def _getStream(self, filename, prefix = True):
         """
         Gets a binary representation of the requested filename.
+
         This should ALWAYS return a bytes object (string in python 2)
         """
         filename = self.fix_path(filename, prefix)
@@ -107,6 +110,12 @@ class MSGFile(olefile.OleFileIO):
     def _getStringStream(self, filename, prefix = True):
         """
         Gets a string representation of the requested filename.
+
+        Rather than the full filename, you should only feed this
+        function the filename sans the type. So if the full name
+        is "__substg1.0_001A001F", the filename this function
+        should receive should be "__substg1.0_001A".
+
         This should ALWAYS return a string (Unicode in python 2)
         """
 
@@ -117,25 +126,165 @@ class MSGFile(olefile.OleFileIO):
             tmp = self._getStream(filename + '001E', prefix = False)
             return None if tmp is None else tmp.decode(self.stringEncoding)
 
+    def _getTypedData(self, id, _type = None, prefix = True):
+        """
+        Gets the data for the specified id as the type that it is
+        supposed to be. :param id: MUST be a 4 digit hexadecimal
+        string.
+
+        If you know for sure what type the data is before hand,
+        you can specify it as being one of the strings in the
+        constant FIXED_LENGTH_PROPS_STRING or
+        VARIABLE_LENGTH_PROPS_STRING.
+        """
+        verifyPropertyId(id)
+        id = id.upper()
+        found, result = self._getTypedStream('__substg1.0_' + id, prefix, _type)
+        if found:
+            return result
+        else:
+            found, result = self._getTypedProperty(id, _type)
+            return result if found else None
+
+    def _getTypedProperty(self, propertyID, _type = None):
+        """
+        Gets the property with the specified id as the type that it
+        is supposed to be. :param id: MUST be a 4 digit hexadecimal
+        string.
+
+        If you know for sure what type the property is before hand,
+        you can specify it as being one of the strings in the
+        constant FIXED_LENGTH_PROPS_STRING or
+        VARIABLE_LENGTH_PROPS_STRING.
+        """
+        verifyPropertyId(propertyID)
+        verifyType(_type)
+        propertyID = propertyID.upper()
+        for x in (propertyID + _type,) if _type is not None else self.mainProperties:
+            if x.startswith(propertyID):
+                prop = self.mainProperties[x]
+                return True, (prop.value if isinstance(prop, FixedLengthProp) else prop)
+        return False, None
+
+    def _getTypedStream(self, filename, prefix = True, _type = None):
+        """
+        Gets the contents of the specified stream as the type that
+        it is supposed to be.
+
+        Rather than the full filename, you should only feed this
+        function the filename sans the type. So if the full name
+        is "__substg1.0_001A001F", the filename this function
+        should receive should be "__substg1.0_001A".
+
+        If you know for sure what type the stream is before hand,
+        you can specify it as being one of the strings in the
+        constant FIXED_LENGTH_PROPS_STRING or
+        VARIABLE_LENGTH_PROPS_STRING.
+
+        If you have not specified the type, the type this function
+        returns in many cases cannot be predicted. As such, when
+        using this function it is best for you to check the type
+        that it returns. If the function returns None, that means
+        it could not find the stream specified.
+        """
+        verifyType(_type)
+        filename = self.fix_path(filename, prefix)
+        for x in (filename + _type,) if _type is not None else self.slistDir():
+            if x.startswith(filename) and x.find('-') == -1:
+                contents = self._getStream(x, False)
+                if len(contents) == 0:
+                    return True, None # We found the file, but it was empty.
+                extras = []
+                _type = x[-4:]
+                if x[-4] == '1': # It's a multiple
+                    if _type in ('101F', '101E'):
+                        streams = len(contents) // 4 # These lengths are normal.
+                    elif _type == '1102':
+                        streams = len(contents) // 8 # These lengths have 4 0x00 bytes at the end for seemingly no reason. They are "reserved" bytes
+                    elif _type in ('1002', '1003', '1004', '1005', '1007', '1040', '1048'):
+                        try:
+                            streams = self.mainProperties[x[-8:]].realLength
+                        except:
+                            logger.error('Could not find matching VariableLengthProp for stream {}'.format(x))
+                            streams = len(contents) // (2 if _type == '1002' else 4 if _type in ('1003', '1004') else 8 if type in ('1005', '1007', '1040') else 16)
+                    else:
+                        raise NotImplementedError('The stream specified is of type {}. We don\'t currently understand exactly how this type works. If it is mandatory that you have the contents of this stream, please create an issue labled "NotImplementedError: _getTypedStream {}".'.format(_type, _type))
+                    if _type in ('101F', '101E', '1102'):
+                        if self.Exists(x + '-00000000', False):
+                            for y in range(streams):
+                                if self.Exists(x + '-' + properHex(y, 8), False):
+                                    extras.append(self._getStream(x + '-' + properHex(y, 8), False))
+                    elif _type in ('1002', '1003', '1004', '1005', '1007', '1040', '1048'):
+                        extras = divide(contents, (2 if _type == '1002' else 4 if _type in ('1003', '1004') else 8 if type in ('1005', '1007', '1040') else 16))
+                        contents = streams
+                return True, parseType(int(_type, 16), contents, self.stringEncoding, extras)
+        return False, None # We didn't find the stream.
+
+    def _registerNamedProperty(self, entry, _type, name = None):
+        """
+        FOR INTERNAL USE ONLY! DO NOT CALL MANUALLY!
+
+        Function to allow things like attachments in subclasses to have their own named properties.
+        """
+        pass
+
     def debug(self):
         for dir_ in self.listDir():
             if dir_[-1].endswith('001E') or dir_[-1].endswith('001F'):
                 print('Directory: ' + str(dir_[:-1]))
                 print('Contents: {}'.format(self._getStream(dir_)))
 
-    def Exists(self, inp):
+    def Exists(self, inp, prefix = True):
         """
         Checks if :param inp: exists in the msg file. Does not always go to the top, starts at specified point
         """
-        inp = self.fix_path(inp)
+        inp = self.fix_path(inp, prefix)
         return self.exists(inp)
 
-    def sExists(self, inp):
+    def sExists(self, inp, prefix = True):
         """
         Checks if string stream :param inp: exists in the msg file.
         """
-        inp = self.fix_path(inp)
+        inp = self.fix_path(inp, prefix)
         return self.exists(inp + '001F') or self.exists(inp + '001E')
+
+    def ExistsTypedProperty(self, id, location = None, _type = None, prefix = True, propertiesInstance = None):
+        """
+        Determines if the stream with the provided id exists in the location specified.
+        If no location is specified, the root directory is searched. The return of this
+        function is 2 values, the first being a boolean for if anything was found, and
+        the second being how many were found.
+
+        Because of how this function works, any folder that contains it's own
+        "__properties_version1.0" file should have this function called from it's class.
+        """
+        verifyPropertyId(id)
+        verifyType(_type)
+        id = id.upper()
+        if propertiesInstance is None:
+            propertiesInstance = self.mainProperties
+        prefixList = self.prefixList if prefix else []
+        if location is not None:
+            prefixList.append(location)
+        prefixList = inputToMsgpath(prefixList)
+        usableid = id + _type if _type is not None else id
+        found_number = 0
+        found_streams = []
+        for item in self.listDir():
+            if len(item) > len(prefixList):
+                if item[len(prefixList)].startswith('__substg1.0_' + usableid) and item[len(prefixList)] not in found_streams:
+                    found_number += 1
+                    found_streams.append(item[len(prefixList)])
+        for x in propertiesInstance:
+            if x.startswith(usableid):
+                already_found = False
+                for y in found_streams:
+                    if y.endswith(x):
+                        already_found = True
+                        break
+                if not already_found:
+                    found_number += 1
+        return (found_number > 0), found_number
 
     def fix_path(self, inp, prefix = True):
         """
@@ -143,8 +292,7 @@ class MSGFile(olefile.OleFileIO):
         prefix (should :param prefix: be True) and
         are strings rather than lists or tuples.
         """
-        if isinstance(inp, (list, tuple)):
-            inp = '/'.join(inp)
+        inp = msgpathToString(inp)
         if prefix:
             inp = self.__prefix + inp
         return inp
@@ -171,6 +319,13 @@ class MSGFile(olefile.OleFileIO):
             if good:
                 out.append(x)
         return out
+
+    def slistDir(self, streams = True, storages = False):
+        """
+        Replacement for OleFileIO.listdir that runs at the current prefix directory.
+        Returns a list of strings instead of lists.
+        """
+        return [msgpathToString(x) for x in self.listDir(streams, storages)]
 
     @property
     def areStringsUnicode(self):
@@ -212,6 +367,17 @@ class MSGFile(olefile.OleFileIO):
             self._prop = Properties(self._getStream('__properties_version1.0'),
                                     constants.TYPE_MESSAGE if self.prefix == '' else constants.TYPE_MESSAGE_EMBED)
             return self._prop
+
+    @property
+    def named(self):
+        """
+        The main named properties instance for this file.
+        """
+        try:
+            return self.__namedProperties
+        except AttributeError:
+            self.__namedProperties = Named(self)
+            return self.__namedProperties
 
     @property
     def path(self):
