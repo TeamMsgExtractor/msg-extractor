@@ -6,7 +6,7 @@ from extract_msg import constants
 from extract_msg.named import NamedAttachmentProperties
 from extract_msg.prop import FixedLengthProp, VariableLengthProp
 from extract_msg.properties import Properties
-from extract_msg.utils import openMsg
+from extract_msg.utils import openMsg, verifyPropertyId, verifyType
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -99,9 +99,9 @@ class Attachment(object):
         verifyPropertyId(propertyID)
         verifyType(_type)
         propertyID = propertyID.upper()
-        for x in (propertyID + _type,) if _type is not None else self.mainProperties:
+        for x in (propertyID + _type,) if _type is not None else self.props:
             if x.startswith(propertyID):
-                prop = self.mainProperties[x]
+                prop = self.props[x]
                 return True, (prop.value if isinstance(prop, FixedLengthProp) else prop)
         return False, None
 
@@ -126,7 +126,7 @@ class Attachment(object):
         that it returns. If the function returns None, that means
         it could not find the stream specified.
         """
-        return self.__msg._getTypedStream(self, [self.__dir, filename], True, _type)
+        return self.__msg._getTypedStream([self.__dir, filename], True, _type)
 
     def _ensureSet(self, variable, streamID, stringStream = True):
         """

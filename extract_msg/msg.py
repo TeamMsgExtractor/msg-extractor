@@ -271,9 +271,10 @@ class MSGFile(olefile.OleFileIO):
         found_number = 0
         found_streams = []
         for item in self.listDir():
-            if item[len(prefixList)].startswith('__substg1.0_' + usableid) and item[len(prefixList)] not in found_streams:
-                found_number += 1
-                found_streams.append(item[len(prefixList)])
+            if len(item) > len(prefixList):
+                if item[len(prefixList)].startswith('__substg1.0_' + usableid) and item[len(prefixList)] not in found_streams:
+                    found_number += 1
+                    found_streams.append(item[len(prefixList)])
         for x in propertiesInstance:
             if x.startswith(usableid):
                 already_found = False

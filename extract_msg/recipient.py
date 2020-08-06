@@ -2,6 +2,7 @@ import logging
 
 from extract_msg import constants
 from extract_msg.properties import Properties
+from extract_msg.utils import verifyPropertyId, verifyType
 
 
 logger = logging.getLogger(__name__)
@@ -72,9 +73,9 @@ class Recipient(object):
         verifyPropertyId(propertyID)
         verifyType(_type)
         propertyID = propertyID.upper()
-        for x in (propertyID + _type,) if _type is not None else self.mainProperties:
+        for x in (propertyID + _type,) if _type is not None else self.props:
             if x.startswith(propertyID):
-                prop = self.mainProperties[x]
+                prop = self.props[x]
                 return True, (prop.value if isinstance(prop, FixedLengthProp) else prop)
         return False, None
 

@@ -18,6 +18,9 @@ class Named(object):
         guid_stream = self._getStream('__substg1.0_00020102')
         entry_stream = self._getStream('__substg1.0_00030102')
         names_stream = self._getStream('__substg1.0_00040102')
+        guid_stream = self._getStream('__substg1.0_00020102', False) if guid_stream is None else guid_stream
+        entry_stream = self._getStream('__substg1.0_00030102', False) if entry_stream is None else entry_stream
+        names_stream = self._getStream('__substg1.0_00040102', False) if names_stream is None else names_stream
         self.guid_stream = guid_stream
         self.entry_stream = entry_stream
         self.names_stream = names_stream
@@ -61,10 +64,10 @@ class Named(object):
         for property in self.__properties:
             self.__propertiesDict[property.name if isinstance(property, StringNamedProperty) else property.propertyID] = property
 
-    def _getStream(self, filename):
-        return self.__msg._getStream([self.__dir, filename])
+    def _getStream(self, filename, prefix = True):
+        return self.__msg._getStream([self.__dir, filename], prefix = prefix)
 
-    def _getStringStream(self, filename):
+    def _getStringStream(self, filename, prefix = True):
         """
         Gets a string representation of the requested filename.
         Checks for both ASCII and Unicode representations and returns
@@ -72,7 +75,7 @@ class Named(object):
         versions, then :param prefer: specifies which will be
         returned.
         """
-        return self.__msg._getStringStream([self.__dir, filename])
+        return self.__msg._getStringStream([self.__dir, filename], prefix = prefix)
 
     def Exists(self, filename):
         """
