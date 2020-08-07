@@ -173,7 +173,7 @@ Credits
 
 `Philippe Lagadec`_ - Python OleFile module developer
 
-Joel Kaufman - First implementations of the json and filename flags
+`Joel Kaufman`_ - First implementations of the json and filename flags
 
 `Dean Malmgren`_ - First implementation of the setup.py script
 
@@ -192,3 +192,4 @@ Joel Kaufman - First implementations of the json and filename flags
 .. _JP Bourget: https://github.com/punkrokk
 .. _Philippe Lagadec: https://github.com/decalage2
 .. _Dean Malmgren: https://github.com/deanmalmgren
+.. _Joel Kaufman: https://github.com/joelkaufman
