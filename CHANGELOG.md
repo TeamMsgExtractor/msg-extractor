@@ -1,3 +1,6 @@
+**v0.26.2**
+* Fixed error in `Message._registerNamedProperty` where I put the exception `KeyError` instead of `AttributeError`
+
 **v0.26.1**
 * Fixed an issue in `openMsg` that would leave the basic `MSGFile` instance open with the function returned, even if the function was returning a specific msg instance.
 

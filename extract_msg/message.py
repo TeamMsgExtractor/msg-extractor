@@ -93,7 +93,7 @@ class Message(MSGFile):
         if self.attachmentsDelayed and not self.attachmentsReady:
             try:
                 self.__waitingProperties
-            except KeyError:
+            except AttributeError:
                 self.__waitingProperties = []
             self.__waitingProperties.append((entry, _type, name))
         else:
