@@ -4,6 +4,9 @@ from extract_msg.msg import MSGFile
 
 
 class Contact(MSGFile):
+    """
+    Class used for parsing contacts.
+    """
     def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None):
         MSGFile.__init__(self, path, prefix, attachmentClass, filename)
         self.named
