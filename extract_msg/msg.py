@@ -327,6 +327,9 @@ class MSGFile(olefile.OleFileIO):
         """
         return [msgpathToString(x) for x in self.listDir(streams, storages)]
 
+    def save(self, *args, **kwargs):
+        raise NotImplementedError('Saving is not yet supported for the {} class'.format(self.__class__.__name__))
+
     @property
     def areStringsUnicode(self):
         """
