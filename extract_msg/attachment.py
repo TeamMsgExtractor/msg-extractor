@@ -52,6 +52,35 @@ class Attachment(object):
         else:
             raise TypeError('Unknown attachment type.')
 
+    def _ensureSet(self, variable, streamID, stringStream = True):
+        """
+        Ensures that the variable exists, otherwise will set it using the specified stream.
+        After that, return said variable.
+
+        If the specified stream is not a string stream, make sure to set :param string stream: to False.
+        """
+        try:
+            return getattr(self, variable)
+        except AttributeError:
+            if stringStream:
+                value = self._getStringStream(streamID)
+            else:
+                value = self._getStream(streamID)
+            setattr(self, variable, value)
+            return value
+
+    def _ensureSetNamed(self, variable, propertyName):
+        """
+        Ensures that the variable exists, otherwise will set it using the named property.
+        After that, return said variable.
+        """
+        try:
+            return getattr(self, variable)
+        except AttributeError:
+            value = self.named.getNamedValue(propertyName)
+            setattr(self, variable, value)
+            return value
+
     def _getStream(self, filename):
         return self.__msg._getStream([self.__dir, filename])
 
@@ -127,23 +156,6 @@ class Attachment(object):
         it could not find the stream specified.
         """
         return self.__msg._getTypedStream([self.__dir, filename], True, _type)
-
-    def _ensureSet(self, variable, streamID, stringStream = True):
-        """
-        Ensures that the variable exists, otherwise will set it using the specified stream.
-        After that, return said variable.
-
-        If the specified stream is not a string stream, make sure to set :param string stream: to False.
-        """
-        try:
-            return getattr(self, variable)
-        except AttributeError:
-            if stringStream:
-                value = self._getStringStream(streamID)
-            else:
-                value = self._getStream(streamID)
-            setattr(self, variable, value)
-            return value
 
     def _registerNamedProperty(self, entry, _type, name = None):
         self.__namedProperties.defineProperty(entry, _type, name)

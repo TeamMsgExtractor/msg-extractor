@@ -1,6 +1,7 @@
 import logging
 
 from extract_msg import constants
+from extract_msg.data import PermanentEntryID
 from extract_msg.properties import Properties
 from extract_msg.utils import verifyPropertyId, verifyType
 
@@ -13,7 +14,6 @@ class Recipient(object):
     """
     Contains the data of one of the recipients in an msg file.
     """
-
     def __init__(self, _dir, msg):
         object.__init__(self)
         self.__msg = msg  # Allows calls to original msg file
@@ -25,6 +25,34 @@ class Recipient(object):
         self.__name = self._getStringStream('__substg1.0_3001')
         self.__type = self.__props.get('0C150003').value
         self.__formatted = u'{0} <{1}>'.format(self.__name, self.__email)
+
+    def _ensureSet(self, variable, streamID, stringStream = True):
+        """
+        Ensures that the variable exists, otherwise will set it using the specified stream.
+        After that, return said variable.
+        If the specified stream is not a string stream, make sure to set :param string stream: to False.
+        """
+        try:
+            return getattr(self, variable)
+        except AttributeError:
+            if stringStream:
+                value = self._getStringStream(streamID)
+            else:
+                value = self._getStream(streamID)
+            setattr(self, variable, value)
+            return value
+
+    def _ensureSetNamed(self, variable, propertyName):
+        """
+        Ensures that the variable exists, otherwise will set it using the named property.
+        After that, return said variable.
+        """
+        try:
+            return getattr(self, variable)
+        except AttributeError:
+            value = self.named.getNamedValue(propertyName)
+            setattr(self, variable, value)
+            return value
 
     def _getStream(self, filename):
         return self.__msg._getStream([self.__dir, filename])
@@ -123,6 +151,13 @@ class Recipient(object):
         return self.__msg.ExistsTypedProperty(id, self.__dir, _type, True, self.__props)
 
     @property
+    def account(self):
+        """
+        Returns the account of this recipient.
+        """
+        return self._ensureSet('_account', '__substg1.0_3A00')
+
+    @property
     def email(self):
         """
         Returns the recipient's email.
@@ -130,11 +165,29 @@ class Recipient(object):
         return self.__email
 
     @property
+    def entryID(self):
+        """
+        Returns the recipient's name.
+        """
+        try:
+            return self.__entryID
+        except AttributeError:
+            self.__entryID = PermanentEntryID(self._getStream('__substg1.0_0FFF0102'))
+            return self.__entryID
+
+    @property
     def formatted(self):
         """
         Returns the formatted recipient string.
         """
         return self.__formatted
+
+    @property
+    def instanceKey(self):
+        """
+        Returns the instance key of this recipient.
+        """
+        return self._ensureSet('_instanceKey', '__substg1.0_0FF60102', False)
 
     @property
     def name(self):
@@ -151,12 +204,40 @@ class Recipient(object):
         return self.__props
 
     @property
+    def recordKey(self):
+        """
+        Returns the instance key of this recipient.
+        """
+        return self._ensureSet('_recordKey', '__substg1.0_0FF90102', False)
+
+    @property
+    def searchKey(self):
+        """
+        Returns the search key of this recipient.
+        """
+        return self._ensureSet('_searchKey', '__substg1.0_300B0102', False)
+
+    @property
+    def smtpAddress(self):
+        """
+        Returns the SMTP address of this recipient.
+        """
+        return self._ensureSet('_smtpAddress', '__substg1.0_39FE')
+
+    @property
+    def transmittableDisplayName(self):
+        """
+        Returns the transmittable display name of this recipient.
+        """
+        return self._ensureSet('_transmittableDisplayName', '__substg1.0_3A20')
+
+    @property
     def type(self):
         """
-        Returns the recipient type.
-        Sender if `type & 0xf == 0`
-        To if `type & 0xf == 1`
-        Cc if `type & 0xf == 2`
-        Bcc if `type & 0xf == 3`
+        Returns the recipient type. Type is:
+            * Sender if `type & 0xf == 0`
+            * To if `type & 0xf == 1`
+            * Cc if `type & 0xf == 2`
+            * Bcc if `type & 0xf == 3`
         """
         return self.__type

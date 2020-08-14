@@ -178,6 +178,8 @@ STMI32 = struct.Struct('<i')
 STMI64 = struct.Struct('<q')
 STMF32 = struct.Struct('<f')
 STMF64 = struct.Struct('<d')
+# PermanentEntryID parsing struct
+STPEID = struct.Struct('<B3x16s4xI')
 
 PTYPES = {
     0x0000: 'PtypUnspecified',
@@ -213,6 +215,19 @@ PTYPES = {
     0x1048: 'PtypMultipleGuid',
     0x1102: 'PtypMultipleBinary',
 }
+
+# Display types
+DT_MAILUSER = 0x0000
+DT_DISTLIST = 0x0001
+DT_FORUM = 0x0002
+DT_AGENT = 0x0003
+DT_ORGANIZATION = 0x0004
+DT_PRIVATE_DISTLIST = 0x0005
+DT_REMOTE_MAILUSER = 0x0006
+DT_CONTAINER = 0x0100
+DT_TEMPLATE = 0x0101
+DT_ADDRESS_TEMPLATE = 0x0102
+DT_SEARCH = 0x0200
 
 # Rule action types
 RA_OP_MOVE = 0x01

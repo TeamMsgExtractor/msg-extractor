@@ -1,3 +1,10 @@
+**v0.26.4**
+* Added new function `MSGFile._ensureSetNamed` which acts like `MSGFile._ensureSet` except that it works with named properties.
+* Added a version of the previous function to the `Attachment` and `Recipient` classes.
+* Added new file `data.py` that contains various data structures that are used for specific properties.
+* Expanded the functionality of the `Recipient` class by adding more properties.
+* Added new functions `Named.getNamed` and `Named.getNamedValue` which retrieves a named property or the value of a named property, respectively, based on its name.
+
 **v0.26.3**
 * Added new function `MSGFile.save` that causes it and subclasses to raise a `NotImplementedError` if they do not override it.
 * Fixed some issues in the changelog.
@@ -20,7 +27,7 @@
 * [[TheElementalOfDestruction #2](https://github.com/TheElementalOfDestruction/msg-extractor/issues/2)] Finished partial implementation of `utils.parseType` which was necessary for the proper implementation of named properties. This function is not fully implemented because there are some types we do not fully understand.
 
 **v0.25.3**
-* [[mattgwwalker #138](https://github.com/mattgwwalker/msg-extractor/issues/138)] Fixed missing import in extract_msg/utils.py.
+* [[mattgwwalker #138](https://github.com/mattgwwalker/msg-extractor/issues/138)] Fixed missing import in `extract_msg/utils.py`.
 
 **v0.25.2**
 * [[mattgwwalker #134](https://github.com/mattgwwalker/msg-extractor/issues/134)] Fixed a typo that caused `Message.headerDict` to raise an exception.
@@ -101,7 +108,7 @@
 * Fixed a section in the `Recipient` class that I have no idea why I did it that way. If errors start randomly occurring with it, this fix is why.
 
 **v0.20.8**
-* Fixed a tab issue and parameter type in `messages.py`.
+* Fixed a tab issue and parameter type in `message.py`.
 
 
 **v0.20.7**

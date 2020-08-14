@@ -77,6 +77,26 @@ class Named(object):
         """
         return self.__msg._getStringStream([self.__dir, filename], prefix = prefix)
 
+    def getNamed(self, propertyName):
+        """
+        Tries to get a named property based on its name. Returns None if not found.
+        """
+        try:
+            return self.namedProperties[propertyName]
+        except KeyError:
+            propertyName = propertyName.upper()
+            for key in self.namedProperties.keys():
+                if propertyName == key.upper():
+                    return self.namedProperties[key]
+            return None
+
+    def getNamedValue(self, propertyName):
+        """
+        Tries to get a the value of a named property based on its name. Returns None if it is not found.
+        """
+        prop = self.getNamed(propertyName)
+        return prop.data if prop is not None else None
+
     def Exists(self, filename):
         """
         Checks if stream exists inside the named properties folder.
