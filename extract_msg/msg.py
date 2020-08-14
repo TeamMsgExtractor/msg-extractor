@@ -93,6 +93,18 @@ class MSGFile(olefile.OleFileIO):
             setattr(self, variable, value)
             return value
 
+    def _ensureSetNamed(self, variable, propertyName):
+        """
+        Ensures that the variable exists, otherwise will set it using the named property.
+        After that, return said variable.
+        """
+        try:
+            return getattr(self, variable)
+        except AttributeError:
+            value = self.named.getNamedValue(propertyName)
+            setattr(self, variable, value)
+            return value
+
     def _getStream(self, filename, prefix = True):
         """
         Gets a binary representation of the requested filename.

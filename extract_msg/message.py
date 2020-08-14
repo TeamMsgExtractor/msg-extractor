@@ -23,7 +23,6 @@ class Message(MSGFile):
     """
     Parser for Microsoft Outlook message files.
     """
-
     def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None, delayAttachments = False):
         """
         :param path: path to the msg file in the system or is the raw msg file.
