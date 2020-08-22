@@ -4,6 +4,7 @@ without explicit instruction to do so from one of the
 contributers, please do not complain about bugs.
 """
 
+import datetime
 import struct
 import sys
 
@@ -146,6 +147,8 @@ RECIPIENT_DICT = {
     RECIPIENT_BCC: 'RECIPIENT_BCC',
 }
 
+PYTPFLOATINGTIME_START = datetime.datetime(1899, 12, 30)
+
 # Constants used for argparse stuff
 KNOWN_FILE_FLAGS = [
     '--out-name',
@@ -173,6 +176,7 @@ STI32 = struct.Struct('<i4x')
 STI64 = struct.Struct('<q')
 STF32 = struct.Struct('<f4x')
 STF64 = struct.Struct('<d')
+STUI32 = struct.Struct('<I4x')
 STMI16 = struct.Struct('<h')
 STMI32 = struct.Struct('<i')
 STMI64 = struct.Struct('<q')
