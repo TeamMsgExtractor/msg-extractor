@@ -109,6 +109,12 @@ class Named(object):
         """
         return self.__msg.sExists([self.__dir, filename])
 
+    def pprintKeys(self):
+        """
+        Uses the pprint function on a sorted list of keys.
+        """
+        pprint.pprint(sorted(tuple(self.__propertiesDict.keys())))
+
     @property
     def dir(self):
         """

@@ -57,7 +57,7 @@ class MSGFile(olefile.OleFileIO):
                     raise TypeError('Invalid prefix type: ' + str(type(prefix)) +
                                     '\n(This was probably caused by you setting it manually).')
             prefix = prefix.replace('\\', '/')
-            g = prefix.split("/")
+            g = prefix.split('/')
             if g[-1] == '':
                 g.pop()
             prefixl = g
@@ -372,6 +372,17 @@ class MSGFile(olefile.OleFileIO):
         return self._ensureSet('_classType', '__substg1.0_001A')
 
     @property
+    def importance(self):
+        """
+        The specified importance of the msg file.
+        """
+        try:
+            return self.__importance
+        except AttributeError:
+            self.__importance = self.mainProperties['00170003']
+            return self.__importance
+
+    @property
     def mainProperties(self):
         """
         Returns the Properties instance used by the MSGFile instance.
@@ -419,6 +430,27 @@ class MSGFile(olefile.OleFileIO):
         """
         return copy.deepcopy(self.__prefixList)
 
+    @property
+    def priority(self):
+        """
+        The specified priority of the msg file.
+        """
+        try:
+            return self.__priority
+        except AttributeError:
+            self.__priority = self.mainProperties['00260003']
+            return self.__priority
+
+    @property
+    def sensitivity(self):
+        """
+        The specified sensitivity of the msg file.
+        """
+        try:
+            return self.__sensitivity
+        except AttributeError:
+            self.__sensitivity = self.mainProperties['00360003']
+            return self.__sensitivity
 
     @property
     def stringEncoding(self):

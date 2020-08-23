@@ -1,5 +1,6 @@
 import copy
 import logging
+import pprint
 
 from extract_msg import constants
 from extract_msg.prop import create_prop
@@ -97,6 +98,13 @@ class Properties(object):
 
     def keys(self):
         return self.__props.keys()
+
+    def pprintKeys(self):
+        """
+        Uses the pprint function on a sorted list of keys.
+        """
+        pprint.pprint(sorted(tuple(self.__props.keys())))
+
 
     def values(self):
         return self.__props.values()

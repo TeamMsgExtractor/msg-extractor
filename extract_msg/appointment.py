@@ -3,7 +3,7 @@ from extract_msg.message_base import MessageBase
 
 class Appointment(MessageBase):
     """
-    Parser for Microsoft Office Appointment files.
+    Parser for Microsoft Outlook Appointment files.
     """
 
     def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None, delayAttachments = False):
