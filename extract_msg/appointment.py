@@ -17,6 +17,13 @@ class Appointment(MessageBase):
         return self._ensureSetNamed('_appointmentClassType', '0024')
 
     @property
+    def endDate(self):
+        """
+        The end date of the appointment.
+        """
+        return self._ensureSetProperty('_endDate', '00610040')
+
+    @property
     def location(self):
         """
         Returns the location of the meeting.
@@ -48,6 +55,14 @@ class Appointment(MessageBase):
         Returns the resource attendees of the meeting.
         """
         return self._ensureSetNamed('_resourceAttendees', '0008')
+
+
+    @property
+    def startDate(self):
+        """
+        The start date of the appointment.
+        """
+        return self._ensureSetProperty('_startDate', '00600040')
 
     @property
     def timeZone(self):

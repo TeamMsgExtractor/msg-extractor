@@ -81,6 +81,21 @@ class Attachment(object):
             setattr(self, variable, value)
             return value
 
+    def _ensureSetProperty(self, variable, propertyName):
+        """
+        Ensures that the variable exists, otherwise will set it using the property.
+        After that, return said variable.
+        """
+        try:
+            return getattr(self, variable)
+        except AttributeError:
+            try:
+                value = self.props[propertyName].value
+            except (KeyError, AttributeError):
+                value = None
+            setattr(self, variable, value)
+            return value
+
     def _getStream(self, filename):
         return self.__msg._getStream([self.__dir, filename])
 

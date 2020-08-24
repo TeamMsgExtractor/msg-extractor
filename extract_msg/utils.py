@@ -278,7 +278,7 @@ def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAtt
     when it cannot identify what MSGFile derivitive to use. Otherwise, it will
     log the error and return a basic MSGFile instance.
     """
-    # from extract_msg.appointment import Appointment
+    from extract_msg.appointment import Appointment
     from extract_msg.attachment import Attachment
     from extract_msg.contact import Contact
     from extract_msg.message import Message
@@ -294,9 +294,9 @@ def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAtt
     elif classtype.startswith('IPM.Note') or classtype.startswith('REPORT'):
         msg.close()
         return Message(path, prefix, attachmentClass, filename, delayAttachments)
-    # elif classtype.startswith('IPM.Appointment') or classtype.startswith('IPM.Schedule'):
-    #     msg.close()
-    #     return Appointment(path, prefix, attachmentClass, filename, delayAttachments)
+    elif classtype.startswith('IPM.Appointment') or classtype.startswith('IPM.Schedule'):
+        msg.close()
+        return Appointment(path, prefix, attachmentClass, filename, delayAttachments)
     elif strict:
         msg.close()
         raise UnrecognizedMSGTypeError('Could not recognize msg class type "{}". It is recommended you report this to the developers.'.format(msg.classType))

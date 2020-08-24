@@ -105,6 +105,21 @@ class MSGFile(olefile.OleFileIO):
             setattr(self, variable, value)
             return value
 
+    def _ensureSetProperty(self, variable, propertyName):
+        """
+        Ensures that the variable exists, otherwise will set it using the property.
+        After that, return said variable.
+        """
+        try:
+            return getattr(self, variable)
+        except AttributeError:
+            try:
+                value = self.mainProperties[propertyName].value
+            except (KeyError, AttributeError):
+                value = None
+            setattr(self, variable, value)
+            return value
+
     def _getStream(self, filename, prefix = True):
         """
         Gets a binary representation of the requested filename.
@@ -376,11 +391,7 @@ class MSGFile(olefile.OleFileIO):
         """
         The specified importance of the msg file.
         """
-        try:
-            return self.__importance
-        except AttributeError:
-            self.__importance = self.mainProperties['00170003']
-            return self.__importance
+        return self._ensureSetProperty('_importance', '00170003')
 
     @property
     def mainProperties(self):
@@ -435,22 +446,14 @@ class MSGFile(olefile.OleFileIO):
         """
         The specified priority of the msg file.
         """
-        try:
-            return self.__priority
-        except AttributeError:
-            self.__priority = self.mainProperties['00260003']
-            return self.__priority
+        return self._ensureSetProperty('_priority', '00260003')
 
     @property
     def sensitivity(self):
         """
         The specified sensitivity of the msg file.
         """
-        try:
-            return self.__sensitivity
-        except AttributeError:
-            self.__sensitivity = self.mainProperties['00360003']
-            return self.__sensitivity
+        return self._ensureSetProperty('_sensitivity', '00360003')
 
     @property
     def stringEncoding(self):
