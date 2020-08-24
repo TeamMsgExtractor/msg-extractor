@@ -57,7 +57,7 @@ class MSGFile(olefile.OleFileIO):
                     raise TypeError('Invalid prefix type: ' + str(type(prefix)) +
                                     '\n(This was probably caused by you setting it manually).')
             prefix = prefix.replace('\\', '/')
-            g = prefix.split("/")
+            g = prefix.split('/')
             if g[-1] == '':
                 g.pop()
             prefixl = g
@@ -102,6 +102,21 @@ class MSGFile(olefile.OleFileIO):
             return getattr(self, variable)
         except AttributeError:
             value = self.named.getNamedValue(propertyName)
+            setattr(self, variable, value)
+            return value
+
+    def _ensureSetProperty(self, variable, propertyName):
+        """
+        Ensures that the variable exists, otherwise will set it using the property.
+        After that, return said variable.
+        """
+        try:
+            return getattr(self, variable)
+        except AttributeError:
+            try:
+                value = self.mainProperties[propertyName].value
+            except (KeyError, AttributeError):
+                value = None
             setattr(self, variable, value)
             return value
 
@@ -372,6 +387,13 @@ class MSGFile(olefile.OleFileIO):
         return self._ensureSet('_classType', '__substg1.0_001A')
 
     @property
+    def importance(self):
+        """
+        The specified importance of the msg file.
+        """
+        return self._ensureSetProperty('_importance', '00170003')
+
+    @property
     def mainProperties(self):
         """
         Returns the Properties instance used by the MSGFile instance.
@@ -419,6 +441,19 @@ class MSGFile(olefile.OleFileIO):
         """
         return copy.deepcopy(self.__prefixList)
 
+    @property
+    def priority(self):
+        """
+        The specified priority of the msg file.
+        """
+        return self._ensureSetProperty('_priority', '00260003')
+
+    @property
+    def sensitivity(self):
+        """
+        The specified sensitivity of the msg file.
+        """
+        return self._ensureSetProperty('_sensitivity', '00360003')
 
     @property
     def stringEncoding(self):

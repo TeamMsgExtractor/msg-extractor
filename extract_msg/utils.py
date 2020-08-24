@@ -278,7 +278,7 @@ def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAtt
     when it cannot identify what MSGFile derivitive to use. Otherwise, it will
     log the error and return a basic MSGFile instance.
     """
-    # from extract_msg.appointment import Appointment
+    from extract_msg.appointment import Appointment
     from extract_msg.attachment import Attachment
     from extract_msg.contact import Contact
     from extract_msg.message import Message
@@ -294,9 +294,9 @@ def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAtt
     elif classtype.startswith('IPM.Note') or classtype.startswith('REPORT'):
         msg.close()
         return Message(path, prefix, attachmentClass, filename, delayAttachments)
-    # elif classtype.startswith('IPM.Appointment') or classtype.startswith('IPM.Schedule'):
-    #     msg.close()
-    #     return Appointment(path, prefix, attachmentClass, filename, delayAttachments)
+    elif classtype.startswith('IPM.Appointment') or classtype.startswith('IPM.Schedule'):
+        msg.close()
+        return Appointment(path, prefix, attachmentClass, filename, delayAttachments)
     elif strict:
         msg.close()
         raise UnrecognizedMSGTypeError('Could not recognize msg class type "{}". It is recommended you report this to the developers.'.format(msg.classType))
@@ -338,17 +338,9 @@ def parseType(_type, stream, encoding, extras):
         return (constants.STI64.unpack(value)[0]) / 10000.0
     elif _type == 0x0007:  # PtypFloatingTime
         value = constants.STF64.unpack(value)[0]
-        # TODO parsing for this
-        # I can't actually find any msg properties that use this, so it should be okay to release this function without support for it.
-        # INFO:
-        # 8 bytes; a 64-bit floating point number in
-        # which the whole number part represents the
-        # number of days since December 30, 1899,
-        # and the fractional part represents the
-        # fraction of a day since midnight
-        raise NotImplementedError('Parsing for type 0x0007 has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType 0x0007"')
+        return constants.PYTPFLOATINGTIME_START + datetime.timedelta(days = value)
     elif _type == 0x000A:  # PtypErrorCode
-        value = constants.STI32.unpack(value)[0]
+        value = constants.STUI32.unpack(value)[0]
         # TODO parsing for this
         # I can't actually find any msg properties that use this, so it should be okay to release this function without support for it.
         raise NotImplementedError('Parsing for type 0x000A has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType 0x000A"')
@@ -365,7 +357,7 @@ def parseType(_type, stream, encoding, extras):
     elif _type == 0x001F:  # PtypString
         return value.decode('utf_16_le')
     elif _type == 0x0040:  # PtypTime
-        return msgEpoch(constants.ST3.unpack(value)[0])
+        return fromTimeStamp(msgEpoch(constants.ST3.unpack(value)[0])).__format__('%a, %d %b %Y %H:%M:%S %z')
     elif _type == 0x0048:  # PtypGuid
         return bytesToGuid(value)
     elif _type == 0x00FB:  # PtypServerId

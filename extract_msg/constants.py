@@ -4,6 +4,7 @@ without explicit instruction to do so from one of the
 contributers, please do not complain about bugs.
 """
 
+import datetime
 import struct
 import sys
 
@@ -119,32 +120,61 @@ VARIABLE_LENGTH_PROPS_STRING = (
 
 INTELLIGENCE_DUMB = 0
 INTELLIGENCE_SMART = 1
-INTELLIGENCE_DICT = {
-    INTELLIGENCE_DUMB: 'INTELLIGENCE_DUMB',
-    INTELLIGENCE_SMART: 'INTELLIGENCE_SMART',
-}
+INTELLIGENCE_TUPLE = (
+    'INTELLIGENCE_DUMB',
+    'INTELLIGENCE_SMART',
+)
 
 TYPE_MESSAGE = 0
 TYPE_MESSAGE_EMBED = 1
 TYPE_ATTACHMENT = 2
 TYPE_RECIPIENT = 3
-TYPE_DICT = {
-    TYPE_MESSAGE: 'TYPE_MESSAGE',
-    TYPE_MESSAGE_EMBED: 'TYPE_MESSAGE_EMBED',
-    TYPE_ATTACHMENT: 'TYPE_ATTACHMENT',
-    TYPE_RECIPIENT: 'TYPE_RECIPIENT',
-}
+TYPE_TUPLE = (
+    'TYPE_MESSAGE',
+    'TYPE_MESSAGE_EMBED',
+    'TYPE_ATTACHMENT',
+    'TYPE_RECIPIENT',
+)
 
 RECIPIENT_SENDER = 0
 RECIPIENT_TO = 1
 RECIPIENT_CC = 2
 RECIPIENT_BCC = 3
-RECIPIENT_DICT = {
-    RECIPIENT_SENDER: 'RECIPIENT_SENDER',
-    RECIPIENT_TO: 'RECIPIENT_TO',
-    RECIPIENT_CC: 'RECIPIENT_CC',
-    RECIPIENT_BCC: 'RECIPIENT_BCC',
-}
+RECIPIENT_TUPLE = (
+    'RECIPIENT_SENDER',
+    'RECIPIENT_TO',
+    'RECIPIENT_CC',
+    'RECIPIENT_BCC',
+)
+
+# PidTagImportance
+IMPORTANCE_LOW = 0
+IMPORTANCE_MEDIUM = 1
+IMPORTANCE_HIGH = 2
+IMPORTANCE_TUPLE = (
+    'IMPORTANCE_LOW',
+    'IMPORTANCE_MEDIUM',
+    'IMPORTANCE_HIGH',
+)
+
+# PidTagSensitivity
+SENSITIVITY_NORMAL = 0
+SENSITIVITY_PERSONAL = 1
+SENSITIVITY_PRIVATE = 2
+SENSITIVITY_CONFIDENTIAL = 3
+SENSITIVITY_TUPLE = (
+    'SENSITIVITY_NORMAL',
+    'SENSITIVITY_PERSONAL',
+    'SENSITIVITY_PRIVATE',
+    'SENSITIVITY_CONFIDENTIAL',
+)
+
+# PidTagPriority
+PRIORITY_URGENT = 0x00000001
+PRIORITY_NORMAL = 0x00000000
+PRIORITY_NOT_URGENT = 0xFFFFFFFF
+
+PYTPFLOATINGTIME_START = datetime.datetime(1899, 12, 30)
 
 # Constants used for argparse stuff
 KNOWN_FILE_FLAGS = [
@@ -169,10 +199,11 @@ STFIX = struct.Struct('<8x8s')
 STVAR = struct.Struct('<8xi4s')
 # Structs to help with email type to python type conversions
 STI16 = struct.Struct('<h6x')
-STI32 = struct.Struct('<i4x')
+STI32 = struct.Struct('<I4x')
 STI64 = struct.Struct('<q')
 STF32 = struct.Struct('<f4x')
 STF64 = struct.Struct('<d')
+STUI32 = struct.Struct('<I4x')
 STMI16 = struct.Struct('<h')
 STMI32 = struct.Struct('<i')
 STMI64 = struct.Struct('<q')
@@ -476,17 +507,17 @@ def int_to_data_type(integer):
     """
     Returns the name of the data type constant that has the value of :param integer:
     """
-    return TYPE_DICT[integer]
+    return TYPE_TUPLE[integer]
 
 
 def int_to_intelligence(integer):
     """
     Returns the name of the intelligence level constant that has the value of :param integer:
     """
-    return INTELLIGENCE_DICT[integer]
+    return INTELLIGENCE_TUPLE[integer]
 
 def int_to_recipient_type(integer):
     """
     Returns the name of the recipient type constant that has the value of :param integer:
     """
-    return RECIPIENT_DICT[integer]
+    return RECIPIENT_TUPLE[integer]

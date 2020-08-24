@@ -1,3 +1,12 @@
+**v0.27.0**
+* [[mattgwwalker #143](https://github.com/mattgwwalker/msg-extractor/issues/143)] Added new class `Appointment` that can handle outlook appointments or meetings.
+* [[mattgwwalker #143](https://github.com/mattgwwalker/msg-extractor/issues/143)] Added new class `MessageBase` for classes that end up being mostly like the `Message` class. Currently subclassed by `Message` and `Appointment`. This should not have a direct effect on any code that uses this module.
+* Added support for `PtypFloatingTime` in `utils.parseType`.
+* Added proper support for `PtypTime` in `FixedLengthProp.parseType`
+* Added pretty print functions to the `Properties` class and the `Named` class.
+* Added new function `MSGFile._ensureSetProperty` that acts like `MSGFile._ensureSet` except that it works with properties from the `Properties` instance.
+* Added equivalent of the previously mentioned function to the `Attachment` class and the `Recipient` class.
+
 **v0.26.4**
 * Added new function `MSGFile._ensureSetNamed` which acts like `MSGFile._ensureSet` except that it works with named properties.
 * Added a version of the previous function to the `Attachment` and `Recipient` classes.

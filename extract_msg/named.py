@@ -1,5 +1,6 @@
 import copy
 import logging
+import pprint
 import zlib
 
 from extract_msg import constants
@@ -108,6 +109,12 @@ class Named(object):
         Checks if the string stream exists inside the named properties folder.
         """
         return self.__msg.sExists([self.__dir, filename])
+
+    def pprintKeys(self):
+        """
+        Uses the pprint function on a sorted list of keys.
+        """
+        pprint.pprint(sorted(tuple(self.__propertiesDict.keys())))
 
     @property
     def dir(self):

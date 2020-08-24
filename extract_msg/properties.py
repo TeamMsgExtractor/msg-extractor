@@ -1,5 +1,6 @@
 import copy
 import logging
+import pprint
 
 from extract_msg import constants
 from extract_msg.prop import create_prop
@@ -98,6 +99,13 @@ class Properties(object):
     def keys(self):
         return self.__props.keys()
 
+    def pprintKeys(self):
+        """
+        Uses the pprint function on a sorted list of keys.
+        """
+        pprint.pprint(sorted(tuple(self.__props.keys())))
+
+
     def values(self):
         return self.__props.values()
 
@@ -120,14 +128,11 @@ class Properties(object):
             return self.__date
         except AttributeError:
             if self.has_key('00390040'):
-                self.__date = fromTimeStamp(msgEpoch(self.get('00390040').value)).__format__(
-                    '%a, %d %b %Y %H:%M:%S %z')
+                self.__date = self.get('00390040').value.__format__('%a, %d %b %Y %H:%M:%S %z')
             elif self.has_key('30080040'):
-                self.__date = fromTimeStamp(msgEpoch(self.get('30080040').value)).__format__(
-                    '%a, %d %b %Y %H:%M:%S %z')
+                self.__date = self.get('30080040').value.__format__('%a, %d %b %Y %H:%M:%S %z')
             elif self.has_key('30070040'):
-                self.__date = fromTimeStamp(msgEpoch(self.get('30070040').value)).__format__(
-                    '%a, %d %b %Y %H:%M:%S %z')
+                self.__date = self.get('30070040').value.__format__('%a, %d %b %Y %H:%M:%S %z')
             else:
                 # DEBUG
                 logger.warning(
