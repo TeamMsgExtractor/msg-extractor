@@ -23,7 +23,7 @@ class Message(MessageBase):
     """
     Parser for Microsoft Outlook message files.
     """
-    
+
     def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None, delayAttachments = False):
         MessageBase.__init__(self, path, prefix, attachmentClass, filename, delayAttachments)
 
@@ -58,7 +58,7 @@ class Message(MessageBase):
         if count > 1:
             raise IncompatibleOptionsException('Only one of the following options may be used at a time: toJSon, raw, html, rtf')
 
-        crlf = inputToBytes(self.__crlf, 'utf-8')
+        crlf = inputToBytes(self.crlf, 'utf-8')
 
         if customFilename != None and customFilename != '':
             dirName = customFilename
