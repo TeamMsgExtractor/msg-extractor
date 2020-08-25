@@ -1,5 +1,5 @@
 **v0.27.1**
-* Fixed an issue in `Message.save` caused by it attempting to directly access a private variable that was moved to the base class `MessageBase`.
+* [[mattgwwalker #147](https://github.com/mattgwwalker/msg-extractor/issues/147)]Fixed an issue in `Message.save` caused by it attempting to directly access a private variable that was moved to the base class `MessageBase`.
 
 **v0.27.0**
 * [[mattgwwalker #143](https://github.com/mattgwwalker/msg-extractor/issues/143)] Added new class `Appointment` that can handle outlook appointments or meetings.
