@@ -7,9 +7,9 @@ class Contact(MSGFile):
     """
     Class used for parsing contacts.
     """
-    
-    def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None):
-        MSGFile.__init__(self, path, prefix, attachmentClass, filename)
+
+    def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None, overrideEncoding = None):
+        MSGFile.__init__(self, path, prefix, attachmentClass, filename, overrideEncoding)
         self.named
 
     @property
