@@ -24,8 +24,8 @@ class Message(MessageBase):
     Parser for Microsoft Outlook message files.
     """
 
-    def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None, delayAttachments = False):
-        MessageBase.__init__(self, path, prefix, attachmentClass, filename, delayAttachments)
+    def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None, delayAttachments = False, overrideEncoding = None):
+        MessageBase.__init__(self, path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding)
 
     def dump(self):
         """

@@ -24,7 +24,7 @@ class MessageBase(MSGFile):
     Base class for Message like msg files.
     """
 
-    def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None, delayAttachments = False):
+    def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None, delayAttachments = False, overrideEncoding = None):
         """
         :param path: path to the msg file in the system or is the raw msg file.
         :param prefix: used for extracting embeded msg files
@@ -38,8 +38,10 @@ class MessageBase(MSGFile):
         :param delayAttachments: optional, delays the initialization of attachments
             until the user attempts to retrieve them. Allows MSG files with bad
             attachments to be initialized so the other data can be retrieved.
+        :param overrideEncoding: optional, an encoding to use instead of the one
+            specified by the msg file. Do not report encoding errors caused by this.
         """
-        MSGFile.__init__(self, path, prefix, attachmentClass, filename)
+        MSGFile.__init__(self, path, prefix, attachmentClass, filename, overrideEncoding)
         self.__attachmentsDelayed = delayAttachments
         self.__attachmentsReady = False
         # Initialize properties in the order that is least likely to cause bugs.

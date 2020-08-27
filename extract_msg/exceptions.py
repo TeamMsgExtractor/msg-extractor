@@ -36,6 +36,12 @@ class MissingEncodingError(Exception):
     """
     pass
 
+class UnknownCodepageError(Exception):
+    """
+    The codepage provided was not one we know of.
+    """
+    pass
+
 class UnknownTypeError(Exception):
     """
     The type specified is not one that is recognized.

@@ -3,6 +3,7 @@ Utility functions of extract_msg.
 """
 
 import argparse
+import codecs
 import datetime
 import json
 import logging
@@ -14,7 +15,7 @@ import tzlocal
 
 from extract_msg import constants
 from extract_msg.compat import os_ as os
-from extract_msg.exceptions import ConversionError, InvaildPropertyIdError, UnknownTypeError, UnrecognizedMSGTypeError
+from extract_msg.exceptions import ConversionError, InvaildPropertyIdError, UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -192,6 +193,18 @@ def getContFileDir(_file_):
     """
     return '/'.join(_file_.replace('\\', '/').split('/')[:-1])
 
+def getEncodingName(codepage):
+    """
+    Returns the name of the encoding with the specified codepage.
+    """
+    if codepage not in constants.CODE_PAGES:
+        raise UnknownCodepageError(str(codepage))
+    try:
+        codecs.lookup(constants.CODE_PAGES[codepage])
+        return constants.CODE_PAGES[codepage]
+    except LookupError:
+        raise UnsupportedEncodingError('The codepage {} ({}) is not currently supported by your version of Python.'.format(codepage, constants.CODE_PAGES[codepage]))
+
 def get_full_class_name(inp):
     return inp.__class__.__module__ + '.' + inp.__class__.__name__
 
@@ -257,7 +270,7 @@ def msgpathToString(inp):
     inp.replace('\\', '/')
     return inp
 
-def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAttachments = False, strict = True):
+def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAttachments = False, overrideEncoding = None, strict = True):
     """
     Function to automatically open an MSG file and detect what type it is.
 
@@ -286,17 +299,17 @@ def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAtt
 
     attachmentClass = Attachment if attachmentClass is None else attachmentClass
 
-    msg = MSGFile(path, prefix, attachmentClass, filename)
+    msg = MSGFile(path, prefix, attachmentClass, filename, overrideEncoding)
     classtype = msg.classType
     if classtype.startswith('IPM.Contact') or classtype.startswith('IPM.DistList'):
         msg.close()
-        return Contact(path, prefix, attachmentClass, filename)
+        return Contact(path, prefix, attachmentClass, filename, overrideEncoding)
     elif classtype.startswith('IPM.Note') or classtype.startswith('REPORT'):
         msg.close()
-        return Message(path, prefix, attachmentClass, filename, delayAttachments)
+        return Message(path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding)
     elif classtype.startswith('IPM.Appointment') or classtype.startswith('IPM.Schedule'):
         msg.close()
-        return Appointment(path, prefix, attachmentClass, filename, delayAttachments)
+        return Appointment(path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding)
     elif strict:
         msg.close()
         raise UnrecognizedMSGTypeError('Could not recognize msg class type "{}". It is recommended you report this to the developers.'.format(msg.classType))

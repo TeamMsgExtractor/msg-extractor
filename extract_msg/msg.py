@@ -1,3 +1,4 @@
+import codecs
 import copy
 import logging
 
@@ -8,7 +9,7 @@ from extract_msg.attachment import Attachment
 from extract_msg.named import Named
 from extract_msg.prop import FixedLengthProp, VariableLengthProp
 from extract_msg.properties import Properties
-from extract_msg.utils import divide, has_len, inputToMsgpath, inputToString, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
+from extract_msg.utils import divide, getEncodingName, has_len, inputToMsgpath, inputToString, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
 from extract_msg.exceptions import InvalidFileFormatError, MissingEncodingError
 
 
@@ -20,7 +21,7 @@ class MSGFile(olefile.OleFileIO):
     """
     Parser for .msg files
     """
-    def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None):
+    def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None, overrideEncoding = None):
         """
         :param path: path to the msg file in the system or is the raw msg file.
         :param prefix: used for extracting embeded msg files
@@ -31,10 +32,17 @@ class MSGFile(olefile.OleFileIO):
             not change this value unless you know what you
             are doing.
         :param filename: optional, the filename to be used by default when saving.
+        :param overrideEncoding: optional, an encoding to use instead of the one
+            specified by the msg file. Do not report encoding errors caused by this.
         """
         # WARNING DO NOT MANUALLY MODIFY PREFIX. Let the program set it.
         self.__path = path
         self.__attachmentClass = attachmentClass
+        if overrideEncoding is not None:
+            codecs.lookup(overrideEncoding)
+            logger.warning('You have chosen to override the string encoding. Do not report encoding erros caused by this.')
+            self.__stringEncoding = overrideEncoding
+        self.__overrideEncoding = overrideEncoding
 
         try:
             olefile.OleFileIO.__init__(self, path)
@@ -263,7 +271,7 @@ class MSGFile(olefile.OleFileIO):
 
     def Exists(self, inp, prefix = True):
         """
-        Checks if :param inp: exists in the msg file. Does not always go to the top, starts at specified point
+        Checks if :param inp: exists in the msg file.
         """
         inp = self.fix_path(inp, prefix)
         return self.exists(inp)
@@ -417,6 +425,14 @@ class MSGFile(olefile.OleFileIO):
             return self.__namedProperties
 
     @property
+    def overrideEncoding(self):
+        """
+        Returns None is the encoding has not been overriden, otherwise returns
+        the encoding.
+        """
+        return self.__overrideEncoding
+
+    @property
     def path(self):
         """
         Returns the message path if generated from a file,
@@ -471,6 +487,5 @@ class MSGFile(olefile.OleFileIO):
                     raise MissingEncodingError('Encoding property not found')
                 enc = self.mainProperties['3FFD0003'].value
                 # Now we just need to translate that value
-                # Now, this next line SHOULD work, but it is possible that it might not...
-                self.__stringEncoding = str(enc)
+                self.__stringEncoding = getEncodingName(enc)
                 return self.__stringEncoding
