@@ -27,8 +27,8 @@ https://github.com/mattgwwalker/msg-extractor
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 __author__ = 'The Elemental of Destruction & Matthew Walker'
-__date__ = '2020-08-26'
-__version__ = '0.27.2'
+__date__ = '2020-08-30'
+__version__ = '0.27.3'
 
 import logging
 
@@ -38,6 +38,7 @@ from extract_msg.attachment import Attachment
 from extract_msg.contact import Contact
 from extract_msg.exceptions import UnrecognizedMSGTypeError
 from extract_msg.message import Message
+from extract_msg.message_base import MessageBase
 from extract_msg.msg import MSGFile
 from extract_msg.prop import create_prop
 from extract_msg.properties import Properties

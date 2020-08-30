@@ -69,12 +69,10 @@ class MessageBase(MSGFile):
             return getattr(self, private)
         except AttributeError:
             # Check header first
-            headerResult = None
+            value = None
             if self.headerInit():
-                headerResult = self.header[recipientType]
-            if headerResult is not None:
-                setattr(self, private, headerResult)
-            else:
+                value = self.header[recipientType]
+            if value is None:
                 if self.headerInit():
                     logger.info('Header found, but "{}" is not included. Will be generated from other streams.'.format(recipientType))
                 f = []
@@ -86,10 +84,14 @@ class MessageBase(MSGFile):
                     if len(f) > 1:
                         for x in range(1, len(f)):
                             st += ', {0}'.format(f[x])
-                    setattr(self, private, st)
-                else:
-                    setattr(self, private, None)
-            return getattr(self, private)
+                    value = st
+            if value is not None:
+                value = value.replace(' \r\n\t', ' ').replace('\r\n\t ', ' ').replace('\r\n\t', ' ')
+                value = value.replace('\r\n', ' ').replace('\r', ' ').replace('\n', ' ')
+                while value.find('  ') != -1:
+                    value = value.replace('  ', ' ')
+            setattr(self, private, value)
+            return value
 
     def _registerNamedProperty(self, entry, _type, name = None):
         if self.attachmentsDelayed and not self.attachmentsReady:
@@ -174,6 +176,13 @@ class MessageBase(MSGFile):
         Returns True if the attachments are ready to be used.
         """
         return self.__attachmentsReady
+
+    @property
+    def bcc(self):
+        """
+        Returns the bcc field, if it exists.
+        """
+        return self._genRecipient('bcc', 3)
 
     @property
     def body(self):
