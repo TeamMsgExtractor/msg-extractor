@@ -1,3 +1,8 @@
+**v0.27.3**
+* [[mattgwwalker #105](https://github.com/mattgwwalker/msg-extractor/issues/105)] Added code to fix an internal msg issue that had recipient lists being split up in the header after a certain amount of characters. This was now a bug on our part, but an issue with the generation of the msg file itself.
+* Exposed the `MessageBase` class directly from extract_msg. I forgot to do this when I created it.
+* Added `MessageBase.bcc`. I think it used to exist but got erased somehow on accident. Either way, it exists now.
+
 **v0.27.2**
 * After much debate, I have finally decided to allow an option to override the string encoding in message files. This Was something I reserved solely for `dev_classes.Message` because it felt like it didn't fit with how msg files were supposed to work. I also didn't want messages from people about them running into errors after they overrode the encoding. You can now do this by providing the `overrideEncoding` option on any `MSGFile` class as well as the `openMsg` function.
 * [[mattgwwalker #103](https://github.com/mattgwwalker/msg-extractor/issues/103)] Implemented correct detection of encodings. If you have any more issues with "'X' codec can't decode bytes" it is likely because the encoding specified inside the msg file is wrong.
