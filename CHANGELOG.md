@@ -1,3 +1,6 @@
+**v0.27.4**
+* [[mattgwwalker #152](https://github.com/mattgwwalker/msg-extractor/issues/152)] Fixed an issue where the name of an exception was put as the wrong thing.
+
 **v0.27.3**
 * [[mattgwwalker #105](https://github.com/mattgwwalker/msg-extractor/issues/105)] Added code to fix an internal msg issue that had recipient lists being split up in the header after a certain amount of characters. This was now a bug on our part, but an issue with the generation of the msg file itself.
 * Exposed the `MessageBase` class directly from extract_msg. I forgot to do this when I created it.
