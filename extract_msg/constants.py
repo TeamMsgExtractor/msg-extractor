@@ -346,6 +346,10 @@ MAINDOC = "extract_msg:\n\tExtracts emails and attachments saved in Microsoft Ou
 ST1 = struct.Struct('<8x4I')
 ST2 = struct.Struct('<H2xI8x')
 ST3 = struct.Struct('<Q')
+# Structs used by data.py
+ST_DATA_UI32 = struct.Struct('<I')
+ST_DATA_UI16 = struct.Struct('<H')
+ST_DATA_UI8 = struct.Struct('<B')
 # Structs used by named.py
 STNP_NAM = struct.Struct('<i')
 STNP_ENT = struct.Struct('<IHH') # Struct used for unpacking the entries in the entry stream
@@ -428,15 +432,15 @@ RA_OP_TAG = 0x09
 RA_OP_DELETE = 0x0A
 RA_OP_MARK_AS_READ = 0x0B
 
-# Recipiet Row Types
-RR_NOTYPE = 0x0
-RR_X500DN = 0x1
-RR_MSMAIL = 0x2
-RR_SMTP = 0x3
-RR_FAX = 0x4
-RR_PROFESSIONALOFFICESYSTEM = 0x5
-RR_PERSONALDESTRIBUTIONLIST1 = 0x6
-RR_PERSONALDESTRIBUTIONLIST2 = 0x7
+# Recipiet Row Flag Types
+RF_NOTYPE = 0x0
+RF_X500DN = 0x1
+RF_MSMAIL = 0x2
+RF_SMTP = 0x3
+RF_FAX = 0x4
+RF_PROFESSIONALOFFICESYSTEM = 0x5
+RF_PERSONALDESTRIBUTIONLIST1 = 0x6
+RF_PERSONALDESTRIBUTIONLIST2 = 0x7
 
 
 # This property information was sourced from

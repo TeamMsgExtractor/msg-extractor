@@ -30,6 +30,12 @@ class InvaildPropertyIdError(Exception):
     """
     pass
 
+class InvalidVersionError(Exception):
+    """
+    The version specified is invalid.
+    """
+    pass
+
 class MissingEncodingError(Exception):
     """
     MSG file is missing an encodng.

@@ -8,6 +8,7 @@ import datetime
 import json
 import logging
 import logging.config
+import math
 import struct
 import sys
 
@@ -79,6 +80,31 @@ def addNumToDir(dirName):
             pass
     return None
 
+def bitwiseAdjust(result, mask):
+    """
+    Uses a given mask to adjust the location of bits after an operation like
+    bitwise AND. This is useful for things like flags where you are trying to
+    get a small portion of a larger number. Say for example, you had the number
+    0xED (0b11101101) and you needed the adjusted result of the AND operation
+    with 0x70 (0b01110000). The result of the and operation (0b01100000) and the
+    mask used to get it (0x70) are give and the output gets adjusted to be 0x6
+    (0b110).
+
+    :param mask: MUST be greater than 0.
+    """
+    if mask < 1:
+        raise ValueError('Mask MUST be greater than 0')
+    return result >> bin(mask)[::-1].index('1')
+
+def bitwiseAdjustedAnd(inp, mask):
+    """
+    Preforms the bitwise AND operation between :param inp: and :param mask: and
+    adjusts the results based on the rules of the bitwiseAdjust function.
+    """
+    if mask < 1:
+        raise ValueError('Mask MUST be greater than 0')
+    return (result & mask) >> bin(mask)[::-1].index('1')
+
 def bytesToGuid(bytes_input):
     hexinput = [properHex(byte) for byte in bytes_input]
     hexs = [hexinput[3] + hexinput[2] + hexinput[1] + hexinput[0], hexinput[5] + hexinput[4], hexinput[7] + hexinput[6], hexinput[8] + hexinput[9], ''.join(hexinput[10:16])]
@@ -88,17 +114,24 @@ def divide(string, length):
     """
     Taken (with permission) from https://github.com/TheElementalOfDestruction/creatorUtils
 
-    Divides a string into multiple substrings of equal length
-    :param string: string to be divided.
-    :param length: length of each division.
-    :returns: list containing the divided strings.
+    Divides a string into multiple substrings of equal length.
+    If there is not enough for the last substring to be equal,
+    it will simply use the rest of the string.
+	Can also be used for things like lists and tuples.
 
-    Example:
-    >>>> a = divide('Hello World!', 2)
-    >>>> print(a)
-    ['He', 'll', 'o ', 'Wo', 'rl', 'd!']
-    """
-    return [string[length * x:length * (x + 1)] for x in range(len(string) // length)]
+	:param string: string to be divided.
+	:param length: length of each division.
+	:returns: list containing the divided strings.
+
+	Example:
+	>>>> a = divide('Hello World!', 2)
+	>>>> print(a)
+	['He', 'll', 'o ', 'Wo', 'rl', 'd!']
+    >>>> a = divide('Hello World!', 5)
+	>>>> print(a)
+	['Hello', ' Worl', 'd!']
+	"""
+	return [string[length * x:length * (x + 1)] for x in range(int(math.ceil(len(string) / length)))]
 
 def fromTimeStamp(stamp):
     return datetime.datetime.fromtimestamp(stamp, tzlocal.get_localzone())
