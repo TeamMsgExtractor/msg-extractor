@@ -1,26 +1,27 @@
 **v0.27.5**
 * Fixed an error in `utils.divide` that would cause it to drop the extra data is there was not enough to create a full division. For example, if you had a string that was 10 characters, and divided by 3, you would only receive a total of 9 characters back.
 * Added some useful functions that will be used in the future.
-* Updated to use new version of tzlocal.
+* [[TeamMsgExtractor](https://github.com/TeamMsgExtractor/msg-extractor/issues/155)] Updated to use new version of tzlocal.
+* Updated changelog to fit new repository.
 
 **v0.27.4**
-* [[mattgwwalker #152](https://github.com/mattgwwalker/msg-extractor/issues/152)] Fixed an issue where the name of an exception was put as the wrong thing.
+* [[TeamMsgExtractor #152](https://github.com/TeamMsgExtractor/msg-extractor/issues/152)] Fixed an issue where the name of an exception was put as the wrong thing.
 
 **v0.27.3**
-* [[mattgwwalker #105](https://github.com/mattgwwalker/msg-extractor/issues/105)] Added code to fix an internal msg issue that had recipient lists being split up in the header after a certain amount of characters. This was now a bug on our part, but an issue with the generation of the msg file itself.
-* Exposed the `MessageBase` class directly from extract_msg. I forgot to do this when I created it.
+* [[TeamMsgExtractor #105](https://github.com/TeamMsgExtractor/msg-extractor/issues/105)] Added code to fix an internal msg issue that had recipient lists being split up in the header after a certain amount of characters. This was now a bug on our part, but an issue with the generation of the msg file itself.
+* Exposed the `MessageBase` class directly from `extract_msg`. I forgot to do this when I created it.
 * Added `MessageBase.bcc`. I think it used to exist but got erased somehow on accident. Either way, it exists now.
 
 **v0.27.2**
 * After much debate, I have finally decided to allow an option to override the string encoding in message files. This Was something I reserved solely for `dev_classes.Message` because it felt like it didn't fit with how msg files were supposed to work. I also didn't want messages from people about them running into errors after they overrode the encoding. You can now do this by providing the `overrideEncoding` option on any `MSGFile` class as well as the `openMsg` function.
-* [[mattgwwalker #103](https://github.com/mattgwwalker/msg-extractor/issues/103)] Implemented correct detection of encodings. If you have any more issues with "'X' codec can't decode bytes" it is likely because the encoding specified inside the msg file is wrong.
+* [[TeamMsgExtractor #103](https://github.com/TeamMsgExtractor/msg-extractor/issues/103)] Implemented correct detection of encodings. If you have any more issues with "'X' codec can't decode bytes" it is likely because the encoding specified inside the msg file is wrong.
 
 **v0.27.1**
-* [[mattgwwalker #147](https://github.com/mattgwwalker/msg-extractor/issues/147)] Fixed an issue in `Message.save` caused by it attempting to directly access a private variable that was moved to the base class `MessageBase`.
+* [[TeamMsgExtractor #147](https://github.com/TeamMsgExtractor/msg-extractor/issues/147)] Fixed an issue in `Message.save` caused by it attempting to directly access a private variable that was moved to the base class `MessageBase`.
 
 **v0.27.0**
-* [[mattgwwalker #143](https://github.com/mattgwwalker/msg-extractor/issues/143)] Added new class `Appointment` that can handle outlook appointments or meetings.
-* [[mattgwwalker #143](https://github.com/mattgwwalker/msg-extractor/issues/143)] Added new class `MessageBase` for classes that end up being mostly like the `Message` class. Currently subclassed by `Message` and `Appointment`. This should not have a direct effect on any code that uses this module.
+* [[TeamMsgExtractor #143](https://github.com/TeamMsgExtractor/msg-extractor/issues/143)] Added new class `Appointment` that can handle outlook appointments or meetings.
+* [[TeamMsgExtractor #143](https://github.com/TeamMsgExtractor/msg-extractor/issues/143)] Added new class `MessageBase` for classes that end up being mostly like the `Message` class. Currently subclassed by `Message` and `Appointment`. This should not have a direct effect on any code that uses this module.
 * Added support for `PtypFloatingTime` in `utils.parseType`.
 * Added proper support for `PtypTime` in `FixedLengthProp.parseType`
 * Added pretty print functions to the `Properties` class and the `Named` class.
@@ -56,20 +57,20 @@
 * [[TheElementalOfDestruction #2](https://github.com/TheElementalOfDestruction/msg-extractor/issues/2)] Finished partial implementation of `utils.parseType` which was necessary for the proper implementation of named properties. This function is not fully implemented because there are some types we do not fully understand.
 
 **v0.25.3**
-* [[mattgwwalker #138](https://github.com/mattgwwalker/msg-extractor/issues/138)] Fixed missing import in `extract_msg/utils.py`.
+* [[TeamMsgExtractor #138](https://github.com/TeamMsgExtractor/msg-extractor/issues/138)] Fixed missing import in `extract_msg/utils.py`.
 
 **v0.25.2**
-* [[mattgwwalker #134](https://github.com/mattgwwalker/msg-extractor/issues/134)] Fixed a typo that caused `Message.headerDict` to raise an exception.
+* [[TeamMsgExtractor #134](https://github.com/TeamMsgExtractor/msg-extractor/issues/134)] Fixed a typo that caused `Message.headerDict` to raise an exception.
 * Upgraded code for `Message.headerDict` to avoid accidentally raising a key error if the header is ever missing the "Received" property.
 * Fixed an error in the changelog that caused some issue links to link to the wrong place.
 
 **v0.25.1**
-* [[mattgwwalker #132](https://github.com/mattgwwalker/msg-extractor/issues/132)] Fixed an issue caused by unfinished code being left in the \_\_main\_\_ file.
+* [[TeamMsgExtractor #132](https://github.com/TeamMsgExtractor/msg-extractor/issues/132)] Fixed an issue caused by unfinished code being left in the \_\_main\_\_ file.
 * Cleaned up the imports to only be what is needed.
 
 **v0.25.0**
 * Added new class `MSGFile`. The `Message` class now inherits from this. This class is the base for all MSG files, not just `Message`s. It somewhat recently came to our attention that MSG files are used for a variety of things, including the storage of contacts, leading us to the next part of the changelog.
-* [[mattgwwalker #110](https://github.com/mattgwwalker/msg-extractor/issues/110)] Added new class `Contact` for extracting the data from MSG files storing contacts.
+* [[TeamMsgExtractor #110](https://github.com/TeamMsgExtractor/msg-extractor/issues/110)] Added new class `Contact` for extracting the data from MSG files storing contacts.
 * Added new function `openMsg` to the module to be used to open MSG files in which it is not certain what type of MSG is being opened.
 * Modified the `Attachment` class to use the `openMsg` function to open embedded MSG files.
 * Added option `delayAttachments` to the `Message` class that will stop it from initializing attachments until the user is ready. This allows users to open `Message`s that have unimplemented attachment types without having to worry about the exception stopping them. This is also an option in the new `openMsg` function.
@@ -87,36 +88,36 @@
 * Fixed bug with embedded msg files introduced in v0.24.0
 
 **v0.24.0**
-* [[mattgwwalker #107](https://github.com/mattgwwalker/msg-extractor/issues/107)] Rewrote the `Messsage.save` function to fix many errors arising from it and to extend its functionality.
+* [[TeamMsgExtractor #107](https://github.com/TeamMsgExtractor/msg-extractor/issues/107)] Rewrote the `Messsage.save` function to fix many errors arising from it and to extend its functionality.
 * Added new function `isEmptyString` to check if a string passed to it is `None` or is empty.
 
 **v0.23.4**
-* [[mattgwwalker #112](https://github.com/mattgwwalker/msg-extractor/issues/112)] Changed method used to get the message from an exception to make it compatible with Python 2 and 3.
+* [[TeamMsgExtractor #112](https://github.com/TeamMsgExtractor/msg-extractor/issues/112)] Changed method used to get the message from an exception to make it compatible with Python 2 and 3.
 * [[TheElementalOfDestruction #23](https://github.com/TheElementalOfDestruction/msg-extractor/issues/23)] General cleanup and all around improvements of the code.
 
 **v0.23.3**
 * Fixed issues in readme.
 * [[TheElementalOfDestruction #22](https://github.com/TheElementalOfDestruction/msg-extractor/issues/22)] Updated `dev_classes.Message` to better match the current `Message` class.
 * Fixed bad links in changelog.
-* [[mattgwwalker #95](https://github.com/mattgwwalker/msg-extractor/issues/95)] Added fallback encoding as well as manual encoding change to `dev_classes.Message`.
+* [[TeamMsgExtractor #95](https://github.com/TeamMsgExtractor/msg-extractor/issues/95)] Added fallback encoding as well as manual encoding change to `dev_classes.Message`.
 
 **v0.23.1**
 * Fixed issue with embedded msg files caused by the changes in v0.23.0.
 
 **v0.23.0**
-* [[mattgwwalker #75](https://github.com/mattgwwalker/msg-extractor/issues/75)] & [[TheElementalOfDestruction #19](https://github.com/TheElementalOfDestruction/msg-extractor/issues/19)] Completely rewrote the function `Message._getStringStream`. This was done for two reasons. The first was to make it actually work with msg files that have their strings encoded in a non-Unicode encoding. The second reason was to make it so that it better reflected msg specification which says that ALL strings in a file will be either Unicode or non-Unicode, but not both. Because of the second part, the `prefer` option has been removed.
+* [[TeamMsgExtractor #75](https://github.com/TeamMsgExtractor/msg-extractor/issues/75)] & [[TheElementalOfDestruction #19](https://github.com/TheElementalOfDestruction/msg-extractor/issues/19)] Completely rewrote the function `Message._getStringStream`. This was done for two reasons. The first was to make it actually work with msg files that have their strings encoded in a non-Unicode encoding. The second reason was to make it so that it better reflected msg specification which says that ALL strings in a file will be either Unicode or non-Unicode, but not both. Because of the second part, the `prefer` option has been removed.
 * As part of fixing the two issues in the previous change, we have added two new properties:
     1. a boolean `Message.areStringsUnicode` which tells if the strings are Unicode encoded.
     2. A string `Message.stringEncoding` which tells what the encoding is. This is used by the `Message._getStringStream` to determine how to decode the data into a string.
 
 **v0.22.1**
-* [[mattgwwalker #69](https://github.com/mattgwwalker/msg-extractor/issues/69)] Fixed date format not being up to standard.
+* [[TeamMsgExtractor #69](https://github.com/TeamMsgExtractor/msg-extractor/issues/69)] Fixed date format not being up to standard.
 * Fixed a minor spelling error in the code.
 
 **v0.22.0**
 * [[TheElementalOfDestruction #18](https://github.com/TheElementalOfDestruction/msg-extractor/issues/18)] Added `--validate` option.
 * [[TheElementalOfDestruction #16](https://github.com/TheElementalOfDestruction/msg-extractor/issues/16)] Moved all dev code into its own scripts. Use `--dev` to use from the command line.
-* [[mattgwwalker #67](https://github.com/mattgwwalker/msg-extractor/issues/67)] Added compatibility module to enforce Unicode os functions.
+* [[TeamMsgExtractor #67](https://github.com/TeamMsgExtractor/msg-extractor/issues/67)] Added compatibility module to enforce Unicode os functions.
 * Added new function to `Message` class: `Message.sExists`. This function checks if a string stream exists. It's input should be formatted identically to that of `Message._getStringStream`.
 * Added new function to `Message` class: `Message.fix_path`. This function will add the proper prefix to the path (if the `prefix` parameter is true) and adjust the path to be a string rather than a list or tuple.
 * Added new function to `utils.py`: `get_full_class_name`. This function returns a string containing the module name and the class name of any instance of any class. It is returned in the format of `{module}.{class}`.
@@ -128,9 +129,9 @@
 * [[TheElementalOfDestruction #17](https://github.com/TheElementalOfDestruction/msg-extractor/issues/17)] Fixed Attachment class using wrong properties file location in embedded msg files.
 * [[TheElementalOfDestruction #11](https://github.com/TheElementalOfDestruction/msg-extractor/issues/11)] Improved handling of command line arguments using argparse module.
 * [[TheElementalOfDestruction #16](https://github.com/TheElementalOfDestruction/msg-extractor/issues/16)] Started work on moving developer code into its own script.
-* [[mattgwwalker #63](https://github.com/mattgwwalker/msg-extractor/issues/63)] Fixed JSON saving not applying to embedded msg files.
-* [[mattgwwalker #55](https://github.com/mattgwwalker/msg-extractor/issues/55)] Added fix for recipient sometimes missing email address.
-* [[mattgwwalker #65](https://github.com/mattgwwalker/msg-extractor/issues/65)] Added fix for special characters in recipient names.
+* [[TeamMsgExtractor #63](https://github.com/TeamMsgExtractor/msg-extractor/issues/63)] Fixed JSON saving not applying to embedded msg files.
+* [[TeamMsgExtractor #55](https://github.com/TeamMsgExtractor/msg-extractor/issues/55)] Added fix for recipient sometimes missing email address.
+* [[TeamMsgExtractor #65](https://github.com/TeamMsgExtractor/msg-extractor/issues/65)] Added fix for special characters in recipient names.
 * Module now raises a custom exception (instead of just `IOError`) if the input is not a valid OLE file.
 * Added `header_dict` property to the `Message` class.
 * General minor bug fixes.
