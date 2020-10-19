@@ -37,3 +37,6 @@ __pycache__/
 
 # End user logging
 logging.json
+
+# Developer files
+upload.bat
