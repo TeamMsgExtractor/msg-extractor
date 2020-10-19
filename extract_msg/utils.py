@@ -117,21 +117,21 @@ def divide(string, length):
     Divides a string into multiple substrings of equal length.
     If there is not enough for the last substring to be equal,
     it will simply use the rest of the string.
-	Can also be used for things like lists and tuples.
+    Can also be used for things like lists and tuples.
 
-	:param string: string to be divided.
-	:param length: length of each division.
-	:returns: list containing the divided strings.
+    :param string: string to be divided.
+    :param length: length of each division.
+    :returns: list containing the divided strings.
 
-	Example:
-	>>>> a = divide('Hello World!', 2)
-	>>>> print(a)
-	['He', 'll', 'o ', 'Wo', 'rl', 'd!']
+    Example:
+    >>>> a = divide('Hello World!', 2)
+    >>>> print(a)
+    ['He', 'll', 'o ', 'Wo', 'rl', 'd!']
     >>>> a = divide('Hello World!', 5)
-	>>>> print(a)
-	['Hello', ' Worl', 'd!']
-	"""
-	return [string[length * x:length * (x + 1)] for x in range(int(math.ceil(len(string) / length)))]
+    >>>> print(a)
+    ['Hello', ' Worl', 'd!']
+    """
+    return [string[length * x:length * (x + 1)] for x in range(int(math.ceil(len(string) / length)))]
 
 def fromTimeStamp(stamp):
     return datetime.datetime.fromtimestamp(stamp, tzlocal.get_localzone())
