@@ -1,5 +1,5 @@
 **v0.27.5**
-* Fixed an error in `utils.divide` that would cause it to drop the extra data is there was not enough to create a full division. For example, if you had a string that was 10 characters, and divided by 3, you would only receive a total of 9 characters back.
+* Fixed an error in `utils.divide` that would cause it to drop the extra data if there was not enough to create a full division. For example, if you had a string that was 10 characters, and divided by 3, you would only receive a total of 9 characters back.
 * Added some useful functions that will be used in the future.
 * [[TeamMsgExtractor](https://github.com/TeamMsgExtractor/msg-extractor/issues/155)] Updated to use new version of tzlocal.
 * Updated changelog to fit new repository.
