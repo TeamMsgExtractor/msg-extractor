@@ -1,16 +1,17 @@
 """
 Various small data structures used in msg extractor.
 """
-from extract_msg import constants
 
+from extract_msg import constants
 
 
 class PermanentEntryID(object):
     def __init__(self, data):
+        super(PermanentEntryID, self).__init__()
         self.__data = data
         unpacked = constants.STPEID.unpack(data[:28])
         if unpacked[0] != 0:
-            raise TypeError('Not a PermanentEntryID (expected 0, got )')
+            raise TypeError('Not a PermanentEntryID (expected 0, got {}).'.format(unpacked[0]))
         self.__providerUID = unpacked[1]
         self.__displayTypeString = unpacked[2]
         self.__distinguishedName = data[28:-1].decode('ascii') # Cut off the null character at the end and decode the data as ascii

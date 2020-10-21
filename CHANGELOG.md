@@ -1,3 +1,6 @@
+**v0.27.6**
+* Fixed a few lines in `data.py`.
+
 **v0.27.5**
 * Fixed an error in `utils.divide` that would cause it to drop the extra data if there was not enough to create a full division. For example, if you had a string that was 10 characters, and divided by 3, you would only receive a total of 9 characters back.
 * Added some useful functions that will be used in the future.
