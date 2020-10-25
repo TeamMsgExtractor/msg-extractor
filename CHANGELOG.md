@@ -1,3 +1,6 @@
+**v0.27.7**
+* Fixed an issue in the new bitwise adjustment functions. One of the variable names was incorrect.
+
 **v0.27.6**
 * Fixed a few lines in `data.py`.
 
