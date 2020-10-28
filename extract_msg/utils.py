@@ -8,7 +8,6 @@ import datetime
 import json
 import logging
 import logging.config
-import math
 import struct
 import sys
 
@@ -80,7 +79,7 @@ def addNumToDir(dirName):
             pass
     return None
 
-def bitwiseAdjust(result, mask):
+def bitwiseAdjust(inp, mask):
     """
     Uses a given mask to adjust the location of bits after an operation like
     bitwise AND. This is useful for things like flags where you are trying to
@@ -94,7 +93,7 @@ def bitwiseAdjust(result, mask):
     """
     if mask < 1:
         raise ValueError('Mask MUST be greater than 0')
-    return result >> bin(mask)[::-1].index('1')
+    return inp >> bin(mask)[::-1].index('1')
 
 def bitwiseAdjustedAnd(inp, mask):
     """
@@ -103,12 +102,22 @@ def bitwiseAdjustedAnd(inp, mask):
     """
     if mask < 1:
         raise ValueError('Mask MUST be greater than 0')
-    return (result & mask) >> bin(mask)[::-1].index('1')
+    return (inp & mask) >> bin(mask)[::-1].index('1')
 
 def bytesToGuid(bytes_input):
     hexinput = [properHex(byte) for byte in bytes_input]
     hexs = [hexinput[3] + hexinput[2] + hexinput[1] + hexinput[0], hexinput[5] + hexinput[4], hexinput[7] + hexinput[6], hexinput[8] + hexinput[9], ''.join(hexinput[10:16])]
     return '{{{}-{}-{}-{}-{}}}'.format(*hexs).upper()
+
+def ceilDiv(n, d):
+    """
+    Returns the int from the ceil division of n / d.
+    ONLY use ints as inputs to this function.
+
+    For ints, this is faster and more accurate for numbers
+    outside the precision range of float.
+    """
+    return -(n // -d)
 
 def divide(string, length):
     """
@@ -131,7 +140,7 @@ def divide(string, length):
     >>>> print(a)
     ['Hello', ' Worl', 'd!']
     """
-    return [string[length * x:length * (x + 1)] for x in range(int(math.ceil(len(string) / length)))]
+    return [string[length * x:length * (x + 1)] for x in range(int(ceilDiv(len(string), length)))]
 
 def fromTimeStamp(stamp):
     return datetime.datetime.fromtimestamp(stamp, tzlocal.get_localzone())

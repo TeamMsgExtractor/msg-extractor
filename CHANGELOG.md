@@ -1,10 +1,16 @@
+**v0.27.8**
+* [[TeamMsgExtractor #158](https://github.com/TeamMsgExtractor/msg-extractor/issues/158)] Fixed a spelling error in a function name that was causing it to not be seen. The function was called `ceilDiv` but was accidentally called as `cielDiv`.
+
+**v0.27.7**
+* Fixed an issue in the new bitwise adjustment functions. One of the variable names was incorrect.
+
 **v0.27.6**
 * Fixed a few lines in `data.py`.
 
 **v0.27.5**
 * Fixed an error in `utils.divide` that would cause it to drop the extra data if there was not enough to create a full division. For example, if you had a string that was 10 characters, and divided by 3, you would only receive a total of 9 characters back.
 * Added some useful functions that will be used in the future.
-* [[TeamMsgExtractor](https://github.com/TeamMsgExtractor/msg-extractor/issues/155)] Updated to use new version of tzlocal.
+* [[TeamMsgExtractor #155](https://github.com/TeamMsgExtractor/msg-extractor/issues/155)] Updated to use new version of tzlocal.
 * Updated changelog to fit new repository.
 
 **v0.27.4**
