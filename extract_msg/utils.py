@@ -140,7 +140,7 @@ def divide(string, length):
     >>>> print(a)
     ['Hello', ' Worl', 'd!']
     """
-    return [string[length * x:length * (x + 1)] for x in range(int(cielDiv(len(string), length)))]
+    return [string[length * x:length * (x + 1)] for x in range(int(ceilDiv(len(string), length)))]
 
 def fromTimeStamp(stamp):
     return datetime.datetime.fromtimestamp(stamp, tzlocal.get_localzone())
