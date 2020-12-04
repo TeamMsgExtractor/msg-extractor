@@ -4,7 +4,7 @@ import re
 
 
 # a handful of variables that are used a couple of times
-github_url = 'https://github.com/mattgwwalker/msg-extractor'
+github_url = 'https://github.com/TeamMsgExtractor/msg-extractor'
 main_module = 'extract_msg'
 # main_script = main_module + '.py'
 
