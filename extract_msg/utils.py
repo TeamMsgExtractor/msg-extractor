@@ -180,6 +180,9 @@ def get_command_args(args):
     # --use-filename
     parser.add_argument('--use-filename', dest='use_filename', action='store_true',
                         help='Sets whether the name of each output is based on the msg filename.')
+    # --dump-stdout
+    parser.add_argument('--dump-stdout', dest='dump_stdout', action='store_true',
+                        help='Tells the program to dump the message body (plain text) to stdout. Overrides saving arguments.')
     # --html
     #parser.add_argument('--html', dest='html', action='store_true',
     #                    help='Sets whether the output should be html. If this is not possible, will fallback to plain text')
@@ -207,6 +210,18 @@ def get_command_args(args):
 
     if options.dev or options.file_logging:
         options.verbose = True
+
+    # If dump_stdout is True, we need to unset all arguments used in files.
+    # Technically we actually only *need* to unset `out_path`, but that may
+    # change in the future, so let's be thorough.
+    if options.dump_stdout:
+        options.out_path = None
+        options.json = False
+        #options.rtf = False
+        #options.html = False
+        options.use_filename = False
+        options.cid = False
+
     file_args = options.msgs
     file_tables = []  # This is where we will store the separated files and their arguments
     temp_table = []  # temp_table will store each table while it is still being built.

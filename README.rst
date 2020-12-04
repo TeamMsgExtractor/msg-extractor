@@ -180,8 +180,8 @@ Credits
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
 
-.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.27.8-blue.svg
-   :target: https://pypi.org/project/extract-msg/0.27.8/
+.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.27.9-blue.svg
+   :target: https://pypi.org/project/extract-msg/0.27.9/
 
 .. |PyPI1| image:: https://img.shields.io/badge/python-2.7+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-2715/
