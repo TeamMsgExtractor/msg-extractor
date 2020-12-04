@@ -42,6 +42,7 @@ setup(
     license='GPL',
     packages=[main_module],
     py_modules=[main_module],
+    scripts=['scripts/extract_msg'],
     include_package_data=True,
     install_requires=dependencies,
 )

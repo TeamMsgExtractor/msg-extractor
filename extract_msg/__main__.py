@@ -6,7 +6,7 @@ from extract_msg import __doc__, utils
 from extract_msg.compat import os_ as os
 from extract_msg.message import Message
 
-if __name__ == '__main__':
+def main():
     # Setup logging to stdout, indicate running from cli
     CLI_LOGGING = 'extract_msg_cli'
 
@@ -53,3 +53,6 @@ if __name__ == '__main__':
                 print("Error with file '" + x[0] + "': " +
                       traceback.format_exc())
             os.chdir(currentdir)
+
+if __name__ == '__main__':
+    main()

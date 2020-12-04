@@ -1,7 +1,9 @@
 **v0.27.9**
 * [[TeamMsgExtractor #161](https://github.com/TeamMsgExtractor/msg-extractor/issues/161)] Added commands to the command line that will allow the user to specify that they want the message data to be output to stdout rather than to a file.
+* [[TeamMsgExtractor #162](https://github.com/TeamMsgExtractor/msg-extractor/issues/162)] Added a wrapper for extract_msg that will be installed.
 * Fixed some of the encoding names to allow them to actually be used in Python. The names they previously held were not aliases that currently exist.
 * Added more documentation to `constants.CODE_PAGES` to give more information about what it is. As it is a list of the possible encodings an msg file can use, I also specified which ones were supported by Python 3.
+* Moved the main code into a function so it is now callable from outside of the file.
 
 **v0.27.8**
 * [[TeamMsgExtractor #158](https://github.com/TeamMsgExtractor/msg-extractor/issues/158)] Fixed a spelling error in a function name that was causing it to not be seen. The function was called `ceilDiv` but was accidentally called as `cielDiv`.
