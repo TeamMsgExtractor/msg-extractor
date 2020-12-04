@@ -38,13 +38,17 @@ if __name__ == '__main__':
             fil.write(json.dumps(val_results))
         utils.get_input('Press enter to exit...')
     else:
-        utils.setup_logging(args.config_path, level, args.log, args.file_logging)
+        if not args.dump_stdout:
+            utils.setup_logging(args.config_path, level, args.log, args.file_logging)
         for x in args.msgs:
             try:
                 with Message(x[0]) as msg:
                     # Right here we should still be in the path in currentdir
-                    os.chdir(out)
-                    msg.save(toJson = args.json, useFileName = args.use_filename, ContentId = args.cid)#, html = args.html, rtf = args.html)
+                    if args.dump_stdout:
+                        print(msg.body)
+                    else:
+                        os.chdir(out)
+                        msg.save(toJson = args.json, useFileName = args.use_filename, ContentId = args.cid)#, html = args.html, rtf = args.html)
             except Exception as e:
                 print("Error with file '" + x[0] + "': " +
                       traceback.format_exc())
