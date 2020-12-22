@@ -5,6 +5,8 @@ import re
 
 import compressed_rtf
 from imapclient.imapclient import decode_utf7
+from RTFDE import DeEncapsulator
+from RTFDE.exceptions import MalformedEncapsulatedRtf, NotEncapsulatedRtf
 
 from email.parser import Parser as EmailParser
 from extract_msg import constants
@@ -58,6 +60,7 @@ class MessageBase(MSGFile):
         self.date
         self.__crlf = '\n'  # This variable keeps track of what the new line character should be
         self.body
+        self._deencapsulatedRtfBody = None
         self.named
 
     def _genRecipient(self, recipientType, recipientInt):
@@ -279,7 +282,11 @@ class MessageBase(MSGFile):
         """
         Returns the html body, if it exists.
         """
-        return self._ensureSet('_htmlBody', '__substg1.0_10130102', False)
+        _html_body = self._ensureSet('_htmlBody', '__substg1.0_10130102', False)
+        if (_html_body is None) and (self.deencapsulatedRtfBody is not None):
+            if self._deencapsulatedRtfBody.content_type == "html":
+                self._htmlBody = self._deencapsulatedRtfBody.html
+        return self._htmlBody
 
     @property
     def inReplyTo(self):
@@ -344,6 +351,24 @@ class MessageBase(MSGFile):
         Returns the decompressed Rtf body from the message.
         """
         return compressed_rtf.decompress(self.compressedRtf)
+
+    @property
+    def deencapsulatedRtfBody(self):
+        """
+        Returns the de-encapsulated content from the Rtf body of the message, if there is any.
+        """
+        if self._deencapsulatedRtfBody is None:
+            try:
+                rtf_obj = DeEncapsulator(self.rtfBody)
+                rtf_obj.deencapsulate()
+                self._deencapsulatedRtfBody = rtf_obj
+            except NotEncapsulatedRtf as _e:
+                logger.debug("RTF body is not encapsulated.")
+                return None
+            except MalformedEncapsulatedRtf as _e:
+                logger.info("RTF body contains encapsulated content, but it is malformed and can't be de-encapsulated.")
+                return None
+        return self._deencapsulatedRtfBody.content
 
     @property
     def sender(self):
