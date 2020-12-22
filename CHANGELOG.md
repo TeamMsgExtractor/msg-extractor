@@ -1,3 +1,6 @@
+**v0.28.0**
+* [[TeamMsgExtractor #137]](https://github.com/TeamMsgExtractor/msg-extractor/issues/137) Added functionality to De-Encapsulate HTML/plain text from an RTF body.
+
 **v0.27.9**
 * [[TeamMsgExtractor #161](https://github.com/TeamMsgExtractor/msg-extractor/issues/161)] Added commands to the command line that will allow the user to specify that they want the message data to be output to stdout rather than to a file.
 * [[TeamMsgExtractor #162](https://github.com/TeamMsgExtractor/msg-extractor/issues/162)] Added a wrapper for extract_msg that will be installed.
