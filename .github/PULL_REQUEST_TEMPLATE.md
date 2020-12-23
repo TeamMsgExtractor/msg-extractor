@@ -1,4 +1,5 @@
 - [ ] Issue #: (Replace text with #<issue_number>)
+- [ ] Have you confirmed that any changes you have made are compatible with Python 2.7? If your changes are not compatible, you will be denied.
 - [ ] Have you listed any changes to install or build dependencies?
 - [ ] Have you updated the [CHANGELOG](CHANGELOG.md) with details of changes to the codebase, this includes new functionality, deprecated features, or any other material changes.
 - [ ] If necessary, have you bumped the version number? We will usually do this for you.
