@@ -1,5 +1,5 @@
 **v0.27.10**
-* [[TeamMsgExtractor #162](https://github.com/TeamMsgExtractor/msg-extractor/issues/162)] Fixed line endings in the wrapper script to be UNIX line endings rather than Windows line endings.
+* [[TeamMsgExtractor #162](https://github.com/TeamMsgExtractor/msg-extractor/issues/162)] Fixed line endings in the wrapper script to be UNIX line endings rather than Windows line endings. Attempted to add the execution flag to the runnable script.
 
 **v0.27.9**
 * [[TeamMsgExtractor #161](https://github.com/TeamMsgExtractor/msg-extractor/issues/161)] Added commands to the command line that will allow the user to specify that they want the message data to be output to stdout rather than to a file.
