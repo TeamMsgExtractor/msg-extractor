@@ -455,7 +455,7 @@ def parseType(_type, stream, encoding, extras):
             return ret
         elif _type == 0x1102:
             ret = copy.deepcopy(extras)
-            lengths = [struct.unpack('<i', stream[pos*8:(pos+1)*8]) for pos in range(len(stream) // 8)]
+            lengths = tuple(struct.unpack('<i', stream[pos*8:(pos+1)*8]) for pos in range(len(stream) // 8))
             length_lengths = len(lengths)
             if length_lengths > length_extras:
                 logger.warning('Error while parsing multiple type. Expected {} stream{}, got {}. Ignoring.'.format(length_lengths, 's' if length_lengths > 1 or length_lengths == 0 else '', length_extras))
@@ -463,24 +463,26 @@ def parseType(_type, stream, encoding, extras):
                 if lengths[x] != len(y):
                     logger.warning('Error while parsing multiple type. Expected length {}, got {}. Ignoring.'.format(lengths[x], len(y)))
             return ret
-        elif _type in (0x1002, 0x1003, 0x1004, 0x1005, 0x1007, 0x1040, 0x1048):
+        elif _type in (0x1002, 0x1003, 0x1004, 0x1005, 0x1007, 0x1014, 0x1040, 0x1048):
             if stream != len(extras):
                 logger.warning('Error while parsing multiple type. Expected {} entr{}, got {}. Ignoring.'.format(stream, ('y' if stream == 1 else 'ies'), len(extras)))
             if _type == 0x1002:
-                return [constants.STMI16.unpack(x)[0] for x in extras]
+                return tuple(constants.STMI16.unpack(x)[0] for x in extras)
             if _type == 0x1003:
-                return [constants.STMI32.unpack(x)[0] for x in extras]
+                return tuple(constants.STMI32.unpack(x)[0] for x in extras)
             if _type == 0x1004:
-                return [constants.STMF32.unpack(x)[0] for x in extras]
+                return tuple(constants.STMF32.unpack(x)[0] for x in extras)
             if _type == 0x1005:
-                return [constants.STMF64.unpack(x)[0] for x in extras]
+                return tuple(constants.STMF64.unpack(x)[0] for x in extras)
             if _type == 0x1007:
-                values = [constants.STMF64.unpack(x)[0] for x in extras]
-                raise NotImplementedError('Parsing for type 0x1007 has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType 0x1007"')
+                values = tuple(constants.STMF64.unpack(x)[0] for x in extras)
+                raise NotImplementedError('Parsing for type 0x1007 has not yet een implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType 0x1007"')
+            if _type == 0x1014:
+                return tuple(constants.STMI64.unpack(x)[0] for x in extras)
             if _type == 0x1040:
-                return [msgEpoch(constants.ST3.unpack(x)[0]) for x in extras]
+                return tuple(msgEpoch(constants.ST3.unpack(x)[0]) for x in extras)
             if _type == 0x1048:
-                return [bytesToGuid(x) for x in extras]
+                return tuple(bytesToGuid(x) for x in extras)
         else:
             raise NotImplementedError('Parsing for type {} has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType {}"'.format(_type, _type))
     return value
