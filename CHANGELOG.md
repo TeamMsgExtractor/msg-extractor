@@ -1,3 +1,6 @@
+**v0.27.11**
+* [[TeamMsgExtractor #173](https://github.com/TeamMsgExtractor/msg-extractor/issues/173)] Tentatively implemented type 0x1014 (PtypMultipleInteger64). Apparently I forgot to do it earlier.
+
 **v0.27.10**
 * [[TeamMsgExtractor #162](https://github.com/TeamMsgExtractor/msg-extractor/issues/162)] Fixed line endings in the wrapper script to be UNIX line endings rather than Windows line endings. Attempted to add the execution flag to the runnable script.
 
