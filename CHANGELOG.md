@@ -1,3 +1,7 @@
+**v0.27.12**
+* [[TeamMsgExtractor #173](https://github.com/TeamMsgExtractor/msg-extractor/issues/173)] Made an assumption about where an exception was thrown from and was wrong. While that location would have throw an exception, the function that called that code was the one to actually throw the exception in question. This issue *should* be fixed...
+* [[TeamMsgExtractor #162](https://github.com/TeamMsgExtractor/msg-extractor/issues/162)] Made another attempt to fix the execution flag on the wrapper script.
+
 **v0.27.11**
 * [[TeamMsgExtractor #173](https://github.com/TeamMsgExtractor/msg-extractor/issues/173)] Tentatively implemented type 0x1014 (PtypMultipleInteger64). Apparently I forgot to do it earlier.
 
