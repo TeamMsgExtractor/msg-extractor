@@ -1,3 +1,7 @@
+**v0.27.14**
+* [[TeamMsgExtractor #173](https://github.com/TeamMsgExtractor/msg-extractor/issues/173)] Fixed typo that I made in the last version that broke things. I didn't have the resources to test this one myself, unfortunately.
+* Fixed a typo in an exception message.
+
 **v0.27.13**
 * [[TeamMsgExtractor #173](https://github.com/TeamMsgExtractor/msg-extractor/issues/173)] Moved some data used in checks into constants so that I can make sure they get changed every where that they are used. Hopefully I can close this issue.
 
