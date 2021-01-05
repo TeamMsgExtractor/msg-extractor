@@ -4,6 +4,7 @@ Utility functions of extract_msg.
 
 import argparse
 import codecs
+import copy
 import datetime
 import json
 import logging

@@ -1,3 +1,6 @@
+**v0.27.15**
+* [[TeamMsgExtractor #177](https://github.com/TeamMsgExtractor/msg-extractor/issues/177)] Fixed missing import.
+
 **v0.27.14**
 * [[TeamMsgExtractor #173](https://github.com/TeamMsgExtractor/msg-extractor/issues/173)] Fixed typo that I made in the last version that broke things. I didn't have the resources to test this one myself, unfortunately.
 * Fixed a typo in an exception message.
