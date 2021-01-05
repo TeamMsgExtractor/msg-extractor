@@ -241,7 +241,7 @@ class MSGFile(olefile.OleFileIO):
                             streams = self.mainProperties[x[-8:]].realLength
                         except:
                             logger.error('Could not find matching VariableLengthProp for stream {}'.format(x))
-                            streams = len(contents) // (2 if _type == '1002' else 4 if _type in ('1003', '1004') else 8 if type in ('1005', '1007', '1014', '1040') else 16)
+                            streams = len(contents) // (2 if _type in constants.MULTIPLE_2_BYTES else 4 if _type in constants.MULTIPLE_4_BYTES else 8 if type in constants.MULTIPLE_8_BYTES else 16)
                     else:
                         raise NotImplementedError('The stream specified is of type {}. We don\'t currently understand exactly how this type works. If it is mandatory that you have the contents of this stream, please create an issue labled "NotImplementedError: _getTypedStream {}".'.format(_type, _type))
                     if _type in ('101F', '101E', '1102'):
@@ -250,7 +250,7 @@ class MSGFile(olefile.OleFileIO):
                                 if self.Exists(x + '-' + properHex(y, 8), False):
                                     extras.append(self._getStream(x + '-' + properHex(y, 8), False))
                     elif _type in ('1002', '1003', '1004', '1005', '1007', '1014', '1040', '1048'):
-                        extras = divide(contents, (2 if _type == '1002' else 4 if _type in ('1003', '1004') else 8 if type in ('1005', '1007', '1040') else 16))
+                        extras = divide(contents, (2 if _type in constants.MULTIPLE_2_BYTES else 4 if _type in constants.MULTIPLE_4_BYTES else 8 if type in constants.MULTIPLE_8_BYTES else 16))
                         contents = streams
                 return True, parseType(int(_type, 16), contents, self.stringEncoding, extras)
         return False, None # We didn't find the stream.
