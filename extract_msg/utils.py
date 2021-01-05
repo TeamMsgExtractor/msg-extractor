@@ -476,7 +476,7 @@ def parseType(_type, stream, encoding, extras):
                 return tuple(constants.STMF64.unpack(x)[0] for x in extras)
             if _type == 0x1007:
                 values = tuple(constants.STMF64.unpack(x)[0] for x in extras)
-                raise NotImplementedError('Parsing for type 0x1007 has not yet een implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType 0x1007"')
+                raise NotImplementedError('Parsing for type 0x1007 has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType 0x1007"')
             if _type == 0x1014:
                 return tuple(constants.STMI64.unpack(x)[0] for x in extras)
             if _type == 0x1040:

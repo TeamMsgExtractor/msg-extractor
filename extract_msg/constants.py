@@ -118,6 +118,30 @@ VARIABLE_LENGTH_PROPS_STRING = (
     '1102',
 )
 
+# Multiple type properties that take up 2 bytes
+MULTIPLE_2_BYTES = (
+    '1002',
+)
+
+# Multiple type properties that take up 4 bytes
+MULTIPLE_4_BYTES = (
+    '1003',
+    '1004',
+)
+
+# Multiple type properties that take up 4 bytes
+MULTIPLE_8_BYTES = (
+    '1005',
+    '1007',
+    '1014',
+    '1040',
+)
+
+# Multiple type properties that take up 4 bytes
+MULTIPLE_16_BYTES = (
+
+)
+
 
 # This is a dictionary matching the code page number to it's encoding name.
 # The list used to make this can be found here:
