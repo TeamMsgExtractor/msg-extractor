@@ -40,3 +40,4 @@ logging.json
 
 # Developer files
 upload.bat
+upload.sh
