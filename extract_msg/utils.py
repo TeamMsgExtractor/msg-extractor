@@ -456,7 +456,7 @@ def parseType(_type, stream, encoding, extras):
             return ret
         elif _type == 0x1102:
             ret = copy.deepcopy(extras)
-            lengths = tuple(struct.unpack('<i', stream[pos*8:(pos+1)*8]) for pos in range(len(stream) // 8))
+            lengths = tuple(constants.STUI32.unpack(stream[pos*8:(pos+1)*8]) for pos in range(len(stream) // 8))
             length_lengths = len(lengths)
             if length_lengths > length_extras:
                 logger.warning('Error while parsing multiple type. Expected {} stream{}, got {}. Ignoring.'.format(length_lengths, 's' if length_lengths > 1 or length_lengths == 0 else '', length_extras))
