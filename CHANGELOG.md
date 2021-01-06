@@ -1,3 +1,7 @@
+**v0.27.16**
+* [[TeamMsgExtractor #177](https://github.com/TeamMsgExtractor/msg-extractor/issues/177)] Fixed incorrect struct being used. It should be the correct one now, but further testing will be required to confirm this.
+* Fixed log error message in `extract_msg.prop` to actually format a value into the message.
+
 **v0.27.15**
 * [[TeamMsgExtractor #177](https://github.com/TeamMsgExtractor/msg-extractor/issues/177)] Fixed missing import.
 

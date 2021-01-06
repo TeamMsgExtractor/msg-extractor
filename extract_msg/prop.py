@@ -138,7 +138,7 @@ class FixedLengthProp(PropBase):
                 value = fromTimeStamp(msgEpoch(constants.ST3.unpack(value)[0]))
             except Exception as e:
                 logger.exception(e)
-                logger.error('Timestamp value of {} caused an exception. This was probably caused by the time stamp being too far in the future.')
+                logger.error('Timestamp value of {} caused an exception. This was probably caused by the time stamp being too far in the future.'.format(msgEpoch(constants.ST3.unpack(value)[0])))
                 logger.error(self.raw)
                 value = constants.ST3.unpack(value)[0]
         elif _type == 0x0048:  # PtypGuid
