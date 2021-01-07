@@ -564,6 +564,11 @@ RF_PROFESSIONALOFFICESYSTEM = 0x5
 RF_PERSONALDESTRIBUTIONLIST1 = 0x6
 RF_PERSONALDESTRIBUTIONLIST2 = 0x7
 
+# Attachment Error behavior types
+ATTACHMENT_ERROR_THROW = 0
+ATTACHMENT_ERROR_NOT_IMPLEMENTED = 1
+ATTACHMENT_ERROR_BROKEN = 2
+
 
 # This property information was sourced from
 # http://www.fileformat.info/format/outlookmsg/index.htm

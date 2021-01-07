@@ -21,7 +21,7 @@ class MSGFile(olefile.OleFileIO):
     """
     Parser for .msg files
     """
-    def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None, overrideEncoding = None):
+    def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None, overrideEncoding = None, attachmentErrorBehavior = constants.ATTACHMENT_ERROR_THROW):
         """
         :param path: path to the msg file in the system or is the raw msg file.
         :param prefix: used for extracting embeded msg files
@@ -38,9 +38,12 @@ class MSGFile(olefile.OleFileIO):
         # WARNING DO NOT MANUALLY MODIFY PREFIX. Let the program set it.
         self.__path = path
         self.__attachmentClass = attachmentClass
+        if not (constants.ATTACHMENT_ERROR_THROW <= attachmentErrorBehavior <= constants.ATTACHMENT_ERROR_BROKEN):
+            raise ValueError("`attachmentErrorBehavior` must be ATTACHMENT_ERROR_THROW, ATTACHMENT_ERROR_NOT_IMPLEMENTED, or ATTACHMENT_ERROR_BROKEN.")
+        self.__attachmentErrorBehavior = attachmentErrorBehavior
         if overrideEncoding is not None:
             codecs.lookup(overrideEncoding)
-            logger.warning('You have chosen to override the string encoding. Do not report encoding erros caused by this.')
+            logger.warning('You have chosen to override the string encoding. Do not report encoding errors caused by this.')
             self.__stringEncoding = overrideEncoding
         self.__overrideEncoding = overrideEncoding
 
@@ -386,6 +389,17 @@ class MSGFile(olefile.OleFileIO):
         Returns the Attachment class being used, should you need to use it externally for whatever reason.
         """
         return self.__attachmentClass
+
+    @property
+    def attachmentErrorBehavior(self):
+        """
+        The behavior to follow when an attachment raises an exception. Will be one
+        of the following values:
+        ATTACHMENT_ERROR_THROW: Don't catch exceptions.
+        ATTACHMENT_ERROR_NOT_IMPLEMENTED: Catch NotImplementedError exceptions.
+        ATTACHMENT_ERROR_BROKEN: Catch all exceptions.
+        """
+        return self.__attachmentErrorBehavior
 
     @property
     def classType(self):

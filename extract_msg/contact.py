@@ -1,6 +1,6 @@
+from extract_msg import constants
 from extract_msg.attachment import Attachment
 from extract_msg.msg import MSGFile
-
 
 
 class Contact(MSGFile):
@@ -8,8 +8,8 @@ class Contact(MSGFile):
     Class used for parsing contacts.
     """
 
-    def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None, overrideEncoding = None):
-        MSGFile.__init__(self, path, prefix, attachmentClass, filename, overrideEncoding)
+    def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None, overrideEncoding = None, attachmentErrorBehavior = constants.ATTACHMENT_ERROR_THROW):
+        MSGFile.__init__(self, path, prefix, attachmentClass, filename, overrideEncoding, attachmentErrorBehavior)
         self.named
 
     @property
