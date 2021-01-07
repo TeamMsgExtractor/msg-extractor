@@ -1,3 +1,4 @@
+from extract_msg import constants
 from extract_msg.attachment import Attachment
 from extract_msg.message_base import MessageBase
 
@@ -6,8 +7,8 @@ class Appointment(MessageBase):
     Parser for Microsoft Outlook Appointment files.
     """
 
-    def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None, delayAttachments = False, overrideEncoding = None):
-        MessageBase.__init__(self, path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding)
+    def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None, delayAttachments = False, overrideEncoding = None, attachmentErrorBehavior = constants.ATTACHMENT_ERROR_THROW):
+        MessageBase.__init__(self, path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior)
 
     @property
     def appointmentClassType(self):

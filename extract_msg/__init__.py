@@ -27,8 +27,8 @@ https://github.com/mattgwwalker/msg-extractor
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 __author__ = 'The Elemental of Destruction & Matthew Walker'
-__date__ = '2021-01-06'
-__version__ = '0.27.16'
+__date__ = '2021-01-07'
+__version__ = '0.28.0'
 
 import logging
 

@@ -328,7 +328,7 @@ def msgpathToString(inp):
     inp.replace('\\', '/')
     return inp
 
-def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAttachments = False, overrideEncoding = None, strict = True):
+def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAttachments = False, overrideEncoding = None, attachmentErrorBehavior = constants.ATTACHMENT_ERROR_THROW, strict = True):
     """
     Function to automatically open an MSG file and detect what type it is.
 
@@ -357,17 +357,17 @@ def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAtt
 
     attachmentClass = Attachment if attachmentClass is None else attachmentClass
 
-    msg = MSGFile(path, prefix, attachmentClass, filename, overrideEncoding)
+    msg = MSGFile(path, prefix, attachmentClass, filename, overrideEncoding, attachmentErrorBehavior)
     classtype = msg.classType
     if classtype.startswith('IPM.Contact') or classtype.startswith('IPM.DistList'):
         msg.close()
-        return Contact(path, prefix, attachmentClass, filename, overrideEncoding)
+        return Contact(path, prefix, attachmentClass, filename, overrideEncoding, attachmentErrorBehavior)
     elif classtype.startswith('IPM.Note') or classtype.startswith('REPORT'):
         msg.close()
-        return Message(path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding)
+        return Message(path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior)
     elif classtype.startswith('IPM.Appointment') or classtype.startswith('IPM.Schedule'):
         msg.close()
-        return Appointment(path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding)
+        return Appointment(path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior)
     elif strict:
         msg.close()
         raise UnrecognizedMSGTypeError('Could not recognize msg class type "{}". It is recommended you report this to the developers.'.format(msg.classType))

@@ -8,7 +8,7 @@ from imapclient.imapclient import decode_utf7
 
 from email.parser import Parser as EmailParser
 from extract_msg import constants
-from extract_msg.attachment import Attachment
+from extract_msg.attachment import Attachment, BrokenAttachment, UnsupportedAttachment
 from extract_msg.compat import os_ as os
 from extract_msg.msg import MSGFile
 from extract_msg.recipient import Recipient
@@ -24,7 +24,9 @@ class MessageBase(MSGFile):
     Base class for Message like msg files.
     """
 
-    def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None, delayAttachments = False, overrideEncoding = None):
+    def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None,
+                 delayAttachments = False, overrideEncoding = None,
+                 attachmentErrorBehavior = constants.ATTACHMENT_ERROR_THROW):
         """
         :param path: path to the msg file in the system or is the raw msg file.
         :param prefix: used for extracting embeded msg files
@@ -41,7 +43,7 @@ class MessageBase(MSGFile):
         :param overrideEncoding: optional, an encoding to use instead of the one
             specified by the msg file. Do not report encoding errors caused by this.
         """
-        MSGFile.__init__(self, path, prefix, attachmentClass, filename, overrideEncoding)
+        MSGFile.__init__(self, path, prefix, attachmentClass, filename, overrideEncoding, attachmentErrorBehavior)
         self.__attachmentsDelayed = delayAttachments
         self.__attachmentsReady = False
         # Initialize properties in the order that is least likely to cause bugs.
@@ -150,7 +152,23 @@ class MessageBase(MSGFile):
             self._attachments = []
 
             for attachmentDir in attachmentDirs:
-                self._attachments.append(self.attachmentClass(self, attachmentDir))
+                try:
+                    self._attachments.append(self.attachmentClass(self, attachmentDir))
+                except NotImplementedError as e:
+                    if self.attachmentErrorBehavior > constants.ATTACHMENT_ERROR_THROW:
+                        logger.error('Error processing attachment at {}'.format(attachmentDir))
+                        logger.exception(e)
+                        self._attachments.append(UnsupportedAttachment(self, attachmentDir))
+                    else:
+                        raise
+                except Exception as e:
+                    if self.attachmentErrorBehavior == constants.ATTACHMENT_ERROR_BROKEN:
+                        logger.error('Error processing attachment at {}'.format(attachmentDir))
+                        logger.exception(e)
+                        self._attachments.append(BrokenAttachment(self, attachmentDir))
+                    else:
+                        raise
+
             self.__attachmentsReady = True
             try:
                 self.__waitingProperties
