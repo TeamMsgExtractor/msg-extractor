@@ -8,6 +8,8 @@ import datetime
 import struct
 import sys
 
+import ebcdic
+
 if sys.version_info[0] >= 3:
     BYTES = bytes
     STRING = str
@@ -184,8 +186,7 @@ CODE_PAGES = {
     865: 'IBM865', # OEM Nordic; Nordic (DOS)
     866: 'cp866', # OEM Russian; Cyrillic (DOS)
     869: 'ibm869', # OEM Modern Greek; Greek, Modern (DOS)
-    # UNSUPPORTED
-    870: 'IBM870', # IBM EBCDIC Multilingual/ROECE (Latin 2); IBM EBCDIC Multilingual Latin 2
+    870: 'cp870', # IBM870 # IBM EBCDIC Multilingual/ROECE (Latin 2); IBM EBCDIC Multilingual Latin 2
     # UNSUPPORTED
     874: 'windows-874', # ANSI/OEM Thai (ISO 8859-11); Thai (Windows)
     875: 'cp875', # IBM EBCDIC Greek Modern
@@ -194,28 +195,17 @@ CODE_PAGES = {
     949: 'ks_c_5601-1987', # ANSI/OEM Korean (Unified Hangul Code)
     950: 'big5', # ANSI/OEM Traditional Chinese (Taiwan; Hong Kong SAR, PRC); Chinese Traditional (Big5)
     1026: 'IBM1026', # IBM EBCDIC Turkish (Latin 5)
-    # UNSUPPORTED
-    1047: 'IBM01047', # IBM EBCDIC Latin 1/Open System
-    # UNSUPPORTED
-    1140: 'IBM01140', # IBM EBCDIC US-Canada (037 + Euro symbol); IBM EBCDIC (US-Canada-Euro)
-    # UNSUPPORTED
-    1141: 'IBM01141', # IBM EBCDIC Germany (20273 + Euro symbol); IBM EBCDIC (Germany-Euro)
-    # UNSUPPORTED
-    1142: 'IBM01142', # IBM EBCDIC Denmark-Norway (20277 + Euro symbol); IBM EBCDIC (Denmark-Norway-Euro)
-    # UNSUPPORTED
-    1143: 'IBM01143', # IBM EBCDIC Finland-Sweden (20278 + Euro symbol); IBM EBCDIC (Finland-Sweden-Euro)
-    # UNSUPPORTED
-    1144: 'IBM01144', # IBM EBCDIC Italy (20280 + Euro symbol); IBM EBCDIC (Italy-Euro)
-    # UNSUPPORTED
-    1145: 'IBM01145', # IBM EBCDIC Latin America-Spain (20284 + Euro symbol); IBM EBCDIC (Spain-Euro)
-    # UNSUPPORTED
-    1146: 'IBM01146', # IBM EBCDIC United Kingdom (20285 + Euro symbol); IBM EBCDIC (UK-Euro)
-    # UNSUPPORTED
-    1147: 'IBM01147', # IBM EBCDIC France (20297 + Euro symbol); IBM EBCDIC (France-Euro)
-    # UNSUPPORTED
-    1148: 'IBM01148', # IBM EBCDIC International (500 + Euro symbol); IBM EBCDIC (International-Euro)
-    # UNSUPPORTED
-    1149: 'IBM01149', # IBM EBCDIC Icelandic (20871 + Euro symbol); IBM EBCDIC (Icelandic-Euro)
+    1047: 'cp1047', # IBM EBCDIC Latin 1/Open System
+    1140: 'cp1140', # IBM EBCDIC US-Canada (037 + Euro symbol); IBM EBCDIC (US-Canada-Euro)
+    1141: 'cp1141', # IBM EBCDIC Germany (20273 + Euro symbol); IBM EBCDIC (Germany-Euro)
+    1142: 'cp1142', # IBM EBCDIC Denmark-Norway (20277 + Euro symbol); IBM EBCDIC (Denmark-Norway-Euro)
+    1143: 'cp1143', # IBM EBCDIC Finland-Sweden (20278 + Euro symbol); IBM EBCDIC (Finland-Sweden-Euro)
+    1144: 'cp1144', # IBM EBCDIC Italy (20280 + Euro symbol); IBM EBCDIC (Italy-Euro)
+    1145: 'cp1145', # IBM EBCDIC Latin America-Spain (20284 + Euro symbol); IBM EBCDIC (Spain-Euro)
+    1146: 'cp1146', # IBM EBCDIC United Kingdom (20285 + Euro symbol); IBM EBCDIC (UK-Euro)
+    1147: 'cp1147', # IBM EBCDIC France (20297 + Euro symbol); IBM EBCDIC (France-Euro)
+    1148: 'cp1148ms', # IBM EBCDIC International (500 + Euro symbol); IBM EBCDIC (International-Euro)
+    1149: 'cp1149', # IBM EBCDIC Icelandic (20871 + Euro symbol); IBM EBCDIC (Icelandic-Euro)
     1200: 'utf-16-le', # Unicode UTF-16, little endian byte order (BMP of ISO 10646); available only to managed applications
     1201: 'utf-16-be', # Unicode UTF-16, big endian byte order; available only to managed applications
     1250: 'windows-1250', # ANSI Central European; Central European (Windows)
@@ -285,32 +275,21 @@ CODE_PAGES = {
     # UNSUPPORTED
     20269: 'x-cp20269', # ISO 6937 Non-Spacing Accent
     20273: 'IBM273', # IBM EBCDIC Germany
-    # UNSUPPORTED
-    20277: 'IBM277', # IBM EBCDIC Denmark-Norway
-    # UNSUPPORTED
-    20278: 'IBM278', # IBM EBCDIC Finland-Sweden
-    # UNSUPPORTED
-    20280: 'IBM280', # IBM EBCDIC Italy
-    # UNSUPPORTED
-    20284: 'IBM284', # IBM EBCDIC Latin America-Spain
-    # UNSUPPORTED
-    20285: 'IBM285', # IBM EBCDIC United Kingdom
-    # UNSUPPORTED
-    20290: 'IBM290', # IBM EBCDIC Japanese Katakana Extended
-    # UNSUPPORTED
-    20297: 'IBM297', # IBM EBCDIC France
-    # UNSUPPORTED
-    20420: 'IBM420', # IBM EBCDIC Arabic
+    20277: 'cp277', # IBM EBCDIC Denmark-Norway
+    20278: 'cp278', # IBM EBCDIC Finland-Sweden
+    20280: 'cp280', # IBM EBCDIC Italy
+    20284: 'cp284', # IBM EBCDIC Latin America-Spain
+    20285: 'cp285', # IBM EBCDIC United Kingdom
+    20290: 'cp290', # IBM EBCDIC Japanese Katakana Extended
+    20297: 'cp297', # IBM EBCDIC France
+    20420: 'cp420', # IBM EBCDIC Arabic
     # UNSUPPORTED
     20423: 'IBM423', # IBM EBCDIC Greek
     20424: 'IBM424', # IBM EBCDIC Hebrew
-    # UNSUPPORTED
-    20833: 'x-EBCDIC-KoreanExtended', # IBM EBCDIC Korean Extended
-    # UNSUPPORTED
-    20838: 'IBM-Thai', # IBM EBCDIC Thai
+    20833: 'cp833', # IBM EBCDIC Korean Extended
+    20838: 'cp838', # IBM EBCDIC Thai
     20866: 'koi8-r', # Russian (KOI8-R); Cyrillic (KOI8-R)
-    # UNSUPPORTED
-    20871: 'IBM871', # IBM EBCDIC Icelandic
+    20871: 'cp871', # IBM EBCDIC Icelandic
     # UNSUPPORTED
     20880: 'IBM880', # IBM EBCDIC Cyrillic Russian
     # UNSUPPORTED
@@ -322,7 +301,6 @@ CODE_PAGES = {
     20936: 'x-cp20936', # Simplified Chinese (GB2312); Chinese Simplified (GB2312-80)
     # UNSUPPORTED
     20949: 'x-cp20949', # Korean Wansung
-    # UNSUPPORTED
     21025: 'cp1025', # IBM EBCDIC Cyrillic Serbian-Bulgarian
     # UNSUPPORTED
     21027: '', # (deprecated)

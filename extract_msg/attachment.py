@@ -41,7 +41,7 @@ class Attachment(AttachmentBase):
                 self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
                 self.__type = 'msg'
                 self.__data = openMsg(self.msg.path, self.__prefix, self.__class__, overrideEncoding = msg.overrideEncoding, attachmentErrorBehavior = msg.attachmentErrorBehavior)
-        elif (self.__props['37050003'].value & 0x7) == 0x7:
+        elif (self.props['37050003'].value & 0x7) == 0x7:
             # TODO Handling for special attacment type 0x7
             self.__type = 'web'
             raise NotImplementedError('Attachments of type afByWebReference are not currently supported.')
