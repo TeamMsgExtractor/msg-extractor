@@ -72,7 +72,7 @@ class Message(MessageBase):
         count += 1 if raw else 0
 
         if count > 1:
-            raise IncompatibleOptionsError('Only one of the following options may be used at a time: toJSon, raw, html, rtf')
+            raise IncompatibleOptionsError('Only one of the following options may be used at a time: toJson, raw, html, rtf')
 
         crlf = inputToBytes(self.crlf, 'utf-8')
 
