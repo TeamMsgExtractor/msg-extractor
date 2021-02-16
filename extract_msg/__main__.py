@@ -48,7 +48,7 @@ def main():
                         print(msg.body)
                     else:
                         os.chdir(out)
-                        msg.save(toJson = args.json, useFileName = args.use_filename, ContentId = args.cid)#, html = args.html, rtf = args.html)
+                        msg.save(toJson = args.json, useFileName = args.use_filename, ContentId = args.cid)#, html = args.html, rtf = args.html, args.allowFallback)
             except Exception as e:
                 print("Error with file '" + x[0] + "': " +
                       traceback.format_exc())

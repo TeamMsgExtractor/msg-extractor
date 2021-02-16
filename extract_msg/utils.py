@@ -16,7 +16,7 @@ import tzlocal
 
 from extract_msg import constants
 from extract_msg.compat import os_ as os
-from extract_msg.exceptions import ConversionError, InvaildPropertyIdError, UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError
+from extract_msg.exceptions import ConversionError, IncompatibleOptionsError, InvaildPropertyIdError, UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -165,7 +165,7 @@ def get_command_args(args):
                         help='Changes to write output files as json.')
     # --file-logging
     parser.add_argument('--file-logging', dest='file_logging', action='store_true',
-                        help='Enables file logging. Implies --verbose')
+                        help='Enables file logging. Implies --verbose.')
     # --verbose
     parser.add_argument('--verbose', dest='verbose', action='store_true',
                         help='Turns on console logging.')
@@ -186,13 +186,16 @@ def get_command_args(args):
                         help='Tells the program to dump the message body (plain text) to stdout. Overrides saving arguments.')
     # --html
     #parser.add_argument('--html', dest='html', action='store_true',
-    #                    help='Sets whether the output should be html. If this is not possible, will fallback to plain text')
+    #                    help='Sets whether the output should be html. If this is not possible, will error.')
     # --rtf
     #parser.add_argument('--rtf', dest='rtf', action='store_true',
-    #                    help='Sets whether the output should be rtf. If this is not possible, will fallback to plain text')
+    #                    help='Sets whether the output should be rtf. If this is not possible, will error.')
+    # --allow-fallback
+    #parser.add_argument('--allow-fallback', dest='allowFallbac', action='store_true',
+    #                    help='Tells the program to fallback to a different save type if the selected one is not possible.')
     # --out-name NAME
     # parser.add_argument('--out-name', dest = 'out_name',
-    #                     help = 'Name to be used with saving the file output. Should come immediately after the file name')
+    #                     help = 'Name to be used with saving the file output. Should come immediately after the file name.')
     # [msg files]
     parser.add_argument('msgs', metavar='msg', nargs='+',
                         help='An msg file to be parsed')
@@ -207,7 +210,7 @@ def get_command_args(args):
     #if options.json:
     #    valid += 1
     #if valid > 1:
-    #    raise Exception('Only one of these options may be selected at a time: --html, --rtf, --json')
+    #    raise IncompatibleOptionsError('Only one of these options may be selected at a time: --html, --rtf, --json')
 
     if options.dev or options.file_logging:
         options.verbose = True
