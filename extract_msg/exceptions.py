@@ -18,6 +18,17 @@ class ConversionError(Exception):
     """
     pass
 
+class DataNotFoundError(Exception):
+    """
+    Requested stream type was unavailable.
+    """
+    pass
+
+class IncompatibleOptionsError(Exception):
+    """
+    Provided options are incompatible with each other.
+    """
+
 class InvalidFileFormatError(OSError):
     """
     An Invalid File Format Error occurred.

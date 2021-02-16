@@ -1,3 +1,10 @@
+**v0.28.2**
+* Started preparing more of the code for when HTML and RTF saving are fully implemented. Please note that they do not work at all right now. Commented out the code for this because it wasn't meant to be uncommented.
+* [[TeamMsgExtractor #184](https://github.com/TeamMsgExtractor/msg-extractor/issues/184)] Added code to ensure file names don't have null characters when saving an attachment.
+* Minor improvement to the section of the save code that checks if you have provided incompatible options.
+* [[TeamMsgExtractor #185](https://github.com/TeamMsgExtractor/msg-extractor/issues/184)] Added the `IncompatibleOptionsError`. It was supposed to be added a few updates ago, but was accidentally left out.
+* Modified `Message.save` to return the current `Message` instance to allow for chained commands. This allows you to do something like `extract_msg.openMsg("path/to/message.msg").save().close()` where you could not before.
+
 **v0.28.1**
 * [[TeamMsgExtractor #181](https://github.com/TeamMsgExtractor/msg-extractor/issues/181)] Fixed issue in `Attachment` that arose when moving some of the code to a base class.
 * Fixed small error in `utils.parse_type` that caused it to incorrectly compare expected and actual length. Fortunately, this had no actual effect aside from a warning.

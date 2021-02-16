@@ -10,6 +10,7 @@ from email.parser import Parser as EmailParser
 from extract_msg import constants
 from extract_msg.attachment import Attachment
 from extract_msg.compat import os_ as os
+from extract_msg.exceptions import DataNotFoundError, IncompatibleOptionsError
 from extract_msg.message_base import MessageBase
 from extract_msg.recipient import Recipient
 from extract_msg.utils import addNumToDir, inputToBytes, inputToString
@@ -37,10 +38,9 @@ class Message(MessageBase):
         print('Body:')
         print(self.body)
 
-    def save(self, toJson = False, useFileName = False, raw = False, ContentId = False, customPath = None, customFilename = None, html = False, rtf = False):
+    def save(self, toJson = False, useFileName = False, raw = False, ContentId = False, customPath = None, customFilename = None):#, html = False, rtf = False, allowFallback = False):
         """
-        Saves the message body and attachments found in the message. Setting toJson
-        to true will output the message body as JSON-formatted text. The body and
+        Saves the message body and attachments found in the message. The body and
         attachments are stored in a folder. Setting useFileName to true will mean that
         the filename is used as the name of the folder; otherwise, the message's date
         and subject are used as the folder name.
@@ -49,14 +49,30 @@ class Message(MessageBase):
             2. self.filename if useFileName
             3. {date} {subject}
         """
-        count = 0
-        count += 1 if toJson else 0
-        count += 1 if html else 0
-        count += 1 if rtf else 0
+        #There are several parameters used to determine how the message will be saved.
+        #By default, the message will be saved as plain text. Setting one of the
+        #following parameters to True will change that:
+        #    * :param html: will try to output the message in HTML format.
+        #    * :param json: will output the message in JSON format.
+        #    * :param raw: will output the message in a raw format.
+        #    * :param rtf: will output the message in RTF format.
+        #
+        #Usage of more than one formatting parameter will raise an exception.
+        #
+        #Using HTML or RTF will raise an exception if they could not be retrieved
+        #unless you have :param allowFallback: set to True. Fallback will go in this
+        #order, starting at the top most format that is set:
+        #    * HTML
+        #    * RTF
+        #    * Plain text
+        #"""
+        count = 1 if toJson else 0
+        #count += 1 if html else 0
+        #count += 1 if rtf else 0
         count += 1 if raw else 0
 
         if count > 1:
-            raise IncompatibleOptionsException('Only one of the following options may be used at a time: toJSon, raw, html, rtf')
+            raise IncompatibleOptionsError('Only one of the following options may be used at a time: toJSon, raw, html, rtf')
 
         crlf = inputToBytes(self.crlf, 'utf-8')
 
@@ -107,7 +123,7 @@ class Message(MessageBase):
             attachmentNames = []
             # Save the attachments
             for attachment in self.attachments:
-                attachmentNames.append(attachment.save(ContentId, toJson, useFileName, raw, html = html, rtf = rtf))
+                attachmentNames.append(attachment.save(ContentId, toJson, useFileName, raw))#, html = html, rtf = rtf, allowFallback = allowFallback))
 
             # Save the message body
             fext = 'json' if toJson else 'txt'
@@ -118,10 +134,15 @@ class Message(MessageBase):
             #    if self.htmlBody is not None:
             #        useHtml = True
             #        fext = 'html'
-            #elif rtf:
-            #    if self.htmlBody is not None:
+            #elif not allowFallback:
+            #    raise DataNotFoundError('Could not find the htmlBody')
+
+            #if rtf or (html and not useHtml):
+            #    if self.rtfBody is not None:
             #        useRtf = True
             #        fext = 'rtf'
+            #elif not allowFallback:
+            #    raise DataNotFoundError('Could not find the rtfBody')
 
             with open('message.' + fext, 'wb') as f:
                 if toJson:
@@ -157,6 +178,9 @@ class Message(MessageBase):
         finally:
             # Return to previous directory
             os.chdir(oldDir)
+
+        # Return the instance so that functions can easily be chained.
+        return self
 
     def saveRaw(self):
         # Create a 'raw' folder
