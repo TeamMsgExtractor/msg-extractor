@@ -1,3 +1,7 @@
+**v0.28.3**
+* Fixed minor typo in an exception description.
+* Updated the README this time. Forgot to do it for at least 1 update.
+
 **v0.28.2**
 * Started preparing more of the code for when HTML and RTF saving are fully implemented. Please note that they do not work at all right now. Commented out the code for this because it wasn't meant to be uncommented.
 * [[TeamMsgExtractor #184](https://github.com/TeamMsgExtractor/msg-extractor/issues/184)] Added code to ensure file names don't have null characters when saving an attachment.
