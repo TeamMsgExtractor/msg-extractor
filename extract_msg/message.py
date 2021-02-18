@@ -13,7 +13,7 @@ from extract_msg.compat import os_ as os
 from extract_msg.exceptions import DataNotFoundError, IncompatibleOptionsError
 from extract_msg.message_base import MessageBase
 from extract_msg.recipient import Recipient
-from extract_msg.utils import addNumToDir, inputToBytes, inputToString
+from extract_msg.utils import addNumToDir, inputToBytes, inputToString, prepareFilename
 
 
 
@@ -97,7 +97,7 @@ class Message(MessageBase):
                 if self.subject is None:
                     subject = '[No subject]'
                 else:
-                    subject = ''.join(i for i in self.subject if i not in r'\/:*?"<>|')
+                    subject = prepareFilename(self.subject)
 
                 dirName = dirName + ' ' + subject
 

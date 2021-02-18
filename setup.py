@@ -37,7 +37,7 @@ setup(
     long_description_content_type='text/x-rst',
     url=github_url,
     download_url='%s/archives/master' % github_url,
-    author='The Elemental of Destruction & Matthew Walker',
+    author='Destiny Peterson & Matthew Walker',
     author_email='arceusthe@gmail.com, mattgwwalker@gmail.com',
     license='GPL',
     packages=[main_module],
