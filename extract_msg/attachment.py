@@ -77,7 +77,7 @@ class Attachment(AttachmentBase):
             filename = customPath + filename
 
         # Someone managed to have a null character here, so let's get rid of that
-        filename = inputToString(filename, self.msg.stringEncoding).replace('\x00', '')
+        filename = prepareFilename(inputToString(filename, self.msg.stringEncoding))
 
         if self.__type == "data":
             with open(filename, 'wb') as f:

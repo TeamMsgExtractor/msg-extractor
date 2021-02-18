@@ -1,3 +1,7 @@
+**v0.28.4**
+* [[TeamMsgExtractor #184](https://github.com/TeamMsgExtractor/msg-extractor/issues/184)] Added code to `Message` to ensure subjects with null characters get stripped of them.
+* Moved code for stripping subjects of bad characters to `prepareFilename` in `utils`.
+
 **v0.28.3**
 * Fixed minor typo in an exception description.
 * Updated the README this time. Forgot to do it for at least 1 update.
