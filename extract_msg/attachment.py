@@ -7,7 +7,7 @@ from extract_msg.attachment_base import AttachmentBase
 from extract_msg.named import NamedAttachmentProperties
 from extract_msg.prop import FixedLengthProp, VariableLengthProp
 from extract_msg.properties import Properties
-from extract_msg.utils import openMsg, inputToString, verifyPropertyId, verifyType
+from extract_msg.utils import openMsg, inputToString, prepareFilename, verifyPropertyId, verifyType
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
