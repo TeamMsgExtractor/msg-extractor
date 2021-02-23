@@ -177,6 +177,8 @@ Credits
 
 `Dean Malmgren`_ - First implementation of the setup.py script
 
+And thank you to everyone who has opened an issue and helped us track down those pesky bugs.
+
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
 
