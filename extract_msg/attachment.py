@@ -1,6 +1,7 @@
 import logging
 import random
 import string
+from pathlib import Path
 
 from extract_msg import constants
 from extract_msg.attachment_base import AttachmentBase
@@ -71,13 +72,12 @@ class Attachment(AttachmentBase):
                            ''.join(random.choice(string.ascii_uppercase + string.digits)
                                    for _ in range(5)) + '.bin'
 
-        if customPath is not None and customPath != '':
-            if customPath[-1] != '/' or customPath[-1] != '\\':
-                customPath += '/'
-            filename = customPath + filename
 
         # Someone managed to have a null character here, so let's get rid of that
         filename = prepareFilename(inputToString(filename, self.msg.stringEncoding))
+
+        if customPath:
+            filename = str(Path(customPath).joinpath(filename))
 
         if self.__type == "data":
             with open(filename, 'wb') as f:
