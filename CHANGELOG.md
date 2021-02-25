@@ -1,3 +1,6 @@
+**v0.28.6**
+* [[TeamMsgExtractor #189](https://github.com/TeamMsgExtractor/msg-extractor/issues/191) Changed the function flow to allow for custom directory saving.
+
 **v0.28.5**
 * [[TeamMsgExtractor #189](https://github.com/TeamMsgExtractor/msg-extractor/issues/189)] Forgot to import `prepareFilename` in `attachment.py`.
 * Fixed bad link in the changelog.
