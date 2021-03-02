@@ -157,11 +157,11 @@ MULTIPLE_8_BYTES_HEX = (
 
 # Multiple type properties that take up 4 bytes
 MULTIPLE_16_BYTES = (
-    '1048'
+    '1048',
 )
 
 MULTIPLE_16_BYTES_HEX = (
-    0x1048
+    0x1048,
 )
 
 
