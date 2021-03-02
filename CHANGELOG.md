@@ -1,4 +1,4 @@
-**v0.28.5**
+**v0.28.6**
 * [[TeamMsgExtractor #191](https://github.com/TeamMsgExtractor/msg-extractor/issues/191)] This feature was never properly implemented, so it's not officially supported. However, this specific issue should be fixed. This is a temporary patch until I can get around to rewriting the way the module saves files in general.
 * Added `venv` to the .gitignore list.
 * Added information to the readme.
