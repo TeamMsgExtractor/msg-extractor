@@ -166,13 +166,13 @@ class VariableLengthProp(PropBase):
             self.__realLength = self.__length - 1
         elif self.type == 0x001F:
             self.__realLength = self.__length - 2
-        elif self.type == 0x1002:
+        elif self.type in constants.MULTIPLE_2_BYTES_HEX:
             self.__realLength = self.__length // 2
-        elif self.type in (0x1003, 0x1004):
+        elif self.type in constants.MULTIPLE_4_BYTES_HEX:
             self.__realLength = self.__length // 4
-        elif self.type in (0x1005, 0x1007, 0x1040):
+        elif self.type in constants.MULTIPLE_8_BYTES_HEX:
             self.__realLength = self.__length // 8
-        elif self.type == 0x1048:
+        elif self.type in constants.MULTIPLE_16_BYTES_HEX:
             self.__realLength = self.__length // 16
         elif self.type == 0x000D:
             self.__realLength = None

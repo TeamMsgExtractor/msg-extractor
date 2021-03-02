@@ -125,10 +125,19 @@ MULTIPLE_2_BYTES = (
     '1002',
 )
 
+MULTIPLE_2_BYTES_HEX = (
+    0x1002,
+)
+
 # Multiple type properties that take up 4 bytes
 MULTIPLE_4_BYTES = (
     '1003',
     '1004',
+)
+
+MULTIPLE_4_BYTES_HEX = (
+    0x1003,
+    0x1004,
 )
 
 # Multiple type properties that take up 4 bytes
@@ -139,9 +148,20 @@ MULTIPLE_8_BYTES = (
     '1040',
 )
 
+MULTIPLE_8_BYTES_HEX = (
+    0x1005,
+    0x1007,
+    0x1014,
+    0x1040,
+)
+
 # Multiple type properties that take up 4 bytes
 MULTIPLE_16_BYTES = (
+    '1048'
+)
 
+MULTIPLE_16_BYTES_HEX = (
+    0x1048
 )
 
 

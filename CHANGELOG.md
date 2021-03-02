@@ -1,3 +1,8 @@
+**v0.28.7**
+* Added hex versions of the `MULTIPLE_X_BYTES` constants.
+* Added `1048` to `constants.MULTIPLE_16_BYTES`
+* [[TeamMsgExtractor #173](https://github.com/TeamMsgExtractor/msg-extractor/issues/173)] rewrote the parsing of the length in `VariableLengthProp.__init__` to use constants rather than values coded directly into the function. This should fix this issue.
+
 **v0.28.6**
 * [[TeamMsgExtractor #191](https://github.com/TeamMsgExtractor/msg-extractor/issues/191)] This feature was never properly implemented, so it's not officially supported. However, this specific issue should be fixed. This is a temporary patch until I can get around to rewriting the way the module saves files in general.
 * Added `venv` to the .gitignore list.
