@@ -8,6 +8,19 @@ Extracts emails and attachments saved in Microsoft Outlook's .msg files
 The python package extract_msg automates the extraction of key email
 data (from, to, cc, date, subject, body) and the email's attachments.
 
+NOTICE
+======
+0.29.* will be the last versions that will support Python 2. While we want to
+continue to support it, it would just be too much work to do so. We are
+providing notice ahead of time of this change so that you may sort out your
+Python environments ahead of time.
+
+This module has a Discord server for general discussion. You can find it here:
+`Discord`_
+
+
+Changelog
+---------
 -  `Changelog <CHANGELOG.md>`__
 
 Usage
@@ -177,11 +190,13 @@ Credits
 
 `Dean Malmgren`_ - First implementation of the setup.py script
 
+And thank you to everyone who has opened an issue and helped us track down those pesky bugs.
+
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
 
-.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.28.5-blue.svg
-   :target: https://pypi.org/project/extract-msg/0.28.5/
+.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.28.6-blue.svg
+   :target: https://pypi.org/project/extract-msg/0.28.6/
 
 .. |PyPI1| image:: https://img.shields.io/badge/python-2.7+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-2715/
@@ -193,3 +208,4 @@ Credits
 .. _Philippe Lagadec: https://github.com/decalage2
 .. _Dean Malmgren: https://github.com/deanmalmgren
 .. _Joel Kaufman: https://github.com/joelkaufman
+.. _Discord: https://discord.com/invite/B77McRmzdc
