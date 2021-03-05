@@ -190,6 +190,8 @@ Credits
 
 `Dean Malmgren`_ - First implementation of the setup.py script
 
+`Liam`_ - Significant reorganization and transfer of data.
+
 And thank you to everyone who has opened an issue and helped us track down those pesky bugs.
 
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
@@ -208,4 +210,5 @@ And thank you to everyone who has opened an issue and helped us track down those
 .. _Philippe Lagadec: https://github.com/decalage2
 .. _Dean Malmgren: https://github.com/deanmalmgren
 .. _Joel Kaufman: https://github.com/joelkaufman
+.. _Liam: https://github.com/LiamPM5
 .. _Discord: https://discord.com/invite/B77McRmzdc
