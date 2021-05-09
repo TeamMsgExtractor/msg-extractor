@@ -27,8 +27,8 @@ https://github.com/mattgwwalker/msg-extractor
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 __author__ = 'Destiny Peterson & Matthew Walker'
-__date__ = '2021-03-02'
-__version__ = '0.28.7'
+__date__ = '2021-05-08'
+__version__ = '0.29.0'
 
 import logging
 

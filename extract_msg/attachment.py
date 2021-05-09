@@ -29,10 +29,10 @@ class Attachment(AttachmentBase):
         AttachmentBase.__init__(self, msg, dir_)
 
         # Get attachment data
-        if self.Exists('__substg1.0_37010102'):
+        if self.exists('__substg1.0_37010102'):
             self.__type = 'data'
             self.__data = self._getStream('__substg1.0_37010102')
-        elif self.Exists('__substg1.0_3701000D'):
+        elif self.exists('__substg1.0_3701000D'):
             if (self.props['37050003'].value & 0x7) != 0x5:
                 raise NotImplementedError(
                     'Current version of extract_msg does not support extraction of containers that are not embedded msg files.')
@@ -47,6 +47,13 @@ class Attachment(AttachmentBase):
             raise NotImplementedError('Attachments of type afByWebReference are not currently supported.')
         else:
             raise TypeError('Unknown attachment type.')
+
+    def getFilename(self, **kwargs):
+        """
+        Returns the filename to use for the attachment.
+
+        :param contentId: Use the contentId, if available.
+        """
 
     def save(self, contentId = False, json = False, useFileName = False, raw = False, customPath = None,
              customFilename = None):#, html = False, rtf = False, allowFallback = False):
@@ -79,20 +86,19 @@ class Attachment(AttachmentBase):
                 customPath += '/'
             filename = customPath + filename
 
-        if self.__type == "data":
+        if self.__type == 'data':
             with open(filename, 'wb') as f:
                 f.write(self.__data)
         else:
-            self.saveEmbededMessage(contentId, json, useFileName, raw, customPath, customFilename)#, html, rtf, allowFallback)
+            self.saveEmbededMessage(**kwargs)
         return filename
 
-    def saveEmbededMessage(self, contentId = False, json = False, useFileName = False, raw = False, customPath = None,
-                           customFilename = None):#, html = False, rtf = False, allowFallback = False):
+    def saveEmbededMessage(**kwargs):
         """
-        Seperate function from save to allow it to
-        easily be overridden by a subclass.
+        Seperate function from save to allow it to easily be overridden by a
+        subclass.
         """
-        self.data.save(json, useFileName, raw, contentId, customPath, customFilename)#, html, rtf, allowFallback)
+        self.data.save(**kwargs)
 
     @property
     def cid(self):
@@ -101,7 +107,7 @@ class Attachment(AttachmentBase):
         """
         return self._ensureSet('_cid', '__substg1.0_3712')
 
-    contend_id = cid
+    contendId = cid
 
     @property
     def data(self):

@@ -1,3 +1,14 @@
+**v0.29.0**
+* Completely redesigned all existing save functions. You can now properly save to custom locations under custom file names. This change may break existing code for several reasons. First, all arguments have been changed to keyword arguments. Second, a few keyword arguments have been renamed to better fit the naming conventions.
+* All `Exists` functions have been renamed to `exists` (this does not apply to `sExists`) to better fit the naming convention.
+* All `ExistsTypedProperty` functions have been renamed to `existsTypedProperty` to better fit the naming convention.
+* [[TeamMsgExtractor #197](https://github.com/TeamMsgExtractor/msg-extractor/issues/197)] Added new property `Message.defaultFolderName`. This property returns the default name to be used for a Message if none of the options change the name.
+* Improved internal code in many functions to make them faster and more efficient.
+* Added caching to `MSGFile.listDir`. I found that if you have larger files this single function might be taking up over half of the processing time because of how many times it is used in the module.
+* Fully implemented raw saving.
+* Changed `Message.saveRaw` to `MSGFile.saveRaw`.
+* Changed `MSGFile.saveRaw` to take a path and save the contents to a zipfile.
+
 **v0.28.7**
 * Added hex versions of the `MULTIPLE_X_BYTES` constants.
 * Added `1048` to `constants.MULTIPLE_16_BYTES`

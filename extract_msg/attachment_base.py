@@ -153,11 +153,11 @@ class AttachmentBase(object):
     def _registerNamedProperty(self, entry, _type, name = None):
         self.__namedProperties.defineProperty(entry, _type, name)
 
-    def Exists(self, filename):
+    def exists(self, filename):
         """
         Checks if stream exists inside the attachment folder.
         """
-        return self.__msg.Exists([self.__dir, filename])
+        return self.__msg.exists([self.__dir, filename])
 
     def sExists(self, filename):
         """
@@ -165,13 +165,13 @@ class AttachmentBase(object):
         """
         return self.__msg.sExists([self.__dir, filename])
 
-    def ExistsTypedProperty(self, id, _type = None):
+    def existsTypedProperty(self, id, _type = None):
         """
         Determines if the stream with the provided id exists. The return of this
         function is 2 values, the first being a boolean for if anything was found,
         and the second being how many were found.
         """
-        return self.__msg.ExistsTypedProperty(id, self.__dir, _type, True, self.__props)
+        return self.__msg.existsTypedProperty(id, self.__dir, _type, True, self.__props)
 
     @property
     def dir(self):

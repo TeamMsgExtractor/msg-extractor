@@ -7,7 +7,6 @@ from extract_msg import constants
 from extract_msg.utils import bytesToGuid, divide, properHex, roundUp
 
 
-
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
@@ -59,7 +58,7 @@ class Named(object):
         for entry in entries:
             streamID = properHex(0x8000 + entry['pid'])
             msg._registerNamedProperty(entry, entry['pkind'], names[entry['id']] if entry['pkind'] == constants.STRING_NAMED else None)
-            if msg.ExistsTypedProperty(streamID):
+            if msg.existsTypedProperty(streamID):
                 self.__properties.append(StringNamedProperty(entry, names[entry['id']], msg._getTypedData(streamID)) if entry['pkind'] == constants.STRING_NAMED else NumericalNamedProperty(entry, msg._getTypedData(streamID)))
         self.__propertiesDict = {}
         for property in self.__properties:
@@ -98,11 +97,11 @@ class Named(object):
         prop = self.getNamed(propertyName)
         return prop.data if prop is not None else None
 
-    def Exists(self, filename):
+    def exists(self, filename):
         """
         Checks if stream exists inside the named properties folder.
         """
-        return self.__msg.Exists([self.__dir, filename])
+        return self.__msg.exists([self.__dir, filename])
 
     def sExists(self, filename):
         """
@@ -153,7 +152,7 @@ class NamedAttachmentProperties(object):
         Informs the class of a named property that needs to be loaded.
         """
         streamID = properHex(0x8000 + entry['pid']).upper()
-        if self.__attachment.ExistsTypedProperty(streamID)[0]:
+        if self.__attachment.existsTypedProperty(streamID)[0]:
             data = self.__attachment._getTypedData(streamID)
             property = StringNamedProperty(entry, name, data) if _type == constants.STRING_NAMED else NumericalNamedProperty(entry, data)
             self.__properties.append(property)

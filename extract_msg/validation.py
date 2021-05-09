@@ -13,8 +13,8 @@ def get_email_details(instance, stream):
 
 def get_stream_details(instance, stream):
     return {
-        'exists': instance.Exists(stream),
-        'not empty': False if not instance.Exists(stream) else len(instance._getStream(stream)) > 0,
+        'exists': instance.exists(stream),
+        'not empty': False if not instance.exists(stream) else len(instance._getStream(stream)) > 0,
     }
 
 def get_string_details(instance, stream):

@@ -1,5 +1,4 @@
 import email.utils
-import json
 import logging
 import re
 
@@ -12,8 +11,7 @@ from extract_msg.attachment import Attachment, BrokenAttachment, UnsupportedAtta
 from extract_msg.compat import os_ as os
 from extract_msg.msg import MSGFile
 from extract_msg.recipient import Recipient
-from extract_msg.utils import addNumToDir, inputToBytes, inputToString
-
+from extract_msg.utils import addNumToDir, inputToBytes, inputToString, prepareFilename
 
 
 logger = logging.getLogger(__name__)
@@ -143,11 +141,11 @@ class MessageBase(MSGFile):
         except AttributeError:
             # Get the attachments
             attachmentDirs = []
-
+            prefixLen = self.prefixLen
             for dir_ in self.listDir(False, True):
-                if dir_[len(self.prefixList)].startswith('__attach') and\
-                        dir_[len(self.prefixList)] not in attachmentDirs:
-                    attachmentDirs.append(dir_[len(self.prefixList)])
+                if dir_[prefixLen].startswith('__attach') and\
+                        dir_[prefixLen] not in attachmentDirs:
+                    attachmentDirs.append(dir_[prefixLen])
 
             self._attachments = []
 
@@ -253,6 +251,22 @@ class MessageBase(MSGFile):
             return self._date
 
     @property
+    def defaultFolderName(self):
+        """
+        Generates the default name of the save folder.
+        """
+        try:
+            return self._defaultFolderName
+        except AttributeError:
+            d = self.parsedDate
+
+            dirName = '{0:02d}-{1:02d}-{2:02d}_{3:02d}{4:02d}'.format(*d) if d else 'UnknownDate'
+            dirName += ' ' + (prepareFilename(self.subject) if self.subject else '[No subject]')
+
+            self._defaultFolderName = dirName
+            return dirName
+
+    @property
     def header(self):
         """
         Returns the message header, if it exists. Otherwise it will generate one.
@@ -343,11 +357,11 @@ class MessageBase(MSGFile):
         except AttributeError:
             # Get the recipients
             recipientDirs = []
-
+            prefixLen = self.prefixLen
             for dir_ in self.listDir():
-                if dir_[len(self.prefixList)].startswith('__recip') and\
-                        dir_[len(self.prefixList)] not in recipientDirs:
-                    recipientDirs.append(dir_[len(self.prefixList)])
+                if dir_[prefixLen].startswith('__recip') and\
+                        dir_[prefixLen] not in recipientDirs:
+                    recipientDirs.append(dir_[prefixLen])
 
             self._recipients = []
 
