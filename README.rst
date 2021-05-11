@@ -180,7 +180,7 @@ Credits
 
 `Matthew Walker`_ - Original developer and owner
 
-`Destiny Peterson (The Elemental of Destruction)`_ - Principle programmer, manager, and msg file "expert"
+`Destiny Peterson (The Elemental of Destruction)`_ - Co-owner, principle programmer, knows more about msg files than anyone probably should
 
 `JP Bourget`_ - Senior programmer, readability and organization expert, secondary manager
 

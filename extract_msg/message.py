@@ -156,6 +156,7 @@ class Message(MessageBase):
                    fext = 'rtf'
             elif not allowFallback:
                raise DataNotFoundError('Could not find the rtfBody')
+
             with open(path + 'message.' + fext, 'wb') as f:
                 if _json:
                     emailObj = {'from': inputToString(self.sender, 'utf-8'),
