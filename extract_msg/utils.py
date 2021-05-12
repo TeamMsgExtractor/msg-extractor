@@ -23,7 +23,7 @@ logger.addHandler(logging.NullHandler())
 logging.addLevelName(5, 'DEVELOPER')
 
 if sys.version_info[0] >= 3:  # Python 3
-    get_input = input
+    getInput = input
 
     def properHex(inp, length = 0):
         """
@@ -44,7 +44,7 @@ if sys.version_info[0] >= 3:  # Python 3
         return str(string, 'utf_16_le') if string is not None else None
 
 else:  # Python 2
-    get_input = raw_input
+    getInput = raw_input
 
     def properHex(inp, length = 0):
         """

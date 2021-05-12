@@ -4,6 +4,7 @@ import string
 
 from extract_msg import constants
 from extract_msg.attachment_base import AttachmentBase
+from extract_msg.compat import os_ as os
 from extract_msg.named import NamedAttachmentProperties
 from extract_msg.prop import FixedLengthProp, VariableLengthProp
 from extract_msg.properties import Properties
@@ -62,7 +63,7 @@ class Attachment(AttachmentBase):
         customFilename = kwargs.get('customFilename')
         if customFilename:
             # First we need to validate it. If there are invalid characters, this will detect it.
-            if constants.RE_INVALID_PATH_CHARACTERS.search(customFilename):
+            if constants.RE_INVALID_FILENAME_CHARACTERS.search(customFilename):
                 raise ValueError('Invalid character found in customFilename. Must not contain any of the following characters: \\/:*?"<>|')
             filename = customFilename
         else:
@@ -91,38 +92,60 @@ class Attachment(AttachmentBase):
                    ''.join(random.choice(string.ascii_uppercase + string.digits)
                            for _ in range(5)) + '.bin'
 
-    def save(self, contentId = False, json = False, useFileName = False, raw = False, customPath = None,
-             customFilename = None):#, html = False, rtf = False, allowFallback = False):
-            """
-            Saves the attachment data.
+    def save(self, **kwargs):
+        """
+        Saves the attachment data.
 
-            The name of the file is determined by several factors. The first
-            thing that is checked is if you have provided :param customFileName:
-            to this function. If you have, that is the name that will be used.
-            If no custom name has been provided and :param contentId: is True,
-            the file will be saved using the content ID of the attachment. If
-            it is not found or :param contentId: is False, the long filename
-            will be used. If the long filename is not found, the short one will
-            be used. If after all of this a usable filename has not been found,
-            """
+        The name of the file is determined by several factors. The first
+        thing that is checked is if you have provided :param customFileName:
+        to this function. If you have, that is the name that will be used.
+        If no custom name has been provided and :param contentId: is True,
+        the file will be saved using the content ID of the attachment. If
+        it is not found or :param contentId: is False, the long filename
+        will be used. If the long filename is not found, the short one will
+        be used. If after all of this a usable filename has not been found, a
+        random one will be used (accessible from `Attachment.randomFilename`).
+
+        If you want to save the contents into a ZipFile or similar object,
+        either pass a path to where you want to create one or pass an instance
+        to :param zip:. If :param zip: is an instance, :param customPath: will
+        refer to a location inside the zip file.
+        """
         # Check if the user has specified a custom filename
         filename = self.getFilename(**kwargs)
-        kwargs['customFilename'] = None
 
         # Someone managed to have a null character here, so let's get rid of that
         filename = prepareFilename(inputToString(filename, self.msg.stringEncoding))
 
+        # Check if we are doing a zip file.
+        zip = kwargs.get('zip')
+
         customPath = os.path.abspath(kwargs.get('customPath', os.getcwdu())).replace('\\', '/')
         customPath += '' if customPath.endswith('/') else '/'
-        filename = customPath + filename
+        fullFilename = customPath + filename
 
         if self.__type == 'data':
-            if os.path.exists(filename):
-            with open(filename, 'wb') as f:
+            if os.path.exists(fullFilename):
+                # Try to split the filename into a name and extention.
+                name, ext = os.path.splitext(filename)
+                # Try to add a number to it so that we can save without overwriting.
+                for i in range(2, 100):
+                    testName = customPath + name + ' (' + str(i) + ')' + ext
+                    if not os.path.exists(testName):
+                        fullFilename = testName
+                        break
+                else:
+                    # If we couldn't find one that didn't exist.
+                    raise FileExistsError('Could not create the specified file because it already exists ("{}").'.format(fullFilename))
+
+            with open(fullFilename, 'wb') as f:
                 f.write(self.__data)
+
+            return fullFilename
         else:
             self.saveEmbededMessage(**kwargs)
-        return filename
+            return self.msg
+
 
     def saveEmbededMessage(self, **kwargs):
         """

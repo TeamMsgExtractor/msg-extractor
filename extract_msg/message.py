@@ -1,5 +1,6 @@
 import json
 import logging
+import zipfile
 
 from imapclient.imapclient import decode_utf7
 
@@ -8,7 +9,7 @@ from extract_msg.attachment import Attachment
 from extract_msg.compat import os_ as os
 from extract_msg.exceptions import DataNotFoundError, IncompatibleOptionsError
 from extract_msg.message_base import MessageBase
-from extract_msg.utils import addNumToDir, inputToBytes, inputToString
+from extract_msg.utils import addNumToDir, inputToBytes, inputToString, prepareFilename
 
 
 logger = logging.getLogger(__name__)
@@ -36,7 +37,14 @@ class Message(MessageBase):
         """
         Returns the JSON representation of the Message.
         """
-
+        return json.dumps({
+            'from': inputToString(self.sender, 'utf-8'),
+            'to': inputToString(self.to, 'utf-8'),
+            'cc': inputToString(self.cc, 'utf-8'),
+            'subject': inputToString(self.subject, 'utf-8'),
+            'date': inputToString(self.date, 'utf-8'),
+            'body': decode_utf7(self.body)
+        })
 
     def save(self, **kwargs):
         """
@@ -72,6 +80,11 @@ class Message(MessageBase):
            * HTML
            * RTF
            * Plain text
+
+        If you want to save the contents into a ZipFile or similar object,
+        either pass a path to where you want to create one or pass an instance
+        to :param zip:. If :param zip: is an instance, :param customPath: will
+        refer to a location inside the zip file.
         """
 
         # Move keyword arguments into variables.
@@ -79,11 +92,32 @@ class Message(MessageBase):
         html = kwargs.get('html', False)
         rtf = kwargs.get('rtf', False)
         raw = kwargs.get('raw', False)
+        allowFallback = kwargs.get('allowFallback', False)
+        zip = kwargs.get('zip')
 
         # Variables involved in the save location.
-        path = os.path.abspath(kwargs.get('customPath', os.getcwdu())).replace('\\', '/')
         customFilename = kwargs.get('customFilename')
         useMsgFilename = kwargs.get('useMsgFilename', False)
+
+        # ZipFile handling.
+        if zip:
+            # If we are doing a zip file, first check that we have been given a path.
+            if isinstance(zip, constants.STRING):
+                # If we have a path then we use the zip file.
+                zip = zipfile.ZipFile(zip)
+                kwargs['zip'] = zip
+            # Path needs to be done in a special way if we are in a zip file.
+            path = kwargs.get('customPath', '').replace('\\'. '/')
+            path += '/' if path[-1] != '/' and path else ''
+            # Set the open command to be that of the zip file.
+            open = zip.open
+            # Zip files use w for writing in binary.
+            mode = 'w'
+        else:
+            path = os.path.abspath(kwargs.get('customPath', os.getcwdu())).replace('\\', '/')
+            # Prepare the path.
+            path += '/' if path[-1] != '/' else ''
+            mode = 'wb'
 
         # Reset this for sub save calls.
         kwargs['customFilename'] = None
@@ -95,20 +129,32 @@ class Message(MessageBase):
         # Get the type of line endings.
         crlf = inputToBytes(self.crlf, 'utf-8')
 
-        # Prepare the path.
-        path += '/' if path[-1] != '/' else ''
+
 
         if customFilename:
             # First we need to validate it. If there are invalid characters, this will detect it.
-            if constants.RE_INVALID_PATH_CHARACTERS.search(customFilename):
+            if constants.RE_INVALID_FILENAME_CHARACTERS.search(customFilename):
                 raise ValueError('Invalid character found in customFilename. Must not contain any of the following characters: \\/:*?"<>|')
             path += customFilename
         elif useMsgFilename:
             if not self.filename:
                 raise ValueError(':param useMsgFilename: is only available if you are using an msg file on the disk or have provided a filename.')
-            path += self.filename
+            path += prepareFilename(self.filename)
         else:
             path += self.defaultFolderName
+
+        # Create the folders.
+        try:
+            os.makedirs(path)
+        except Exception:
+            newDirName = addNumToDir(path)
+            if newDirName:
+                path = newDirName
+            else:
+                raise Exception(
+                    "Failed to create directory '%s'. Does it already exist?" %
+                    path
+                )
 
         # Prepare the path one last time.
         path += '/' if path[-1] != '/' else ''
@@ -116,23 +162,9 @@ class Message(MessageBase):
         # Update the kwargs.
         kwargs['customPath'] = path
 
-        # Create the folders.
-        try:
-            os.makedirs(dirName)
-        except Exception:
-            newDirName = addNumToDir(dirName)
-            if newDirName is not None:
-                dirName = newDirName
-            else:
-                raise Exception(
-                    "Failed to create directory '%s'. Does it already exist?" %
-                    dirName
-                )
-
         if raw:
             self.saveRaw(path)
             return self
-
 
         try:
             # Save the attachments
@@ -144,28 +176,23 @@ class Message(MessageBase):
             useHtml = False
             useRtf = False
             if html:
-               if self.htmlBody:
+                if self.htmlBody:
                    useHtml = True
                    fext = 'html'
-            elif not allowFallback:
-               raise DataNotFoundError('Could not find the htmlBody')
+                elif not allowFallback:
+                   raise DataNotFoundError('Could not find the htmlBody')
 
             if rtf or (html and not useHtml):
-               if self.rtfBody:
+                if self.rtfBody:
                    useRtf = True
                    fext = 'rtf'
-            elif not allowFallback:
-               raise DataNotFoundError('Could not find the rtfBody')
+                elif not allowFallback:
+                   raise DataNotFoundError('Could not find the rtfBody')
 
-            with open(path + 'message.' + fext, 'wb') as f:
+            with open(path + 'message.' + fext, mode) as f:
                 if _json:
-                    emailObj = {'from': inputToString(self.sender, 'utf-8'),
-                                'to': inputToString(self.to, 'utf-8'),
-                                'cc': inputToString(self.cc, 'utf-8'),
-                                'subject': inputToString(self.subject, 'utf-8'),
-                                'date': inputToString(self.date, 'utf-8'),
-                                'attachments': attachmentNames,
-                                'body': decode_utf7(self.body)}
+                    emailObj = json.loads(self.getJson())
+                    emailObj['attachments'] = attachmentNames
 
                     f.write(inputToBytes(json.dumps(emailObj), 'utf-8'))
                 else:
@@ -187,10 +214,6 @@ class Message(MessageBase):
         except Exception:
             self.saveRaw(path)
             raise
-
-        finally:
-            # Return to previous directory
-            os.chdir(oldDir)
 
         # Return the instance so that functions can easily be chained.
         return self

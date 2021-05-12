@@ -29,14 +29,14 @@ def main():
 
         from extract_msg import validation
 
-        val_results = {x[0]: validation.validate(x[0]) for x in args.msgs}
+        valResults = {x[0]: validation.validate(x[0]) for x in args.msgs}
         filename = 'validation {}.json'.format(int(time.time()))
         print('Validation Results:')
-        pprint.pprint(val_results)
+        pprint.pprint(valResults)
         print('These results have been saved to {}'.format(filename))
         with open(filename, 'w') as fil:
-            fil.write(json.dumps(val_results))
-        utils.get_input('Press enter to exit...')
+            fil.write(json.dumps(valResults))
+        utils.getInput('Press enter to exit...')
     else:
         if not args.dump_stdout:
             utils.setup_logging(args.config_path, level, args.log, args.file_logging)
@@ -48,7 +48,7 @@ def main():
                         print(msg.body)
                     else:
                         os.chdir(out)
-                        msg.save(json = args.json, useFilename = args.use_filename, contentId = args.cid, html = args.html, rtf = args.html, args.allowFallback)
+                        msg.save(json = args.json, useMsgFilename = args.use_filename, contentId = args.cid, html = args.html, rtf = args.html, allowFallback = args.allowFallback)
             except Exception as e:
                 print("Error with file '" + x[0] + "': " +
                       traceback.format_exc())

@@ -7,6 +7,7 @@ import olefile
 
 from extract_msg import constants
 from extract_msg.attachment import Attachment
+from extract_msg.compat import os_ as os
 from extract_msg.named import Named
 from extract_msg.prop import FixedLengthProp, VariableLengthProp
 from extract_msg.properties import Properties
