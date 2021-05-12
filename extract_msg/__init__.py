@@ -40,7 +40,7 @@ from extract_msg.exceptions import UnrecognizedMSGTypeError
 from extract_msg.message import Message
 from extract_msg.message_base import MessageBase
 from extract_msg.msg import MSGFile
-from extract_msg.prop import create_prop
+from extract_msg.prop import createProp
 from extract_msg.properties import Properties
 from extract_msg.recipient import Recipient
 from extract_msg.utils import openMsg, properHex

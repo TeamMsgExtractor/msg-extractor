@@ -3,7 +3,7 @@ import logging
 import pprint
 
 from extract_msg import constants
-from extract_msg.prop import create_prop
+from extract_msg.prop import createProp
 from extract_msg.utils import divide, fromTimeStamp, msgEpoch, properHex
 
 logger = logging.getLogger(__name__)
@@ -51,7 +51,7 @@ class Properties(object):
                     skip = 32
         streams = divide(self.__stream[skip:], 16)
         for st in streams:
-            a = create_prop(st)
+            a = createProp(st)
             self.__props[a.name] = a
         self.__pl = len(self.__props)
 

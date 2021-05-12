@@ -11,7 +11,7 @@ from extract_msg.compat import os_ as os
 from extract_msg.named import Named
 from extract_msg.prop import FixedLengthProp, VariableLengthProp
 from extract_msg.properties import Properties
-from extract_msg.utils import divide, getEncodingName, has_len, inputToMsgpath, inputToString, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
+from extract_msg.utils import divide, getEncodingName, hasLen, inputToMsgpath, inputToString, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
 from extract_msg.exceptions import InvalidFileFormatError, MissingEncodingError
 
 
@@ -58,8 +58,7 @@ class MSGFile(olefile.OleFileIO):
                 raise
 
         prefixl = []
-        tmp_condition = prefix != ''
-        if tmp_condition:
+        if prefix:
             try:
                 prefix = inputToString(prefix, 'utf-8')
             except:
@@ -78,11 +77,11 @@ class MSGFile(olefile.OleFileIO):
         self.__prefix = prefix
         self.__prefixList = prefixl
         self.__prefixLen = len(prefixl)
-        if tmp_condition:
+        if prefix:
             filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix=False)
         if filename is not None:
             self.filename = filename
-        elif has_len(path):
+        elif hasLen(path):
             if len(path) < 1536:
                 self.filename = path
             else:
@@ -308,21 +307,21 @@ class MSGFile(olefile.OleFileIO):
             prefixList.append(location)
         prefixList = inputToMsgpath(prefixList)
         usableid = id + _type if _type is not None else id
-        found_number = 0
-        found_streams = []
+        foundNumber = 0
+        foundStreams = []
         for item in self.listDir():
             if len(item) > self.__prefixLen:
-                if item[self.__prefixLen].startswith('__substg1.0_' + usableid) and item[self.__prefixLen] not in found_streams:
-                    found_number += 1
-                    found_streams.append(item[self.__prefixLen])
+                if item[self.__prefixLen].startswith('__substg1.0_' + usableid) and item[self.__prefixLen] not in foundStreams:
+                    foundNumber += 1
+                    foundStreams.append(item[self.__prefixLen])
         for x in propertiesInstance:
             if x.startswith(usableid):
-                for y in found_streams:
+                for y in foundStreams:
                     if y.endswith(x):
                         break
                 else:
-                    found_number += 1
-        return (found_number > 0), found_number
+                    foundNumber += 1
+        return (foundNumber > 0), foundNumber
 
     def fixPath(self, inp, prefix = True):
         """

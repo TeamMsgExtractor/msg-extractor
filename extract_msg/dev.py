@@ -21,8 +21,8 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-def setupDevLogger(default_path=None, logfile = None, env_key='EXTRACT_MSG_LOG_CFG'):
-    utils.setupLogging(default_path, 5, logfile, True, env_key)
+def setupDevLogger(defaultPath=None, logfile = None, envKey='EXTRACT_MSG_LOG_CFG'):
+    utils.setupLogging(defaultPath, 5, logfile, True, envKey)
 
 
 def main(args, argv):

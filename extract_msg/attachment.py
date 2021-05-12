@@ -1,6 +1,7 @@
 import logging
 import random
 import string
+import zipfile
 
 from extract_msg import constants
 from extract_msg.attachment_base import AttachmentBase
@@ -120,30 +121,73 @@ class Attachment(AttachmentBase):
         # Check if we are doing a zip file.
         zip = kwargs.get('zip')
 
-        customPath = os.path.abspath(kwargs.get('customPath', os.getcwdu())).replace('\\', '/')
-        customPath += '' if customPath.endswith('/') else '/'
+        # ZipFile handling.
+        if zip:
+            # If we are doing a zip file, first check that we have been given a path.
+            if isinstance(zip, constants.STRING):
+                # If we have a path then we use the zip file.
+                zip = zipfile.ZipFile(zip, 'a', zipfile.ZIP_DEFLATED)
+                kwargs['zip'] = zip
+                createdZip = True
+            else:
+                createdZip = False
+            # Path needs to be done in a special way if we are in a zip file.
+            customPath = kwargs.get('customPath', '').replace('\\', '/')
+            customPath += '/' if customPath and customPath[-1] != '/' else ''
+            # Set the open command to be that of the zip file.
+            open = zip.open
+            # Zip files use w for writing in binary.
+            mode = 'w'
+        else:
+            customPath = os.path.abspath(kwargs.get('customPath', os.getcwdu())).replace('\\', '/')
+            # Prepare the path.
+            customPath += '' if customPath.endswith('/') else '/'
+            mode = 'wb'
+
         fullFilename = customPath + filename
 
         if self.__type == 'data':
-            if os.path.exists(fullFilename):
-                # Try to split the filename into a name and extention.
+            if zip:
                 name, ext = os.path.splitext(filename)
-                # Try to add a number to it so that we can save without overwriting.
-                for i in range(2, 100):
-                    testName = customPath + name + ' (' + str(i) + ')' + ext
-                    if not os.path.exists(testName):
-                        fullFilename = testName
-                        break
-                else:
-                    # If we couldn't find one that didn't exist.
-                    raise FileExistsError('Could not create the specified file because it already exists ("{}").'.format(fullFilename))
+                nameList = zip.namelist()
+                if fullFilename in nameList:
+                    for i in range(2, 100):
+                        testName = customPath + name + ' (' + str(i) + ')' + ext
+                        if testName not in nameList:
+                            fullFilename = testName
+                            break
+                    else:
+                        # If we couldn't find one that didn't exist.
+                        raise FileExistsError('Could not create the specified file because it already exists ("{}").'.format(fullFilename))
+            else:
+                if os.path.exists(fullFilename):
+                    # Try to split the filename into a name and extention.
+                    name, ext = os.path.splitext(filename)
+                    # Try to add a number to it so that we can save without overwriting.
+                    for i in range(2, 100):
+                        testName = customPath + name + ' (' + str(i) + ')' + ext
+                        if not os.path.exists(testName):
+                            fullFilename = testName
+                            break
+                    else:
+                        # If we couldn't find one that didn't exist.
+                        raise FileExistsError('Could not create the specified file because it already exists ("{}").'.format(fullFilename))
 
-            with open(fullFilename, 'wb') as f:
+            with open(fullFilename, mode) as f:
                 f.write(self.__data)
+
+            # Close the ZipFile if this function created it.
+            if createdZip:
+                zip.close()
 
             return fullFilename
         else:
             self.saveEmbededMessage(**kwargs)
+
+            # Close the ZipFile if this function created it.
+            if createdZip:
+                zip.close()
+
             return self.msg
 
 

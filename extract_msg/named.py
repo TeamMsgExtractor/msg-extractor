@@ -15,23 +15,20 @@ class Named(object):
     def __init__(self, msg):
         super(Named, self).__init__()
         self.__msg = msg
-        guid_stream = self._getStream('__substg1.0_00020102')
-        entry_stream = self._getStream('__substg1.0_00030102')
-        names_stream = self._getStream('__substg1.0_00040102')
-        guid_stream = self._getStream('__substg1.0_00020102', False) if guid_stream is None else guid_stream
-        entry_stream = self._getStream('__substg1.0_00030102', False) if entry_stream is None else entry_stream
-        names_stream = self._getStream('__substg1.0_00040102', False) if names_stream is None else names_stream
-        self.guid_stream = guid_stream
-        self.entry_stream = entry_stream
-        self.names_stream = names_stream
-        guid_stream_length = len(guid_stream)
-        entry_stream_length = len(entry_stream)
-        names_stream_length = len(names_stream)
-        # TODO guid stream parsing
-        guids = tuple([None, constants.GUID_PS_MAPI, constants.GUID_PS_PUBLIC_STRINGS] + [bytesToGuid(x) for x in divide(guid_stream, 16)])
-        # TODO entry_stream parsing
+        guidStream = self._getStream('__substg1.0_00020102') or self._getStream('__substg1.0_00020102', False)
+        entryStream = self._getStream('__substg1.0_00030102') or self._getStream('__substg1.0_00030102', False)
+        namesStream = self._getStream('__substg1.0_00040102') or self._getStream('__substg1.0_00040102', False)
+        self.guidStream = guidStream
+        self.entryStream = entryStream
+        self.namesStream = namesStream
+        guidStreamLength = len(guidStream)
+        entryStreamLength = len(entryStream)
+        namesStreamLength = len(namesStream)
+        # TODO guidStream parsing
+        guids = tuple([None, constants.GUID_PS_MAPI, constants.GUID_PS_PUBLIC_STRINGS] + [bytesToGuid(x) for x in divide(guidStream, 16)])
+        # TODO entryStream parsing
         entries = []
-        for x in divide(entry_stream, 8):
+        for x in divide(entryStream, 8):
             tmp = constants.STNP_ENT.unpack(x)
             entry = {
                 'id': tmp[0],
@@ -45,11 +42,11 @@ class Named(object):
         # Parse the names stream.
         names = {}
         pos = 0
-        while pos < names_stream_length:
-            name_length = constants.STNP_NAM.unpack(names_stream[pos:pos+4])[0]
-            pos += 4 # Move to the start of the
-            names[pos - 4] = names_stream[pos:pos+name_length].decode('utf_16_le') # Names are stored in the dictionary as the position they start at
-            pos += roundUp(name_length, 4)
+        while pos < namesStreamLength:
+            nameLength = constants.STNP_NAM.unpack(namesStream[pos:pos+4])[0]
+            pos += 4 # Move to the start of the entry.
+            names[pos - 4] = namesStream[pos:pos+nameLength].decode('utf_16_le') # Names are stored in the dictionary as the position they start at.
+            pos += roundUp(nameLength, 4)
 
         self.entries = entries
         self.__names = names

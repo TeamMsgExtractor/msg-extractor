@@ -193,32 +193,28 @@ def getCommandArgs(args):
     parser.add_argument('--dump-stdout', dest='dump_stdout', action='store_true',
                         help='Tells the program to dump the message body (plain text) to stdout. Overrides saving arguments.')
     # --html
-    #parser.add_argument('--html', dest='html', action='store_true',
-    #                    help='Sets whether the output should be html. If this is not possible, will error.')
+    parser.add_argument('--html', dest='html', action='store_true',
+                       help='Sets whether the output should be html. If this is not possible, will error.')
+    # --raw
+    parser.add_argument('--raw', dest='raw', action='store_true',
+                       help='Sets whether the output should be html. If this is not possible, will error.')
     # --rtf
-    #parser.add_argument('--rtf', dest='rtf', action='store_true',
-    #                    help='Sets whether the output should be rtf. If this is not possible, will error.')
+    parser.add_argument('--rtf', dest='rtf', action='store_true',
+                       help='Sets whether the output should be rtf. If this is not possible, will error.')
     # --allow-fallback
-    #parser.add_argument('--allow-fallback', dest='allowFallbac', action='store_true',
-    #                    help='Tells the program to fallback to a different save type if the selected one is not possible.')
+    parser.add_argument('--allow-fallback', dest='allowFallbac', action='store_true',
+                       help='Tells the program to fallback to a different save type if the selected one is not possible.')
     # --out-name NAME
-    # parser.add_argument('--out-name', dest = 'out_name',
-    #                     help = 'Name to be used with saving the file output. Should come immediately after the file name.')
+    parser.add_argument('--out-name', dest = 'out_name',
+                        help = 'Name to be used with saving the file output. Should come immediately after the file name.')
     # [msg files]
     parser.add_argument('msgs', metavar='msg', nargs='+',
                         help='An msg file to be parsed')
 
     options = parser.parse_args(args)
     # Check if more than one of the following arguments has been specified
-    #valid = 0
-    #if options.html:
-    #    valid += 1
-    #if options.rtf:
-    #    valid += 1
-    #if options.json:
-    #    valid += 1
-    #if valid > 1:
-    #    raise IncompatibleOptionsError('Only one of these options may be selected at a time: --html, --rtf, --json')
+    if options.html + options.rtf + options.json > 1:
+       raise IncompatibleOptionsError('Only one of these options may be selected at a time: --html, --json, --raw, --rtf')
 
     if options.dev or options.file_logging:
         options.verbose = True
@@ -274,25 +270,21 @@ def getEncodingName(codepage):
     except LookupError:
         raise UnsupportedEncodingError('The codepage {} ({}) is not currently supported by your version of Python.'.format(codepage, constants.CODE_PAGES[codepage]))
 
-def get_full_class_name(inp):
+def getFullClassName(inp):
     return inp.__class__.__module__ + '.' + inp.__class__.__name__
 
-def has_len(obj):
+def hasLen(obj):
     """
     Checks if :param obj: has a __len__ attribute.
     """
-    try:
-        obj.__len__
-        return True
-    except AttributeError:
-        return False
+    return hasattr(obj, '__len__')
 
-def inputToBytes(string_input_var, encoding):
-    if isinstance(string_input_var, constants.BYTES):
-        return string_input_var
-    elif isinstance(string_input_var, constants.STRING):
-        return string_input_var.encode(encoding)
-    elif string_input_var is None:
+def inputToBytes(stringInputVar, encoding):
+    if isinstance(stringInputVar, constants.BYTES):
+        return stringInputVar
+    elif isinstance(stringInputVar, constants.STRING):
+        return stringInputVar.encode(encoding)
+    elif stringInputVar is None:
         return b''
     else:
         raise ConversionError('Cannot convert to BYTES type')
@@ -306,12 +298,12 @@ def inputToMsgpath(inp):
     ret = inputToString(inp, 'utf-8').replace('\\', '/').split('/')
     return ret if ret[0] != '' else []
 
-def inputToString(bytes_input_var, encoding):
-    if isinstance(bytes_input_var, constants.STRING):
-        return bytes_input_var
-    elif isinstance(bytes_input_var, constants.BYTES):
-        return bytes_input_var.decode(encoding)
-    elif bytes_input_var is None:
+def inputToString(bytesInputVar, encoding):
+    if isinstance(bytesInputVar, constants.STRING):
+        return bytesInputVar
+    elif isinstance(bytesInputVar, constants.BYTES):
+        return bytesInputVar.decode(encoding)
+    elif bytesInputVar is None:
         return ''
     else:
         raise ConversionError('Cannot convert to STRING type')
@@ -400,7 +392,7 @@ def parseType(_type, stream, encoding, extras):
     """
     # WARNING Not done. Do not try to implement anywhere where it is not already implemented
     value = stream
-    length_extras = len(extras)
+    lengthExtras = len(extras)
     if _type == 0x0000:  # PtypUnspecified
         pass
     elif _type == 0x0001:  # PtypNull
@@ -458,9 +450,9 @@ def parseType(_type, stream, encoding, extras):
         if _type in (0x101F, 0x101E):
             ret = [x.decode(encoding) for x in extras]
             lengths = struct.unpack('<{}i'.format(len(ret)), stream)
-            length_lengths = len(lengths)
-            if length_lengths > length_extras:
-                logger.warning('Error while parsing multiple type. Expected {} stream{}, got {}. Ignoring.'.format(length_lengths, 's' if length_lengths > 1 or length_lengths == 0 else '', length_extras))
+            lengthLengths = len(lengths)
+            if lengthLengths > lengthExtras:
+                logger.warning('Error while parsing multiple type. Expected {} stream{}, got {}. Ignoring.'.format(lengthLengths, 's' if lengthLengths != 1 else '', lengthExtras))
             for x, y in enumerate(extras):
                 if lengths[x] != len(y):
                     logger.warning('Error while parsing multiple type. Expected length {}, got {}. Ignoring.'.format(lengths[x], len(y)))
@@ -468,9 +460,9 @@ def parseType(_type, stream, encoding, extras):
         elif _type == 0x1102:
             ret = copy.deepcopy(extras)
             lengths = tuple(constants.STUI32.unpack(stream[pos*8:(pos+1)*8])[0] for pos in range(len(stream) // 8))
-            length_lengths = len(lengths)
-            if length_lengths > length_extras:
-                logger.warning('Error while parsing multiple type. Expected {} stream{}, got {}. Ignoring.'.format(length_lengths, 's' if length_lengths > 1 or length_lengths == 0 else '', length_extras))
+            lengthLengths = len(lengths)
+            if lengthLengths > lengthExtras:
+                logger.warning('Error while parsing multiple type. Expected {} stream{}, got {}. Ignoring.'.format(lengthLengths, 's' if lengthLengths != 1 else '', lengthExtras))
             for x, y in enumerate(extras):
                 if lengths[x] != len(y):
                     logger.warning('Error while parsing multiple type. Expected length {}, got {}. Ignoring.'.format(lengths[x], len(y)))
@@ -505,43 +497,43 @@ def roundUp(inp, mult):
     """
     return inp + (mult - inp) % mult
 
-def setupLogging(default_path=None, default_level=logging.WARN, logfile=None, enable_file_logging=False,
+def setupLogging(defaultPath=None, defaultLevel=logging.WARN, logfile=None, enableFileLogging=False,
                   env_key='EXTRACT_MSG_LOG_CFG'):
     """
     Setup logging configuration
 
     Args:
-        default_path (str): Default path to use for the logging configuration file
-        default_level (int): Default logging level
+        defaultPath (str): Default path to use for the logging configuration file
+        defaultLevel (int): Default logging level
         env_key (str): Environment variable name to search for, for setting logfile path
 
     Returns:
         bool: True if the configuration file was found and applied, False otherwise
     """
-    shipped_config = getContFileDir(__file__) + '/logging-config/'
+    shippedConfig = getContFileDir(__file__) + '/logging-config/'
     if os.name == 'nt':
         null = 'NUL'
-        shipped_config += 'logging-nt.json'
+        shippedConfig += 'logging-nt.json'
     elif os.name == 'posix':
         null = '/dev/null'
-        shipped_config += 'logging-posix.json'
+        shippedConfig += 'logging-posix.json'
     # Find logging.json if not provided
-    if not default_path:
-        default_path = shipped_config
+    if not defaultPath:
+        defaultPath = shippedConfig
 
     paths = [
-        default_path,
+        defaultPath,
         'logging.json',
         '../logging.json',
         '../../logging.json',
-        shipped_config,
+        shippedConfig,
     ]
 
     path = None
 
-    for config_path in paths:
-        if os.path.exists(config_path):
-            path = config_path
+    for configPath in paths:
+        if os.path.exists(configPath):
+            path = configPath
             break
 
     value = os.getenv(env_key, None)
@@ -550,11 +542,11 @@ def setupLogging(default_path=None, default_level=logging.WARN, logfile=None, en
 
     if path is None:
         print('Unable to find logging.json configuration file')
-        print('Make sure a valid logging configuration file is referenced in the default_path'
+        print('Make sure a valid logging configuration file is referenced in the defaultPath'
               ' argument, is inside the extract_msg install location, or is available at one '
               'of the following file-paths:')
         print(str(paths[1:]))
-        logging.basicConfig(level=default_level)
+        logging.basicConfig(level=defaultLevel)
         logging.warning('The extract_msg logging configuration was not found - using a basic configuration.'
                         'Please check the extract_msg installation directory for "logging-{}.json".'.format(os.name))
         return False
@@ -564,7 +556,7 @@ def setupLogging(default_path=None, default_level=logging.WARN, logfile=None, en
 
     for x in config['handlers']:
         if 'filename' in config['handlers'][x]:
-            if enable_file_logging:
+            if enableFileLogging:
                 config['handlers'][x]['filename'] = tmp = os.path.expanduser(
                     os.path.expandvars(logfile if logfile else config['handlers'][x]['filename']))
                 tmp = getContFileDir(tmp)
@@ -579,7 +571,7 @@ def setupLogging(default_path=None, default_level=logging.WARN, logfile=None, en
         print('Failed to configure the logger. Did your installation get messed up?')
         print(e)
 
-    logging.getLogger().setLevel(default_level)
+    logging.getLogger().setLevel(defaultLevel)
     return True
 
 def verifyPropertyId(id):

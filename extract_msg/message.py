@@ -101,14 +101,20 @@ class Message(MessageBase):
 
         # ZipFile handling.
         if zip:
+            # `raw` and `zip` are incompatible.
+            if raw:
+                raise IncompatibleOptionsError('The options `raw` and `zip` are incompatible.')
             # If we are doing a zip file, first check that we have been given a path.
             if isinstance(zip, constants.STRING):
                 # If we have a path then we use the zip file.
-                zip = zipfile.ZipFile(zip)
+                zip = zipfile.ZipFile(zip, 'a', zipfile.ZIP_DEFLATED)
                 kwargs['zip'] = zip
+                createdZip = True
+            else:
+                createdZip = False
             # Path needs to be done in a special way if we are in a zip file.
-            path = kwargs.get('customPath', '').replace('\\'. '/')
-            path += '/' if path[-1] != '/' and path else ''
+            path = kwargs.get('customPath', '').replace('\\', '/')
+            path += '/' if path and path[-1] != '/' else ''
             # Set the open command to be that of the zip file.
             open = zip.open
             # Zip files use w for writing in binary.
@@ -144,17 +150,18 @@ class Message(MessageBase):
             path += self.defaultFolderName
 
         # Create the folders.
-        try:
-            os.makedirs(path)
-        except Exception:
-            newDirName = addNumToDir(path)
-            if newDirName:
-                path = newDirName
-            else:
-                raise Exception(
-                    "Failed to create directory '%s'. Does it already exist?" %
-                    path
-                )
+        if not zip:
+            try:
+                os.makedirs(path)
+            except Exception:
+                newDirName = addNumToDir(path)
+                if newDirName:
+                    path = newDirName
+                else:
+                    raise Exception(
+                        "Failed to create directory '%s'. Does it already exist?" %
+                        path
+                    )
 
         # Prepare the path one last time.
         path += '/' if path[-1] != '/' else ''
@@ -212,8 +219,13 @@ class Message(MessageBase):
                         f.write(inputToBytes(self.body, 'utf-8'))
 
         except Exception:
-            self.saveRaw(path)
+            if not zip:
+                self.saveRaw(path)
             raise
+        finally:
+            # Close the ZipFile if this function created it.
+            if createdZip:
+                zip.close()
 
         # Return the instance so that functions can easily be chained.
         return self
