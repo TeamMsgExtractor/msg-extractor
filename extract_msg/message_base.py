@@ -124,12 +124,12 @@ class MessageBase(MSGFile):
         except AttributeError:
             return False
 
-    def save_attachments(self, contentId = False, json = False, useFileName = False, raw = False, customPath = None):
+    def saveAttachments(self, **kwargs):
         """
         Saves only attachments in the same folder.
         """
         for attachment in self.attachments:
-            attachment.save(contentId, json, useFileName, raw, customPath)
+            attachment.save(**kwargs)
 
     @property
     def attachments(self):

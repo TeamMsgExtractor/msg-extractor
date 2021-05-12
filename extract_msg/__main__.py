@@ -10,7 +10,7 @@ def main():
     # Setup logging to stdout, indicate running from cli
     CLI_LOGGING = 'extract_msg_cli'
 
-    args = utils.get_command_args(sys.argv[1:])
+    args = utils.getCommandArgs(sys.argv[1:])
     level = logging.INFO if args.verbose else logging.WARNING
     currentdir = os.getcwdu() # Store this just in case the paths that have been given are relative
     if args.out_path:
@@ -39,7 +39,7 @@ def main():
         utils.getInput('Press enter to exit...')
     else:
         if not args.dump_stdout:
-            utils.setup_logging(args.config_path, level, args.log, args.file_logging)
+            utils.setupLogging(args.config_path, level, args.log, args.file_logging)
         for x in args.msgs:
             try:
                 with Message(x[0]) as msg:

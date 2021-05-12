@@ -111,7 +111,7 @@ class Message(olefile.OleFileIO):
         filename = self.fix_path(filename)
         return self.exists(filename + '001F') or self.exists(filename + '001E')
 
-    def fix_path(self, filename, prefix=True):
+    def fixPath(self, filename, prefix=True):
         """
         Changes paths so that they have the proper
         prefix (should :param prefix: be True) and

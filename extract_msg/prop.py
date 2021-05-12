@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-def create_prop(string):
+def createProp(string):
     temp = constants.ST2.unpack(string)[0]
     if temp in constants.FIXED_LENGTH_PROPS:
         return FixedLengthProp(string)

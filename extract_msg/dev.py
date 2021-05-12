@@ -21,8 +21,8 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-def setup_dev_logger(default_path=None, logfile = None, env_key='EXTRACT_MSG_LOG_CFG'):
-    utils.setup_logging(default_path, 5, logfile, True, env_key)
+def setupDevLogger(default_path=None, logfile = None, env_key='EXTRACT_MSG_LOG_CFG'):
+    utils.setupLogging(default_path, 5, logfile, True, env_key)
 
 
 def main(args, argv):
@@ -33,7 +33,7 @@ def main(args, argv):
     the list of arguments that were the input to the aforementioned
     function.
     """
-    setup_dev_logger(args.config_path, args.log)
+    setupDevLogger(args.config_path, args.log)
     currentdir = os.getcwdu() # Store this just in case the paths that have been given are relative
     if args.out_path:
         if not os.path.exists(args.out_path):

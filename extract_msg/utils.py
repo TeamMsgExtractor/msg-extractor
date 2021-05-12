@@ -154,7 +154,7 @@ def prepareFilename(filename):
 def fromTimeStamp(stamp):
     return datetime.datetime.fromtimestamp(stamp, tzlocal.get_localzone())
 
-def get_command_args(args):
+def getCommandArgs(args):
     """
     Parse command-line arguments
     """
@@ -505,7 +505,7 @@ def roundUp(inp, mult):
     """
     return inp + (mult - inp) % mult
 
-def setup_logging(default_path=None, default_level=logging.WARN, logfile=None, enable_file_logging=False,
+def setupLogging(default_path=None, default_level=logging.WARN, logfile=None, enable_file_logging=False,
                   env_key='EXTRACT_MSG_LOG_CFG'):
     """
     Setup logging configuration

@@ -139,7 +139,7 @@ class MSGFile(olefile.OleFileIO):
 
         This should ALWAYS return a bytes object (string in python 2)
         """
-        filename = self.fix_path(filename, prefix)
+        filename = self.fixPath(filename, prefix)
         if self.exists(filename, False):
             with self.openstream(filename) as stream:
                 return stream.read()
@@ -159,7 +159,7 @@ class MSGFile(olefile.OleFileIO):
         This should ALWAYS return a string (Unicode in python 2)
         """
 
-        filename = self.fix_path(filename, prefix)
+        filename = self.fixPath(filename, prefix)
         if self.areStringsUnicode:
             return windowsUnicode(self._getStream(filename + '001F', prefix = False))
         else:
@@ -228,7 +228,7 @@ class MSGFile(olefile.OleFileIO):
         it could not find the stream specified.
         """
         verifyType(_type)
-        filename = self.fix_path(filename, prefix)
+        filename = self.fixPath(filename, prefix)
         for x in (filename + _type,) if _type is not None else self.slistDir():
             if x.startswith(filename) and x.find('-') == -1:
                 contents = self._getStream(x, False)
@@ -278,14 +278,14 @@ class MSGFile(olefile.OleFileIO):
         """
         Checks if :param inp: exists in the msg file.
         """
-        inp = self.fix_path(inp, prefix)
+        inp = self.fixPath(inp, prefix)
         return olefile.OleFileIO.exists(self, inp)
 
     def sExists(self, inp, prefix = True):
         """
         Checks if string stream :param inp: exists in the msg file.
         """
-        inp = self.fix_path(inp, prefix)
+        inp = self.fixPath(inp, prefix)
         return self.exists(inp + '001F') or self.exists(inp + '001E')
 
     def existsTypedProperty(self, id, location = None, _type = None, prefix = True, propertiesInstance = None):
@@ -324,7 +324,7 @@ class MSGFile(olefile.OleFileIO):
                     found_number += 1
         return (found_number > 0), found_number
 
-    def fix_path(self, inp, prefix = True):
+    def fixPath(self, inp, prefix = True):
         """
         Changes paths so that they have the proper
         prefix (should :param prefix: be True) and
