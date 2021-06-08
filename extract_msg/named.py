@@ -3,8 +3,8 @@ import logging
 import pprint
 import zlib
 
-from extract_msg import constants
-from extract_msg.utils import bytesToGuid, divide, properHex, roundUp
+from . import constants
+from .utils import bytesToGuid, divide, properHex, roundUp
 
 
 

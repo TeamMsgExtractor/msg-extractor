@@ -1,6 +1,6 @@
-from extract_msg import constants
-from extract_msg.attachment import Attachment
-from extract_msg.msg import MSGFile
+from . import constants
+from .attachment import Attachment
+from .msg import MSGFile
 
 
 class Contact(MSGFile):

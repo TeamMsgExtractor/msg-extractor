@@ -2,12 +2,12 @@ import logging
 import random
 import string
 
-from extract_msg import constants
-from extract_msg.attachment_base import AttachmentBase
-from extract_msg.named import NamedAttachmentProperties
-from extract_msg.prop import FixedLengthProp, VariableLengthProp
-from extract_msg.properties import Properties
-from extract_msg.utils import openMsg, inputToString, prepareFilename, verifyPropertyId, verifyType
+from . import constants
+from .attachment_base import AttachmentBase
+from .named import NamedAttachmentProperties
+from .prop import FixedLengthProp, VariableLengthProp
+from .properties import Properties
+from .utils import openMsg, inputToString, prepareFilename, verifyPropertyId, verifyType
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -40,7 +40,7 @@ class Attachment(AttachmentBase):
             else:
                 self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
                 self.__type = 'msg'
-                self.__data = openMsg(self.msg.path, self.__prefix, self.__class__, overrideEncoding = msg.overrideEncoding, attachmentErrorBehavior = msg.attachmentErrorBehavior)
+                self.__data = openMsg(self.msg.path, self.__prefix, self.__class__, overrideEncoding = msg.overrideEncoding, attachmentErrorBehavior = msg.attachmentErrorBehavior, strict = False)
         elif (self.props['37050003'].value & 0x7) == 0x7:
             # TODO Handling for special attacment type 0x7
             self.__type = 'web'

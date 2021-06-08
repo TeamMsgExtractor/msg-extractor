@@ -14,9 +14,9 @@ import sys
 
 import tzlocal
 
-from extract_msg import constants
-from extract_msg.compat import os_ as os
-from extract_msg.exceptions import ConversionError, IncompatibleOptionsError, InvaildPropertyIdError, UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError
+from . import constants
+from .compat import os_ as os
+from .exceptions import ConversionError, IncompatibleOptionsError, InvaildPropertyIdError, UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -360,11 +360,11 @@ def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAtt
     when it cannot identify what MSGFile derivitive to use. Otherwise, it will
     log the error and return a basic MSGFile instance.
     """
-    from extract_msg.appointment import Appointment
-    from extract_msg.attachment import Attachment
-    from extract_msg.contact import Contact
-    from extract_msg.message import Message
-    from extract_msg.msg import MSGFile
+    from .appointment import Appointment
+    from .attachment import Attachment
+    from .contact import Contact
+    from .message import Message
+    from .msg import MSGFile
 
     attachmentClass = Attachment if attachmentClass is None else attachmentClass
 

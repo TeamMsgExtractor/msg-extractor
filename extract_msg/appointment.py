@@ -1,6 +1,6 @@
-from extract_msg import constants
-from extract_msg.attachment import Attachment
-from extract_msg.message_base import MessageBase
+from . import constants
+from .attachment import Attachment
+from .message_base import MessageBase
 
 class Appointment(MessageBase):
     """

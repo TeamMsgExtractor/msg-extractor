@@ -1,7 +1,7 @@
 import olefile
 
-from extract_msg.message import Message
-from extract_msg.utils import get_full_class_name, has_len
+from .message import Message
+from .utils import get_full_class_name, has_len
 
 
 def get_email_details(instance, stream):

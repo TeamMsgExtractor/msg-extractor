@@ -4,13 +4,13 @@ import logging
 
 import olefile
 
-from extract_msg import constants
-from extract_msg.attachment import Attachment
-from extract_msg.named import Named
-from extract_msg.prop import FixedLengthProp, VariableLengthProp
-from extract_msg.properties import Properties
-from extract_msg.utils import divide, getEncodingName, has_len, inputToMsgpath, inputToString, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
-from extract_msg.exceptions import InvalidFileFormatError, MissingEncodingError
+from . import constants
+from .attachment import Attachment
+from .named import Named
+from .prop import FixedLengthProp, VariableLengthProp
+from .properties import Properties
+from .utils import divide, getEncodingName, has_len, inputToMsgpath, inputToString, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
+from .exceptions import InvalidFileFormatError, MissingEncodingError
 
 
 

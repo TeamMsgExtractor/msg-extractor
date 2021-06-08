@@ -11,10 +11,10 @@ Module for collecting data to be sent to the developer.
 
 import logging
 
-from extract_msg import dev_classes
-from extract_msg import utils
-from extract_msg.compat import os_ as os
-from extract_msg.message import Message
+from . import dev_classes
+from . import utils
+from .compat import os_ as os
+from .message import Message
 
 
 logger = logging.getLogger(__name__)
