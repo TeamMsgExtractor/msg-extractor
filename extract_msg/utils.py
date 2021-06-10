@@ -143,14 +143,6 @@ def divide(string, length):
     """
     return [string[length * x:length * (x + 1)] for x in range(int(ceilDiv(len(string), length)))]
 
-def prepareFilename(filename):
-    """
-    Adjusts :param filename: so that it can succesfully be used as an actual
-    file name.
-    """
-    # I would use re here, but it tested to be slightly slower than this.
-    return ''.join(i for i in filename if i not in r'\/:*?"<>|' + '\x00')
-
 def fromTimeStamp(stamp):
     return datetime.datetime.fromtimestamp(stamp, tzlocal.get_localzone())
 
@@ -490,6 +482,14 @@ def parseType(_type, stream, encoding, extras):
         else:
             raise NotImplementedError('Parsing for type {} has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType {}"'.format(_type, _type))
     return value
+
+def prepareFilename(filename):
+    """
+    Adjusts :param filename: so that it can succesfully be used as an actual
+    file name.
+    """
+    # I would use re here, but it tested to be slightly slower than this.
+    return ''.join(i for i in filename if i not in r'\/:*?"<>|' + '\x00')
 
 def roundUp(inp, mult):
     """

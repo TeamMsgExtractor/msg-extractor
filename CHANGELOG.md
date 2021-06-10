@@ -14,6 +14,7 @@
 * Added zip file support for the `Attachment.save` and `Message.save`. Simply pass a path for the `zip` keyword argument and it will create a new ZipFile instance and save all of it's data inside there. Alternatively, you can pass an instance of a class that is either a ZipFile or ZipFile-like and it will simply use that. When this argument is defined, the `customPath` argument refers to the path inside the zip file.
 * Added the `html` and `rtf` keywords to `Message.save`. These will attempt to save the body in the html or rtf format, respectively. If the program cannot save in those formats, it will raise an exception unless the `allowFallback` keyword argument is `True`.
 * Changed `utils.hasLen` to use `hasattr` instead of the try-except method it was using.
+* Changed imports to use the `.` format (instead of `extract_msg.`) where applicable
 * Many renames to better fit naming convention:
     * `dev.setup_dev_logger` to `dev.setupDevLogger`.
     * `MSGFile.fix_path` to `MSGFile.fixPath`.

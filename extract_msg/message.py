@@ -4,12 +4,12 @@ import zipfile
 
 from imapclient.imapclient import decode_utf7
 
-from extract_msg import constants
-from extract_msg.attachment import Attachment
-from extract_msg.compat import os_ as os
-from extract_msg.exceptions import DataNotFoundError, IncompatibleOptionsError
-from extract_msg.message_base import MessageBase
-from extract_msg.utils import addNumToDir, inputToBytes, inputToString, prepareFilename
+from . import constants
+from .attachment import Attachment
+from .compat import os_ as os
+from .exceptions import DataNotFoundError, IncompatibleOptionsError
+from .message_base import MessageBase
+from .utils import addNumToDir, inputToBytes, inputToString, prepareFilename
 
 
 logger = logging.getLogger(__name__)
@@ -85,6 +85,9 @@ class Message(MessageBase):
         either pass a path to where you want to create one or pass an instance
         to :param zip:. If :param zip: is an instance, :param customPath: will
         refer to a location inside the zip file.
+
+        If you want to save the header, should it be found, set
+        :param saveHeader: to true.
         """
 
         # Move keyword arguments into variables.
