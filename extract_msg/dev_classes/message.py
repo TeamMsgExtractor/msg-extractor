@@ -2,15 +2,15 @@ import copy
 import logging
 import olefile
 
-from extract_msg import constants
-from extract_msg.dev_classes.attachment import Attachment
-from extract_msg.properties import Properties
-from extract_msg.recipient import Recipient
-from extract_msg.utils import has_len, inputToString, windowsUnicode
+from .. import constants
+from ..dev_classes.attachment import Attachment
+from ..properties import Properties
+from ..recipient import Recipient
+from ..utils import hasLen, inputToString, windowsUnicode
+
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
-
 
 class Message(olefile.OleFileIO):
     """

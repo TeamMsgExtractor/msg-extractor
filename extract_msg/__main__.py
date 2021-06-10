@@ -2,9 +2,9 @@ import logging
 import sys
 import traceback
 
-from . import __doc__, utils
-from .compat import os_ as os
-from .message import Message
+from extract_msg import __doc__, utils
+from extract_msg.compat import os_ as os
+from extract_msg.message import Message
 
 def main():
     # Setup logging to stdout, indicate running from cli
@@ -20,14 +20,14 @@ def main():
     else:
         out = currentdir
     if args.dev:
-        import .dev
+        import extract_msg.dev
         extract_msg.dev.main(args, sys.argv[1:])
     elif args.validate:
         import json
         import pprint
         import time
 
-        from . import validation
+        from extract_msg import validation
 
         valResults = {x[0]: validation.validate(x[0]) for x in args.msgs}
         filename = 'validation {}.json'.format(int(time.time()))
