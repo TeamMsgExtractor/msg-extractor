@@ -1,9 +1,9 @@
 import logging
 
-from extract_msg import constants
-from extract_msg.data import PermanentEntryID
-from extract_msg.properties import Properties
-from extract_msg.utils import verifyPropertyId, verifyType
+from . import constants
+from .data import PermanentEntryID
+from .properties import Properties
+from .utils import verifyPropertyId, verifyType
 
 
 logger = logging.getLogger(__name__)

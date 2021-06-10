@@ -3,13 +3,13 @@ import random
 import string
 import zipfile
 
-from extract_msg import constants
-from extract_msg.attachment_base import AttachmentBase
-from extract_msg.compat import os_ as os
-from extract_msg.named import NamedAttachmentProperties
-from extract_msg.prop import FixedLengthProp, VariableLengthProp
-from extract_msg.properties import Properties
-from extract_msg.utils import openMsg, inputToString, prepareFilename, verifyPropertyId, verifyType
+from . import constants
+from .attachment_base import AttachmentBase
+from .compat import os_ as os
+from .named import NamedAttachmentProperties
+from .prop import FixedLengthProp, VariableLengthProp
+from .properties import Properties
+from .utils import openMsg, inputToString, prepareFilename, verifyPropertyId, verifyType
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())

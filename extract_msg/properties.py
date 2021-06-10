@@ -2,9 +2,9 @@ import copy
 import logging
 import pprint
 
-from extract_msg import constants
-from extract_msg.prop import createProp
-from extract_msg.utils import divide, fromTimeStamp, msgEpoch, properHex
+from . import constants
+from .prop import createProp
+from .utils import divide, fromTimeStamp, msgEpoch, properHex
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())

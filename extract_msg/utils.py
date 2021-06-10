@@ -14,9 +14,9 @@ import sys
 
 import tzlocal
 
-from extract_msg import constants
-from extract_msg.compat import os_ as os
-from extract_msg.exceptions import ConversionError, IncompatibleOptionsError, InvaildPropertyIdError, UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError
+from . import constants
+from .compat import os_ as os
+from .exceptions import ConversionError, IncompatibleOptionsError, InvaildPropertyIdError, UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())

@@ -3,16 +3,15 @@ import logging
 import re
 
 import compressed_rtf
-from imapclient.imapclient import decode_utf7
 
+from . import constants
+from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment
+from .compat import os_ as os
+from .msg import MSGFile
+from .recipient import Recipient
+from .utils import addNumToDir, inputToBytes, inputToString, prepareFilename
 from email.parser import Parser as EmailParser
-from extract_msg import constants
-from extract_msg.attachment import Attachment, BrokenAttachment, UnsupportedAttachment
-from extract_msg.compat import os_ as os
-from extract_msg.msg import MSGFile
-from extract_msg.recipient import Recipient
-from extract_msg.utils import addNumToDir, inputToBytes, inputToString, prepareFilename
-
+from imapclient.imapclient import decode_utf7
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())

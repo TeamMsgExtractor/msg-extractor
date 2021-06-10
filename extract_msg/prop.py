@@ -1,8 +1,8 @@
 import datetime
 import logging
 
-from extract_msg import constants
-from extract_msg.utils import fromTimeStamp, msgEpoch, properHex
+from . import constants
+from .utils import fromTimeStamp, msgEpoch, properHex
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
