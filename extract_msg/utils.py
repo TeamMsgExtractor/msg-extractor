@@ -217,8 +217,8 @@ def getCommandArgs(args):
     if options.dump_stdout:
         options.out_path = None
         options.json = False
-        #options.rtf = False
-        #options.html = False
+        options.rtf = False
+        options.html = False
         options.use_filename = False
         options.cid = False
 
@@ -353,14 +353,17 @@ def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAtt
     attachmentClass = Attachment if attachmentClass is None else attachmentClass
 
     msg = MSGFile(path, prefix, attachmentClass, filename, overrideEncoding, attachmentErrorBehavior)
-    classtype = msg.classType
-    if classtype.startswith('IPM.Contact') or classtype.startswith('IPM.DistList'):
+    classtype = msg.classType.lower()
+    # Should be 'IMP.Contact' and 'IPM.DistList' but because of #201...
+    if classtype.startswith('ipm.contact') or classtype.startswith('ipm.distlist'):
         msg.close()
         return Contact(path, prefix, attachmentClass, filename, overrideEncoding, attachmentErrorBehavior)
-    elif classtype.startswith('IPM.Note') or classtype.startswith('REPORT'):
+    # Should be 'IMP.Note' and 'REPORT'.
+    elif classtype.startswith('ipm.note') or classtype.startswith('report'):
         msg.close()
         return Message(path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior)
-    elif classtype.startswith('IPM.Appointment') or classtype.startswith('IPM.Schedule'):
+    # Should be 'IPM.Appointment' and 'IPM.Schedule'.
+    elif classtype.startswith('ipm.appointment') or classtype.startswith('ipm.schedule'):
         msg.close()
         return Appointment(path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior)
     elif strict:
