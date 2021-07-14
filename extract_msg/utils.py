@@ -323,7 +323,7 @@ def msgpathToString(inp):
     inp.replace('\\', '/')
     return inp
 
-def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAttachments = False, overrideEncoding = None, attachmentErrorBehavior = constants.ATTACHMENT_ERROR_THROW, , recipientSeparator = ';', strict = True):
+def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAttachments = False, overrideEncoding = None, attachmentErrorBehavior = constants.ATTACHMENT_ERROR_THROW, recipientSeparator = ';', strict = True):
     """
     Function to automatically open an MSG file and detect what type it is.
 
@@ -367,11 +367,11 @@ def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAtt
     # Should be 'IMP.Note' and 'REPORT'.
     elif classtype.startswith('ipm.note') or classtype.startswith('report'):
         msg.close()
-        return Message(path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior)
+        return Message(path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior, recipientSeparator)
     # Should be 'IPM.Appointment' and 'IPM.Schedule'.
     elif classtype.startswith('ipm.appointment') or classtype.startswith('ipm.schedule'):
         msg.close()
-        return Appointment(path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior)
+        return Appointment(path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior, recipientSeparator)
     elif strict:
         msg.close()
         raise UnrecognizedMSGTypeError('Could not recognize msg class type "{}". It is recommended you report this to the developers.'.format(msg.classType))

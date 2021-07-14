@@ -75,29 +75,34 @@ class MessageBase(MSGFile):
         try:
             return getattr(self, private)
         except AttributeError:
-            # Check header first
             value = None
+            # Check header first.
             if self.headerInit():
                 value = self.header[recipientType]
-            if value is None:
+
+            # If the header had a blank field or didn't have the field, generate it manually.
+            if not value:
+                # Check if the header has initialized.
                 if self.headerInit():
                     logger.info('Header found, but "{}" is not included. Will be generated from other streams.'.format(recipientType))
-                f = []
-                for x in self.recipients:
-                    if x.type & 0x0000000f == recipientInt:
-                        f.append(x.formatted)
+
+                # Get a list of the recipients of the specified type.
+                foundRecipients = tuple(recipient.formatted for recipient in self.recipients if recipient.type & 0x0000000f == recipientInt)
+
+                # If we found recipients, join them with the recipient separator and a space.
                 if len(f) > 0:
-                    st = f[0]
-                    if len(f) > 1:
-                        for x in range(1, len(f)):
-                            st += '{} {}'.format(self.__recipientSeparator, f[x])
-                    value = st
-            if value is not None:
+                    value = (self.__recipientSeparator + ' ').join(foundRecipients)
+
+            # Code to fix the formatting so it's all a single line. This allows the user to format it themself if they want.
+            if value:
                 value = value.replace(' \r\n\t', ' ').replace('\r\n\t ', ' ').replace('\r\n\t', ' ')
                 value = value.replace('\r\n', ' ').replace('\r', ' ').replace('\n', ' ')
                 while value.find('  ') != -1:
                     value = value.replace('  ', ' ')
+
+            # Set the field in the class.
             setattr(self, private, value)
+
             return value
 
     def _registerNamedProperty(self, entry, _type, name = None):
@@ -113,6 +118,7 @@ class MessageBase(MSGFile):
 
     def close(self):
         try:
+            # If this throws an AttributeError then we have not loaded the attachments.
             self._attachments
             for attachment in self.attachments:
                 if attachment.type == 'msg':
@@ -353,6 +359,10 @@ class MessageBase(MSGFile):
     @property
     def parsedDate(self):
         return email.utils.parsedate(self.date)
+
+    @property
+    def recipientSeparator(self):
+        return self.__recipientSeparator
 
     @property
     def recipients(self):
