@@ -323,32 +323,38 @@ def msgpathToString(inp):
     inp.replace('\\', '/')
     return inp
 
-def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAttachments = False, overrideEncoding = None, attachmentErrorBehavior = constants.ATTACHMENT_ERROR_THROW, strict = True):
+def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAttachments = False, overrideEncoding = None, attachmentErrorBehavior = constants.ATTACHMENT_ERROR_THROW, , recipientSeparator = ';', strict = True):
     """
     Function to automatically open an MSG file and detect what type it is.
 
-    :param path: path to the msg file in the system or is the raw msg file.
-    :param prefix: used for extracting embeded msg files
+    :param path: Path to the msg file in the system or is the raw msg file.
+    :param prefix: Used for extracting embeded msg files
         inside the main one. Do not set manually unless
         you know what you are doing.
-    :param attachmentClass: optional, the class the Message object
+    :param attachmentClass: Optional, the class the Message object
         will use for attachments. You probably should
         not change this value unless you know what you
         are doing.
-    :param filename: optional, the filename to be used by default when saving.
-    :param delayAttachments: optional, delays the initialization of attachments
+    :param filename: Optional, the filename to be used by default when saving.
+    :param delayAttachments: Optional, delays the initialization of attachments
         until the user attempts to retrieve them. Allows MSG files with bad
         attachments to be initialized so the other data can be retrieved.
+    :param overrideEncoding: Optional, overrides the specified encoding of the
+        MSG file.
+    :param attachmentErrorBehavior: Optional, the behaviour to use in the event
+        of an error when parsing the attachments.
+    :param recipientSeparator: Optional, Separator string to use between
+        recipients.
 
     If :param strict: is set to `True`, this function will raise an exception
     when it cannot identify what MSGFile derivitive to use. Otherwise, it will
     log the error and return a basic MSGFile instance.
     """
-    from extract_msg.appointment import Appointment
-    from extract_msg.attachment import Attachment
-    from extract_msg.contact import Contact
-    from extract_msg.message import Message
-    from extract_msg.msg import MSGFile
+    from .appointment import Appointment
+    from .attachment import Attachment
+    from .contact import Contact
+    from .message import Message
+    from .msg import MSGFile
 
     attachmentClass = Attachment if attachmentClass is None else attachmentClass
 

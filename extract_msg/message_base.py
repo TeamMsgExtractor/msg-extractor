@@ -23,7 +23,7 @@ class MessageBase(MSGFile):
 
     def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None,
                  delayAttachments = False, overrideEncoding = None,
-                 attachmentErrorBehavior = constants.ATTACHMENT_ERROR_THROW):
+                 attachmentErrorBehavior = constants.ATTACHMENT_ERROR_THROW, recipientSeparator = ';'):
         """
         :param path: path to the msg file in the system or is the raw msg file.
         :param prefix: used for extracting embeded msg files
@@ -33,16 +33,24 @@ class MessageBase(MSGFile):
             will use for attachments. You probably should
             not change this value unless you know what you
             are doing.
-        :param filename: optional, the filename to be used by default when saving.
-        :param delayAttachments: optional, delays the initialization of attachments
-            until the user attempts to retrieve them. Allows MSG files with bad
-            attachments to be initialized so the other data can be retrieved.
+        :param filename: optional, the filename to be used by default when
+            saving.
+        :param delayAttachments: optional, delays the initialization of
+            attachments until the user attempts to retrieve them. Allows MSG
+            files with bad attachments to be initialized so the other data can
+            be retrieved.
         :param overrideEncoding: optional, an encoding to use instead of the one
-            specified by the msg file. Do not report encoding errors caused by this.
+            specified by the msg file. Do not report encoding errors caused by
+            this.
+        :param attachmentErrorBehavior: Optional, the behaviour to use in the event
+            of an error when parsing the attachments.
+        :param recipientSeparator: Optional, Separator string to use between
+            recipients.
         """
         MSGFile.__init__(self, path, prefix, attachmentClass, filename, overrideEncoding, attachmentErrorBehavior)
         self.__attachmentsDelayed = delayAttachments
         self.__attachmentsReady = False
+        self.__recipientSeparator = recipientSeparator
         # Initialize properties in the order that is least likely to cause bugs.
         # TODO have each function check for initialization of needed data so these
         # lines will be unnecessary.
@@ -82,7 +90,7 @@ class MessageBase(MSGFile):
                     st = f[0]
                     if len(f) > 1:
                         for x in range(1, len(f)):
-                            st += ', {0}'.format(f[x])
+                            st += '{} {}'.format(self.__recipientSeparator, f[x])
                     value = st
             if value is not None:
                 value = value.replace(' \r\n\t', ' ').replace('\r\n\t ', ' ').replace('\r\n\t', ' ')
