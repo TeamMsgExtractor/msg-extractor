@@ -92,7 +92,7 @@ class MessageBase(MSGFile):
                 foundRecipients = tuple(recipient.formatted for recipient in self.recipients if recipient.type & 0x0000000f == recipientInt)
 
                 # If we found recipients, join them with the recipient separator and a space.
-                if len(f) > 0:
+                if len(foundRecipients) > 0:
                     value = (self.__recipientSeparator + ' ').join(foundRecipients)
 
             # Code to fix the formatting so it's all a single line. This allows the user to format it themself if they want.
