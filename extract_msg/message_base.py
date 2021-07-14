@@ -69,7 +69,7 @@ class MessageBase(MSGFile):
 
     def _genRecipient(self, recipientType, recipientInt):
         """
-        Returns the specified recipient field
+        Returns the specified recipient field.
         """
         private = '_' + recipientType
         try:
@@ -79,6 +79,8 @@ class MessageBase(MSGFile):
             # Check header first.
             if self.headerInit():
                 value = self.header[recipientType]
+                if value:
+                    value = value.replace(',', self.__recipientSeparator)
 
             # If the header had a blank field or didn't have the field, generate it manually.
             if not value:
@@ -94,6 +96,7 @@ class MessageBase(MSGFile):
                     value = (self.__recipientSeparator + ' ').join(foundRecipients)
 
             # Code to fix the formatting so it's all a single line. This allows the user to format it themself if they want.
+            # This should probably be redone to use re or something, but I can do that later. This shouldn't be a huge problem for now.
             if value:
                 value = value.replace(' \r\n\t', ' ').replace('\r\n\t ', ' ').replace('\r\n\t', ' ')
                 value = value.replace('\r\n', ' ').replace('\r', ' ').replace('\n', ' ')
