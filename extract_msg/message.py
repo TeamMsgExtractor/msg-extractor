@@ -60,9 +60,11 @@ class Message(MessageBase):
            * If the file name has not been provided or :param useMsgFilename:
              has not been set, the name of the folder will be created using the
              `defaultFolderName` property.
-
-        :param useMsgFilename: is passed recursively to all save functions, but
-        is used exclusively by embedded msg files.
+           * If the length of the path will be greater than
+             :param maxPathLength: (minus 1 to accomodate the null), the names
+             will be forced shorter. Only change :param maxPathLength: if you
+             know that your system will handle it, otherwise you will be
+             responsible for catching the exceptions. Default is 255.
 
         There are several parameters used to determine how the message will be
         saved. By default, the message will be saved as plain text. Setting one
@@ -101,6 +103,7 @@ class Message(MessageBase):
         # Variables involved in the save location.
         customFilename = kwargs.get('customFilename')
         useMsgFilename = kwargs.get('useMsgFilename', False)
+        maxPathLength = kwargs.get('maxPathLength', 255)
 
         # ZipFile handling.
         if zip:
@@ -138,7 +141,7 @@ class Message(MessageBase):
         # Get the type of line endings.
         crlf = inputToBytes(self.crlf, 'utf-8')
 
-
+        # TODO: insert code here that will handle checking all of the msg files to see if the path with overflow.
 
         if customFilename:
             # First we need to validate it. If there are invalid characters, this will detect it.

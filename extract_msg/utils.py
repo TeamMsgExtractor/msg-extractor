@@ -391,7 +391,7 @@ def parseType(_type, stream, encoding, extras):
 
     WARNING: Not done. Do not try to implement anywhere where it is not already implemented
     """
-    # WARNING Not done. Do not try to implement anywhere where it is not already implemented
+    # WARNING Not done. Do not try to implement anywhere where it is not already implemented.
     value = stream
     lengthExtras = len(extras)
     if _type == 0x0000:  # PtypUnspecified
@@ -416,7 +416,7 @@ def parseType(_type, stream, encoding, extras):
         return constants.PYTPFLOATINGTIME_START + datetime.timedelta(days = value)
     elif _type == 0x000A:  # PtypErrorCode
         value = constants.STUI32.unpack(value)[0]
-        # TODO parsing for this
+        # TODO parsing for this.
         # I can't actually find any msg properties that use this, so it should be okay to release this function without support for it.
         raise NotImplementedError('Parsing for type 0x000A has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType 0x000A"')
     elif _type == 0x000B:  # PtypBoolean

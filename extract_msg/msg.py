@@ -79,7 +79,7 @@ class MSGFile(olefile.OleFileIO):
         self.__prefixLen = len(prefixl)
         if prefix:
             filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix=False)
-        if filename is not None:
+        if filename:
             self.filename = filename
         elif hasLen(path):
             if len(path) < 1536:
