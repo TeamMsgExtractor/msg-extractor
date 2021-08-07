@@ -151,7 +151,18 @@ class Message(MessageBase):
         elif useMsgFilename:
             if not self.filename:
                 raise ValueError(':param useMsgFilename: is only available if you are using an msg file on the disk or have provided a filename.')
-            path += prepareFilename(self.filename)
+            # Get the actual name of the file.
+            filename = os.path.split(self.filename)[1]
+            # Remove the extensions.
+            filename = os.path.splitext(filename)[0]
+            # Prepare the filename by removing any special characters.
+            filename = prepareFilename(filename)
+            # Check to make sure we actually have a filename to use.
+            if not filename:
+                raise ValueError('Invalid filename found in self.filename: "{}"'.format(self.filename))
+
+            # Add the file name to the path.
+            path += filename
         else:
             path += self.defaultFolderName
 
