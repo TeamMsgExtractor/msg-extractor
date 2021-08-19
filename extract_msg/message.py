@@ -9,7 +9,7 @@ from .attachment import Attachment
 from .compat import os_ as os
 from .exceptions import DataNotFoundError, IncompatibleOptionsError
 from .message_base import MessageBase
-from .utils import addNumToDir, inputToBytes, inputToString, prepareFilename
+from .utils import addNumToDir, inputToBytes, inputToString, makeDirs, prepareFilename
 
 
 logger = logging.getLogger(__name__)
@@ -90,6 +90,11 @@ class Message(MessageBase):
 
         If you want to save the header, should it be found, set
         :param saveHeader: to true.
+
+        There is an internally used option :param dryRun: which will cause the
+        function to not actually save and instead return information about how
+        it would have saved given the selected options. This is used internally
+        for path length calculations.
         """
 
         # Move keyword arguments into variables.
@@ -99,6 +104,7 @@ class Message(MessageBase):
         raw = kwargs.get('raw', False)
         allowFallback = kwargs.get('allowFallback', False)
         zip = kwargs.get('zip')
+        dryRun = kwargs.get('dryRun')
 
         # Variables involved in the save location.
         customFilename = kwargs.get('customFilename')
@@ -122,7 +128,7 @@ class Message(MessageBase):
             path = kwargs.get('customPath', '').replace('\\', '/')
             path += '/' if path and path[-1] != '/' else ''
             # Set the open command to be that of the zip file.
-            open = zip.open
+            _open = zip.open
             # Zip files use w for writing in binary.
             mode = 'w'
         else:
@@ -130,6 +136,7 @@ class Message(MessageBase):
             # Prepare the path.
             path += '/' if path[-1] != '/' else ''
             mode = 'wb'
+            _open = open
 
         # Reset this for sub save calls.
         kwargs['customFilename'] = None
@@ -169,7 +176,7 @@ class Message(MessageBase):
         # Create the folders.
         if not zip:
             try:
-                os.makedirs(path)
+                makeDirs(path)
             except Exception:
                 newDirName = addNumToDir(path)
                 if newDirName:
@@ -213,7 +220,7 @@ class Message(MessageBase):
                 elif not allowFallback:
                    raise DataNotFoundError('Could not find the rtfBody')
 
-            with open(path + 'message.' + fext, mode) as f:
+            with _open(path + 'message.' + fext, mode) as f:
                 if _json:
                     emailObj = json.loads(self.getJson())
                     emailObj['attachments'] = attachmentNames
@@ -241,7 +248,7 @@ class Message(MessageBase):
             raise
         finally:
             # Close the ZipFile if this function created it.
-            if createdZip:
+            if zip and createdZip:
                 zip.close()
 
         # Return the instance so that functions can easily be chained.

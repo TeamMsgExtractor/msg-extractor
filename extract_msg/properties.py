@@ -51,8 +51,8 @@ class Properties(object):
                     skip = 32
         streams = divide(self.__stream[skip:], 16)
         for st in streams:
-            a = createProp(st)
-            self.__props[a.name] = a
+            prop = createProp(st)
+            self.__props[prop.name] = prop
         self.__pl = len(self.__props)
 
     def __contains__(self, key):

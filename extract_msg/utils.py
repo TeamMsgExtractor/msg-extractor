@@ -25,6 +25,8 @@ logging.addLevelName(5, 'DEVELOPER')
 if sys.version_info[0] >= 3:  # Python 3
     getInput = input
 
+    makeDirs = os.makedirs
+
     def properHex(inp, length = 0):
         """
         Taken (with permission) from https://github.com/TheElementalOfDestruction/creatorUtils
@@ -45,6 +47,14 @@ if sys.version_info[0] >= 3:  # Python 3
 
 else:  # Python 2
     getInput = raw_input
+
+    def makeDirs(name, mode = 0o0777, exist_ok = False):
+        try:
+            os.makedirs(name, mode)
+        except WindowsError as e:
+            if exist_ok and e.winerror == 183: # Path exists.
+                return
+            raise
 
     def properHex(inp, length = 0):
         """
@@ -74,7 +84,7 @@ def addNumToDir(dirName):
     for i in range(2, 100):
         try:
             newDirName = dirName + ' (' + str(i) + ')'
-            os.makedirs(newDirName)
+            makeDirs(newDirName)
             return newDirName
         except Exception as e:
             pass
@@ -570,7 +580,7 @@ def setupLogging(defaultPath=None, defaultLevel=logging.WARN, logfile=None, enab
                     os.path.expandvars(logfile if logfile else config['handlers'][x]['filename']))
                 tmp = getContFileDir(tmp)
                 if not os.path.exists(tmp):
-                    os.makedirs(tmp)
+                    makeDirs(tmp)
             else:
                 config['handlers'][x]['filename'] = null
 

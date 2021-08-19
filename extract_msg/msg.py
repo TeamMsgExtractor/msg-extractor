@@ -1,6 +1,7 @@
 import codecs
 import copy
 import logging
+import sys
 import zipfile
 
 import olefile
@@ -11,7 +12,7 @@ from .compat import os_ as os
 from .named import Named
 from .prop import FixedLengthProp, VariableLengthProp
 from .properties import Properties
-from .utils import divide, getEncodingName, hasLen, inputToMsgpath, inputToString, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
+from .utils import divide, getEncodingName, hasLen, inputToMsgpath, inputToString, makeDirs, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
 from .exceptions import InvalidFileFormatError, MissingEncodingError
 
 
@@ -141,7 +142,7 @@ class MSGFile(olefile.OleFileIO):
         filename = self.fixPath(filename, prefix)
         if self.exists(filename, False):
             with self.openstream(filename) as stream:
-                return stream.read()
+                return stream.read() or b''
         else:
             logger.info('Stream "{}" was requested but could not be found. Returning `None`.'.format(filename))
             return None
@@ -369,7 +370,7 @@ class MSGFile(olefile.OleFileIO):
         path = path.replace('\\', '/')
         path += '/' if path[-1] != '/' else ''
         # Make the location
-        os.makedirs(path, exist_ok = True)
+        makeDirs(path, exist_ok = True)
         # Create the zipfile
         path += 'raw.zip'
         if os.path.exists(path):
@@ -389,8 +390,20 @@ class MSGFile(olefile.OleFileIO):
                     filename = 'contents.bin'
 
                 # Save contents of directory
-                with zfile.open(sysdir + '/' + filename, 'w') as f:
-                    f.write(self._getStream(dir_))
+                if sys.version_info[0] < 3:
+                    # Python 2 zip files don't seem to actually match the docs, and `open` simply opens in read mode, even though it should be able to open in write mode.
+                    data = self._getStream(dir_)
+                    if data is not None:
+                        zfile.writestr(sysdir + '/' + filename, data, zipfile.ZIP_DEFLATED)
+
+                else:
+                    with zfile.open(sysdir + '/' + filename, 'w') as f:
+                        data = self._getStream(dir_)
+                        # Specifically check for None. If this is bytes we still want to do this line.
+                        # There was actually this weird issue where for some reason data would be bytes
+                        # but then also simultaneously register as None?
+                        if data is not None:
+                            f.write(data)
 
     @property
     def areStringsUnicode(self):

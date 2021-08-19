@@ -89,9 +89,9 @@ class Attachment(AttachmentBase):
         Used to regenerate the random filename used if the attachment cannot
         find a usable filename.
         """
-        self.__randomName = filename = 'UnknownFilename ' + \
+        self.__randomName = inputToString('UnknownFilename ' + \
                    ''.join(random.choice(string.ascii_uppercase + string.digits)
-                           for _ in range(5)) + '.bin'
+                           for _ in range(5)) + '.bin', 'ascii')
 
     def save(self, **kwargs):
         """
@@ -135,7 +135,7 @@ class Attachment(AttachmentBase):
             customPath = kwargs.get('customPath', '').replace('\\', '/')
             customPath += '/' if customPath and customPath[-1] != '/' else ''
             # Set the open command to be that of the zip file.
-            open = zip.open
+            _open = zip.open
             # Zip files use w for writing in binary.
             mode = 'w'
         else:
@@ -143,6 +143,7 @@ class Attachment(AttachmentBase):
             # Prepare the path.
             customPath += '' if customPath.endswith('/') else '/'
             mode = 'wb'
+            _open = open
 
         fullFilename = customPath + filename
 
@@ -173,11 +174,11 @@ class Attachment(AttachmentBase):
                         # If we couldn't find one that didn't exist.
                         raise FileExistsError('Could not create the specified file because it already exists ("{}").'.format(fullFilename))
 
-            with open(fullFilename, mode) as f:
+            with _open(fullFilename, mode) as f:
                 f.write(self.__data)
 
             # Close the ZipFile if this function created it.
-            if createdZip:
+            if zip and createdZip:
                 zip.close()
 
             return fullFilename
@@ -185,7 +186,7 @@ class Attachment(AttachmentBase):
             self.saveEmbededMessage(**kwargs)
 
             # Close the ZipFile if this function created it.
-            if createdZip:
+            if zip and createdZip:
                 zip.close()
 
             return self.msg

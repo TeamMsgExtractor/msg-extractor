@@ -141,6 +141,8 @@ class FixedLengthProp(PropBase):
                 logger.error('Timestamp value of {} caused an exception. This was probably caused by the time stamp being too far in the future.'.format(msgEpoch(constants.ST3.unpack(value)[0])))
                 logger.error(self.raw)
                 value = constants.ST3.unpack(value)[0]
+                if value == 915151392000000000: # This is a known bad date.
+                    logging.error('INFO: CONFIRMATION OF NULL DATE.')
         elif _type == 0x0048:  # PtypGuid
             # TODO parsing for this
             pass
