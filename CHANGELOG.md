@@ -1,6 +1,6 @@
 **v0.29.0**
 * [[TeamMsgExtractor #165](https://github.com/TeamMsgExtractor/msg-extractor/issues/165)] [[TeamMsgExtractor #191](https://github.com/TeamMsgExtractor/msg-extractor/issues/191)] Completely redesigned all existing save functions. You can now properly save to custom locations under custom file names. This change may break existing code for several reasons. First, all arguments have been changed to keyword arguments. Second, a few keyword arguments have been renamed to better fit the naming conventions.
-* [[TeamMsgExtractor #200](https://github.com/TeamMsgExtractor/msg-extractor/issues/200)] Changed imports to use the `.` format (instead of `extract_msg.`) where applicable.
+* [[TeamMsgExtractor #200](https://github.com/TeamMsgExtractor/msg-extractor/issues/200)] Changed imports to use relative imports instead of hard imports where applicable.
 * Updated the save functions to no longer rely on the current working directory to save things. The module now does what it can to use hard pathing so that if you spontaneously change working directory it will not cause problems. This should also allow for saving to be threaded, if I am correct.
 * [[TeamMsgExtractor #197](https://github.com/TeamMsgExtractor/msg-extractor/issues/197)] Added new property `Message.defaultFolderName`. This property returns the default name to be used for a Message if none of the options change the name.
 * [[TeamMsgExtractor #201](https://github.com/TeamMsgExtractor/msg-extractor/issues/201)] Fixed an issue where if the class type was all caps it would not be recognized. As far as I can tell from the documentation this shouldn't happen in the first place, but oh well.
@@ -16,6 +16,7 @@
 * Added property `Attachment.randomFilename` which allows you to get the randomly generated name for attachments that don't have a usable one otherwise.
 * Added function `Attachment.regenerateRandomName` for creating a new random name if necessary.
 * Added function `Attachment.getFilename`. This function is used to get the name an attachment will be saved with given the specified arguments. Arguments are identical to `Attachment.save`.
+* Added additional properties for defined MSG file fields.
 * Added zip file support for the `Attachment.save` and `Message.save`. Simply pass a path for the `zip` keyword argument and it will create a new ZipFile instance and save all of it's data inside there. Alternatively, you can pass an instance of a class that is either a ZipFile or ZipFile-like and it will simply use that. When this argument is defined, the `customPath` argument refers to the path inside the zip file.
 * Added the `html` and `rtf` keywords to `Message.save`. These will attempt to save the body in the html or rtf format, respectively. If the program cannot save in those formats, it will raise an exception unless the `allowFallback` keyword argument is `True`.
 * Changed `utils.hasLen` to use `hasattr` instead of the try-except method it was using.

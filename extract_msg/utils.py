@@ -369,24 +369,22 @@ def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAtt
     attachmentClass = Attachment if attachmentClass is None else attachmentClass
 
     msg = MSGFile(path, prefix, attachmentClass, filename, overrideEncoding, attachmentErrorBehavior)
+    # After rechecking the docs, all comparisons should be case-insensitive, not case-sensitive. My reading ability is great.
     classtype = msg.classType.lower()
-    # Should be 'IMP.Contact' and 'IPM.DistList' but because of #201...
     if classtype.startswith('ipm.contact') or classtype.startswith('ipm.distlist'):
         msg.close()
         return Contact(path, prefix, attachmentClass, filename, overrideEncoding, attachmentErrorBehavior)
-    # Should be 'IMP.Note' and 'REPORT'.
     elif classtype.startswith('ipm.note') or classtype.startswith('report'):
         msg.close()
         return Message(path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior, recipientSeparator)
-    # Should be 'IPM.Appointment' and 'IPM.Schedule'.
     elif classtype.startswith('ipm.appointment') or classtype.startswith('ipm.schedule'):
         msg.close()
         return Appointment(path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior, recipientSeparator)
     elif strict:
         msg.close()
-        raise UnrecognizedMSGTypeError('Could not recognize msg class type "{}". It is recommended you report this to the developers.'.format(msg.classType))
+        raise UnrecognizedMSGTypeError('Could not recognize msg class type "{}". This most likely means it hasn\'t been implemented yet, and you should ask the developers to add support for it.'.format(msg.classType))
     else:
-        logger.error('Could not recognize msg class type "{}". It is recommended you report this to the developers.'.format(msg.classType))
+        logger.error('Could not recognize msg class type "{}". This most likely means it hasn\'t been implemented yet, and you should ask the developers to add support for it.'.format(msg.classType))
         return msg
 
 def parseType(_type, stream, encoding, extras):
