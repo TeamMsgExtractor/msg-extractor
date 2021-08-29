@@ -428,7 +428,7 @@ def parseType(_type, stream, encoding, extras):
         # I can't actually find any msg properties that use this, so it should be okay to release this function without support for it.
         raise NotImplementedError('Parsing for type 0x000A has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType 0x000A"')
     elif _type == 0x000B:  # PtypBoolean
-        return bool(constants.ST3.unpack(value)[0])
+        return constants.ST3.unpack(value)[0] == 1
     elif _type == 0x000D:  # PtypObject/PtypEmbeddedTable
         # TODO parsing for this
         # Wait, that's the extension for an attachment folder, so parsing this might not be as easy as we would hope. The function may be released without support for this.

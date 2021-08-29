@@ -60,11 +60,11 @@ class Message(MessageBase):
            * If the file name has not been provided or :param useMsgFilename:
              has not been set, the name of the folder will be created using the
              `defaultFolderName` property.
-           * If the length of the path will be greater than
-             :param maxPathLength: (minus 1 to accomodate the null), the names
-             will be forced shorter. Only change :param maxPathLength: if you
-             know that your system will handle it, otherwise you will be
-             responsible for catching the exceptions. Default is 255.
+           * :param maxNameLength: will force all file names to be shortened
+             to fit in the space (with the extension included in the length). If
+             a number is added to the directory that will not be included in the
+             length, so it is recommended to plan for up to 5 characters extra
+             to be a part of the name.
 
         There are several parameters used to determine how the message will be
         saved. By default, the message will be saved as plain text. Setting one
@@ -90,11 +90,6 @@ class Message(MessageBase):
 
         If you want to save the header, should it be found, set
         :param saveHeader: to true.
-
-        There is an internally used option :param dryRun: which will cause the
-        function to not actually save and instead return information about how
-        it would have saved given the selected options. This is used internally
-        for path length calculations.
         """
 
         # Move keyword arguments into variables.
@@ -104,12 +99,12 @@ class Message(MessageBase):
         raw = kwargs.get('raw', False)
         allowFallback = kwargs.get('allowFallback', False)
         zip = kwargs.get('zip')
-        dryRun = kwargs.get('dryRun')
+        maxNameLength = kwargs.get('maxNameLength')
 
         # Variables involved in the save location.
         customFilename = kwargs.get('customFilename')
         useMsgFilename = kwargs.get('useMsgFilename', False)
-        maxPathLength = kwargs.get('maxPathLength', 255)
+        #maxPathLength = kwargs.get('maxPathLength', 255)
 
         # ZipFile handling.
         if zip:
@@ -164,6 +159,8 @@ class Message(MessageBase):
             filename = os.path.splitext(filename)[0]
             # Prepare the filename by removing any special characters.
             filename = prepareFilename(filename)
+            # Shorted the filename.
+            filename = filename[:maxNameLength]
             # Check to make sure we actually have a filename to use.
             if not filename:
                 raise ValueError('Invalid filename found in self.filename: "{}"'.format(self.filename))
@@ -171,7 +168,7 @@ class Message(MessageBase):
             # Add the file name to the path.
             path += filename
         else:
-            path += self.defaultFolderName
+            path += self.defaultFolderName[:maxNameLength]
 
         # Create the folders.
         if not zip:
@@ -198,12 +195,13 @@ class Message(MessageBase):
             return self
 
         try:
-            # Save the attachments
+            # Save the attachments.
             attachmentNames = [attachment.save(**kwargs) for attachment in self.attachments]
 
-            # Save the message body
+            # Determine the extension to use for the body.
             fext = 'json' if _json else 'txt'
 
+            # Check whether we should be using HTML or RTF.
             useHtml = False
             useRtf = False
             if html:
