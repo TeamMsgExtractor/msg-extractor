@@ -1,17 +1,19 @@
 import codecs
 import copy
 import logging
+import sys
+import zipfile
 
 import olefile
 
-from extract_msg import constants
-from extract_msg.attachment import Attachment
-from extract_msg.named import Named
-from extract_msg.prop import FixedLengthProp, VariableLengthProp
-from extract_msg.properties import Properties
-from extract_msg.utils import divide, getEncodingName, has_len, inputToMsgpath, inputToString, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
-from extract_msg.exceptions import InvalidFileFormatError, MissingEncodingError
-
+from . import constants
+from .attachment import Attachment
+from .compat import os_ as os
+from .named import Named
+from .prop import FixedLengthProp, VariableLengthProp
+from .properties import Properties
+from .utils import divide, getEncodingName, hasLen, inputToMsgpath, inputToString, makeDirs, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
+from .exceptions import InvalidFileFormatError, MissingEncodingError
 
 
 logger = logging.getLogger(__name__)
@@ -57,8 +59,7 @@ class MSGFile(olefile.OleFileIO):
                 raise
 
         prefixl = []
-        tmp_condition = prefix != ''
-        if tmp_condition:
+        if prefix:
             try:
                 prefix = inputToString(prefix, 'utf-8')
             except:
@@ -76,11 +77,12 @@ class MSGFile(olefile.OleFileIO):
                 prefix += '/'
         self.__prefix = prefix
         self.__prefixList = prefixl
-        if tmp_condition:
+        self.__prefixLen = len(prefixl)
+        if prefix:
             filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix=False)
-        if filename is not None:
+        if filename:
             self.filename = filename
-        elif has_len(path):
+        elif hasLen(path):
             if len(path) < 1536:
                 self.filename = path
             else:
@@ -137,10 +139,10 @@ class MSGFile(olefile.OleFileIO):
 
         This should ALWAYS return a bytes object (string in python 2)
         """
-        filename = self.fix_path(filename, prefix)
-        if self.exists(filename):
+        filename = self.fixPath(filename, prefix)
+        if self.exists(filename, False):
             with self.openstream(filename) as stream:
-                return stream.read()
+                return stream.read() or b''
         else:
             logger.info('Stream "{}" was requested but could not be found. Returning `None`.'.format(filename))
             return None
@@ -157,7 +159,7 @@ class MSGFile(olefile.OleFileIO):
         This should ALWAYS return a string (Unicode in python 2)
         """
 
-        filename = self.fix_path(filename, prefix)
+        filename = self.fixPath(filename, prefix)
         if self.areStringsUnicode:
             return windowsUnicode(self._getStream(filename + '001F', prefix = False))
         else:
@@ -226,7 +228,7 @@ class MSGFile(olefile.OleFileIO):
         it could not find the stream specified.
         """
         verifyType(_type)
-        filename = self.fix_path(filename, prefix)
+        filename = self.fixPath(filename, prefix)
         for x in (filename + _type,) if _type is not None else self.slistDir():
             if x.startswith(filename) and x.find('-') == -1:
                 contents = self._getStream(x, False)
@@ -248,9 +250,9 @@ class MSGFile(olefile.OleFileIO):
                     else:
                         raise NotImplementedError('The stream specified is of type {}. We don\'t currently understand exactly how this type works. If it is mandatory that you have the contents of this stream, please create an issue labled "NotImplementedError: _getTypedStream {}".'.format(_type, _type))
                     if _type in ('101F', '101E', '1102'):
-                        if self.Exists(x + '-00000000', False):
+                        if self.exists(x + '-00000000', False):
                             for y in range(streams):
-                                if self.Exists(x + '-' + properHex(y, 8), False):
+                                if self.exists(x + '-' + properHex(y, 8), False):
                                     extras.append(self._getStream(x + '-' + properHex(y, 8), False))
                     elif _type in ('1002', '1003', '1004', '1005', '1007', '1014', '1040', '1048'):
                         extras = divide(contents, (2 if _type in constants.MULTIPLE_2_BYTES else 4 if _type in constants.MULTIPLE_4_BYTES else 8 if _type in constants.MULTIPLE_8_BYTES else 16))
@@ -272,21 +274,21 @@ class MSGFile(olefile.OleFileIO):
                 print('Directory: ' + str(dir_[:-1]))
                 print('Contents: {}'.format(self._getStream(dir_)))
 
-    def Exists(self, inp, prefix = True):
+    def exists(self, inp, prefix = True):
         """
         Checks if :param inp: exists in the msg file.
         """
-        inp = self.fix_path(inp, prefix)
-        return self.exists(inp)
+        inp = self.fixPath(inp, prefix)
+        return olefile.OleFileIO.exists(self, inp)
 
     def sExists(self, inp, prefix = True):
         """
         Checks if string stream :param inp: exists in the msg file.
         """
-        inp = self.fix_path(inp, prefix)
+        inp = self.fixPath(inp, prefix)
         return self.exists(inp + '001F') or self.exists(inp + '001E')
 
-    def ExistsTypedProperty(self, id, location = None, _type = None, prefix = True, propertiesInstance = None):
+    def existsTypedProperty(self, id, location = None, _type = None, prefix = True, propertiesInstance = None):
         """
         Determines if the stream with the provided id exists in the location specified.
         If no location is specified, the root directory is searched. The return of this
@@ -306,25 +308,23 @@ class MSGFile(olefile.OleFileIO):
             prefixList.append(location)
         prefixList = inputToMsgpath(prefixList)
         usableid = id + _type if _type is not None else id
-        found_number = 0
-        found_streams = []
+        foundNumber = 0
+        foundStreams = []
         for item in self.listDir():
-            if len(item) > len(prefixList):
-                if item[len(prefixList)].startswith('__substg1.0_' + usableid) and item[len(prefixList)] not in found_streams:
-                    found_number += 1
-                    found_streams.append(item[len(prefixList)])
+            if len(item) > self.__prefixLen:
+                if item[self.__prefixLen].startswith('__substg1.0_' + usableid) and item[self.__prefixLen] not in foundStreams:
+                    foundNumber += 1
+                    foundStreams.append(item[self.__prefixLen])
         for x in propertiesInstance:
             if x.startswith(usableid):
-                already_found = False
-                for y in found_streams:
+                for y in foundStreams:
                     if y.endswith(x):
-                        already_found = True
                         break
-                if not already_found:
-                    found_number += 1
-        return (found_number > 0), found_number
+                else:
+                    foundNumber += 1
+        return (foundNumber > 0), foundNumber
 
-    def fix_path(self, inp, prefix = True):
+    def fixPath(self, inp, prefix = True):
         """
         Changes paths so that they have the proper
         prefix (should :param prefix: be True) and
@@ -339,24 +339,21 @@ class MSGFile(olefile.OleFileIO):
         """
         Replacement for OleFileIO.listdir that runs at the current prefix directory.
         """
-        temp = self.listdir(streams, storages)
-        if self.__prefix == '':
-            return temp
-        prefix = self.__prefix.split('/')
-        if prefix[-1] == '':
-            prefix.pop()
-        out = []
-        for x in temp:
-            good = True
-            if len(x) <= len(prefix):
-                good = False
-            if good:
-                for y in range(len(prefix)):
-                    if x[y] != prefix[y]:
-                        good = False
-            if good:
-                out.append(x)
-        return out
+        # Get the items from OleFileIO.
+        try:
+            return self.__listDirRes
+        except AttributeError:
+            temp = self.listdir(streams, storages)
+            if not self.__prefix:
+                return temp
+            prefix = self.__prefix.split('/')
+            if prefix[-1] == '':
+                prefix.pop()
+
+            prefixLength = self.__prefixLen
+            self.__listDirRes = [x for x in temp if len(x) > prefixLength and x[:prefixLength] == prefix]
+            return self.__listDirRes
+
 
     def slistDir(self, streams = True, storages = False):
         """
@@ -367,6 +364,46 @@ class MSGFile(olefile.OleFileIO):
 
     def save(self, *args, **kwargs):
         raise NotImplementedError('Saving is not yet supported for the {} class'.format(self.__class__.__name__))
+
+    def saveRaw(self, path):
+        # Create a 'raw' folder
+        path = path.replace('\\', '/')
+        path += '/' if path[-1] != '/' else ''
+        # Make the location
+        makeDirs(path, exist_ok = True)
+        # Create the zipfile
+        path += 'raw.zip'
+        if os.path.exists(path):
+            raise FileExistsError('File "{}" already exists.'.format(path))
+        with zipfile.ZipFile(path, 'w', zipfile.ZIP_DEFLATED) as zfile:
+            # Loop through all the directories
+            for dir_ in self.listdir():
+                sysdir = '/'.join(dir_)
+                code = dir_[-1][-8:]
+                if constants.PROPERTIES.get(code):
+                    sysdir += ' - ' + constants.PROPERTIES[code]
+
+                # Generate appropriate filename
+                if dir_[-1].endswith('001E') or dir_[-1].endswith('001F'):
+                    filename = 'contents.txt'
+                else:
+                    filename = 'contents.bin'
+
+                # Save contents of directory
+                if sys.version_info[0] < 3:
+                    # Python 2 zip files don't seem to actually match the docs, and `open` simply opens in read mode, even though it should be able to open in write mode.
+                    data = self._getStream(dir_)
+                    if data is not None:
+                        zfile.writestr(sysdir + '/' + filename, data, zipfile.ZIP_DEFLATED)
+
+                else:
+                    with zfile.open(sysdir + '/' + filename, 'w') as f:
+                        data = self._getStream(dir_)
+                        # Specifically check for None. If this is bytes we still want to do this line.
+                        # There was actually this weird issue where for some reason data would be bytes
+                        # but then also simultaneously register as None?
+                        if data is not None:
+                            f.write(data)
 
     @property
     def areStringsUnicode(self):
@@ -462,6 +499,13 @@ class MSGFile(olefile.OleFileIO):
         Intended for developer use.
         """
         return self.__prefix
+
+    @property
+    def prefixLen(self):
+        """
+        Returns the number of elements in the prefix.
+        """
+        return self.__prefixLen
 
     @property
     def prefixList(self):

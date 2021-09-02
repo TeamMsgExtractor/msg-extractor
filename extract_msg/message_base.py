@@ -1,20 +1,17 @@
 import email.utils
-import json
 import logging
 import re
 
 import compressed_rtf
-from imapclient.imapclient import decode_utf7
 
+from . import constants
+from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment
+from .compat import os_ as os
+from .msg import MSGFile
+from .recipient import Recipient
+from .utils import addNumToDir, inputToBytes, inputToString, prepareFilename
 from email.parser import Parser as EmailParser
-from extract_msg import constants
-from extract_msg.attachment import Attachment, BrokenAttachment, UnsupportedAttachment
-from extract_msg.compat import os_ as os
-from extract_msg.msg import MSGFile
-from extract_msg.recipient import Recipient
-from extract_msg.utils import addNumToDir, inputToBytes, inputToString
-
-
+from imapclient.imapclient import decode_utf7
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -26,7 +23,7 @@ class MessageBase(MSGFile):
 
     def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None,
                  delayAttachments = False, overrideEncoding = None,
-                 attachmentErrorBehavior = constants.ATTACHMENT_ERROR_THROW):
+                 attachmentErrorBehavior = constants.ATTACHMENT_ERROR_THROW, recipientSeparator = ';'):
         """
         :param path: path to the msg file in the system or is the raw msg file.
         :param prefix: used for extracting embeded msg files
@@ -36,16 +33,24 @@ class MessageBase(MSGFile):
             will use for attachments. You probably should
             not change this value unless you know what you
             are doing.
-        :param filename: optional, the filename to be used by default when saving.
-        :param delayAttachments: optional, delays the initialization of attachments
-            until the user attempts to retrieve them. Allows MSG files with bad
-            attachments to be initialized so the other data can be retrieved.
+        :param filename: optional, the filename to be used by default when
+            saving.
+        :param delayAttachments: optional, delays the initialization of
+            attachments until the user attempts to retrieve them. Allows MSG
+            files with bad attachments to be initialized so the other data can
+            be retrieved.
         :param overrideEncoding: optional, an encoding to use instead of the one
-            specified by the msg file. Do not report encoding errors caused by this.
+            specified by the msg file. Do not report encoding errors caused by
+            this.
+        :param attachmentErrorBehavior: Optional, the behaviour to use in the event
+            of an error when parsing the attachments.
+        :param recipientSeparator: Optional, Separator string to use between
+            recipients.
         """
         MSGFile.__init__(self, path, prefix, attachmentClass, filename, overrideEncoding, attachmentErrorBehavior)
         self.__attachmentsDelayed = delayAttachments
         self.__attachmentsReady = False
+        self.__recipientSeparator = recipientSeparator
         # Initialize properties in the order that is least likely to cause bugs.
         # TODO have each function check for initialization of needed data so these
         # lines will be unnecessary.
@@ -64,35 +69,43 @@ class MessageBase(MSGFile):
 
     def _genRecipient(self, recipientType, recipientInt):
         """
-        Returns the specified recipient field
+        Returns the specified recipient field.
         """
         private = '_' + recipientType
         try:
             return getattr(self, private)
         except AttributeError:
-            # Check header first
             value = None
+            # Check header first.
             if self.headerInit():
                 value = self.header[recipientType]
-            if value is None:
+                if value:
+                    value = value.replace(',', self.__recipientSeparator)
+
+            # If the header had a blank field or didn't have the field, generate it manually.
+            if not value:
+                # Check if the header has initialized.
                 if self.headerInit():
                     logger.info('Header found, but "{}" is not included. Will be generated from other streams.'.format(recipientType))
-                f = []
-                for x in self.recipients:
-                    if x.type & 0x0000000f == recipientInt:
-                        f.append(x.formatted)
-                if len(f) > 0:
-                    st = f[0]
-                    if len(f) > 1:
-                        for x in range(1, len(f)):
-                            st += ', {0}'.format(f[x])
-                    value = st
-            if value is not None:
+
+                # Get a list of the recipients of the specified type.
+                foundRecipients = tuple(recipient.formatted for recipient in self.recipients if recipient.type & 0x0000000f == recipientInt)
+
+                # If we found recipients, join them with the recipient separator and a space.
+                if len(foundRecipients) > 0:
+                    value = (self.__recipientSeparator + ' ').join(foundRecipients)
+
+            # Code to fix the formatting so it's all a single line. This allows the user to format it themself if they want.
+            # This should probably be redone to use re or something, but I can do that later. This shouldn't be a huge problem for now.
+            if value:
                 value = value.replace(' \r\n\t', ' ').replace('\r\n\t ', ' ').replace('\r\n\t', ' ')
                 value = value.replace('\r\n', ' ').replace('\r', ' ').replace('\n', ' ')
                 while value.find('  ') != -1:
                     value = value.replace('  ', ' ')
+
+            # Set the field in the class.
             setattr(self, private, value)
+
             return value
 
     def _registerNamedProperty(self, entry, _type, name = None):
@@ -108,6 +121,7 @@ class MessageBase(MSGFile):
 
     def close(self):
         try:
+            # If this throws an AttributeError then we have not loaded the attachments.
             self._attachments
             for attachment in self.attachments:
                 if attachment.type == 'msg':
@@ -126,12 +140,12 @@ class MessageBase(MSGFile):
         except AttributeError:
             return False
 
-    def save_attachments(self, contentId = False, json = False, useFileName = False, raw = False, customPath = None):
+    def saveAttachments(self, **kwargs):
         """
         Saves only attachments in the same folder.
         """
         for attachment in self.attachments:
-            attachment.save(contentId, json, useFileName, raw, customPath)
+            attachment.save(**kwargs)
 
     @property
     def attachments(self):
@@ -143,11 +157,11 @@ class MessageBase(MSGFile):
         except AttributeError:
             # Get the attachments
             attachmentDirs = []
-
+            prefixLen = self.prefixLen
             for dir_ in self.listDir(False, True):
-                if dir_[len(self.prefixList)].startswith('__attach') and\
-                        dir_[len(self.prefixList)] not in attachmentDirs:
-                    attachmentDirs.append(dir_[len(self.prefixList)])
+                if dir_[prefixLen].startswith('__attach') and\
+                        dir_[prefixLen] not in attachmentDirs:
+                    attachmentDirs.append(dir_[prefixLen])
 
             self._attachments = []
 
@@ -253,6 +267,22 @@ class MessageBase(MSGFile):
             return self._date
 
     @property
+    def defaultFolderName(self):
+        """
+        Generates the default name of the save folder.
+        """
+        try:
+            return self._defaultFolderName
+        except AttributeError:
+            d = self.parsedDate
+
+            dirName = '{0:02d}-{1:02d}-{2:02d}_{3:02d}{4:02d}'.format(*d) if d else 'UnknownDate'
+            dirName += ' ' + (prepareFilename(self.subject) if self.subject else '[No subject]')
+
+            self._defaultFolderName = dirName
+            return dirName
+
+    @property
     def header(self):
         """
         Returns the message header, if it exists. Otherwise it will generate one.
@@ -334,6 +364,10 @@ class MessageBase(MSGFile):
         return email.utils.parsedate(self.date)
 
     @property
+    def recipientSeparator(self):
+        return self.__recipientSeparator
+
+    @property
     def recipients(self):
         """
         Returns a list of all recipients.
@@ -343,11 +377,11 @@ class MessageBase(MSGFile):
         except AttributeError:
             # Get the recipients
             recipientDirs = []
-
+            prefixLen = self.prefixLen
             for dir_ in self.listDir():
-                if dir_[len(self.prefixList)].startswith('__recip') and\
-                        dir_[len(self.prefixList)] not in recipientDirs:
-                    recipientDirs.append(dir_[len(self.prefixList)])
+                if dir_[prefixLen].startswith('__recip') and\
+                        dir_[prefixLen] not in recipientDirs:
+                    recipientDirs.append(dir_[prefixLen])
 
             self._recipients = []
 

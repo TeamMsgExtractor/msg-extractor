@@ -1,3 +1,49 @@
+**v0.29.0**
+* [[TeamMsgExtractor #165](https://github.com/TeamMsgExtractor/msg-extractor/issues/165)] [[TeamMsgExtractor #191](https://github.com/TeamMsgExtractor/msg-extractor/issues/191)] Completely redesigned all existing save functions. You can now properly save to custom locations under custom file names. This change may break existing code for several reasons. First, all arguments have been changed to keyword arguments. Second, a few keyword arguments have been renamed to better fit the naming conventions.
+* [[TeamMsgExtractor #200](https://github.com/TeamMsgExtractor/msg-extractor/issues/200)] Changed imports to use relative imports instead of hard imports where applicable.
+* Updated the save functions to no longer rely on the current working directory to save things. The module now does what it can to use hard pathing so that if you spontaneously change working directory it will not cause problems. This should also allow for saving to be threaded, if I am correct.
+* [[TeamMsgExtractor #197](https://github.com/TeamMsgExtractor/msg-extractor/issues/197)] Added new property `Message.defaultFolderName`. This property returns the default name to be used for a Message if none of the options change the name.
+* [[TeamMsgExtractor #201](https://github.com/TeamMsgExtractor/msg-extractor/issues/201)] Fixed an issue where if the class type was all caps it would not be recognized. According to the documentation the comparisons should have been case insensitive, but I must have misread it at some point.
+* [[TeamMsgExtractor #202](https://github.com/TeamMsgExtractor/msg-extractor/issues/202)] Module will now handle path lengths in a semi-intelligent way to determine how best to save the MSG files. Default path length max is 255.
+* [[TeamMsgExtractor #203](https://github.com/TeamMsgExtractor/msg-extractor/issues/203)] Fixed an issue where having multiple "." characters in your file name would cause the directories to be incorrectly named when using the `useFileName` (now `useMsgFilename`) argument in the save function.
+* [[TeamMsgExtractor #204](https://github.com/TeamMsgExtractor/msg-extractor/issues/204)] Fixed an issue where the failsafe name used by attachments wasn't being encoded before hand causing encoding errors.
+* Improved internal code in many functions to make them faster and more efficient.
+* Added caching to `MSGFile.listDir`. I found that if you have larger files this single function might be taking up over half of the processing time because of how many times it is used in the module.
+* Fully implemented raw saving.
+* Changed `Message.saveRaw` to `MSGFile.saveRaw`.
+* Changed `MSGFile.saveRaw` to take a path and save the contents to a zip file.
+* The `raw` keyword of `Message.save` now actually works.
+* Added property `Attachment.randomFilename` which allows you to get the randomly generated name for attachments that don't have a usable one otherwise.
+* Added function `Attachment.regenerateRandomName` for creating a new random name if necessary.
+* Added function `Attachment.getFilename`. This function is used to get the name an attachment will be saved with given the specified arguments. Arguments are identical to `Attachment.save`.
+* Added additional properties for defined MSG file fields.
+* Added zip file support for the `Attachment.save` and `Message.save`. Simply pass a path for the `zip` keyword argument and it will create a new ZipFile instance and save all of it's data inside there. Alternatively, you can pass an instance of a class that is either a ZipFile or ZipFile-like and it will simply use that. When this argument is defined, the `customPath` argument refers to the path inside the zip file.
+* Added the `html` and `rtf` keywords to `Message.save`. These will attempt to save the body in the html or rtf format, respectively. If the program cannot save in those formats, it will raise an exception unless the `allowFallback` keyword argument is `True`.
+* Changed `utils.hasLen` to use `hasattr` instead of the try-except method it was using.
+* Added new option `recipientSeparator` to `MessageBase` allowing you to specify a custom recipient separator (default is ";" to match Microsoft Outlook).
+* Changed the openMsg function in `Attachment` to not be strict. This allows you to actually open the MSG file even if we don't recognize the type of embedded MSG that is being used.
+* Reworked `MessageBase._genRecipient` to improve it (because what on earth was that code it was using before?). Variables in the function are now more descriptive. Added comments in several places.
+* Many renames to better fit naming convention:
+    * `dev.setup_dev_logger` to `dev.setupDevLogger`.
+    * `MSGFile.fix_path` to `MSGFile.fixPath`.
+    * `MessageBase.save_attachments` to `MessageBase.saveAttachments`.
+    * `*.Exists` to `exists`.
+    * `*.ExistsTypedProperty` to `*.existsTypedProperty`.
+    * `prop.create_prop` to `prop.createProp`.
+    * `Properties.attachment_count` to `Properties.attachmentCount`.
+    * `Properties.next_attachment_id` to `Properties.nextAttachmentId`.
+    * `Properties.next_recipient_id` to `Properties.nextRecipientId`.
+    * `Properties.recipient_count` to `Properties.recipientCount`.
+    * `utils.get_command_args` to `utils.getCommandArgs`.
+    * `utils.get_full_class_name` to `utils.getFullClassName`.
+    * `utils.get_input` to `utils.getInput`.
+    * `utils.has_len` to `utils.hasLen`.
+    * `utils.setup_logging` to `utils.setupLogging`.
+    * `constants.int_to_data_type` to `constants.intToDataType`.
+    * `constants.int_to_intelligence` to `constants.intToIntelligence`.
+    * `constants.int_to_recipient_type` to `constants.intToRecipientType`.
+    * Misc internal function variables.
+
 **v0.28.7**
 * Added hex versions of the `MULTIPLE_X_BYTES` constants.
 * Added `1048` to `constants.MULTIPLE_16_BYTES`

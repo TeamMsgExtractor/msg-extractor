@@ -1,10 +1,10 @@
 import logging
 
-from extract_msg import constants
-from extract_msg.named import NamedAttachmentProperties
-from extract_msg.prop import FixedLengthProp
-from extract_msg.properties import Properties
-from extract_msg.utils import verifyPropertyId, verifyType
+from . import constants
+from .named import NamedAttachmentProperties
+from .prop import FixedLengthProp
+from .properties import Properties
+from .utils import verifyPropertyId, verifyType
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -153,11 +153,11 @@ class AttachmentBase(object):
     def _registerNamedProperty(self, entry, _type, name = None):
         self.__namedProperties.defineProperty(entry, _type, name)
 
-    def Exists(self, filename):
+    def exists(self, filename):
         """
         Checks if stream exists inside the attachment folder.
         """
-        return self.__msg.Exists([self.__dir, filename])
+        return self.__msg.exists([self.__dir, filename])
 
     def sExists(self, filename):
         """
@@ -165,13 +165,13 @@ class AttachmentBase(object):
         """
         return self.__msg.sExists([self.__dir, filename])
 
-    def ExistsTypedProperty(self, id, _type = None):
+    def existsTypedProperty(self, id, _type = None):
         """
         Determines if the stream with the provided id exists. The return of this
         function is 2 values, the first being a boolean for if anything was found,
         and the second being how many were found.
         """
-        return self.__msg.ExistsTypedProperty(id, self.__dir, _type, True, self.__props)
+        return self.__msg.existsTypedProperty(id, self.__dir, _type, True, self.__props)
 
     @property
     def dir(self):

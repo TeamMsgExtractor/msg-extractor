@@ -2,15 +2,15 @@ import copy
 import logging
 import olefile
 
-from extract_msg import constants
-from extract_msg.dev_classes.attachment import Attachment
-from extract_msg.properties import Properties
-from extract_msg.recipient import Recipient
-from extract_msg.utils import has_len, inputToString, windowsUnicode
+from .. import constants
+from ..dev_classes.attachment import Attachment
+from ..properties import Properties
+from ..recipient import Recipient
+from ..utils import hasLen, inputToString, windowsUnicode
+
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
-
 
 class Message(olefile.OleFileIO):
     """
@@ -46,7 +46,7 @@ class Message(olefile.OleFileIO):
                 prefix += '/'
         self.__prefix = prefix
         self.__prefixList = prefixl
-        
+
         if tmp_condition:
             filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix=False)
         if filename is not None:
@@ -97,21 +97,21 @@ class Message(olefile.OleFileIO):
             tmp = self._getStream(filename + '001E', prefix = False)
             return None if tmp is None else tmp.decode(self.stringEncoding)
 
-    def Exists(self, filename):
+    def exists(self, filename):
         """
         Checks if :param filename: exists in the msg file.
         """
         filename = self.fix_path(filename)
         return self.exists(filename)
-    
+
     def sExists(self, filename):
         """
         Checks if string stream :param filename: exists in the msg file.
         """
         filename = self.fix_path(filename)
         return self.exists(filename + '001F') or self.exists(filename + '001E')
-    
-    def fix_path(self, filename, prefix=True):
+
+    def fixPath(self, filename, prefix=True):
         """
         Changes paths so that they have the proper
         prefix (should :param prefix: be True) and
@@ -194,7 +194,7 @@ class Message(olefile.OleFileIO):
         except AttributeError:
             self._date = self._prop.date
             return self._date
-    
+
     @property
     def mainProperties(self):
         """
@@ -276,7 +276,7 @@ class Message(olefile.OleFileIO):
                 # Now, this next line SHOULD work, but it is possible that it might not...
                 self.__stringEncoding = str(enc)
                 return self.__stringEncoding
-    
+
     @stringEncoding.setter
     def stringEncoding(self, enc):
         self.__stringEncoding = enc

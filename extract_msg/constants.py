@@ -5,10 +5,12 @@ contributers, please do not complain about bugs.
 """
 
 import datetime
+import re
 import struct
 import sys
 
 import ebcdic
+
 
 if sys.version_info[0] >= 3:
     BYTES = bytes
@@ -22,6 +24,9 @@ else:
 # WARNING DO NOT CHANGE ANY OF THESE VALUES UNLESS YOU KNOW
 # WHAT YOU ARE DOING! FAILURE TO FOLLOW THIS INSTRUCTION
 # CAN AND WILL BREAK THIS SCRIPT!
+
+# Regular expresion constants.
+RE_INVALID_FILENAME_CHARACTERS = re.compile(r'[\\/:*?"<>|]')
 
 # Constants used by named.py
 NUMERICAL_NAMED = 0

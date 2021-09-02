@@ -8,7 +8,7 @@ extract_msg.exceptions
 This module contains the set of extract_msg exceptions.
 """
 
-# add logger bus
+# Add logger bus.
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 

@@ -1,20 +1,15 @@
-import email.utils
 import json
 import logging
-import re
+import zipfile
 
-import compressed_rtf
 from imapclient.imapclient import decode_utf7
 
-from email.parser import Parser as EmailParser
-from extract_msg import constants
-from extract_msg.attachment import Attachment
-from extract_msg.compat import os_ as os
-from extract_msg.exceptions import DataNotFoundError, IncompatibleOptionsError
-from extract_msg.message_base import MessageBase
-from extract_msg.recipient import Recipient
-from extract_msg.utils import addNumToDir, inputToBytes, inputToString, prepareFilename
-
+from . import constants
+from .attachment import Attachment
+from .compat import os_ as os
+from .exceptions import DataNotFoundError, IncompatibleOptionsError
+from .message_base import MessageBase
+from .utils import addNumToDir, inputToBytes, inputToString, makeDirs, prepareFilename
 
 
 logger = logging.getLogger(__name__)
@@ -25,8 +20,8 @@ class Message(MessageBase):
     Parser for Microsoft Outlook message files.
     """
 
-    def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None, delayAttachments = False, overrideEncoding = None, attachmentErrorBehavior = constants.ATTACHMENT_ERROR_THROW):
-        MessageBase.__init__(self, path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior)
+    def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None, delayAttachments = False, overrideEncoding = None, attachmentErrorBehavior = constants.ATTACHMENT_ERROR_THROW, recipientSeparator = ';'):
+        MessageBase.__init__(self, path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior, recipientSeparator)
 
     def dump(self):
         """
@@ -38,121 +33,195 @@ class Message(MessageBase):
         print('Body:')
         print(self.body)
 
-    def save(self, toJson = False, useFileName = False, raw = False, ContentId = False, customPath = None, customFilename = None):#, html = False, rtf = False, allowFallback = False):
+    def getJson(self):
         """
-        Saves the message body and attachments found in the message. The body and
-        attachments are stored in a folder. Setting useFileName to true will mean that
-        the filename is used as the name of the folder; otherwise, the message's date
-        and subject are used as the folder name.
-        Here is the absolute order of prioity for the name of the folder:
-            1. customFilename
-            2. self.filename if useFileName
-            3. {date} {subject}
+        Returns the JSON representation of the Message.
         """
-        #There are several parameters used to determine how the message will be saved.
-        #By default, the message will be saved as plain text. Setting one of the
-        #following parameters to True will change that:
-        #    * :param html: will try to output the message in HTML format.
-        #    * :param json: will output the message in JSON format.
-        #    * :param raw: will output the message in a raw format.
-        #    * :param rtf: will output the message in RTF format.
-        #
-        #Usage of more than one formatting parameter will raise an exception.
-        #
-        #Using HTML or RTF will raise an exception if they could not be retrieved
-        #unless you have :param allowFallback: set to True. Fallback will go in this
-        #order, starting at the top most format that is set:
-        #    * HTML
-        #    * RTF
-        #    * Plain text
-        #"""
-        count = 1 if toJson else 0
-        #count += 1 if html else 0
-        #count += 1 if rtf else 0
-        count += 1 if raw else 0
+        return json.dumps({
+            'from': inputToString(self.sender, 'utf-8'),
+            'to': inputToString(self.to, 'utf-8'),
+            'cc': inputToString(self.cc, 'utf-8'),
+            'subject': inputToString(self.subject, 'utf-8'),
+            'date': inputToString(self.date, 'utf-8'),
+            'body': decode_utf7(self.body)
+        })
 
-        if count > 1:
+    def save(self, **kwargs):
+        """
+        Saves the message body and attachments found in the message.
+
+        The body and attachments are stored in a folder in the current running
+        directory unless :param customPath: has been specified. The name of the
+        folder will be determined by 3 factors.
+           * If :param customFilename: has been set, the value provided for that
+             will be used.
+           * If :param useMsgFilename: has been set, the name of the file used
+             to create the Message instance will be used.
+           * If the file name has not been provided or :param useMsgFilename:
+             has not been set, the name of the folder will be created using the
+             `defaultFolderName` property.
+           * :param maxNameLength: will force all file names to be shortened
+             to fit in the space (with the extension included in the length). If
+             a number is added to the directory that will not be included in the
+             length, so it is recommended to plan for up to 5 characters extra
+             to be a part of the name.
+
+        There are several parameters used to determine how the message will be
+        saved. By default, the message will be saved as plain text. Setting one
+        of the following parameters to True will change that:
+           * :param html: will try to output the message in HTML format.
+           * :param json: will output the message in JSON format.
+           * :param raw: will output the message in a raw format.
+           * :param rtf: will output the message in RTF format.
+
+        Usage of more than one formatting parameter will raise an exception.
+
+        Using HTML or RTF will raise an exception if they could not be retrieved
+        unless you have :param allowFallback: set to True. Fallback will go in
+        this order, starting at the top most format that is set:
+           * HTML
+           * RTF
+           * Plain text
+
+        If you want to save the contents into a ZipFile or similar object,
+        either pass a path to where you want to create one or pass an instance
+        to :param zip:. If :param zip: is an instance, :param customPath: will
+        refer to a location inside the zip file.
+
+        If you want to save the header, should it be found, set
+        :param saveHeader: to true.
+        """
+
+        # Move keyword arguments into variables.
+        _json = kwargs.get('json', False)
+        html = kwargs.get('html', False)
+        rtf = kwargs.get('rtf', False)
+        raw = kwargs.get('raw', False)
+        allowFallback = kwargs.get('allowFallback', False)
+        zip = kwargs.get('zip')
+        maxNameLength = kwargs.get('maxNameLength')
+
+        # Variables involved in the save location.
+        customFilename = kwargs.get('customFilename')
+        useMsgFilename = kwargs.get('useMsgFilename', False)
+        #maxPathLength = kwargs.get('maxPathLength', 255)
+
+        # ZipFile handling.
+        if zip:
+            # `raw` and `zip` are incompatible.
+            if raw:
+                raise IncompatibleOptionsError('The options `raw` and `zip` are incompatible.')
+            # If we are doing a zip file, first check that we have been given a path.
+            if isinstance(zip, constants.STRING):
+                # If we have a path then we use the zip file.
+                zip = zipfile.ZipFile(zip, 'a', zipfile.ZIP_DEFLATED)
+                kwargs['zip'] = zip
+                createdZip = True
+            else:
+                createdZip = False
+            # Path needs to be done in a special way if we are in a zip file.
+            path = kwargs.get('customPath', '').replace('\\', '/')
+            path += '/' if path and path[-1] != '/' else ''
+            # Set the open command to be that of the zip file.
+            _open = zip.open
+            # Zip files use w for writing in binary.
+            mode = 'w'
+        else:
+            path = os.path.abspath(kwargs.get('customPath', os.getcwdu())).replace('\\', '/')
+            # Prepare the path.
+            path += '/' if path[-1] != '/' else ''
+            mode = 'wb'
+            _open = open
+
+        # Reset this for sub save calls.
+        kwargs['customFilename'] = None
+
+        # Check if incompatible options have been provided in any way.
+        if _json + html + rtf + raw > 1:
             raise IncompatibleOptionsError('Only one of the following options may be used at a time: toJson, raw, html, rtf')
 
+        # Get the type of line endings.
         crlf = inputToBytes(self.crlf, 'utf-8')
 
-        if customFilename != None and customFilename != '':
-            dirName = customFilename
+        # TODO: insert code here that will handle checking all of the msg files to see if the path with overflow.
+
+        if customFilename:
+            # First we need to validate it. If there are invalid characters, this will detect it.
+            if constants.RE_INVALID_FILENAME_CHARACTERS.search(customFilename):
+                raise ValueError('Invalid character found in customFilename. Must not contain any of the following characters: \\/:*?"<>|')
+            path += customFilename
+        elif useMsgFilename:
+            if not self.filename:
+                raise ValueError(':param useMsgFilename: is only available if you are using an msg file on the disk or have provided a filename.')
+            # Get the actual name of the file.
+            filename = os.path.split(self.filename)[1]
+            # Remove the extensions.
+            filename = os.path.splitext(filename)[0]
+            # Prepare the filename by removing any special characters.
+            filename = prepareFilename(filename)
+            # Shorted the filename.
+            filename = filename[:maxNameLength]
+            # Check to make sure we actually have a filename to use.
+            if not filename:
+                raise ValueError('Invalid filename found in self.filename: "{}"'.format(self.filename))
+
+            # Add the file name to the path.
+            path += filename
         else:
-            if useFileName:
-                # strip out the extension
-                if self.filename is not None:
-                    dirName = self.filename.split('/').pop().split('.')[0]
-                else:
-                    ValueError(
-                        'Filename must be specified, or path must have been an actual path, to save using filename')
-            else:
-                # Create a directory based on the date and subject of the message
-                d = self.parsedDate
-                if d is not None:
-                    dirName = '{0:02d}-{1:02d}-{2:02d}_{3:02d}{4:02d}'.format(*d)
-                else:
-                    dirName = 'UnknownDate'
+            path += self.defaultFolderName[:maxNameLength]
 
-                if self.subject is None:
-                    subject = '[No subject]'
+        # Create the folders.
+        if not zip:
+            try:
+                makeDirs(path)
+            except Exception:
+                newDirName = addNumToDir(path)
+                if newDirName:
+                    path = newDirName
                 else:
-                    subject = prepareFilename(self.subject)
+                    raise Exception(
+                        "Failed to create directory '%s'. Does it already exist?" %
+                        path
+                    )
 
-                dirName = dirName + ' ' + subject
+        # Prepare the path one last time.
+        path += '/' if path[-1] != '/' else ''
 
-        if customPath != None and customPath != '':
-            if customPath[-1] != '/' or customPath[-1] != '\\':
-                customPath += '/'
-            dirName = customPath + dirName
+        # Update the kwargs.
+        kwargs['customPath'] = path
+
+        if raw:
+            self.saveRaw(path)
+            return self
+
         try:
-            os.makedirs(dirName)
-        except Exception:
-            newDirName = addNumToDir(dirName)
-            if newDirName is not None:
-                dirName = newDirName
-            else:
-                raise Exception(
-                    "Failed to create directory '%s'. Does it already exist?" %
-                    dirName
-                )
+            # Save the attachments.
+            attachmentNames = [attachment.save(**kwargs) for attachment in self.attachments]
 
-        oldDir = os.getcwdu()
-        try:
-            os.chdir(dirName)
-            attachmentNames = []
-            # Save the attachments
-            for attachment in self.attachments:
-                attachmentNames.append(attachment.save(ContentId, toJson, useFileName, raw))#, html = html, rtf = rtf, allowFallback = allowFallback))
+            # Determine the extension to use for the body.
+            fext = 'json' if _json else 'txt'
 
-            # Save the message body
-            fext = 'json' if toJson else 'txt'
-
+            # Check whether we should be using HTML or RTF.
             useHtml = False
             useRtf = False
-            #if html:
-            #    if self.htmlBody is not None:
-            #        useHtml = True
-            #        fext = 'html'
-            #elif not allowFallback:
-            #    raise DataNotFoundError('Could not find the htmlBody')
+            if html:
+                if self.htmlBody:
+                   useHtml = True
+                   fext = 'html'
+                elif not allowFallback:
+                   raise DataNotFoundError('Could not find the htmlBody')
 
-            #if rtf or (html and not useHtml):
-            #    if self.rtfBody is not None:
-            #        useRtf = True
-            #        fext = 'rtf'
-            #elif not allowFallback:
-            #    raise DataNotFoundError('Could not find the rtfBody')
+            if rtf or (html and not useHtml):
+                if self.rtfBody:
+                   useRtf = True
+                   fext = 'rtf'
+                elif not allowFallback:
+                   raise DataNotFoundError('Could not find the rtfBody')
 
-            with open('message.' + fext, 'wb') as f:
-                if toJson:
-                    emailObj = {'from': inputToString(self.sender, 'utf-8'),
-                                'to': inputToString(self.to, 'utf-8'),
-                                'cc': inputToString(self.cc, 'utf-8'),
-                                'subject': inputToString(self.subject, 'utf-8'),
-                                'date': inputToString(self.date, 'utf-8'),
-                                'attachments': attachmentNames,
-                                'body': decode_utf7(self.body)}
+            with _open(path + 'message.' + fext, mode) as f:
+                if _json:
+                    emailObj = json.loads(self.getJson())
+                    emailObj['attachments'] = attachmentNames
 
                     f.write(inputToBytes(json.dumps(emailObj), 'utf-8'))
                 else:
@@ -171,47 +240,14 @@ class Message(MessageBase):
                         f.write(b'-----------------' + crlf + crlf)
                         f.write(inputToBytes(self.body, 'utf-8'))
 
-        except Exception as e:
-            self.saveRaw()
+        except Exception:
+            if not zip:
+                self.saveRaw(path)
             raise
-
         finally:
-            # Return to previous directory
-            os.chdir(oldDir)
+            # Close the ZipFile if this function created it.
+            if zip and createdZip:
+                zip.close()
 
         # Return the instance so that functions can easily be chained.
         return self
-
-    def saveRaw(self):
-        # Create a 'raw' folder
-        oldDir = os.getcwdu()
-        try:
-            rawDir = 'raw'
-            os.makedirs(rawDir)
-            os.chdir(rawDir)
-            sysRawDir = os.getcwdu()
-
-            # Loop through all the directories
-            for dir_ in self.listdir():
-                sysdir = '/'.join(dir_)
-                code = dir_[-1][-8:]
-                if code in constants.PROPERTIES:
-                    sysdir = sysdir + ' - ' + constants.PROPERTIES[code]
-                os.makedirs(sysdir)
-                os.chdir(sysdir)
-
-                # Generate appropriate filename
-                if dir_[-1].endswith('001E'):
-                    filename = 'contents.txt'
-                else:
-                    filename = 'contents'
-
-                # Save contents of directory
-                with open(filename, 'wb') as f:
-                    f.write(self._getStream(dir_))
-
-                # Return to base directory
-                os.chdir(sysRawDir)
-
-        finally:
-            os.chdir(oldDir)
