@@ -106,6 +106,8 @@ class Attachment(AttachmentBase):
         will be used. If the long filename is not found, the short one will
         be used. If after all of this a usable filename has not been found, a
         random one will be used (accessible from `Attachment.randomFilename`).
+        After the name to use has been determined, it will then be shortened to
+        make sure that it is not more than the value of :param maxNameLength:.
 
         If you want to save the contents into a ZipFile or similar object,
         either pass a path to where you want to create one or pass an instance
@@ -118,8 +120,17 @@ class Attachment(AttachmentBase):
         # Someone managed to have a null character here, so let's get rid of that
         filename = prepareFilename(inputToString(filename, self.msg.stringEncoding))
 
+        # Get the maximum name length.
+        maxNameLength = kwargs.get('maxNameLength', 256)
+
+        # Make sure the filename is not longer than it should be.
+        if len(filename) > maxNameLength:
+            name, ext = os.path.splitext(filename)
+            filename = name[:maxNameLength - len(ext)] + ext
+
         # Check if we are doing a zip file.
         zip = kwargs.get('zip')
+
 
         # ZipFile handling.
         if zip:

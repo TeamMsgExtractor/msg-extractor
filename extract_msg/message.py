@@ -64,7 +64,11 @@ class Message(MessageBase):
              to fit in the space (with the extension included in the length). If
              a number is added to the directory that will not be included in the
              length, so it is recommended to plan for up to 5 characters extra
-             to be a part of the name.
+             to be a part of the name. Default is 256.
+
+        It should be noted that regardless of the value for maxNameLength, the
+        name of the file containing the body will always have the name 'message'
+        followed by the full extension.
 
         There are several parameters used to determine how the message will be
         saved. By default, the message will be saved as plain text. Setting one
@@ -99,7 +103,7 @@ class Message(MessageBase):
         raw = kwargs.get('raw', False)
         allowFallback = kwargs.get('allowFallback', False)
         zip = kwargs.get('zip')
-        maxNameLength = kwargs.get('maxNameLength')
+        maxNameLength = kwargs.get('maxNameLength', 256)
 
         # Variables involved in the save location.
         customFilename = kwargs.get('customFilename')
@@ -149,7 +153,7 @@ class Message(MessageBase):
             # First we need to validate it. If there are invalid characters, this will detect it.
             if constants.RE_INVALID_FILENAME_CHARACTERS.search(customFilename):
                 raise ValueError('Invalid character found in customFilename. Must not contain any of the following characters: \\/:*?"<>|')
-            path += customFilename
+            path += customFilename[:maxNameLength]
         elif useMsgFilename:
             if not self.filename:
                 raise ValueError(':param useMsgFilename: is only available if you are using an msg file on the disk or have provided a filename.')
@@ -166,7 +170,7 @@ class Message(MessageBase):
                 raise ValueError('Invalid filename found in self.filename: "{}"'.format(self.filename))
 
             # Add the file name to the path.
-            path += filename
+            path += filename[:maxNameLength]
         else:
             path += self.defaultFolderName[:maxNameLength]
 
