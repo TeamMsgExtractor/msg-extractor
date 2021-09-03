@@ -440,7 +440,13 @@ def parseType(_type, stream, encoding, extras):
     elif _type == 0x001F:  # PtypString
         return value.decode('utf_16_le')
     elif _type == 0x0040:  # PtypTime
-        return fromTimeStamp(msgEpoch(constants.ST3.unpack(value)[0])).__format__('%a, %d %b %Y %H:%M:%S %z')
+        rawtime = constants.ST3.unpack(value)[0]
+        if rawtime != 915151392000000000:
+            value = fromTimeStamp(msgEpoch(rawtime))
+        else:
+            # Temporarily just set to max time to signify a null date.
+            value = datetime.datetime.max
+        return value
     elif _type == 0x0048:  # PtypGuid
         return bytesToGuid(value)
     elif _type == 0x00FB:  # PtypServerId
