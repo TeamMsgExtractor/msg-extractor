@@ -9,7 +9,10 @@
 * [[TeamMsgExtractor #202](https://github.com/TeamMsgExtractor/msg-extractor/issues/202)] Module will now handle path lengths in a semi-intelligent way to determine how best to save the MSG files. Default path length max is 255.
 * [[TeamMsgExtractor #203](https://github.com/TeamMsgExtractor/msg-extractor/issues/203)] Fixed an issue where having multiple "." characters in your file name would cause the directories to be incorrectly named when using the `useFileName` (now `useMsgFilename`) argument in the save function.
 * [[TeamMsgExtractor #204](https://github.com/TeamMsgExtractor/msg-extractor/issues/204)] Fixed an issue where the failsafe name used by attachments wasn't being encoded before hand causing encoding errors.
+* MSG files with a type of simply `IPM` will now be returned as `MSGFile` by `openMsg`, as this specifies that no format has been specified.
+* [[TeamMsgExtractor #214](https://github.com/TeamMsgExtractor/msg-extractor/issues/214)] Attachments that error because the MSG class type wasn't recognized or isn't supported will now correctly be `UnsupportedAttachment` instead of `BrokenAttachment`.
 * Improved internal code in many functions to make them faster and more efficient.
+* `openMsg` will now tell you if a class type is simply unsupported rather than unrecognized. If it is found in the list, the function will raise `UnsupportedMSGTypeError`.
 * Added caching to `MSGFile.listDir`. I found that if you have larger files this single function might be taking up over half of the processing time because of how many times it is used in the module.
 * Fully implemented raw saving.
 * Changed `Message.saveRaw` to `MSGFile.saveRaw`.

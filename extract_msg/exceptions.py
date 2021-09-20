@@ -65,6 +65,12 @@ class UnknownTypeError(Exception):
     """
     pass
 
+class UnsupportedMSGTypeError(NotImplementedError):
+    """
+    An exception that is raised when an MSG class is recognized by not
+    supported.
+    """
+
 class UnrecognizedMSGTypeError(TypeError):
     """
     An exception that is raised when the module cannot determine how to properly

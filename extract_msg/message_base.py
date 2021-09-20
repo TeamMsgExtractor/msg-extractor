@@ -7,6 +7,7 @@ import compressed_rtf
 from . import constants
 from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment
 from .compat import os_ as os
+from .exceptions import UnrecognizedMSGTypeError
 from .msg import MSGFile
 from .recipient import Recipient
 from .utils import addNumToDir, inputToBytes, inputToString, prepareFilename
@@ -168,7 +169,7 @@ class MessageBase(MSGFile):
             for attachmentDir in attachmentDirs:
                 try:
                     self._attachments.append(self.attachmentClass(self, attachmentDir))
-                except NotImplementedError as e:
+                except (NotImplementedError, UnrecognizedMSGTypeError) as e:
                     if self.attachmentErrorBehavior > constants.ATTACHMENT_ERROR_THROW:
                         logger.error('Error processing attachment at {}'.format(attachmentDir))
                         logger.exception(e)

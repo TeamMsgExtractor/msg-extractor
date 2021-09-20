@@ -16,7 +16,7 @@ import tzlocal
 
 from . import constants
 from .compat import os_ as os
-from .exceptions import ConversionError, IncompatibleOptionsError, InvaildPropertyIdError, UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError
+from .exceptions import ConversionError, IncompatibleOptionsError, InvaildPropertyIdError, UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError, UnsupportedMSGTypeError
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -316,6 +316,21 @@ def isEmptyString(inp):
     """
     return (inp == '' or inp is None)
 
+def knownMsgClass(classType):
+    """
+    Checks if the specified class type is recognized by the module. Usually used
+    for checking if a type is simply unsupported rather than unknown.
+    """
+    classType = classType.lower()
+    if classType == 'ipm':
+        return True
+
+    for item in constants.KNOWN_CLASS_TYPES:
+        if classType.startsWith(item):
+            return True
+
+    return False
+
 def msgEpoch(inp):
     """
     Taken (with permission) from https://github.com/TheElementalOfDestruction/creatorUtils
@@ -359,6 +374,8 @@ def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAtt
     If :param strict: is set to `True`, this function will raise an exception
     when it cannot identify what MSGFile derivitive to use. Otherwise, it will
     log the error and return a basic MSGFile instance.
+
+    Raises UnsupportedMSGTypeError and UnrecognizedMSGTypeError.
     """
     from .appointment import Appointment
     from .attachment import Attachment
@@ -370,19 +387,24 @@ def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAtt
 
     msg = MSGFile(path, prefix, attachmentClass, filename, overrideEncoding, attachmentErrorBehavior)
     # After rechecking the docs, all comparisons should be case-insensitive, not case-sensitive. My reading ability is great.
-    classtype = msg.classType.lower()
-    if classtype.startswith('ipm.contact') or classtype.startswith('ipm.distlist'):
+    classType = msg.classType.lower()
+    if classType.startswith('ipm.contact') or classType.startswith('ipm.distlist'):
         msg.close()
         return Contact(path, prefix, attachmentClass, filename, overrideEncoding, attachmentErrorBehavior)
-    elif classtype.startswith('ipm.note') or classtype.startswith('report'):
+    elif classType.startswith('ipm.note') or classType.startswith('report'):
         msg.close()
         return Message(path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior, recipientSeparator)
-    elif classtype.startswith('ipm.appointment') or classtype.startswith('ipm.schedule'):
+    elif classType.startswith('ipm.appointment') or classType.startswith('ipm.schedule'):
         msg.close()
         return Appointment(path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior, recipientSeparator)
+    elif classType == 'ipm': # Unspecified format. It should be equal to this and not just start with it.
+        return msg
     elif strict:
+        ct = msg.classType
         msg.close()
-        raise UnrecognizedMSGTypeError('Could not recognize msg class type "{}". This most likely means it hasn\'t been implemented yet, and you should ask the developers to add support for it.'.format(msg.classType))
+        if knownMsgClass(classType):
+            raise UnsupportedMSGTypeError('MSG type "{}" currently is not supported by the module. If you would like support, please make a feature request.'.format(ct))
+        raise UnrecognizedMSGTypeError('Could not recognize msg class type "{}".'.format(ct))
     else:
         logger.error('Could not recognize msg class type "{}". This most likely means it hasn\'t been implemented yet, and you should ask the developers to add support for it.'.format(msg.classType))
         return msg

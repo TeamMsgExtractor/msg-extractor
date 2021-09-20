@@ -170,6 +170,25 @@ MULTIPLE_16_BYTES_HEX = (
 )
 
 
+KNOWN_CLASS_TYPES = (
+    'ipm.activity',
+    'ipm.appointment',
+    'ipm.contact',
+    'ipm.distlist',
+    'ipm.document',
+    'ipm.ole.class',
+    'ipm.note',
+    'ipm.post',
+    'ipm.stickynote',
+    'ipm.recall.report',
+    'ipm.report',
+    'ipm.resend',
+    'ipm.schedule',
+    'ipm.task',
+    'ipm.taskrequest'
+    'report',
+)
+
 # This is a dictionary matching the code page number to it's encoding name.
 # The list used to make this can be found here:
 # https://docs.microsoft.com/en-us/windows/win32/intl/code-page-identifiers
