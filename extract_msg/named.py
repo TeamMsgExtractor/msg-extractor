@@ -180,7 +180,8 @@ class StringNamedProperty(object):
         self.__guid = entry['guid']
         self.__namedPropertyID = entry['pid']
         # WARNING From the way the documentation is worded, this SHOULD work, but it doesn't.
-        # Correction, name should only be lowered for properties in the PS_INTERNET_HEADERS property set/
+        # Correction, name should only be lowered for properties in the PS_INTERNET_HEADERS property set.
+        # Not only that, but the problem is the crc32. For some reason I can't get the expected result.
         self.__streamID = 0x1000 + (zlib.crc32(name.lower().encode('utf-16-le')) ^ (self.__guidIndex << 1 | 1)) % 0x1F
         self.__data = data
 
