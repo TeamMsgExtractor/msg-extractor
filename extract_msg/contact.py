@@ -20,6 +20,20 @@ class Contact(MSGFile):
         return self._ensureSet('_businessPhone', '__substg1.0_3A08')
 
     @property
+    def carPhone(self):
+        """
+        Contains the number of the contact's car phone.
+        """
+        return self._ensureSet('_carPhone', '__substg1.0_3A1E')
+
+    @property
+    def companyMainPhone(self):
+        """
+        Contains the number of the main phone of the contact's company.
+        """
+        return self._ensureSet('_businessPhone', '__substg1.0_3A08')
+
+    @property
     def companyName(self):
         """
         The name of the company the contact works at.
