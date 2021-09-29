@@ -15,6 +15,8 @@
 * `openMsg` will now tell you if a class type is simply unsupported rather than unrecognized. If it is found in the list, the function will raise `UnsupportedMSGTypeError`.
 * Added caching to `MSGFile.listDir`. I found that if you have larger files this single function might be taking up over half of the processing time because of how many times it is used in the module.
 * Fully implemented raw saving.
+* Extended the `Contact` class to have more properties.
+* Added new function `MSGFile._ensureSetTyped` which acts like the other ensure set functions but doesn't require you to know the type. Prefer to use other ensure set function when you know exactly what type it will be.
 * Changed `Message.saveRaw` to `MSGFile.saveRaw`.
 * Changed `MSGFile.saveRaw` to take a path and save the contents to a zip file.
 * The `raw` keyword of `Message.save` now actually works.

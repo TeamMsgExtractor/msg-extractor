@@ -69,6 +69,17 @@ class Recipient(object):
             setattr(self, variable, value)
             return value
 
+    def _ensureSetTyped(self, variable, _id):
+        """
+        Like the other ensure set functions, but designed for when something could be multiple types (where only one will be present). This way you have no need to set the type, it will be handled for you.
+        """
+        try:
+            return getattr(self, variable)
+        except AttributeError:
+            value = self._getTypedData(_id)
+            setattr(self, variable, value)
+            return value
+
     def _getStream(self, filename):
         return self.__msg._getStream([self.__dir, filename])
 

@@ -36,11 +36,10 @@ class Contact(MSGFile):
     @property
     def businessPhone2(self):
         """
-        Contains the second number of the contact's business phone.
+        Contains the second number or numbers of the contact's
+        business.
         """
-        # This could also be a multiple type so we should deal with that at some
-        # point.
-        return self._ensureSet('_businessPhone2', '__substg1.0_3A1B')
+        return self._ensureSetTyped('_businessPhone2', '3A1B')
 
     @property
     def businessUrl(self):

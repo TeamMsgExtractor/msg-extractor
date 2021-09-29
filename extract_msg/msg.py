@@ -133,6 +133,17 @@ class MSGFile(olefile.OleFileIO):
             setattr(self, variable, value)
             return value
 
+    def _ensureSetTyped(self, variable, _id):
+        """
+        Like the other ensure set functions, but designed for when something could be multiple types (where only one will be present). This way you have no need to set the type, it will be handled for you.
+        """
+        try:
+            return getattr(self, variable)
+        except AttributeError:
+            value = self._getTypedData(_id)
+            setattr(self, variable, value)
+            return value
+
     def _getStream(self, filename, prefix = True):
         """
         Gets a binary representation of the requested filename.
@@ -166,7 +177,7 @@ class MSGFile(olefile.OleFileIO):
             tmp = self._getStream(filename + '001E', prefix = False)
             return None if tmp is None else tmp.decode(self.stringEncoding)
 
-    def _getTypedData(self, id, _type = None, prefix = True):
+    def _getTypedData(self, _id, _type = None, prefix = True):
         """
         Gets the data for the specified id as the type that it is
         supposed to be. :param id: MUST be a 4 digit hexadecimal
@@ -177,13 +188,13 @@ class MSGFile(olefile.OleFileIO):
         constant FIXED_LENGTH_PROPS_STRING or
         VARIABLE_LENGTH_PROPS_STRING.
         """
-        verifyPropertyId(id)
-        id = id.upper()
-        found, result = self._getTypedStream('__substg1.0_' + id, prefix, _type)
+        verifyPropertyId(_id)
+        _id = _id.upper()
+        found, result = self._getTypedStream('__substg1.0_' + _id, prefix, _type)
         if found:
             return result
         else:
-            found, result = self._getTypedProperty(id, _type)
+            found, result = self._getTypedProperty(_id, _type)
             return result if found else None
 
     def _getTypedProperty(self, propertyID, _type = None):
@@ -288,7 +299,7 @@ class MSGFile(olefile.OleFileIO):
         inp = self.fixPath(inp, prefix)
         return self.exists(inp + '001F') or self.exists(inp + '001E')
 
-    def existsTypedProperty(self, id, location = None, _type = None, prefix = True, propertiesInstance = None):
+    def existsTypedProperty(self, _id, location = None, _type = None, prefix = True, propertiesInstance = None):
         """
         Determines if the stream with the provided id exists in the location specified.
         If no location is specified, the root directory is searched. The return of this
@@ -298,25 +309,25 @@ class MSGFile(olefile.OleFileIO):
         Because of how this function works, any folder that contains it's own
         "__properties_version1.0" file should have this function called from it's class.
         """
-        verifyPropertyId(id)
+        verifyPropertyId(_id)
         verifyType(_type)
-        id = id.upper()
+        _id = _id.upper()
         if propertiesInstance is None:
             propertiesInstance = self.mainProperties
         prefixList = self.prefixList if prefix else []
         if location is not None:
             prefixList.append(location)
         prefixList = inputToMsgpath(prefixList)
-        usableid = id + _type if _type is not None else id
+        usableId = _id + _type if _type else _id
         foundNumber = 0
         foundStreams = []
         for item in self.listDir():
             if len(item) > self.__prefixLen:
-                if item[self.__prefixLen].startswith('__substg1.0_' + usableid) and item[self.__prefixLen] not in foundStreams:
+                if item[self.__prefixLen].startswith('__substg1.0_' + usableId) and item[self.__prefixLen] not in foundStreams:
                     foundNumber += 1
                     foundStreams.append(item[self.__prefixLen])
         for x in propertiesInstance:
-            if x.startswith(usableid):
+            if x.startswith(usableId):
                 for y in foundStreams:
                     if y.endswith(x):
                         break
