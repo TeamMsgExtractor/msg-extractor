@@ -1,6 +1,7 @@
 import logging
 import random
 import string
+import os
 
 from extract_msg import constants
 from extract_msg.attachment_base import AttachmentBase
@@ -75,9 +76,7 @@ class Attachment(AttachmentBase):
         filename = prepareFilename(inputToString(filename, self.msg.stringEncoding))
 
         if customPath is not None and customPath != '':
-            if customPath[-1] != '/' or customPath[-1] != '\\':
-                customPath += '/'
-            filename = customPath + filename
+            filename = os.path.join(customPath, filename)
 
         if self.__type == "data":
             with open(filename, 'wb') as f:
