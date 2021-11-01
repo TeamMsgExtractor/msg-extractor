@@ -200,12 +200,6 @@ class Message(MessageBase):
             return self
 
         try:
-            # Save the attachments.
-            attachmentNames = [attachment.save(**kwargs) for attachment in self.attachments]
-
-            # Determine the extension to use for the body.
-            fext = 'json' if _json else 'txt'
-
             # Check whether we should be using HTML or RTF.
             useHtml = False
             useRtf = False
@@ -222,6 +216,12 @@ class Message(MessageBase):
                    fext = 'rtf'
                 elif not allowFallback:
                    raise DataNotFoundError('Could not find the rtfBody')
+
+            # Save the attachments.
+            attachmentNames = [attachment.save(**kwargs) for attachment in self.attachments]
+
+            # Determine the extension to use for the body.
+            fext = 'json' if _json else 'txt'
 
             with _open(path + 'message.' + fext, mode) as f:
                 if _json:
