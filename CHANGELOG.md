@@ -30,6 +30,7 @@
 * Changed `utils.hasLen` to use `hasattr` instead of the try-except method it was using.
 * Added new option `recipientSeparator` to `MessageBase` allowing you to specify a custom recipient separator (default is ";" to match Microsoft Outlook).
 * Changed the openMsg function in `Attachment` to not be strict. This allows you to actually open the MSG file even if we don't recognize the type of embedded MSG that is being used.
+* Finally figured out what CRC32 algorithm is used in named properties after directly asking in a Microsoft forum (see the thread [here](https://docs.microsoft.com/en-us/answers/questions/574894/ms-oxmsg-specifies-the-use-of-crc-32-checksums-wit.html)). Fortunately the is already defined in the `compressed-rtf` module so we can take advantage of that.
 * Reworked `MessageBase._genRecipient` to improve it (because what on earth was that code it was using before?). Variables in the function are now more descriptive. Added comments in several places.
 * Many renames to better fit naming convention:
     * `dev.setup_dev_logger` to `dev.setupDevLogger`.
