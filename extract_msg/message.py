@@ -201,6 +201,8 @@ class Message(MessageBase):
 
         try:
             # Check whether we should be using HTML or RTF.
+            fext = 'txt'
+
             useHtml = False
             useRtf = False
             if html:
@@ -221,7 +223,7 @@ class Message(MessageBase):
             attachmentNames = [attachment.save(**kwargs) for attachment in self.attachments]
 
             # Determine the extension to use for the body.
-            fext = 'json' if _json else 'txt'
+            fext = 'json' if _json else fext
 
             with _open(path + 'message.' + fext, mode) as f:
                 if _json:
