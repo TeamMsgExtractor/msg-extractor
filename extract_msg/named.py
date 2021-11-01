@@ -43,7 +43,7 @@ class Named(object):
         while pos < namesStreamLength:
             nameLength = constants.STNP_NAM.unpack(namesStream[pos:pos+4])[0]
             pos += 4 # Move to the start of the entry.
-            names[pos - 4] = namesStream[pos:pos+nameLength].decode('utf_16_le') # Names are stored in the dictionary as the position they start at.
+            names[pos - 4] = namesStream[pos:pos+nameLength].decode('utf-16-le') # Names are stored in the dictionary as the position they start at.
             pos += roundUp(nameLength, 4)
 
         self.entries = entries

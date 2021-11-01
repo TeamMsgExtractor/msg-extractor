@@ -43,7 +43,7 @@ if sys.version_info[0] >= 3:  # Python 3
         return a.rjust(length, '0').upper()
 
     def windowsUnicode(string):
-        return str(string, 'utf_16_le') if string is not None else None
+        return str(string, 'utf-16-le') if string is not None else None
 
 else:  # Python 2
     getInput = raw_input
@@ -75,7 +75,7 @@ else:  # Python 2
         return a.rjust(length, '0').upper()
 
     def windowsUnicode(string):
-        return unicode(string, 'utf_16_le') if string is not None else None
+        return unicode(string, 'utf-16-le') if string is not None else None
 
 def addNumToDir(dirName):
     """
@@ -460,7 +460,7 @@ def parseType(_type, stream, encoding, extras):
     elif _type == 0x001E:  # PtypString8
         return value.decode(encoding)
     elif _type == 0x001F:  # PtypString
-        return value.decode('utf_16_le')
+        return value.decode('utf-16-le')
     elif _type == 0x0040:  # PtypTime
         rawtime = constants.ST3.unpack(value)[0]
         if rawtime != 915151392000000000:
