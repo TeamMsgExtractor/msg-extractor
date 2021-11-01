@@ -176,7 +176,7 @@ MULTIPLE_16_BYTES_HEX = (
 # `cc`, `bcc`
 MESSAGE_HTML_INJECTABLE_HEADER = """
 <div>
-    <div style="border:none;border-top:solid #E1E1E1 1.0pt;padding:3.0pt 0in 0in 0in">
+    <div>
         <p class="MsoNormal">
             <b>From:</b>&nbsp;{sender}<br/>
             <b>Sent:</b>&nbsp;{date}<br/>
