@@ -27,6 +27,8 @@ else:
 
 # Regular expresion constants.
 RE_INVALID_FILENAME_CHARACTERS = re.compile(r'[\\/:*?"<>|]')
+# Regular expression to find the start of the html body.
+RE_HTML_BODY_START = re.compile(b'<body[^>]*>')
 
 # Constants used by named.py
 NUMERICAL_NAMED = 0
@@ -168,6 +170,25 @@ MULTIPLE_16_BYTES = (
 MULTIPLE_16_BYTES_HEX = (
     0x1048,
 )
+
+# This is the header that will be injected into the html after being formatted
+# with the applicable data. Used entiries are `date`, `sender`, `to`, `subject`,
+# `cc`, `bcc`
+MESSAGE_HTML_INJECTABLE_HEADER = """
+<div>
+    <div style="border:none;border-top:solid #E1E1E1 1.0pt;padding:3.0pt 0in 0in 0in">
+        <p class="MsoNormal">
+            <b>From:</b>&nbsp;{sender}<br/>
+            <b>Sent:</b>&nbsp;{date}<br/>
+            <b>To:</b>&nbsp;{to}<br/>
+            <b>Cc:</b>&nbsp;{cc}<br/>
+            <b>Bcc:</b>&nbsp;{bcc}<br/>
+            <b>Subject:</b>&nbsp;{subject}
+            <o:p></o:p>
+        </p>
+    </div>
+</div>
+""".replace('    ', '').replace('\r', '').replace('\n', '')
 
 
 KNOWN_CLASS_TYPES = (

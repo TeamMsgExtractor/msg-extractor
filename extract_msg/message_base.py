@@ -302,6 +302,7 @@ class MessageBase(MSGFile):
                 header.add_header('From', self.sender)
                 header.add_header('To', self.to)
                 header.add_header('Cc', self.cc)
+                header.add_header('Bcc', self.bcc)
                 header.add_header('Message-Id', self.messageId)
                 # TODO find authentication results outside of header
                 header.add_header('Authentication-Results', None)

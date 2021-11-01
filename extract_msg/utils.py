@@ -45,6 +45,8 @@ if sys.version_info[0] >= 3:  # Python 3
     def windowsUnicode(string):
         return str(string, 'utf-16-le') if string is not None else None
 
+    from html import escape as htmlEscape
+
 else:  # Python 2
     getInput = raw_input
 
@@ -76,6 +78,8 @@ else:  # Python 2
 
     def windowsUnicode(string):
         return unicode(string, 'utf-16-le') if string is not None else None
+
+    from cgi import escape as htmlEscape
 
 def addNumToDir(dirName):
     """
@@ -330,6 +334,24 @@ def knownMsgClass(classType):
             return True
 
     return False
+
+def htmlReplace(msgFile):
+    """
+    Returns a function to be used with re.sub for injecting the header after the
+    body tag.
+    """
+    def replace(bodyMarker):
+        return bodyMarker.group() + constants.MESSAGE_HTML_INJECTABLE_HEADER.format(
+        **{
+            'sender': inputToString(htmlEscape(msgFile.sender) if msgFile.sender else '', 'utf-8'),
+            'to': inputToString(htmlEscape(msgFile.to) if msgFile.to else '', 'utf-8'),
+            'cc': inputToString(htmlEscape(msgFile.cc) if msgFile.cc else '', 'utf-8'),
+            'bcc': inputToString(htmlEscape(msgFile.bcc) if msgFile.bcc else '', 'utf-8'),
+            'date': inputToString(msgFile.date, 'utf-8'),
+            'subject': inputToString(msgFile.subject, 'utf-8'),
+        }).encode('utf-8')
+
+    return replace
 
 def msgEpoch(inp):
     """

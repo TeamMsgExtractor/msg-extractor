@@ -9,7 +9,7 @@ from .attachment import Attachment
 from .compat import os_ as os
 from .exceptions import DataNotFoundError, IncompatibleOptionsError
 from .message_base import MessageBase
-from .utils import addNumToDir, inputToBytes, inputToString, makeDirs, prepareFilename
+from .utils import addNumToDir, htmlReplace, inputToBytes, inputToString, makeDirs, prepareFilename
 
 
 logger = logging.getLogger(__name__)
@@ -41,9 +41,10 @@ class Message(MessageBase):
             'from': inputToString(self.sender, 'utf-8'),
             'to': inputToString(self.to, 'utf-8'),
             'cc': inputToString(self.cc, 'utf-8'),
+            'bcc': inputToString(self.bcc, 'utf-8'),
             'subject': inputToString(self.subject, 'utf-8'),
             'date': inputToString(self.date, 'utf-8'),
-            'body': decode_utf7(self.body)
+            'body': decode_utf7(self.body),
         })
 
     def save(self, **kwargs):
@@ -230,15 +231,18 @@ class Message(MessageBase):
                     f.write(inputToBytes(json.dumps(emailObj), 'utf-8'))
                 else:
                     if useHtml:
-                        # Do stuff
-                        pass
+                        # Inject the header into the data and then write it to
+                        # the file.
+                        data = constants.RE_HTML_BODY_START.sub(htmlReplace(self), self.htmlBody, 1)
+                        f.write(data)
                     elif useRtf:
                         # Do stuff
                         pass
                     else:
                         f.write(b'From: ' + inputToBytes(self.sender, 'utf-8') + crlf)
                         f.write(b'To: ' + inputToBytes(self.to, 'utf-8') + crlf)
-                        f.write(b'CC: ' + inputToBytes(self.cc, 'utf-8') + crlf)
+                        f.write(b'Cc: ' + inputToBytes(self.cc, 'utf-8') + crlf)
+                        f.write(b'Bcc: ' + inputToBytes(self.bcc, 'utf-8') + crlf)
                         f.write(b'Subject: ' + inputToBytes(self.subject, 'utf-8') + crlf)
                         f.write(b'Date: ' + inputToBytes(self.date, 'utf-8') + crlf)
                         f.write(b'-----------------' + crlf + crlf)
