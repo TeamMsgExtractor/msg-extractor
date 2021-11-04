@@ -335,12 +335,18 @@ def knownMsgClass(classType):
 
     return False
 
-def htmlReplace(msgFile):
+def injectHtmlHeader(msgFile):
     """
-    Returns a function to be used with re.sub for injecting the header after the
-    body tag.
+    Returns the HTML body from the MSG file (will check that it has one) with
+    the HTML header injected into it.
     """
+    if not hasattr(msgFile, 'htmlBody'):
+        raise AttributeError('Cannot inject the HTML header without an HTML body attribute.')
+
     def replace(bodyMarker):
+        """
+        Internal function to replace the body tag with itself plus the header.
+        """
         return bodyMarker.group() + constants.MESSAGE_HTML_INJECTABLE_HEADER.format(
         **{
             'sender': inputToString(htmlEscape(msgFile.sender) if msgFile.sender else '', 'utf-8'),
@@ -351,7 +357,8 @@ def htmlReplace(msgFile):
             'subject': inputToString(msgFile.subject, 'utf-8'),
         }).encode('utf-8')
 
-    return replace
+    # Use the previously defined function to inject the html header.
+    return constants.RE_HTML_BODY_START.sub(replace, msgFile.htmlBody, 1)
 
 def msgEpoch(inp):
     """

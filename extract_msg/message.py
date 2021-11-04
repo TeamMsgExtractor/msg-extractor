@@ -9,7 +9,7 @@ from .attachment import Attachment
 from .compat import os_ as os
 from .exceptions import DataNotFoundError, IncompatibleOptionsError
 from .message_base import MessageBase
-from .utils import addNumToDir, htmlReplace, inputToBytes, inputToString, makeDirs, prepareFilename
+from .utils import addNumToDir, injectHtmlHeader, inputToBytes, inputToString, makeDirs, prepareFilename
 
 
 logger = logging.getLogger(__name__)
@@ -235,7 +235,7 @@ class Message(MessageBase):
                     if useHtml:
                         # Inject the header into the data and then write it to
                         # the file.
-                        data = constants.RE_HTML_BODY_START.sub(htmlReplace(self), self.htmlBody, 1)
+                        data = injectHtmlHeader(self)
                         f.write(data)
                     elif useRtf:
                         # Do stuff
