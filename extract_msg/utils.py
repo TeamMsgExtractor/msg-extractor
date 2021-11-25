@@ -347,7 +347,7 @@ def injectHtmlHeader(msgFile):
         """
         Internal function to replace the body tag with itself plus the header.
         """
-        return bodyMarker.group() + constants.MESSAGE_HTML_INJECTABLE_HEADER.format(
+        return bodyMarker.group() + constants.HTML_INJECTABLE_HEADER.format(
         **{
             'sender': inputToString(htmlEscape(msgFile.sender) if msgFile.sender else '', 'utf-8'),
             'to': inputToString(htmlEscape(msgFile.to) if msgFile.to else '', 'utf-8'),

@@ -263,8 +263,10 @@ class NumericalNamedProperty(object):
         self.__propertyID = properHex(entry['id'], 4).upper()
         self.__guidIndex = entry['guid_index']
         self.__namedPropertyID = entry['pid']
+        self.__guid = entry['guid']
         self.__streamID = 0x1000 + (entry['id'] ^ (self.__guidIndex << 1)) % 0x1F
         self.__data = data
+        self.__entry = entry
 
     @property
     def data(self):
