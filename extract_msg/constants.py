@@ -530,7 +530,7 @@ NEEDS_ARG = [
     '--out-name',
 ]
 MAINDOC = "extract_msg:\n\tExtracts emails and attachments saved in Microsoft Outlook's .msg files.\n\n" \
-          "https://github.com/mattgwwalker/msg-extractor"
+          "https://github.com/TeamMsgExtractor/msg-extractor"
 
 # Define pre-compiled structs to make unpacking slightly faster
 # General structs

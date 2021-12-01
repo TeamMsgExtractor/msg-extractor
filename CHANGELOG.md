@@ -19,6 +19,7 @@
 * Added new function `MSGFile._ensureSetTyped` which acts like the other ensure set functions but doesn't require you to know the type. Prefer to use other ensure set function when you know exactly what type it will be.
 * Changed `Message.saveRaw` to `MSGFile.saveRaw`.
 * Changed `MSGFile.saveRaw` to take a path and save the contents to a zip file.
+* Corrected the help doc to reflect the current repository (was still on mattgwwalker).
 * The `raw` keyword of `Message.save` now actually works.
 * Added property `Attachment.randomFilename` which allows you to get the randomly generated name for attachments that don't have a usable one otherwise.
 * Added function `Attachment.regenerateRandomName` for creating a new random name if necessary.
