@@ -285,18 +285,16 @@ Subject: {{\*\htmltag92 </b>}}
 
 # The header to be used for plain RTF files. Uses the same properties as the
 # HTML header.
-RTF_PLAIN_INJECTABLE_HEADER = """
+RTF_PLAIN_INJECTABLE_HEADER = r"""
 {{
-    {{\b From: \b0 {sender}}}
-    {{\b Sent: \b0 {date}}}
-    {{\b To: \b0 {to}}}
-    {{\b Cc: \b0 {cc}}}
-    {{\b Bcc: \b0 {bcc}}}
-    {{\b Subject: \b0 {subject}}}
+    {{\b From: \b0 {sender}}}\line
+    {{\b Sent: \b0 {date}}}\line
+    {{\b To: \b0 {to}}}\line
+    {{\b Cc: \b0 {cc}}}\line
+    {{\b Bcc: \b0 {bcc}}}\line
+    {{\b Subject: \b0 {subject}}}\par\par
 }}
 """.replace('    ', '').replace('\r', '').replace('\n', '')
-
-# The header to be used for RTF files *without* encapsulated HTML.
 
 
 KNOWN_CLASS_TYPES = (
