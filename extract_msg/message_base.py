@@ -21,7 +21,6 @@ class MessageBase(MSGFile):
     """
     Base class for Message like msg files.
     """
-
     def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None,
                  delayAttachments = False, overrideEncoding = None,
                  attachmentErrorBehavior = constants.ATTACHMENT_ERROR_THROW, recipientSeparator = ';'):
@@ -397,7 +396,11 @@ class MessageBase(MSGFile):
         """
         Returns the decompressed Rtf body from the message.
         """
-        return compressed_rtf.decompress(self.compressedRtf)
+        try:
+            return self._rtfBody
+        except AttributeError:
+            self._rtfBody = compressed_rtf.decompress(self.compressedRtf) if self.compressedRtf else None
+            return self._rtfBody
 
     @property
     def sender(self):

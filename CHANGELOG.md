@@ -20,6 +20,7 @@
 * Changed `Message.saveRaw` to `MSGFile.saveRaw`.
 * Changed `MSGFile.saveRaw` to take a path and save the contents to a zip file.
 * Corrected the help doc to reflect the current repository (was still on mattgwwalker).
+* Fixed a bug that would cause an exception on trying to access the RTF body on a file that didn't have one. This is now correctly returning `None`.
 * The `raw` keyword of `Message.save` now actually works.
 * Added property `Attachment.randomFilename` which allows you to get the randomly generated name for attachments that don't have a usable one otherwise.
 * Added function `Attachment.regenerateRandomName` for creating a new random name if necessary.

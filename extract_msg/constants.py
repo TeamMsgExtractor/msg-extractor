@@ -32,6 +32,22 @@ RE_HTML_BODY_START = re.compile(b'<body[^>]*>')
 # Regular expression to find the start of the html body in encapsulated RTF.
 # This is used for one of the pattern types that makes life easy.
 RE_RTF_ENC_BODY_START_1 = re.compile(br'\{\\\*\\htmltag[0-9]* ?<body[^>]*>\}')
+# Unfortunately, while it would make it easy to find the start of the body in
+# terms of the encapsulated HTML, trying to inject directly into this location
+# has proven to cause some rendering issues that I'll figure out later. For now
+# this is basically the universal start we will try to use.
+RE_RTF_BODY_START = re.compile(br'\\lang[0-9]*')
+# This is an unrelible one to use as it doesn't have a proper way to verify that
+# it will inject in exactly the right place. This is kind of just a "well, let's
+# hope this one works" method.
+RE_RTF_ENC_BODY_UGLY = re.compile(br'<body[^>]*>[^}]*?\}')
+# The following tags are fallbacks that we will try to use, with the higher ones
+# having priority. If we can't find any other way, we try these which should
+# hopefully always work.
+RE_RTF_BODY_FALLBACK_FS = re.compile(br'\\fs[0-9]*[^a-zA-Z]')
+RE_RTF_BODY_FALLBACK_F = re.compile(br'\\f[0-9]*[^a-zA-Z]')
+RE_RTF_FALLBACK_PLAIN = re.compile(br'\\plain[^a-zA-Z0-9]')
+
 
 # Constants used by named.py
 NUMERICAL_NAMED = 0
@@ -209,10 +225,76 @@ HTML_INJECTABLE_HEADER = """
 
 # The header to be used for RTF files with encapsulated HTML. Uses the same
 # properties as the HTML header.
-RTF_ENC_INJECTABLE_HEADER = """
+# I'm just going to appologize in advance for how bad this looks. RTF in general
+# is just not pretty to look at, and the garbage I had to do here didn't help.
+# FYI, < and > will need to be sanitized if you actually want it to be properly
+# compatible. "<" will become "{\*\htmltag84 &lt;}\htmlrtf <\htmlrtf0" and ">"
+# will become "{\*\htmltag84 &gt;}\htmlrtf >\htmlrtf0".
+RTF_ENC_INJECTABLE_HEADER = r"""
+{{
+{{\*\htmltag96 <div>}}
+{{\*\htmltag96 <div>}}
+{{\*\htmltag64 <p class=MsoNormal>}}
 
+\htmlrtf {{\b\htmlrtf0
+{{\*\htmltag84 <b>}}
+From: {{\*\htmltag92 </b>}}
+\htmlrtf \b0\htmlrtf0 {sender}
+\htmlrtf }}\htmlrtf0
+{{\*\htmltag116 <br>}}
+\htmlrtf \line\htmlrtf0
+
+\htmlrtf {{\b\htmlrtf0
+{{\*\htmltag84 <b>}}
+Sent: {{\*\htmltag92 </b>}}
+\htmlrtf \b0\htmlrtf0 {date}
+\htmlrtf }}\htmlrtf0
+{{\*\htmltag116 <br>}}
+\htmlrtf \line\htmlrtf0
+
+\htmlrtf {{\b\htmlrtf0
+{{\*\htmltag84 <b>}}
+Cc: {{\*\htmltag92 </b>}}
+\htmlrtf \b0\htmlrtf0 {cc}
+\htmlrtf }}\htmlrtf0
+{{\*\htmltag116 <br>}}
+\htmlrtf \line\htmlrtf0
+
+\htmlrtf {{\b\htmlrtf0
+{{\*\htmltag84 <b>}}
+Bcc: {{\*\htmltag92 </b>}}
+\htmlrtf \b0\htmlrtf0 {bcc}
+\htmlrtf }}\htmlrtf0
+{{\*\htmltag116 <br>}}
+\htmlrtf \line\htmlrtf0
+
+\htmlrtf {{\b\htmlrtf0
+{{\*\htmltag84 <b>}}
+Subject: {{\*\htmltag92 </b>}}
+\htmlrtf \b0\htmlrtf0 {subject}
+\htmlrtf }}\htmlrtf0
+{{\*\htmltag244 <o:p>}}
+{{\*\htmlrag252 </o:p>}}
+\htmlrtf \par\par\htmlrtf0
+
+{{\*\htmltag72 </p>}}
+{{\*\htmltag104 </div>}}
+{{\*\htmltag104 </div>}}
+\htmlrtf }}\htmlrtf0
 """.replace('\r', '').replace('\n', '')
 
+# The header to be used for plain RTF files. Uses the same properties as the
+# HTML header.
+RTF_PLAIN_INJECTABLE_HEADER = """
+{{
+    {{\b From: \b0 {sender}}}
+    {{\b Sent: \b0 {date}}}
+    {{\b To: \b0 {to}}}
+    {{\b Cc: \b0 {cc}}}
+    {{\b Bcc: \b0 {bcc}}}
+    {{\b Subject: \b0 {subject}}}
+}}
+""".replace('    ', '').replace('\r', '').replace('\n', '')
 
 # The header to be used for RTF files *without* encapsulated HTML.
 

@@ -94,6 +94,16 @@ def addNumToDir(dirName):
             pass
     return None
 
+def addNumToZipDir(dirName, _zip):
+    """
+    Attempt to create the directory with a '(n)' appended.
+    """
+    for i in range(2, 100):
+        newDirName = dirName + ' (' + str(i) + ')'
+        if not any(x.startswith(newDirName.rstrip('/') + '/') for x in _zip.namelist()):
+            return newDirName
+    return None
+
 def bitwiseAdjust(inp, mask):
     """
     Uses a given mask to adjust the location of bits after an operation like
@@ -285,6 +295,150 @@ def hasLen(obj):
     """
     return hasattr(obj, '__len__')
 
+def injectHtmlHeader(msgFile):
+    """
+    Returns the HTML body from the MSG file (will check that it has one) with
+    the HTML header injected into it.
+    """
+    if not hasattr(msgFile, 'htmlBody') or not msgFile.htmlBody:
+        raise AttributeError('Cannot inject the HTML header without an HTML body attribute.')
+
+    def replace(bodyMarker):
+        """
+        Internal function to replace the body tag with itself plus the header.
+        """
+        return bodyMarker.group() + constants.HTML_INJECTABLE_HEADER.format(
+        **{
+            'sender': inputToString(htmlEscape(msgFile.sender) if msgFile.sender else '', 'utf-8'),
+            'to': inputToString(htmlEscape(msgFile.to) if msgFile.to else '', 'utf-8'),
+            'cc': inputToString(htmlEscape(msgFile.cc) if msgFile.cc else '', 'utf-8'),
+            'bcc': inputToString(htmlEscape(msgFile.bcc) if msgFile.bcc else '', 'utf-8'),
+            'date': inputToString(msgFile.date, 'utf-8'),
+            'subject': inputToString(htmlEscape(msgFile.subject), 'utf-8'),
+        }).encode('utf-8')
+
+    # Use the previously defined function to inject the HTML header.
+    return constants.RE_HTML_BODY_START.sub(replace, msgFile.htmlBody, 1)
+
+def injectRtfHeader(msgFile):
+    """
+    Returns the RTF body from the MSG file (will check that it has one) with the
+    RTF header injected into it.
+    """
+    if not hasattr(msgFile, 'rtfBody') or not msgFile.rtfBody:
+        raise AttributeError('Cannot inject the RTF header without an RTF body attribute.')
+
+    # Try to determine which header to use. Also determines how to sanitize the
+    # rtf.
+    if isEncapsulatedRtf(msgFile.rtfBody):
+        injectableHeader = constants.RTF_ENC_INJECTABLE_HEADER
+        def rtfSanitize(inp):
+            if not inp:
+                return ''
+            output = ''
+            for char in inp:
+                # Check if it is in the right range to be printed directly.
+                if 32 <= ord(char) < 128:
+                    if char in ('\\', '{', '}'):
+                        output += '\\'
+                    output += char
+                elif ord(char) < 32 or 128 <= ord(char) <= 255:
+                    # Otherwise, see if it is just a small escape.
+                    output += "\\'" + properHex(char, 2)
+                else:
+                    # Handle Unicode characters.
+                    output += '\\u' + str(ord(char)) + '?'
+
+            return output
+    else:
+        injectableHeader = constants.RTF_PLAIN_INJECTABLE_HEADER
+        def rtfSanitize(inp):
+            if not inp:
+                return ''
+            output = ''
+            for char in inp:
+                # Check if it is in the right range to be printed directly.
+                if 32 <= ord(char) < 128:
+                    # Quick check for handling the HTML escapes. Will eventually
+                    # upgrade this code to actually handle all the HTML escapes
+                    # but this will do for now.
+                    if char == '<':
+                        output += r'{\*\htmltag84 &lt;}\htmlrtf <\htmlrtf0 '
+                    elif char == '>':
+                        output += r'{\*\htmltag84 &gt;}\htmlrtf >\htmlrtf0'
+                    else:
+                        if char in ('\\', '{', '}'):
+                            output += '\\'
+                        output += char
+                elif ord(char) < 32 or 128 <= ord(char) <= 255:
+                    # Otherwise, see if it is just a small escape.
+                    output += "\\'" + properHex(char, 2)
+                else:
+                    # Handle Unicode characters.
+                    output += '\\u' + str(ord(char)) + '?'
+
+            return output
+
+    def replace(bodyMarker):
+        """
+        Internal function to replace the body tag with itself plus the header.
+        """
+        return bodyMarker.group() + injectableHeader.format(
+        **{
+            'sender': inputToString(rtfSanitize(msgFile.sender) if msgFile.sender else '', 'utf-8'),
+            'to': inputToString(rtfSanitize(msgFile.to) if msgFile.to else '', 'utf-8'),
+            'cc': inputToString(rtfSanitize(msgFile.cc) if msgFile.cc else '', 'utf-8'),
+            'bcc': inputToString(rtfSanitize(msgFile.bcc) if msgFile.bcc else '', 'utf-8'),
+            'date': inputToString(msgFile.date, 'utf-8'),
+            'subject': inputToString(rtfSanitize(msgFile.subject), 'utf-8'),
+        }).encode('utf-8')
+
+    # Use the previously defined function to inject the RTF header. We are
+    # trying a few different methods to determine where to place the header.
+    data = constants.RE_RTF_BODY_START.sub(replace, msgFile.rtfBody, 1)
+    # If after any method the data does not match the RTF body, then we have
+    # succeeded.
+    if data != msgFile.rtfBody:
+        logger.debug('Successfully injected RTF header using first method.')
+        return data
+
+    # This second method only applies to encapsulated HTML, so we need to check
+    # for that first.
+    if isEncapsulatedRtf(msgFile.rtfBody):
+        data = constants.RE_RTF_ENC_BODY_START_1.sub(replace, msgFile.rtfBody, 1)
+        if data != msgFile.rtfBody:
+            logger.debug('Successfully injected RTF header using second method.')
+            return data
+
+        # This third method is a lot less reliable, and actually would just
+        # simply violate the encapuslated html, so for this one we don't even
+        # try to worry about what the html will think about it. If it injects,
+        # we swap to basic and then inject again, more worried about it working
+        # than looking nice inside.
+        if constants.RE_RTF_ENC_BODY_UGLY.sub(replace, msgFile.rtfBody, 1) != msgFile.rtfBody:
+            injectableHeader = constants.RTF_PLAIN_INJECTABLE_HEADER
+            data = constants.RE_RTF_ENC_BODY_UGLY.sub(replace, msgFile.rtfBody, 1)
+            logger.debug('Successfully injected RTF header using third method.')
+            return data
+
+    # Severe fallback attempts.
+    data = constants.RE_RTF_BODY_FALLBACK_FS.sub(replace, msgFile.rtfBody, 1)
+    if data != msgFile.rtfBody:
+        logger.debug('Successfully injected RTF header using forth method.')
+        return data
+
+    data = constants.RE_RTF_BODY_FALLBACK_F.sub(replace, msgFile.rtfBody, 1)
+    if data != msgFile.rtfBody:
+        logger.debug('Successfully injected RTF header using fifth method.')
+        return data
+
+    data = constants.RE_RTF_BODY_FALLBACK_PLAIN.sub(replace, msgFile.rtfBody, 1)
+    if data != msgFile.rtfBody:
+        logger.debug('Successfully injected RTF header using sixth method.')
+        return data
+
+    raise Exception('All injection attempts failed.')
+
 def inputToBytes(stringInputVar, encoding):
     if isinstance(stringInputVar, constants.BYTES):
         return stringInputVar
@@ -314,6 +468,14 @@ def inputToString(bytesInputVar, encoding):
     else:
         raise ConversionError('Cannot convert to STRING type')
 
+def isEncapsulatedRtf(inp):
+    """
+    Currently the destection is made to be *extremly* basic, but this will work
+    for now. In the future this will be fixed to that literal text in the body
+    of a message won't cause false detection.
+    """
+    return b'\\fromhtml' in inp
+
 def isEmptyString(inp):
     """
     Returns true if the input is None or is an Empty string.
@@ -334,31 +496,6 @@ def knownMsgClass(classType):
             return True
 
     return False
-
-def injectHtmlHeader(msgFile):
-    """
-    Returns the HTML body from the MSG file (will check that it has one) with
-    the HTML header injected into it.
-    """
-    if not hasattr(msgFile, 'htmlBody'):
-        raise AttributeError('Cannot inject the HTML header without an HTML body attribute.')
-
-    def replace(bodyMarker):
-        """
-        Internal function to replace the body tag with itself plus the header.
-        """
-        return bodyMarker.group() + constants.HTML_INJECTABLE_HEADER.format(
-        **{
-            'sender': inputToString(htmlEscape(msgFile.sender) if msgFile.sender else '', 'utf-8'),
-            'to': inputToString(htmlEscape(msgFile.to) if msgFile.to else '', 'utf-8'),
-            'cc': inputToString(htmlEscape(msgFile.cc) if msgFile.cc else '', 'utf-8'),
-            'bcc': inputToString(htmlEscape(msgFile.bcc) if msgFile.bcc else '', 'utf-8'),
-            'date': inputToString(msgFile.date, 'utf-8'),
-            'subject': inputToString(msgFile.subject, 'utf-8'),
-        }).encode('utf-8')
-
-    # Use the previously defined function to inject the html header.
-    return constants.RE_HTML_BODY_START.sub(replace, msgFile.htmlBody, 1)
 
 def msgEpoch(inp):
     """

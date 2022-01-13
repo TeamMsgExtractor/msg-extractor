@@ -9,7 +9,7 @@ from .attachment import Attachment
 from .compat import os_ as os
 from .exceptions import DataNotFoundError, IncompatibleOptionsError
 from .message_base import MessageBase
-from .utils import addNumToDir, injectHtmlHeader, inputToBytes, inputToString, makeDirs, prepareFilename
+from .utils import addNumToDir, addNumToZipDir, injectHtmlHeader, injectRtfHeader, inputToBytes, inputToString, makeDirs, prepareFilename
 
 
 logger = logging.getLogger(__name__)
@@ -19,7 +19,6 @@ class Message(MessageBase):
     """
     Parser for Microsoft Outlook message files.
     """
-
     def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None, delayAttachments = False, overrideEncoding = None, attachmentErrorBehavior = constants.ATTACHMENT_ERROR_THROW, recipientSeparator = ';'):
         MessageBase.__init__(self, path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior, recipientSeparator)
 
@@ -103,7 +102,7 @@ class Message(MessageBase):
         rtf = kwargs.get('rtf', False)
         raw = kwargs.get('raw', False)
         allowFallback = kwargs.get('allowFallback', False)
-        zip = kwargs.get('zip')
+        _zip = kwargs.get('zip')
         maxNameLength = kwargs.get('maxNameLength', 256)
 
         # Variables involved in the save location.
@@ -112,15 +111,15 @@ class Message(MessageBase):
         #maxPathLength = kwargs.get('maxPathLength', 255)
 
         # ZipFile handling.
-        if zip:
+        if _zip:
             # `raw` and `zip` are incompatible.
             if raw:
                 raise IncompatibleOptionsError('The options `raw` and `zip` are incompatible.')
             # If we are doing a zip file, first check that we have been given a path.
-            if isinstance(zip, constants.STRING):
+            if isinstance(_zip, constants.STRING):
                 # If we have a path then we use the zip file.
-                zip = zipfile.ZipFile(zip, 'a', zipfile.ZIP_DEFLATED)
-                kwargs['zip'] = zip
+                _zip = zipfile.ZipFile(_zip, 'a', zipfile.ZIP_DEFLATED)
+                kwargs['zip'] = _zip
                 createdZip = True
             else:
                 createdZip = False
@@ -128,7 +127,7 @@ class Message(MessageBase):
             path = kwargs.get('customPath', '').replace('\\', '/')
             path += '/' if path and path[-1] != '/' else ''
             # Set the open command to be that of the zip file.
-            _open = zip.open
+            _open = _zip.open
             # Zip files use w for writing in binary.
             mode = 'w'
         else:
@@ -185,9 +184,14 @@ class Message(MessageBase):
                     path = newDirName
                 else:
                     raise Exception(
-                        "Failed to create directory '%s'. Does it already exist?" %
+                        'Failed to create directory "%s". Does it already exist?' %
                         path
                     )
+        else:
+            # In my testing I ended up with multiple files in a zip at the same
+            # location so let's try to handle that.
+            if any(x.startswith(path.rstrip('/') + '/') for x in _zip.namelist()):
+                path = newDirName = addNumToZipDir(path, _zip)
 
         # Prepare the path one last time.
         path += '/' if path[-1] != '/' else ''
@@ -238,8 +242,10 @@ class Message(MessageBase):
                         data = injectHtmlHeader(self)
                         f.write(data)
                     elif useRtf:
-                        # Do stuff
-                        pass
+                        # Inject the header into the data and then write it to
+                        # the file.
+                        data = injectRtfHeader(self)
+                        f.write(data)
                     else:
                         f.write(b'From: ' + inputToBytes(self.sender, 'utf-8') + crlf)
                         f.write(b'To: ' + inputToBytes(self.to, 'utf-8') + crlf)
