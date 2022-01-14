@@ -5,6 +5,7 @@
 - [ ] If necessary, have you bumped the version number? We will usually do this for you.
 - [ ] Have you included py.test tests with your pull request. (Not yet necessary)
 - [ ] Ensured your code is as close to PEP 8 compliant as possible?
+- [ ] Ensured your pull request is to the next-release branch?
 
 If you haven't completed the above items, please wait to create a PR until you have done so. We will try to review and reply to PRs as quickly as possible.
 

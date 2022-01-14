@@ -1,12 +1,12 @@
 import logging
 
-from extract_msg import constants
-from extract_msg.properties import Properties
-from extract_msg.utils import properHex
+from .. import constants
+from ..properties import Properties
+from ..utils import properHex
+
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
-
 
 class Attachment(object):
     """
@@ -25,10 +25,10 @@ class Attachment(object):
             constants.TYPE_ATTACHMENT)
 
         # Get attachment data
-        if msg.Exists([dir_, '__substg1.0_37010102']):
+        if msg.exists([dir_, '__substg1.0_37010102']):
             self.__type = 'data'
             self.__data = msg._getStream([dir_, '__substg1.0_37010102'])
-        elif msg.Exists([dir_, '__substg1.0_3701000D']):
+        elif msg.exists([dir_, '__substg1.0_3701000D']):
             if (self.__props['37050003'].value & 0x7) != 0x5:
                 logger.log(5, 'Printing details of NotImplementedError...')
                 logger.log(5, 'dir_ = {}'.format(dir_))

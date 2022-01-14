@@ -1,6 +1,6 @@
-from extract_msg import constants
-from extract_msg.attachment import Attachment
-from extract_msg.msg import MSGFile
+from . import constants
+from .attachment import Attachment
+from .msg import MSGFile
 
 
 class Contact(MSGFile):
@@ -13,11 +13,68 @@ class Contact(MSGFile):
         self.named
 
     @property
+    def birthday(self):
+        """
+        The birthday of the contact.
+        """
+        return self._ensureSetProperty('_birthday', '3A420040')
+
+    @property
+    def businessFax(self):
+        """
+        Contains the number of the contact's business fax.
+        """
+        return self._ensureSet('_businessFax', '__substg1.0_3A24')
+
+    @property
     def businessPhone(self):
         """
         Contains the number of the contact's business phone.
         """
         return self._ensureSet('_businessPhone', '__substg1.0_3A08')
+
+    @property
+    def businessPhone2(self):
+        """
+        Contains the second number or numbers of the contact's
+        business.
+        """
+        return self._ensureSetTyped('_businessPhone2', '3A1B')
+
+    @property
+    def businessUrl(self):
+        """
+        Contains the url of the homepage of the contact's business.
+        """
+        return self._ensureSet('_businessPhone', '__substg1.0_3A51')
+
+    @property
+    def callbackPhone(self):
+        """
+        Contains the number of the contact's car phone.
+        """
+        return self._ensureSet('_carPhone', '__substg1.0_3A1E')
+
+    @property
+    def callbackPhone(self):
+        """
+        Contains the contact's callback phone number.
+        """
+        return self._ensureSet('_callbackPhone', '__substg1.0_3A1E')
+
+    @property
+    def carPhone(self):
+        """
+        Contains the number of the contact's car phone.
+        """
+        return self._ensureSet('_carPhone', '__substg1.0_3A1E')
+
+    @property
+    def companyMainPhone(self):
+        """
+        Contains the number of the main phone of the contact's company.
+        """
+        return self._ensureSet('_businessPhone', '__substg1.0_3A57')
 
     @property
     def companyName(self):
@@ -70,6 +127,13 @@ class Contact(MSGFile):
         return self._ensureSet('_initials', '__substg1.0_3A0A')
 
     @property
+    def instantMessagingAddress(self):
+        """
+        The instant messaging address of the contact.
+        """
+        return self._ensureSetNamed('_instantMessagingAddress', '8062')
+
+    @property
     def jobTitle(self):
         """
         The job title of the contact.
@@ -112,8 +176,22 @@ class Contact(MSGFile):
         return self._ensureSet('_mobilePhone', '__substg1.0_3A1C')
 
     @property
+    def spouseName(self):
+        """
+        The name of the contact's spouse.
+        """
+        return self._ensureSet('_spouseName', '__substg1.0_3A')
+
+    @property
     def state(self):
         """
         The state or province that the contact lives in.
         """
         return self._ensureSet('_state', '__substg1.0_3A28')
+
+    @property
+    def workAddress(self):
+        """
+        The
+        """
+        return self._ensureSetNamed('_workAddress', '801B')

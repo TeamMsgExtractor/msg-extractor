@@ -1,14 +1,14 @@
 import datetime
 import logging
 
-from extract_msg import constants
-from extract_msg.utils import fromTimeStamp, msgEpoch, properHex
+from . import constants
+from .utils import fromTimeStamp, msgEpoch, properHex
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-def create_prop(string):
+def createProp(string):
     temp = constants.ST2.unpack(string)[0]
     if temp in constants.FIXED_LENGTH_PROPS:
         return FixedLengthProp(string)
@@ -130,17 +130,21 @@ class FixedLengthProp(PropBase):
             # TODO parsing for this
             pass
         elif _type == 0x000B:  # PtypBoolean
-            value = bool(constants.ST3.unpack(value)[0])
+            value = constants.ST3.unpack(value)[0] == 1
         elif _type == 0x0014:  # PtypInteger64
             value = constants.STI64.unpack(value)[0]
         elif _type == 0x0040:  # PtypTime
             try:
-                value = fromTimeStamp(msgEpoch(constants.ST3.unpack(value)[0]))
+                rawtime = constants.ST3.unpack(value)[0]
+                if rawtime != 915151392000000000:
+                    value = fromTimeStamp(msgEpoch(rawtime))
+                else:
+                    # Temporarily just set to max time to signify a null date.
+                    value = datetime.datetime.max
             except Exception as e:
                 logger.exception(e)
                 logger.error('Timestamp value of {} caused an exception. This was probably caused by the time stamp being too far in the future.'.format(msgEpoch(constants.ST3.unpack(value)[0])))
                 logger.error(self.raw)
-                value = constants.ST3.unpack(value)[0]
         elif _type == 0x0048:  # PtypGuid
             # TODO parsing for this
             pass

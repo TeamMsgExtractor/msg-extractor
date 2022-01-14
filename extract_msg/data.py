@@ -2,7 +2,7 @@
 Various small data structures used in msg extractor.
 """
 
-from extract_msg import constants
+from . import constants
 
 
 class PermanentEntryID(object):

@@ -18,7 +18,7 @@ class TestCase(unittest.TestCase):
     tearDown = setUp
 
     def test_message(self):
-        msg = base.Message(TEST_FILE)
+        msg = extract_msg.Message(TEST_FILE)
         self.assertEqual(msg.subject, u'Test for TIF files')
         self.assertEqual(
             msg.body,
@@ -35,7 +35,7 @@ class TestCase(unittest.TestCase):
         msg.debug()
 
     def test_save(self):
-        msg = base.Message(TEST_FILE)
+        msg = extract_msg.Message(TEST_FILE)
         msg.save()
         self.assertEqual(
             sorted(os.listdir('2013-11-18_1026 Test for TIF files')),
@@ -44,7 +44,7 @@ class TestCase(unittest.TestCase):
         msg.saveRaw()
 
     def test_saveRaw(self):
-        msg = base.Message(TEST_FILE)
+        msg = extract_msg.Message(TEST_FILE)
         msg.saveRaw()
         assert os.listdir('raw')
 

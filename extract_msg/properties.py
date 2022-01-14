@@ -2,9 +2,9 @@ import copy
 import logging
 import pprint
 
-from extract_msg import constants
-from extract_msg.prop import create_prop
-from extract_msg.utils import divide, fromTimeStamp, msgEpoch, properHex
+from . import constants
+from .prop import createProp
+from .utils import divide, fromTimeStamp, msgEpoch, properHex
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -51,8 +51,8 @@ class Properties(object):
                     skip = 32
         streams = divide(self.__stream[skip:], 16)
         for st in streams:
-            a = create_prop(st)
-            self.__props[a.name] = a
+            prop = createProp(st)
+            self.__props[prop.name] = prop
         self.__pl = len(self.__props)
 
     def __contains__(self, key):
@@ -114,7 +114,7 @@ class Properties(object):
     values.__doc__ = dict.values.__doc__
 
     @property
-    def attachment_count(self):
+    def attachmentCount(self):
         if self.__ac is None:
             raise TypeError('Properties instance must be intelligent and of type TYPE_MESSAGE to get attachment count.')
         return self.__ac
@@ -151,14 +151,14 @@ class Properties(object):
         return self.__intel
 
     @property
-    def next_attachment_id(self):
+    def nextAttachmentId(self):
         if self.__naid is None:
             raise TypeError(
                 'Properties instance must be intelligent and of type TYPE_MESSAGE to get next attachment id.')
         return self.__naid
 
     @property
-    def next_recipient_id(self):
+    def nextRecipientId(self):
         if self.__nrid is None:
             raise TypeError(
                 'Properties instance must be intelligent and of type TYPE_MESSAGE to get next recipient id.')
@@ -172,7 +172,7 @@ class Properties(object):
         return copy.deepcopy(self.__props)
 
     @property
-    def recipient_count(self):
+    def recipientCount(self):
         if self.__rc is None:
             raise TypeError('Properties instance must be intelligent and of type TYPE_MESSAGE to get recipient count.')
         return self.__rc

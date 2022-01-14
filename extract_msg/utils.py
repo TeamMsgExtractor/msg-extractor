@@ -14,16 +14,18 @@ import sys
 
 import tzlocal
 
-from extract_msg import constants
-from extract_msg.compat import os_ as os
-from extract_msg.exceptions import ConversionError, IncompatibleOptionsError, InvaildPropertyIdError, UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError
+from . import constants
+from .compat import os_ as os
+from .exceptions import ConversionError, IncompatibleOptionsError, InvaildPropertyIdError, UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError, UnsupportedMSGTypeError
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 logging.addLevelName(5, 'DEVELOPER')
 
 if sys.version_info[0] >= 3:  # Python 3
-    get_input = input
+    getInput = input
+
+    makeDirs = os.makedirs
 
     def properHex(inp, length = 0):
         """
@@ -41,10 +43,20 @@ if sys.version_info[0] >= 3:  # Python 3
         return a.rjust(length, '0').upper()
 
     def windowsUnicode(string):
-        return str(string, 'utf_16_le') if string is not None else None
+        return str(string, 'utf-16-le') if string is not None else None
+
+    from html import escape as htmlEscape
 
 else:  # Python 2
-    get_input = raw_input
+    getInput = raw_input
+
+    def makeDirs(name, mode = 0o0777, exist_ok = False):
+        try:
+            os.makedirs(name, mode)
+        except WindowsError as e:
+            if exist_ok and e.winerror == 183: # Path exists.
+                return
+            raise
 
     def properHex(inp, length = 0):
         """
@@ -65,7 +77,9 @@ else:  # Python 2
         return a.rjust(length, '0').upper()
 
     def windowsUnicode(string):
-        return unicode(string, 'utf_16_le') if string is not None else None
+        return unicode(string, 'utf-16-le') if string is not None else None
+
+    from cgi import escape as htmlEscape
 
 def addNumToDir(dirName):
     """
@@ -74,10 +88,20 @@ def addNumToDir(dirName):
     for i in range(2, 100):
         try:
             newDirName = dirName + ' (' + str(i) + ')'
-            os.makedirs(newDirName)
+            makeDirs(newDirName)
             return newDirName
         except Exception as e:
             pass
+    return None
+
+def addNumToZipDir(dirName, _zip):
+    """
+    Attempt to create the directory with a '(n)' appended.
+    """
+    for i in range(2, 100):
+        newDirName = dirName + ' (' + str(i) + ')'
+        if not any(x.startswith(newDirName.rstrip('/') + '/') for x in _zip.namelist()):
+            return newDirName
     return None
 
 def bitwiseAdjust(inp, mask):
@@ -143,18 +167,10 @@ def divide(string, length):
     """
     return [string[length * x:length * (x + 1)] for x in range(int(ceilDiv(len(string), length)))]
 
-def prepareFilename(filename):
-    """
-    Adjusts :param filename: so that it can succesfully be used as an actual
-    file name.
-    """
-    # I would use re here, but it tested to be slightly slower than this.
-    return ''.join(i for i in filename if i not in r'\/:*?"<>|' + '\x00')
-
 def fromTimeStamp(stamp):
     return datetime.datetime.fromtimestamp(stamp, tzlocal.get_localzone())
 
-def get_command_args(args):
+def getCommandArgs(args):
     """
     Parse command-line arguments
     """
@@ -193,32 +209,28 @@ def get_command_args(args):
     parser.add_argument('--dump-stdout', dest='dump_stdout', action='store_true',
                         help='Tells the program to dump the message body (plain text) to stdout. Overrides saving arguments.')
     # --html
-    #parser.add_argument('--html', dest='html', action='store_true',
-    #                    help='Sets whether the output should be html. If this is not possible, will error.')
+    parser.add_argument('--html', dest='html', action='store_true',
+                       help='Sets whether the output should be html. If this is not possible, will error.')
+    # --raw
+    parser.add_argument('--raw', dest='raw', action='store_true',
+                       help='Sets whether the output should be html. If this is not possible, will error.')
     # --rtf
-    #parser.add_argument('--rtf', dest='rtf', action='store_true',
-    #                    help='Sets whether the output should be rtf. If this is not possible, will error.')
+    parser.add_argument('--rtf', dest='rtf', action='store_true',
+                       help='Sets whether the output should be rtf. If this is not possible, will error.')
     # --allow-fallback
-    #parser.add_argument('--allow-fallback', dest='allowFallbac', action='store_true',
-    #                    help='Tells the program to fallback to a different save type if the selected one is not possible.')
+    parser.add_argument('--allow-fallback', dest='allowFallbac', action='store_true',
+                       help='Tells the program to fallback to a different save type if the selected one is not possible.')
     # --out-name NAME
-    # parser.add_argument('--out-name', dest = 'out_name',
-    #                     help = 'Name to be used with saving the file output. Should come immediately after the file name.')
+    parser.add_argument('--out-name', dest = 'out_name',
+                        help = 'Name to be used with saving the file output. Should come immediately after the file name.')
     # [msg files]
     parser.add_argument('msgs', metavar='msg', nargs='+',
                         help='An msg file to be parsed')
 
     options = parser.parse_args(args)
     # Check if more than one of the following arguments has been specified
-    #valid = 0
-    #if options.html:
-    #    valid += 1
-    #if options.rtf:
-    #    valid += 1
-    #if options.json:
-    #    valid += 1
-    #if valid > 1:
-    #    raise IncompatibleOptionsError('Only one of these options may be selected at a time: --html, --rtf, --json')
+    if options.html + options.rtf + options.json > 1:
+       raise IncompatibleOptionsError('Only one of these options may be selected at a time: --html, --json, --raw, --rtf')
 
     if options.dev or options.file_logging:
         options.verbose = True
@@ -229,8 +241,8 @@ def get_command_args(args):
     if options.dump_stdout:
         options.out_path = None
         options.json = False
-        #options.rtf = False
-        #options.html = False
+        options.rtf = False
+        options.html = False
         options.use_filename = False
         options.cid = False
 
@@ -274,25 +286,165 @@ def getEncodingName(codepage):
     except LookupError:
         raise UnsupportedEncodingError('The codepage {} ({}) is not currently supported by your version of Python.'.format(codepage, constants.CODE_PAGES[codepage]))
 
-def get_full_class_name(inp):
+def getFullClassName(inp):
     return inp.__class__.__module__ + '.' + inp.__class__.__name__
 
-def has_len(obj):
+def hasLen(obj):
     """
     Checks if :param obj: has a __len__ attribute.
     """
-    try:
-        obj.__len__
-        return True
-    except AttributeError:
-        return False
+    return hasattr(obj, '__len__')
 
-def inputToBytes(string_input_var, encoding):
-    if isinstance(string_input_var, constants.BYTES):
-        return string_input_var
-    elif isinstance(string_input_var, constants.STRING):
-        return string_input_var.encode(encoding)
-    elif string_input_var is None:
+def injectHtmlHeader(msgFile):
+    """
+    Returns the HTML body from the MSG file (will check that it has one) with
+    the HTML header injected into it.
+    """
+    if not hasattr(msgFile, 'htmlBody') or not msgFile.htmlBody:
+        raise AttributeError('Cannot inject the HTML header without an HTML body attribute.')
+
+    def replace(bodyMarker):
+        """
+        Internal function to replace the body tag with itself plus the header.
+        """
+        return bodyMarker.group() + constants.HTML_INJECTABLE_HEADER.format(
+        **{
+            'sender': inputToString(htmlEscape(msgFile.sender) if msgFile.sender else '', 'utf-8'),
+            'to': inputToString(htmlEscape(msgFile.to) if msgFile.to else '', 'utf-8'),
+            'cc': inputToString(htmlEscape(msgFile.cc) if msgFile.cc else '', 'utf-8'),
+            'bcc': inputToString(htmlEscape(msgFile.bcc) if msgFile.bcc else '', 'utf-8'),
+            'date': inputToString(msgFile.date, 'utf-8'),
+            'subject': inputToString(htmlEscape(msgFile.subject), 'utf-8'),
+        }).encode('utf-8')
+
+    # Use the previously defined function to inject the HTML header.
+    return constants.RE_HTML_BODY_START.sub(replace, msgFile.htmlBody, 1)
+
+def injectRtfHeader(msgFile):
+    """
+    Returns the RTF body from the MSG file (will check that it has one) with the
+    RTF header injected into it.
+    """
+    if not hasattr(msgFile, 'rtfBody') or not msgFile.rtfBody:
+        raise AttributeError('Cannot inject the RTF header without an RTF body attribute.')
+
+    # Try to determine which header to use. Also determines how to sanitize the
+    # rtf.
+    if isEncapsulatedRtf(msgFile.rtfBody):
+        injectableHeader = constants.RTF_ENC_INJECTABLE_HEADER
+        def rtfSanitize(inp):
+            if not inp:
+                return ''
+            output = ''
+            for char in inp:
+                # Check if it is in the right range to be printed directly.
+                if 32 <= ord(char) < 128:
+                    if char in ('\\', '{', '}'):
+                        output += '\\'
+                    output += char
+                elif ord(char) < 32 or 128 <= ord(char) <= 255:
+                    # Otherwise, see if it is just a small escape.
+                    output += "\\'" + properHex(char, 2)
+                else:
+                    # Handle Unicode characters.
+                    output += '\\u' + str(ord(char)) + '?'
+
+            return output
+    else:
+        injectableHeader = constants.RTF_PLAIN_INJECTABLE_HEADER
+        def rtfSanitize(inp):
+            if not inp:
+                return ''
+            output = ''
+            for char in inp:
+                # Check if it is in the right range to be printed directly.
+                if 32 <= ord(char) < 128:
+                    # Quick check for handling the HTML escapes. Will eventually
+                    # upgrade this code to actually handle all the HTML escapes
+                    # but this will do for now.
+                    if char == '<':
+                        output += r'{\*\htmltag84 &lt;}\htmlrtf <\htmlrtf0 '
+                    elif char == '>':
+                        output += r'{\*\htmltag84 &gt;}\htmlrtf >\htmlrtf0'
+                    else:
+                        if char in ('\\', '{', '}'):
+                            output += '\\'
+                        output += char
+                elif ord(char) < 32 or 128 <= ord(char) <= 255:
+                    # Otherwise, see if it is just a small escape.
+                    output += "\\'" + properHex(char, 2)
+                else:
+                    # Handle Unicode characters.
+                    output += '\\u' + str(ord(char)) + '?'
+
+            return output
+
+    def replace(bodyMarker):
+        """
+        Internal function to replace the body tag with itself plus the header.
+        """
+        return bodyMarker.group() + injectableHeader.format(
+        **{
+            'sender': inputToString(rtfSanitize(msgFile.sender) if msgFile.sender else '', 'utf-8'),
+            'to': inputToString(rtfSanitize(msgFile.to) if msgFile.to else '', 'utf-8'),
+            'cc': inputToString(rtfSanitize(msgFile.cc) if msgFile.cc else '', 'utf-8'),
+            'bcc': inputToString(rtfSanitize(msgFile.bcc) if msgFile.bcc else '', 'utf-8'),
+            'date': inputToString(msgFile.date, 'utf-8'),
+            'subject': inputToString(rtfSanitize(msgFile.subject), 'utf-8'),
+        }).encode('utf-8')
+
+    # Use the previously defined function to inject the RTF header. We are
+    # trying a few different methods to determine where to place the header.
+    data = constants.RE_RTF_BODY_START.sub(replace, msgFile.rtfBody, 1)
+    # If after any method the data does not match the RTF body, then we have
+    # succeeded.
+    if data != msgFile.rtfBody:
+        logger.debug('Successfully injected RTF header using first method.')
+        return data
+
+    # This second method only applies to encapsulated HTML, so we need to check
+    # for that first.
+    if isEncapsulatedRtf(msgFile.rtfBody):
+        data = constants.RE_RTF_ENC_BODY_START_1.sub(replace, msgFile.rtfBody, 1)
+        if data != msgFile.rtfBody:
+            logger.debug('Successfully injected RTF header using second method.')
+            return data
+
+        # This third method is a lot less reliable, and actually would just
+        # simply violate the encapuslated html, so for this one we don't even
+        # try to worry about what the html will think about it. If it injects,
+        # we swap to basic and then inject again, more worried about it working
+        # than looking nice inside.
+        if constants.RE_RTF_ENC_BODY_UGLY.sub(replace, msgFile.rtfBody, 1) != msgFile.rtfBody:
+            injectableHeader = constants.RTF_PLAIN_INJECTABLE_HEADER
+            data = constants.RE_RTF_ENC_BODY_UGLY.sub(replace, msgFile.rtfBody, 1)
+            logger.debug('Successfully injected RTF header using third method.')
+            return data
+
+    # Severe fallback attempts.
+    data = constants.RE_RTF_BODY_FALLBACK_FS.sub(replace, msgFile.rtfBody, 1)
+    if data != msgFile.rtfBody:
+        logger.debug('Successfully injected RTF header using forth method.')
+        return data
+
+    data = constants.RE_RTF_BODY_FALLBACK_F.sub(replace, msgFile.rtfBody, 1)
+    if data != msgFile.rtfBody:
+        logger.debug('Successfully injected RTF header using fifth method.')
+        return data
+
+    data = constants.RE_RTF_BODY_FALLBACK_PLAIN.sub(replace, msgFile.rtfBody, 1)
+    if data != msgFile.rtfBody:
+        logger.debug('Successfully injected RTF header using sixth method.')
+        return data
+
+    raise Exception('All injection attempts failed.')
+
+def inputToBytes(stringInputVar, encoding):
+    if isinstance(stringInputVar, constants.BYTES):
+        return stringInputVar
+    elif isinstance(stringInputVar, constants.STRING):
+        return stringInputVar.encode(encoding)
+    elif stringInputVar is None:
         return b''
     else:
         raise ConversionError('Cannot convert to BYTES type')
@@ -306,21 +458,44 @@ def inputToMsgpath(inp):
     ret = inputToString(inp, 'utf-8').replace('\\', '/').split('/')
     return ret if ret[0] != '' else []
 
-def inputToString(bytes_input_var, encoding):
-    if isinstance(bytes_input_var, constants.STRING):
-        return bytes_input_var
-    elif isinstance(bytes_input_var, constants.BYTES):
-        return bytes_input_var.decode(encoding)
-    elif bytes_input_var is None:
+def inputToString(bytesInputVar, encoding):
+    if isinstance(bytesInputVar, constants.STRING):
+        return bytesInputVar
+    elif isinstance(bytesInputVar, constants.BYTES):
+        return bytesInputVar.decode(encoding)
+    elif bytesInputVar is None:
         return ''
     else:
         raise ConversionError('Cannot convert to STRING type')
+
+def isEncapsulatedRtf(inp):
+    """
+    Currently the destection is made to be *extremly* basic, but this will work
+    for now. In the future this will be fixed to that literal text in the body
+    of a message won't cause false detection.
+    """
+    return b'\\fromhtml' in inp
 
 def isEmptyString(inp):
     """
     Returns true if the input is None or is an Empty string.
     """
     return (inp == '' or inp is None)
+
+def knownMsgClass(classType):
+    """
+    Checks if the specified class type is recognized by the module. Usually used
+    for checking if a type is simply unsupported rather than unknown.
+    """
+    classType = classType.lower()
+    if classType == 'ipm':
+        return True
+
+    for item in constants.KNOWN_CLASS_TYPES:
+        if classType.startsWith(item):
+            return True
+
+    return False
 
 def msgEpoch(inp):
     """
@@ -339,51 +514,65 @@ def msgpathToString(inp):
     inp.replace('\\', '/')
     return inp
 
-def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAttachments = False, overrideEncoding = None, attachmentErrorBehavior = constants.ATTACHMENT_ERROR_THROW, strict = True):
+def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAttachments = False, overrideEncoding = None, attachmentErrorBehavior = constants.ATTACHMENT_ERROR_THROW, recipientSeparator = ';', strict = True):
     """
     Function to automatically open an MSG file and detect what type it is.
 
-    :param path: path to the msg file in the system or is the raw msg file.
-    :param prefix: used for extracting embeded msg files
+    :param path: Path to the msg file in the system or is the raw msg file.
+    :param prefix: Used for extracting embeded msg files
         inside the main one. Do not set manually unless
         you know what you are doing.
-    :param attachmentClass: optional, the class the Message object
+    :param attachmentClass: Optional, the class the Message object
         will use for attachments. You probably should
         not change this value unless you know what you
         are doing.
-    :param filename: optional, the filename to be used by default when saving.
-    :param delayAttachments: optional, delays the initialization of attachments
+    :param filename: Optional, the filename to be used by default when saving.
+    :param delayAttachments: Optional, delays the initialization of attachments
         until the user attempts to retrieve them. Allows MSG files with bad
         attachments to be initialized so the other data can be retrieved.
+    :param overrideEncoding: Optional, overrides the specified encoding of the
+        MSG file.
+    :param attachmentErrorBehavior: Optional, the behaviour to use in the event
+        of an error when parsing the attachments.
+    :param recipientSeparator: Optional, Separator string to use between
+        recipients.
 
     If :param strict: is set to `True`, this function will raise an exception
     when it cannot identify what MSGFile derivitive to use. Otherwise, it will
     log the error and return a basic MSGFile instance.
+
+    Raises UnsupportedMSGTypeError and UnrecognizedMSGTypeError.
     """
-    from extract_msg.appointment import Appointment
-    from extract_msg.attachment import Attachment
-    from extract_msg.contact import Contact
-    from extract_msg.message import Message
-    from extract_msg.msg import MSGFile
+    from .appointment import Appointment
+    from .attachment import Attachment
+    from .contact import Contact
+    from .message import Message
+    from .msg import MSGFile
 
     attachmentClass = Attachment if attachmentClass is None else attachmentClass
 
     msg = MSGFile(path, prefix, attachmentClass, filename, overrideEncoding, attachmentErrorBehavior)
-    classtype = msg.classType
-    if classtype.startswith('IPM.Contact') or classtype.startswith('IPM.DistList'):
+    # After rechecking the docs, all comparisons should be case-insensitive, not case-sensitive. My reading ability is great.
+    classType = msg.classType.lower()
+    if classType.startswith('ipm.contact') or classType.startswith('ipm.distlist'):
         msg.close()
         return Contact(path, prefix, attachmentClass, filename, overrideEncoding, attachmentErrorBehavior)
-    elif classtype.startswith('IPM.Note') or classtype.startswith('REPORT'):
+    elif classType.startswith('ipm.note') or classType.startswith('report'):
         msg.close()
-        return Message(path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior)
-    elif classtype.startswith('IPM.Appointment') or classtype.startswith('IPM.Schedule'):
+        return Message(path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior, recipientSeparator)
+    elif classType.startswith('ipm.appointment') or classType.startswith('ipm.schedule'):
         msg.close()
-        return Appointment(path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior)
+        return Appointment(path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior, recipientSeparator)
+    elif classType == 'ipm': # Unspecified format. It should be equal to this and not just start with it.
+        return msg
     elif strict:
+        ct = msg.classType
         msg.close()
-        raise UnrecognizedMSGTypeError('Could not recognize msg class type "{}". It is recommended you report this to the developers.'.format(msg.classType))
+        if knownMsgClass(classType):
+            raise UnsupportedMSGTypeError('MSG type "{}" currently is not supported by the module. If you would like support, please make a feature request.'.format(ct))
+        raise UnrecognizedMSGTypeError('Could not recognize msg class type "{}".'.format(ct))
     else:
-        logger.error('Could not recognize msg class type "{}". It is recommended you report this to the developers.'.format(msg.classType))
+        logger.error('Could not recognize msg class type "{}". This most likely means it hasn\'t been implemented yet, and you should ask the developers to add support for it.'.format(msg.classType))
         return msg
 
 def parseType(_type, stream, encoding, extras):
@@ -398,9 +587,9 @@ def parseType(_type, stream, encoding, extras):
 
     WARNING: Not done. Do not try to implement anywhere where it is not already implemented
     """
-    # WARNING Not done. Do not try to implement anywhere where it is not already implemented
+    # WARNING Not done. Do not try to implement anywhere where it is not already implemented.
     value = stream
-    length_extras = len(extras)
+    lengthExtras = len(extras)
     if _type == 0x0000:  # PtypUnspecified
         pass
     elif _type == 0x0001:  # PtypNull
@@ -423,11 +612,11 @@ def parseType(_type, stream, encoding, extras):
         return constants.PYTPFLOATINGTIME_START + datetime.timedelta(days = value)
     elif _type == 0x000A:  # PtypErrorCode
         value = constants.STUI32.unpack(value)[0]
-        # TODO parsing for this
+        # TODO parsing for this.
         # I can't actually find any msg properties that use this, so it should be okay to release this function without support for it.
         raise NotImplementedError('Parsing for type 0x000A has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType 0x000A"')
     elif _type == 0x000B:  # PtypBoolean
-        return bool(constants.ST3.unpack(value)[0])
+        return constants.ST3.unpack(value)[0] == 1
     elif _type == 0x000D:  # PtypObject/PtypEmbeddedTable
         # TODO parsing for this
         # Wait, that's the extension for an attachment folder, so parsing this might not be as easy as we would hope. The function may be released without support for this.
@@ -437,9 +626,15 @@ def parseType(_type, stream, encoding, extras):
     elif _type == 0x001E:  # PtypString8
         return value.decode(encoding)
     elif _type == 0x001F:  # PtypString
-        return value.decode('utf_16_le')
+        return value.decode('utf-16-le')
     elif _type == 0x0040:  # PtypTime
-        return fromTimeStamp(msgEpoch(constants.ST3.unpack(value)[0])).__format__('%a, %d %b %Y %H:%M:%S %z')
+        rawtime = constants.ST3.unpack(value)[0]
+        if rawtime != 915151392000000000:
+            value = fromTimeStamp(msgEpoch(rawtime))
+        else:
+            # Temporarily just set to max time to signify a null date.
+            value = datetime.datetime.max
+        return value
     elif _type == 0x0048:  # PtypGuid
         return bytesToGuid(value)
     elif _type == 0x00FB:  # PtypServerId
@@ -458,9 +653,9 @@ def parseType(_type, stream, encoding, extras):
         if _type in (0x101F, 0x101E):
             ret = [x.decode(encoding) for x in extras]
             lengths = struct.unpack('<{}i'.format(len(ret)), stream)
-            length_lengths = len(lengths)
-            if length_lengths > length_extras:
-                logger.warning('Error while parsing multiple type. Expected {} stream{}, got {}. Ignoring.'.format(length_lengths, 's' if length_lengths > 1 or length_lengths == 0 else '', length_extras))
+            lengthLengths = len(lengths)
+            if lengthLengths > lengthExtras:
+                logger.warning('Error while parsing multiple type. Expected {} stream{}, got {}. Ignoring.'.format(lengthLengths, 's' if lengthLengths != 1 else '', lengthExtras))
             for x, y in enumerate(extras):
                 if lengths[x] != len(y):
                     logger.warning('Error while parsing multiple type. Expected length {}, got {}. Ignoring.'.format(lengths[x], len(y)))
@@ -468,9 +663,9 @@ def parseType(_type, stream, encoding, extras):
         elif _type == 0x1102:
             ret = copy.deepcopy(extras)
             lengths = tuple(constants.STUI32.unpack(stream[pos*8:(pos+1)*8])[0] for pos in range(len(stream) // 8))
-            length_lengths = len(lengths)
-            if length_lengths > length_extras:
-                logger.warning('Error while parsing multiple type. Expected {} stream{}, got {}. Ignoring.'.format(length_lengths, 's' if length_lengths > 1 or length_lengths == 0 else '', length_extras))
+            lengthLengths = len(lengths)
+            if lengthLengths > lengthExtras:
+                logger.warning('Error while parsing multiple type. Expected {} stream{}, got {}. Ignoring.'.format(lengthLengths, 's' if lengthLengths != 1 else '', lengthExtras))
             for x, y in enumerate(extras):
                 if lengths[x] != len(y):
                     logger.warning('Error while parsing multiple type. Expected length {}, got {}. Ignoring.'.format(lengths[x], len(y)))
@@ -499,49 +694,57 @@ def parseType(_type, stream, encoding, extras):
             raise NotImplementedError('Parsing for type {} has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType {}"'.format(_type, _type))
     return value
 
+def prepareFilename(filename):
+    """
+    Adjusts :param filename: so that it can succesfully be used as an actual
+    file name.
+    """
+    # I would use re here, but it tested to be slightly slower than this.
+    return ''.join(i for i in filename if i not in r'\/:*?"<>|' + '\x00')
+
 def roundUp(inp, mult):
     """
     Rounds :param inp: up to the nearest multiple of :param mult:.
     """
     return inp + (mult - inp) % mult
 
-def setup_logging(default_path=None, default_level=logging.WARN, logfile=None, enable_file_logging=False,
+def setupLogging(defaultPath=None, defaultLevel=logging.WARN, logfile=None, enableFileLogging=False,
                   env_key='EXTRACT_MSG_LOG_CFG'):
     """
     Setup logging configuration
 
     Args:
-        default_path (str): Default path to use for the logging configuration file
-        default_level (int): Default logging level
+        defaultPath (str): Default path to use for the logging configuration file
+        defaultLevel (int): Default logging level
         env_key (str): Environment variable name to search for, for setting logfile path
 
     Returns:
         bool: True if the configuration file was found and applied, False otherwise
     """
-    shipped_config = getContFileDir(__file__) + '/logging-config/'
+    shippedConfig = getContFileDir(__file__) + '/logging-config/'
     if os.name == 'nt':
         null = 'NUL'
-        shipped_config += 'logging-nt.json'
+        shippedConfig += 'logging-nt.json'
     elif os.name == 'posix':
         null = '/dev/null'
-        shipped_config += 'logging-posix.json'
+        shippedConfig += 'logging-posix.json'
     # Find logging.json if not provided
-    if not default_path:
-        default_path = shipped_config
+    if not defaultPath:
+        defaultPath = shippedConfig
 
     paths = [
-        default_path,
+        defaultPath,
         'logging.json',
         '../logging.json',
         '../../logging.json',
-        shipped_config,
+        shippedConfig,
     ]
 
     path = None
 
-    for config_path in paths:
-        if os.path.exists(config_path):
-            path = config_path
+    for configPath in paths:
+        if os.path.exists(configPath):
+            path = configPath
             break
 
     value = os.getenv(env_key, None)
@@ -550,11 +753,11 @@ def setup_logging(default_path=None, default_level=logging.WARN, logfile=None, e
 
     if path is None:
         print('Unable to find logging.json configuration file')
-        print('Make sure a valid logging configuration file is referenced in the default_path'
+        print('Make sure a valid logging configuration file is referenced in the defaultPath'
               ' argument, is inside the extract_msg install location, or is available at one '
               'of the following file-paths:')
         print(str(paths[1:]))
-        logging.basicConfig(level=default_level)
+        logging.basicConfig(level=defaultLevel)
         logging.warning('The extract_msg logging configuration was not found - using a basic configuration.'
                         'Please check the extract_msg installation directory for "logging-{}.json".'.format(os.name))
         return False
@@ -564,12 +767,12 @@ def setup_logging(default_path=None, default_level=logging.WARN, logfile=None, e
 
     for x in config['handlers']:
         if 'filename' in config['handlers'][x]:
-            if enable_file_logging:
+            if enableFileLogging:
                 config['handlers'][x]['filename'] = tmp = os.path.expanduser(
                     os.path.expandvars(logfile if logfile else config['handlers'][x]['filename']))
                 tmp = getContFileDir(tmp)
                 if not os.path.exists(tmp):
-                    os.makedirs(tmp)
+                    makeDirs(tmp)
             else:
                 config['handlers'][x]['filename'] = null
 
@@ -579,7 +782,7 @@ def setup_logging(default_path=None, default_level=logging.WARN, logfile=None, e
         print('Failed to configure the logger. Did your installation get messed up?')
         print(e)
 
-    logging.getLogger().setLevel(default_level)
+    logging.getLogger().setLevel(defaultLevel)
     return True
 
 def verifyPropertyId(id):

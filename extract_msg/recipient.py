@@ -1,9 +1,9 @@
 import logging
 
-from extract_msg import constants
-from extract_msg.data import PermanentEntryID
-from extract_msg.properties import Properties
-from extract_msg.utils import verifyPropertyId, verifyType
+from . import constants
+from .data import PermanentEntryID
+from .properties import Properties
+from .utils import verifyPropertyId, verifyType
 
 
 logger = logging.getLogger(__name__)
@@ -66,6 +66,17 @@ class Recipient(object):
                 value = self.props[propertyName].value
             except (KeyError, AttributeError):
                 value = None
+            setattr(self, variable, value)
+            return value
+
+    def _ensureSetTyped(self, variable, _id):
+        """
+        Like the other ensure set functions, but designed for when something could be multiple types (where only one will be present). This way you have no need to set the type, it will be handled for you.
+        """
+        try:
+            return getattr(self, variable)
+        except AttributeError:
+            value = self._getTypedData(_id)
             setattr(self, variable, value)
             return value
 
@@ -145,11 +156,11 @@ class Recipient(object):
         """
         self.__msg._getTypedStream(self, [self.__dir, filename], True, _type)
 
-    def Exists(self, filename):
+    def exists(self, filename):
         """
         Checks if stream exists inside the recipient folder.
         """
-        return self.__msg.Exists([self.__dir, filename])
+        return self.__msg.exists([self.__dir, filename])
 
     def sExists(self, filename):
         """
@@ -157,13 +168,13 @@ class Recipient(object):
         """
         return self.__msg.sExists([self.__dir, filename])
 
-    def ExistsTypedProperty(self, id, _type = None):
+    def existsTypedProperty(self, id, _type = None):
         """
         Determines if the stream with the provided id exists. The return of this
         function is 2 values, the first being a boolean for if anything was found,
         and the second being how many were found.
         """
-        return self.__msg.ExistsTypedProperty(id, self.__dir, _type, True, self.__props)
+        return self.__msg.existsTypedProperty(id, self.__dir, _type, True, self.__props)
 
     @property
     def account(self):

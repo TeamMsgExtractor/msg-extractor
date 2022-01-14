@@ -5,10 +5,12 @@ contributers, please do not complain about bugs.
 """
 
 import datetime
+import re
 import struct
 import sys
 
 import ebcdic
+
 
 if sys.version_info[0] >= 3:
     BYTES = bytes
@@ -22,6 +24,30 @@ else:
 # WARNING DO NOT CHANGE ANY OF THESE VALUES UNLESS YOU KNOW
 # WHAT YOU ARE DOING! FAILURE TO FOLLOW THIS INSTRUCTION
 # CAN AND WILL BREAK THIS SCRIPT!
+
+# Regular expresion constants.
+RE_INVALID_FILENAME_CHARACTERS = re.compile(r'[\\/:*?"<>|]')
+# Regular expression to find the start of the html body.
+RE_HTML_BODY_START = re.compile(b'<body[^>]*>')
+# Regular expression to find the start of the html body in encapsulated RTF.
+# This is used for one of the pattern types that makes life easy.
+RE_RTF_ENC_BODY_START_1 = re.compile(br'\{\\\*\\htmltag[0-9]* ?<body[^>]*>\}')
+# Unfortunately, while it would make it easy to find the start of the body in
+# terms of the encapsulated HTML, trying to inject directly into this location
+# has proven to cause some rendering issues that I'll figure out later. For now
+# this is basically the universal start we will try to use.
+RE_RTF_BODY_START = re.compile(br'\\lang[0-9]*')
+# This is an unrelible one to use as it doesn't have a proper way to verify that
+# it will inject in exactly the right place. This is kind of just a "well, let's
+# hope this one works" method.
+RE_RTF_ENC_BODY_UGLY = re.compile(br'<body[^>]*>[^}]*?\}')
+# The following tags are fallbacks that we will try to use, with the higher ones
+# having priority. If we can't find any other way, we try these which should
+# hopefully always work.
+RE_RTF_BODY_FALLBACK_FS = re.compile(br'\\fs[0-9]*[^a-zA-Z]')
+RE_RTF_BODY_FALLBACK_F = re.compile(br'\\f[0-9]*[^a-zA-Z]')
+RE_RTF_FALLBACK_PLAIN = re.compile(br'\\plain[^a-zA-Z0-9]')
+
 
 # Constants used by named.py
 NUMERICAL_NAMED = 0
@@ -43,6 +69,20 @@ GUID_PSETID_AIRSYNC = '{71035549-0739-4DCB-9163-00F0580DBBDF}'
 GUID_PSETID_SHARING = '{00062040-0000-0000-C000-000000000046}'
 GUID_PSETID_XMLEXTRACTEDENTITIES = '{23239608-685D-4732-9C55-4C95CB4E8E33}'
 GUID_PSETID_ATTACHMENT = '{96357F7F-59E1-47D0-99A7-46515C183B54}'
+
+# EntryID UID Types.
+EUID_PUBLIC_MESSAGE_STORE = b'\x1A\x44\x73\x90\xAA\x66\x11\xCD\x9B\xC8\x00\xAA\x00\x2F\xC4\x5A'
+EUID_PUBLIC_MESSAGE_STORE_HEX = '1A447390AA6611CD9BC800AA002FC45A'
+EUID_ADDRESS_BOOK_RECIPIENT = b'\xDC\xA7\x40\xC8\xC0\x42\x10\x1A\xB4\xB9\x08\x00\x2B\x2F\xE1\x82'
+EUID_ADDRESS_BOOK_RECIPIENT_HEX = 'DCA740C8C042101AB4B908002B2FE182'
+EUID_ONE_OFF_RECIPIENT = b'\x81\x2B\x1F\xA4\xBE\xA3\x10\x19\x9D\x6E\x00\xDD\x01\x0F\x54\x02'
+EUID_ONE_OFF_RECIPIENT_HEX = '812B1FA4BEA310199D6E00DD010F5402'
+# Contact address or personal distribution list recipient.
+EUID_CA_OR_PDL_RECIPIENT = b'\xFE\x42\xAA\x0A\x18\xC7\x1A\x10\xE8\x85\x0B\x65\x1C\x24\x00\x00'
+EUID_CA_OR_PDL_RECIPIENT_HEX = 'FE42AA0A18C71A10E8850B651C240000'
+EUID_NNTP_NEWSGROUP_FOLDER = b'\x38\xA1\xBB\x10\x05\xE5\x10\x1A\xA1\xBB\x08\x00\x2B\x2A\x56\xC2'
+EUID_NNTP_NEWSGROUP_FOLDER_HEX = '38A1BB1005E5101AA1BB08002B2A56C2'
+
 
 FIXED_LENGTH_PROPS = (
     0x0000,
@@ -164,13 +204,124 @@ MULTIPLE_16_BYTES_HEX = (
     0x1048,
 )
 
+# This is the header that will be injected into the html after being formatted
+# with the applicable data. Used entiries are `date`, `sender`, `to`, `subject`,
+# `cc`, `bcc`
+HTML_INJECTABLE_HEADER = """
+<div>
+    <div>
+        <p class="MsoNormal">
+            <b>From:</b>&nbsp;{sender}<br/>
+            <b>Sent:</b>&nbsp;{date}<br/>
+            <b>To:</b>&nbsp;{to}<br/>
+            <b>Cc:</b>&nbsp;{cc}<br/>
+            <b>Bcc:</b>&nbsp;{bcc}<br/>
+            <b>Subject:</b>&nbsp;{subject}
+            <o:p></o:p>
+        </p>
+    </div>
+</div>
+""".replace('    ', '').replace('\r', '').replace('\n', '')
+
+# The header to be used for RTF files with encapsulated HTML. Uses the same
+# properties as the HTML header.
+# I'm just going to appologize in advance for how bad this looks. RTF in general
+# is just not pretty to look at, and the garbage I had to do here didn't help.
+# FYI, < and > will need to be sanitized if you actually want it to be properly
+# compatible. "<" will become "{\*\htmltag84 &lt;}\htmlrtf <\htmlrtf0" and ">"
+# will become "{\*\htmltag84 &gt;}\htmlrtf >\htmlrtf0".
+RTF_ENC_INJECTABLE_HEADER = r"""
+{{
+{{\*\htmltag96 <div>}}
+{{\*\htmltag96 <div>}}
+{{\*\htmltag64 <p class=MsoNormal>}}
+
+\htmlrtf {{\b\htmlrtf0
+{{\*\htmltag84 <b>}}
+From: {{\*\htmltag92 </b>}}
+\htmlrtf \b0\htmlrtf0 {sender}
+\htmlrtf }}\htmlrtf0
+{{\*\htmltag116 <br>}}
+\htmlrtf \line\htmlrtf0
+
+\htmlrtf {{\b\htmlrtf0
+{{\*\htmltag84 <b>}}
+Sent: {{\*\htmltag92 </b>}}
+\htmlrtf \b0\htmlrtf0 {date}
+\htmlrtf }}\htmlrtf0
+{{\*\htmltag116 <br>}}
+\htmlrtf \line\htmlrtf0
+
+\htmlrtf {{\b\htmlrtf0
+{{\*\htmltag84 <b>}}
+Cc: {{\*\htmltag92 </b>}}
+\htmlrtf \b0\htmlrtf0 {cc}
+\htmlrtf }}\htmlrtf0
+{{\*\htmltag116 <br>}}
+\htmlrtf \line\htmlrtf0
+
+\htmlrtf {{\b\htmlrtf0
+{{\*\htmltag84 <b>}}
+Bcc: {{\*\htmltag92 </b>}}
+\htmlrtf \b0\htmlrtf0 {bcc}
+\htmlrtf }}\htmlrtf0
+{{\*\htmltag116 <br>}}
+\htmlrtf \line\htmlrtf0
+
+\htmlrtf {{\b\htmlrtf0
+{{\*\htmltag84 <b>}}
+Subject: {{\*\htmltag92 </b>}}
+\htmlrtf \b0\htmlrtf0 {subject}
+\htmlrtf }}\htmlrtf0
+{{\*\htmltag244 <o:p>}}
+{{\*\htmlrag252 </o:p>}}
+\htmlrtf \par\par\htmlrtf0
+
+{{\*\htmltag72 </p>}}
+{{\*\htmltag104 </div>}}
+{{\*\htmltag104 </div>}}
+\htmlrtf }}\htmlrtf0
+""".replace('\r', '').replace('\n', '')
+
+# The header to be used for plain RTF files. Uses the same properties as the
+# HTML header.
+RTF_PLAIN_INJECTABLE_HEADER = r"""
+{{
+    {{\b From: \b0 {sender}}}\line
+    {{\b Sent: \b0 {date}}}\line
+    {{\b To: \b0 {to}}}\line
+    {{\b Cc: \b0 {cc}}}\line
+    {{\b Bcc: \b0 {bcc}}}\line
+    {{\b Subject: \b0 {subject}}}\par\par
+}}
+""".replace('    ', '').replace('\r', '').replace('\n', '')
+
+
+KNOWN_CLASS_TYPES = (
+    'ipm.activity',
+    'ipm.appointment',
+    'ipm.contact',
+    'ipm.distlist',
+    'ipm.document',
+    'ipm.ole.class',
+    'ipm.note',
+    'ipm.post',
+    'ipm.stickynote',
+    'ipm.recall.report',
+    'ipm.report',
+    'ipm.resend',
+    'ipm.schedule',
+    'ipm.task',
+    'ipm.taskrequest'
+    'report',
+)
 
 # This is a dictionary matching the code page number to it's encoding name.
 # The list used to make this can be found here:
 # https://docs.microsoft.com/en-us/windows/win32/intl/code-page-identifiers
 ### TODO:
 # Many of these code pages are not supported by Python. As such, we should
-# Really implement them ourselves to make sure that if someone wants to use an
+# really implement them ourselves to make sure that if someone wants to use an
 # msg file with one of those encodings, they are able to. Perhaps we should
 # create a seperate module for that?
 # Code pages that currently don't have a supported encoding will be preceded by
@@ -459,7 +610,7 @@ NEEDS_ARG = [
     '--out-name',
 ]
 MAINDOC = "extract_msg:\n\tExtracts emails and attachments saved in Microsoft Outlook's .msg files.\n\n" \
-          "https://github.com/mattgwwalker/msg-extractor"
+          "https://github.com/TeamMsgExtractor/msg-extractor"
 
 # Define pre-compiled structs to make unpacking slightly faster
 # General structs
@@ -477,6 +628,7 @@ STNP_ENT = struct.Struct('<IHH') # Struct used for unpacking the entries in the 
 STFIX = struct.Struct('<8x8s')
 STVAR = struct.Struct('<8xi4s')
 # Structs to help with email type to python type conversions
+STI8 = struct.Struct('<b');
 STI16 = struct.Struct('<h6x')
 STI32 = struct.Struct('<I4x')
 STI64 = struct.Struct('<q')
@@ -490,6 +642,28 @@ STMF32 = struct.Struct('<f')
 STMF64 = struct.Struct('<d')
 # PermanentEntryID parsing struct
 STPEID = struct.Struct('<B3x16s4xI')
+# Structs for reading from a BytesReader (not yet implemented). Some are just
+# aliases for existing structs, used for clarity and consistency in the code.
+ST_LE_I8 = STI8
+ST_LE_I16 = STMI16
+ST_LE_I32 = STMI32
+ST_LE_I64 = STMI64
+ST_LE_UI8 = ST_DATA_UI8
+ST_LE_UI16 = ST_DATA_UI16
+ST_LE_UI32 = ST_DATA_UI32
+ST_LE_UI64 = ST3
+ST_LE_F32 = STF32
+ST_LE_F64 = STF64
+ST_BE_I8 = struct.Struct('>b')
+ST_BE_I16 = struct.Struct('>h')
+ST_BE_I32 = struct.Struct('>i')
+ST_BE_I64 = struct.Struct('>q')
+ST_BE_UI8 = struct.Struct('>B')
+ST_BE_UI16 = struct.Struct('>H')
+ST_BE_UI32 = struct.Struct('>I')
+ST_BE_UI64 = struct.Struct('>Q')
+ST_BE_F32 = struct.Struct('>f')
+ST_BE_F64 = struct.Struct('>d')
 
 PTYPES = {
     0x0000: 'PtypUnspecified',
