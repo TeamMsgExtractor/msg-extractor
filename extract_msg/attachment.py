@@ -1,11 +1,11 @@
 import logging
+import os
 import random
 import string
 import zipfile
 
 from . import constants
 from .attachment_base import AttachmentBase
-from .compat import os_ as os
 from .named import NamedAttachmentProperties
 from .prop import FixedLengthProp, VariableLengthProp
 from .properties import Properties
@@ -150,7 +150,7 @@ class Attachment(AttachmentBase):
             # Zip files use w for writing in binary.
             mode = 'w'
         else:
-            customPath = os.path.abspath(kwargs.get('customPath', os.getcwdu())).replace('\\', '/')
+            customPath = os.path.abspath(kwargs.get('customPath', os.getcwd())).replace('\\', '/')
             # Prepare the path.
             customPath += '' if customPath.endswith('/') else '/'
             mode = 'wb'

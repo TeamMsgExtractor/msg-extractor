@@ -10,10 +10,10 @@ Module for collecting data to be sent to the developer.
 
 
 import logging
+import os
 
 from . import dev_classes
 from . import utils
-from .compat import os_ as os
 from .message import Message
 
 

@@ -1,9 +1,9 @@
 import logging
+import os
 import sys
 import traceback
 
 from extract_msg import __doc__, utils
-from extract_msg.compat import os_ as os
 from extract_msg.message import Message
 
 def main():
@@ -12,7 +12,7 @@ def main():
 
     args = utils.getCommandArgs(sys.argv[1:])
     level = logging.INFO if args.verbose else logging.WARNING
-    currentdir = os.getcwdu() # Store this just in case the paths that have been given are relative
+    currentdir = os.getcwd() # Store this just in case the paths that have been given are relative
     if args.out_path:
         if not os.path.exists(args.out_path):
             os.makedirs(args.out_path)
