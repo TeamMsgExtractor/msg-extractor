@@ -135,7 +135,7 @@ class Attachment(AttachmentBase):
         # ZipFile handling.
         if zip:
             # If we are doing a zip file, first check that we have been given a path.
-            if isinstance(zip, constants.STRING):
+            if isinstance(zip, str):
                 # If we have a path then we use the zip file.
                 zip = zipfile.ZipFile(zip, 'a', zipfile.ZIP_DEFLATED)
                 kwargs['zip'] = zip

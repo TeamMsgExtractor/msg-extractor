@@ -1,4 +1,4 @@
-|License: GPL v3| |PyPI3| |PyPI1| |PyPI2|
+|License: GPL v3| |PyPI3| |PyPI2|
 
 msg-extractor
 =============
@@ -10,11 +10,6 @@ data (from, to, cc, date, subject, body) and the email's attachments.
 
 NOTICE
 ======
-0.29.* will be the last versions that will support Python 2. While we want to
-continue to support it, it would just be too much work to do so. We are
-providing notice ahead of time of this change so that you may sort out your
-Python environments ahead of time.
-
 This module has a Discord server for general discussion. You can find it here:
 `Discord`_
 
@@ -40,8 +35,7 @@ attachments.
 The script uses Philippe Lagadec's Python module that reads Microsoft
 OLE2 files (also called Structured Storage, Compound File Binary Format
 or Compound Document File Format). This is the underlying format of
-Outlook's .msg files. This library currently supports up to Python 2.7
-and 3.4.
+Outlook's .msg files. This library currently supports Python 3.6 and above.
 
 The script was built using Peter Fiskerstrand's documentation of the
 .msg format. Redemption's discussion of the different property types
@@ -116,11 +110,8 @@ where ``CustomAttachmentClass`` is your custom class.
 
 #TODO: Finish this section
 
-If you have any questions feel free to contact me, Matthew Walker, at
-mattgwwalker at gmail.com. NOTE: Due to time constraints, The Elemental
-of Destruction has been added as a contributor to help manage the project.
-As such, it may be helpful to send emails to arceusthe@gmail.com as
-well.
+If you have any questions feel free to contact me, Destiny, as arceusthe [at]
+gmail [dot] com. I am the co-owner and main developer of the project.
 
 If you have issues, it would be best to get help for them by opening a
 new github issue.
@@ -200,8 +191,6 @@ And thank you to everyone who has opened an issue and helped us track down those
 .. |PyPI3| image:: https://img.shields.io/badge/pypi-0.29.0-blue.svg
    :target: https://pypi.org/project/extract-msg/0.29.0/
 
-.. |PyPI1| image:: https://img.shields.io/badge/python-2.7+-brightgreen.svg
-   :target: https://www.python.org/downloads/release/python-2715/
 .. |PyPI2| image:: https://img.shields.io/badge/python-3.6+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-367/
 .. _Matthew Walker: https://github.com/mattgwwalker

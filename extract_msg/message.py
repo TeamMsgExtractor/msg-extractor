@@ -1,15 +1,15 @@
 import json
 import logging
+import os
 import zipfile
 
 from imapclient.imapclient import decode_utf7
 
 from . import constants
 from .attachment import Attachment
-from .compat import os_ as os
 from .exceptions import DataNotFoundError, IncompatibleOptionsError
 from .message_base import MessageBase
-from .utils import addNumToDir, addNumToZipDir, injectHtmlHeader, injectRtfHeader, inputToBytes, inputToString, makeDirs, prepareFilename
+from .utils import addNumToDir, addNumToZipDir, injectHtmlHeader, injectRtfHeader, inputToBytes, inputToString, prepareFilename
 
 
 logger = logging.getLogger(__name__)
@@ -116,7 +116,7 @@ class Message(MessageBase):
             if raw:
                 raise IncompatibleOptionsError('The options `raw` and `zip` are incompatible.')
             # If we are doing a zip file, first check that we have been given a path.
-            if isinstance(_zip, constants.STRING):
+            if isinstance(_zip, str):
                 # If we have a path then we use the zip file.
                 _zip = zipfile.ZipFile(_zip, 'a', zipfile.ZIP_DEFLATED)
                 kwargs['zip'] = _zip
@@ -131,7 +131,7 @@ class Message(MessageBase):
             # Zip files use w for writing in binary.
             mode = 'w'
         else:
-            path = os.path.abspath(kwargs.get('customPath', os.getcwdu())).replace('\\', '/')
+            path = os.path.abspath(kwargs.get('customPath', os.getcwd())).replace('\\', '/')
             # Prepare the path.
             path += '/' if path[-1] != '/' else ''
             mode = 'wb'
@@ -177,7 +177,7 @@ class Message(MessageBase):
         # Create the folders.
         if not zip:
             try:
-                makeDirs(path)
+                os.makedirs(path)
             except Exception:
                 newDirName = addNumToDir(path)
                 if newDirName:

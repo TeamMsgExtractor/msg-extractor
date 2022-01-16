@@ -36,7 +36,7 @@ def main():
         print('These results have been saved to {}'.format(filename))
         with open(filename, 'w') as fil:
             fil.write(json.dumps(valResults))
-        utils.getInput('Press enter to exit...')
+        input('Press enter to exit...')
     else:
         if not args.dump_stdout:
             utils.setupLogging(args.config_path, level, args.log, args.file_logging)

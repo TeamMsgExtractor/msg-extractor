@@ -9,77 +9,22 @@ import datetime
 import json
 import logging
 import logging.config
+import os
 import struct
 import sys
 
 import tzlocal
 
+from html import escape as htmlEscape
+
 from . import constants
-from .compat import os_ as os
 from .exceptions import ConversionError, IncompatibleOptionsError, InvaildPropertyIdError, UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError, UnsupportedMSGTypeError
+
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 logging.addLevelName(5, 'DEVELOPER')
 
-if sys.version_info[0] >= 3:  # Python 3
-    getInput = input
-
-    makeDirs = os.makedirs
-
-    def properHex(inp, length = 0):
-        """
-        Taken (with permission) from https://github.com/TheElementalOfDestruction/creatorUtils
-        """
-        a = ''
-        if isinstance(inp, str):
-            a = ''.join([hex(ord(inp[x]))[2:].rjust(2, '0') for x in range(len(inp))])
-        elif isinstance(inp, bytes):
-            a = inp.hex()
-        elif isinstance(inp, int):
-            a = hex(inp)[2:]
-        if len(a) % 2 != 0:
-            a = '0' + a
-        return a.rjust(length, '0').upper()
-
-    def windowsUnicode(string):
-        return str(string, 'utf-16-le') if string is not None else None
-
-    from html import escape as htmlEscape
-
-else:  # Python 2
-    getInput = raw_input
-
-    def makeDirs(name, mode = 0o0777, exist_ok = False):
-        try:
-            os.makedirs(name, mode)
-        except WindowsError as e:
-            if exist_ok and e.winerror == 183: # Path exists.
-                return
-            raise
-
-    def properHex(inp, length = 0):
-        """
-        Converts the input into a hexadecimal string without the beginning "0x". The string
-        will also always have a length that is a multiple of 2 (unless :param length: has
-        been specified). :param length: only specifies the MINIMUM length that the string
-        will use.
-        """
-        a = ''
-        if isinstance(inp, (str, unicode)):
-            a = ''.join([hex(ord(inp[x]))[2:].rjust(2, '0') for x in range(len(inp))])
-        elif isinstance(inp, int):
-            a = hex(inp)[2:]
-        elif isinstance(inp, long):
-            a = hex(inp)[2:-1]
-        if len(a) % 2 != 0:
-            a = '0' + a
-        return a.rjust(length, '0').upper()
-
-    def windowsUnicode(string):
-        return unicode(string, 'utf-16-le') if string is not None else None
-
-    from cgi import escape as htmlEscape
 
 def addNumToDir(dirName):
     """
@@ -88,7 +33,7 @@ def addNumToDir(dirName):
     for i in range(2, 100):
         try:
             newDirName = dirName + ' (' + str(i) + ')'
-            makeDirs(newDirName)
+            os.makedirs(newDirName)
             return newDirName
         except Exception as e:
             pass
@@ -440,14 +385,14 @@ def injectRtfHeader(msgFile):
     raise Exception('All injection attempts failed.')
 
 def inputToBytes(stringInputVar, encoding):
-    if isinstance(stringInputVar, constants.BYTES):
+    if isinstance(stringInputVar, bytes):
         return stringInputVar
-    elif isinstance(stringInputVar, constants.STRING):
+    elif isinstance(stringInputVar, str):
         return stringInputVar.encode(encoding)
     elif stringInputVar is None:
         return b''
     else:
-        raise ConversionError('Cannot convert to BYTES type')
+        raise ConversionError('Cannot convert to bytes.')
 
 def inputToMsgpath(inp):
     """
@@ -459,14 +404,14 @@ def inputToMsgpath(inp):
     return ret if ret[0] != '' else []
 
 def inputToString(bytesInputVar, encoding):
-    if isinstance(bytesInputVar, constants.STRING):
+    if isinstance(bytesInputVar, str):
         return bytesInputVar
-    elif isinstance(bytesInputVar, constants.BYTES):
+    elif isinstance(bytesInputVar, bytes):
         return bytesInputVar.decode(encoding)
     elif bytesInputVar is None:
         return ''
     else:
-        raise ConversionError('Cannot convert to STRING type')
+        raise ConversionError('Cannot convert to str type.')
 
 def isEncapsulatedRtf(inp):
     """
@@ -702,6 +647,21 @@ def prepareFilename(filename):
     # I would use re here, but it tested to be slightly slower than this.
     return ''.join(i for i in filename if i not in r'\/:*?"<>|' + '\x00')
 
+def properHex(inp, length = 0):
+    """
+    Taken (with permission) from https://github.com/TheElementalOfDestruction/creatorUtils
+    """
+    a = ''
+    if isinstance(inp, str):
+        a = ''.join([hex(ord(inp[x]))[2:].rjust(2, '0') for x in range(len(inp))])
+    elif isinstance(inp, bytes):
+        a = inp.hex()
+    elif isinstance(inp, int):
+        a = hex(inp)[2:]
+    if len(a) % 2 != 0:
+        a = '0' + a
+    return a.rjust(length, '0').upper()
+
 def roundUp(inp, mult):
     """
     Rounds :param inp: up to the nearest multiple of :param mult:.
@@ -772,7 +732,7 @@ def setupLogging(defaultPath=None, defaultLevel=logging.WARN, logfile=None, enab
                     os.path.expandvars(logfile if logfile else config['handlers'][x]['filename']))
                 tmp = getContFileDir(tmp)
                 if not os.path.exists(tmp):
-                    makeDirs(tmp)
+                    os.makedirs(tmp)
             else:
                 config['handlers'][x]['filename'] = null
 
@@ -804,3 +764,6 @@ def verifyType(_type):
     if _type is not None:
         if (_type not in constants.VARIABLE_LENGTH_PROPS_STRING) and (_type not in constants.FIXED_LENGTH_PROPS_STRING):
             raise UnknownTypeError('Unknown type {}'.format(_type))
+
+def windowsUnicode(string):
+    return str(string, 'utf-16-le') if string is not None else None

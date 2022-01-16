@@ -1,6 +1,7 @@
 import codecs
 import copy
 import logging
+import os
 import sys
 import zipfile
 
@@ -8,11 +9,10 @@ import olefile
 
 from . import constants
 from .attachment import Attachment
-from .compat import os_ as os
 from .named import Named
 from .prop import FixedLengthProp, VariableLengthProp
 from .properties import Properties
-from .utils import divide, getEncodingName, hasLen, inputToMsgpath, inputToString, makeDirs, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
+from .utils import divide, getEncodingName, hasLen, inputToMsgpath, inputToString, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
 from .exceptions import InvalidFileFormatError, MissingEncodingError
 
 
@@ -381,7 +381,7 @@ class MSGFile(olefile.OleFileIO):
         path = path.replace('\\', '/')
         path += '/' if path[-1] != '/' else ''
         # Make the location
-        makeDirs(path, exist_ok = True)
+        os.makedirs(path, exist_ok = True)
         # Create the zipfile
         path += 'raw.zip'
         if os.path.exists(path):

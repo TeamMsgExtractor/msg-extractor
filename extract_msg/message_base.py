@@ -1,12 +1,12 @@
 import email.utils
 import logging
+import os
 import re
 
 import compressed_rtf
 
 from . import constants
 from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment
-from .compat import os_ as os
 from .exceptions import UnrecognizedMSGTypeError
 from .msg import MSGFile
 from .recipient import Recipient

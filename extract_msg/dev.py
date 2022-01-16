@@ -34,7 +34,7 @@ def main(args, argv):
     function.
     """
     setupDevLogger(args.config_path, args.log)
-    currentdir = os.getcwdu() # Store this just in case the paths that have been given are relative
+    currentdir = os.getcwd() # Store this just in case the paths that have been given are relative
     if args.out_path:
         if not os.path.exists(args.out_path):
             os.makedirs(args.out_path)

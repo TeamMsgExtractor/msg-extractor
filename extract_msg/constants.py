@@ -12,14 +12,6 @@ import sys
 import ebcdic
 
 
-if sys.version_info[0] >= 3:
-    BYTES = bytes
-    STRING = str
-else:
-    BYTES = str
-    STRING = unicode
-
-
 # DEFINE CONSTANTS
 # WARNING DO NOT CHANGE ANY OF THESE VALUES UNLESS YOU KNOW
 # WHAT YOU ARE DOING! FAILURE TO FOLLOW THIS INSTRUCTION
