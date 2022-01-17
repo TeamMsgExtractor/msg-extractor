@@ -30,10 +30,10 @@ def main():
         from extract_msg import validation
 
         valResults = {x[0]: validation.validate(x[0]) for x in args.msgs}
-        filename = 'validation {}.json'.format(int(time.time()))
+        filename = f'validation {int(time.time())}.json'
         print('Validation Results:')
         pprint.pprint(valResults)
-        print('These results have been saved to {}'.format(filename))
+        print(f'These results have been saved to {filename}')
         with open(filename, 'w') as fil:
             fil.write(json.dumps(valResults))
         input('Press enter to exit...')

@@ -10,7 +10,7 @@ class PermanentEntryID:
         self.__data = data
         unpacked = constants.STPEID.unpack(data[:28])
         if unpacked[0] != 0:
-            raise TypeError('Not a PermanentEntryID (expected 0, got {}).'.format(unpacked[0]))
+            raise TypeError(f'Not a PermanentEntryID (expected 0, got {unpacked[0]}).')
         self.__providerUID = unpacked[1]
         self.__displayTypeString = unpacked[2]
         self.__distinguishedName = data[28:-1].decode('ascii') # Cut off the null character at the end and decode the data as ascii

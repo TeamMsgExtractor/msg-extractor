@@ -170,7 +170,7 @@ class Attachment(AttachmentBase):
                             break
                     else:
                         # If we couldn't find one that didn't exist.
-                        raise FileExistsError('Could not create the specified file because it already exists ("{}").'.format(fullFilename))
+                        raise FileExistsError(f'Could not create the specified file because it already exists ("{fullFilename}").')
             else:
                 if os.path.exists(fullFilename):
                     # Try to split the filename into a name and extention.
@@ -183,7 +183,7 @@ class Attachment(AttachmentBase):
                             break
                     else:
                         # If we couldn't find one that didn't exist.
-                        raise FileExistsError('Could not create the specified file because it already exists ("{}").'.format(fullFilename))
+                        raise FileExistsError(f'Could not create the specified file because it already exists ("{fullFilename}").')
 
             with _open(fullFilename, mode) as f:
                 f.write(self.__data)

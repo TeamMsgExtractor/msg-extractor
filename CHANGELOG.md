@@ -1,8 +1,8 @@
 **v0.30.0**
 * Removed all support for Python 2. This caused a lot of things to be moved around and changed from indirect references to direct references, so it's possible something fell through the cracks. I'm doing my best to test it, but let me know if you have an issue.
-* Converted much of the path nonsense to use `pathlib` so the code is smaller and more reliable. This does have a slight speed penalty, but given that the logic is right next to read/write operations the penalty is negligable.
 * Changed classes to now prefer super() over direct superclass initalization.
 * Removed explicit object subclassing (it's implicit in Python 3 so we don't need it anymore).
+* Converted most `.format`s into f strings.
 
 **v0.29.2**
 * Fixed issue where the RTF injection was accidentally doing HTML escapes for non-encapsulated streams and *not* doing escapes for encapsulated streams.

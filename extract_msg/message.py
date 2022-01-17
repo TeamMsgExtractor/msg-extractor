@@ -125,16 +125,13 @@ class Message(MessageBase):
             else:
                 createdZip = False
             # Path needs to be done in a special way if we are in a zip file.
-            path = kwargs.get('customPath', '').replace('\\', '/')
-            path += '/' if path and path[-1] != '/' else ''
+            path = pathlib.Path(kwargs.get('customPath', ''))
             # Set the open command to be that of the zip file.
             _open = _zip.open
             # Zip files use w for writing in binary.
             mode = 'w'
         else:
-            path = os.path.abspath(kwargs.get('customPath', os.getcwd())).replace('\\', '/')
-            # Prepare the path.
-            path += '/' if path[-1] != '/' else ''
+            path = pathlib.Path(kwargs.get('customPath', '.')).absolute()
             mode = 'wb'
             _open = open
 
@@ -154,7 +151,7 @@ class Message(MessageBase):
             # First we need to validate it. If there are invalid characters, this will detect it.
             if constants.RE_INVALID_FILENAME_CHARACTERS.search(customFilename):
                 raise ValueError('Invalid character found in customFilename. Must not contain any of the following characters: \\/:*?"<>|')
-            path += customFilename[:maxNameLength]
+            path /= customFilename[:maxNameLength]
         elif useMsgFilename:
             if not self.filename:
                 raise ValueError(':param useMsgFilename: is only available if you are using an msg file on the disk or have provided a filename.')
@@ -168,12 +165,12 @@ class Message(MessageBase):
             filename = filename[:maxNameLength]
             # Check to make sure we actually have a filename to use.
             if not filename:
-                raise ValueError('Invalid filename found in self.filename: "{}"'.format(self.filename))
+                raise ValueError(f'Invalid filename found in self.filename: "{self.filename}"')
 
             # Add the file name to the path.
-            path += filename[:maxNameLength]
+            path /= filename[:maxNameLength]
         else:
-            path += self.defaultFolderName[:maxNameLength]
+            path /= self.defaultFolderName[:maxNameLength]
 
         # Create the folders.
         if not _zip:
@@ -184,18 +181,17 @@ class Message(MessageBase):
                 if newDirName:
                     path = newDirName
                 else:
-                    raise Exception(
-                        'Failed to create directory "%s". Does it already exist?' %
-                        path
-                    )
+                    raise Exception(f'Failed to create directory "{path}". Does it already exist?')
         else:
             # In my testing I ended up with multiple files in a zip at the same
             # location so let's try to handle that.
-            if any(x.startswith(path.rstrip('/') + '/') for x in _zip.namelist()):
-                path = newDirName = addNumToZipDir(path, _zip)
-
-        # Prepare the path one last time.
-        path += '/' if path[-1] != '/' else ''
+            pathCompare = str(path).rstrip('/') + '/'
+            if any(x.startswith(pathCompare) for x in _zip.namelist()):
+                newDirName = addNumToZipDir(path, _zip)
+                if newDirName:
+                    path = newDireName
+                else:
+                    raise Exception(f'Failed to create directory "{path}". Does it already exist?')
 
         # Update the kwargs.
         kwargs['customPath'] = path
@@ -210,7 +206,7 @@ class Message(MessageBase):
             if not headerText:
                 headerText = constants.HEADER_FORMAT.format(subject = self.subject, **self.header)
 
-            with _open(path + 'header.txt', mode) as f:
+            with _open(str(path / 'header.txt'), mode) as f:
                 f.write(headerText.encode('utf-8'))
 
         try:
@@ -239,7 +235,7 @@ class Message(MessageBase):
             # Determine the extension to use for the body.
             fext = 'json' if _json else fext
 
-            with _open(path + 'message.' + fext, mode) as f:
+            with _open(str(path / ('message.' + fext)), mode) as f:
                 if _json:
                     emailObj = json.loads(self.getJson())
                     emailObj['attachments'] = attachmentNames

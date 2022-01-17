@@ -41,9 +41,9 @@ def main(args, argv):
         out = args.out_path
     else:
         out = currentdir
-    logger.log(5, 'ARGV: {}'.format(argv))
+    logger.log(5, f'ARGV: {argv}')
     for y, x in enumerate(args.msgs):
-        logger.log(5, '---- RUNNING DEVELOPER MODE ON FILE {} ----'.format(x[0]))
+        logger.log(5, f'---- RUNNING DEVELOPER MODE ON FILE {x[0]} ----')
         logger.log(5, 'EXCEPTION CHECK:')
         try:
             with Message(x[0]) as msg:
@@ -64,4 +64,4 @@ def main(args, argv):
                 logpath = x.baseFilename
             except AttributeError:
                 pass;
-        print('Logging complete. Log has been saved to {}'.format(logpath))
+        print(g'Logging complete. Log has been saved to {logpath}')

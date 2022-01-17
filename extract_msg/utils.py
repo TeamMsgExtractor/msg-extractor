@@ -10,6 +10,7 @@ import json
 import logging
 import logging.config
 import os
+import pathlib
 import struct
 # Not actually sure if this needs to be here for the logging, so just in case.
 import sys
@@ -40,13 +41,14 @@ def addNumToDir(dirName):
             pass
     return None
 
-def addNumToZipDir(dirName, _zip):
+def addNumToZipDir(dirName : pathlib.Path, _zip):
     """
     Attempt to create the directory with a '(n)' appended.
     """
     for i in range(2, 100):
-        newDirName = dirName + ' (' + str(i) + ')'
-        if not any(x.startswith(newDirName.rstrip('/') + '/') for x in _zip.namelist()):
+        newDirName = dirName / f' ({i})'
+        pathCompare = str(newDirName).rstrip('/') + '/'
+        if not any(x.startswith(pathCompare) for x in _zip.namelist()):
             return newDirName
     return None
 

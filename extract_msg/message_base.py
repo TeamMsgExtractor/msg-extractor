@@ -86,7 +86,7 @@ class MessageBase(MSGFile):
             if not value:
                 # Check if the header has initialized.
                 if self.headerInit():
-                    logger.info('Header found, but "{}" is not included. Will be generated from other streams.'.format(recipientType))
+                    logger.info(f'Header found, but "{recipientType}" is not included. Will be generated from other streams.')
 
                 # Get a list of the recipients of the specified type.
                 foundRecipients = tuple(recipient.formatted for recipient in self.recipients if recipient.type & 0x0000000f == recipientInt)
@@ -118,6 +118,8 @@ class MessageBase(MSGFile):
         else:
             for attachment in self.attachments:
                 attachment._registerNamedProperty(entry, _type, name)
+
+        super()._registerNamedProperty(entry, _type, name)
 
     def close(self):
         try:
@@ -170,14 +172,14 @@ class MessageBase(MSGFile):
                     self._attachments.append(self.attachmentClass(self, attachmentDir))
                 except (NotImplementedError, UnrecognizedMSGTypeError) as e:
                     if self.attachmentErrorBehavior > constants.ATTACHMENT_ERROR_THROW:
-                        logger.error('Error processing attachment at {}'.format(attachmentDir))
+                        logger.error(f'Error processing attachment at {attachmentDir}')
                         logger.exception(e)
                         self._attachments.append(UnsupportedAttachment(self, attachmentDir))
                     else:
                         raise
                 except Exception as e:
                     if self.attachmentErrorBehavior == constants.ATTACHMENT_ERROR_BROKEN:
-                        logger.error('Error processing attachment at {}'.format(attachmentDir))
+                        logger.error(f'Error processing attachment at {attachmentDir}')
                         logger.exception(e)
                         self._attachments.append(BrokenAttachment(self, attachmentDir))
                     else:

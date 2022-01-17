@@ -30,7 +30,7 @@ class Attachment:
         elif msg.exists([dir_, '__substg1.0_3701000D']):
             if (self.__props['37050003'].value & 0x7) != 0x5:
                 logger.log(5, 'Printing details of NotImplementedError...')
-                logger.log(5, 'dir_ = {}'.format(dir_))
+                logger.log(5, f'dir_ = {dir_}')
                 logger.log(5, 'Writing properties stream to output:')
                 logger.log(5, '--------Start-Properties-Stream--------\n' +
                               properHex(self.__props.stream) +

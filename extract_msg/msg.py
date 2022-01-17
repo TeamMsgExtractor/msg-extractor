@@ -353,17 +353,16 @@ class MSGFile(olefile.OleFileIO):
         try:
             return self.__listDirRes
         except AttributeError:
-            temp = self.listdir(streams, storages)
+            entries = self.listdir(streams, storages)
             if not self.__prefix:
-                return temp
+                return entries
             prefix = self.__prefix.split('/')
             if prefix[-1] == '':
                 prefix.pop()
 
             prefixLength = self.__prefixLen
-            self.__listDirRes = [x for x in temp if len(x) > prefixLength and x[:prefixLength] == prefix]
+            self.__listDirRes = [x for x in entries if len(x) > prefixLength and x[:prefixLength] == prefix]
             return self.__listDirRes
-
 
     def slistDir(self, streams = True, storages = False):
         """
