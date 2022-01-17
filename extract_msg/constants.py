@@ -289,6 +289,17 @@ RTF_PLAIN_INJECTABLE_HEADER = r"""
 """.replace('    ', '').replace('\r', '').replace('\n', '')
 
 
+# Used to format the header for saving only the header.
+HEADER_FORMAT = """From: {From}
+To: {To}
+CC: {Cc}
+Bcc: {Bcc}
+Subject: {subject}
+Date: {Date}
+Message-ID: {Message-Id}
+"""
+
+
 KNOWN_CLASS_TYPES = (
     'ipm.activity',
     'ipm.appointment',

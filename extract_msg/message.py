@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import pathlib
 import zipfile
 
 from imapclient.imapclient import decode_utf7
@@ -116,7 +117,7 @@ class Message(MessageBase):
             if raw:
                 raise IncompatibleOptionsError('The options `raw` and `zip` are incompatible.')
             # If we are doing a zip file, first check that we have been given a path.
-            if isinstance(_zip, str):
+            if isinstance(_zip, (str, pathlib.Path)):
                 # If we have a path then we use the zip file.
                 _zip = zipfile.ZipFile(_zip, 'a', zipfile.ZIP_DEFLATED)
                 kwargs['zip'] = _zip
@@ -202,6 +203,15 @@ class Message(MessageBase):
         if raw:
             self.saveRaw(path)
             return self
+
+        # If the user has requested the headers for this file, save it now.
+        if kwargs.get('saveHeader', False):
+            headerText = self._getStringStream('__substg1.0_007D')
+            if not headerText:
+                headerText = constants.HEADER_FORMAT.format(subject = self.subject, **self.header)
+
+            with _open(path + 'header.txt', mode) as f:
+                f.write(headerText.encode('utf-8'))
 
         try:
             # Check whether we should be using HTML or RTF.
