@@ -129,16 +129,16 @@ class Attachment(AttachmentBase):
             filename = name[:maxNameLength - len(ext)] + ext
 
         # Check if we are doing a zip file.
-        zip = kwargs.get('zip')
+        _zip = kwargs.get('zip')
 
 
         # ZipFile handling.
-        if zip:
+        if _zip:
             # If we are doing a zip file, first check that we have been given a path.
-            if isinstance(zip, constants.STRING):
+            if isinstance(_zip, constants.STRING):
                 # If we have a path then we use the zip file.
-                zip = zipfile.ZipFile(zip, 'a', zipfile.ZIP_DEFLATED)
-                kwargs['zip'] = zip
+                _zip = zipfile.ZipFile(_zip, 'a', zipfile.ZIP_DEFLATED)
+                kwargs['zip'] = _zip
                 createdZip = True
             else:
                 createdZip = False
@@ -146,7 +146,7 @@ class Attachment(AttachmentBase):
             customPath = kwargs.get('customPath', '').replace('\\', '/')
             customPath += '/' if customPath and customPath[-1] != '/' else ''
             # Set the open command to be that of the zip file.
-            _open = zip.open
+            _open = _zip.open
             # Zip files use w for writing in binary.
             mode = 'w'
         else:
@@ -159,9 +159,9 @@ class Attachment(AttachmentBase):
         fullFilename = customPath + filename
 
         if self.__type == 'data':
-            if zip:
+            if _zip:
                 name, ext = os.path.splitext(filename)
-                nameList = zip.namelist()
+                nameList = _zip.namelist()
                 if fullFilename in nameList:
                     for i in range(2, 100):
                         testName = customPath + name + ' (' + str(i) + ')' + ext
@@ -189,16 +189,16 @@ class Attachment(AttachmentBase):
                 f.write(self.__data)
 
             # Close the ZipFile if this function created it.
-            if zip and createdZip:
-                zip.close()
+            if _zip and createdZip:
+                _zip.close()
 
             return fullFilename
         else:
             self.saveEmbededMessage(**kwargs)
 
             # Close the ZipFile if this function created it.
-            if zip and createdZip:
-                zip.close()
+            if _zip and createdZip:
+                _zip.close()
 
             return self.msg
 

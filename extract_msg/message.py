@@ -175,7 +175,7 @@ class Message(MessageBase):
             path += self.defaultFolderName[:maxNameLength]
 
         # Create the folders.
-        if not zip:
+        if not _zip:
             try:
                 makeDirs(path)
             except Exception:
@@ -266,13 +266,13 @@ class Message(MessageBase):
                         f.write(inputToBytes(self.body, 'utf-8'))
 
         except Exception:
-            if not zip:
+            if not _zip:
                 self.saveRaw(path)
             raise
         finally:
             # Close the ZipFile if this function created it.
-            if zip and createdZip:
-                zip.close()
+            if _zip and createdZip:
+                _zip.close()
 
         # Return the instance so that functions can easily be chained.
         return self
