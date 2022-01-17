@@ -3,6 +3,7 @@
 * Changed classes to now prefer super() over direct superclass initalization.
 * Removed explicit object subclassing (it's implicit in Python 3 so we don't need it anymore).
 * Converted most `.format`s into f strings.
+* Improved consistency of docstrings. It's not perfect, but it should at least be better.
 
 **v0.29.2**
 * Fixed issue where the RTF injection was accidentally doing HTML escapes for non-encapsulated streams and *not* doing escapes for encapsulated streams.

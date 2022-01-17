@@ -15,7 +15,7 @@ def createProp(string):
     else:
         if temp not in constants.VARIABLE_LENGTH_PROPS:
             # DEBUG
-            logger.warning('Unknown property type: {}'.format(properHex(temp)))
+            logger.warning(f'Unknown property type: {properHex(temp)}')
         return VariableLengthProp(string)
 
 
@@ -95,9 +95,8 @@ class FixedLengthProp(PropBase):
 
     def parseType(self, _type, stream):
         """
-        Converts the data in :param stream: to a
-        much more accurate type, specified by
-        :param _type:, if possible.
+        Converts the data in :param stream: to a much more accurate type,
+        specified by :param _type:, if possible.
         :param stream: #TODO what is stream for?
 
         WARNING: Not done.
@@ -142,7 +141,7 @@ class FixedLengthProp(PropBase):
                     value = datetime.datetime.max
             except Exception as e:
                 logger.exception(e)
-                logger.error('Timestamp value of {} caused an exception. This was probably caused by the time stamp being too far in the future.'.format(msgEpoch(constants.ST3.unpack(value)[0])))
+                logger.error(f'Timestamp value of {msgEpoch(constants.ST3.unpack(value)[0])} caused an exception. This was probably caused by the time stamp being too far in the future.')
                 logger.error(self.raw)
         elif _type == 0x0048:  # PtypGuid
             # TODO parsing for this

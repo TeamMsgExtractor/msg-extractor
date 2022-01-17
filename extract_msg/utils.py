@@ -232,7 +232,7 @@ def getEncodingName(codepage):
         codecs.lookup(constants.CODE_PAGES[codepage])
         return constants.CODE_PAGES[codepage]
     except LookupError:
-        raise UnsupportedEncodingError('The codepage {} ({}) is not currently supported by your version of Python.'.format(codepage, constants.CODE_PAGES[codepage]))
+        raise UnsupportedEncodingError(f'The codepage {codepage} ({constants.CODE_PAGES[codepage]}) is not currently supported by your version of Python.')
 
 def getFullClassName(inp):
     return inp.__class__.__module__ + '.' + inp.__class__.__name__
@@ -425,13 +425,11 @@ def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAtt
     Function to automatically open an MSG file and detect what type it is.
 
     :param path: Path to the msg file in the system or is the raw msg file.
-    :param prefix: Used for extracting embeded msg files
-        inside the main one. Do not set manually unless
-        you know what you are doing.
-    :param attachmentClass: Optional, the class the Message object
-        will use for attachments. You probably should
-        not change this value unless you know what you
-        are doing.
+    :param prefix: Used for extracting embeded msg files inside the main one.
+        Do not set manually unless you know what you are doing.
+    :param attachmentClass: Optional, the class the Message object will use for
+        attachments. You probably should not change this value unless you know
+        what you are doing.
     :param filename: Optional, the filename to be used by default when saving.
     :param delayAttachments: Optional, delays the initialization of attachments
         until the user attempts to retrieve them. Allows MSG files with bad
@@ -483,13 +481,14 @@ def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAtt
 
 def parseType(_type, stream, encoding, extras):
     """
-    Converts the data in :param stream: to a
-    much more accurate type, specified by
+    Converts the data in :param stream: to a much more accurate type, specified
+    by :param _type:.
     :param _type: the data's type.
     :param stream: is the data to be converted.
     :param encoding: is the encoding to be used for regular strings.
     :param extras: is used in the case of types like PtypMultipleString.
-    For that example, extras should be a list of the bytes from rest of the streams.
+    For that example, extras should be a list of the bytes from rest of the
+    streams.
 
     WARNING: Not done. Do not try to implement anywhere where it is not already implemented
     """
@@ -776,7 +775,7 @@ def verifyPropertyId(id):
 def verifyType(_type):
     if _type is not None:
         if (_type not in constants.VARIABLE_LENGTH_PROPS_STRING) and (_type not in constants.FIXED_LENGTH_PROPS_STRING):
-            raise UnknownTypeError('Unknown type {}'.format(_type))
+            raise UnknownTypeError(f'Unknown type {_type}')
 
 def windowsUnicode(string):
     return str(string, 'utf-16-le') if string is not None else None

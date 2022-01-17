@@ -42,8 +42,8 @@ class MessageBase(MSGFile):
         :param overrideEncoding: optional, an encoding to use instead of the one
             specified by the msg file. Do not report encoding errors caused by
             this.
-        :param attachmentErrorBehavior: Optional, the behaviour to use in the event
-            of an error when parsing the attachments.
+        :param attachmentErrorBehavior: Optional, the behaviour to use in the
+            event of an error when parsing the attachments.
         :param recipientSeparator: Optional, Separator string to use between
             recipients.
         """
@@ -252,7 +252,8 @@ class MessageBase(MSGFile):
     @property
     def crlf(self):
         """
-        Returns the value of self.__crlf, should you need it for whatever reason.
+        Returns the value of self.__crlf, should you need it for whatever
+        reason.
         """
         self.body
         return self.__crlf
@@ -287,7 +288,8 @@ class MessageBase(MSGFile):
     @property
     def header(self):
         """
-        Returns the message header, if it exists. Otherwise it will generate one.
+        Returns the message header, if it exists. Otherwise it will generate
+        one.
         """
         try:
             return self._header

@@ -23,13 +23,15 @@ class Recipient:
             self.__email = self._getStringStream('__substg1.0_3003')
         self.__name = self._getStringStream('__substg1.0_3001')
         self.__type = self.__props.get('0C150003').value
-        self.__formatted = u'{0} <{1}>'.format(self.__name, self.__email)
+        self.__formatted = uf'{self.__name} <{self.__email}>'
 
     def _ensureSet(self, variable, streamID, stringStream = True):
         """
-        Ensures that the variable exists, otherwise will set it using the specified stream.
-        After that, return said variable.
-        If the specified stream is not a string stream, make sure to set :param string stream: to False.
+        Ensures that the variable exists, otherwise will set it using the
+        specified stream. After that, return said variable.
+
+        If the specified stream is not a string stream, make sure to set
+        :param string stream: to False.
         """
         try:
             return getattr(self, variable)
@@ -43,8 +45,8 @@ class Recipient:
 
     def _ensureSetNamed(self, variable, propertyName):
         """
-        Ensures that the variable exists, otherwise will set it using the named property.
-        After that, return said variable.
+        Ensures that the variable exists, otherwise will set it using the named
+        property. After that, return said variable.
         """
         try:
             return getattr(self, variable)
@@ -55,8 +57,8 @@ class Recipient:
 
     def _ensureSetProperty(self, variable, propertyName):
         """
-        Ensures that the variable exists, otherwise will set it using the property.
-        After that, return said variable.
+        Ensures that the variable exists, otherwise will set it using the
+        property. After that, return said variable.
         """
         try:
             return getattr(self, variable)
@@ -70,7 +72,9 @@ class Recipient:
 
     def _ensureSetTyped(self, variable, _id):
         """
-        Like the other ensure set functions, but designed for when something could be multiple types (where only one will be present). This way you have no need to set the type, it will be handled for you.
+        Like the other ensure set functions, but designed for when something
+        could be multiple types (where only one will be present). This way you
+        have no need to set the type, it will be handled for you.
         """
         try:
             return getattr(self, variable)
@@ -84,24 +88,21 @@ class Recipient:
 
     def _getStringStream(self, filename):
         """
-        Gets a string representation of the requested filename.
-        Checks for both ASCII and Unicode representations and returns
-        a value if possible.  If there are both ASCII and Unicode
-        versions, then :param prefer: specifies which will be
-        returned.
+        Gets a string representation of the requested filename. Checks for both
+        Unicode and Non-Unicode representations and returns a value if possible.
+        If there are both Unicode and Non-Unicode versions, then :param prefer:
+        specifies which will be returned.
         """
         return self.__msg._getStringStream([self.__dir, filename])
 
     def _getTypedData(self, id, _type = None):
         """
-        Gets the data for the specified id as the type that it is
-        supposed to be. :param id: MUST be a 4 digit hexadecimal
-        string.
+        Gets the data for the specified id as the type that it is supposed to
+        be. :param id: MUST be a 4 digit hexadecimal string.
 
-        If you know for sure what type the data is before hand,
-        you can specify it as being one of the strings in the
-        constant FIXED_LENGTH_PROPS_STRING or
-        VARIABLE_LENGTH_PROPS_STRING.
+        If you know for sure what type the data is before hand, you can specify
+        it as being one of the strings in the constant FIXED_LENGTH_PROPS_STRING
+        or VARIABLE_LENGTH_PROPS_STRING.
         """
         verifyPropertyId(id)
         id = id.upper()
@@ -114,14 +115,12 @@ class Recipient:
 
     def _getTypedProperty(self, propertyID, _type = None):
         """
-        Gets the property with the specified id as the type that it
-        is supposed to be. :param id: MUST be a 4 digit hexadecimal
-        string.
+        Gets the property with the specified id as the type that it is supposed
+        to be. :param id: MUST be a 4 digit hexadecimal string.
 
-        If you know for sure what type the property is before hand,
-        you can specify it as being one of the strings in the
-        constant FIXED_LENGTH_PROPS_STRING or
-        VARIABLE_LENGTH_PROPS_STRING.
+        If you know for sure what type the property is before hand, you can
+        specify it as being one of the strings in the constant
+        FIXED_LENGTH_PROPS_STRING or VARIABLE_LENGTH_PROPS_STRING.
         """
         verifyPropertyId(propertyID)
         verifyType(_type)
@@ -134,24 +133,21 @@ class Recipient:
 
     def _getTypedStream(self, filename, _type = None):
         """
-        Gets the contents of the specified stream as the type that
-        it is supposed to be.
+        Gets the contents of the specified stream as the type that it is
+        supposed to be.
 
-        Rather than the full filename, you should only feed this
-        function the filename sans the type. So if the full name
-        is "__substg1.0_001A001F", the filename this function
-        should receive should be "__substg1.0_001A".
+        Rather than the full filename, you should only feed this function the
+        filename sans the type. So if the full name is "__substg1.0_001A001F",
+        the filename this function should receive should be "__substg1.0_001A".
 
-        If you know for sure what type the stream is before hand,
-        you can specify it as being one of the strings in the
-        constant FIXED_LENGTH_PROPS_STRING or
-        VARIABLE_LENGTH_PROPS_STRING.
+        If you know for sure what type the stream is before hand, you can
+        specify it as being one of the strings in the constant
+        FIXED_LENGTH_PROPS_STRING or VARIABLE_LENGTH_PROPS_STRING.
 
-        If you have not specified the type, the type this function
-        returns in many cases cannot be predicted. As such, when
-        using this function it is best for you to check the type
-        that it returns. If the function returns None, that means
-        it could not find the stream specified.
+        If you have not specified the type, the type this function returns in
+        many cases cannot be predicted. As such, when using this function it is
+        best for you to check the type that it returns. If the function returns
+        None, that means it could not find the stream specified.
         """
         self.__msg._getTypedStream(self, [self.__dir, filename], True, _type)
 
@@ -170,8 +166,8 @@ class Recipient:
     def existsTypedProperty(self, id, _type = None):
         """
         Determines if the stream with the provided id exists. The return of this
-        function is 2 values, the first being a boolean for if anything was found,
-        and the second being how many were found.
+        function is 2 values, the first being a boolean for if anything was
+        found, and the second being how many were found.
         """
         return self.__msg.existsTypedProperty(id, self.__dir, _type, True, self.__props)
 
