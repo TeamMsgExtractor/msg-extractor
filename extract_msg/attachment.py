@@ -1,5 +1,6 @@
 import logging
 import os
+import pathlib
 import random
 import string
 import zipfile
@@ -63,6 +64,7 @@ class Attachment(AttachmentBase):
         filename = None
         customFilename = kwargs.get('customFilename')
         if customFilename:
+            customFilename = str(customFilename)
             # First we need to validate it. If there are invalid characters, this will detect it.
             if constants.RE_INVALID_FILENAME_CHARACTERS.search(customFilename):
                 raise ValueError('Invalid character found in customFilename. Must not contain any of the following characters: \\/:*?"<>|')
@@ -73,13 +75,13 @@ class Attachment(AttachmentBase):
             if kwargs.get('contentId', False):
                 filename = self.cid
             # If filename is None at this point, use long filename as first preference
-            if filename is None:
+            if not filename:
                 filename = self.longFilename
             # Otherwise use the short filename
-            if filename is None:
+            if not filename:
                 filename = self.shortFilename
             # Otherwise just make something up!
-            if filename is None:
+            if not filename:
                 return self.randomFilename
 
         return filename
@@ -143,20 +145,17 @@ class Attachment(AttachmentBase):
             else:
                 createdZip = False
             # Path needs to be done in a special way if we are in a zip file.
-            customPath = kwargs.get('customPath', '').replace('\\', '/')
-            customPath += '/' if customPath and customPath[-1] != '/' else ''
+            customPath = pathlib.Path(kwargs.get('customPath', ''))
             # Set the open command to be that of the zip file.
             _open = _zip.open
             # Zip files use w for writing in binary.
             mode = 'w'
         else:
-            customPath = os.path.abspath(kwargs.get('customPath', os.getcwd())).replace('\\', '/')
-            # Prepare the path.
-            customPath += '' if customPath.endswith('/') else '/'
+            customPath = pathlib.Path(kwargs.get('customPath', '.')).absolute()
             mode = 'wb'
             _open = open
 
-        fullFilename = customPath + filename
+        fullFilename = customPath / filename
 
         if self.__type == 'data':
             if _zip:
@@ -164,7 +163,7 @@ class Attachment(AttachmentBase):
                 nameList = _zip.namelist()
                 if fullFilename in nameList:
                     for i in range(2, 100):
-                        testName = customPath + name + ' (' + str(i) + ')' + ext
+                        testName = customPath / f'{name} ({i}){ext}'
                         if testName not in nameList:
                             fullFilename = testName
                             break
@@ -172,20 +171,20 @@ class Attachment(AttachmentBase):
                         # If we couldn't find one that didn't exist.
                         raise FileExistsError(f'Could not create the specified file because it already exists ("{fullFilename}").')
             else:
-                if os.path.exists(fullFilename):
+                if fullFilename.exists():
                     # Try to split the filename into a name and extention.
                     name, ext = os.path.splitext(filename)
                     # Try to add a number to it so that we can save without overwriting.
                     for i in range(2, 100):
-                        testName = customPath + name + ' (' + str(i) + ')' + ext
-                        if not os.path.exists(testName):
+                        testName = customPath / f'{name} ({i}){ext}'
+                        if not testName.exists():
                             fullFilename = testName
                             break
                     else:
                         # If we couldn't find one that didn't exist.
                         raise FileExistsError(f'Could not create the specified file because it already exists ("{fullFilename}").')
 
-            with _open(fullFilename, mode) as f:
+            with _open(str(fullFilename), mode) as f:
                 f.write(self.__data)
 
             # Close the ZipFile if this function created it.

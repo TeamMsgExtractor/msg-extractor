@@ -34,7 +34,7 @@ def addNumToDir(dirName):
     """
     for i in range(2, 100):
         try:
-            newDirName = dirName + ' (' + str(i) + ')'
+            newDirName = dirName.with_name(dirName.name + f' ({i})')
             os.makedirs(newDirName)
             return newDirName
         except Exception as e:
@@ -46,7 +46,7 @@ def addNumToZipDir(dirName : pathlib.Path, _zip):
     Attempt to create the directory with a '(n)' appended.
     """
     for i in range(2, 100):
-        newDirName = dirName / f' ({i})'
+        newDirName = dirName.with_name(dirName.name + f' ({i})')
         pathCompare = str(newDirName).rstrip('/') + '/'
         if not any(x.startswith(pathCompare) for x in _zip.namelist()):
             return newDirName
