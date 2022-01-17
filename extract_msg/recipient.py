@@ -23,7 +23,7 @@ class Recipient:
             self.__email = self._getStringStream('__substg1.0_3003')
         self.__name = self._getStringStream('__substg1.0_3001')
         self.__type = self.__props.get('0C150003').value
-        self.__formatted = uf'{self.__name} <{self.__email}>'
+        self.__formatted = f'{self.__name} <{self.__email}>'
 
     def _ensureSet(self, variable, streamID, stringStream = True):
         """
