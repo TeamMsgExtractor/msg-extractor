@@ -5,9 +5,8 @@ Various small data structures used in msg extractor.
 from . import constants
 
 
-class PermanentEntryID(object):
+class PermanentEntryID:
     def __init__(self, data):
-        super(PermanentEntryID, self).__init__()
         self.__data = data
         unpacked = constants.STPEID.unpack(data[:28])
         if unpacked[0] != 0:

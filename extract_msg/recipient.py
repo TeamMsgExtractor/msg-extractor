@@ -10,12 +10,11 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-class Recipient(object):
+class Recipient:
     """
     Contains the data of one of the recipients in an msg file.
     """
     def __init__(self, _dir, msg):
-        object.__init__(self)
         self.__msg = msg  # Allows calls to original msg file
         self.__dir = _dir
         self.__props = Properties(self._getStream('__properties_version1.0'), constants.TYPE_RECIPIENT)

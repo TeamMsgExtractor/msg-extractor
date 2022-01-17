@@ -28,7 +28,7 @@ class Attachment(AttachmentBase):
         :param msg: the Message instance that the attachment belongs to.
         :param dir_: the directory inside the msg file where the attachment is located.
         """
-        AttachmentBase.__init__(self, msg, dir_)
+        super().__init__(msg, dir_)
 
         # Get attachment data
         if self.exists('__substg1.0_37010102'):

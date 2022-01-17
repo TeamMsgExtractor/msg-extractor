@@ -8,7 +8,7 @@ from ..utils import properHex
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
-class Attachment(object):
+class Attachment:
     """
     Developer version of the `extract_msg.attachment.Attachment` class.
     """
@@ -17,7 +17,6 @@ class Attachment(object):
         :param msg: the Message instance that the attachment belongs to.
         :param dir_: the directory inside the msg file where the attachment is located.
         """
-        object.__init__(self)
         self.__msg = msg
         self.__dir = dir_
         self.__props = Properties(

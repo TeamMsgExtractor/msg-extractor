@@ -19,13 +19,12 @@ def createProp(string):
         return VariableLengthProp(string)
 
 
-class PropBase(object):
+class PropBase:
     """
     Base class for Prop instances.
     """
 
     def __init__(self, string):
-        super(PropBase, self).__init__()
         self.__raw = string
         self.__name = properHex(string[3::-1]).upper()
         self.__type, self.__flags = constants.ST2.unpack(string)

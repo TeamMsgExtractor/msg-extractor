@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-class AttachmentBase(object):
+class AttachmentBase:
     """
     Stores the attachment data of a Message instance.
     Should the attachment be an embeded message, the
@@ -23,7 +23,6 @@ class AttachmentBase(object):
         :param msg: the Message instance that the attachment belongs to.
         :param dir_: the directory inside the msg file where the attachment is located.
         """
-        object.__init__(self)
         self.__msg = msg
         self.__dir = dir_
         self.__props = Properties(self._getStream('__properties_version1.0'), constants.TYPE_ATTACHMENT)

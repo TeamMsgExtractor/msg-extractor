@@ -9,10 +9,9 @@ from compressed_rtf.crc32 import crc32
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
-class Named(object):
+class Named:
     __dir = '__nameid_version1.0'
     def __init__(self, msg):
-        super(Named, self).__init__()
         self.__msg = msg
         guidStream = self._getStream('__substg1.0_00020102') or self._getStream('__substg1.0_00020102', False)
         entryStream = self._getStream('__substg1.0_00030102') or self._getStream('__substg1.0_00030102', False)
@@ -133,7 +132,7 @@ class Named(object):
 
 
 
-class NamedAttachmentProperties(object):
+class NamedAttachmentProperties:
     """
     The named properties associated with a specific attachment.
     """
@@ -169,9 +168,8 @@ class NamedAttachmentProperties(object):
 
 
 
-class StringNamedProperty(object):
+class StringNamedProperty:
     def __init__(self, entry, name, data):
-        super(StringNamedProperty, self).__init__()
         self.__entry = entry
         self.__name = name
         self.__guidIndex = entry['guid_index']
@@ -257,9 +255,8 @@ class StringNamedProperty(object):
 
 
 
-class NumericalNamedProperty(object):
+class NumericalNamedProperty:
     def __init__(self, entry, data):
-        super(NumericalNamedProperty, self).__init__()
         self.__propertyID = properHex(entry['id'], 4).upper()
         self.__guidIndex = entry['guid_index']
         self.__namedPropertyID = entry['pid']

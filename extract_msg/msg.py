@@ -50,7 +50,7 @@ class MSGFile(olefile.OleFileIO):
         self.__overrideEncoding = overrideEncoding
 
         try:
-            olefile.OleFileIO.__init__(self, path)
+            super().__init__(path)
         except IOError as e:    # py2 and py3 compatible
             logger.error(e)
             if str(e) == 'not an OLE2 structured storage file':

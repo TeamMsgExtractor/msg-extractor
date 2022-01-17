@@ -47,7 +47,7 @@ class MessageBase(MSGFile):
         :param recipientSeparator: Optional, Separator string to use between
             recipients.
         """
-        MSGFile.__init__(self, path, prefix, attachmentClass, filename, overrideEncoding, attachmentErrorBehavior)
+        super().__init__(path, prefix, attachmentClass, filename, overrideEncoding, attachmentErrorBehavior)
         self.__attachmentsDelayed = delayAttachments
         self.__attachmentsReady = False
         self.__recipientSeparator = recipientSeparator
@@ -128,7 +128,7 @@ class MessageBase(MSGFile):
                     attachment.data.close()
         except AttributeError:
             pass
-        MSGFile.close(self)
+        super().close()
 
     def headerInit(self):
         """

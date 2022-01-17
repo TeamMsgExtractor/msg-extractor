@@ -27,7 +27,7 @@ class Message(olefile.OleFileIO):
         """
         logger.log(5, 'prefix: {}'.format(prefix))
         self.__path = path
-        olefile.OleFileIO.__init__(self, path)
+        super().__init__(path)
         prefixl = []
         tmp_condition = prefix != ''
         if tmp_condition:
