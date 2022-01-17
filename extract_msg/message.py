@@ -203,6 +203,15 @@ class Message(MessageBase):
             self.saveRaw(path)
             return self
 
+        # If the user has requested the headers for this file, save it now.
+        if kwargs.get('saveHeader', False):
+            headerText = self._getStringStream('__substg1.0_007D')
+            if not headerText:
+                headerText = constants.HEADER_FORMAT.format(subject = self.subject, **self.header)
+
+            with _open(path + 'header.txt', mode) as f:
+                f.write(headerText.encode('utf-8'))
+
         try:
             # Check whether we should be using HTML or RTF.
             fext = 'txt'

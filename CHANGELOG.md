@@ -1,3 +1,6 @@
+**v0.29.1**
+* [[TeamMsgExtractor #198](https://github.com/TeamMsgExtractor/msg-extractor/issues/198)] Added a feature to save the header in it's own file (prefers the full raw header if it can find it, otherwise puts in a generated one) that was actually supposed to be in v0.29.0 but I forgot, lol.
+
 **v0.29.0**
 * [[TeamMsgExtractor #207](https://github.com/TeamMsgExtractor/msg-extractor/issues/207)] Made it so that unspecified dates are handled properly. For clarification, an unspecified date is a custom value in MSG files for dates that means that the date is unspecified. It is distinctly different from a property not existing, which will still return None. For unspecified dates, `datetime.datetime.max` is returned. While perhaps not the best solution, it will have to do for now.
 * Fixed an issue where `utils.parseType` was returning a string for the date when it makes more sense to return an actual datetime instance.
