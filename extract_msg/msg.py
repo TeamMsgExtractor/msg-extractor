@@ -42,7 +42,7 @@ class MSGFile(olefile.OleFileIO):
         self.__path = path
         self.__attachmentClass = attachmentClass
         if not (constants.ATTACHMENT_ERROR_THROW <= attachmentErrorBehavior <= constants.ATTACHMENT_ERROR_BROKEN):
-            raise ValueError("`attachmentErrorBehavior` must be ATTACHMENT_ERROR_THROW, ATTACHMENT_ERROR_NOT_IMPLEMENTED, or ATTACHMENT_ERROR_BROKEN.")
+            raise ValueError(":param attachmentErrorBehavior: must be ATTACHMENT_ERROR_THROW, ATTACHMENT_ERROR_NOT_IMPLEMENTED, or ATTACHMENT_ERROR_BROKEN.")
         self.__attachmentErrorBehavior = attachmentErrorBehavior
         if overrideEncoding is not None:
             codecs.lookup(overrideEncoding)
@@ -85,9 +85,11 @@ class MSGFile(olefile.OleFileIO):
             self.filename = filename
         elif hasLen(path):
             if len(path) < 1536:
-                self.filename = path
+                self.filename = str(path)
             else:
                 self.filename = None
+        elif isinstance(path, pathlib.Path):
+            self.filename = str(path)
         else:
             self.filename = None
 
@@ -97,7 +99,7 @@ class MSGFile(olefile.OleFileIO):
         specified stream. After that, return said variable.
 
         If the specified stream is not a string stream, make sure to set
-        :param string stream: to False.
+        :param stringStream: to False.
         """
         try:
             return getattr(self, variable)

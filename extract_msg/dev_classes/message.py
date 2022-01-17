@@ -87,7 +87,7 @@ class Message(olefile.OleFileIO):
     def _getStringStream(self, filename, prefer='unicode', prefix=True):
         """
         Gets a string representation of the requested filename.
-        This should ALWAYS return a string (Unicode in python 2)
+        This should ALWAYS return a string.
         """
 
         filename = self.fix_path(filename, prefix)
@@ -150,7 +150,7 @@ class Message(olefile.OleFileIO):
 
             if good:
                 out.append(x)
-                
+
         return out
 
     @property
