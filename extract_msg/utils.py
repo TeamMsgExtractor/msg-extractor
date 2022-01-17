@@ -473,10 +473,10 @@ def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAtt
         ct = msg.classType
         msg.close()
         if knownMsgClass(classType):
-            raise UnsupportedMSGTypeError('MSG type "{}" currently is not supported by the module. If you would like support, please make a feature request.'.format(ct))
-        raise UnrecognizedMSGTypeError('Could not recognize msg class type "{}".'.format(ct))
+            raise UnsupportedMSGTypeError(f'MSG type "{ct}" currently is not supported by the module. If you would like support, please make a feature request.')
+        raise UnrecognizedMSGTypeError(f'Could not recognize msg class type "{ct}".')
     else:
-        logger.error('Could not recognize msg class type "{}". This most likely means it hasn\'t been implemented yet, and you should ask the developers to add support for it.'.format(msg.classType))
+        logger.error(f'Could not recognize msg class type "{msg.classType}". This most likely means it hasn\'t been implemented yet, and you should ask the developers to add support for it.')
         return msg
 
 def parseType(_type, stream, encoding, extras):
@@ -557,27 +557,27 @@ def parseType(_type, stream, encoding, extras):
         # TODO parsing for `multiple` types
         if _type in (0x101F, 0x101E):
             ret = [x.decode(encoding) for x in extras]
-            lengths = struct.unpack('<{}i'.format(len(ret)), stream)
+            lengths = struct.unpack(f'<{len(ret)}i', stream)
             lengthLengths = len(lengths)
             if lengthLengths > lengthExtras:
-                logger.warning('Error while parsing multiple type. Expected {} stream{}, got {}. Ignoring.'.format(lengthLengths, 's' if lengthLengths != 1 else '', lengthExtras))
+                logger.warning(f'Error while parsing multiple type. Expected {lengthLengths} stream{"s" if lengthLengths != 1 else ""}, got {lengthExtras}. Ignoring.')
             for x, y in enumerate(extras):
                 if lengths[x] != len(y):
-                    logger.warning('Error while parsing multiple type. Expected length {}, got {}. Ignoring.'.format(lengths[x], len(y)))
+                    logger.warning(f'Error while parsing multiple type. Expected length {lengths[x]}, got {len(y)}. Ignoring.')
             return ret
         elif _type == 0x1102:
             ret = copy.deepcopy(extras)
             lengths = tuple(constants.STUI32.unpack(stream[pos*8:(pos+1)*8])[0] for pos in range(len(stream) // 8))
             lengthLengths = len(lengths)
             if lengthLengths > lengthExtras:
-                logger.warning('Error while parsing multiple type. Expected {} stream{}, got {}. Ignoring.'.format(lengthLengths, 's' if lengthLengths != 1 else '', lengthExtras))
+                logger.warning(f'Error while parsing multiple type. Expected {lengthLengths} stream{"s" if lengthLengths != 1 else ""}, got {lengthExtras}. Ignoring.')
             for x, y in enumerate(extras):
                 if lengths[x] != len(y):
-                    logger.warning('Error while parsing multiple type. Expected length {}, got {}. Ignoring.'.format(lengths[x], len(y)))
+                    logger.warning(f'Error while parsing multiple type. Expected length {lengths[x]}, got {len(y)}. Ignoring.')
             return ret
         elif _type in (0x1002, 0x1003, 0x1004, 0x1005, 0x1007, 0x1014, 0x1040, 0x1048):
             if stream != len(extras):
-                logger.warning('Error while parsing multiple type. Expected {} entr{}, got {}. Ignoring.'.format(stream, ('y' if stream == 1 else 'ies'), len(extras)))
+                logger.warning(f'Error while parsing multiple type. Expected {stream} entr{"y" if stream == 1 else "ies"}, got {len(extras)}. Ignoring.')
             if _type == 0x1002:
                 return tuple(constants.STMI16.unpack(x)[0] for x in extras)
             if _type == 0x1003:
@@ -596,7 +596,7 @@ def parseType(_type, stream, encoding, extras):
             if _type == 0x1048:
                 return tuple(bytesToGuid(x) for x in extras)
         else:
-            raise NotImplementedError('Parsing for type {} has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType {}"'.format(_type, _type))
+            raise NotImplementedError(f'Parsing for type {_type} has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType {_type}"')
     return value
 
 def prepareFilename(filename):
@@ -609,7 +609,8 @@ def prepareFilename(filename):
 
 def properHex(inp, length = 0):
     """
-    Taken (with permission) from https://github.com/TheElementalOfDestruction/creatorUtils
+    Taken (with permission) from
+    https://github.com/TheElementalOfDestruction/creatorUtils
     """
     a = ''
     if isinstance(inp, str):
@@ -731,7 +732,7 @@ def setupLogging(defaultPath=None, defaultLevel=logging.WARN, logfile=None, enab
         print(str(paths[1:]))
         logging.basicConfig(level=defaultLevel)
         logging.warning('The extract_msg logging configuration was not found - using a basic configuration.'
-                        'Please check the extract_msg installation directory for "logging-{}.json".'.format(os.name))
+                        f'Please check the extract_msg installation directory for "logging-{os.name}.json".')
         return False
 
     with open(path, 'rt') as f:
