@@ -10,10 +10,8 @@ data (from, to, cc, date, subject, body) and the email's attachments.
 
 NOTICE
 ======
-0.29.* will be the last versions that will support Python 2. While we want to
-continue to support it, it would just be too much work to do so. We are
-providing notice ahead of time of this change so that you may sort out your
-Python environments ahead of time.
+0.29.* is the branch that supports Python 2. It is now only receiving bug fixes
+and will not be receiving feature updates.
 
 This module has a Discord server for general discussion. You can find it here:
 `Discord`_
