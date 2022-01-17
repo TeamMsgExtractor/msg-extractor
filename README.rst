@@ -10,8 +10,8 @@ data (from, to, cc, date, subject, body) and the email's attachments.
 
 NOTICE
 ======
-0.29.* is the branch that supports both Python 2 and Python 3. It is now only receiving bug fixes
-and will not be receiving feature updates.
+0.29.* is the branch that supports both Python 2 and Python 3. It is now only
+receiving bug fixes and will not be receiving feature updates.
 
 This module has a Discord server for general discussion. You can find it here:
 `Discord`_
@@ -52,35 +52,48 @@ refer to the usage information provided from the program's help dialog:
 ::
 
     usage: extract_msg [-h] [--use-content-id] [--dev] [--validate] [--json]
-                    [--file-logging] [--verbose] [--log LOG]
-                    [--config CONFIG_PATH] [--out OUT_PATH] [--use-filename]
-                    msg [msg ...]
+                       [--file-logging] [--verbose] [--log LOG]
+                       [--config CONFIG_PATH] [--out OUT_PATH] [--use-filename]
+                       [--dump-stdout] [--html] [--raw] [--rtf]
+                       [--allow-fallback] [--out-name OUT_NAME] msg [msg ...]
 
-    extract_msg: Extracts emails and attachments saved in Microsoft Outlook's .msg
-    files. https://github.com/mattgwwalker/msg-extractor
+    extract_msg: Extracts emails and attachments saved in Microsoft Outlook's
+    .msg files. https://github.com/TeamMsgExtractor/msg-extractor
 
     positional arguments:
-    msg                   An msg file to be parsed
+        msg                   An msg file to be parsed
 
     optional arguments:
-    -h, --help            show this help message and exit
-    --use-content-id, --cid
-                         Save attachments by their Content ID, if they have
-                         one. Useful when working with the HTML body.
-    --dev                 Changes to use developer mode. Automatically enables
-                         the --verbose flag. Takes precedence over the
-                         --validate flag.
-    --validate            Turns on file validation mode. Turns off regular file
-                         output.
-    --json                Changes to write output files as json.
-    --file-logging        Enables file logging. Implies --verbose
-    --verbose             Turns on console logging.
-    --log LOG             Set the path to write the file log to.
-    --config CONFIG_PATH  Set the path to load the logging config from.
-    --out OUT_PATH        Set the folder to use for the program output.
-                         (Default: Current directory)
-    --use-filename        Sets whether the name of each output is based on the
-                         msg filename.
+        -h, --help            show this help message and exit
+        --use-content-id, --cid
+                              Save attachments by their Content ID, if they have
+                              one. Useful when working with the HTML body.
+        --dev                 Changes to use developer mode. Automatically
+                              enables the --verbose flag. Takes precedence over
+                              the --validate flag.
+        --validate            Turns on file validation mode. Turns off regular
+                              file output.
+        --json                Changes to write output files as json.
+        --file-logging        Enables file logging. Implies --verbose.
+        --verbose             Turns on console logging.
+        --log LOG             Set the path to write the file log to.
+        --config CONFIG_PATH  Set the path to load the logging config from.
+        --out OUT_PATH        Set the folder to use for the program output.
+                              (Default: Current directory)
+        --use-filename        Sets whether the name of each output is based on
+                              the msg filename.
+        --dump-stdout         Tells the program to dump the message body (plain
+                              text) to stdout. Overrides saving arguments.
+        --html                Sets whether the output should be html. If this is
+                              not possible, will error.
+        --raw                 Sets whether the output should be html. If this is
+                              not possible, will error.
+        --rtf                 Sets whether the output should be rtf. If this is
+                              not possible, will error.
+        --allow-fallback      Tells the program to fallback to a different save
+                              type if the selected one is not possible.
+        --out-name OUT_NAME   Name to be used with saving the file output.
+                              Should come immediately after the file name.
 
 **To use this in your own script**, start by using:
 
