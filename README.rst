@@ -10,6 +10,9 @@ data (from, to, cc, date, subject, body) and the email's attachments.
 
 NOTICE
 ======
+0.29.* is the branch that supports both Python 2 and Python 3. It is now only receiving bug fixes
+and will not be receiving feature updates.
+
 This module has a Discord server for general discussion. You can find it here:
 `Discord`_
 

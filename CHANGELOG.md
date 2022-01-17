@@ -2,7 +2,11 @@
 * Removed all support for Python 2. This caused a lot of things to be moved around and changed from indirect references to direct references, so it's possible something fell through the cracks. I'm doing my best to test it, but let me know if you have an issue.
 * Converted much of the path nonsense to use `pathlib` so the code is smaller and more reliable. This does have a slight speed penalty, but given that the logic is right next to read/write operations the penalty is negligable.
 * Changed classes to now prefer super() over direct superclass initalization.
-* Removed explicit object subclassing (it's implicit in Python 3 so we don't need it anymore.)
+* Removed explicit object subclassing (it's implicit in Python 3 so we don't need it anymore).
+
+**v0.29.2**
+* Fixed issue where the RTF injection was accidentally doing HTML escapes for non-encapsulated streams and *not* doing escapes for encapsulated streams.
+* Fixed name error in `Message.save` causing bad logic. For context, the internal variable `zip` was renamed to `_zip` to avoid a name conflict with the built-in function. Some instances of it were missed.
 
 **v0.29.1**
 * [[TeamMsgExtractor #198](https://github.com/TeamMsgExtractor/msg-extractor/issues/198)] Added a feature to save the header in it's own file (prefers the full raw header if it can find it, otherwise puts in a generated one) that was actually supposed to be in v0.29.0 but I forgot, lol.

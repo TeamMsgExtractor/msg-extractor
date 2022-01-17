@@ -7,7 +7,6 @@ contributers, please do not complain about bugs.
 import datetime
 import re
 import struct
-import sys
 
 import ebcdic
 
