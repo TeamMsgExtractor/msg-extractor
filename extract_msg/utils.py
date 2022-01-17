@@ -332,52 +332,10 @@ def injectRtfHeader(msgFile):
     # rtf.
     if isEncapsulatedRtf(msgFile.rtfBody):
         injectableHeader = constants.RTF_ENC_INJECTABLE_HEADER
-        def rtfSanitize(inp):
-            if not inp:
-                return ''
-            output = ''
-            for char in inp:
-                # Check if it is in the right range to be printed directly.
-                if 32 <= ord(char) < 128:
-                    if char in ('\\', '{', '}'):
-                        output += '\\'
-                    output += char
-                elif ord(char) < 32 or 128 <= ord(char) <= 255:
-                    # Otherwise, see if it is just a small escape.
-                    output += "\\'" + properHex(char, 2)
-                else:
-                    # Handle Unicode characters.
-                    output += '\\u' + str(ord(char)) + '?'
-
-            return output
+        rtfSanitize = rtfSanitizeHtml
     else:
         injectableHeader = constants.RTF_PLAIN_INJECTABLE_HEADER
-        def rtfSanitize(inp):
-            if not inp:
-                return ''
-            output = ''
-            for char in inp:
-                # Check if it is in the right range to be printed directly.
-                if 32 <= ord(char) < 128:
-                    # Quick check for handling the HTML escapes. Will eventually
-                    # upgrade this code to actually handle all the HTML escapes
-                    # but this will do for now.
-                    if char == '<':
-                        output += r'{\*\htmltag84 &lt;}\htmlrtf <\htmlrtf0 '
-                    elif char == '>':
-                        output += r'{\*\htmltag84 &gt;}\htmlrtf >\htmlrtf0'
-                    else:
-                        if char in ('\\', '{', '}'):
-                            output += '\\'
-                        output += char
-                elif ord(char) < 32 or 128 <= ord(char) <= 255:
-                    # Otherwise, see if it is just a small escape.
-                    output += "\\'" + properHex(char, 2)
-                else:
-                    # Handle Unicode characters.
-                    output += '\\u' + str(ord(char)) + '?'
-
-            return output
+        rtfSanitize = rtfSanitizePlain
 
     def replace(bodyMarker):
         """
@@ -707,6 +665,55 @@ def roundUp(inp, mult):
     Rounds :param inp: up to the nearest multiple of :param mult:.
     """
     return inp + (mult - inp) % mult
+
+def rtfSanitizeHtml(inp):
+    """
+    Sanitizes input to an RTF stream that has encapsulated HTML.
+    """
+    if not inp:
+        return ''
+    output = ''
+    for char in inp:
+        # Check if it is in the right range to be printed directly.
+        if 32 <= ord(char) < 128:
+            # Quick check for handling the HTML escapes. Will eventually
+            # upgrade this code to actually handle all the HTML escapes
+            # but this will do for now.
+            if char == '<':
+                output += r'{\*\htmltag84 &lt;}\htmlrtf <\htmlrtf0 '
+            elif char == '>':
+                output += r'{\*\htmltag84 &gt;}\htmlrtf >\htmlrtf0'
+            else:
+                if char in ('\\', '{', '}'):
+                    output += '\\'
+                output += char
+        elif ord(char) < 32 or 128 <= ord(char) <= 255:
+            # Otherwise, see if it is just a small escape.
+            output += "\\'" + properHex(char, 2)
+        else:
+            # Handle Unicode characters.
+            output += '\\u' + str(ord(char)) + '?'
+
+    return output
+
+def rtfSanitizePlain(inp):
+    if not inp:
+        return ''
+    output = ''
+    for char in inp:
+        # Check if it is in the right range to be printed directly.
+        if 32 <= ord(char) < 128:
+            if char in ('\\', '{', '}'):
+                output += '\\'
+            output += char
+        elif ord(char) < 32 or 128 <= ord(char) <= 255:
+            # Otherwise, see if it is just a small escape.
+            output += "\\'" + properHex(char, 2)
+        else:
+            # Handle Unicode characters.
+            output += '\\u' + str(ord(char)) + '?'
+
+    return output
 
 def setupLogging(defaultPath=None, defaultLevel=logging.WARN, logfile=None, enableFileLogging=False,
                   env_key='EXTRACT_MSG_LOG_CFG'):
