@@ -40,10 +40,11 @@ OLE2 files (also called Structured Storage, Compound File Binary Format
 or Compound Document File Format). This is the underlying format of
 Outlook's .msg files. This library currently supports Python 3.6 and above.
 
-The script was built using Peter Fiskerstrand's documentation of the
-.msg format. Redemption's discussion of the different property types
-used within Extended MAPI was also useful. For future reference, I note
-that Microsoft have opened up their documentation of the file format.
+The script was originally built using Peter Fiskerstrand's documentation of the
+.msg format. Redemption's discussion of the different property types used within
+Extended MAPI was also useful. For future reference, I note that Microsoft have
+opened up their documentation of the file format, which is what is currently
+being used for development.
 
 
 #########REWRITE COMMAND LINE USAGE#############

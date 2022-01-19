@@ -93,7 +93,7 @@ class MSGFile(olefile.OleFileIO):
         else:
             self.filename = None
 
-    def _ensureSet(self, variable, streamID, stringStream = True):
+    def _ensureSet(self, variable : str, streamID, stringStream : bool = True):
         """
         Ensures that the variable exists, otherwise will set it using the
         specified stream. After that, return said variable.
@@ -111,7 +111,7 @@ class MSGFile(olefile.OleFileIO):
             setattr(self, variable, value)
             return value
 
-    def _ensureSetNamed(self, variable, propertyName):
+    def _ensureSetNamed(self, variable : str, propertyName):
         """
         Ensures that the variable exists, otherwise will set it using the named
         property. After that, return said variable.
@@ -123,7 +123,7 @@ class MSGFile(olefile.OleFileIO):
             setattr(self, variable, value)
             return value
 
-    def _ensureSetProperty(self, variable, propertyName):
+    def _ensureSetProperty(self, variable : str, propertyName):
         """
         Ensures that the variable exists, otherwise will set it using the
         property. After that, return said variable.
@@ -138,7 +138,7 @@ class MSGFile(olefile.OleFileIO):
             setattr(self, variable, value)
             return value
 
-    def _ensureSetTyped(self, variable, _id):
+    def _ensureSetTyped(self, variable : str, _id):
         """
         Like the other ensure set functions, but designed for when something
         could be multiple types (where only one will be present). This way you
@@ -151,11 +151,12 @@ class MSGFile(olefile.OleFileIO):
             setattr(self, variable, value)
             return value
 
-    def _getStream(self, filename, prefix = True):
+    def _getStream(self, filename, prefix : bool = True) -> bytes:
         """
         Gets a binary representation of the requested filename.
 
-        This should ALWAYS return a bytes object.
+        This should ALWAYS return a bytes object if it was found, otherwise
+        returns None.
         """
         filename = self.fixPath(filename, prefix)
         if self.exists(filename, False):
@@ -165,7 +166,7 @@ class MSGFile(olefile.OleFileIO):
             logger.info(f'Stream "{filename}" was requested but could not be found. Returning `None`.')
             return None
 
-    def _getStringStream(self, filename, prefix = True):
+    def _getStringStream(self, filename, prefix : bool = True) -> str:
         """
         Gets a string representation of the requested filename.
 
@@ -173,7 +174,8 @@ class MSGFile(olefile.OleFileIO):
         filename sans the type. So if the full name is "__substg1.0_001A001F",
         the filename this function should receive should be "__substg1.0_001A".
 
-        This should ALWAYS return a string.
+        This should ALWAYS return a string if it was found, otherwise returns
+        None.
         """
 
         filename = self.fixPath(filename, prefix)
@@ -183,7 +185,7 @@ class MSGFile(olefile.OleFileIO):
             tmp = self._getStream(filename + '001E', prefix = False)
             return None if tmp is None else tmp.decode(self.stringEncoding)
 
-    def _getTypedData(self, _id, _type = None, prefix = True):
+    def _getTypedData(self, _id : str, _type = None, prefix : bool = True):
         """
         Gets the data for the specified id as the type that it is supposed to
         be. :param id: MUST be a 4 digit hexadecimal string.
@@ -201,7 +203,7 @@ class MSGFile(olefile.OleFileIO):
             found, result = self._getTypedProperty(_id, _type)
             return result if found else None
 
-    def _getTypedProperty(self, propertyID, _type = None):
+    def _getTypedProperty(self, propertyID : str, _type = None):
         """
         Gets the property with the specified id as the type that it is supposed
         to be. :param id: MUST be a 4 digit hexadecimal string.
@@ -219,7 +221,7 @@ class MSGFile(olefile.OleFileIO):
                 return True, (prop.value if isinstance(prop, FixedLengthProp) else prop)
         return False, None
 
-    def _getTypedStream(self, filename, prefix = True, _type = None):
+    def _getTypedStream(self, filename, prefix : bool = True, _type = None):
         """
         Gets the contents of the specified stream as the type that it is
         supposed to be.
@@ -279,20 +281,20 @@ class MSGFile(olefile.OleFileIO):
         """
         pass
 
-    def debug(self):
+    def debug(self) -> None:
         for dir_ in self.listDir():
             if dir_[-1].endswith('001E') or dir_[-1].endswith('001F'):
                 print('Directory: ' + str(dir_[:-1]))
                 print(f'Contents: {self._getStream(dir_)}')
 
-    def exists(self, inp, prefix = True):
+    def exists(self, inp, prefix : bool = True) -> bool:
         """
         Checks if :param inp: exists in the msg file.
         """
         inp = self.fixPath(inp, prefix)
         return olefile.OleFileIO.exists(self, inp)
 
-    def sExists(self, inp, prefix = True):
+    def sExists(self, inp, prefix : bool = True) -> bool:
         """
         Checks if string stream :param inp: exists in the msg file.
         """
@@ -336,7 +338,7 @@ class MSGFile(olefile.OleFileIO):
                     foundNumber += 1
         return (foundNumber > 0), foundNumber
 
-    def fixPath(self, inp, prefix = True):
+    def fixPath(self, inp, prefix : bool = True):
         """
         Changes paths so that they have the proper prefix (should :param prefix:
         be True) and are strings rather than lists or tuples.
@@ -346,7 +348,7 @@ class MSGFile(olefile.OleFileIO):
             inp = self.__prefix + inp
         return inp
 
-    def listDir(self, streams = True, storages = False):
+    def listDir(self, streams : bool = True, storages : bool = False):
         """
         Replacement for OleFileIO.listdir that runs at the current prefix
         directory.
@@ -366,7 +368,7 @@ class MSGFile(olefile.OleFileIO):
             self.__listDirRes = [x for x in entries if len(x) > prefixLength and x[:prefixLength] == prefix]
             return self.__listDirRes
 
-    def slistDir(self, streams = True, storages = False):
+    def slistDir(self, streams : bool = True, storages : bool = False):
         """
         Replacement for OleFileIO.listdir that runs at the current prefix
         directory. Returns a list of strings instead of lists.
@@ -409,7 +411,7 @@ class MSGFile(olefile.OleFileIO):
                         f.write(data)
 
     @property
-    def areStringsUnicode(self):
+    def areStringsUnicode(self) -> bool:
         """
         Returns a boolean telling if the strings are unicode encoded.
         """
@@ -457,7 +459,7 @@ class MSGFile(olefile.OleFileIO):
         return self._ensureSetProperty('_importance', '00170003')
 
     @property
-    def mainProperties(self):
+    def mainProperties(self) -> Properties:
         """
         Returns the Properties instance used by the MSGFile instance.
         """
@@ -469,7 +471,7 @@ class MSGFile(olefile.OleFileIO):
             return self._prop
 
     @property
-    def named(self):
+    def named(self) -> Named:
         """
         The main named properties instance for this file.
         """

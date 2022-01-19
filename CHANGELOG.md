@@ -1,9 +1,12 @@
 **v0.30.0**
 * Removed all support for Python 2. This caused a lot of things to be moved around and changed from indirect references to direct references, so it's possible something fell through the cracks. I'm doing my best to test it, but let me know if you have an issue.
-* Changed classes to now prefer super() over direct superclass initalization.
+* Changed classes to now prefer super() over direct superclass initialization.
 * Removed explicit object subclassing (it's implicit in Python 3 so we don't need it anymore).
 * Converted most `.format`s into f strings.
 * Improved consistency of docstrings. It's not perfect, but it should at least be better.
+* Started the addition of type hints to functions and methods.
+* Updated `utils.bytesToGuid` to make it faster and more efficient.
+* Renamed `utils.msgEpoch` to `utils.filetimeToUtc` to be more descriptive.
 
 **v0.29.2**
 * Fixed issue where the RTF injection was accidentally doing HTML escapes for non-encapsulated streams and *not* doing escapes for encapsulated streams.

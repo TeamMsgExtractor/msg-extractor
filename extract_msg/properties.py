@@ -4,7 +4,7 @@ import pprint
 
 from . import constants
 from .prop import createProp
-from .utils import divide, fromTimeStamp, msgEpoch, properHex
+from .utils import divide, fromTimeStamp, filetimeToUtc, properHex
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())

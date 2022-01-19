@@ -17,6 +17,7 @@ from imapclient.imapclient import decode_utf7
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
+
 class MessageBase(MSGFile):
     """
     Base class for Message like msg files.
@@ -121,7 +122,7 @@ class MessageBase(MSGFile):
 
         super()._registerNamedProperty(entry, _type, name)
 
-    def close(self):
+    def close(self) -> None:
         try:
             # If this throws an AttributeError then we have not loaded the attachments.
             self._attachments
@@ -132,7 +133,7 @@ class MessageBase(MSGFile):
             pass
         super().close()
 
-    def headerInit(self):
+    def headerInit(self) -> bool:
         """
         Checks whether the header has been initialized.
         """
@@ -142,7 +143,7 @@ class MessageBase(MSGFile):
         except AttributeError:
             return False
 
-    def saveAttachments(self, **kwargs):
+    def saveAttachments(self, **kwargs) -> None:
         """
         Saves only attachments in the same folder.
         """
@@ -270,7 +271,7 @@ class MessageBase(MSGFile):
             return self._date
 
     @property
-    def defaultFolderName(self):
+    def defaultFolderName(self) -> str:
         """
         Generates the default name of the save folder.
         """
@@ -313,7 +314,7 @@ class MessageBase(MSGFile):
             return self._header
 
     @property
-    def headerDict(self):
+    def headerDict(self) -> dict:
         """
         Returns a dictionary of the entries in the header
         """
@@ -328,21 +329,21 @@ class MessageBase(MSGFile):
             return self._headerDict
 
     @property
-    def htmlBody(self):
+    def htmlBody(self) -> bytes:
         """
         Returns the html body, if it exists.
         """
         return self._ensureSet('_htmlBody', '__substg1.0_10130102', False)
 
     @property
-    def inReplyTo(self):
+    def inReplyTo(self) -> str:
         """
         Returns the message id that this message is in reply to.
         """
         return self._ensureSet('_in_reply_to', '__substg1.0_1042')
 
     @property
-    def isRead(self):
+    def isRead(self) -> bool:
         """
         Returns if this email has been marked as read.
         """
@@ -369,11 +370,11 @@ class MessageBase(MSGFile):
         return email.utils.parsedate(self.date)
 
     @property
-    def recipientSeparator(self):
+    def recipientSeparator(self) -> str:
         return self.__recipientSeparator
 
     @property
-    def recipients(self):
+    def recipients(self) -> list:
         """
         Returns a list of all recipients.
         """
@@ -396,7 +397,7 @@ class MessageBase(MSGFile):
             return self._recipients
 
     @property
-    def rtfBody(self):
+    def rtfBody(self) -> bytes:
         """
         Returns the decompressed Rtf body from the message.
         """
@@ -407,7 +408,7 @@ class MessageBase(MSGFile):
             return self._rtfBody
 
     @property
-    def sender(self):
+    def sender(self) -> str:
         """
         Returns the message sender, if it exists.
         """

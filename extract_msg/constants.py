@@ -619,6 +619,8 @@ MAINDOC = "extract_msg:\n\tExtracts emails and attachments saved in Microsoft Ou
 ST1 = struct.Struct('<8x4I')
 ST2 = struct.Struct('<H2xI8x')
 ST3 = struct.Struct('<Q')
+# Struct used for unpacking a GUID from bytes.
+ST_GUID = struct.Struct('<IHH8s')
 # Structs used by data.py
 ST_DATA_UI32 = struct.Struct('<I')
 ST_DATA_UI16 = struct.Struct('<H')
@@ -682,7 +684,7 @@ PTYPES = {
     0x0014: 'PtypInteger64',  # Signed longlong
     0x001E: 'PtypString8',
     0x001F: 'PtypString',
-    0x0040: 'PtypTime',  # Use msgEpoch to convert to unix time stamp
+    0x0040: 'PtypTime',  # Use filetimeToUtc to convert to unix time stamp
     0x0048: 'PtypGuid',
     0x00FB: 'PtypServerId',
     0x00FD: 'PtypRestriction',

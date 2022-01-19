@@ -28,7 +28,7 @@ logger.addHandler(logging.NullHandler())
 logging.addLevelName(5, 'DEVELOPER')
 
 
-def addNumToDir(dirName):
+def addNumToDir(dirName : pathlib.Path) -> pathlib.Path:
     """
     Attempt to create the directory with a '(n)' appended.
     """
@@ -52,15 +52,15 @@ def addNumToZipDir(dirName : pathlib.Path, _zip):
             return newDirName
     return None
 
-def bitwiseAdjust(inp, mask):
+def bitwiseAdjust(inp : int, mask : int) -> int:
     """
     Uses a given mask to adjust the location of bits after an operation like
     bitwise AND. This is useful for things like flags where you are trying to
     get a small portion of a larger number. Say for example, you had the number
     0xED (0b11101101) and you needed the adjusted result of the AND operation
-    with 0x70 (0b01110000). The result of the and operation (0b01100000) and the
-    mask used to get it (0x70) are give and the output gets adjusted to be 0x6
-    (0b110).
+    with 0x70 (0b01110000). The result of the AND operation (0b01100000) and the
+    mask used to get it (0x70) are given to this function and the adjustment
+    will be done automatically.
 
     :param mask: MUST be greater than 0.
     """
@@ -68,7 +68,7 @@ def bitwiseAdjust(inp, mask):
         raise ValueError('Mask MUST be greater than 0')
     return inp >> bin(mask)[::-1].index('1')
 
-def bitwiseAdjustedAnd(inp, mask):
+def bitwiseAdjustedAnd(inp : int, mask : int) -> int:
     """
     Preforms the bitwise AND operation between :param inp: and :param mask: and
     adjusts the results based on the rules of the bitwiseAdjust function.
@@ -77,12 +77,14 @@ def bitwiseAdjustedAnd(inp, mask):
         raise ValueError('Mask MUST be greater than 0')
     return (inp & mask) >> bin(mask)[::-1].index('1')
 
-def bytesToGuid(bytes_input):
-    hexinput = [properHex(byte) for byte in bytes_input]
-    hexs = [hexinput[3] + hexinput[2] + hexinput[1] + hexinput[0], hexinput[5] + hexinput[4], hexinput[7] + hexinput[6], hexinput[8] + hexinput[9], ''.join(hexinput[10:16])]
-    return '{{{}-{}-{}-{}-{}}}'.format(*hexs).upper()
+def bytesToGuid(bytesInput : bytes) -> str:
+    """
+    Converts a bytes instance to a GUID.
+    """
+    guidVals = constants.ST_GUID.unpack(bytesInput)
+    return f'{{{guidVals[0]:08X}-{guidVals[1]:04X}-{guidVals[2]:04X}-{guidVals[3][:2].hex().upper()}-{guidVals[3][2:].hex().upper()}}}'
 
-def ceilDiv(n, d):
+def ceilDiv(n : int, d : int) -> int:
     """
     Returns the int from the ceil division of n / d.
     ONLY use ints as inputs to this function.
@@ -92,14 +94,11 @@ def ceilDiv(n, d):
     """
     return -(n // -d)
 
-def divide(string, length):
+def divide(string, length : int) -> list:
     """
-    Taken (with permission) from https://github.com/TheElementalOfDestruction/creatorUtils
-
-    Divides a string into multiple substrings of equal length.
-    If there is not enough for the last substring to be equal,
-    it will simply use the rest of the string.
-    Can also be used for things like lists and tuples.
+    Divides a string into multiple substrings of equal length. If there is not
+    enough for the last substring to be equal, it will simply use the rest of
+    the string. Can also be used for things like lists and tuples.
 
     :param string: string to be divided.
     :param length: length of each division.
@@ -115,12 +114,15 @@ def divide(string, length):
     """
     return [string[length * x:length * (x + 1)] for x in range(int(ceilDiv(len(string), length)))]
 
-def fromTimeStamp(stamp):
+def fromTimeStamp(stamp) -> datetime.datetime:
+    """
+    Returns a datetime from the UTC timestamp given the current timezone.
+    """
     return datetime.datetime.fromtimestamp(stamp, tzlocal.get_localzone())
 
 def getCommandArgs(args):
     """
-    Parse command-line arguments
+    Parse command-line arguments.
     """
     parser = argparse.ArgumentParser(description=constants.MAINDOC, prog='extract_msg')
     # --use-content-id, --cid
@@ -222,7 +224,7 @@ def getContFileDir(_file_):
     """
     return '/'.join(_file_.replace('\\', '/').split('/')[:-1])
 
-def getEncodingName(codepage):
+def getEncodingName(codepage : int) -> str:
     """
     Returns the name of the encoding with the specified codepage.
     """
@@ -237,13 +239,13 @@ def getEncodingName(codepage):
 def getFullClassName(inp):
     return inp.__class__.__module__ + '.' + inp.__class__.__name__
 
-def hasLen(obj):
+def hasLen(obj) -> bool:
     """
     Checks if :param obj: has a __len__ attribute.
     """
     return hasattr(obj, '__len__')
 
-def injectHtmlHeader(msgFile):
+def injectHtmlHeader(msgFile) -> bytes:
     """
     Returns the HTML body from the MSG file (will check that it has one) with
     the HTML header injected into it.
@@ -268,7 +270,7 @@ def injectHtmlHeader(msgFile):
     # Use the previously defined function to inject the HTML header.
     return constants.RE_HTML_BODY_START.sub(replace, msgFile.htmlBody, 1)
 
-def injectRtfHeader(msgFile):
+def injectRtfHeader(msgFile) -> bytes:
     """
     Returns the RTF body from the MSG file (will check that it has one) with the
     RTF header injected into it.
@@ -345,7 +347,12 @@ def injectRtfHeader(msgFile):
 
     raise Exception('All injection attempts failed.')
 
-def inputToBytes(stringInputVar, encoding):
+def inputToBytes(stringInputVar, encoding) -> bytes:
+    """
+    Converts the input into bytes.
+
+    :raises ConversionError: if the input cannot be converted.
+    """
     if isinstance(stringInputVar, bytes):
         return stringInputVar
     elif isinstance(stringInputVar, str):
@@ -355,7 +362,7 @@ def inputToBytes(stringInputVar, encoding):
     else:
         raise ConversionError('Cannot convert to bytes.')
 
-def inputToMsgpath(inp):
+def inputToMsgpath(inp) -> list:
     """
     Converts the input into an msg path.
     """
@@ -364,7 +371,12 @@ def inputToMsgpath(inp):
     ret = inputToString(inp, 'utf-8').replace('\\', '/').split('/')
     return ret if ret[0] != '' else []
 
-def inputToString(bytesInputVar, encoding):
+def inputToString(bytesInputVar, encoding) -> str:
+    """
+    Converts the input into a string.
+
+    :raises ConversionError: if the input cannot be converted.
+    """
     if isinstance(bytesInputVar, str):
         return bytesInputVar
     elif isinstance(bytesInputVar, bytes):
@@ -374,7 +386,7 @@ def inputToString(bytesInputVar, encoding):
     else:
         raise ConversionError('Cannot convert to str type.')
 
-def isEncapsulatedRtf(inp):
+def isEncapsulatedRtf(inp : bytes) -> bool:
     """
     Currently the destection is made to be *extremly* basic, but this will work
     for now. In the future this will be fixed to that literal text in the body
@@ -382,13 +394,13 @@ def isEncapsulatedRtf(inp):
     """
     return b'\\fromhtml' in inp
 
-def isEmptyString(inp):
+def isEmptyString(inp : str) -> bool:
     """
     Returns true if the input is None or is an Empty string.
     """
     return (inp == '' or inp is None)
 
-def knownMsgClass(classType):
+def knownMsgClass(classType : str) -> bool:
     """
     Checks if the specified class type is recognized by the module. Usually used
     for checking if a type is simply unsupported rather than unknown.
@@ -403,15 +415,16 @@ def knownMsgClass(classType):
 
     return False
 
-def msgEpoch(inp):
+def filetimeToUtc(inp : int) -> float:
     """
-    Taken (with permission) from https://github.com/TheElementalOfDestruction/creatorUtils
+    Converts a FILETIME into a unix timestamp.
     """
     return (inp - 116444736000000000) / 10000000.0
 
-def msgpathToString(inp):
+def msgpathToString(inp) -> str:
     """
-    Converts an msgpath (one of the internal paths inside an msg file) into a string.
+    Converts an msgpath (one of the internal paths inside an msg file) into a
+    string.
     """
     if inp is None:
         return None
@@ -445,7 +458,8 @@ def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAtt
     when it cannot identify what MSGFile derivitive to use. Otherwise, it will
     log the error and return a basic MSGFile instance.
 
-    Raises UnsupportedMSGTypeError and UnrecognizedMSGTypeError.
+    :raises UnsupportedMSGTypeError: if the type is recognized but not suppoted.
+    :raises UnrecognizedMSGTypeError: if the type is not recognized.
     """
     from .appointment import Appointment
     from .attachment import Attachment
@@ -470,6 +484,7 @@ def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAtt
     elif classType == 'ipm': # Unspecified format. It should be equal to this and not just start with it.
         return msg
     elif strict:
+        # Because we are closing it, we need to store it in a variable first.
         ct = msg.classType
         msg.close()
         if knownMsgClass(classType):
@@ -479,7 +494,7 @@ def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAtt
         logger.error(f'Could not recognize msg class type "{msg.classType}". This most likely means it hasn\'t been implemented yet, and you should ask the developers to add support for it.')
         return msg
 
-def parseType(_type, stream, encoding, extras):
+def parseType(_type : int, stream, encoding, extras):
     """
     Converts the data in :param stream: to a much more accurate type, specified
     by :param _type:.
@@ -535,7 +550,7 @@ def parseType(_type, stream, encoding, extras):
     elif _type == 0x0040:  # PtypTime
         rawtime = constants.ST3.unpack(value)[0]
         if rawtime != 915151392000000000:
-            value = fromTimeStamp(msgEpoch(rawtime))
+            value = fromTimeStamp(filetimeToUtc(rawtime))
         else:
             # Temporarily just set to max time to signify a null date.
             value = datetime.datetime.max
@@ -592,14 +607,14 @@ def parseType(_type, stream, encoding, extras):
             if _type == 0x1014:
                 return tuple(constants.STMI64.unpack(x)[0] for x in extras)
             if _type == 0x1040:
-                return tuple(msgEpoch(constants.ST3.unpack(x)[0]) for x in extras)
+                return tuple(filetimeToUtc(constants.ST3.unpack(x)[0]) for x in extras)
             if _type == 0x1048:
                 return tuple(bytesToGuid(x) for x in extras)
         else:
             raise NotImplementedError(f'Parsing for type {_type} has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType {_type}"')
     return value
 
-def prepareFilename(filename):
+def prepareFilename(filename) -> str:
     """
     Adjusts :param filename: so that it can succesfully be used as an actual
     file name.
@@ -607,10 +622,10 @@ def prepareFilename(filename):
     # I would use re here, but it tested to be slightly slower than this.
     return ''.join(i for i in filename if i not in r'\/:*?"<>|' + '\x00')
 
-def properHex(inp, length = 0):
+def properHex(inp, length : int = 0) -> str:
     """
-    Taken (with permission) from
-    https://github.com/TheElementalOfDestruction/creatorUtils
+    Takes in various input types and converts them into a hex string whose
+    length will always be even.
     """
     a = ''
     if isinstance(inp, str):
@@ -623,13 +638,13 @@ def properHex(inp, length = 0):
         a = '0' + a
     return a.rjust(length, '0').upper()
 
-def roundUp(inp, mult):
+def roundUp(inp : int, mult : int) -> int:
     """
     Rounds :param inp: up to the nearest multiple of :param mult:.
     """
     return inp + (mult - inp) % mult
 
-def rtfSanitizeHtml(inp):
+def rtfSanitizeHtml(inp : str) -> str:
     """
     Sanitizes input to an RTF stream that has encapsulated HTML.
     """
@@ -659,7 +674,7 @@ def rtfSanitizeHtml(inp):
 
     return output
 
-def rtfSanitizePlain(inp):
+def rtfSanitizePlain(inp : str) -> str:
     """
     Sanitizes input to a plain RTF stream.
     """

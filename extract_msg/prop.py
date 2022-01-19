@@ -2,7 +2,7 @@ import datetime
 import logging
 
 from . import constants
-from .utils import fromTimeStamp, msgEpoch, properHex
+from .utils import fromTimeStamp, filetimeToUtc, properHex
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -135,13 +135,13 @@ class FixedLengthProp(PropBase):
             try:
                 rawtime = constants.ST3.unpack(value)[0]
                 if rawtime != 915151392000000000:
-                    value = fromTimeStamp(msgEpoch(rawtime))
+                    value = fromTimeStamp(filetimeToUtc(rawtime))
                 else:
                     # Temporarily just set to max time to signify a null date.
                     value = datetime.datetime.max
             except Exception as e:
                 logger.exception(e)
-                logger.error(f'Timestamp value of {msgEpoch(constants.ST3.unpack(value)[0])} caused an exception. This was probably caused by the time stamp being too far in the future.')
+                logger.error(f'Timestamp value of {filetimeToUtc(constants.ST3.unpack(value)[0])} caused an exception. This was probably caused by the time stamp being too far in the future.')
                 logger.error(self.raw)
         elif _type == 0x0048:  # PtypGuid
             # TODO parsing for this

@@ -6,7 +6,7 @@ from . import constants
 
 
 class PermanentEntryID:
-    def __init__(self, data):
+    def __init__(self, data : bytes):
         self.__data = data
         unpacked = constants.STPEID.unpack(data[:28])
         if unpacked[0] != 0:
@@ -16,21 +16,21 @@ class PermanentEntryID:
         self.__distinguishedName = data[28:-1].decode('ascii') # Cut off the null character at the end and decode the data as ascii
 
     @property
-    def data(self):
+    def data(self) -> bytes:
         """
         Returns the raw data used to generate this instance.
         """
         return self.__data
 
     @property
-    def displayTypeString(self):
+    def displayTypeString(self) -> int:
         """
         Returns the display type string. This will be one of the display type constants.
         """
         return self.__displayTypeString
 
     @property
-    def distinguishedName(self):
+    def distinguishedName(self) -> str:
         """
         Returns the distinguished name.
         """
