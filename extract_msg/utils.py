@@ -218,7 +218,7 @@ def getCommandArgs(args):
     parser.add_argument('--rtf', dest='rtf', action='store_true',
                        help='Sets whether the output should be rtf. If this is not possible, will error.')
     # --allow-fallback
-    parser.add_argument('--allow-fallback', dest='allowFallbac', action='store_true',
+    parser.add_argument('--allow-fallback', dest='allowFallback', action='store_true',
                        help='Tells the program to fallback to a different save type if the selected one is not possible.')
     # --out-name NAME
     parser.add_argument('--out-name', dest = 'out_name',
@@ -228,6 +228,7 @@ def getCommandArgs(args):
                         help='An msg file to be parsed')
 
     options = parser.parse_args(args)
+
     # Check if more than one of the following arguments has been specified
     if options.html + options.rtf + options.json > 1:
        raise IncompatibleOptionsError('Only one of these options may be selected at a time: --html, --json, --raw, --rtf')

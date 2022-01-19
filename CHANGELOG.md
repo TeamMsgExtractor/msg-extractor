@@ -1,3 +1,10 @@
+**v0.29.3**
+* [[TeamMsgExtractor #226](https://github.com/TeamMsgExtractor/msg-extractor/issues/198)] Fix typo in command parsing that prevented the usage of `allowFallback`.
+* Fixed main still manually navigating to a new directory with os.chdir instead of using `customPath`.
+* Fixed issue in main where the `--html` option was being using for both html *and* rtf. This meant if you wanted rtf it would not have used it, and if you wanted html it would have thrown an error.
+* Fixed `--out-name` having no effect.
+* Fixed `--out` having no effect.
+
 **v0.29.2**
 * Fixed issue where the RTF injection was accidentally doing HTML escapes for non-encapsulated streams and *not* doing escapes for encapsulated streams.
 * Fixed name error in `Message.save` causing bad logic. For context, the internal variable `zip` was renamed to `_zip` to avoid a name conflict with the built-in function. Some instances of it were missed.
