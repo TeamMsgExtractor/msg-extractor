@@ -25,7 +25,7 @@ class Recipient:
         self.__type = self.__props.get('0C150003').value
         self.__formatted = f'{self.__name} <{self.__email}>'
 
-    def _ensureSet(self, variable, streamID, stringStream = True):
+    def _ensureSet(self, variable, streamID, stringStream : bool = True):
         """
         Ensures that the variable exists, otherwise will set it using the
         specified stream. After that, return said variable.
@@ -43,7 +43,7 @@ class Recipient:
             setattr(self, variable, value)
             return value
 
-    def _ensureSetNamed(self, variable, propertyName):
+    def _ensureSetNamed(self, variable : str, propertyName : str):
         """
         Ensures that the variable exists, otherwise will set it using the named
         property. After that, return said variable.
@@ -55,7 +55,7 @@ class Recipient:
             setattr(self, variable, value)
             return value
 
-    def _ensureSetProperty(self, variable, propertyName):
+    def _ensureSetProperty(self, variable : str, propertyName : str):
         """
         Ensures that the variable exists, otherwise will set it using the
         property. After that, return said variable.
@@ -70,7 +70,7 @@ class Recipient:
             setattr(self, variable, value)
             return value
 
-    def _ensureSetTyped(self, variable, _id):
+    def _ensureSetTyped(self, variable : str, _id):
         """
         Like the other ensure set functions, but designed for when something
         could be multiple types (where only one will be present). This way you
@@ -95,7 +95,7 @@ class Recipient:
         """
         return self.__msg._getStringStream([self.__dir, filename])
 
-    def _getTypedData(self, id, _type = None):
+    def _getTypedData(self, _id, _type = None):
         """
         Gets the data for the specified id as the type that it is supposed to
         be. :param id: MUST be a 4 digit hexadecimal string.
@@ -105,15 +105,15 @@ class Recipient:
         or VARIABLE_LENGTH_PROPS_STRING.
         """
         verifyPropertyId(id)
-        id = id.upper()
-        found, result = self._getTypedStream('__substg1.0_' + id, _type)
+        _id = _id.upper()
+        found, result = self._getTypedStream('__substg1.0_' + _id, _type)
         if found:
             return result
         else:
-            found, result = self._getTypedProperty(id, _type)
+            found, result = self._getTypedProperty(_id, _type)
             return result if found else None
 
-    def _getTypedProperty(self, propertyID, _type = None):
+    def _getTypedProperty(self, propertyID : str, _type = None):
         """
         Gets the property with the specified id as the type that it is supposed
         to be. :param id: MUST be a 4 digit hexadecimal string.
@@ -151,19 +151,19 @@ class Recipient:
         """
         self.__msg._getTypedStream(self, [self.__dir, filename], True, _type)
 
-    def exists(self, filename):
+    def exists(self, filename) -> bool:
         """
         Checks if stream exists inside the recipient folder.
         """
         return self.__msg.exists([self.__dir, filename])
 
-    def sExists(self, filename):
+    def sExists(self, filename) -> bool:
         """
         Checks if the string stream exists inside the recipient folder.
         """
         return self.__msg.sExists([self.__dir, filename])
 
-    def existsTypedProperty(self, id, _type = None):
+    def existsTypedProperty(self, id, _type = None) -> bool:
         """
         Determines if the stream with the provided id exists. The return of this
         function is 2 values, the first being a boolean for if anything was
@@ -197,7 +197,7 @@ class Recipient:
             return self.__entryID
 
     @property
-    def formatted(self):
+    def formatted(self) -> str:
         """
         Returns the formatted recipient string.
         """
@@ -218,7 +218,7 @@ class Recipient:
         return self.__name
 
     @property
-    def props(self):
+    def props(self) -> Properties:
         """
         Returns the Properties instance of the recipient.
         """

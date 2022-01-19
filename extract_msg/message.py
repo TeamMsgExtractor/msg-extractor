@@ -23,7 +23,7 @@ class Message(MessageBase):
     def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None, delayAttachments = False, overrideEncoding = None, attachmentErrorBehavior = constants.ATTACHMENT_ERROR_THROW, recipientSeparator = ';'):
         super().__init__(path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior, recipientSeparator)
 
-    def dump(self):
+    def dump(self) -> None:
         """
         Prints out a summary of the message
         """
@@ -33,7 +33,7 @@ class Message(MessageBase):
         print('Body:')
         print(self.body)
 
-    def getJson(self):
+    def getJson(self) -> str:
         """
         Returns the JSON representation of the Message.
         """

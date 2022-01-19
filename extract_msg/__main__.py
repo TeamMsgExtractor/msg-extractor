@@ -47,12 +47,10 @@ def main():
                     if args.dump_stdout:
                         print(msg.body)
                     else:
-                        os.chdir(out)
-                        msg.save(json = args.json, useMsgFilename = args.use_filename, contentId = args.cid, html = args.html, rtf = args.html, allowFallback = args.allowFallback)
+                        msg.save(customPath = out, customFilename = args.out_name, json = args.json, useMsgFilename = args.use_filename, contentId = args.cid, html = args.html, rtf = args.rtf, allowFallback = args.allowFallback)
             except Exception as e:
                 print("Error with file '" + x[0] + "': " +
                       traceback.format_exc())
-            os.chdir(currentdir)
 
 if __name__ == '__main__':
     main()
