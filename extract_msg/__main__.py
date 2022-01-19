@@ -42,7 +42,7 @@ def main():
             utils.setupLogging(args.config_path, level, args.log, args.file_logging)
         for x in args.msgs:
             try:
-                with Message(x[0]) as msg:
+                with utils.openMsg(x[0]) as msg:
                     # Right here we should still be in the path in currentdir
                     if args.dump_stdout:
                         print(msg.body)

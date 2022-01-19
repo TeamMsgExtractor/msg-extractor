@@ -178,6 +178,7 @@ def getCommandArgs(args):
                         help='An msg file to be parsed')
 
     options = parser.parse_args(args)
+
     # Check if more than one of the following arguments has been specified
     if options.html + options.rtf + options.json > 1:
        raise IncompatibleOptionsError('Only one of these options may be selected at a time: --html, --json, --raw, --rtf')
