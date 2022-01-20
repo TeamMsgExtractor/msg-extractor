@@ -6,19 +6,22 @@ import traceback
 from extract_msg import __doc__, utils
 from extract_msg.message import Message
 
-def main():
+
+def main() -> None:
     # Setup logging to stdout, indicate running from cli
     CLI_LOGGING = 'extract_msg_cli'
-
     args = utils.getCommandArgs(sys.argv[1:])
     level = logging.INFO if args.verbose else logging.WARNING
-    currentdir = os.getcwd() # Store this just in case the paths that have been given are relative
+
+    # Determine where to save the files to.
+    currentDir = os.getcwd() # Store this incase the path changes.
     if args.out_path:
         if not os.path.exists(args.out_path):
             os.makedirs(args.out_path)
         out = args.out_path
     else:
-        out = currentdir
+        out = currentDir
+
     if args.dev:
         import extract_msg.dev
         extract_msg.dev.main(args, sys.argv[1:])
@@ -35,22 +38,34 @@ def main():
         pprint.pprint(valResults)
         print(f'These results have been saved to {filename}')
         with open(filename, 'w') as fil:
-            fil.write(json.dumps(valResults))
+            json.dump(valResults, fil)
         input('Press enter to exit...')
     else:
         if not args.dump_stdout:
             utils.setupLogging(args.config_path, level, args.log, args.file_logging)
+
+        # Quickly make a dictionary for the keyword arguments.
+        kwargs = {
+            'customPath': out,
+            'customFilename': args.out_name,
+            'json': args.json,
+            'useMsgFilename': args.use_filename,
+            'contentId': args.cid,
+            'html': args.html,
+            'rtf': args.rtf,
+            'allowFallback': args.allowFallback,
+        }
+
         for x in args.msgs:
             try:
                 with utils.openMsg(x[0]) as msg:
-                    # Right here we should still be in the path in currentdir
                     if args.dump_stdout:
                         print(msg.body)
                     else:
-                        msg.save(customPath = out, customFilename = args.out_name, json = args.json, useMsgFilename = args.use_filename, contentId = args.cid, html = args.html, rtf = args.rtf, allowFallback = args.allowFallback)
+                        msg.save(**kwargs)
             except Exception as e:
-                print("Error with file '" + x[0] + "': " +
-                      traceback.format_exc())
+                print(f'Error with file "{x[0]}": {traceback.format_exc()}')
+
 
 if __name__ == '__main__':
     main()
