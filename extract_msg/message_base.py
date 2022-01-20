@@ -1,12 +1,12 @@
 import email.utils
 import logging
+import os
 import re
 
 import compressed_rtf
 
 from . import constants
 from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment
-from .compat import os_ as os
 from .exceptions import UnrecognizedMSGTypeError
 from .msg import MSGFile
 from .recipient import Recipient
@@ -16,6 +16,7 @@ from imapclient.imapclient import decode_utf7
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
 
 class MessageBase(MSGFile):
     """
@@ -42,12 +43,12 @@ class MessageBase(MSGFile):
         :param overrideEncoding: optional, an encoding to use instead of the one
             specified by the msg file. Do not report encoding errors caused by
             this.
-        :param attachmentErrorBehavior: Optional, the behaviour to use in the event
-            of an error when parsing the attachments.
+        :param attachmentErrorBehavior: Optional, the behaviour to use in the
+            event of an error when parsing the attachments.
         :param recipientSeparator: Optional, Separator string to use between
             recipients.
         """
-        MSGFile.__init__(self, path, prefix, attachmentClass, filename, overrideEncoding, attachmentErrorBehavior)
+        super().__init__(path, prefix, attachmentClass, filename, overrideEncoding, attachmentErrorBehavior)
         self.__attachmentsDelayed = delayAttachments
         self.__attachmentsReady = False
         self.__recipientSeparator = recipientSeparator
@@ -86,7 +87,7 @@ class MessageBase(MSGFile):
             if not value:
                 # Check if the header has initialized.
                 if self.headerInit():
-                    logger.info('Header found, but "{}" is not included. Will be generated from other streams.'.format(recipientType))
+                    logger.info(f'Header found, but "{recipientType}" is not included. Will be generated from other streams.')
 
                 # Get a list of the recipients of the specified type.
                 foundRecipients = tuple(recipient.formatted for recipient in self.recipients if recipient.type & 0x0000000f == recipientInt)
@@ -119,7 +120,9 @@ class MessageBase(MSGFile):
             for attachment in self.attachments:
                 attachment._registerNamedProperty(entry, _type, name)
 
-    def close(self):
+        super()._registerNamedProperty(entry, _type, name)
+
+    def close(self) -> None:
         try:
             # If this throws an AttributeError then we have not loaded the attachments.
             self._attachments
@@ -128,9 +131,9 @@ class MessageBase(MSGFile):
                     attachment.data.close()
         except AttributeError:
             pass
-        MSGFile.close(self)
+        super().close()
 
-    def headerInit(self):
+    def headerInit(self) -> bool:
         """
         Checks whether the header has been initialized.
         """
@@ -140,7 +143,7 @@ class MessageBase(MSGFile):
         except AttributeError:
             return False
 
-    def saveAttachments(self, **kwargs):
+    def saveAttachments(self, **kwargs) -> None:
         """
         Saves only attachments in the same folder.
         """
@@ -170,14 +173,14 @@ class MessageBase(MSGFile):
                     self._attachments.append(self.attachmentClass(self, attachmentDir))
                 except (NotImplementedError, UnrecognizedMSGTypeError) as e:
                     if self.attachmentErrorBehavior > constants.ATTACHMENT_ERROR_THROW:
-                        logger.error('Error processing attachment at {}'.format(attachmentDir))
+                        logger.error(f'Error processing attachment at {attachmentDir}')
                         logger.exception(e)
                         self._attachments.append(UnsupportedAttachment(self, attachmentDir))
                     else:
                         raise
                 except Exception as e:
                     if self.attachmentErrorBehavior == constants.ATTACHMENT_ERROR_BROKEN:
-                        logger.error('Error processing attachment at {}'.format(attachmentDir))
+                        logger.error(f'Error processing attachment at {attachmentDir}')
                         logger.exception(e)
                         self._attachments.append(BrokenAttachment(self, attachmentDir))
                     else:
@@ -250,7 +253,8 @@ class MessageBase(MSGFile):
     @property
     def crlf(self):
         """
-        Returns the value of self.__crlf, should you need it for whatever reason.
+        Returns the value of self.__crlf, should you need it for whatever
+        reason.
         """
         self.body
         return self.__crlf
@@ -267,7 +271,7 @@ class MessageBase(MSGFile):
             return self._date
 
     @property
-    def defaultFolderName(self):
+    def defaultFolderName(self) -> str:
         """
         Generates the default name of the save folder.
         """
@@ -285,7 +289,8 @@ class MessageBase(MSGFile):
     @property
     def header(self):
         """
-        Returns the message header, if it exists. Otherwise it will generate one.
+        Returns the message header, if it exists. Otherwise it will generate
+        one.
         """
         try:
             return self._header
@@ -309,7 +314,7 @@ class MessageBase(MSGFile):
             return self._header
 
     @property
-    def headerDict(self):
+    def headerDict(self) -> dict:
         """
         Returns a dictionary of the entries in the header
         """
@@ -324,21 +329,21 @@ class MessageBase(MSGFile):
             return self._headerDict
 
     @property
-    def htmlBody(self):
+    def htmlBody(self) -> bytes:
         """
         Returns the html body, if it exists.
         """
         return self._ensureSet('_htmlBody', '__substg1.0_10130102', False)
 
     @property
-    def inReplyTo(self):
+    def inReplyTo(self) -> str:
         """
         Returns the message id that this message is in reply to.
         """
         return self._ensureSet('_in_reply_to', '__substg1.0_1042')
 
     @property
-    def isRead(self):
+    def isRead(self) -> bool:
         """
         Returns if this email has been marked as read.
         """
@@ -365,11 +370,11 @@ class MessageBase(MSGFile):
         return email.utils.parsedate(self.date)
 
     @property
-    def recipientSeparator(self):
+    def recipientSeparator(self) -> str:
         return self.__recipientSeparator
 
     @property
-    def recipients(self):
+    def recipients(self) -> list:
         """
         Returns a list of all recipients.
         """
@@ -392,7 +397,7 @@ class MessageBase(MSGFile):
             return self._recipients
 
     @property
-    def rtfBody(self):
+    def rtfBody(self) -> bytes:
         """
         Returns the decompressed Rtf body from the message.
         """
@@ -403,7 +408,7 @@ class MessageBase(MSGFile):
             return self._rtfBody
 
     @property
-    def sender(self):
+    def sender(self) -> str:
         """
         Returns the message sender, if it exists.
         """

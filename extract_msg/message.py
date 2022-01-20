@@ -1,15 +1,16 @@
 import json
 import logging
+import os
+import pathlib
 import zipfile
 
 from imapclient.imapclient import decode_utf7
 
 from . import constants
 from .attachment import Attachment
-from .compat import os_ as os
 from .exceptions import DataNotFoundError, IncompatibleOptionsError
 from .message_base import MessageBase
-from .utils import addNumToDir, addNumToZipDir, injectHtmlHeader, injectRtfHeader, inputToBytes, inputToString, makeDirs, prepareFilename
+from .utils import addNumToDir, addNumToZipDir, injectHtmlHeader, injectRtfHeader, inputToBytes, inputToString, prepareFilename
 
 
 logger = logging.getLogger(__name__)
@@ -20,9 +21,9 @@ class Message(MessageBase):
     Parser for Microsoft Outlook message files.
     """
     def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None, delayAttachments = False, overrideEncoding = None, attachmentErrorBehavior = constants.ATTACHMENT_ERROR_THROW, recipientSeparator = ';'):
-        MessageBase.__init__(self, path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior, recipientSeparator)
+        super().__init__(path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior, recipientSeparator)
 
-    def dump(self):
+    def dump(self) -> None:
         """
         Prints out a summary of the message
         """
@@ -32,7 +33,7 @@ class Message(MessageBase):
         print('Body:')
         print(self.body)
 
-    def getJson(self):
+    def getJson(self) -> str:
         """
         Returns the JSON representation of the Message.
         """
@@ -116,7 +117,7 @@ class Message(MessageBase):
             if raw:
                 raise IncompatibleOptionsError('The options `raw` and `zip` are incompatible.')
             # If we are doing a zip file, first check that we have been given a path.
-            if isinstance(_zip, constants.STRING):
+            if isinstance(_zip, (str, pathlib.Path)):
                 # If we have a path then we use the zip file.
                 _zip = zipfile.ZipFile(_zip, 'a', zipfile.ZIP_DEFLATED)
                 kwargs['zip'] = _zip
@@ -124,16 +125,13 @@ class Message(MessageBase):
             else:
                 createdZip = False
             # Path needs to be done in a special way if we are in a zip file.
-            path = kwargs.get('customPath', '').replace('\\', '/')
-            path += '/' if path and path[-1] != '/' else ''
+            path = pathlib.Path(kwargs.get('customPath', ''))
             # Set the open command to be that of the zip file.
             _open = _zip.open
             # Zip files use w for writing in binary.
             mode = 'w'
         else:
-            path = os.path.abspath(kwargs.get('customPath', os.getcwdu())).replace('\\', '/')
-            # Prepare the path.
-            path += '/' if path[-1] != '/' else ''
+            path = pathlib.Path(kwargs.get('customPath', '.')).absolute()
             mode = 'wb'
             _open = open
 
@@ -153,7 +151,7 @@ class Message(MessageBase):
             # First we need to validate it. If there are invalid characters, this will detect it.
             if constants.RE_INVALID_FILENAME_CHARACTERS.search(customFilename):
                 raise ValueError('Invalid character found in customFilename. Must not contain any of the following characters: \\/:*?"<>|')
-            path += customFilename[:maxNameLength]
+            path /= customFilename[:maxNameLength]
         elif useMsgFilename:
             if not self.filename:
                 raise ValueError(':param useMsgFilename: is only available if you are using an msg file on the disk or have provided a filename.')
@@ -167,34 +165,33 @@ class Message(MessageBase):
             filename = filename[:maxNameLength]
             # Check to make sure we actually have a filename to use.
             if not filename:
-                raise ValueError('Invalid filename found in self.filename: "{}"'.format(self.filename))
+                raise ValueError(f'Invalid filename found in self.filename: "{self.filename}"')
 
             # Add the file name to the path.
-            path += filename[:maxNameLength]
+            path /= filename[:maxNameLength]
         else:
-            path += self.defaultFolderName[:maxNameLength]
+            path /= self.defaultFolderName[:maxNameLength]
 
         # Create the folders.
-        if not zip:
+        if not _zip:
             try:
-                makeDirs(path)
+                os.makedirs(path)
             except Exception:
                 newDirName = addNumToDir(path)
                 if newDirName:
                     path = newDirName
                 else:
-                    raise Exception(
-                        'Failed to create directory "%s". Does it already exist?' %
-                        path
-                    )
+                    raise Exception(f'Failed to create directory "{path}". Does it already exist?')
         else:
             # In my testing I ended up with multiple files in a zip at the same
             # location so let's try to handle that.
-            if any(x.startswith(path.rstrip('/') + '/') for x in _zip.namelist()):
-                path = newDirName = addNumToZipDir(path, _zip)
-
-        # Prepare the path one last time.
-        path += '/' if path[-1] != '/' else ''
+            pathCompare = str(path).rstrip('/') + '/'
+            if any(x.startswith(pathCompare) for x in _zip.namelist()):
+                newDirName = addNumToZipDir(path, _zip)
+                if newDirName:
+                    path = newDireName
+                else:
+                    raise Exception(f'Failed to create directory "{path}". Does it already exist?')
 
         # Update the kwargs.
         kwargs['customPath'] = path
@@ -202,6 +199,15 @@ class Message(MessageBase):
         if raw:
             self.saveRaw(path)
             return self
+
+        # If the user has requested the headers for this file, save it now.
+        if kwargs.get('saveHeader', False):
+            headerText = self._getStringStream('__substg1.0_007D')
+            if not headerText:
+                headerText = constants.HEADER_FORMAT.format(subject = self.subject, **self.header)
+
+            with _open(str(path / 'header.txt'), mode) as f:
+                f.write(headerText.encode('utf-8'))
 
         try:
             # Check whether we should be using HTML or RTF.
@@ -229,7 +235,7 @@ class Message(MessageBase):
             # Determine the extension to use for the body.
             fext = 'json' if _json else fext
 
-            with _open(path + 'message.' + fext, mode) as f:
+            with _open(str(path / ('message.' + fext)), mode) as f:
                 if _json:
                     emailObj = json.loads(self.getJson())
                     emailObj['attachments'] = attachmentNames
@@ -257,13 +263,13 @@ class Message(MessageBase):
                         f.write(inputToBytes(self.body, 'utf-8'))
 
         except Exception:
-            if not zip:
+            if not _zip:
                 self.saveRaw(path)
             raise
         finally:
             # Close the ZipFile if this function created it.
-            if zip and createdZip:
-                zip.close()
+            if _zip and createdZip:
+                _zip.close()
 
         # Return the instance so that functions can easily be chained.
         return self

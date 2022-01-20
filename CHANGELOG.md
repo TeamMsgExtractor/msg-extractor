@@ -1,3 +1,29 @@
+**v0.30.0**
+* Removed all support for Python 2. This caused a lot of things to be moved around and changed from indirect references to direct references, so it's possible something fell through the cracks. I'm doing my best to test it, but let me know if you have an issue.
+* Changed classes to now prefer super() over direct superclass initialization.
+* Removed explicit object subclassing (it's implicit in Python 3 so we don't need it anymore).
+* Converted most `.format`s into f strings.
+* Improved consistency of docstrings. It's not perfect, but it should at least be better.
+* Started the addition of type hints to functions and methods.
+* Updated `utils.bytesToGuid` to make it faster and more efficient.
+* Renamed `utils.msgEpoch` to `utils.filetimeToUtc` to be more descriptive.
+* Updated internal variable names to be more consistent.
+* Improvements to the way `__main__` works. This does not affect the output it will generate, only the efficiency and readability.
+
+**v0.29.3**
+* [[TeamMsgExtractor #226](https://github.com/TeamMsgExtractor/msg-extractor/issues/198)] Fix typo in command parsing that prevented the usage of `allowFallback`.
+* Fixed main still manually navigating to a new directory with os.chdir instead of using `customPath`.
+* Fixed issue in main where the `--html` option was being using for both html *and* rtf. This meant if you wanted rtf it would not have used it, and if you wanted html it would have thrown an error.
+* Fixed `--out-name` having no effect.
+* Fixed `--out` having no effect.
+
+**v0.29.2**
+* Fixed issue where the RTF injection was accidentally doing HTML escapes for non-encapsulated streams and *not* doing escapes for encapsulated streams.
+* Fixed name error in `Message.save` causing bad logic. For context, the internal variable `zip` was renamed to `_zip` to avoid a name conflict with the built-in function. Some instances of it were missed.
+
+**v0.29.1**
+* [[TeamMsgExtractor #198](https://github.com/TeamMsgExtractor/msg-extractor/issues/198)] Added a feature to save the header in it's own file (prefers the full raw header if it can find it, otherwise puts in a generated one) that was actually supposed to be in v0.29.0 but I forgot, lol.
+
 **v0.29.0**
 * [[TeamMsgExtractor #207](https://github.com/TeamMsgExtractor/msg-extractor/issues/207)] Made it so that unspecified dates are handled properly. For clarification, an unspecified date is a custom value in MSG files for dates that means that the date is unspecified. It is distinctly different from a property not existing, which will still return None. For unspecified dates, `datetime.datetime.max` is returned. While perhaps not the best solution, it will have to do for now.
 * Fixed an issue where `utils.parseType` was returning a string for the date when it makes more sense to return an actual datetime instance.

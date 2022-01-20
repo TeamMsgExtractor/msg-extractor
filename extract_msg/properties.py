@@ -4,19 +4,18 @@ import pprint
 
 from . import constants
 from .prop import createProp
-from .utils import divide, fromTimeStamp, msgEpoch, properHex
+from .utils import divide, fromTimeStamp, filetimeToUtc, properHex
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-class Properties(object):
+class Properties:
     """
     Parser for msg properties files.
     """
 
     def __init__(self, stream, type=None, skip=None):
-        object.__init__(self)
         self.__stream = stream
         self.__pos = 0
         self.__len = len(stream)

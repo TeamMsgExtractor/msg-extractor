@@ -9,7 +9,7 @@ class Contact(MSGFile):
     """
 
     def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None, overrideEncoding = None, attachmentErrorBehavior = constants.ATTACHMENT_ERROR_THROW):
-        MSGFile.__init__(self, path, prefix, attachmentClass, filename, overrideEncoding, attachmentErrorBehavior)
+        super().__init__(path, prefix, attachmentClass, filename, overrideEncoding, attachmentErrorBehavior)
         self.named
 
     @property

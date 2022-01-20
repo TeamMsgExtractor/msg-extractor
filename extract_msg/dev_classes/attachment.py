@@ -8,7 +8,7 @@ from ..utils import properHex
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
-class Attachment(object):
+class Attachment:
     """
     Developer version of the `extract_msg.attachment.Attachment` class.
     """
@@ -17,7 +17,6 @@ class Attachment(object):
         :param msg: the Message instance that the attachment belongs to.
         :param dir_: the directory inside the msg file where the attachment is located.
         """
-        object.__init__(self)
         self.__msg = msg
         self.__dir = dir_
         self.__props = Properties(
@@ -31,7 +30,7 @@ class Attachment(object):
         elif msg.exists([dir_, '__substg1.0_3701000D']):
             if (self.__props['37050003'].value & 0x7) != 0x5:
                 logger.log(5, 'Printing details of NotImplementedError...')
-                logger.log(5, 'dir_ = {}'.format(dir_))
+                logger.log(5, f'dir_ = {dir_}')
                 logger.log(5, 'Writing properties stream to output:')
                 logger.log(5, '--------Start-Properties-Stream--------\n' +
                               properHex(self.__props.stream) +

@@ -1,18 +1,17 @@
 import codecs
 import copy
 import logging
-import sys
+import os
 import zipfile
 
 import olefile
 
 from . import constants
 from .attachment import Attachment
-from .compat import os_ as os
 from .named import Named
 from .prop import FixedLengthProp, VariableLengthProp
 from .properties import Properties
-from .utils import divide, getEncodingName, hasLen, inputToMsgpath, inputToString, makeDirs, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
+from .utils import divide, getEncodingName, hasLen, inputToMsgpath, inputToString, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
 from .exceptions import InvalidFileFormatError, MissingEncodingError
 
 
@@ -33,15 +32,17 @@ class MSGFile(olefile.OleFileIO):
             will use for attachments. You probably should
             not change this value unless you know what you
             are doing.
-        :param filename: optional, the filename to be used by default when saving.
+        :param filename: optional, the filename to be used by default when
+            saving.
         :param overrideEncoding: optional, an encoding to use instead of the one
-            specified by the msg file. Do not report encoding errors caused by this.
+            specified by the msg file. Do not report encoding errors caused by
+            this.
         """
         # WARNING DO NOT MANUALLY MODIFY PREFIX. Let the program set it.
         self.__path = path
         self.__attachmentClass = attachmentClass
         if not (constants.ATTACHMENT_ERROR_THROW <= attachmentErrorBehavior <= constants.ATTACHMENT_ERROR_BROKEN):
-            raise ValueError("`attachmentErrorBehavior` must be ATTACHMENT_ERROR_THROW, ATTACHMENT_ERROR_NOT_IMPLEMENTED, or ATTACHMENT_ERROR_BROKEN.")
+            raise ValueError(":param attachmentErrorBehavior: must be ATTACHMENT_ERROR_THROW, ATTACHMENT_ERROR_NOT_IMPLEMENTED, or ATTACHMENT_ERROR_BROKEN.")
         self.__attachmentErrorBehavior = attachmentErrorBehavior
         if overrideEncoding is not None:
             codecs.lookup(overrideEncoding)
@@ -50,7 +51,7 @@ class MSGFile(olefile.OleFileIO):
         self.__overrideEncoding = overrideEncoding
 
         try:
-            olefile.OleFileIO.__init__(self, path)
+            super().__init__(path)
         except IOError as e:    # py2 and py3 compatible
             logger.error(e)
             if str(e) == 'not an OLE2 structured storage file':
@@ -84,17 +85,21 @@ class MSGFile(olefile.OleFileIO):
             self.filename = filename
         elif hasLen(path):
             if len(path) < 1536:
-                self.filename = path
+                self.filename = str(path)
             else:
                 self.filename = None
+        elif isinstance(path, pathlib.Path):
+            self.filename = str(path)
         else:
             self.filename = None
 
-    def _ensureSet(self, variable, streamID, stringStream = True):
+    def _ensureSet(self, variable : str, streamID, stringStream : bool = True):
         """
-        Ensures that the variable exists, otherwise will set it using the specified stream.
-        After that, return said variable.
-        If the specified stream is not a string stream, make sure to set :param string stream: to False.
+        Ensures that the variable exists, otherwise will set it using the
+        specified stream. After that, return said variable.
+
+        If the specified stream is not a string stream, make sure to set
+        :param stringStream: to False.
         """
         try:
             return getattr(self, variable)
@@ -106,10 +111,10 @@ class MSGFile(olefile.OleFileIO):
             setattr(self, variable, value)
             return value
 
-    def _ensureSetNamed(self, variable, propertyName):
+    def _ensureSetNamed(self, variable : str, propertyName):
         """
-        Ensures that the variable exists, otherwise will set it using the named property.
-        After that, return said variable.
+        Ensures that the variable exists, otherwise will set it using the named
+        property. After that, return said variable.
         """
         try:
             return getattr(self, variable)
@@ -118,10 +123,10 @@ class MSGFile(olefile.OleFileIO):
             setattr(self, variable, value)
             return value
 
-    def _ensureSetProperty(self, variable, propertyName):
+    def _ensureSetProperty(self, variable : str, propertyName):
         """
-        Ensures that the variable exists, otherwise will set it using the property.
-        After that, return said variable.
+        Ensures that the variable exists, otherwise will set it using the
+        property. After that, return said variable.
         """
         try:
             return getattr(self, variable)
@@ -133,9 +138,11 @@ class MSGFile(olefile.OleFileIO):
             setattr(self, variable, value)
             return value
 
-    def _ensureSetTyped(self, variable, _id):
+    def _ensureSetTyped(self, variable : str, _id):
         """
-        Like the other ensure set functions, but designed for when something could be multiple types (where only one will be present). This way you have no need to set the type, it will be handled for you.
+        Like the other ensure set functions, but designed for when something
+        could be multiple types (where only one will be present). This way you
+        have no need to set the type, it will be handled for you.
         """
         try:
             return getattr(self, variable)
@@ -144,30 +151,31 @@ class MSGFile(olefile.OleFileIO):
             setattr(self, variable, value)
             return value
 
-    def _getStream(self, filename, prefix = True):
+    def _getStream(self, filename, prefix : bool = True) -> bytes:
         """
         Gets a binary representation of the requested filename.
 
-        This should ALWAYS return a bytes object (string in python 2)
+        This should ALWAYS return a bytes object if it was found, otherwise
+        returns None.
         """
         filename = self.fixPath(filename, prefix)
         if self.exists(filename, False):
             with self.openstream(filename) as stream:
                 return stream.read() or b''
         else:
-            logger.info('Stream "{}" was requested but could not be found. Returning `None`.'.format(filename))
+            logger.info(f'Stream "{filename}" was requested but could not be found. Returning `None`.')
             return None
 
-    def _getStringStream(self, filename, prefix = True):
+    def _getStringStream(self, filename, prefix : bool = True) -> str:
         """
         Gets a string representation of the requested filename.
 
-        Rather than the full filename, you should only feed this
-        function the filename sans the type. So if the full name
-        is "__substg1.0_001A001F", the filename this function
-        should receive should be "__substg1.0_001A".
+        Rather than the full filename, you should only feed this function the
+        filename sans the type. So if the full name is "__substg1.0_001A001F",
+        the filename this function should receive should be "__substg1.0_001A".
 
-        This should ALWAYS return a string (Unicode in python 2)
+        This should ALWAYS return a string if it was found, otherwise returns
+        None.
         """
 
         filename = self.fixPath(filename, prefix)
@@ -177,16 +185,14 @@ class MSGFile(olefile.OleFileIO):
             tmp = self._getStream(filename + '001E', prefix = False)
             return None if tmp is None else tmp.decode(self.stringEncoding)
 
-    def _getTypedData(self, _id, _type = None, prefix = True):
+    def _getTypedData(self, _id : str, _type = None, prefix : bool = True):
         """
-        Gets the data for the specified id as the type that it is
-        supposed to be. :param id: MUST be a 4 digit hexadecimal
-        string.
+        Gets the data for the specified id as the type that it is supposed to
+        be. :param id: MUST be a 4 digit hexadecimal string.
 
-        If you know for sure what type the data is before hand,
-        you can specify it as being one of the strings in the
-        constant FIXED_LENGTH_PROPS_STRING or
-        VARIABLE_LENGTH_PROPS_STRING.
+        If you know for sure what type the data is before hand, you can specify
+        it as being one of the strings in the constant FIXED_LENGTH_PROPS_STRING
+        or VARIABLE_LENGTH_PROPS_STRING.
         """
         verifyPropertyId(_id)
         _id = _id.upper()
@@ -197,16 +203,14 @@ class MSGFile(olefile.OleFileIO):
             found, result = self._getTypedProperty(_id, _type)
             return result if found else None
 
-    def _getTypedProperty(self, propertyID, _type = None):
+    def _getTypedProperty(self, propertyID : str, _type = None):
         """
-        Gets the property with the specified id as the type that it
-        is supposed to be. :param id: MUST be a 4 digit hexadecimal
-        string.
+        Gets the property with the specified id as the type that it is supposed
+        to be. :param id: MUST be a 4 digit hexadecimal string.
 
-        If you know for sure what type the property is before hand,
-        you can specify it as being one of the strings in the
-        constant FIXED_LENGTH_PROPS_STRING or
-        VARIABLE_LENGTH_PROPS_STRING.
+        If you know for sure what type the property is before hand, you can
+        specify it as being one of the strings in the constant
+        FIXED_LENGTH_PROPS_STRING or VARIABLE_LENGTH_PROPS_STRING.
         """
         verifyPropertyId(propertyID)
         verifyType(_type)
@@ -217,26 +221,23 @@ class MSGFile(olefile.OleFileIO):
                 return True, (prop.value if isinstance(prop, FixedLengthProp) else prop)
         return False, None
 
-    def _getTypedStream(self, filename, prefix = True, _type = None):
+    def _getTypedStream(self, filename, prefix : bool = True, _type = None):
         """
-        Gets the contents of the specified stream as the type that
-        it is supposed to be.
+        Gets the contents of the specified stream as the type that it is
+        supposed to be.
 
-        Rather than the full filename, you should only feed this
-        function the filename sans the type. So if the full name
-        is "__substg1.0_001A001F", the filename this function
-        should receive should be "__substg1.0_001A".
+        Rather than the full filename, you should only feed this function the
+        filename sans the type. So if the full name is "__substg1.0_001A001F",
+        the filename this function should receive should be "__substg1.0_001A".
 
-        If you know for sure what type the stream is before hand,
-        you can specify it as being one of the strings in the
-        constant FIXED_LENGTH_PROPS_STRING or
-        VARIABLE_LENGTH_PROPS_STRING.
+        If you know for sure what type the stream is before hand, you can
+        specify it as being one of the strings in the constant
+        FIXED_LENGTH_PROPS_STRING or VARIABLE_LENGTH_PROPS_STRING.
 
-        If you have not specified the type, the type this function
-        returns in many cases cannot be predicted. As such, when
-        using this function it is best for you to check the type
-        that it returns. If the function returns None, that means
-        it could not find the stream specified.
+        If you have not specified the type, the type this function returns in
+        many cases cannot be predicted. As such, when using this function it is
+        best for you to check the type that it returns. If the function returns
+        None, that means it could not find the stream specified.
         """
         verifyType(_type)
         filename = self.fixPath(filename, prefix)
@@ -256,10 +257,10 @@ class MSGFile(olefile.OleFileIO):
                         try:
                             streams = self.mainProperties[x[-8:]].realLength
                         except:
-                            logger.error('Could not find matching VariableLengthProp for stream {}'.format(x))
+                            logger.error(f'Could not find matching VariableLengthProp for stream {x}')
                             streams = len(contents) // (2 if _type in constants.MULTIPLE_2_BYTES else 4 if _type in constants.MULTIPLE_4_BYTES else 8 if _type in constants.MULTIPLE_8_BYTES else 16)
                     else:
-                        raise NotImplementedError('The stream specified is of type {}. We don\'t currently understand exactly how this type works. If it is mandatory that you have the contents of this stream, please create an issue labled "NotImplementedError: _getTypedStream {}".'.format(_type, _type))
+                        raise NotImplementedError(f'The stream specified is of type {_type}. We don\'t currently understand exactly how this type works. If it is mandatory that you have the contents of this stream, please create an issue labled "NotImplementedError: _getTypedStream {_type}".')
                     if _type in ('101F', '101E', '1102'):
                         if self.exists(x + '-00000000', False):
                             for y in range(streams):
@@ -275,24 +276,25 @@ class MSGFile(olefile.OleFileIO):
         """
         FOR INTERNAL USE ONLY! DO NOT CALL MANUALLY!
 
-        Function to allow things like attachments in subclasses to have their own named properties.
+        Function to allow things like attachments in subclasses to have their
+        own named properties.
         """
         pass
 
-    def debug(self):
+    def debug(self) -> None:
         for dir_ in self.listDir():
             if dir_[-1].endswith('001E') or dir_[-1].endswith('001F'):
                 print('Directory: ' + str(dir_[:-1]))
-                print('Contents: {}'.format(self._getStream(dir_)))
+                print(f'Contents: {self._getStream(dir_)}')
 
-    def exists(self, inp, prefix = True):
+    def exists(self, inp, prefix : bool = True) -> bool:
         """
         Checks if :param inp: exists in the msg file.
         """
         inp = self.fixPath(inp, prefix)
         return olefile.OleFileIO.exists(self, inp)
 
-    def sExists(self, inp, prefix = True):
+    def sExists(self, inp, prefix : bool = True) -> bool:
         """
         Checks if string stream :param inp: exists in the msg file.
         """
@@ -301,13 +303,14 @@ class MSGFile(olefile.OleFileIO):
 
     def existsTypedProperty(self, _id, location = None, _type = None, prefix = True, propertiesInstance = None):
         """
-        Determines if the stream with the provided id exists in the location specified.
-        If no location is specified, the root directory is searched. The return of this
-        function is 2 values, the first being a boolean for if anything was found, and
-        the second being how many were found.
+        Determines if the stream with the provided id exists in the location
+        specified. If no location is specified, the root directory is searched.
+        The return of this function is 2 values, the first being a boolean for
+        if anything was found, and the second being how many were found.
 
         Because of how this function works, any folder that contains it's own
-        "__properties_version1.0" file should have this function called from it's class.
+        "__properties_version1.0" file should have this function called from
+        it's class.
         """
         verifyPropertyId(_id)
         verifyType(_type)
@@ -335,57 +338,55 @@ class MSGFile(olefile.OleFileIO):
                     foundNumber += 1
         return (foundNumber > 0), foundNumber
 
-    def fixPath(self, inp, prefix = True):
+    def fixPath(self, inp, prefix : bool = True):
         """
-        Changes paths so that they have the proper
-        prefix (should :param prefix: be True) and
-        are strings rather than lists or tuples.
+        Changes paths so that they have the proper prefix (should :param prefix:
+        be True) and are strings rather than lists or tuples.
         """
         inp = msgpathToString(inp)
         if prefix:
             inp = self.__prefix + inp
         return inp
 
-    def listDir(self, streams = True, storages = False):
+    def listDir(self, streams : bool = True, storages : bool = False):
         """
-        Replacement for OleFileIO.listdir that runs at the current prefix directory.
+        Replacement for OleFileIO.listdir that runs at the current prefix
+        directory.
         """
         # Get the items from OleFileIO.
         try:
             return self.__listDirRes
         except AttributeError:
-            temp = self.listdir(streams, storages)
+            entries = self.listdir(streams, storages)
             if not self.__prefix:
-                return temp
+                return entries
             prefix = self.__prefix.split('/')
             if prefix[-1] == '':
                 prefix.pop()
 
             prefixLength = self.__prefixLen
-            self.__listDirRes = [x for x in temp if len(x) > prefixLength and x[:prefixLength] == prefix]
+            self.__listDirRes = [x for x in entries if len(x) > prefixLength and x[:prefixLength] == prefix]
             return self.__listDirRes
 
-
-    def slistDir(self, streams = True, storages = False):
+    def slistDir(self, streams : bool = True, storages : bool = False):
         """
-        Replacement for OleFileIO.listdir that runs at the current prefix directory.
-        Returns a list of strings instead of lists.
+        Replacement for OleFileIO.listdir that runs at the current prefix
+        directory. Returns a list of strings instead of lists.
         """
         return [msgpathToString(x) for x in self.listDir(streams, storages)]
 
     def save(self, *args, **kwargs):
-        raise NotImplementedError('Saving is not yet supported for the {} class'.format(self.__class__.__name__))
+        raise NotImplementedError(f'Saving is not yet supported for the {self.__class__.__name__} class.')
 
     def saveRaw(self, path):
         # Create a 'raw' folder
-        path = path.replace('\\', '/')
-        path += '/' if path[-1] != '/' else ''
+        path = pathlib.Path(path)
         # Make the location
-        makeDirs(path, exist_ok = True)
+        os.makedirs(path, exist_ok = True)
         # Create the zipfile
-        path += 'raw.zip'
-        if os.path.exists(path):
-            raise FileExistsError('File "{}" already exists.'.format(path))
+        path /= 'raw.zip'
+        if path.exists():
+            raise FileExistsError(f'File "{path}" already exists.')
         with zipfile.ZipFile(path, 'w', zipfile.ZIP_DEFLATED) as zfile:
             # Loop through all the directories
             for dir_ in self.listdir():
@@ -401,23 +402,16 @@ class MSGFile(olefile.OleFileIO):
                     filename = 'contents.bin'
 
                 # Save contents of directory
-                if sys.version_info[0] < 3:
-                    # Python 2 zip files don't seem to actually match the docs, and `open` simply opens in read mode, even though it should be able to open in write mode.
+                with zfile.open(sysdir + '/' + filename, 'w') as f:
                     data = self._getStream(dir_)
+                    # Specifically check for None. If this is bytes we still want to do this line.
+                    # There was actually this weird issue where for some reason data would be bytes
+                    # but then also simultaneously register as None?
                     if data is not None:
-                        zfile.writestr(sysdir + '/' + filename, data, zipfile.ZIP_DEFLATED)
-
-                else:
-                    with zfile.open(sysdir + '/' + filename, 'w') as f:
-                        data = self._getStream(dir_)
-                        # Specifically check for None. If this is bytes we still want to do this line.
-                        # There was actually this weird issue where for some reason data would be bytes
-                        # but then also simultaneously register as None?
-                        if data is not None:
-                            f.write(data)
+                        f.write(data)
 
     @property
-    def areStringsUnicode(self):
+    def areStringsUnicode(self) -> bool:
         """
         Returns a boolean telling if the strings are unicode encoded.
         """
@@ -434,15 +428,16 @@ class MSGFile(olefile.OleFileIO):
     @property
     def attachmentClass(self):
         """
-        Returns the Attachment class being used, should you need to use it externally for whatever reason.
+        Returns the Attachment class being used, should you need to use it
+        externally for whatever reason.
         """
         return self.__attachmentClass
 
     @property
     def attachmentErrorBehavior(self):
         """
-        The behavior to follow when an attachment raises an exception. Will be one
-        of the following values:
+        The behavior to follow when an attachment raises an exception. Will be
+        one of the following values:
         ATTACHMENT_ERROR_THROW: Don't catch exceptions.
         ATTACHMENT_ERROR_NOT_IMPLEMENTED: Catch NotImplementedError exceptions.
         ATTACHMENT_ERROR_BROKEN: Catch all exceptions.
@@ -464,7 +459,7 @@ class MSGFile(olefile.OleFileIO):
         return self._ensureSetProperty('_importance', '00170003')
 
     @property
-    def mainProperties(self):
+    def mainProperties(self) -> Properties:
         """
         Returns the Properties instance used by the MSGFile instance.
         """
@@ -476,7 +471,7 @@ class MSGFile(olefile.OleFileIO):
             return self._prop
 
     @property
-    def named(self):
+    def named(self) -> Named:
         """
         The main named properties instance for this file.
         """
@@ -497,17 +492,15 @@ class MSGFile(olefile.OleFileIO):
     @property
     def path(self):
         """
-        Returns the message path if generated from a file,
-        otherwise returns the data used to generate the
-        Message instance.
+        Returns the message path if generated from a file, otherwise returns the
+        data used to generate the Message instance.
         """
         return self.__path
 
     @property
     def prefix(self):
         """
-        Returns the prefix of the Message instance.
-        Intended for developer use.
+        Returns the prefix of the Message instance. Intended for developer use.
         """
         return self.__prefix
 
@@ -521,8 +514,8 @@ class MSGFile(olefile.OleFileIO):
     @property
     def prefixList(self):
         """
-        Returns the prefix list of the Message instance.
-        Intended for developer use.
+        Returns the prefix list of the Message instance. Intended for developer
+        use.
         """
         return copy.deepcopy(self.__prefixList)
 

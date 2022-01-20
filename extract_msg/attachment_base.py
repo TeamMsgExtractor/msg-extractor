@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-class AttachmentBase(object):
+class AttachmentBase:
     """
     Stores the attachment data of a Message instance.
     Should the attachment be an embeded message, the
@@ -23,7 +23,6 @@ class AttachmentBase(object):
         :param msg: the Message instance that the attachment belongs to.
         :param dir_: the directory inside the msg file where the attachment is located.
         """
-        object.__init__(self)
         self.__msg = msg
         self.__dir = dir_
         self.__props = Properties(self._getStream('__properties_version1.0'), constants.TYPE_ATTACHMENT)
@@ -76,7 +75,9 @@ class AttachmentBase(object):
 
     def _ensureSetTyped(self, variable, _id):
         """
-        Like the other ensure set functions, but designed for when something could be multiple types (where only one will be present). This way you have no need to set the type, it will be handled for you.
+        Like the other ensure set functions, but designed for when something
+        could be multiple types (where only one will be present). This way you
+        have no need to set the type, it will be handled for you.
         """
         try:
             return getattr(self, variable)
@@ -179,15 +180,16 @@ class AttachmentBase(object):
     def existsTypedProperty(self, id, _type = None):
         """
         Determines if the stream with the provided id exists. The return of this
-        function is 2 values, the first being a boolean for if anything was found,
-        and the second being how many were found.
+        function is 2 values, the first being a boolean for if anything was
+        found, and the second being how many were found.
         """
         return self.__msg.existsTypedProperty(id, self.__dir, _type, True, self.__props)
 
     @property
     def dir(self):
         """
-        Returns the directory inside the msg file where the attachment is located.
+        Returns the directory inside the msg file where the attachment is
+        located.
         """
         return self.__dir
 

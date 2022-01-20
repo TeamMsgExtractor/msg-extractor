@@ -9,110 +9,58 @@ import datetime
 import json
 import logging
 import logging.config
+import os
+import pathlib
 import struct
+# Not actually sure if this needs to be here for the logging, so just in case.
 import sys
 
 import tzlocal
 
+from html import escape as htmlEscape
+
 from . import constants
-from .compat import os_ as os
 from .exceptions import ConversionError, IncompatibleOptionsError, InvaildPropertyIdError, UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError, UnsupportedMSGTypeError
+
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 logging.addLevelName(5, 'DEVELOPER')
 
-if sys.version_info[0] >= 3:  # Python 3
-    getInput = input
 
-    makeDirs = os.makedirs
-
-    def properHex(inp, length = 0):
-        """
-        Taken (with permission) from https://github.com/TheElementalOfDestruction/creatorUtils
-        """
-        a = ''
-        if isinstance(inp, str):
-            a = ''.join([hex(ord(inp[x]))[2:].rjust(2, '0') for x in range(len(inp))])
-        elif isinstance(inp, bytes):
-            a = inp.hex()
-        elif isinstance(inp, int):
-            a = hex(inp)[2:]
-        if len(a) % 2 != 0:
-            a = '0' + a
-        return a.rjust(length, '0').upper()
-
-    def windowsUnicode(string):
-        return str(string, 'utf-16-le') if string is not None else None
-
-    from html import escape as htmlEscape
-
-else:  # Python 2
-    getInput = raw_input
-
-    def makeDirs(name, mode = 0o0777, exist_ok = False):
-        try:
-            os.makedirs(name, mode)
-        except WindowsError as e:
-            if exist_ok and e.winerror == 183: # Path exists.
-                return
-            raise
-
-    def properHex(inp, length = 0):
-        """
-        Converts the input into a hexadecimal string without the beginning "0x". The string
-        will also always have a length that is a multiple of 2 (unless :param length: has
-        been specified). :param length: only specifies the MINIMUM length that the string
-        will use.
-        """
-        a = ''
-        if isinstance(inp, (str, unicode)):
-            a = ''.join([hex(ord(inp[x]))[2:].rjust(2, '0') for x in range(len(inp))])
-        elif isinstance(inp, int):
-            a = hex(inp)[2:]
-        elif isinstance(inp, long):
-            a = hex(inp)[2:-1]
-        if len(a) % 2 != 0:
-            a = '0' + a
-        return a.rjust(length, '0').upper()
-
-    def windowsUnicode(string):
-        return unicode(string, 'utf-16-le') if string is not None else None
-
-    from cgi import escape as htmlEscape
-
-def addNumToDir(dirName):
+def addNumToDir(dirName : pathlib.Path) -> pathlib.Path:
     """
     Attempt to create the directory with a '(n)' appended.
     """
     for i in range(2, 100):
         try:
-            newDirName = dirName + ' (' + str(i) + ')'
-            makeDirs(newDirName)
+            newDirName = dirName.with_name(dirName.name + f' ({i})')
+            os.makedirs(newDirName)
             return newDirName
         except Exception as e:
             pass
     return None
 
-def addNumToZipDir(dirName, _zip):
+def addNumToZipDir(dirName : pathlib.Path, _zip):
     """
     Attempt to create the directory with a '(n)' appended.
     """
     for i in range(2, 100):
-        newDirName = dirName + ' (' + str(i) + ')'
-        if not any(x.startswith(newDirName.rstrip('/') + '/') for x in _zip.namelist()):
+        newDirName = dirName.with_name(dirName.name + f' ({i})')
+        pathCompare = str(newDirName).rstrip('/') + '/'
+        if not any(x.startswith(pathCompare) for x in _zip.namelist()):
             return newDirName
     return None
 
-def bitwiseAdjust(inp, mask):
+def bitwiseAdjust(inp : int, mask : int) -> int:
     """
     Uses a given mask to adjust the location of bits after an operation like
     bitwise AND. This is useful for things like flags where you are trying to
     get a small portion of a larger number. Say for example, you had the number
     0xED (0b11101101) and you needed the adjusted result of the AND operation
-    with 0x70 (0b01110000). The result of the and operation (0b01100000) and the
-    mask used to get it (0x70) are give and the output gets adjusted to be 0x6
-    (0b110).
+    with 0x70 (0b01110000). The result of the AND operation (0b01100000) and the
+    mask used to get it (0x70) are given to this function and the adjustment
+    will be done automatically.
 
     :param mask: MUST be greater than 0.
     """
@@ -120,7 +68,7 @@ def bitwiseAdjust(inp, mask):
         raise ValueError('Mask MUST be greater than 0')
     return inp >> bin(mask)[::-1].index('1')
 
-def bitwiseAdjustedAnd(inp, mask):
+def bitwiseAdjustedAnd(inp : int, mask : int) -> int:
     """
     Preforms the bitwise AND operation between :param inp: and :param mask: and
     adjusts the results based on the rules of the bitwiseAdjust function.
@@ -129,12 +77,14 @@ def bitwiseAdjustedAnd(inp, mask):
         raise ValueError('Mask MUST be greater than 0')
     return (inp & mask) >> bin(mask)[::-1].index('1')
 
-def bytesToGuid(bytes_input):
-    hexinput = [properHex(byte) for byte in bytes_input]
-    hexs = [hexinput[3] + hexinput[2] + hexinput[1] + hexinput[0], hexinput[5] + hexinput[4], hexinput[7] + hexinput[6], hexinput[8] + hexinput[9], ''.join(hexinput[10:16])]
-    return '{{{}-{}-{}-{}-{}}}'.format(*hexs).upper()
+def bytesToGuid(bytesInput : bytes) -> str:
+    """
+    Converts a bytes instance to a GUID.
+    """
+    guidVals = constants.ST_GUID.unpack(bytesInput)
+    return f'{{{guidVals[0]:08X}-{guidVals[1]:04X}-{guidVals[2]:04X}-{guidVals[3][:2].hex().upper()}-{guidVals[3][2:].hex().upper()}}}'
 
-def ceilDiv(n, d):
+def ceilDiv(n : int, d : int) -> int:
     """
     Returns the int from the ceil division of n / d.
     ONLY use ints as inputs to this function.
@@ -144,14 +94,11 @@ def ceilDiv(n, d):
     """
     return -(n // -d)
 
-def divide(string, length):
+def divide(string, length : int) -> list:
     """
-    Taken (with permission) from https://github.com/TheElementalOfDestruction/creatorUtils
-
-    Divides a string into multiple substrings of equal length.
-    If there is not enough for the last substring to be equal,
-    it will simply use the rest of the string.
-    Can also be used for things like lists and tuples.
+    Divides a string into multiple substrings of equal length. If there is not
+    enough for the last substring to be equal, it will simply use the rest of
+    the string. Can also be used for things like lists and tuples.
 
     :param string: string to be divided.
     :param length: length of each division.
@@ -167,12 +114,15 @@ def divide(string, length):
     """
     return [string[length * x:length * (x + 1)] for x in range(int(ceilDiv(len(string), length)))]
 
-def fromTimeStamp(stamp):
+def fromTimeStamp(stamp) -> datetime.datetime:
+    """
+    Returns a datetime from the UTC timestamp given the current timezone.
+    """
     return datetime.datetime.fromtimestamp(stamp, tzlocal.get_localzone())
 
 def getCommandArgs(args):
     """
-    Parse command-line arguments
+    Parse command-line arguments.
     """
     parser = argparse.ArgumentParser(description=constants.MAINDOC, prog='extract_msg')
     # --use-content-id, --cid
@@ -218,7 +168,7 @@ def getCommandArgs(args):
     parser.add_argument('--rtf', dest='rtf', action='store_true',
                        help='Sets whether the output should be rtf. If this is not possible, will error.')
     # --allow-fallback
-    parser.add_argument('--allow-fallback', dest='allowFallbac', action='store_true',
+    parser.add_argument('--allow-fallback', dest='allowFallback', action='store_true',
                        help='Tells the program to fallback to a different save type if the selected one is not possible.')
     # --out-name NAME
     parser.add_argument('--out-name', dest = 'out_name',
@@ -228,6 +178,7 @@ def getCommandArgs(args):
                         help='An msg file to be parsed')
 
     options = parser.parse_args(args)
+
     # Check if more than one of the following arguments has been specified
     if options.html + options.rtf + options.json > 1:
        raise IncompatibleOptionsError('Only one of these options may be selected at a time: --html, --json, --raw, --rtf')
@@ -274,7 +225,7 @@ def getContFileDir(_file_):
     """
     return '/'.join(_file_.replace('\\', '/').split('/')[:-1])
 
-def getEncodingName(codepage):
+def getEncodingName(codepage : int) -> str:
     """
     Returns the name of the encoding with the specified codepage.
     """
@@ -284,18 +235,18 @@ def getEncodingName(codepage):
         codecs.lookup(constants.CODE_PAGES[codepage])
         return constants.CODE_PAGES[codepage]
     except LookupError:
-        raise UnsupportedEncodingError('The codepage {} ({}) is not currently supported by your version of Python.'.format(codepage, constants.CODE_PAGES[codepage]))
+        raise UnsupportedEncodingError(f'The codepage {codepage} ({constants.CODE_PAGES[codepage]}) is not currently supported by your version of Python.')
 
 def getFullClassName(inp):
     return inp.__class__.__module__ + '.' + inp.__class__.__name__
 
-def hasLen(obj):
+def hasLen(obj) -> bool:
     """
     Checks if :param obj: has a __len__ attribute.
     """
     return hasattr(obj, '__len__')
 
-def injectHtmlHeader(msgFile):
+def injectHtmlHeader(msgFile) -> bytes:
     """
     Returns the HTML body from the MSG file (will check that it has one) with
     the HTML header injected into it.
@@ -320,7 +271,7 @@ def injectHtmlHeader(msgFile):
     # Use the previously defined function to inject the HTML header.
     return constants.RE_HTML_BODY_START.sub(replace, msgFile.htmlBody, 1)
 
-def injectRtfHeader(msgFile):
+def injectRtfHeader(msgFile) -> bytes:
     """
     Returns the RTF body from the MSG file (will check that it has one) with the
     RTF header injected into it.
@@ -332,52 +283,10 @@ def injectRtfHeader(msgFile):
     # rtf.
     if isEncapsulatedRtf(msgFile.rtfBody):
         injectableHeader = constants.RTF_ENC_INJECTABLE_HEADER
-        def rtfSanitize(inp):
-            if not inp:
-                return ''
-            output = ''
-            for char in inp:
-                # Check if it is in the right range to be printed directly.
-                if 32 <= ord(char) < 128:
-                    if char in ('\\', '{', '}'):
-                        output += '\\'
-                    output += char
-                elif ord(char) < 32 or 128 <= ord(char) <= 255:
-                    # Otherwise, see if it is just a small escape.
-                    output += "\\'" + properHex(char, 2)
-                else:
-                    # Handle Unicode characters.
-                    output += '\\u' + str(ord(char)) + '?'
-
-            return output
+        rtfSanitize = rtfSanitizeHtml
     else:
         injectableHeader = constants.RTF_PLAIN_INJECTABLE_HEADER
-        def rtfSanitize(inp):
-            if not inp:
-                return ''
-            output = ''
-            for char in inp:
-                # Check if it is in the right range to be printed directly.
-                if 32 <= ord(char) < 128:
-                    # Quick check for handling the HTML escapes. Will eventually
-                    # upgrade this code to actually handle all the HTML escapes
-                    # but this will do for now.
-                    if char == '<':
-                        output += r'{\*\htmltag84 &lt;}\htmlrtf <\htmlrtf0 '
-                    elif char == '>':
-                        output += r'{\*\htmltag84 &gt;}\htmlrtf >\htmlrtf0'
-                    else:
-                        if char in ('\\', '{', '}'):
-                            output += '\\'
-                        output += char
-                elif ord(char) < 32 or 128 <= ord(char) <= 255:
-                    # Otherwise, see if it is just a small escape.
-                    output += "\\'" + properHex(char, 2)
-                else:
-                    # Handle Unicode characters.
-                    output += '\\u' + str(ord(char)) + '?'
-
-            return output
+        rtfSanitize = rtfSanitizePlain
 
     def replace(bodyMarker):
         """
@@ -439,17 +348,22 @@ def injectRtfHeader(msgFile):
 
     raise Exception('All injection attempts failed.')
 
-def inputToBytes(stringInputVar, encoding):
-    if isinstance(stringInputVar, constants.BYTES):
+def inputToBytes(stringInputVar, encoding) -> bytes:
+    """
+    Converts the input into bytes.
+
+    :raises ConversionError: if the input cannot be converted.
+    """
+    if isinstance(stringInputVar, bytes):
         return stringInputVar
-    elif isinstance(stringInputVar, constants.STRING):
+    elif isinstance(stringInputVar, str):
         return stringInputVar.encode(encoding)
     elif stringInputVar is None:
         return b''
     else:
-        raise ConversionError('Cannot convert to BYTES type')
+        raise ConversionError('Cannot convert to bytes.')
 
-def inputToMsgpath(inp):
+def inputToMsgpath(inp) -> list:
     """
     Converts the input into an msg path.
     """
@@ -458,17 +372,22 @@ def inputToMsgpath(inp):
     ret = inputToString(inp, 'utf-8').replace('\\', '/').split('/')
     return ret if ret[0] != '' else []
 
-def inputToString(bytesInputVar, encoding):
-    if isinstance(bytesInputVar, constants.STRING):
+def inputToString(bytesInputVar, encoding) -> str:
+    """
+    Converts the input into a string.
+
+    :raises ConversionError: if the input cannot be converted.
+    """
+    if isinstance(bytesInputVar, str):
         return bytesInputVar
-    elif isinstance(bytesInputVar, constants.BYTES):
+    elif isinstance(bytesInputVar, bytes):
         return bytesInputVar.decode(encoding)
     elif bytesInputVar is None:
         return ''
     else:
-        raise ConversionError('Cannot convert to STRING type')
+        raise ConversionError('Cannot convert to str type.')
 
-def isEncapsulatedRtf(inp):
+def isEncapsulatedRtf(inp : bytes) -> bool:
     """
     Currently the destection is made to be *extremly* basic, but this will work
     for now. In the future this will be fixed to that literal text in the body
@@ -476,13 +395,13 @@ def isEncapsulatedRtf(inp):
     """
     return b'\\fromhtml' in inp
 
-def isEmptyString(inp):
+def isEmptyString(inp : str) -> bool:
     """
     Returns true if the input is None or is an Empty string.
     """
     return (inp == '' or inp is None)
 
-def knownMsgClass(classType):
+def knownMsgClass(classType : str) -> bool:
     """
     Checks if the specified class type is recognized by the module. Usually used
     for checking if a type is simply unsupported rather than unknown.
@@ -497,15 +416,16 @@ def knownMsgClass(classType):
 
     return False
 
-def msgEpoch(inp):
+def filetimeToUtc(inp : int) -> float:
     """
-    Taken (with permission) from https://github.com/TheElementalOfDestruction/creatorUtils
+    Converts a FILETIME into a unix timestamp.
     """
     return (inp - 116444736000000000) / 10000000.0
 
-def msgpathToString(inp):
+def msgpathToString(inp) -> str:
     """
-    Converts an msgpath (one of the internal paths inside an msg file) into a string.
+    Converts an msgpath (one of the internal paths inside an msg file) into a
+    string.
     """
     if inp is None:
         return None
@@ -519,13 +439,11 @@ def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAtt
     Function to automatically open an MSG file and detect what type it is.
 
     :param path: Path to the msg file in the system or is the raw msg file.
-    :param prefix: Used for extracting embeded msg files
-        inside the main one. Do not set manually unless
-        you know what you are doing.
-    :param attachmentClass: Optional, the class the Message object
-        will use for attachments. You probably should
-        not change this value unless you know what you
-        are doing.
+    :param prefix: Used for extracting embeded msg files inside the main one.
+        Do not set manually unless you know what you are doing.
+    :param attachmentClass: Optional, the class the Message object will use for
+        attachments. You probably should not change this value unless you know
+        what you are doing.
     :param filename: Optional, the filename to be used by default when saving.
     :param delayAttachments: Optional, delays the initialization of attachments
         until the user attempts to retrieve them. Allows MSG files with bad
@@ -541,7 +459,8 @@ def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAtt
     when it cannot identify what MSGFile derivitive to use. Otherwise, it will
     log the error and return a basic MSGFile instance.
 
-    Raises UnsupportedMSGTypeError and UnrecognizedMSGTypeError.
+    :raises UnsupportedMSGTypeError: if the type is recognized but not suppoted.
+    :raises UnrecognizedMSGTypeError: if the type is not recognized.
     """
     from .appointment import Appointment
     from .attachment import Attachment
@@ -566,24 +485,26 @@ def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAtt
     elif classType == 'ipm': # Unspecified format. It should be equal to this and not just start with it.
         return msg
     elif strict:
+        # Because we are closing it, we need to store it in a variable first.
         ct = msg.classType
         msg.close()
         if knownMsgClass(classType):
-            raise UnsupportedMSGTypeError('MSG type "{}" currently is not supported by the module. If you would like support, please make a feature request.'.format(ct))
-        raise UnrecognizedMSGTypeError('Could not recognize msg class type "{}".'.format(ct))
+            raise UnsupportedMSGTypeError(f'MSG type "{ct}" currently is not supported by the module. If you would like support, please make a feature request.')
+        raise UnrecognizedMSGTypeError(f'Could not recognize msg class type "{ct}".')
     else:
-        logger.error('Could not recognize msg class type "{}". This most likely means it hasn\'t been implemented yet, and you should ask the developers to add support for it.'.format(msg.classType))
+        logger.error(f'Could not recognize msg class type "{msg.classType}". This most likely means it hasn\'t been implemented yet, and you should ask the developers to add support for it.')
         return msg
 
-def parseType(_type, stream, encoding, extras):
+def parseType(_type : int, stream, encoding, extras):
     """
-    Converts the data in :param stream: to a
-    much more accurate type, specified by
+    Converts the data in :param stream: to a much more accurate type, specified
+    by :param _type:.
     :param _type: the data's type.
     :param stream: is the data to be converted.
     :param encoding: is the encoding to be used for regular strings.
     :param extras: is used in the case of types like PtypMultipleString.
-    For that example, extras should be a list of the bytes from rest of the streams.
+    For that example, extras should be a list of the bytes from rest of the
+    streams.
 
     WARNING: Not done. Do not try to implement anywhere where it is not already implemented
     """
@@ -630,7 +551,7 @@ def parseType(_type, stream, encoding, extras):
     elif _type == 0x0040:  # PtypTime
         rawtime = constants.ST3.unpack(value)[0]
         if rawtime != 915151392000000000:
-            value = fromTimeStamp(msgEpoch(rawtime))
+            value = fromTimeStamp(filetimeToUtc(rawtime))
         else:
             # Temporarily just set to max time to signify a null date.
             value = datetime.datetime.max
@@ -652,27 +573,27 @@ def parseType(_type, stream, encoding, extras):
         # TODO parsing for `multiple` types
         if _type in (0x101F, 0x101E):
             ret = [x.decode(encoding) for x in extras]
-            lengths = struct.unpack('<{}i'.format(len(ret)), stream)
+            lengths = struct.unpack(f'<{len(ret)}i', stream)
             lengthLengths = len(lengths)
             if lengthLengths > lengthExtras:
-                logger.warning('Error while parsing multiple type. Expected {} stream{}, got {}. Ignoring.'.format(lengthLengths, 's' if lengthLengths != 1 else '', lengthExtras))
+                logger.warning(f'Error while parsing multiple type. Expected {lengthLengths} stream{"s" if lengthLengths != 1 else ""}, got {lengthExtras}. Ignoring.')
             for x, y in enumerate(extras):
                 if lengths[x] != len(y):
-                    logger.warning('Error while parsing multiple type. Expected length {}, got {}. Ignoring.'.format(lengths[x], len(y)))
+                    logger.warning(f'Error while parsing multiple type. Expected length {lengths[x]}, got {len(y)}. Ignoring.')
             return ret
         elif _type == 0x1102:
             ret = copy.deepcopy(extras)
             lengths = tuple(constants.STUI32.unpack(stream[pos*8:(pos+1)*8])[0] for pos in range(len(stream) // 8))
             lengthLengths = len(lengths)
             if lengthLengths > lengthExtras:
-                logger.warning('Error while parsing multiple type. Expected {} stream{}, got {}. Ignoring.'.format(lengthLengths, 's' if lengthLengths != 1 else '', lengthExtras))
+                logger.warning(f'Error while parsing multiple type. Expected {lengthLengths} stream{"s" if lengthLengths != 1 else ""}, got {lengthExtras}. Ignoring.')
             for x, y in enumerate(extras):
                 if lengths[x] != len(y):
-                    logger.warning('Error while parsing multiple type. Expected length {}, got {}. Ignoring.'.format(lengths[x], len(y)))
+                    logger.warning(f'Error while parsing multiple type. Expected length {lengths[x]}, got {len(y)}. Ignoring.')
             return ret
         elif _type in (0x1002, 0x1003, 0x1004, 0x1005, 0x1007, 0x1014, 0x1040, 0x1048):
             if stream != len(extras):
-                logger.warning('Error while parsing multiple type. Expected {} entr{}, got {}. Ignoring.'.format(stream, ('y' if stream == 1 else 'ies'), len(extras)))
+                logger.warning(f'Error while parsing multiple type. Expected {stream} entr{"y" if stream == 1 else "ies"}, got {len(extras)}. Ignoring.')
             if _type == 0x1002:
                 return tuple(constants.STMI16.unpack(x)[0] for x in extras)
             if _type == 0x1003:
@@ -687,14 +608,14 @@ def parseType(_type, stream, encoding, extras):
             if _type == 0x1014:
                 return tuple(constants.STMI64.unpack(x)[0] for x in extras)
             if _type == 0x1040:
-                return tuple(msgEpoch(constants.ST3.unpack(x)[0]) for x in extras)
+                return tuple(filetimeToUtc(constants.ST3.unpack(x)[0]) for x in extras)
             if _type == 0x1048:
                 return tuple(bytesToGuid(x) for x in extras)
         else:
-            raise NotImplementedError('Parsing for type {} has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType {}"'.format(_type, _type))
+            raise NotImplementedError(f'Parsing for type {_type} has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType {_type}"')
     return value
 
-def prepareFilename(filename):
+def prepareFilename(filename) -> str:
     """
     Adjusts :param filename: so that it can succesfully be used as an actual
     file name.
@@ -702,11 +623,79 @@ def prepareFilename(filename):
     # I would use re here, but it tested to be slightly slower than this.
     return ''.join(i for i in filename if i not in r'\/:*?"<>|' + '\x00')
 
-def roundUp(inp, mult):
+def properHex(inp, length : int = 0) -> str:
+    """
+    Takes in various input types and converts them into a hex string whose
+    length will always be even.
+    """
+    a = ''
+    if isinstance(inp, str):
+        a = ''.join([hex(ord(inp[x]))[2:].rjust(2, '0') for x in range(len(inp))])
+    elif isinstance(inp, bytes):
+        a = inp.hex()
+    elif isinstance(inp, int):
+        a = hex(inp)[2:]
+    if len(a) % 2 != 0:
+        a = '0' + a
+    return a.rjust(length, '0').upper()
+
+def roundUp(inp : int, mult : int) -> int:
     """
     Rounds :param inp: up to the nearest multiple of :param mult:.
     """
     return inp + (mult - inp) % mult
+
+def rtfSanitizeHtml(inp : str) -> str:
+    """
+    Sanitizes input to an RTF stream that has encapsulated HTML.
+    """
+    if not inp:
+        return ''
+    output = ''
+    for char in inp:
+        # Check if it is in the right range to be printed directly.
+        if 32 <= ord(char) < 128:
+            # Quick check for handling the HTML escapes. Will eventually
+            # upgrade this code to actually handle all the HTML escapes
+            # but this will do for now.
+            if char == '<':
+                output += r'{\*\htmltag84 &lt;}\htmlrtf <\htmlrtf0 '
+            elif char == '>':
+                output += r'{\*\htmltag84 &gt;}\htmlrtf >\htmlrtf0'
+            else:
+                if char in ('\\', '{', '}'):
+                    output += '\\'
+                output += char
+        elif ord(char) < 32 or 128 <= ord(char) <= 255:
+            # Otherwise, see if it is just a small escape.
+            output += "\\'" + properHex(char, 2)
+        else:
+            # Handle Unicode characters.
+            output += '\\u' + str(ord(char)) + '?'
+
+    return output
+
+def rtfSanitizePlain(inp : str) -> str:
+    """
+    Sanitizes input to a plain RTF stream.
+    """
+    if not inp:
+        return ''
+    output = ''
+    for char in inp:
+        # Check if it is in the right range to be printed directly.
+        if 32 <= ord(char) < 128:
+            if char in ('\\', '{', '}'):
+                output += '\\'
+            output += char
+        elif ord(char) < 32 or 128 <= ord(char) <= 255:
+            # Otherwise, see if it is just a small escape.
+            output += "\\'" + properHex(char, 2)
+        else:
+            # Handle Unicode characters.
+            output += '\\u' + str(ord(char)) + '?'
+
+    return output
 
 def setupLogging(defaultPath=None, defaultLevel=logging.WARN, logfile=None, enableFileLogging=False,
                   env_key='EXTRACT_MSG_LOG_CFG'):
@@ -759,7 +748,7 @@ def setupLogging(defaultPath=None, defaultLevel=logging.WARN, logfile=None, enab
         print(str(paths[1:]))
         logging.basicConfig(level=defaultLevel)
         logging.warning('The extract_msg logging configuration was not found - using a basic configuration.'
-                        'Please check the extract_msg installation directory for "logging-{}.json".'.format(os.name))
+                        f'Please check the extract_msg installation directory for "logging-{os.name}.json".')
         return False
 
     with open(path, 'rt') as f:
@@ -772,7 +761,7 @@ def setupLogging(defaultPath=None, defaultLevel=logging.WARN, logfile=None, enab
                     os.path.expandvars(logfile if logfile else config['handlers'][x]['filename']))
                 tmp = getContFileDir(tmp)
                 if not os.path.exists(tmp):
-                    makeDirs(tmp)
+                    os.makedirs(tmp)
             else:
                 config['handlers'][x]['filename'] = null
 
@@ -803,4 +792,7 @@ def verifyPropertyId(id):
 def verifyType(_type):
     if _type is not None:
         if (_type not in constants.VARIABLE_LENGTH_PROPS_STRING) and (_type not in constants.FIXED_LENGTH_PROPS_STRING):
-            raise UnknownTypeError('Unknown type {}'.format(_type))
+            raise UnknownTypeError(f'Unknown type {_type}')
+
+def windowsUnicode(string):
+    return str(string, 'utf-16-le') if string is not None else None

@@ -7,17 +7,8 @@ contributers, please do not complain about bugs.
 import datetime
 import re
 import struct
-import sys
 
 import ebcdic
-
-
-if sys.version_info[0] >= 3:
-    BYTES = bytes
-    STRING = str
-else:
-    BYTES = str
-    STRING = unicode
 
 
 # DEFINE CONSTANTS
@@ -295,6 +286,17 @@ RTF_PLAIN_INJECTABLE_HEADER = r"""
     {{\b Subject: \b0 {subject}}}\par\par
 }}
 """.replace('    ', '').replace('\r', '').replace('\n', '')
+
+
+# Used to format the header for saving only the header.
+HEADER_FORMAT = """From: {From}
+To: {To}
+CC: {Cc}
+Bcc: {Bcc}
+Subject: {subject}
+Date: {Date}
+Message-ID: {Message-Id}
+"""
 
 
 KNOWN_CLASS_TYPES = (
@@ -617,6 +619,8 @@ MAINDOC = "extract_msg:\n\tExtracts emails and attachments saved in Microsoft Ou
 ST1 = struct.Struct('<8x4I')
 ST2 = struct.Struct('<H2xI8x')
 ST3 = struct.Struct('<Q')
+# Struct used for unpacking a GUID from bytes.
+ST_GUID = struct.Struct('<IHH8s')
 # Structs used by data.py
 ST_DATA_UI32 = struct.Struct('<I')
 ST_DATA_UI16 = struct.Struct('<H')
@@ -680,7 +684,7 @@ PTYPES = {
     0x0014: 'PtypInteger64',  # Signed longlong
     0x001E: 'PtypString8',
     0x001F: 'PtypString',
-    0x0040: 'PtypTime',  # Use msgEpoch to convert to unix time stamp
+    0x0040: 'PtypTime',  # Use filetimeToUtc to convert to unix time stamp
     0x0048: 'PtypGuid',
     0x00FB: 'PtypServerId',
     0x00FD: 'PtypRestriction',

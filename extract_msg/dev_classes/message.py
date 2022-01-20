@@ -25,9 +25,9 @@ class Message(olefile.OleFileIO):
             inside the main one. Do not set manually unless
             you know what you are doing.
         """
-        logger.log(5, 'prefix: {}'.format(prefix))
+        logger.log(5, f'Prefix: {prefix}')
         self.__path = path
-        olefile.OleFileIO.__init__(self, path)
+        super().__init__(path)
         prefixl = []
         tmp_condition = prefix != ''
         if tmp_condition:
@@ -35,7 +35,7 @@ class Message(olefile.OleFileIO):
             try:
                 prefix = '/'.join(prefix)
             except:
-                raise TypeError('Invalid prefix type: ' + str(type(prefix)) +
+                raise TypeError(f'Invalid prefix type: {type(prefix)}' +
                                 '\n(This was probably caused by you setting it manually).')
             prefix = prefix.replace('\\', '/')
             g = prefix.split('/')
@@ -52,13 +52,13 @@ class Message(olefile.OleFileIO):
         if filename is not None:
             self.filename = filename
         else:
-            logger.log(5, ':param path: has __len__ attribute?: {}'.format(has_len(path)))
+            logger.log(5, f':param path: has __len__ attribute?: {has_len(path)}')
             if has_len(path):
                 if len(path) < 1536:
                     self.filename = path
-                    logger.log(5, ':param path: length is {}; Using :param path: as file path'.format(len(path)))
+                    logger.log(5, f':param path: length is {len(path)}; Using :param path: as file path')
                 else:
-                    logger.log(5, ':param path: length is {}; Using :param path: as raw msg stream'.format(len(path)))
+                    logger.log(5, f':param path: length is {len(path)}; Using :param path: as raw msg stream')
                     self.filename = None
             else:
                 self.filename = None
@@ -81,13 +81,13 @@ class Message(olefile.OleFileIO):
             stream = self.openstream(filename)
             return stream.read()
         else:
-            logger.info('Stream "{}" was requested but could not be found. Returning `None`.'.format(filename))
+            logger.info(f'Stream "{filename}" was requested but could not be found. Returning `None`.')
             return None
 
     def _getStringStream(self, filename, prefer='unicode', prefix=True):
         """
         Gets a string representation of the requested filename.
-        This should ALWAYS return a string (Unicode in python 2)
+        This should ALWAYS return a string.
         """
 
         filename = self.fix_path(filename, prefix)
@@ -127,23 +127,30 @@ class Message(olefile.OleFileIO):
         """
         Replacement for OleFileIO.listdir that runs at the current prefix directory.
         """
-        temp = self.listdir(streams, storages)
-        if self.__prefix == '':
-            return temp
+        entries = self.listdir(streams, storages)
+        # If we are in the top level MSG already, we can just return.
+        if not self.__prefix:
+            return entries
+
+        # Get a list for the prefix.
         prefix = self.__prefix.split('/')
         if prefix[-1] == '':
             prefix.pop()
+
         out = []
-        for x in temp:
+        for pathEntry in entries:
             good = True
+            # If the entry we are looking at is not longer then the prefix, it's not good.
             if len(x) <= len(prefix):
-                good = False
-            if good:
-                for y in range(len(prefix)):
-                    if x[y] != prefix[y]:
-                        good = False
+                continue
+
+            for index, entry in enumerate(prefix):
+                if x[y] != entry:
+                    good = False
+
             if good:
                 out.append(x)
+
         return out
 
     @property
