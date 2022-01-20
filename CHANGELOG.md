@@ -8,7 +8,7 @@
 * Updated `utils.bytesToGuid` to make it faster and more efficient.
 * Renamed `utils.msgEpoch` to `utils.filetimeToUtc` to be more descriptive.
 * Updated internal variable names to be more consistent.
-* Improvements to the way `__main__` works. This does not affect the output it will generate, only the efficiency and readability. 
+* Improvements to the way `__main__` works. This does not affect the output it will generate, only the efficiency and readability.
 
 **v0.29.3**
 * [[TeamMsgExtractor #226](https://github.com/TeamMsgExtractor/msg-extractor/issues/198)] Fix typo in command parsing that prevented the usage of `allowFallback`.
