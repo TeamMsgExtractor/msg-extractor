@@ -10,7 +10,7 @@ from .attachment_base import AttachmentBase
 from .named import NamedAttachmentProperties
 from .prop import FixedLengthProp, VariableLengthProp
 from .properties import Properties
-from .utils import openMsg, inputToString, prepareFilename, verifyPropertyId, verifyType
+from .utils import createZipOpen, inputToString, openMsg, prepareFilename, verifyPropertyId, verifyType
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -133,7 +133,6 @@ class Attachment(AttachmentBase):
         # Check if we are doing a zip file.
         _zip = kwargs.get('zip')
 
-
         # ZipFile handling.
         if _zip:
             # If we are doing a zip file, first check that we have been given a path.
@@ -147,7 +146,7 @@ class Attachment(AttachmentBase):
             # Path needs to be done in a special way if we are in a zip file.
             customPath = pathlib.Path(kwargs.get('customPath', ''))
             # Set the open command to be that of the zip file.
-            _open = _zip.open
+            _open = createZipOpen(_zip.open)
             # Zip files use w for writing in binary.
             mode = 'w'
         else:
@@ -200,7 +199,6 @@ class Attachment(AttachmentBase):
                 _zip.close()
 
             return self.msg
-
 
     def saveEmbededMessage(self, **kwargs):
         """
