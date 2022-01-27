@@ -1,3 +1,7 @@
+**v0.30.2**
+* Fixed typo in `utils.knownMsgClass`.
+* Updated contributing guidelines and pull request template. Pull requests were updated to match the new structure of the module while the guidelines were updated for clarity.
+
 **v0.30.1**
 * [[TeamMsgExtractor #102](https://github.com/TeamMsgExtractor/msg-extractor/issues/102)] Added property `MessageBase.htmlBodyPrepared` which provides the HTML body that has been prepared for actual use or conversion to PDF. All attachments that can be injected into the body directly will be injected.
 * Corrected a mistake in the documentation of `Message.save`.
