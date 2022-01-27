@@ -138,8 +138,9 @@ Error Reporting
 
 Should you encounter an error that has not already been reported, please
 do the following when reporting it: \* Make sure you are using the
-latest version of extract_msg. \* State your Python version. \* Include
-the code, if any, that you used. \* Include a copy of the traceback.
+latest version of extract_msg (check the version on PyPi). \* State your
+Python version. \* Include the code, if any, that you used. \* Include a
+copy of the traceback.
 
 Installation
 ------------
@@ -205,8 +206,8 @@ And thank you to everyone who has opened an issue and helped us track down those
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
 
-.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.30.0-blue.svg
-   :target: https://pypi.org/project/extract-msg/0.30.0/
+.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.30.1-blue.svg
+   :target: https://pypi.org/project/extract-msg/0.30.1/
 
 .. |PyPI2| image:: https://img.shields.io/badge/python-3.6+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-367/

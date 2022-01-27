@@ -15,12 +15,15 @@ def main() -> None:
 
     # Determine where to save the files to.
     currentDir = os.getcwd() # Store this incase the path changes.
-    if args.out_path:
-        if not os.path.exists(args.out_path):
-            os.makedirs(args.out_path)
-        out = args.out_path
+    if not args.zip:
+        if args.out_path:
+            if not os.path.exists(args.out_path):
+                os.makedirs(args.out_path)
+            out = args.out_path
+        else:
+            out = currentDir
     else:
-        out = currentDir
+        out = args.out_path if args.out_path else ''
 
     if args.dev:
         import extract_msg.dev
@@ -54,6 +57,8 @@ def main() -> None:
             'html': args.html,
             'rtf': args.rtf,
             'allowFallback': args.allowFallback,
+            'preparedHtml': args.preparedHtml,
+            'zip': args.zip,
         }
 
         for x in args.msgs:

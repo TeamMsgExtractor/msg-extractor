@@ -10,7 +10,7 @@ from . import constants
 from .attachment import Attachment
 from .exceptions import DataNotFoundError, IncompatibleOptionsError
 from .message_base import MessageBase
-from .utils import addNumToDir, addNumToZipDir, injectHtmlHeader, injectRtfHeader, inputToBytes, inputToString, prepareFilename
+from .utils import addNumToDir, addNumToZipDir, createZipOpen, injectHtmlHeader, injectRtfHeader, inputToBytes, inputToString, prepareFilename
 
 
 logger = logging.getLogger(__name__)
@@ -74,12 +74,15 @@ class Message(MessageBase):
         There are several parameters used to determine how the message will be
         saved. By default, the message will be saved as plain text. Setting one
         of the following parameters to True will change that:
-           * :param html: will try to output the message in HTML format.
+           * :param html: will output the message in HTML format.
            * :param json: will output the message in JSON format.
            * :param raw: will output the message in a raw format.
            * :param rtf: will output the message in RTF format.
 
         Usage of more than one formatting parameter will raise an exception.
+        Setting :param preparedHtml: to True in addition to :param html: will
+        use the version of the HTML body that has attachments injected into it,
+        useful for direct viewing or conversion to PDF.
 
         Using HTML or RTF will raise an exception if they could not be retrieved
         unless you have :param allowFallback: set to True. Fallback will go in
@@ -90,8 +93,8 @@ class Message(MessageBase):
 
         If you want to save the contents into a ZipFile or similar object,
         either pass a path to where you want to create one or pass an instance
-        to :param zip:. If :param zip: is an instance, :param customPath: will
-        refer to a location inside the zip file.
+        to :param zip:. If :param zip: is set, :param customPath: will refer to
+        a location inside the zip file.
 
         If you want to save the header, should it be found, set
         :param saveHeader: to true.
@@ -127,7 +130,7 @@ class Message(MessageBase):
             # Path needs to be done in a special way if we are in a zip file.
             path = pathlib.Path(kwargs.get('customPath', ''))
             # Set the open command to be that of the zip file.
-            _open = _zip.open
+            _open = createZipOpen(_zip.open)
             # Zip files use w for writing in binary.
             mode = 'w'
         else:
@@ -189,7 +192,7 @@ class Message(MessageBase):
             if any(x.startswith(pathCompare) for x in _zip.namelist()):
                 newDirName = addNumToZipDir(path, _zip)
                 if newDirName:
-                    path = newDireName
+                    path = newDirName
                 else:
                     raise Exception(f'Failed to create directory "{path}". Does it already exist?')
 
@@ -245,7 +248,7 @@ class Message(MessageBase):
                     if useHtml:
                         # Inject the header into the data and then write it to
                         # the file.
-                        data = injectHtmlHeader(self)
+                        data = injectHtmlHeader(self, prepared = kwargs.get('preparedHtml', False))
                         f.write(data)
                     elif useRtf:
                         # Inject the header into the data and then write it to

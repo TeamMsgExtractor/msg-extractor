@@ -1,6 +1,21 @@
+**v0.30.1**
+* Added property `MessageBase.htmlBodyPrepared` which provides the HTML body that has been prepared for actual use or conversion to PDF. All attachments that can be injected into the body directly will be injected.
+* Corrected a mistake in the documentation of `Message.save`.
+* Fixed issue where the command line parser was not checking for raw in conjunction with other saving options.
+* Changed `utils.setupLogging` to use `pathlib`.
+* Improved reliability of the logic in `utils.setupLogging`.
+* Removed function `utils.getContFileDir`.
+* Cleaned up plain `Exception` being raised at the end of `utils.injectRtfHeader` if the injection failed. This now raises `RuntimeError`, an error that should be reported so the injection system can be improved.
+* Added parsing for PtypServerId to `utils.parseType`.
+* Added `FolderID`, `MessageID`, and `ServerID` to `data`.
+* Added zip output to the command line.
+* Added support for PtypMultipleFloatingTime to `utils.parseType`.
+* Improved documentation of many functions with the exceptions they may raise.
+* Changed the way zipfiles are handled so that files written to them actually have a modification date now.
+
 **v0.30.0**
 * Removed all support for Python 2. This caused a lot of things to be moved around and changed from indirect references to direct references, so it's possible something fell through the cracks. I'm doing my best to test it, but let me know if you have an issue.
-* Changed classes to now prefer super() over direct superclass initialization.
+* Changed classes to now prefer `super()` over direct superclass initialization.
 * Removed explicit object subclassing (it's implicit in Python 3 so we don't need it anymore).
 * Converted most `.format`s into f strings.
 * Improved consistency of docstrings. It's not perfect, but it should at least be better.
