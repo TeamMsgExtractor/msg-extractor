@@ -1,3 +1,7 @@
+**v0.29.4**
+* Fixed typo in `utils.knownMsgClass`.
+* Updated contributing guidelines and pull request template.
+
 **v0.29.3**
 * [[TeamMsgExtractor #226](https://github.com/TeamMsgExtractor/msg-extractor/issues/198)] Fix typo in command parsing that prevented the usage of `allowFallback`.
 * Fixed main still manually navigating to a new directory with os.chdir instead of using `customPath`.

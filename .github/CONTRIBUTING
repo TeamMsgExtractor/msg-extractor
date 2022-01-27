@@ -12,8 +12,9 @@ Please note we have a [code of conduct](CODE_OF_CONDUCT.md), please follow it in
 1. Ensure an issue already exists for what you are fixing and link to it in your pull.
 2. Ensure any install or build dependencies are removed before the end of the layer when doing a
    build.
+3. Ensure you are not pulling to the master branch that is for final releases only.
 3. Update the [CHANGELOG](CHANGELOG.md) with details of changes to the codebase, this includes new functionality,
-   deprecated featrues, or any other material changes.
+   deprecated features, or any other material changes.
 4. Increase the version numbers in any examples files and the README.md to the new version that this
    Pull Request would represent. The versioning scheme we use is [SemVer](http://semver.org/). (Usually done by the
    maintainers.

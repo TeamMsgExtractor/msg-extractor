@@ -451,7 +451,7 @@ def knownMsgClass(classType):
         return True
 
     for item in constants.KNOWN_CLASS_TYPES:
-        if classType.startsWith(item):
+        if classType.startswith(item):
             return True
 
     return False
