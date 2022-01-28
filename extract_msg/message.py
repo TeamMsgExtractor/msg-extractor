@@ -249,26 +249,25 @@ class Message(MessageBase):
                         emailObj['attachments'] = attachmentNames
 
                         f.write(inputToBytes(json.dumps(emailObj), 'utf-8'))
+                    elif useHtml:
+                        # Inject the header into the data and then write it to
+                        # the file.
+                        data = injectHtmlHeader(self, prepared = kwargs.get('preparedHtml', False))
+                        f.write(data)
+                    elif useRtf:
+                        # Inject the header into the data and then write it to
+                        # the file.
+                        data = injectRtfHeader(self)
+                        f.write(data)
                     else:
-                        if useHtml:
-                            # Inject the header into the data and then write it
-                            # to the file.
-                            data = injectHtmlHeader(self, prepared = kwargs.get('preparedHtml', False))
-                            f.write(data)
-                        elif useRtf:
-                            # Inject the header into the data and then write it
-                            # to the file.
-                            data = injectRtfHeader(self)
-                            f.write(data)
-                        else:
-                            f.write(b'From: ' + inputToBytes(self.sender, 'utf-8') + crlf)
-                            f.write(b'To: ' + inputToBytes(self.to, 'utf-8') + crlf)
-                            f.write(b'Cc: ' + inputToBytes(self.cc, 'utf-8') + crlf)
-                            f.write(b'Bcc: ' + inputToBytes(self.bcc, 'utf-8') + crlf)
-                            f.write(b'Subject: ' + inputToBytes(self.subject, 'utf-8') + crlf)
-                            f.write(b'Date: ' + inputToBytes(self.date, 'utf-8') + crlf)
-                            f.write(b'-----------------' + crlf + crlf)
-                            f.write(inputToBytes(self.body, 'utf-8'))
+                        f.write(b'From: ' + inputToBytes(self.sender, 'utf-8') + crlf)
+                        f.write(b'To: ' + inputToBytes(self.to, 'utf-8') + crlf)
+                        f.write(b'Cc: ' + inputToBytes(self.cc, 'utf-8') + crlf)
+                        f.write(b'Bcc: ' + inputToBytes(self.bcc, 'utf-8') + crlf)
+                        f.write(b'Subject: ' + inputToBytes(self.subject, 'utf-8') + crlf)
+                        f.write(b'Date: ' + inputToBytes(self.date, 'utf-8') + crlf)
+                        f.write(b'-----------------' + crlf + crlf)
+                        f.write(inputToBytes(self.body, 'utf-8'))
 
         except Exception:
             if not _zip:
