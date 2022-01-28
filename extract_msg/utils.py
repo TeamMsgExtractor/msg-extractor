@@ -197,6 +197,9 @@ def getCommandArgs(args):
     # --zip
     parser.add_argument('--zip', dest='zip',
                         help='Path to use for saving to a zip file.')
+    # --attachments-only
+    parser.add_argument('--attachments-only', dest='attachmentsOnly', action='store_true',
+                        help='Specify to only save attachments from an msg file.')
     # --out-name NAME
     parser.add_argument('--out-name', dest='out_name',
                         help='Name to be used with saving the file output. Should come immediately after the file name.')
@@ -207,8 +210,8 @@ def getCommandArgs(args):
     options = parser.parse_args(args)
 
     # Check if more than one of the following arguments has been specified
-    if options.html + options.rtf + options.json + options.raw > 1:
-       raise IncompatibleOptionsError('Only one of these options may be selected at a time: --html, --json, --raw, --rtf')
+    if options.html + options.rtf + options.json + options.raw + options.attachmentsOnly > 1:
+       raise IncompatibleOptionsError('Only one of these options may be selected at a time: --html, --json, --raw, --rtf, --attachments-only')
 
     if options.dev or options.file_logging:
         options.verbose = True

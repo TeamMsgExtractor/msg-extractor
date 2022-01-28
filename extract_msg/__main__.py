@@ -49,15 +49,16 @@ def main() -> None:
 
         # Quickly make a dictionary for the keyword arguments.
         kwargs = {
-            'customPath': out,
-            'customFilename': args.out_name,
-            'json': args.json,
-            'useMsgFilename': args.use_filename,
-            'contentId': args.cid,
-            'html': args.html,
-            'rtf': args.rtf,
             'allowFallback': args.allowFallback,
+            'attachmentsOnly': args.attachmentsOnly,
+            'contentId': args.cid,
+            'customFilename': args.out_name,
+            'customPath': out,
+            'html': args.html,
+            'json': args.json,
             'preparedHtml': args.preparedHtml,
+            'rtf': args.rtf,
+            'useMsgFilename': args.use_filename,
             'zip': args.zip,
         }
 
