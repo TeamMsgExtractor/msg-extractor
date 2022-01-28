@@ -315,15 +315,17 @@ KNOWN_CLASS_TYPES = (
     'ipm.distlist',
     'ipm.document',
     'ipm.ole.class',
+    'ipm.outlook.recall',
     'ipm.note',
     'ipm.post',
     'ipm.stickynote',
     'ipm.recall.report',
+    'ipm.remote',
     'ipm.report',
     'ipm.resend',
     'ipm.schedule',
     'ipm.task',
-    'ipm.taskrequest'
+    'ipm.taskrequest',
     'report',
 )
 
