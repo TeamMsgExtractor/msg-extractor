@@ -28,7 +28,7 @@ https://github.com/mattgwwalker/msg-extractor
 
 __author__ = 'Destiny Peterson & Matthew Walker'
 __date__ = '2022-01-28'
-__version__ = '0.29.5'
+__version__ = '0.29.6'
 
 import logging
 

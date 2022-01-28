@@ -142,7 +142,7 @@ class Message(MessageBase):
 
         # Check if incompatible options have been provided in any way.
         if _json + html + rtf + raw > 1:
-            raise IncompatibleOptionsError('Only one of the following options may be used at a time: toJson, raw, html, rtf')
+            raise IncompatibleOptionsError('Only one of the following options may be used at a time: json, raw, html, rtf')
 
         # Get the type of line endings.
         crlf = inputToBytes(self.crlf, 'utf-8')

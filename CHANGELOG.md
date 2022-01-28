@@ -1,5 +1,8 @@
+**v0.29.6**
+* Corrected error string for incompatible options in `Message.save`.
+
 **v0.29.5**
-* Updated list of known MSG class types so the module would correctly give `UnsupportedMSGTypeError` instead of `UnrecognizedMSGTypeError`.
+* [[TeamMsgExtractor #232](https://github.com/TeamMsgExtractor/msg-extractor/issues/232)] Updated list of known MSG class types so the module would correctly give `UnsupportedMSGTypeError` instead of `UnrecognizedMSGTypeError`.
 
 **v0.29.4**
 * Fixed typo in `utils.knownMsgClass`.
