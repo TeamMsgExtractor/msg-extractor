@@ -1,7 +1,7 @@
 **v0.30.4**
 * [[TeamMsgExtractor #233](https://github.com/TeamMsgExtractor/msg-extractor/issues/233)] Added option to `Message.save` to only save the attachments (`attachmentsOnly`). This can also be used from the command line with the option `--attachments-only`.
 * Corrected error string for incompatible options in `Message.save`.
-* Fixed if blocks being nested weirdly in `Message.save` instead of being chained with elif. Probably an artifact left from adding support for html and rtf.
+* Fixed if blocks being nested weirdly in `Message.save` instead of being chained with `elif`. Probably an artifact left from adding support for HTML and RTF.
 
 **v0.30.3**
 * [[TeamMsgExtractor #232](https://github.com/TeamMsgExtractor/msg-extractor/issues/232)] Updated list of known MSG class types so the module would correctly give `UnsupportedMSGTypeError` instead of `UnrecognizedMSGTypeError`.
