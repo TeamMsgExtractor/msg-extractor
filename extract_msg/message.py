@@ -114,6 +114,9 @@ class Message(MessageBase):
         useMsgFilename = kwargs.get('useMsgFilename', False)
         #maxPathLength = kwargs.get('maxPathLength', 255)
 
+        # Track if we are only saving the attachments.
+        attachOnly = kwargs.get('attachmentsOnly', False)
+
         # ZipFile handling.
         if _zip:
             # `raw` and `zip` are incompatible.
@@ -142,8 +145,8 @@ class Message(MessageBase):
         kwargs['customFilename'] = None
 
         # Check if incompatible options have been provided in any way.
-        if _json + html + rtf + raw > 1:
-            raise IncompatibleOptionsError('Only one of the following options may be used at a time: toJson, raw, html, rtf')
+        if _json + html + rtf + raw + attachOnly > 1:
+            raise IncompatibleOptionsError('Only one of the following options may be used at a time: json, raw, html, rtf, attachmentsOnly.')
 
         # Get the type of line endings.
         crlf = inputToBytes(self.crlf, 'utf-8')
@@ -213,39 +216,40 @@ class Message(MessageBase):
                 f.write(headerText.encode('utf-8'))
 
         try:
-            # Check whether we should be using HTML or RTF.
-            fext = 'txt'
+            if not attachOnly:
+                # Check whether we should be using HTML or RTF.
+                fext = 'txt'
 
-            useHtml = False
-            useRtf = False
-            if html:
-                if self.htmlBody:
-                   useHtml = True
-                   fext = 'html'
-                elif not allowFallback:
-                   raise DataNotFoundError('Could not find the htmlBody')
+                useHtml = False
+                useRtf = False
+                if html:
+                    if self.htmlBody:
+                       useHtml = True
+                       fext = 'html'
+                    elif not allowFallback:
+                       raise DataNotFoundError('Could not find the htmlBody')
 
-            if rtf or (html and not useHtml):
-                if self.rtfBody:
-                   useRtf = True
-                   fext = 'rtf'
-                elif not allowFallback:
-                   raise DataNotFoundError('Could not find the rtfBody')
+                if rtf or (html and not useHtml):
+                    if self.rtfBody:
+                       useRtf = True
+                       fext = 'rtf'
+                    elif not allowFallback:
+                       raise DataNotFoundError('Could not find the rtfBody')
 
             # Save the attachments.
             attachmentNames = [attachment.save(**kwargs) for attachment in self.attachments]
 
-            # Determine the extension to use for the body.
-            fext = 'json' if _json else fext
+            if not attachOnly:
+                # Determine the extension to use for the body.
+                fext = 'json' if _json else fext
 
-            with _open(str(path / ('message.' + fext)), mode) as f:
-                if _json:
-                    emailObj = json.loads(self.getJson())
-                    emailObj['attachments'] = attachmentNames
+                with _open(str(path / ('message.' + fext)), mode) as f:
+                    if _json:
+                        emailObj = json.loads(self.getJson())
+                        emailObj['attachments'] = attachmentNames
 
-                    f.write(inputToBytes(json.dumps(emailObj), 'utf-8'))
-                else:
-                    if useHtml:
+                        f.write(inputToBytes(json.dumps(emailObj), 'utf-8'))
+                    elif useHtml:
                         # Inject the header into the data and then write it to
                         # the file.
                         data = injectHtmlHeader(self, prepared = kwargs.get('preparedHtml', False))
