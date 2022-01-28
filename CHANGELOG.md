@@ -1,3 +1,6 @@
+**v0.30.3**
+* Updated list of known MSG class types so the module would correctly give `UnsupportedMSGTypeError` instead of `UnrecognizedMSGTypeError`.
+
 **v0.30.2**
 * Fixed typo in `utils.knownMsgClass`.
 * Updated contributing guidelines and pull request template. Pull requests were updated to match the new structure of the module while the guidelines were updated for clarity.
