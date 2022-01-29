@@ -6,6 +6,7 @@ import re
 
 import bs4
 import compressed_rtf
+import RTFDE
 
 from . import constants
 from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment
@@ -236,6 +237,11 @@ class MessageBase(MSGFile):
                 if a is not None:
                     if re.search('\r\n', self._body) is not None:
                         self.__crlf = '\r\n'
+            else:
+                # If the body doesn't exist, see if we can get it from the RTF
+                # body.
+                if self.deencapsulatedRtf and self.deencapsulatedRtf.content_type == 'text':
+                    self._body = self.deencapsulatedRtf.text
             return self._body
 
     @property
@@ -271,6 +277,29 @@ class MessageBase(MSGFile):
         except AttributeError:
             self._date = self._prop.date
             return self._date
+
+    @property
+    def deencapsulatedRtf(self) -> RTFDE.DeEncapsulator:
+        """
+        Returns the instance of the deencapsulated RTF body.
+        """
+        try:
+            return self._deencapsultor
+        except AttributeError:
+            if self.rtfBody:
+                # If there is an RTF body, we try to deencapsulate it.
+                try:
+                    self._deencapsultor = RTFDE.DeEncapsulator(self.rtfBody)
+                    self._deencapsultor.deencapsulate()
+                except RTFDE.NotEncapsulatedRtf as e:
+                    logger.debug("RTF body is not encapsulated.")
+                    self._deencapsultor = None
+                except RTFDE.MalformedEncapsulatedRtf as _e:
+                    logger.info("RTF body contains malformed encapsulated content.")
+                    self._deencapsultor = None
+            else:
+                self._deencapsultor = None
+            return self._deencapsultor
 
     @property
     def defaultFolderName(self) -> str:
@@ -335,7 +364,27 @@ class MessageBase(MSGFile):
         """
         Returns the html body, if it exists.
         """
-        return self._ensureSet('_htmlBody', '__substg1.0_10130102', False)
+        try:
+            return self._htmlBody
+        except AttributeError:
+            if self._ensureSet('_htmlBody', '__substg1.0_10130102', False):
+                # Reducing line repetition.
+                pass
+            elif self.rtfBody:
+                logger.info('HTML body was not found, attempting to generate from RTF.')
+                if self.deencapsulatedRtf and self.deencapsulatedRtf.content_type == 'html':
+                    self._htmlBody = self.deencapsulatedRtf.html.encode('utf-8')
+                else:
+                    logger.info('Could not deencapsulate HTML from RTF body.')
+            elif self.body:
+                # Convert the plain text body to html.
+                logger.info('HTML body was not found, attempting to generate from plain text body.')
+                correctedBody = self.body.encode('utf-8').replace('\r', '').replace('\n', '</br>')
+                self._htmlBody = f'<html><body>{correctedBody}</body></head>'
+            else:
+                logger.into('HTML body could not be found nor generated.')
+
+            return self._htmlBody
 
     @property
     def htmlBodyPrepared(self) -> bytes:

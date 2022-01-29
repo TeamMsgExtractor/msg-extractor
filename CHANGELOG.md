@@ -1,3 +1,8 @@
+**v0.30.5**
+* [[TeamMsgExtractor #225](https://github.com/TeamMsgExtractor/msg-extractor/issues/225)] Added the ability to generate the HTML body from the RTF body if it is encapsulated HTML. If there is no RTF body, then it will do a very basic generation from the plain text body. This process is automatically performed if the HTML body is missing.
+* Added the ability for the plain text body to sometimes generate from the RTF body if the plain text body does not exist.
+* Added documentation to `Message.save` for the `attachmentsOnly` option.
+
 **v0.30.4**
 * [[TeamMsgExtractor #233](https://github.com/TeamMsgExtractor/msg-extractor/issues/233)] Added option to `Message.save` to only save the attachments (`attachmentsOnly`). This can also be used from the command line with the option `--attachments-only`.
 * Corrected error string for incompatible options in `Message.save`.
