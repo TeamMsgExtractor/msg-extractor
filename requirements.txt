@@ -6,3 +6,4 @@ tzlocal>=2.1
 compressed_rtf>=1.0.6
 ebcdic>=1.1.1
 beautifulsoup4>=4.10.0
+RTFDE>=0.0.2
