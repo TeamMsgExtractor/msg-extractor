@@ -1,3 +1,9 @@
+**v0.30.6**
+* Small adjustments to internal code to make it a bit better.
+* Added `Message.getSaveBody`, `Message.getSaveHtmlBody`, and `Message.getSaveRtfBody`. These three functions generate their respective bodies that will be used when saving the file, allowing you to retrieve the final products without having to write them to the disk first. All arguments that are passed to `Message.save` that would influence the respective bodies are passed to their respective functions.
+* I thought I added the documentation for `attachmentsOnly` to `Message.save` but apparently it was missing. Not sure what happened there but I made sure it was added this time.
+* Added new option to `Message.save` called `charset`. This is used in the preparation of the HTML body when using `preparedHtml`. This is also usable with `--charset CHARSET` from the command line.
+
 **v0.30.5**
 * [[TeamMsgExtractor #225](https://github.com/TeamMsgExtractor/msg-extractor/issues/225)] Added the ability to generate the HTML body from the RTF body if it is encapsulated HTML. If there is no RTF body, then it will do a very basic generation from the plain text body. This process is automatically performed if the HTML body is missing.
 * Added the ability for the plain text body to sometimes generate from the RTF body if the plain text body does not exist.

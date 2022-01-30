@@ -394,7 +394,7 @@ class MessageBase(MSGFile):
         """
         # If we can't get an HTML body then we have nothing to do.
         if not self.htmlBody:
-            return b''
+            return self.htmlBody
 
         # Create the BeautifulSoup instance to use.
         soup = bs4.BeautifulSoup(self.htmlBody, 'html.parser')
@@ -402,17 +402,17 @@ class MessageBase(MSGFile):
         # Get a list of image tags to see if we can inject into. If the source
         # of an image starts with "cid:" that means it is one of the attachments
         # and is using the content id of that attachment.
-        tags = tuple(tag for tag in soup.findAll('img') if tag.get('src') and tag.get('src').startswith('cid:'))
+        tags = (tag for tag in soup.findAll('img') if tag.get('src') and tag.get('src').startswith('cid:'))
 
         for tag in tags:
-            # Iterate through the attachments until we get the right
+            # Iterate through the attachments until we get the right one.
             cid = tag['src'][4:]
             data = next((attachment.data for attachment in self.attachments if attachment.cid == cid), None)
             # If we found anything, inject it.
             if data:
                 tag['src'] = (b'data:image;base64,' + base64.b64encode(data)).decode('utf-8')
 
-        return soup.prettify().encode('utf8')
+        return soup.prettify('utf-8')
 
     @property
     def inReplyTo(self) -> str:

@@ -4,6 +4,8 @@ import os
 import pathlib
 import zipfile
 
+import bs4
+
 from imapclient.imapclient import decode_utf7
 
 from . import constants
@@ -80,9 +82,6 @@ class Message(MessageBase):
            * :param rtf: will output the message in RTF format.
 
         Usage of more than one formatting parameter will raise an exception.
-        Setting :param preparedHtml: to True in addition to :param html: will
-        use the version of the HTML body that has attachments injected into it,
-        useful for direct viewing or conversion to PDF.
 
         Using HTML or RTF will raise an exception if they could not be retrieved
         unless you have :param allowFallback: set to True. Fallback will go in
@@ -96,8 +95,18 @@ class Message(MessageBase):
         to :param zip:. If :param zip: is set, :param customPath: will refer to
         a location inside the zip file.
 
-        If you want to save the header, should it be found, set
-        :param saveHeader: to true.
+        :param attachmentsOnly: Turns off saving the body and only saves the
+            attachments when set.
+        :param charset: If the html is being prepared, the charset to use for
+            the Content-Type meta tag to insert. This exists to ensure that
+            something parsing the html can properly determine the encoding (as
+            not having this tag can cause errors in some programs). Set this to
+            `None` or an empty string to not insert the tag (Default: 'utf-8').
+        :param kwargs: Used to allow kwags expansion in the save function.
+        :param preparedHtml: When set, prepares the HTML body for standalone
+            usage, doing things like adding tags, injecting attachments, etc.
+            This is useful for things like trying to convert the HTML body
+            directly to PDF.
         """
 
         # Move keyword arguments into variables.
@@ -147,9 +156,6 @@ class Message(MessageBase):
         # Check if incompatible options have been provided in any way.
         if _json + html + rtf + raw + attachOnly > 1:
             raise IncompatibleOptionsError('Only one of the following options may be used at a time: json, raw, html, rtf, attachmentsOnly.')
-
-        # Get the type of line endings.
-        crlf = inputToBytes(self.crlf, 'utf-8')
 
         # TODO: insert code here that will handle checking all of the msg files to see if the path with overflow.
 
@@ -250,24 +256,11 @@ class Message(MessageBase):
 
                         f.write(inputToBytes(json.dumps(emailObj), 'utf-8'))
                     elif useHtml:
-                        # Inject the header into the data and then write it to
-                        # the file.
-                        data = injectHtmlHeader(self, prepared = kwargs.get('preparedHtml', False))
-                        f.write(data)
+                        f.write(self.getSaveHtmlBody(**kwargs))
                     elif useRtf:
-                        # Inject the header into the data and then write it to
-                        # the file.
-                        data = injectRtfHeader(self)
-                        f.write(data)
+                        f.write(self.getSaveRtfBody(**kwargs))
                     else:
-                        f.write(b'From: ' + inputToBytes(self.sender, 'utf-8') + crlf)
-                        f.write(b'To: ' + inputToBytes(self.to, 'utf-8') + crlf)
-                        f.write(b'Cc: ' + inputToBytes(self.cc, 'utf-8') + crlf)
-                        f.write(b'Bcc: ' + inputToBytes(self.bcc, 'utf-8') + crlf)
-                        f.write(b'Subject: ' + inputToBytes(self.subject, 'utf-8') + crlf)
-                        f.write(b'Date: ' + inputToBytes(self.date, 'utf-8') + crlf)
-                        f.write(b'-----------------' + crlf + crlf)
-                        f.write(inputToBytes(self.body, 'utf-8'))
+                        f.write(self.getSaveBody(**kwargs))
 
         except Exception:
             if not _zip:
@@ -280,3 +273,83 @@ class Message(MessageBase):
 
         # Return the instance so that functions can easily be chained.
         return self
+
+    def getSaveBody(self, **kwargs) -> bytes:
+        """
+        Returns the plain text body that will be used in saving based on the
+        arguments.
+
+        :param **kwargs: Used to allow kwargs expansion in the save function.
+            Arguments absorbed by this are simply ignored.
+        """
+        # Get the type of line endings.
+        crlf = inputToBytes(self.crlf, 'utf-8')
+
+        outputBytes = b'From: ' + inputToBytes(self.sender, 'utf-8') + crlf
+        outputBytes += b'To: ' + inputToBytes(self.to, 'utf-8') + crlf
+        outputBytes += b'Cc: ' + inputToBytes(self.cc, 'utf-8') + crlf
+        outputBytes += b'Bcc: ' + inputToBytes(self.bcc, 'utf-8') + crlf
+        outputBytes += b'Subject: ' + inputToBytes(self.subject, 'utf-8') + crlf
+        outputBytes += b'Date: ' + inputToBytes(self.date, 'utf-8') + crlf
+        outputBytes += b'-----------------' + crlf + crlf
+        outputBytes += inputToBytes(self.body, 'utf-8')
+
+        return outputBytes
+
+    def getSaveHtmlBody(self, preparedHtml : bool = False, charset : str = 'utf-8', **kwargs) -> bytes:
+        """
+        Returns the HTML body that will be used in saving based on the
+        arguments.
+
+        :param preparedHtml: Whether or not the HTML should be prepared for
+            standalone use (add tags, inject images, etc.).
+        :param charset: If the html is being prepared, the charset to use for
+            the Content-Type meta tag to insert. This exists to ensure that
+            something parsing the html can properly determine the encoding (as
+            not having this tag can cause errors in some programs). Set this to
+            `None` or an empty string to not insert the tag (Default: 'utf-8').
+        :param **kwargs: Used to allow kwargs expansion in the save function.
+            Arguments absorbed by this are simply ignored.
+        """
+        if self.htmlBody:
+            # Inject the header into the data.
+            data = injectHtmlHeader(self, prepared = preparedHtml)
+
+            # If we are preparing the HTML, then we should
+            if preparedHtml and charset:
+                bs = bs4.BeautifulSoup(data, features = 'html.parser')
+                if not bs.find('meta', {'http-equiv': 'Content-Type'}):
+                    # Setup the attributes for the tag.
+                    tagAttrs = {
+                        'http-equiv': 'Content-Type',
+                        'content': f'text/html; charset={charset}',
+                    }
+                    # Create the tag.
+                    tag = bs4.Tag(parser = bs, name = 'meta', attrs = tagAttrs, can_be_empty_element = True)
+                    # Add the tag to the head section.
+                    if bs.find('head'):
+                        bs.find('head').insert(1, tag)
+                    else:
+                        # If we are here, the head doesn't exist, so let's add
+                        # it.
+                        if bs.find('html'):
+                            # This should always be true, but I want to be safe.
+                            head = bs4.Tag(parser = bs, name = 'head')
+                            head.insert(1, tag)
+                            bs.find('html').insert(1, head)
+
+                    data = bs.prettify('utf-8')
+
+            return data
+        else:
+            return self.htmlBody
+
+    def getSaveRtfBody(self, **kwargs) -> bytes:
+        """
+        Returns the RTF body that will be used in saving based on the arguments.
+
+        :param **kwargs: Used to allow kwargs expansion in the save function.
+            Arguments absorbed by this are simply ignored.
+        """
+        # Inject the header into the data.
+        return injectRtfHeader(self)
