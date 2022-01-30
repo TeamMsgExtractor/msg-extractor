@@ -185,6 +185,9 @@ def getCommandArgs(args):
     # --prepared-html
     parser.add_argument('--prepared-html', dest='preparedHtml', action='store_true',
                         help='When used in conjunction with --html, sets whether the HTML output should be prepared for embedded attachments.')
+    # --charset
+    parser.add_argument('--charset', dest='charset', default='utf-8',
+                        help='Character set to use for the prepared HTML in the added tag. (Default: utf-8)')
     # --raw
     parser.add_argument('--raw', dest='raw', action='store_true',
                         help='Sets whether the output should be HTML. If this is not possible, will error.')

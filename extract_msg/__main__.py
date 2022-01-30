@@ -51,6 +51,7 @@ def main() -> None:
         kwargs = {
             'allowFallback': args.allowFallback,
             'attachmentsOnly': args.attachmentsOnly,
+            'charset': args.charset,
             'contentId': args.cid,
             'customFilename': args.out_name,
             'customPath': out,
