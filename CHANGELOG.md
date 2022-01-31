@@ -1,3 +1,11 @@
+**v0.30.7**
+* [[TeamMsgExtractor #239](https://github.com/TeamMsgExtractor/msg-extractor/issues/239)] Fixed msg.py not having `import pathlib`.
+* After going through the details of the example MSG files provided with the module, specifically unicode.msg, I now am glad I decided to put in some fail-safes in the HTML body processing. One of them does not have an `<html>`, `<head>`, nor `<body>` tag, and so would have had an error. This will actually prevent the header from injecting properly as well, so a bit of validation before was made necessary to ensure the HTML saving would still work.
+* Added new exception `BadHtmlError`.
+* Added new function `utils.validateHtml`.
+* Updated README credits.
+* Changed header logic to generate manually if the header data has been stripped (filled with null bytes) and not just if the stream does not exist.
+
 **v0.30.6**
 * Small adjustments to internal code to make it a bit better.
 * Added `Message.getSaveBody`, `Message.getSaveHtmlBody`, and `Message.getSaveRtfBody`. These three functions generate their respective bodies that will be used when saving the file, allowing you to retrieve the final products without having to write them to the disk first. All arguments that are passed to `Message.save` that would influence the respective bodies are passed to their respective functions.

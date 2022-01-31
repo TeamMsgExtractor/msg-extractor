@@ -12,6 +12,12 @@ This module contains the set of extract_msg exceptions.
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
+class BadHtmlError(ValueError):
+    """
+    HTML failed to pass validation.
+    """
+    pass
+
 class ConversionError(Exception):
     """
     An error occured during type conversion.

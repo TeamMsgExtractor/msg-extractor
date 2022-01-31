@@ -199,6 +199,8 @@ Credits
 
 `Dean Malmgren`_ - First implementation of the setup.py script
 
+`Seamus Tuohy`_ - Developer of the Python RTFDE module. Gave first examples of how to use the module.
+
 `Liam`_ - Significant reorganization and transfer of data.
 
 And thank you to everyone who has opened an issue and helped us track down those pesky bugs.
@@ -206,8 +208,8 @@ And thank you to everyone who has opened an issue and helped us track down those
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
 
-.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.30.6-blue.svg
-   :target: https://pypi.org/project/extract-msg/0.30.6/
+.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.30.7-blue.svg
+   :target: https://pypi.org/project/extract-msg/0.30.7/
 
 .. |PyPI2| image:: https://img.shields.io/badge/python-3.6+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-367/
@@ -218,4 +220,5 @@ And thank you to everyone who has opened an issue and helped us track down those
 .. _Dean Malmgren: https://github.com/deanmalmgren
 .. _Joel Kaufman: https://github.com/joelkaufman
 .. _Liam: https://github.com/LiamPM5
+.. _Seamus Tuohy: https://github.com/seamustuohy
 .. _Discord: https://discord.com/invite/B77McRmzdc
