@@ -2,6 +2,7 @@ import codecs
 import copy
 import logging
 import os
+import pathlib
 import zipfile
 
 import olefile

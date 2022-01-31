@@ -310,6 +310,9 @@ class Message(MessageBase):
             `None` or an empty string to not insert the tag (Default: 'utf-8').
         :param **kwargs: Used to allow kwargs expansion in the save function.
             Arguments absorbed by this are simply ignored.
+
+        :raises BadHtmlError: if :param preparedHtml: is False and the HTML
+            fails to validate.
         """
         if self.htmlBody:
             # Inject the header into the data.
@@ -328,15 +331,15 @@ class Message(MessageBase):
                     tag = bs4.Tag(parser = bs, name = 'meta', attrs = tagAttrs, can_be_empty_element = True)
                     # Add the tag to the head section.
                     if bs.find('head'):
-                        bs.find('head').insert(1, tag)
+                        bs.find('head').insert(0, tag)
                     else:
                         # If we are here, the head doesn't exist, so let's add
                         # it.
                         if bs.find('html'):
                             # This should always be true, but I want to be safe.
                             head = bs4.Tag(parser = bs, name = 'head')
-                            head.insert(1, tag)
-                            bs.find('html').insert(1, head)
+                            head.insert(0, tag)
+                            bs.find('html').insert(0, head)
 
                     data = bs.prettify('utf-8')
 

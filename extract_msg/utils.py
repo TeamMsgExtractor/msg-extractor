@@ -16,12 +16,13 @@ import struct
 import sys
 import zipfile
 
+import bs4
 import tzlocal
 
 from html import escape as htmlEscape
 
 from . import constants
-from .exceptions import ConversionError, IncompatibleOptionsError, InvaildPropertyIdError, UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError, UnsupportedMSGTypeError
+from .exceptions import BadHtmlError, ConversionError, IncompatibleOptionsError, InvaildPropertyIdError, UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError, UnsupportedMSGTypeError
 
 
 logger = logging.getLogger(__name__)
@@ -282,9 +283,11 @@ def injectHtmlHeader(msgFile, prepared : bool = False) -> bytes:
     the HTML header injected into it.
 
     :param prepared: Determines whether to be using the standard HTML (False) or
-                     the prepared HTML (True) body (Default: False).
+        the prepared HTML (True) body (Default: False).
 
     :raises AttributeError: if the correct HTML body cannot be acquired.
+    :raises BadHtmlError: if :param preparedHtml: is False and the HTML fails to
+        validate.
     """
     if not hasattr(msgFile, 'htmlBody') or not msgFile.htmlBody:
         raise AttributeError('Cannot inject the HTML header without an HTML body attribute.')
@@ -302,6 +305,77 @@ def injectHtmlHeader(msgFile, prepared : bool = False) -> bytes:
 
     else:
         body = msgFile.htmlBody
+
+    # Validate the HTML.
+    if not validateHtml(body):
+        # If we are not preparing the HTML body, then raise an
+        # exception.
+        if not prepared:
+            raise BadHtmlError('HTML body failed to pass validation.')
+
+        # If we are here, then we need to do what we can to fix the HTML body.
+        # Unfortunately this gets complicated because of the various ways the
+        # body could be wrong. If only the <body> tag is missing, then we just
+        # need to insert it at the end and be done. If both the <html> and
+        # <body> tag are missing, we determine where to put the body tag (around
+        # everything if there is no <head> tag, otherwise at the end) and then
+        # wrap it all in the <html> tag.
+        parser = bs4.BeautifulSoup(body)
+        if not parser.find('html') and not parser.find('body'):
+            if parser.find('head') or parser.find('footer'):
+                # Create the parser we will be using for the corrections.
+                correctedHtml = bs4.BeautifulSoup(b'<html></html>', features = 'html.parser')
+                htmlTag = correctedHtml.find('html')
+
+                # Iterate over each of the direct descendents of the parser and
+                # add each to a new tag if they are not the head or footer.
+                bodyTag = parser.new_tag('body')
+                # What we are going to be doing will be causing some of the tags
+                # to be moved out of the parser, and so the iterator will end up
+                # pointing to the wrong place after that. To compensate we first
+                # create a tuple and iterate over that.
+                for tag in tuple(parser.children):
+                    if tag.name.lower() in ('head', 'footer'):
+                        correctedHtml.append(tag)
+                    else:
+                        bodyTag.append(tag)
+
+                # All the tags should now be properly in the body, so let's
+                # insert it.
+                if correctedHtml.find('head'):
+                    correctedHtml.find('head').insert_after(bodyTag)
+                else:
+                    correctedHtml.find('footer').insert_before(bodyTag)
+            else:
+                # If there is no <html>, <head>, <footer>, or <body> tag, then
+                # we just add the tags to the beginning and end of the data and
+                # move on.
+                body = b'<html><body>' + body + b'</body></html>'
+        elif parser.find('html'):
+            # Found <html> but not <body>.
+            # Iterate over each of the direct descendents of the parser and
+            # add each to a new tag if they are not the head or footer.
+            bodyTag = parser.new_tag('body')
+            # What we are going to be doing will be causing some of the tags
+            # to be moved out of the parser, and so the iterator will end up
+            # pointing to the wrong place after that. To compensate we first
+            # create a tuple and iterate over that.
+            for tag in tuple(parser.find('html').children):
+                if tag.name.lower() not in ('head', 'footer'):
+                    bodyTag.append(tag)
+
+            # All the tags should now be properly in the body, so let's
+            # insert it.
+            if parser.find('head'):
+                parser.find('head').insert_after(bodyTag)
+            elif parser.find('footer'):
+                parser.find('footer').insert_before(bodyTag)
+            else:
+                parser.find('html').insert(0, bodyTag)
+        else:
+            # Found <body> but not <html>. Just wrap everything in the <html>
+            # tags.
+            body = b'<html>' + body + b'</html>'
 
     def replace(bodyMarker):
         """
@@ -834,6 +908,16 @@ def setupLogging(defaultPath = None, defaultLevel = logging.WARN, logfile = None
         print(e)
 
     logging.getLogger().setLevel(defaultLevel)
+    return True
+
+def validateHtml(html : bytes) -> bool:
+    """
+    Checks whether the HTML is considered valid. To be valid, the HTML must, at
+    minimum, contain an <html> tag, a <body> tag, and closing tags for each.
+    """
+    bs = bs4.BeautifulSoup(html, 'html.parser')
+    if not bs.find('html') or not bs.find('body'):
+        return False
     return True
 
 def verifyPropertyId(id : str) -> None:

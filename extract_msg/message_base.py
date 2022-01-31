@@ -327,7 +327,7 @@ class MessageBase(MSGFile):
             return self._header
         except AttributeError:
             headerText = self._getStringStream('__substg1.0_007D')
-            if headerText is not None:
+            if headerText:
                 self._header = EmailParser().parsestr(headerText)
                 self._header['date'] = self.date
             else:
