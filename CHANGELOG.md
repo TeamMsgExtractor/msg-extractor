@@ -1,3 +1,6 @@
+**v0.30.8**
+* Update `imapclient` requirement to `>=2.1.0` instead of `==2.1.0`. Currently there are no changes that would prevent current future versions from working.
+
 **v0.30.7**
 * [[TeamMsgExtractor #239](https://github.com/TeamMsgExtractor/msg-extractor/issues/239)] Fixed msg.py not having `import pathlib`.
 * After going through the details of the example MSG files provided with the module, specifically unicode.msg, I now am glad I decided to put in some fail-safes in the HTML body processing. One of them does not have an `<html>`, `<head>`, nor `<body>` tag, and so would have had an error. This will actually prevent the header from injecting properly as well, so a bit of validation before was made necessary to ensure the HTML saving would still work.
