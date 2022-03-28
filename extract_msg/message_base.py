@@ -382,7 +382,7 @@ class MessageBase(MSGFile):
                 correctedBody = self.body.encode('utf-8').replace('\r', '').replace('\n', '</br>')
                 self._htmlBody = f'<html><body>{correctedBody}</body></head>'
             else:
-                logger.into('HTML body could not be found nor generated.')
+                logger.info('HTML body could not be found nor generated.')
 
             return self._htmlBody
 
