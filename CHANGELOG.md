@@ -1,3 +1,7 @@
+**v0.30.9**
+* Fixed the behavior of `Properties.get` so it actually behaves like a dict (that was the intent of it, but I did it the wrong way for some reason).
+* Fixed a type that caused an exception when no HTML body could be found nor generated.
+
 **v0.30.8**
 * Update `imapclient` requirement to `>=2.1.0` instead of `==2.1.0`. Currently there are no changes that would prevent current future versions from working.
 

@@ -73,7 +73,7 @@ class Properties:
     def __repr__(self):
         return self.__props.__repr__
 
-    def get(self, name):
+    def get(self, name, default = None):
         """
         Retrieve the property of :param name:.
         """
@@ -84,7 +84,7 @@ class Properties:
             logger.debug('KeyError exception.')
             logger.debug(properHex(self.__stream))
             logger.debug(self.__props)
-            raise
+            return default
 
     def has_key(self, key):
         """
