@@ -281,7 +281,8 @@ class MessageBase(MSGFile):
     @property
     def deencapsulatedRtf(self) -> RTFDE.DeEncapsulator:
         """
-        Returns the instance of the deencapsulated RTF body.
+        Returns the instance of the deencapsulated RTF body. If there is no RTF
+        body or the body is not encasulated, returns None.
         """
         try:
             return self._deencapsultor
@@ -291,10 +292,10 @@ class MessageBase(MSGFile):
                 try:
                     self._deencapsultor = RTFDE.DeEncapsulator(self.rtfBody)
                     self._deencapsultor.deencapsulate()
-                except RTFDE.NotEncapsulatedRtf as e:
+                except RTFDE.exceptions.NotEncapsulatedRtf as e:
                     logger.debug("RTF body is not encapsulated.")
                     self._deencapsultor = None
-                except RTFDE.MalformedEncapsulatedRtf as _e:
+                except RTFDE.exceptions.MalformedEncapsulatedRtf as _e:
                     logger.info("RTF body contains malformed encapsulated content.")
                     self._deencapsultor = None
             else:

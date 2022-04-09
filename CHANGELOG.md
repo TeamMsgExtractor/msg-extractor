@@ -1,3 +1,7 @@
+**v0.30.10**
+* [[TeamMsgExtractor #249](https://github.com/TeamMsgExtractor/msg-extractor/issues/249)] Fixed exception catching not properly accessing the exception (forgot to go through one of the submodules to access exception).
+* Updated docstring for `MessageBase.deencapsulatedRtf`.
+
 **v0.30.9**
 * Fixed the behavior of `Properties.get` so it actually behaves like a dict (that was the intent of it, but I did it the wrong way for some reason).
 * Fixed a type that caused an exception when no HTML body could be found nor generated.
