@@ -67,8 +67,13 @@ class MessageBase(MSGFile):
         self.cc
         self.sender
         self.date
-        self.__crlf = '\n'  # This variable keeps track of what the new line character should be
-        self.body
+        # This variable keeps track of what the new line character should be.
+        self.__crlf = '\n'
+        try:
+            self.body
+        except Exception as e:
+            # Prevent an error in the body from preventing opening.
+            logger.exception('Critical error accessing the body. File opened but accessing the body will throw an exception.')
         self.named
 
     def _genRecipient(self, recipientType, recipientInt):
