@@ -178,9 +178,7 @@ Here is a list of things that are currently on our todo list:
 * Tests (ie. unittest)
 * Finish writing a usage guide
 * Improve the intelligence of the saving functions
-* Provide a way to save attachments and messages into a custom location under a custom name
-* Implement better property handling that will convert each type into a python equivalent if possible
-* Implement handling of named properties
+* Improve handling of named properties
 * Improve README
 * Create a wiki for advanced usage information
 

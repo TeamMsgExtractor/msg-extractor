@@ -11,7 +11,7 @@ https://github.com/mattgwwalker/msg-extractor
 
 # --- LICENSE.txt -----------------------------------------------------------------
 #
-#    Copyright 2013 Matthew Walker
+#    Copyright 2013-2022 Matthew Walker and Destiny Peterson
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
