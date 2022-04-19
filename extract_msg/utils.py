@@ -191,7 +191,7 @@ def getCommandArgs(args):
                         help='Character set to use for the prepared HTML in the added tag. (Default: utf-8)')
     # --raw
     parser.add_argument('--raw', dest='raw', action='store_true',
-                        help='Sets whether the output should be HTML. If this is not possible, will error.')
+                        help='Sets whether the output should be raw. If this is not possible, will error.')
     # --rtf
     parser.add_argument('--rtf', dest='rtf', action='store_true',
                         help='Sets whether the output should be RTF. If this is not possible, will error.')

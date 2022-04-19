@@ -87,7 +87,7 @@ refer to the usage information provided from the program's help dialog:
                               text) to stdout. Overrides saving arguments.
         --html                Sets whether the output should be html. If this is
                               not possible, will error.
-        --raw                 Sets whether the output should be html. If this is
+        --raw                 Sets whether the output should be raw. If this is
                               not possible, will error.
         --rtf                 Sets whether the output should be rtf. If this is
                               not possible, will error.
