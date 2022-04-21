@@ -1,6 +1,6 @@
 **v0.30.11**
 * [[TeamMsgExtractor #249](https://github.com/TeamMsgExtractor/msg-extractor/issues/249)] Fixed an error with opening the body causing the file to throw an uncaught exception in the `__init__` function of `MessageBase`. The error may still come up later, but you will still have general access to the instance.
-* Fixed an issue with part of the command line documentation. 
+* Fixed an issue with part of the command line documentation.
 
 **v0.30.10**
 * [[TeamMsgExtractor #249](https://github.com/TeamMsgExtractor/msg-extractor/issues/249)] Fixed exception catching not properly accessing the exception (forgot to go through one of the submodules to access exception).
