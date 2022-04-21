@@ -87,7 +87,7 @@ refer to the usage information provided from the program's help dialog:
                               text) to stdout. Overrides saving arguments.
         --html                Sets whether the output should be html. If this is
                               not possible, will error.
-        --raw                 Sets whether the output should be html. If this is
+        --raw                 Sets whether the output should be raw. If this is
                               not possible, will error.
         --rtf                 Sets whether the output should be rtf. If this is
                               not possible, will error.
@@ -178,26 +178,24 @@ Here is a list of things that are currently on our todo list:
 * Tests (ie. unittest)
 * Finish writing a usage guide
 * Improve the intelligence of the saving functions
-* Provide a way to save attachments and messages into a custom location under a custom name
-* Implement better property handling that will convert each type into a python equivalent if possible
-* Implement handling of named properties
+* Improve handling of named properties
 * Improve README
 * Create a wiki for advanced usage information
 
 Credits
 -------
 
-`Matthew Walker`_ - Original developer and owner
+`Matthew Walker`_ - Original developer and owner.
 
-`Destiny Peterson (The Elemental of Destruction)`_ - Co-owner, principle programmer, knows more about msg files than anyone probably should
+`Destiny Peterson (The Elemental of Destruction)`_ - Co-owner, principle programmer, knows more about msg files than anyone probably should.
 
-`JP Bourget`_ - Senior programmer, readability and organization expert, secondary manager
+`JP Bourget`_ - Senior programmer, readability and organization expert, secondary manager.
 
-`Philippe Lagadec`_ - Python OleFile module developer
+`Philippe Lagadec`_ - Python OleFile module developer.
 
-`Joel Kaufman`_ - First implementations of the json and filename flags
+`Joel Kaufman`_ - First implementations of the json and filename flags.
 
-`Dean Malmgren`_ - First implementation of the setup.py script
+`Dean Malmgren`_ - First implementation of the setup.py script.
 
 `Seamus Tuohy`_ - Developer of the Python RTFDE module. Gave first examples of how to use the module.
 
@@ -208,8 +206,8 @@ And thank you to everyone who has opened an issue and helped us track down those
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
 
-.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.30.10-blue.svg
-   :target: https://pypi.org/project/extract-msg/0.30.10/
+.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.30.11-blue.svg
+   :target: https://pypi.org/project/extract-msg/0.30.11/
 
 .. |PyPI2| image:: https://img.shields.io/badge/python-3.6+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-367/
