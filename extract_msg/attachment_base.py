@@ -31,10 +31,11 @@ class AttachmentBase:
 
     def _ensureSet(self, variable, streamID, stringStream = True):
         """
-        Ensures that the variable exists, otherwise will set it using the specified stream.
-        After that, return said variable.
+        Ensures that the variable exists, otherwise will set it using the
+        specified stream. After that, return said variable.
 
-        If the specified stream is not a string stream, make sure to set :param string stream: to False.
+        If the specified stream is not a string stream, make sure to set
+        :param stringStream: to False.
         """
         try:
             return getattr(self, variable)
@@ -48,8 +49,8 @@ class AttachmentBase:
 
     def _ensureSetNamed(self, variable, propertyName):
         """
-        Ensures that the variable exists, otherwise will set it using the named property.
-        After that, return said variable.
+        Ensures that the variable exists, otherwise will set it using the named
+        property. After that, return said variable.
         """
         try:
             return getattr(self, variable)
@@ -60,8 +61,8 @@ class AttachmentBase:
 
     def _ensureSetProperty(self, variable, propertyName):
         """
-        Ensures that the variable exists, otherwise will set it using the property.
-        After that, return said variable.
+        Ensures that the variable exists, otherwise will set it using the
+        property. After that, return said variable.
         """
         try:
             return getattr(self, variable)

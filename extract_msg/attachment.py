@@ -100,7 +100,7 @@ class Attachment(AttachmentBase):
         Saves the attachment data.
 
         The name of the file is determined by several factors. The first
-        thing that is checked is if you have provided :param customFileName:
+        thing that is checked is if you have provided :param customFilename:
         to this function. If you have, that is the name that will be used.
         If no custom name has been provided and :param contentId: is True,
         the file will be saved using the content ID of the attachment. If

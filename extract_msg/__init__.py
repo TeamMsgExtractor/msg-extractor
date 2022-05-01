@@ -6,7 +6,7 @@
 extract_msg:
     Extracts emails and attachments saved in Microsoft Outlook's .msg files.
 
-https://github.com/mattgwwalker/msg-extractor
+https://github.com/TeamMsgExtractor/msg-extractor
 """
 
 # --- LICENSE.txt -----------------------------------------------------------------
@@ -27,8 +27,8 @@ https://github.com/mattgwwalker/msg-extractor
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 __author__ = 'Destiny Peterson & Matthew Walker'
-__date__ = '2022-04-21'
-__version__ = '0.30.11'
+__date__ = '2022-05-01'
+__version__ = '0.30.12'
 
 import logging
 
