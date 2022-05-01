@@ -1,3 +1,6 @@
+**v0.30.12**
+* [[TeamMsgExtractor #253](https://github.com/TeamMsgExtractor/msg-extractor/issues/253)] Fixed various docstring issues.
+
 **v0.30.11**
 * [[TeamMsgExtractor #249](https://github.com/TeamMsgExtractor/msg-extractor/issues/249)] Fixed an error with opening the body causing the file to throw an uncaught exception in the `__init__` function of `MessageBase`. The error may still come up later, but you will still have general access to the instance.
 * Fixed an issue with part of the command line documentation.
