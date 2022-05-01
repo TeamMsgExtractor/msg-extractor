@@ -206,8 +206,8 @@ And thank you to everyone who has opened an issue and helped us track down those
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
 
-.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.30.11-blue.svg
-   :target: https://pypi.org/project/extract-msg/0.30.11/
+.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.30.12-blue.svg
+   :target: https://pypi.org/project/extract-msg/0.30.12/
 
 .. |PyPI2| image:: https://img.shields.io/badge/python-3.6+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-367/
