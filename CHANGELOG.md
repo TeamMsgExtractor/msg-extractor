@@ -1,3 +1,6 @@
+**v0.30.13**
+* [[TeamMsgExtractor #257](https://github.com/TeamMsgExtractor/msg-extractor/issues/257)] Fixed missing documentation for `customPath` keyword argument to `Attachment.save`.
+
 **v0.30.12**
 * [[TeamMsgExtractor #253](https://github.com/TeamMsgExtractor/msg-extractor/issues/253)] Fixed various docstring issues.
 

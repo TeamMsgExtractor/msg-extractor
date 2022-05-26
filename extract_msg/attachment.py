@@ -111,6 +111,10 @@ class Attachment(AttachmentBase):
         After the name to use has been determined, it will then be shortened to
         make sure that it is not more than the value of :param maxNameLength:.
 
+        To change the directory that the attachment is saved to, set the value
+        of :param customPath: when calling this function. The default save
+        directory is the working directory.
+
         If you want to save the contents into a ZipFile or similar object,
         either pass a path to where you want to create one or pass an instance
         to :param zip:. If :param zip: is an instance, :param customPath: will
