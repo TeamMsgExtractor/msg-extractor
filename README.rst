@@ -157,7 +157,7 @@ You can install using pip:
 
 .. code:: sh
 
-     pip install git+https://github.com/mattgwwalker/msg-extractor
+     pip install git+https://github.com/TeamMsgExtractor/msg-extractor
 
 or you can include this in your list of python dependencies with:
 
@@ -167,7 +167,7 @@ or you can include this in your list of python dependencies with:
 
    setup(
        ...
-       dependency_links=['https://github.com/mattgwwalker/msg-extractor/zipball/master'],
+       dependency_links=['https://github.com/TeamMsgExtractor/msg-extractor/zipball/master'],
    )
 
 Todo
