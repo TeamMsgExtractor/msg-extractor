@@ -51,7 +51,7 @@ class MSGFile(olefile.OleFileIO):
             self.__stringEncoding = overrideEncoding
         self.__overrideEncoding = overrideEncoding
 
-        self.__listDirRes = []
+        self.__listDirRes = {}
 
         try:
             super().__init__(path)
