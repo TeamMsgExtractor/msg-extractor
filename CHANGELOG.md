@@ -1,3 +1,8 @@
+**v0.30.14**
+* Fixed major bug in `MSGFile.listDir` that would cause it to give the wrong data due to caching. I forgot to have it cache a different result for each set of options, so it would always give the same result regardless of options after the first access.
+* Minor updates to `setup.py`.
+* Fixed URLs in `README`.
+
 **v0.30.13**
 * [[TeamMsgExtractor #257](https://github.com/TeamMsgExtractor/msg-extractor/issues/257)] Fixed missing documentation for `customPath` keyword argument to `Attachment.save`.
 
