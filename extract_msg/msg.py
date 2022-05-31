@@ -359,7 +359,7 @@ class MSGFile(olefile.OleFileIO):
         # Get the items from OleFileIO.
         try:
             return self.__listDirRes[(streams, storages)]
-        except AttributeError:
+        except KeyError:
             entries = self.listdir(streams, storages)
             if not self.__prefix:
                 return entries
