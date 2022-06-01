@@ -3,24 +3,23 @@ from setuptools import setup
 import re
 
 
-# a handful of variables that are used a couple of times
+# A handful of variables that are used a couple of times.
 github_url = 'https://github.com/TeamMsgExtractor/msg-extractor'
 main_module = 'extract_msg'
-# main_script = main_module + '.py'
 
-# read in the description from README
+# Read in the description from README.
 with open('README.rst', 'rb') as stream:
     long_description = stream.read().decode('utf-8').replace('\r', '')
 
-# get the version from the ExtractMsg script. This can not be directly
-# imported because ExtractMsg imports olefile, which may not be installed yet
+# Get the version string this way to avoid issues with modules not being
+# installed before setup.
 version_re = re.compile("__version__ = '(?P<version>[0-9\\.]*)'")
 with open('extract_msg/__init__.py', 'r') as stream:
     contents = stream.read()
 match = version_re.search(contents)
 version = match.groupdict()['version']
 
-# read in the dependencies from the virtualenv requirements file
+# Read in the dependencies from the virtualenv requirements file.
 dependencies = []
 filename = os.path.join('requirements.txt')
 with open(filename, 'r') as stream:

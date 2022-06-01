@@ -51,6 +51,8 @@ class MSGFile(olefile.OleFileIO):
             self.__stringEncoding = overrideEncoding
         self.__overrideEncoding = overrideEncoding
 
+        self.__listDirRes = {}
+
         try:
             super().__init__(path)
         except IOError as e:    # py2 and py3 compatible
@@ -356,8 +358,8 @@ class MSGFile(olefile.OleFileIO):
         """
         # Get the items from OleFileIO.
         try:
-            return self.__listDirRes
-        except AttributeError:
+            return self.__listDirRes[(streams, storages)]
+        except KeyError:
             entries = self.listdir(streams, storages)
             if not self.__prefix:
                 return entries
@@ -366,8 +368,8 @@ class MSGFile(olefile.OleFileIO):
                 prefix.pop()
 
             prefixLength = self.__prefixLen
-            self.__listDirRes = [x for x in entries if len(x) > prefixLength and x[:prefixLength] == prefix]
-            return self.__listDirRes
+            self.__listDirRes[(streams, storages)] = [x for x in entries if len(x) > prefixLength and x[:prefixLength] == prefix]
+            return self.__listDirRes[(streams, storages)]
 
     def slistDir(self, streams : bool = True, storages : bool = False):
         """
