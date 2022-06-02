@@ -1,3 +1,9 @@
+**v0.31.0**
+* [[TeamMsgExtractor #223](https://github.com/TeamMsgExtractor/msg-extractor/issues/223)] First implementation of support for signed messages.
+* Fixed some issues with the contact class (some of the code was left unfinished).
+* Converted many arguments for msg files to keyword arguments (`**kwargs`). This is a breaking change if your code provides anything except the path to the msg file. This will, however, make it easier to add arguments without the function signature being polluted with numerous arguments.
+* Updated exception blocks to ensure they would only catch exceptions that are instances of Exception or a child of Exception. A few were missing this check and so might have caught unwanted exceptions.
+
 **v0.30.14**
 * Fixed major bug in `MSGFile.listDir` that would cause it to give the wrong data due to caching. I forgot to have it cache a different result for each set of options, so it would always give the same result regardless of options after the first access.
 * Minor updates to `setup.py`.

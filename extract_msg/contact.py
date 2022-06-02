@@ -8,8 +8,27 @@ class Contact(MSGFile):
     Class used for parsing contacts.
     """
 
-    def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None, overrideEncoding = None, attachmentErrorBehavior = constants.ATTACHMENT_ERROR_THROW):
-        super().__init__(path, prefix, attachmentClass, filename, overrideEncoding, attachmentErrorBehavior)
+    def __init__(self, path, **kwargs):
+        """
+        :param path: path to the msg file in the system or is the raw msg file.
+        :param prefix: used for extracting embeded msg files
+            inside the main one. Do not set manually unless
+            you know what you are doing.
+        :param attachmentClass: optional, the class the MSGFile object
+            will use for attachments. You probably should
+            not change this value unless you know what you
+            are doing.
+        :param delayAttachments: optional, delays the initialization of
+            attachments until the user attempts to retrieve them. Allows MSG
+            files with bad attachments to be initialized so the other data can
+            be retrieved.
+        :param filename: optional, the filename to be used by default when
+            saving.
+        :param overrideEncoding: optional, an encoding to use instead of the one
+            specified by the msg file. Do not report encoding errors caused by
+            this.
+        """
+        super().__init__(path, **kwargs)
         self.named
 
     @property
@@ -192,6 +211,6 @@ class Contact(MSGFile):
     @property
     def workAddress(self):
         """
-        The
+        The work address of the contact.
         """
         return self._ensureSetNamed('_workAddress', '801B')

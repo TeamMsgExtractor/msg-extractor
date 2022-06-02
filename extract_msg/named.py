@@ -242,7 +242,7 @@ class StringNamedProperty:
     @property
     def streamID(self):
         """
-        Returns the streamID of the named property. This may not be accurate
+        Returns the streamID of the named property. This may not be accurate.
         """
         return self.__streamID
 

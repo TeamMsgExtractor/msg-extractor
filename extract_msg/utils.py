@@ -560,7 +560,7 @@ def msgpathToString(inp) -> str:
     inp.replace('\\', '/')
     return inp
 
-def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAttachments = False, overrideEncoding = None, attachmentErrorBehavior = constants.ATTACHMENT_ERROR_THROW, recipientSeparator = ';', strict = True):
+def openMsg(path, strict = True, **kwargs):
     """
     Function to automatically open an MSG file and detect what type it is.
 
@@ -570,6 +570,8 @@ def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAtt
     :param attachmentClass: Optional, the class the Message object will use for
         attachments. You probably should not change this value unless you know
         what you are doing.
+    :param signedAttachmentClass: optional, the class the object will use for
+        signed attachments.
     :param filename: Optional, the filename to be used by default when saving.
     :param delayAttachments: Optional, delays the initialization of attachments
         until the user attempts to retrieve them. Allows MSG files with bad
@@ -593,21 +595,23 @@ def openMsg(path, prefix = '', attachmentClass = None, filename = None, delayAtt
     from .contact import Contact
     from .message import Message
     from .msg import MSGFile
+    from .message_signed import MessageSigned
 
-    attachmentClass = Attachment if attachmentClass is None else attachmentClass
-
-    msg = MSGFile(path, prefix, attachmentClass, filename, overrideEncoding, attachmentErrorBehavior)
+    msg = MSGFile(path, **kwargs)
     # After rechecking the docs, all comparisons should be case-insensitive, not case-sensitive. My reading ability is great.
     classType = msg.classType.lower()
     if classType.startswith('ipm.contact') or classType.startswith('ipm.distlist'):
         msg.close()
-        return Contact(path, prefix, attachmentClass, filename, overrideEncoding, attachmentErrorBehavior)
+        return Contact(path, **kwargs)
     elif classType.startswith('ipm.note') or classType.startswith('report'):
         msg.close()
-        return Message(path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior, recipientSeparator)
+        if classType.endswith('smime.multipartsigned'):
+            return MessageSigned(path, **kwargs)
+        else:
+            return Message(path, **kwargs)
     elif classType.startswith('ipm.appointment') or classType.startswith('ipm.schedule'):
         msg.close()
-        return Appointment(path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior, recipientSeparator)
+        return Appointment(path, **kwargs)
     elif classType == 'ipm': # Unspecified format. It should be equal to this and not just start with it.
         return msg
     elif strict:

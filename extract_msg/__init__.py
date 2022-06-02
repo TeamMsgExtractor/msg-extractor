@@ -27,8 +27,8 @@ https://github.com/TeamMsgExtractor/msg-extractor
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 __author__ = 'Destiny Peterson & Matthew Walker'
-__date__ = '2022-05-31'
-__version__ = '0.30.14'
+__date__ = '2022-06-01'
+__version__ = '0.31.0'
 
 import logging
 
@@ -39,6 +39,8 @@ from .contact import Contact
 from .exceptions import UnrecognizedMSGTypeError
 from .message import Message
 from .message_base import MessageBase
+from .message_signed import MessageSigned
+from .message_signed_base import MessageSignedBase
 from .msg import MSGFile
 from .prop import createProp
 from .properties import Properties

@@ -6,22 +6,25 @@ import re
 
 import bs4
 import compressed_rtf
+import mailbits
 import RTFDE
 
 from . import constants
-from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment
 from .exceptions import UnrecognizedMSGTypeError
-from .msg import MSGFile
+from .message_base import MessageBase
 from .recipient import Recipient
+from .signed_attachment import SignedAttachment
 from .utils import addNumToDir, inputToBytes, inputToString, prepareFilename
+
 from email.parser import Parser as EmailParser
+
 from imapclient.imapclient import decode_utf7
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-class MessageBase(MSGFile):
+class MessageSignedBase(MessageBase):
     """
     Base class for Message like msg files.
     """
@@ -35,6 +38,8 @@ class MessageBase(MSGFile):
             will use for attachments. You probably should
             not change this value unless you know what you
             are doing.
+        :param signedAttachmentClass: optional, the class the object will use
+            for signed attachments.
         :param filename: optional, the filename to be used by default when
             saving.
         :param delayAttachments: optional, delays the initialization of
@@ -49,69 +54,14 @@ class MessageBase(MSGFile):
         :param recipientSeparator: Optional, Separator string to use between
             recipients.
         """
-        super().__init__(path, **kwargs)
-        recipientSeparator = ';'
         self.__recipientSeparator = kwargs.get('recipientSeparator', ';')
+        self.__signedAttachmentClass = kwargs.get('signedAttachmentClass', SignedAttachment)
+        super().__init__(path, **kwargs)
         # Initialize properties in the order that is least likely to cause bugs.
         # TODO have each function check for initialization of needed data so these
         # lines will be unnecessary.
-        self.mainProperties
-        self.header
-        self.recipients
-
-        self.to
-        self.cc
-        self.sender
-        self.date
-        # This variable keeps track of what the new line character should be.
-        self.__crlf = '\n'
-        try:
-            self.body
-        except Exception as e:
-            # Prevent an error in the body from preventing opening.
-            logger.exception('Critical error accessing the body. File opened but accessing the body will throw an exception.')
-        self.named
-
-    def _genRecipient(self, recipientType, recipientInt):
-        """
-        Returns the specified recipient field.
-        """
-        private = '_' + recipientType
-        try:
-            return getattr(self, private)
-        except AttributeError:
-            value = None
-            # Check header first.
-            if self.headerInit():
-                value = self.header[recipientType]
-                if value:
-                    value = value.replace(',', self.__recipientSeparator)
-
-            # If the header had a blank field or didn't have the field, generate it manually.
-            if not value:
-                # Check if the header has initialized.
-                if self.headerInit():
-                    logger.info(f'Header found, but "{recipientType}" is not included. Will be generated from other streams.')
-
-                # Get a list of the recipients of the specified type.
-                foundRecipients = tuple(recipient.formatted for recipient in self.recipients if recipient.type & 0x0000000f == recipientInt)
-
-                # If we found recipients, join them with the recipient separator and a space.
-                if len(foundRecipients) > 0:
-                    value = (self.__recipientSeparator + ' ').join(foundRecipients)
-
-            # Code to fix the formatting so it's all a single line. This allows the user to format it themself if they want.
-            # This should probably be redone to use re or something, but I can do that later. This shouldn't be a huge problem for now.
-            if value:
-                value = value.replace(' \r\n\t', ' ').replace('\r\n\t ', ' ').replace('\r\n\t', ' ')
-                value = value.replace('\r\n', ' ').replace('\r', ' ').replace('\n', ' ')
-                while value.find('  ') != -1:
-                    value = value.replace('  ', ' ')
-
-            # Set the field in the class.
-            setattr(self, private, value)
-
-            return value
+        if not kwargs.get('delayAttachments', False):
+            self.attachments
 
     def headerInit(self) -> bool:
         """
@@ -122,6 +72,67 @@ class MessageBase(MSGFile):
             return True
         except AttributeError:
             return False
+
+    @property
+    def attachments(self) -> list:
+        """
+        Returns a list of all attachments.
+        """
+        try:
+            return self._sAttachments
+        except AttributeError:
+            atts = super().attachments
+            self._sAttachments = []
+            self._signedBody = None
+            self._signedHtmlBody = None
+            if len(atts) > 1:
+                logger.warn('')
+            elif len(atts) == 0:
+                logger.warn('Failed to access any attachments from the signed message.')
+                return self._sAttachments
+
+            try:
+                mainAttachment = next(att for att in atts if hasattr(att, 'getFilename') and att.getFilename() == 'smime.p7m')
+            except StopIteration:
+                logger.warn('Failed to find signed attachment.')
+                return self._sAttachments
+
+            # If we are here, we should have the attachment. So now we need to
+            # try to parse and unwrap the data.
+            toParse = [mailbits.email2dict(email.message_from_bytes(mainAttachment.data))]
+            output = []
+
+            while len(toParse) != 0:
+                parsing = toParse.pop(0)
+                for part in parsing['content']:
+                    # If it is multipart, push it to the toParse list, otherwise add it
+                    # to the output.
+                    if part['headers']['content-type']['content_type'].startswith('multipart'):
+                        toParse.append(part)
+                    else:
+                        output.append(part)
+
+            # At this point, `output` has out parts.
+            for part in output:
+                # Get the mime type.
+                mime = part['headers']['content-type']['content_type']
+
+                # Now try to grab a name. If it doesn't exist, we make one.
+                try:
+                    name = part['headers']['content-type']['params']['name']
+                except KeyError:
+                    if mime == 'text/plain':
+                        self._signedBody = part['content']
+                        continue
+                    elif mime == 'text/html':
+                        self._signedHtmlBody = part['content']
+                        continue
+                    else:
+                        name = 'unknown.bin'
+                self._sAttachments.append(self.__signedAttachmentClass(self, part['content'], name, mime))
+
+            return self._sAttachments
+
 
     @property
     def bcc(self):
@@ -140,6 +151,8 @@ class MessageBase(MSGFile):
         except AttributeError:
             if self._ensureSet('_body', '__substg1.0_1000'):
                 pass
+            elif self.signedBody:
+                self._body = self.signedBody
             else:
                 # If the body doesn't exist, see if we can get it from the RTF
                 # body.
@@ -155,122 +168,6 @@ class MessageBase(MSGFile):
             return self._body
 
     @property
-    def cc(self):
-        """
-        Returns the cc field, if it exists.
-        """
-        return self._genRecipient('cc', 2)
-
-    @property
-    def compressedRtf(self):
-        """
-        Returns the compressed RTF stream, if it exists.
-        """
-        return self._ensureSet('_compressedRtf', '__substg1.0_10090102', False)
-
-    @property
-    def crlf(self):
-        """
-        Returns the value of self.__crlf, should you need it for whatever
-        reason.
-        """
-        self.body
-        return self.__crlf
-
-    @property
-    def date(self):
-        """
-        Returns the send date, if it exists.
-        """
-        try:
-            return self._date
-        except AttributeError:
-            self._date = self._prop.date
-            return self._date
-
-    @property
-    def deencapsulatedRtf(self) -> RTFDE.DeEncapsulator:
-        """
-        Returns the instance of the deencapsulated RTF body. If there is no RTF
-        body or the body is not encasulated, returns None.
-        """
-        try:
-            return self._deencapsultor
-        except AttributeError:
-            if self.rtfBody:
-                # If there is an RTF body, we try to deencapsulate it.
-                try:
-                    self._deencapsultor = RTFDE.DeEncapsulator(self.rtfBody)
-                    self._deencapsultor.deencapsulate()
-                except RTFDE.exceptions.NotEncapsulatedRtf as e:
-                    logger.debug("RTF body is not encapsulated.")
-                    self._deencapsultor = None
-                except RTFDE.exceptions.MalformedEncapsulatedRtf as _e:
-                    logger.info("RTF body contains malformed encapsulated content.")
-                    self._deencapsultor = None
-            else:
-                self._deencapsultor = None
-            return self._deencapsultor
-
-    @property
-    def defaultFolderName(self) -> str:
-        """
-        Generates the default name of the save folder.
-        """
-        try:
-            return self._defaultFolderName
-        except AttributeError:
-            d = self.parsedDate
-
-            dirName = '{0:02d}-{1:02d}-{2:02d}_{3:02d}{4:02d}'.format(*d) if d else 'UnknownDate'
-            dirName += ' ' + (prepareFilename(self.subject) if self.subject else '[No subject]')
-
-            self._defaultFolderName = dirName
-            return dirName
-
-    @property
-    def header(self):
-        """
-        Returns the message header, if it exists. Otherwise it will generate
-        one.
-        """
-        try:
-            return self._header
-        except AttributeError:
-            headerText = self._getStringStream('__substg1.0_007D')
-            if headerText:
-                self._header = EmailParser().parsestr(headerText)
-                self._header['date'] = self.date
-            else:
-                logger.info('Header is empty or was not found. Header will be generated from other streams.')
-                header = EmailParser().parsestr('')
-                header.add_header('Date', self.date)
-                header.add_header('From', self.sender)
-                header.add_header('To', self.to)
-                header.add_header('Cc', self.cc)
-                header.add_header('Bcc', self.bcc)
-                header.add_header('Message-Id', self.messageId)
-                # TODO find authentication results outside of header
-                header.add_header('Authentication-Results', None)
-                self._header = header
-            return self._header
-
-    @property
-    def headerDict(self) -> dict:
-        """
-        Returns a dictionary of the entries in the header
-        """
-        try:
-            return self._headerDict
-        except AttributeError:
-            self._headerDict = dict(self.header._headers)
-            try:
-                self._headerDict.pop('Received')
-            except KeyError:
-                pass
-            return self._headerDict
-
-    @property
     def htmlBody(self) -> bytes:
         """
         Returns the html body, if it exists.
@@ -281,6 +178,8 @@ class MessageBase(MSGFile):
             if self._ensureSet('_htmlBody', '__substg1.0_10130102', False):
                 # Reducing line repetition.
                 pass
+            elif self.signedHtmlBody:
+                self._htmlBody = self.signedHtmlBody
             elif self.rtfBody:
                 logger.info('HTML body was not found, attempting to generate from RTF.')
                 if self.deencapsulatedRtf and self.deencapsulatedRtf.content_type == 'html':
@@ -360,6 +259,13 @@ class MessageBase(MSGFile):
         return email.utils.parsedate(self.date)
 
     @property
+    def _rawAttachments(self):
+        """
+        A property to allow access to the non-signed attachments.
+        """
+        return super().attachments
+
+    @property
     def recipientSeparator(self) -> str:
         return self.__recipientSeparator
 
@@ -426,6 +332,35 @@ class MessageBase(MSGFile):
 
             self._sender = result
             return result
+
+    @property
+    def signedAttachmentClass(self):
+        """
+        The attachment class used for signed attachments.
+        """
+        return self.__signedAttachmentClass
+
+    @property
+    def signedBody(self):
+        """
+        Returns the body from the signed message if it exists.
+        """
+        try:
+            return self._signedBody
+        except AttributeError:
+            self.attachments
+            return self._signedBody
+
+    @property
+    def signedHtmlBody(self):
+        """
+        Returns the HTML body from the signed message if it exists.
+        """
+        try:
+            return self._signedHtmlBody
+        except AttributeError:
+            self.attachments
+            return self._signedHtmlBody
 
     @property
     def subject(self):

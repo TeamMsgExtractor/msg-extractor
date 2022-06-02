@@ -27,7 +27,8 @@ class Attachment(AttachmentBase):
     def __init__(self, msg, dir_):
         """
         :param msg: the Message instance that the attachment belongs to.
-        :param dir_: the directory inside the msg file where the attachment is located.
+        :param dir_: the directory inside the msg file where the attachment is
+            located.
         """
         super().__init__(msg, dir_)
 
@@ -43,7 +44,7 @@ class Attachment(AttachmentBase):
             else:
                 self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
                 self.__type = 'msg'
-                self.__data = openMsg(self.msg.path, self.__prefix, self.__class__, overrideEncoding = msg.overrideEncoding, attachmentErrorBehavior = msg.attachmentErrorBehavior, strict = False)
+                self.__data = openMsg(self.msg.path, prefix = self.__prefix, **self.msg.kwargs)
         elif (self.props['37050003'].value & 0x7) == 0x7:
             # TODO Handling for special attacment type 0x7
             self.__type = 'web'

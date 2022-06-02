@@ -34,7 +34,7 @@ class Message(olefile.OleFileIO):
             prefix = inputToString(prefix, 'utf-8')
             try:
                 prefix = '/'.join(prefix)
-            except:
+            except TypeError:
                 raise TypeError(f'Invalid prefix type: {type(prefix)}' +
                                 '\n(This was probably caused by you setting it manually).')
             prefix = prefix.replace('\\', '/')

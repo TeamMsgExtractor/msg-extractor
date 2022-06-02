@@ -11,16 +11,16 @@ from imapclient.imapclient import decode_utf7
 from . import constants
 from .attachment import Attachment
 from .exceptions import DataNotFoundError, IncompatibleOptionsError
-from .message_base import MessageBase
+from .message_signed_base import MessageSignedBase
 from .utils import addNumToDir, addNumToZipDir, createZipOpen, injectHtmlHeader, injectRtfHeader, inputToBytes, inputToString, prepareFilename
 
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
-class Message(MessageBase):
+class MessageSigned(MessageSignedBase):
     """
-    Parser for Microsoft Outlook message files.
+    Parser for Signed Microsoft Outlook message files.
     """
     def __init__(self, path, **kwargs):
         super().__init__(path, **kwargs)
