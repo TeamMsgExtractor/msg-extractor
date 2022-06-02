@@ -213,47 +213,11 @@ class Attachment(AttachmentBase):
         self.data.save(**kwargs)
 
     @property
-    def attachmentEncoding(self):
-        """
-        The encoding information about the attachment object. Will return
-        b'*\x86H\x86\xf7\x14\x03\x0b\x01' if encoded in MacBinary format,
-        otherwise it is unset.
-        """
-        return self._ensureSet('_attachmentEncoding', '__substg1.0_37020102', False)
-
-    @property
-    def additionalInformation(self):
-        """
-        The additional information about the attachment. This property MUST be
-        an empty string if attachmentEncoding is not set. Otherwise it MUST be
-        set to a string of the format ":CREA:TYPE" where ":CREA" is the
-        four-letter Macintosh file creator code and ":TYPE" is a four-letter
-        Macintosh type code.
-        """
-        return self._ensureSet('_additionalInformation', '__substg1.0_370F')
-
-    @property
-    def cid(self):
-        """
-        Returns the Content ID of the attachment, if it exists.
-        """
-        return self._ensureSet('_cid', '__substg1.0_3712')
-
-    contendId = cid
-
-    @property
     def data(self):
         """
         Returns the attachment data.
         """
         return self.__data
-
-    @property
-    def longFilename(self):
-        """
-        Returns the long file name of the attachment, if it exists.
-        """
-        return self._ensureSet('_longFilename', '__substg1.0_3707')
 
     @property
     def randomFilename(self):
@@ -265,22 +229,6 @@ class Attachment(AttachmentBase):
         except AttributeError:
             self.regenerateRandomName()
             return self.__randomName
-
-    @property
-    def renderingPosition(self):
-        """
-        The offset, in redered characters, to use when rendering the attachment
-        within the main message text. A value of 0xFFFFFFFF indicates a hidden
-        attachment that is not to be rendered.
-        """
-        return self._ensureSetProperty('_renderingPosition', '370B0003')
-
-    @property
-    def shortFilename(self):
-        """
-        Returns the short file name of the attachment, if it exists.
-        """
-        return self._ensureSet('_shortFilename', '__substg1.0_3704')
 
     @property
     def type(self):
