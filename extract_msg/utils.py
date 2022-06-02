@@ -560,7 +560,7 @@ def msgpathToString(inp) -> str:
     inp.replace('\\', '/')
     return inp
 
-def openMsg(path, strict = True, **kwargs):
+def openMsg(path, **kwargs):
     """
     Function to automatically open an MSG file and detect what type it is.
 
@@ -614,7 +614,7 @@ def openMsg(path, strict = True, **kwargs):
         return Appointment(path, **kwargs)
     elif classType == 'ipm': # Unspecified format. It should be equal to this and not just start with it.
         return msg
-    elif strict:
+    elif kwargs.get('strict', True):
         # Because we are closing it, we need to store it in a variable first.
         ct = msg.classType
         msg.close()
