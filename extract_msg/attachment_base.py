@@ -252,6 +252,14 @@ class AttachmentBase:
         return self.__namedProperties
 
     @property
+    def payloadClass(self):
+        """
+        The class name of an object that can display the contents of the
+        message.
+        """
+        return self._ensureSet('_payloadClass', '__substg1.0_371A')
+
+    @property
     def props(self):
         """
         Returns the Properties instance of the attachment.
