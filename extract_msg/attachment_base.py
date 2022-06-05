@@ -224,6 +224,13 @@ class AttachmentBase:
         return self.__dir
 
     @property
+    def extension(self):
+        """
+        The reported extension for the file.
+        """
+        return self._ensureSet('_extension', '__substg1.0_3703')
+
+    @property
     def longFilename(self):
         """
         Returns the long file name of the attachment, if it exists.
