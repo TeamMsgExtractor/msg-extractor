@@ -9,6 +9,7 @@ import olefile
 
 from . import constants
 from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment
+from .enums import AttachErrorBehavior
 from .exceptions import InvalidFileFormatError, MissingEncodingError, UnrecognizedMSGTypeError
 from .named import Named
 from .prop import FixedLengthProp, VariableLengthProp
@@ -39,24 +40,30 @@ class MSGFile(olefile.OleFileIO):
             be retrieved.
         :param filename: optional, the filename to be used by default when
             saving.
+        :param attachmentErrorBehavior: Optional, the behavior to use in the
+            event of an error when parsing the attachments.
         :param overrideEncoding: optional, an encoding to use instead of the one
             specified by the msg file. Do not report encoding errors caused by
             this.
+
+        :raises ValueError: If the attachment error behavior is not
+        :raises TypeError: If the prefix is not a supported type.
+
+        It's recommended to check the error message to ensure you know why a
+        specific exceptions was raised.
         """
         # Retrieve all the kwargs that we need.
         prefix = kwargs.get('prefix', '')
         filename = kwargs.get('filename', None)
         overrideEncoding = kwargs.get('overrideEncoding', None)
-        attachmentErrorBehavior = kwargs.get('attachmentErrorBehavior', constants.ATTACHMENT_ERROR_THROW)
 
         # WARNING DO NOT MANUALLY MODIFY PREFIX. Let the program set it.
         self.__path = path
         self.__attachmentClass = kwargs.get('attachmentClass', Attachment)
         self.__attachmentsDelayed = kwargs.get('delayAttachments', False)
         self.__attachmentsReady = False
-        if not (constants.ATTACHMENT_ERROR_THROW <= attachmentErrorBehavior <= constants.ATTACHMENT_ERROR_BROKEN):
-            raise ValueError(":param attachmentErrorBehavior: must be ATTACHMENT_ERROR_THROW, ATTACHMENT_ERROR_NOT_IMPLEMENTED, or ATTACHMENT_ERROR_BROKEN.")
-        self.__attachmentErrorBehavior = attachmentErrorBehavior
+        self.__attachmentErrorBehavior = AttachErrorBehavior(kwargs.get('attachmentErrorBehavior', AttachErrorBehavior.THROW))
+        self.__waitingProperties = []
         if overrideEncoding is not None:
             codecs.lookup(overrideEncoding)
             logger.warning('You have chosen to override the string encoding. Do not report encoding errors caused by this.')
@@ -302,10 +309,6 @@ class MSGFile(olefile.OleFileIO):
         own named properties.
         """
         if not self.attachmentsReady:
-            try:
-                self.__waitingProperties
-            except AttributeError:
-                self.__waitingProperties = []
             self.__waitingProperties.append((entry, _type, name))
         else:
             # We specifically access internall to ensure that we get the
@@ -429,11 +432,11 @@ class MSGFile(olefile.OleFileIO):
             attachment.save(**kwargs)
 
     def saveRaw(self, path):
-        # Create a 'raw' folder
+        # Create a 'raw' folder.
         path = pathlib.Path(path)
-        # Make the location
+        # Make the location.
         os.makedirs(path, exist_ok = True)
-        # Create the zipfile
+        # Create the zipfile.
         path /= 'raw.zip'
         if path.exists():
             raise FileExistsError(f'File "{path}" already exists.')
@@ -445,13 +448,13 @@ class MSGFile(olefile.OleFileIO):
                 if constants.PROPERTIES.get(code):
                     sysdir += ' - ' + constants.PROPERTIES[code]
 
-                # Generate appropriate filename
+                # Generate appropriate filename.
                 if dir_[-1].endswith('001E') or dir_[-1].endswith('001F'):
                     filename = 'contents.txt'
                 else:
                     filename = 'contents.bin'
 
-                # Save contents of directory
+                # Save contents of directory.
                 with zfile.open(sysdir + '/' + filename, 'w') as f:
                     data = self._getStream(dir_)
                     # Specifically check for None. If this is bytes we still want to do this line.
@@ -483,11 +486,11 @@ class MSGFile(olefile.OleFileIO):
         try:
             return self._attachments
         except AttributeError:
-            # Get the attachments
+            # Get the attachments.
             attachmentDirs = []
             prefixLen = self.prefixLen
             for dir_ in self.listDir(False, True):
-                if dir_[prefixLen].startswith('__attach') and\
+                if dir_[prefixLen].startswith('__attach') and \
                         dir_[prefixLen] not in attachmentDirs:
                     attachmentDirs.append(dir_[prefixLen])
 
@@ -497,14 +500,14 @@ class MSGFile(olefile.OleFileIO):
                 try:
                     self._attachments.append(self.attachmentClass(self, attachmentDir))
                 except (NotImplementedError, UnrecognizedMSGTypeError) as e:
-                    if self.attachmentErrorBehavior > constants.ATTACHMENT_ERROR_THROW:
+                    if self.attachmentErrorBehavior != AttachErrorBehavior.THROW:
                         logger.error(f'Error processing attachment at {attachmentDir}')
                         logger.exception(e)
                         self._attachments.append(UnsupportedAttachment(self, attachmentDir))
                     else:
                         raise
                 except Exception as e:
-                    if self.attachmentErrorBehavior == constants.ATTACHMENT_ERROR_BROKEN:
+                    if self.attachmentErrorBehavior == AttachErrorBehavior.BROKEN:
                         logger.error(f'Error processing attachment at {attachmentDir}')
                         logger.exception(e)
                         self._attachments.append(BrokenAttachment(self, attachmentDir))
@@ -513,7 +516,6 @@ class MSGFile(olefile.OleFileIO):
 
             self.__attachmentsReady = True
             try:
-                self.__waitingProperties
                 if self.__attachmentsDelayed:
                     for attachment in self._attachments:
                         for prop in self.__waitingProperties:
@@ -533,14 +535,14 @@ class MSGFile(olefile.OleFileIO):
         return self.__attachmentClass
 
     @property
-    def attachmentsDelayed(self):
+    def attachmentsDelayed(self) -> bool:
         """
         Returns True if the attachment initialization was delayed.
         """
         return self.__attachmentsDelayed
 
     @property
-    def attachmentErrorBehavior(self):
+    def attachmentErrorBehavior(self) -> AttachErrorBehavior:
         """
         The behavior to follow when an attachment raises an exception. Will be
         one of the following values:
@@ -551,28 +553,28 @@ class MSGFile(olefile.OleFileIO):
         return self.__attachmentErrorBehavior
 
     @property
-    def attachmentsReady(self):
+    def attachmentsReady(self) -> bool:
         """
         Returns True if the attachments are ready to be used.
         """
         return self.__attachmentsReady
 
     @property
-    def classType(self):
+    def classType(self) -> str:
         """
         The class type of the MSG file.
         """
         return self._ensureSet('_classType', '__substg1.0_001A')
 
     @property
-    def importance(self):
+    def importance(self) -> int:
         """
         The specified importance of the msg file.
         """
         return self._ensureSetProperty('_importance', '00170003')
 
     @property
-    def kwargs(self):
+    def kwargs(self) -> dict:
         """
         The kwargs used to initialize this message, excluding the prefix. This
         is used for initializing embedded msg files.
@@ -626,7 +628,7 @@ class MSGFile(olefile.OleFileIO):
         return self.__prefix
 
     @property
-    def prefixLen(self):
+    def prefixLen(self) -> int:
         """
         Returns the number of elements in the prefix.
         """
@@ -641,14 +643,14 @@ class MSGFile(olefile.OleFileIO):
         return copy.deepcopy(self.__prefixList)
 
     @property
-    def priority(self):
+    def priority(self) -> int:
         """
         The specified priority of the msg file.
         """
         return self._ensureSetProperty('_priority', '00260003')
 
     @property
-    def sensitivity(self):
+    def sensitivity(self) -> int:
         """
         The specified sensitivity of the msg file.
         """
@@ -659,7 +661,7 @@ class MSGFile(olefile.OleFileIO):
         try:
             return self.__stringEncoding
         except AttributeError:
-            # We need to calculate the encoding
+            # We need to calculate the encoding.
             # Let's first check if the encoding will be unicode:
             if self.areStringsUnicode:
                 self.__stringEncoding = "utf-16-le"
@@ -667,8 +669,12 @@ class MSGFile(olefile.OleFileIO):
             else:
                 # Well, it's not unicode. Now we have to figure out what it IS.
                 if not self.mainProperties.has_key('3FFD0003'):
-                    raise MissingEncodingError('Encoding property not found')
-                enc = self.mainProperties['3FFD0003'].value
-                # Now we just need to translate that value
-                self.__stringEncoding = getEncodingName(enc)
+                    # If this property is not set by the client, we SHOULD set
+                    # it to ISO-8859-15, but MAY set it to ISO-8859-1.
+                    logger.warn('Encoding property not found. Defaulting to ISO-8859-15')
+                    self.__stringEncoding = 'iso-8859-15'
+                else:
+                    enc = self.mainProperties['3FFD0003'].value
+                    # Now we just need to translate that value.
+                    self.__stringEncoding = getEncodingName(enc)
                 return self.__stringEncoding

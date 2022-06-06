@@ -49,7 +49,7 @@ class MessageSignedBase(MessageBase):
         :param overrideEncoding: optional, an encoding to use instead of the one
             specified by the msg file. Do not report encoding errors caused by
             this.
-        :param attachmentErrorBehavior: Optional, the behaviour to use in the
+        :param attachmentErrorBehavior: Optional, the behavior to use in the
             event of an error when parsing the attachments.
         :param recipientSeparator: Optional, Separator string to use between
             recipients.

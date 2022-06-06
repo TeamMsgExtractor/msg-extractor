@@ -1,6 +1,17 @@
 import enum
 
 
+class AttachErrorBehavior(enum.Enum):
+    """
+    The behavior to follow when handling an error in an attachment.
+    THROW: Throw the exception regardless of type.
+    NOT_IMPLEMENTED: Silence the exception for NotImplementedError.
+    BROKEN: Silence the exception for NotImplementedError and for broken
+        attachments.
+    """
+    THROW = 0
+    NOT_IMPLEMENTED = 1
+    BROKEN = 2
 
 class Guid(enum.Enum):
     GUID_PS_MAPI = '{00020328-0000-0000-C000-000000000046}'

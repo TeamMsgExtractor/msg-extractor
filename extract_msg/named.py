@@ -31,7 +31,7 @@ class Named:
                 'id': tmp[0],
                 'pid': tmp[2],
                 'guid_index': tmp[1] >> 1,
-                'pkind': tmp[1] & 1, # 0 if numerical, 1 if string
+                'pkind': NamedPropertyType(tmp[1] & 1), # 0 if numerical, 1 if string.
                 'rawStream': rawStream,
                 }
             entry['guid'] = guids[entry['guid_index']]
@@ -52,9 +52,9 @@ class Named:
         self.__properties = []
         for entry in entries:
             streamID = properHex(0x8000 + entry['pid'])
-            msg._registerNamedProperty(entry, entry['pkind'], names[entry['id']] if entry['pkind'] == NamedPropertyType.STRING_NAMED.value else None)
+            msg._registerNamedProperty(entry, entry['pkind'], names[entry['id']] if entry['pkind'] == NamedPropertyType.STRING_NAMED else None)
             if msg.existsTypedProperty(streamID):
-                self.__properties.append(StringNamedProperty(entry, names[entry['id']], msg._getTypedData(streamID)) if entry['pkind'] == NamedPropertyType.STRING_NAMED.value else NumericalNamedProperty(entry, msg._getTypedData(streamID)))
+                self.__properties.append(StringNamedProperty(entry, names[entry['id']], msg._getTypedData(streamID)) if entry['pkind'] == NamedPropertyType.STRING_NAMED else NumericalNamedProperty(entry, msg._getTypedData(streamID)))
         self.__propertiesDict = {}
         for property in self.__properties:
             self.__propertiesDict[property.name if isinstance(property, StringNamedProperty) else property.propertyID] = property
