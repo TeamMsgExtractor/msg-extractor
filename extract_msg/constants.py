@@ -530,12 +530,12 @@ CODE_PAGES = {
 PYTPFLOATINGTIME_START = datetime.datetime(1899, 12, 30)
 
 # Constants used for argparse stuff
-KNOWN_FILE_FLAGS = [
+KNOWN_FILE_FLAGS = (
     '--out-name',
-]
-NEEDS_ARG = [
+)
+NEEDS_ARG = (
     '--out-name',
-]
+)
 MAINDOC = "extract_msg:\n\tExtracts emails and attachments saved in Microsoft Outlook's .msg files.\n\n" \
           "https://github.com/TeamMsgExtractor/msg-extractor"
 
@@ -628,43 +628,6 @@ PTYPES = {
     0x1048: 'PtypMultipleGuid',
     0x1102: 'PtypMultipleBinary',
 }
-
-# Display types
-DT_MAILUSER = 0x0000
-DT_DISTLIST = 0x0001
-DT_FORUM = 0x0002
-DT_AGENT = 0x0003
-DT_ORGANIZATION = 0x0004
-DT_PRIVATE_DISTLIST = 0x0005
-DT_REMOTE_MAILUSER = 0x0006
-DT_CONTAINER = 0x0100
-DT_TEMPLATE = 0x0101
-DT_ADDRESS_TEMPLATE = 0x0102
-DT_SEARCH = 0x0200
-
-# Rule action types
-RA_OP_MOVE = 0x01
-RA_OP_COPY = 0x02
-RA_OP_REPLY = 0x03
-RA_OP_OOF_REPLY = 0x04
-RA_OP_DEFER_ACTION = 0x05
-RA_OP_BOUNCE = 0x06
-RA_OP_FORWARD = 0x07
-RA_OP_DELEGATE = 0x08
-RA_OP_TAG = 0x09
-RA_OP_DELETE = 0x0A
-RA_OP_MARK_AS_READ = 0x0B
-
-# Recipiet Row Flag Types
-RF_NOTYPE = 0x0
-RF_X500DN = 0x1
-RF_MSMAIL = 0x2
-RF_SMTP = 0x3
-RF_FAX = 0x4
-RF_PROFESSIONALOFFICESYSTEM = 0x5
-RF_PERSONALDESTRIBUTIONLIST1 = 0x6
-RF_PERSONALDESTRIBUTIONLIST2 = 0x7
-
 
 # This property information was sourced from
 # http://www.fileformat.info/format/outlookmsg/index.htm
@@ -884,22 +847,3 @@ PROPERTIES = {
 
 
 # END CONSTANTS
-
-def int_to_data_type(integer):
-    """
-    Returns the name of the data type constant that has the value of :param integer:
-    """
-    return TYPE_TUPLE[integer]
-
-
-def int_to_intelligence(integer):
-    """
-    Returns the name of the intelligence level constant that has the value of :param integer:
-    """
-    return INTELLIGENCE_TUPLE[integer]
-
-def int_to_recipient_type(integer):
-    """
-    Returns the name of the recipient type constant that has the value of :param integer:
-    """
-    return RECIPIENT_TUPLE[integer]

@@ -13,6 +13,19 @@ class AttachErrorBehavior(enum.Enum):
     NOT_IMPLEMENTED = 1
     BROKEN = 2
 
+class DisplayType(enum.Enum):
+    MAILUSER = 0x0000
+    DISTLIST = 0x0001
+    FORUM = 0x0002
+    AGENT = 0x0003
+    ORGANIZATION = 0x0004
+    PRIVATE_DISTLIST = 0x0005
+    REMOTE_MAILUSER = 0x0006
+    CONTAINER = 0x0100
+    TEMPLATE = 0x0101
+    ADDRESS_TEMPLATE = 0x0102
+    SEARCH = 0x0200
+
 class Guid(enum.Enum):
     PS_MAPI = '{00020328-0000-0000-C000-000000000046}'
     PS_PUBLIC_STRINGS = '{00020329-0000-0000-C000-000000000046}'
@@ -59,6 +72,16 @@ class PropertiesType(enum.Enum):
     ATTACHMENT = 2
     RECIPIENT = 3
 
+class RecipientRowFlagType(enum.Enum):
+    NOTYPE = 0x0
+    X500DN = 0x1
+    MSMAIL = 0x2
+    SMTP = 0x3
+    FAX = 0x4
+    PROFESSIONALOFFICESYSTEM = 0x5
+    PERSONALDESTRIBUTIONLIST1 = 0x6
+    PERSONALDESTRIBUTIONLIST2 = 0x7
+
 class RecipientType(enum.Enum):
     """
     The type of recipient.
@@ -67,6 +90,19 @@ class RecipientType(enum.Enum):
     TO = 1
     CC = 2
     BCC = 3
+
+class RuleActionType(enum.Enum):
+    OP_MOVE = 0x01
+    OP_COPY = 0x02
+    OP_REPLY = 0x03
+    OP_OOF_REPLY = 0x04
+    OP_DEFER_ACTION = 0x05
+    OP_BOUNCE = 0x06
+    OP_FORWARD = 0x07
+    OP_DELEGATE = 0x08
+    OP_TAG = 0x09
+    OP_DELETE = 0x0A
+    OP_MARK_AS_READ = 0x0B
 
 class Sensitivity(enum.Enum):
     NORMAL = 0
