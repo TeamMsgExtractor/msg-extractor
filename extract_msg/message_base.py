@@ -10,6 +10,7 @@ import RTFDE
 
 from . import constants
 from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment
+from .enums import RecipientType
 from .exceptions import UnrecognizedMSGTypeError
 from .msg import MSGFile
 from .recipient import Recipient
@@ -72,11 +73,12 @@ class MessageBase(MSGFile):
             logger.exception('Critical error accessing the body. File opened but accessing the body will throw an exception.')
         self.named
 
-    def _genRecipient(self, recipientType, recipientInt):
+    def _genRecipient(self, recipientType, recipientInt : RecipientType):
         """
         Returns the specified recipient field.
         """
         private = '_' + recipientType
+        recipientInt = RecipientType(recipientInt)
         try:
             return getattr(self, private)
         except AttributeError:
@@ -94,7 +96,7 @@ class MessageBase(MSGFile):
                     logger.info(f'Header found, but "{recipientType}" is not included. Will be generated from other streams.')
 
                 # Get a list of the recipients of the specified type.
-                foundRecipients = tuple(recipient.formatted for recipient in self.recipients if recipient.type & 0x0000000f == recipientInt)
+                foundRecipients = tuple(recipient.formatted for recipient in self.recipients if recipient.type == recipientInt)
 
                 # If we found recipients, join them with the recipient separator and a space.
                 if len(foundRecipients) > 0:
@@ -128,7 +130,7 @@ class MessageBase(MSGFile):
         """
         Returns the bcc field, if it exists.
         """
-        return self._genRecipient('bcc', 3)
+        return self._genRecipient('bcc', RecipientType.BCC)
 
     @property
     def body(self):
@@ -159,7 +161,7 @@ class MessageBase(MSGFile):
         """
         Returns the cc field, if it exists.
         """
-        return self._genRecipient('cc', 2)
+        return self._genRecipient('cc', RecipientType.CC)
 
     @property
     def compressedRtf(self):
@@ -439,4 +441,4 @@ class MessageBase(MSGFile):
         """
         Returns the to field, if it exists.
         """
-        return self._genRecipient('to', 1)
+        return self._genRecipient('to', RecipientType.TO)

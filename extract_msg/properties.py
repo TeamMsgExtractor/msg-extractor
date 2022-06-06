@@ -3,6 +3,7 @@ import logging
 import pprint
 
 from . import constants
+from .enums import Intelligence, PropertiesType
 from .prop import createProp
 from .utils import divide, fromTimeStamp, filetimeToUtc, properHex
 
@@ -15,7 +16,7 @@ class Properties:
     Parser for msg properties files.
     """
 
-    def __init__(self, stream, type=None, skip=None):
+    def __init__(self, stream, type : PropertiesType = None, skip = None):
         self.__stream = stream
         self.__pos = 0
         self.__len = len(stream)
@@ -25,17 +26,18 @@ class Properties:
         self.__ac = None
         self.__rc = None
         if type is not None:
-            self.__intel = constants.INTELLIGENCE_SMART
-            if type == constants.TYPE_MESSAGE:
+            type = PropertiesType(type)
+            self.__intel = Intelligence.SMART
+            if type == PropertiesType.MESSAGE:
                 skip = 32
                 self.__naid, self.__nrid, self.__ac, self.__rc = constants.ST1.unpack(self.__stream[:24])
-            elif type == constants.TYPE_MESSAGE_EMBED:
+            elif type == PropertiesType.MESSAGE_EMBED:
                 skip = 24
                 self.__naid, self.__nrid, self.__ac, self.__rc = constants.ST1.unpack(self.__stream[:24])
             else:
                 skip = 8
         else:
-            self.__intel = constants.INTELLIGENCE_DUMB
+            self.__intel = Intelligence.DUMB
             if skip is None:
                 # This section of the skip handling is not very good.
                 # While it does work, it is likely to create extra
@@ -143,7 +145,7 @@ class Properties:
             return self.__date
 
     @property
-    def intelligence(self):
+    def intelligence(self) -> Intelligence:
         """
         Returns the inteligence level of the Properties instance.
         """
@@ -171,7 +173,7 @@ class Properties:
         return copy.deepcopy(self.__props)
 
     @property
-    def recipientCount(self):
+    def recipientCount(self) -> int:
         if self.__rc is None:
             raise TypeError('Properties instance must be intelligent and of type TYPE_MESSAGE to get recipient count.')
         return self.__rc

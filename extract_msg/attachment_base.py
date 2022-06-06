@@ -1,6 +1,7 @@
 import logging
 
 from . import constants
+from .enums import PropertiesType
 from .named import NamedAttachmentProperties
 from .prop import FixedLengthProp
 from .properties import Properties
@@ -25,7 +26,7 @@ class AttachmentBase:
         """
         self.__msg = msg
         self.__dir = dir_
-        self.__props = Properties(self._getStream('__properties_version1.0'), constants.TYPE_ATTACHMENT)
+        self.__props = Properties(self._getStream('__properties_version1.0'), PropertiesType.ATTACHMENT)
         self.__namedProperties = NamedAttachmentProperties(self)
 
 

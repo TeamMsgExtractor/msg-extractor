@@ -3,6 +3,7 @@ import logging
 import olefile
 
 from .. import constants
+from ..enums import PropertiesType
 from ..dev_classes.attachment import Attachment
 from ..properties import Properties
 from ..recipient import Recipient
@@ -211,7 +212,7 @@ class Message(olefile.OleFileIO):
             return self._prop
         except AttributeError:
             self._prop = Properties(self._getStream('__properties_version1.0'),
-                                    constants.TYPE_MESSAGE if self.__prefix == '' else constants.TYPE_MESSAGE_EMBED)
+                                    PropertiesType.MESSAGE if self.__prefix == '' else PropertiesType.MESSAGE_EMBED)
             return self._prop
 
     @property

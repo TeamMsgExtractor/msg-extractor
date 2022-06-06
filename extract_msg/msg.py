@@ -9,7 +9,7 @@ import olefile
 
 from . import constants
 from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment
-from .enums import AttachErrorBehavior
+from .enums import AttachErrorBehavior, PropertiesType
 from .exceptions import InvalidFileFormatError, MissingEncodingError, UnrecognizedMSGTypeError
 from .named import Named
 from .prop import FixedLengthProp, VariableLengthProp
@@ -590,7 +590,7 @@ class MSGFile(olefile.OleFileIO):
             return self._prop
         except AttributeError:
             self._prop = Properties(self._getStream('__properties_version1.0'),
-                                    constants.TYPE_MESSAGE if self.prefix == '' else constants.TYPE_MESSAGE_EMBED)
+                                    PropertiesType.MESSAGE if self.prefix == '' else PropertiesType.MESSAGE_EMBED)
             return self._prop
 
     @property
@@ -671,7 +671,7 @@ class MSGFile(olefile.OleFileIO):
                 if not self.mainProperties.has_key('3FFD0003'):
                     # If this property is not set by the client, we SHOULD set
                     # it to ISO-8859-15, but MAY set it to ISO-8859-1.
-                    logger.warn('Encoding property not found. Defaulting to ISO-8859-15')
+                    logger.warn('Encoding property not found. Defaulting to ISO-8859-15.')
                     self.__stringEncoding = 'iso-8859-15'
                 else:
                     enc = self.mainProperties['3FFD0003'].value

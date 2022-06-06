@@ -27,12 +27,12 @@ https://github.com/TeamMsgExtractor/msg-extractor
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 __author__ = 'Destiny Peterson & Matthew Walker'
-__date__ = '2022-06-01'
+__date__ = '2022-06-05'
 __version__ = '0.31.0'
 
 import logging
 
-from . import constants
+from . import constants, enums
 from .appointment import Appointment
 from .attachment import Attachment
 from .contact import Contact

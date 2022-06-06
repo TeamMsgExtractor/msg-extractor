@@ -7,6 +7,7 @@
 * Shifted some minor parts down towards the `AttachmentBase` class where possible to allow more usability with broken and unsupported attachments. Nothing about these properties required the attachment to be fully processed, which is why they were moved down. From the perspective of using the `Attachment` class nothing has changed. The following properties have been moved: `attachmentEncoding`, `additionalInformation`, `cid`/`contentId`, `longFilename`, `renderingPosition`, and `shortFilename`.
 * Added link to readme for supporting development.
 * Finally found the behavior to use for missing encoding. As such, `MissingEncodingError` is being removed from the module entirely, as it is no longer a thing.
+* Moved many constant sets to enums. This makes things a lot more organized.
 
 **v0.30.14**
 * Fixed major bug in `MSGFile.listDir` that would cause it to give the wrong data due to caching. I forgot to have it cache a different result for each set of options, so it would always give the same result regardless of options after the first access.
