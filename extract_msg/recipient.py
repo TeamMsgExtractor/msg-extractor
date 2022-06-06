@@ -2,6 +2,7 @@ import logging
 
 from . import constants
 from .data import PermanentEntryID
+from .enums import PropertiesType, RecipientType
 from .properties import Properties
 from .utils import verifyPropertyId, verifyType
 
@@ -15,14 +16,15 @@ class Recipient:
     Contains the data of one of the recipients in an msg file.
     """
     def __init__(self, _dir, msg):
-        self.__msg = msg  # Allows calls to original msg file
+        self.__msg = msg  # Allows calls to original msg file.
         self.__dir = _dir
-        self.__props = Properties(self._getStream('__properties_version1.0'), constants.TYPE_RECIPIENT)
+        self.__props = Properties(self._getStream('__properties_version1.0'), PropertiesType.RECIPIENT)
         self.__email = self._getStringStream('__substg1.0_39FE')
         if not self.__email:
             self.__email = self._getStringStream('__substg1.0_3003')
         self.__name = self._getStringStream('__substg1.0_3001')
-        self.__type = self.__props.get('0C150003').value
+        self.__typeFlags = self.__props.get('0C150003').value or 0
+        self.__type = RecipientType(0xF & self.__typeFlags)
         self.__formatted = f'{self.__name} <{self.__email}>'
 
     def _ensureSet(self, variable, streamID, stringStream : bool = True):
@@ -253,7 +255,7 @@ class Recipient:
         return self._ensureSet('_transmittableDisplayName', '__substg1.0_3A20')
 
     @property
-    def type(self):
+    def type(self) -> RecipientType:
         """
         Returns the recipient type. Type is:
             * Sender if `type & 0xf == 0`
@@ -262,3 +264,10 @@ class Recipient:
             * Bcc if `type & 0xf == 3`
         """
         return self.__type
+
+    @property
+    def typeFlags(self) -> int:
+        """
+        The raw recipient type value and all the flags it includes.
+        """
+        return self.__typeFlags

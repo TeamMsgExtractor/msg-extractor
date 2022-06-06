@@ -1,6 +1,7 @@
 import logging
 
 from .. import constants
+from ..enums import PropertiesType
 from ..properties import Properties
 from ..utils import properHex
 
@@ -21,7 +22,7 @@ class Attachment:
         self.__dir = dir_
         self.__props = Properties(
             msg._getStream([self.__dir, '__properties_version1.0']),
-            constants.TYPE_ATTACHMENT)
+            PropertiesType.ATTACHMENT)
 
         # Get attachment data
         if msg.exists([dir_, '__substg1.0_37010102']):

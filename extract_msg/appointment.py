@@ -8,8 +8,8 @@ class Appointment(MessageBase):
     Parser for Microsoft Outlook Appointment files.
     """
 
-    def __init__(self, path, prefix = '', attachmentClass = Attachment, filename = None, delayAttachments = False, overrideEncoding = None, attachmentErrorBehavior = constants.ATTACHMENT_ERROR_THROW, recipientSeparator = ';'):
-        super().__init__(path, prefix, attachmentClass, filename, delayAttachments, overrideEncoding, attachmentErrorBehavior, recipientSeparator)
+    def __init__(self, path, **kwargs):
+        super().__init__(path, **kwargs)
 
     @property
     def appointmentClassType(self):
@@ -57,7 +57,6 @@ class Appointment(MessageBase):
         Returns the resource attendees of the meeting.
         """
         return self._ensureSetNamed('_resourceAttendees', '0008')
-
 
     @property
     def startDate(self):

@@ -42,7 +42,7 @@ Outlook's .msg files. This library currently supports Python 3.6 and above.
 
 The script was originally built using Peter Fiskerstrand's documentation of the
 .msg format. Redemption's discussion of the different property types used within
-Extended MAPI was also useful. For future reference, I note that Microsoft have
+Extended MAPI was also useful. For future reference, note that Microsoft have
 opened up their documentation of the file format, which is what is currently
 being used for development.
 
@@ -127,8 +127,8 @@ where ``CustomAttachmentClass`` is your custom class.
 
 #TODO: Finish this section
 
-If you have any questions feel free to contact me, Destiny, as arceusthe [at]
-gmail [dot] com. I am the co-owner and main developer of the project.
+If you have any questions feel free to contact Destiny at arceusthe [at]
+gmail [dot] com. She is the co-owner and main developer of the project.
 
 If you have issues, it would be best to get help for them by opening a
 new github issue.
@@ -141,6 +141,12 @@ do the following when reporting it: \* Make sure you are using the
 latest version of extract_msg (check the version on PyPi). \* State your
 Python version. \* Include the code, if any, that you used. \* Include a
 copy of the traceback.
+
+Supporting The Module
+---------------------
+
+If you'd like to donate to help support the development of the module, you can
+donate to Destiny at her Buy Me a Coffee page here: `Buy Me a Coffee`_
 
 Installation
 ------------
@@ -206,8 +212,8 @@ And thank you to everyone who has opened an issue and helped us track down those
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
 
-.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.30.14-blue.svg
-   :target: https://pypi.org/project/extract-msg/0.30.14/
+.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.31.0-blue.svg
+   :target: https://pypi.org/project/extract-msg/0.31.0/
 
 .. |PyPI2| image:: https://img.shields.io/badge/python-3.6+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-367/
@@ -220,3 +226,4 @@ And thank you to everyone who has opened an issue and helped us track down those
 .. _Liam: https://github.com/LiamPM5
 .. _Seamus Tuohy: https://github.com/seamustuohy
 .. _Discord: https://discord.com/invite/B77McRmzdc
+.. _Buy Me a Coffee: https://www.buymeacoffee.com/DestructionE

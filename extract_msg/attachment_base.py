@@ -1,6 +1,7 @@
 import logging
 
 from . import constants
+from .enums import PropertiesType
 from .named import NamedAttachmentProperties
 from .prop import FixedLengthProp
 from .properties import Properties
@@ -25,7 +26,7 @@ class AttachmentBase:
         """
         self.__msg = msg
         self.__dir = dir_
-        self.__props = Properties(self._getStream('__properties_version1.0'), constants.TYPE_ATTACHMENT)
+        self.__props = Properties(self._getStream('__properties_version1.0'), PropertiesType.ATTACHMENT)
         self.__namedProperties = NamedAttachmentProperties(self)
 
 
@@ -187,12 +188,62 @@ class AttachmentBase:
         return self.__msg.existsTypedProperty(id, self.__dir, _type, True, self.__props)
 
     @property
+    def attachmentEncoding(self):
+        """
+        The encoding information about the attachment object. Will return
+        b'*\x86H\x86\xf7\x14\x03\x0b\x01' if encoded in MacBinary format,
+        otherwise it is unset.
+        """
+        return self._ensureSet('_attachmentEncoding', '__substg1.0_37020102', False)
+
+    @property
+    def additionalInformation(self):
+        """
+        The additional information about the attachment. This property MUST be
+        an empty string if attachmentEncoding is not set. Otherwise it MUST be
+        set to a string of the format ":CREA:TYPE" where ":CREA" is the
+        four-letter Macintosh file creator code and ":TYPE" is a four-letter
+        Macintosh type code.
+        """
+        return self._ensureSet('_additionalInformation', '__substg1.0_370F')
+
+    @property
+    def cid(self):
+        """
+        Returns the Content ID of the attachment, if it exists.
+        """
+        return self._ensureSet('_cid', '__substg1.0_3712')
+
+    contendId = cid
+
+    @property
     def dir(self):
         """
         Returns the directory inside the msg file where the attachment is
         located.
         """
         return self.__dir
+
+    @property
+    def extension(self):
+        """
+        The reported extension for the file.
+        """
+        return self._ensureSet('_extension', '__substg1.0_3703')
+
+    @property
+    def longFilename(self):
+        """
+        Returns the long file name of the attachment, if it exists.
+        """
+        return self._ensureSet('_longFilename', '__substg1.0_3707')
+
+    @property
+    def mimetype(self):
+        """
+        The content-type mime header of the attachment, if specified.
+        """
+        return self._ensureSet('_mimetype', '__substg1.0_370E')
 
     @property
     def msg(self):
@@ -209,8 +260,32 @@ class AttachmentBase:
         return self.__namedProperties
 
     @property
+    def payloadClass(self):
+        """
+        The class name of an object that can display the contents of the
+        message.
+        """
+        return self._ensureSet('_payloadClass', '__substg1.0_371A')
+
+    @property
     def props(self):
         """
         Returns the Properties instance of the attachment.
         """
         return self.__props
+
+    @property
+    def renderingPosition(self):
+        """
+        The offset, in redered characters, to use when rendering the attachment
+        within the main message text. A value of 0xFFFFFFFF indicates a hidden
+        attachment that is not to be rendered.
+        """
+        return self._ensureSetProperty('_renderingPosition', '370B0003')
+
+    @property
+    def shortFilename(self):
+        """
+        Returns the short file name of the attachment, if it exists.
+        """
+        return self._ensureSet('_shortFilename', '__substg1.0_3704')

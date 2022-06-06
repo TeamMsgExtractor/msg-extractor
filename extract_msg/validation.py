@@ -54,7 +54,7 @@ def validate(msg):
         except NotImplementedError:
             # Should we have a special procedure for handling it if we get "not implemented"?
             pass
-        except:
+        except Exception:
             pass
         else:
             validationDict['message']['initializes'] = True
