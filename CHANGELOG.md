@@ -1,3 +1,6 @@
+**v0.31.1**
+* Updated signed attachment mimetype property from `mime` to `mimetype` to match with the regular attachment property.
+
 **v0.31.0**
 * [[TeamMsgExtractor #223](https://github.com/TeamMsgExtractor/msg-extractor/issues/223)] First implementation of support for signed messages.
 * [[TeamMsgExtractor #256](https://github.com/TeamMsgExtractor/msg-extractor/issues/256)] Extended the properties of the attachment class to allow for access to more data.
