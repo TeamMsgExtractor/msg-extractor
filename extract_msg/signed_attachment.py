@@ -136,7 +136,7 @@ class SignedAttachment:
         return self.__data
 
     @property
-    def mime(self) -> str:
+    def mimetype(self) -> str:
         return self.__mime
 
     @property
