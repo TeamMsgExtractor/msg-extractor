@@ -567,10 +567,12 @@ def openMsg(path, **kwargs):
     :param path: Path to the msg file in the system or is the raw msg file.
     :param prefix: Used for extracting embeded msg files inside the main one.
         Do not set manually unless you know what you are doing.
+    :param parentMsg: Used for syncronizing named properties instances. Do not
+        set this unless you know what you are doing.
     :param attachmentClass: Optional, the class the Message object will use for
         attachments. You probably should not change this value unless you know
         what you are doing.
-    :param signedAttachmentClass: optional, the class the object will use for
+    :param signedAttachmentClass: Optional, the class the object will use for
         signed attachments.
     :param filename: Optional, the filename to be used by default when saving.
     :param delayAttachments: Optional, delays the initialization of attachments

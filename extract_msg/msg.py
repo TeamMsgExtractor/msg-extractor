@@ -10,8 +10,8 @@ import olefile
 from . import constants
 from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment
 from .enums import AttachErrorBehavior, PropertiesType
-from .exceptions import InvalidFileFormatError, MissingEncodingError, UnrecognizedMSGTypeError
-from .named import Named
+from .exceptions import InvalidFileFormatError, UnrecognizedMSGTypeError
+from .named import Named, NamedProperties
 from .prop import FixedLengthProp, VariableLengthProp
 from .properties import Properties
 from .utils import divide, getEncodingName, hasLen, inputToMsgpath, inputToString, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
@@ -27,18 +27,19 @@ class MSGFile(olefile.OleFileIO):
     def __init__(self, path, **kwargs):
         """
         :param path: path to the msg file in the system or is the raw msg file.
-        :param prefix: used for extracting embeded msg files
-            inside the main one. Do not set manually unless
-            you know what you are doing.
-        :param attachmentClass: optional, the class the MSGFile object
+        :param prefix: Used for extracting embeded msg files inside the main
+            one. Do not set manually unless you know what you are doing.
+        :param parentMsg: Used for syncronizing named properties instances. Do
+            not set this unless you know what you are doing.
+        :param attachmentClass: Optional, the class the MSGFile object
             will use for attachments. You probably should
             not change this value unless you know what you
             are doing.
-        :param delayAttachments: optional, delays the initialization of
+        :param delayAttachments: Optional, delays the initialization of
             attachments until the user attempts to retrieve them. Allows MSG
             files with bad attachments to be initialized so the other data can
             be retrieved.
-        :param filename: optional, the filename to be used by default when
+        :param filename: Optional, the filename to be used by default when
             saving.
         :param attachmentErrorBehavior: Optional, the behavior to use in the
             event of an error when parsing the attachments.
@@ -46,16 +47,34 @@ class MSGFile(olefile.OleFileIO):
             specified by the msg file. Do not report encoding errors caused by
             this.
 
-        :raises ValueError: If the attachment error behavior is not
+        :raises InvalidFileFormatError: If the file is not an OleFile.
+        :raises IOError: If there is an issue opening the MSG file.
+        :raises NameError: If the encoding provided is not supported.
         :raises TypeError: If the prefix is not a supported type.
+        :raises TypeError: If the parent is not an instance of MSGFile or a
+            subclass.
+        :raises ValueError: If the attachment error behavior is not valid.
 
         It's recommended to check the error message to ensure you know why a
         specific exceptions was raised.
         """
         # Retrieve all the kwargs that we need.
         prefix = kwargs.get('prefix', '')
+        parentMsg = kwargs.get('parentMsg')
         filename = kwargs.get('filename', None)
         overrideEncoding = kwargs.get('overrideEncoding', None)
+
+        # Handle the parent msg file existing.
+        if parentMsg:
+            # Verify it is a valid class.
+            if not isinstance(parentMsg, MSGFile):
+                raise TypeError(':param parentMsg: must be an instance of MSGFile or a subclass.')
+            # Try to get the named properties and use that for our main
+            # instance.
+            try:
+                self.__named = parentMsg.named
+            except Exception:
+                pass
 
         # WARNING DO NOT MANUALLY MODIFY PREFIX. Let the program set it.
         self.__path = path
@@ -84,6 +103,8 @@ class MSGFile(olefile.OleFileIO):
         kwargsCopy = copy.copy(kwargs)
         if 'prefix' in kwargsCopy:
             del kwargsCopy['prefix']
+        if 'parent' in kwargsCopy:
+            del kwargsCopy['parent']
         self.__kwargs = kwargsCopy
 
         prefixl = []
@@ -146,7 +167,7 @@ class MSGFile(olefile.OleFileIO):
         try:
             return getattr(self, variable)
         except AttributeError:
-            value = self.named.getNamedValue(propertyName)
+            value = self.namedProperties.get(propertyName)
             setattr(self, variable, value)
             return value
 
@@ -300,21 +321,6 @@ class MSGFile(olefile.OleFileIO):
                         contents = streams
                 return True, parseType(int(_type, 16), contents, self.stringEncoding, extras)
         return False, None # We didn't find the stream.
-
-    def _registerNamedProperty(self, entry, _type, name = None):
-        """
-        FOR INTERNAL USE ONLY! DO NOT CALL MANUALLY!
-
-        Function to allow types in subclasses to have their
-        own named properties.
-        """
-        if not self.attachmentsReady:
-            self.__waitingProperties.append((entry, _type, name))
-        else:
-            # We specifically access internall to ensure that we get the
-            # local attachments and not some other type.
-            for attachment in self._attachments:
-                attachment._registerNamedProperty(entry, _type, name)
 
     def close(self) -> None:
         try:
@@ -515,14 +521,6 @@ class MSGFile(olefile.OleFileIO):
                         raise
 
             self.__attachmentsReady = True
-            try:
-                if self.__attachmentsDelayed:
-                    for attachment in self._attachments:
-                        for prop in self.__waitingProperties:
-                            attachment._registerNamedProperty(*prop)
-            except Exception as e:
-                logger.error('Error occured handling attachment named properties (msg.py).')
-                logger.exception(e)
 
             return self._attachments
 
@@ -596,12 +594,25 @@ class MSGFile(olefile.OleFileIO):
     @property
     def named(self) -> Named:
         """
-        The main named properties instance for this file.
+        The main named properties storage. This is not usable to access the data
+        of the properties directly.
+        """
+        try:
+            return self.__named
+        except AttributeError:
+            self.__named = Named(self)
+            return self.__named
+
+    @property
+    def namedProperties(self) -> None:
+        """
+        The NamedProperties instances usable to access the data for named
+        properties.
         """
         try:
             return self.__namedProperties
         except AttributeError:
-            self.__namedProperties = Named(self)
+            self.__namedProperties = NamedProperties(self.named, self)
             return self.__namedProperties
 
     @property

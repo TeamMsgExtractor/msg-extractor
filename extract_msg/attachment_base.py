@@ -2,7 +2,7 @@ import logging
 
 from . import constants
 from .enums import PropertiesType
-from .named import NamedAttachmentProperties
+from .named import NamedProperties
 from .prop import FixedLengthProp
 from .properties import Properties
 from .utils import verifyPropertyId, verifyType
@@ -27,7 +27,7 @@ class AttachmentBase:
         self.__msg = msg
         self.__dir = dir_
         self.__props = Properties(self._getStream('__properties_version1.0'), PropertiesType.ATTACHMENT)
-        self.__namedProperties = NamedAttachmentProperties(self)
+        self.__namedProperties = NamedProperties(msg.named, self)
 
 
     def _ensureSet(self, variable, streamID, stringStream = True):
@@ -56,7 +56,7 @@ class AttachmentBase:
         try:
             return getattr(self, variable)
         except AttributeError:
-            value = self.named.getNamedValue(propertyName)
+            value = self.namedProperties.get(propertyName)
             setattr(self, variable, value)
             return value
 
@@ -163,9 +163,6 @@ class AttachmentBase:
         it could not find the stream specified.
         """
         return self.__msg._getTypedStream([self.__dir, filename], True, _type)
-
-    def _registerNamedProperty(self, entry, _type, name = None):
-        self.__namedProperties.defineProperty(entry, _type, name)
 
     def exists(self, filename):
         """

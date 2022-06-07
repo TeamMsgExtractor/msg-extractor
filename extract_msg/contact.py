@@ -30,6 +30,7 @@ class Contact(MSGFile):
         """
         super().__init__(path, **kwargs)
         self.named
+        self.namedProperties
 
     @property
     def birthday(self):

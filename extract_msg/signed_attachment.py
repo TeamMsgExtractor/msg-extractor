@@ -7,7 +7,7 @@ import zipfile
 
 from . import constants
 from .attachment_base import AttachmentBase
-from .named import NamedAttachmentProperties
+from .enums import AttachmentType
 from .prop import FixedLengthProp, VariableLengthProp
 from .properties import Properties
 from .utils import createZipOpen, inputToString, openMsg, prepareFilename, verifyPropertyId, verifyType
@@ -22,13 +22,6 @@ class SignedAttachment:
         self.__name = name
         self.__mime = mime
         self.__msg = msg
-
-    def _registerNamedProperty(self, *args, **kwargs):
-        """
-        Signed attachments have no named properties to speak of, so just ignore
-        them.
-        """
-        pass
 
     def save(self, **kwargs):
         """
@@ -146,3 +139,7 @@ class SignedAttachment:
     @property
     def name(self):
         return self.__name
+
+    @property
+    def type(self):
+        return AttachmentType.SIGNED

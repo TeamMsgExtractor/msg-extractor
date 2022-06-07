@@ -97,6 +97,7 @@ class Message(MessageBase):
 
         :param attachmentsOnly: Turns off saving the body and only saves the
             attachments when set.
+        :param skipAttachments: Turns off saving attachments.
         :param charset: If the html is being prepared, the charset to use for
             the Content-Type meta tag to insert. This exists to ensure that
             something parsing the html can properly determine the encoding (as
@@ -108,7 +109,6 @@ class Message(MessageBase):
             This is useful for things like trying to convert the HTML body
             directly to PDF.
         """
-
         # Move keyword arguments into variables.
         _json = kwargs.get('json', False)
         html = kwargs.get('html', False)
@@ -125,6 +125,8 @@ class Message(MessageBase):
 
         # Track if we are only saving the attachments.
         attachOnly = kwargs.get('attachmentsOnly', False)
+        # Track if we are skipping attachments.
+        skipAttachments = kwargs.get('skipAttachments', False)
 
         # ZipFile handling.
         if _zip:
@@ -242,8 +244,9 @@ class Message(MessageBase):
                     elif not allowFallback:
                        raise DataNotFoundError('Could not find the rtfBody')
 
-            # Save the attachments.
-            attachmentNames = [attachment.save(**kwargs) for attachment in self.attachments]
+            if not skipAttachments:
+                # Save the attachments.
+                attachmentNames = [attachment.save(**kwargs) for attachment in self.attachments]
 
             if not attachOnly:
                 # Determine the extension to use for the body.
@@ -252,7 +255,8 @@ class Message(MessageBase):
                 with _open(str(path / ('message.' + fext)), mode) as f:
                     if _json:
                         emailObj = json.loads(self.getJson())
-                        emailObj['attachments'] = attachmentNames
+                        if not skipAttachments:
+                            emailObj['attachments'] = attachmentNames
 
                         f.write(inputToBytes(json.dumps(emailObj), 'utf-8'))
                     elif useHtml:

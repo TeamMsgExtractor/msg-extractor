@@ -53,12 +53,6 @@ class InvalidVersionError(Exception):
     """
     pass
 
-class MissingEncodingError(Exception):
-    """
-    MSG file is missing an encodng.
-    """
-    pass
-
 class UnknownCodepageError(Exception):
     """
     The codepage provided was not one we know of.
