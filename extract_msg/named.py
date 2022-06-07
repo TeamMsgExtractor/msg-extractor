@@ -63,11 +63,10 @@ class Named:
                 streamID = properHex(0x8000 + entry['pid'])
                 #msg._registerNamedProperty(entry, entry['pkind'], names[entry['id']] if entry['pkind'] == NamedPropertyType.STRING_NAMED else None)
                 if msg.existsTypedProperty(streamID):
-                    self.__properties.append(StringNamedProperty(entry, names[entry['id']], msg._getTypedData(streamID)) if entry['pkind'] == NamedPropertyType.STRING_NAMED else NumericalNamedProperty(entry, msg._getTypedData(streamID)))
+                    self.__properties.append(StringNamedProperty(entry, names[entry['id']]) if entry['pkind'] == NamedPropertyType.STRING_NAMED else NumericalNamedProperty(entry))
 
             for property in self.__properties:
                 self.__propertiesDict[property.name if isinstance(property, StringNamedProperty) else property.propertyID] = property
-
 
     def __getitem__(self, key):
         return self.__propertiesDict[key]
