@@ -45,18 +45,6 @@ class Recipient:
             setattr(self, variable, value)
             return value
 
-    def _ensureSetNamed(self, variable : str, propertyName : str):
-        """
-        Ensures that the variable exists, otherwise will set it using the named
-        property. After that, return said variable.
-        """
-        try:
-            return getattr(self, variable)
-        except AttributeError:
-            value = self.named.getNamedValue(propertyName)
-            setattr(self, variable, value)
-            return value
-
     def _ensureSetProperty(self, variable : str, propertyName : str):
         """
         Ensures that the variable exists, otherwise will set it using the

@@ -1,3 +1,15 @@
+**v0.32.0**
+* [[TeamMsgExtractor #217](https://github.com/TeamMsgExtractor/msg-extractor/issues/217)] Redesigned named properties to be much more efficient. All in all, load times for MSG files are significantly improved all around.
+    * Named properties load dynamically.
+    * Named properties use a single shared instance for embedded msg files to contain all of the entries, and tiny individual instances for actually accessing based on what is accessing.
+    * `Named` has been updated so it's methods are more standardized.
+    * `Named` is no longer usable to directly access property values. Instead,
+    access to them is done through `NamedProperties`.
+    * `_registerNamedProperty` has been removed due to no longer being part of the named properties framework.
+* Actually removed the exception I meant to remove in 0.31.0.
+* Changed `Attachment.type` to an enum instead of a string. This makes it easier to see all of the possible values.
+* Added option to allow attachment saving to be skipped when calling `Message.save`.
+
 **v0.31.1**
 * Updated signed attachment mimetype property from `mime` to `mimetype` to match with the regular attachment property.
 

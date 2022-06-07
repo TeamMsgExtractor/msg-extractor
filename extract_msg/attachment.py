@@ -7,7 +7,7 @@ import zipfile
 
 from . import constants
 from .attachment_base import AttachmentBase
-from .named import NamedAttachmentProperties
+from .enums import AttachmentType
 from .prop import FixedLengthProp, VariableLengthProp
 from .properties import Properties
 from .utils import createZipOpen, inputToString, openMsg, prepareFilename, verifyPropertyId, verifyType
@@ -34,7 +34,7 @@ class Attachment(AttachmentBase):
 
         # Get attachment data
         if self.exists('__substg1.0_37010102'):
-            self.__type = 'data'
+            self.__type = AttachmentType.DATA
             self.__data = self._getStream('__substg1.0_37010102')
         elif self.exists('__substg1.0_3701000D'):
             if (self.props['37050003'].value & 0x7) != 0x5:
@@ -43,11 +43,11 @@ class Attachment(AttachmentBase):
                 # TODO add implementation
             else:
                 self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
-                self.__type = 'msg'
-                self.__data = openMsg(self.msg.path, prefix = self.__prefix, **self.msg.kwargs)
+                self.__type = AttachmentType.MSG
+                self.__data = openMsg(self.msg.path, prefix = self.__prefix, parent = self.msg, **self.msg.kwargs)
         elif (self.props['37050003'].value & 0x7) == 0x7:
             # TODO Handling for special attacment type 0x7
-            self.__type = 'web'
+            self.__type = AttachmentType.WEB
             raise NotImplementedError('Attachments of type afByWebReference are not currently supported.')
         else:
             raise TypeError('Unknown attachment type.')
@@ -161,7 +161,7 @@ class Attachment(AttachmentBase):
 
         fullFilename = customPath / filename
 
-        if self.__type == 'data':
+        if self.__type == AttachmentType.DATA:
             if _zip:
                 name, ext = os.path.splitext(filename)
                 nameList = _zip.namelist()
@@ -231,7 +231,7 @@ class Attachment(AttachmentBase):
             return self.__randomName
 
     @property
-    def type(self):
+    def type(self) -> AttachmentType:
         """
         Returns the (internally used) type of the data.
         """

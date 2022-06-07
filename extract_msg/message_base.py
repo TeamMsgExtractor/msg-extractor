@@ -32,17 +32,19 @@ class MessageBase(MSGFile):
         :param prefix: used for extracting embeded msg files
             inside the main one. Do not set manually unless
             you know what you are doing.
-        :param attachmentClass: optional, the class the Message object
+        :param parentMsg: Used for syncronizing named properties instances. Do
+            not set this unless you know what you are doing.
+        :param attachmentClass: Optional, the class the Message object
             will use for attachments. You probably should
             not change this value unless you know what you
             are doing.
-        :param filename: optional, the filename to be used by default when
+        :param filename: Optional, the filename to be used by default when
             saving.
-        :param delayAttachments: optional, delays the initialization of
+        :param delayAttachments: Optional, delays the initialization of
             attachments until the user attempts to retrieve them. Allows MSG
             files with bad attachments to be initialized so the other data can
             be retrieved.
-        :param overrideEncoding: optional, an encoding to use instead of the one
+        :param overrideEncoding: Optional, an encoding to use instead of the one
             specified by the msg file. Do not report encoding errors caused by
             this.
         :param attachmentErrorBehavior: Optional, the behavior to use in the
@@ -72,6 +74,7 @@ class MessageBase(MSGFile):
             # Prevent an error in the body from preventing opening.
             logger.exception('Critical error accessing the body. File opened but accessing the body will throw an exception.')
         self.named
+        self.namedProperties
 
     def _genRecipient(self, recipientType, recipientInt : RecipientType):
         """

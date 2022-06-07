@@ -13,6 +13,15 @@ class AttachErrorBehavior(enum.Enum):
     NOT_IMPLEMENTED = 1
     BROKEN = 2
 
+class AttachmentType(enum.Enum):
+    """
+    The type represented by the attachment.
+    """
+    DATA = 0
+    MSG = 1
+    WEB = 2
+    SIGNED = 3
+
 class DisplayType(enum.Enum):
     MAILUSER = 0x0000
     DISTLIST = 0x0001
