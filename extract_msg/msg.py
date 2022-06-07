@@ -10,7 +10,7 @@ import olefile
 from . import constants
 from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment
 from .enums import AttachErrorBehavior, PropertiesType
-from .exceptions import InvalidFileFormatError, MissingEncodingError, UnrecognizedMSGTypeError
+from .exceptions import InvalidFileFormatError, UnrecognizedMSGTypeError
 from .named import Named
 from .prop import FixedLengthProp, VariableLengthProp
 from .properties import Properties
