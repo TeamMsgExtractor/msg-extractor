@@ -103,6 +103,8 @@ class MSGFile(olefile.OleFileIO):
         kwargsCopy = copy.copy(kwargs)
         if 'prefix' in kwargsCopy:
             del kwargsCopy['prefix']
+        if 'parent' in kwargsCopy:
+            del kwargsCopy['parent']
         self.__kwargs = kwargsCopy
 
         prefixl = []

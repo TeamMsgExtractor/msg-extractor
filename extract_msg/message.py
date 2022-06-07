@@ -109,7 +109,6 @@ class Message(MessageBase):
             This is useful for things like trying to convert the HTML body
             directly to PDF.
         """
-
         # Move keyword arguments into variables.
         _json = kwargs.get('json', False)
         html = kwargs.get('html', False)
