@@ -14,50 +14,63 @@ class Named:
     __dir = '__nameid_version1.0'
     def __init__(self, msg):
         self.__msg = msg
+        # Get the basic streams. If all are emtpy, then nothing to do.
         guidStream = self._getStream('__substg1.0_00020102') or self._getStream('__substg1.0_00020102', False)
         entryStream = self._getStream('__substg1.0_00030102') or self._getStream('__substg1.0_00030102', False)
         namesStream = self._getStream('__substg1.0_00040102') or self._getStream('__substg1.0_00040102', False)
         self.guidStream = guidStream
         self.entryStream = entryStream
         self.namesStream = namesStream
-        guidStreamLength = len(guidStream)
-        entryStreamLength = len(entryStream)
-        namesStreamLength = len(namesStream)
-        guids = tuple([None, Guid.PS_MAPI.value, Guid.PS_PUBLIC_STRINGS.value] + [bytesToGuid(x) for x in divide(guidStream, 16)])
-        entries = []
-        for rawStream in divide(entryStream, 8):
-            tmp = constants.STNP_ENT.unpack(rawStream)
-            entry = {
-                'id': tmp[0],
-                'pid': tmp[2],
-                'guid_index': tmp[1] >> 1,
-                'pkind': NamedPropertyType(tmp[1] & 1), # 0 if numerical, 1 if string.
-                'rawStream': rawStream,
-                }
-            entry['guid'] = guids[entry['guid_index']]
-            entries.append(entry)
+        # The if else stuff is for protection against None.
+        guidStreamLength = len(guidStream) if guidStream else 0
+        entryStreamLength = len(entryStream) if entryStream else 0
+        namesStreamLength = len(namesStream) if namesStream else 0
 
-        # Parse the names stream.
-        names = {}
-        pos = 0
-        while pos < namesStreamLength:
-            nameLength = constants.STNP_NAM.unpack(namesStream[pos:pos+4])[0]
-            pos += 4 # Move to the start of the entry.
-            names[pos - 4] = namesStream[pos:pos+nameLength].decode('utf-16-le') # Names are stored in the dictionary as the position they start at.
-            pos += roundUp(nameLength, 4)
-
-        self.entries = entries
-        self.__names = names
-        self.__guids = guids
-        self.__properties = []
-        for entry in entries:
-            streamID = properHex(0x8000 + entry['pid'])
-            msg._registerNamedProperty(entry, entry['pkind'], names[entry['id']] if entry['pkind'] == NamedPropertyType.STRING_NAMED else None)
-            if msg.existsTypedProperty(streamID):
-                self.__properties.append(StringNamedProperty(entry, names[entry['id']], msg._getTypedData(streamID)) if entry['pkind'] == NamedPropertyType.STRING_NAMED else NumericalNamedProperty(entry, msg._getTypedData(streamID)))
         self.__propertiesDict = {}
-        for property in self.__properties:
-            self.__propertiesDict[property.name if isinstance(property, StringNamedProperty) else property.propertyID] = property
+        self.__properties = []
+        self.__guids = tuple()
+        self.__names = {}
+
+        # Check that we even have any entries. If there are none, nothing to do.
+        if entryStream:
+            guids = tuple([None, Guid.PS_MAPI.value, Guid.PS_PUBLIC_STRINGS.value] + [bytesToGuid(x) for x in divide(guidStream, 16)])
+            entries = []
+            for rawStream in divide(entryStream, 8):
+                tmp = constants.STNP_ENT.unpack(rawStream)
+                entry = {
+                    'id': tmp[0],
+                    'pid': tmp[2],
+                    'guid_index': tmp[1] >> 1,
+                    'pkind': NamedPropertyType(tmp[1] & 1), # 0 if numerical, 1 if string.
+                    'rawStream': rawStream,
+                    }
+                entry['guid'] = guids[entry['guid_index']]
+                entries.append(entry)
+
+            # Parse the names stream.
+            names = self.__names
+            pos = 0
+            while pos < namesStreamLength:
+                nameLength = constants.STNP_NAM.unpack(namesStream[pos:pos+4])[0]
+                pos += 4 # Move to the start of the entry.
+                names[pos - 4] = namesStream[pos:pos+nameLength].decode('utf-16-le') # Names are stored in the dictionary as the position they start at.
+                pos += roundUp(nameLength, 4)
+
+            self.entries = entries
+            self.__guids = guids
+
+            for entry in entries:
+                streamID = properHex(0x8000 + entry['pid'])
+                #msg._registerNamedProperty(entry, entry['pkind'], names[entry['id']] if entry['pkind'] == NamedPropertyType.STRING_NAMED else None)
+                if msg.existsTypedProperty(streamID):
+                    self.__properties.append(StringNamedProperty(entry, names[entry['id']], msg._getTypedData(streamID)) if entry['pkind'] == NamedPropertyType.STRING_NAMED else NumericalNamedProperty(entry, msg._getTypedData(streamID)))
+
+            for property in self.__properties:
+                self.__propertiesDict[property.name if isinstance(property, StringNamedProperty) else property.propertyID] = property
+
+
+    def __getitem__(self, key):
+        return self.__propertiesDict[key]
 
     def _getStream(self, filename, prefix = True):
         return self.__msg._getStream([self.__dir, filename], prefix = prefix)
@@ -171,12 +184,13 @@ class NamedAttachmentProperties:
 
 
 class StringNamedProperty:
-    def __init__(self, entry, name, data):
+    def __init__(self, entry, name):
         self.__entry = entry
         self.__name = name
         self.__guidIndex = entry['guid_index']
         self.__guid = entry['guid']
         self.__namedPropertyID = entry['pid']
+        self.__propertyStreamID = f'{0x8000 + self.__namedPropertyID:04X}'
 
         # Finally got this to be correct after asking about it on a Microsoft
         # forum. Apparently it uses the same CRC-32 as the Compressed RTF
@@ -204,14 +218,6 @@ class StringNamedProperty:
         else:
             # No special logic here to determine what to do.
             self.__streamID = 0x1000 + (crc32(name.encode('utf-16-le')) ^ (self.__guidIndex << 1 | 1)) % 0x1F
-        self.__data = data
-
-    @property
-    def data(self):
-        """
-        The data of the property.
-        """
-        return copy.deepcopy(self.__data)
 
     @property
     def guid(self):
@@ -233,6 +239,13 @@ class StringNamedProperty:
         The named property id.
         """
         return self.__namedPropertyID
+
+    @property
+    def propertyStreamID(self):
+        """
+        An ID usable for grabbing the value stream.
+        """
+        return self.__propertyStreamID
 
     @property
     def rawEntryStream(self):
@@ -264,15 +277,8 @@ class NumericalNamedProperty:
         self.__namedPropertyID = entry['pid']
         self.__guid = entry['guid']
         self.__streamID = 0x1000 + (entry['id'] ^ (self.__guidIndex << 1)) % 0x1F
-        self.__data = data
         self.__entry = entry
-
-    @property
-    def data(self):
-        """
-        The data of the property.
-        """
-        return copy.deepcopy(self.__data)
+        self.__propertyStreamID = f'{0x8000 + self.__namedPropertyID:04X}'
 
     @property
     def guid(self):
@@ -294,6 +300,13 @@ class NumericalNamedProperty:
         The actualy property id of the named property.
         """
         return self.__propertyID
+
+    @property
+    def propertyStreamID(self):
+        """
+        An ID usable for grabbing the value stream.
+        """
+        return self.__propertyStreamID
 
     @property
     def streamID(self):
