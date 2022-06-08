@@ -2,12 +2,12 @@ import datetime
 import logging
 
 from .enums import TaskAcceptance, TaskHistory, TaskMode, TaskOwnership, TaskStatus
-from .msg import MSGFile
+from .message_base import MessageBase
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
-class Task(MSGFile):
+class Task(MessageBase):
     """
     Class used for parsing task files.
     """

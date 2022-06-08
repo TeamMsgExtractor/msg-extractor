@@ -25,6 +25,7 @@ class MSGFile(olefile.OleFileIO):
     """
     Parser for .msg files.
     """
+    
     def __init__(self, path, **kwargs):
         """
         :param path: path to the msg file in the system or is the raw msg file.
