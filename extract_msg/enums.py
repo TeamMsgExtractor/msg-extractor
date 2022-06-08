@@ -119,6 +119,17 @@ class Sensitivity(enum.Enum):
     PRIVATE = 2
     CONFIDENTIAL = 3
 
+class TaskHistory(enum.Enum):
+    """
+    The type of the last change to the Task object.
+    """
+    NONE = 0x00000000
+    ACCEPTED = 0x00000001
+    REJECTED = 0x00000002
+    OTHER = 0x00000003
+    DUE_DATE_CHANGED = 0x00000004
+    ASSIGNED = 0x00000005
+
 class TaskMode(enum.Enum):
     """
     The mode of the Task object used in task communication (PidLidTaskMode).
@@ -137,8 +148,6 @@ class TaskMode(enum.Enum):
     REJECTED = 3
     EMBEDDED_UPDATE = 4
     SELF_ASSIGNED = 5
-
-
 
 class TaskStatus(enum.Enum):
     """

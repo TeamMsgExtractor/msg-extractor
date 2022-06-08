@@ -24,6 +24,28 @@ class Task(MSGFile):
         return self._ensureSetNamed('_percentComplete', '8102')
 
     @property
+    def taskActualEffort(self) -> int:
+        """
+        Indicates the number of minutes that the user actually spent working on
+        a task.
+        """
+        return self._ensureSetNamed('_taskActualEffort', '8110')
+
+    @property
+    def taskAssigner(self) -> str:
+        """
+        Specifies the name of the user that last assigned the task.
+        """
+        return self._ensureSetNamed('_taskAssigner', '811F')
+
+    @property
+    def taskComplete(self) -> bool:
+        """
+        Indicates if the task is complete.
+        """
+        return self._ensureSetNamed('_taskComplete', '811C')
+
+    @property
     def taskDueDate(self) -> datetime.datetime:
         """
         Specifies the date by which the user expects work on the task to be
@@ -32,11 +54,32 @@ class Task(MSGFile):
         return self._ensureSetNamed('_taskStartDate', '8105')
 
     @property
+    def taskEstimatedEffort(self) -> int:
+        """
+        Indicates the number of minutes that the user expects to work on a task.
+        """
+        return self._ensureSetNamed('_taskEstimatedEffort', '8111')
+
+    @property
+    def taskHistory(self) -> int:
+        """
+        Indicates the type of change that was last made to the Task object.
+        """
+        return self._ensureSetNamed('_taskHistory', '8110', overrideClass = TaskHistory)
+
+    @property
     def taskMode(self) -> TaskMode:
         """
         Used in a task communication. Should be 0 (UNASSIGNED) on task objects.
         """
         return self._ensureSetNamed('_taskMode', '8518', overrideClass = TaskMode)
+
+    @property
+    def taskOwner(self) -> str:
+        """
+        Contains the name of the owner of the task.
+        """
+        return self._ensureSetNamed('_taskOwner', '811F')
 
     @property
     def taskStartDate(self) -> datetime.datetime:
@@ -67,3 +110,10 @@ class Task(MSGFile):
         update when the assigned Task object changes.
         """
         return self._ensureSetNamed('_taskUpdates', '811B')
+
+    @property
+    def taskVersion(self) -> int:
+        """
+        Indicates which copy is the latest update of a Task object.
+        """
+        return self._ensureSetNamed('_taskVersion', '8113')
