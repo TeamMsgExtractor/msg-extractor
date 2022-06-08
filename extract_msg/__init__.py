@@ -45,4 +45,5 @@ from .msg import MSGFile
 from .prop import createProp
 from .properties import Properties
 from .recipient import Recipient
+from .task import Task
 from .utils import openMsg, properHex

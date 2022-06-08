@@ -9,7 +9,7 @@ import olefile
 
 from . import constants
 from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment
-from .enums import AttachErrorBehavior, PropertiesType
+from .enums import AttachErrorBehavior, Priority, PropertiesType, Sensitivity
 from .exceptions import InvalidFileFormatError, UnrecognizedMSGTypeError
 from .named import Named, NamedProperties
 from .prop import FixedLengthProp, VariableLengthProp
@@ -610,11 +610,48 @@ class MSGFile(olefile.OleFileIO):
         return self.__attachmentsReady
 
     @property
+    def classified(self) -> bool:
+        """
+        Indicates whether the contents of this message are regarded as
+        classified information.
+        """
+        return self._ensureSetNamed('_classified', '85B5')
+
+    @property
     def classType(self) -> str:
         """
         The class type of the MSG file.
         """
         return self._ensureSet('_classType', '__substg1.0_001A')
+
+    @property
+    def commonEnd(self) -> datetime.datetime:
+        """
+        The end time for the object.
+        """
+        return self._ensureSetNamed('_commonEnd', '8517')
+
+    @property
+    def commonStart(self) -> datetime.datetime:
+        """
+        The start time for the object.
+        """
+        return self._ensureSetNamed('_commonStart', '8516')
+
+    @property
+    def currentVersion(self) -> int:
+        """
+        Specifies the build number of the client application that sent the
+        message.
+        """
+        return self._ensureSetNamed('_currentVersion', '8552')
+
+    @property
+    def currentVersionName(self) -> str:
+        """
+        Specifies the name of the client application that sent the message.
+        """
+        return self._ensureSetNamed('_currentVersionName', '8554')
 
     @property
     def importance(self) -> int:
@@ -706,18 +743,18 @@ class MSGFile(olefile.OleFileIO):
         return copy.deepcopy(self.__prefixList)
 
     @property
-    def priority(self) -> int:
+    def priority(self) -> Priority:
         """
         The specified priority of the msg file.
         """
-        return self._ensureSetProperty('_priority', '00260003')
+        return self._ensureSetProperty('_priority', '00260003', overrideClass = Priority)
 
     @property
-    def sensitivity(self) -> int:
+    def sensitivity(self) -> Sensitivity:
         """
         The specified sensitivity of the msg file.
         """
-        return self._ensureSetProperty('_sensitivity', '00360003')
+        return self._ensureSetProperty('_sensitivity', '00360003', overrideClass = Sensitivity)
 
     @property
     def stringEncoding(self):

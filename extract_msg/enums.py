@@ -119,6 +119,15 @@ class Sensitivity(enum.Enum):
     PRIVATE = 2
     CONFIDENTIAL = 3
 
+class TaskAcceptance(enum.Enum):
+    """
+    The acceptance state of the task.
+    """
+    NOT_ASSIGNED = 0x00000000
+    UNKNOWN = 0x00000001
+    ACCEPTED = 0x00000002
+    REJECTED = 0x00000003
+
 class TaskHistory(enum.Enum):
     """
     The type of the last change to the Task object.
@@ -148,6 +157,20 @@ class TaskMode(enum.Enum):
     REJECTED = 3
     EMBEDDED_UPDATE = 4
     SELF_ASSIGNED = 5
+
+class TaskOwnership(enum.Enum):
+    """
+    The role of the current user relative to the Task object.
+
+    NOT_ASSIGNED: The Task object is not assigned.
+    ASSIGNERS_COPY: The Task object is the task assigner's copy of the Task
+        object.
+    ASSIGNEES_COPY: The Task object is the task assignee's copy of the Task
+        object.
+    """
+    NOT_ASSIGNED = 0x00000000
+    ASSIGNERS_COPY = 0x00000001
+    ASSIGNEES_COPY = 0x00000002
 
 class TaskStatus(enum.Enum):
     """

@@ -1,7 +1,7 @@
 import datetime
 import logging
 
-from .enums import TaskMode, TaskStatus
+from .enums import TaskAcceptance, TaskHistory, TaskMode, TaskOwnership, TaskStatus
 from .msg import MSGFile
 
 logger = logging.getLogger(__name__)
@@ -22,6 +22,13 @@ class Task(MSGFile):
         percentage in decimal form. 1.0 indicates it is complete.
         """
         return self._ensureSetNamed('_percentComplete', '8102')
+
+    @property
+    def taskAcceptanceState(self) -> TaskAcceptance:
+        """
+        Indicates the acceptance state of the task.
+        """
+        return self._ensureSetNamed('_percentComplete', '812A', overrideClass = TaskAcceptance)
 
     @property
     def taskActualEffort(self) -> int:
@@ -46,6 +53,13 @@ class Task(MSGFile):
         return self._ensureSetNamed('_taskComplete', '811C')
 
     @property
+    def taskCustomFlags(self) -> int:
+        """
+        Custom flags set on the task.
+        """
+        return self._ensureSetNamed('_taskCustomFlags', '8139')
+
+    @property
     def taskDueDate(self) -> datetime.datetime:
         """
         Specifies the date by which the user expects work on the task to be
@@ -61,11 +75,34 @@ class Task(MSGFile):
         return self._ensureSetNamed('_taskEstimatedEffort', '8111')
 
     @property
-    def taskHistory(self) -> int:
+    def taskFRecurring(self) -> bool:
+        """
+        Indicates whether the task includes a recurrence pattern.
+        """
+        return self._ensureSetNamed('_taskFRecurring', '8126')
+
+    @property
+    def taskHistory(self) -> TaskHistory:
         """
         Indicates the type of change that was last made to the Task object.
         """
-        return self._ensureSetNamed('_taskHistory', '8110', overrideClass = TaskHistory)
+        return self._ensureSetNamed('_taskHistory', '811A', overrideClass = TaskHistory)
+
+    @property
+    def taskLastDelegate(self) -> str:
+        """
+        Contains the name of the user who most recently assigned the task, or
+        the user to whom it was most recently assigned.
+        """
+        return self._ensureSetNamed('_taskLastDelegate', '8125')
+
+    @property
+    def taskLastUser(self) -> str:
+        """
+        Contains the name of the most recent user to have been the owner of the
+        task.
+        """
+        return self._ensureSetNamed('_taskLastUser', '8122')
 
     @property
     def taskMode(self) -> TaskMode:
@@ -80,6 +117,13 @@ class Task(MSGFile):
         Contains the name of the owner of the task.
         """
         return self._ensureSetNamed('_taskOwner', '811F')
+
+    @property
+    def taskOwnership(self) -> TaskOwnership:
+        """
+        Contains the name of the owner of the task.
+        """
+        return self._ensureSetNamed('_taskOwnership', '8129', overrideClass = TaskOwnership)
 
     @property
     def taskStartDate(self) -> datetime.datetime:
