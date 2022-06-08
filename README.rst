@@ -209,6 +209,15 @@ Credits
 
 And thank you to everyone who has opened an issue and helped us track down those pesky bugs.
 
+Extra
+-----
+
+Check out the new project `msg-explorer`_ that allows you to open MSG files and
+explore their contents in a GUI. It is usually updated within a few days of a
+major release to ensure continued support. Because of this, it is recommended to
+install it to a separate environment (like a vitural env) to not interfere with
+your access to the newest major version of extract-msg.
+
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
 
@@ -227,3 +236,4 @@ And thank you to everyone who has opened an issue and helped us track down those
 .. _Seamus Tuohy: https://github.com/seamustuohy
 .. _Discord: https://discord.com/invite/B77McRmzdc
 .. _Buy Me a Coffee: https://www.buymeacoffee.com/DestructionE
+.. _msg-explorer: https://pypi.org/project/msg-explorer/
