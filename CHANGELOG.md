@@ -1,3 +1,11 @@
+**v0.33.0**
+* [[TeamMsgExtractor #212](https://github.com/TeamMsgExtractor/msg-extractor/issues/212)] Added support for Task objects.
+* Added additional parameter `overrideClass` to all `_ensureSetX` type functions. This parameter is a class to initialize using the data, if provided. The data will be provided as the first argument to the `__init__` function of the class *if* the data is not `None`. If the data is done, the value set and returned from `_ensureSetX` will be `None`. This can be overriden using the second added parameter, which defaults to this behavior. Simply set `preserveNone` to `False` to force the data to be passed to the class. Keep in mind that this means the class will receive `None` as it's first parameter.
+* Updated `Named` class to make it more like the dictionary it is build on top of. Specifically, added `keys`, `values`, and `items` as functions.
+* Fixed issue in `Named` where old code wasn't deleted, causing some named properties to be completely omitted.
+* Improved efficiency of `Named` by making it so `get` no longer copied the entire dictionary repeatedly while looking for the property.
+* Fixed typo in `Attachment` that caused embedded msg files to still regenerate the `Named` instance even though they should have been using the parent's.
+
 **v0.32.0**
 * [[TeamMsgExtractor #217](https://github.com/TeamMsgExtractor/msg-extractor/issues/217)] Redesigned named properties to be much more efficient. All in all, load times for MSG files are significantly improved all around.
     * Named properties load dynamically.

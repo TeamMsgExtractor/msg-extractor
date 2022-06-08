@@ -103,8 +103,8 @@ class MSGFile(olefile.OleFileIO):
         kwargsCopy = copy.copy(kwargs)
         if 'prefix' in kwargsCopy:
             del kwargsCopy['prefix']
-        if 'parent' in kwargsCopy:
-            del kwargsCopy['parent']
+        if 'parentMsg' in kwargsCopy:
+            del kwargsCopy['parentMsg']
         self.__kwargs = kwargsCopy
 
         prefixl = []
@@ -141,13 +141,21 @@ class MSGFile(olefile.OleFileIO):
         else:
             self.filename = None
 
-    def _ensureSet(self, variable : str, streamID, stringStream : bool = True):
+    def _ensureSet(self, variable : str, streamID, stringStream : bool = True, **kwargs):
         """
         Ensures that the variable exists, otherwise will set it using the
         specified stream. After that, return said variable.
 
         If the specified stream is not a string stream, make sure to set
         :param stringStream: to False.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. By
+            default, this will be completely ignored if the value was not found.
+        :param preserveNone: If true (default), causes the function to ignore
+            :param overrideClass: when the value could not be found (is None).
+            If this is changed to False, then the value will be used regardless.
         """
         try:
             return getattr(self, variable)
@@ -156,25 +164,51 @@ class MSGFile(olefile.OleFileIO):
                 value = self._getStringStream(streamID)
             else:
                 value = self._getStream(streamID)
+            # Check if we should be overriding the data type for this instance.
+            if kwargs:
+                overrideClass = kwargs.get('overrideClass')
+                if overrideClass is not None and (value is not None or not kwargs.get('preserveNone', True)):
+                    value = overrideClass(value)
             setattr(self, variable, value)
             return value
 
-    def _ensureSetNamed(self, variable : str, propertyName):
+    def _ensureSetNamed(self, variable : str, propertyName, **kwargs):
         """
         Ensures that the variable exists, otherwise will set it using the named
         property. After that, return said variable.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. By
+            default, this will be completely ignored if the value was not found.
+        :param preserveNone: If true (default), causes the function to ignore
+            :param overrideClass: when the value could not be found (is None).
+            If this is changed to False, then the value will be used regardless.
         """
         try:
             return getattr(self, variable)
         except AttributeError:
             value = self.namedProperties.get(propertyName)
+            # Check if we should be overriding the data type for this instance.
+            if kwargs:
+                overrideClass = kwargs.get('overrideClass')
+                if overrideClass is not None and (value is not None or not kwargs.get('preserveNone', True)):
+                    value = overrideClass(value)
             setattr(self, variable, value)
             return value
 
-    def _ensureSetProperty(self, variable : str, propertyName):
+    def _ensureSetProperty(self, variable : str, propertyName, **kwargs):
         """
         Ensures that the variable exists, otherwise will set it using the
         property. After that, return said variable.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. By
+            default, this will be completely ignored if the value was not found.
+        :param preserveNone: If true (default), causes the function to ignore
+            :param overrideClass: when the value could not be found (is None).
+            If this is changed to False, then the value will be used regardless.
         """
         try:
             return getattr(self, variable)
@@ -183,19 +217,37 @@ class MSGFile(olefile.OleFileIO):
                 value = self.mainProperties[propertyName].value
             except (KeyError, AttributeError):
                 value = None
+            # Check if we should be overriding the data type for this instance.
+            if kwargs:
+                overrideClass = kwargs.get('overrideClass')
+                if overrideClass is not None and (value is not None or not kwargs.get('preserveNone', True)):
+                    value = overrideClass(value)
             setattr(self, variable, value)
             return value
 
-    def _ensureSetTyped(self, variable : str, _id):
+    def _ensureSetTyped(self, variable : str, _id, **kwargs):
         """
         Like the other ensure set functions, but designed for when something
         could be multiple types (where only one will be present). This way you
         have no need to set the type, it will be handled for you.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. By
+            default, this will be completely ignored if the value was not found.
+        :param preserveNone: If true (default), causes the function to ignore
+            :param overrideClass: when the value could not be found (is None).
+            If this is changed to False, then the value will be used regardless.
         """
         try:
             return getattr(self, variable)
         except AttributeError:
             value = self._getTypedData(_id)
+            # Check if we should be overriding the data type for this instance.
+            if kwargs:
+                overrideClass = kwargs.get('overrideClass')
+                if overrideClass is not None and (value is not None or not kwargs.get('preserveNone', True)):
+                    value = overrideClass(value)
             setattr(self, variable, value)
             return value
 

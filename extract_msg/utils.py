@@ -598,6 +598,7 @@ def openMsg(path, **kwargs):
     from .message import Message
     from .msg import MSGFile
     from .message_signed import MessageSigned
+    from .task import Task
 
     msg = MSGFile(path, **kwargs)
     # After rechecking the docs, all comparisons should be case-insensitive, not case-sensitive. My reading ability is great.
@@ -614,6 +615,9 @@ def openMsg(path, **kwargs):
     elif classType.startswith('ipm.appointment') or classType.startswith('ipm.schedule'):
         msg.close()
         return Appointment(path, **kwargs)
+    elif classType.startswith('ipm.task'):
+        msg.close()
+        return Task(path, **kwargs)
     elif classType == 'ipm': # Unspecified format. It should be equal to this and not just start with it.
         return msg
     elif kwargs.get('strict', True):

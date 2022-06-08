@@ -106,7 +106,6 @@ class Properties:
         """
         pprint.pprint(sorted(tuple(self.__props.keys())))
 
-
     def values(self):
         return self.__props.values()
 
