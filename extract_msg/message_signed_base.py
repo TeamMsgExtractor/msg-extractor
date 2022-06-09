@@ -1,24 +1,14 @@
-import base64
 import email.utils
+import html
 import logging
-import os
 import re
 
-import bs4
-import compressed_rtf
 import mailbits
-import RTFDE
 
-from . import constants
-from .exceptions import UnrecognizedMSGTypeError
 from .message_base import MessageBase
-from .recipient import Recipient
 from .signed_attachment import SignedAttachment
-from .utils import addNumToDir, inputToBytes, inputToString, prepareFilename
+from .utils import inputToString
 
-from email.parser import Parser as EmailParser
-
-from imapclient.imapclient import decode_utf7
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -28,6 +18,7 @@ class MessageSignedBase(MessageBase):
     """
     Base class for Message like msg files.
     """
+
     def __init__(self, path, **kwargs):
         """
         :param path: path to the msg file in the system or is the raw msg file.
@@ -86,15 +77,15 @@ class MessageSignedBase(MessageBase):
             self._signedBody = None
             self._signedHtmlBody = None
             if len(atts) > 1:
-                logger.warn('')
+                logger.warning('Found more than one regular attachment when parsing signed message.')
             elif len(atts) == 0:
-                logger.warn('Failed to access any attachments from the signed message.')
+                logger.warning('Failed to access any attachments from the signed message.')
                 return self._sAttachments
 
             try:
                 mainAttachment = next(att for att in atts if hasattr(att, 'getFilename') and att.getFilename() == 'smime.p7m')
             except StopIteration:
-                logger.warn('Failed to find signed attachment.')
+                logger.warning('Failed to find signed attachment.')
                 return self._sAttachments
 
             # If we are here, we should have the attachment. So now we need to
@@ -132,14 +123,6 @@ class MessageSignedBase(MessageBase):
                 self._sAttachments.append(self.__signedAttachmentClass(self, part['content'], name, mime))
 
             return self._sAttachments
-
-
-    @property
-    def bcc(self):
-        """
-        Returns the bcc field, if it exists.
-        """
-        return self._genRecipient('bcc', 3)
 
     @property
     def body(self):
@@ -189,74 +172,12 @@ class MessageSignedBase(MessageBase):
             elif self.body:
                 # Convert the plain text body to html.
                 logger.info('HTML body was not found, attempting to generate from plain text body.')
-                correctedBody = self.body.encode('utf-8').replace('\r', '').replace('\n', '</br>')
-                self._htmlBody = f'<html><body>{correctedBody}</body></head>'
+                correctedBody = html.escpae(self.body).replace('\r', '').replace('\n', '</br>')
+                self._htmlBody = f'<html><body>{correctedBody}</body></head>'.encode('utf-8')
             else:
                 logger.info('HTML body could not be found nor generated.')
 
             return self._htmlBody
-
-    @property
-    def htmlBodyPrepared(self) -> bytes:
-        """
-        Returns the HTML body that has (where possible) the embedded attachments
-        inserted into the body.
-        """
-        # If we can't get an HTML body then we have nothing to do.
-        if not self.htmlBody:
-            return self.htmlBody
-
-        # Create the BeautifulSoup instance to use.
-        soup = bs4.BeautifulSoup(self.htmlBody, 'html.parser')
-
-        # Get a list of image tags to see if we can inject into. If the source
-        # of an image starts with "cid:" that means it is one of the attachments
-        # and is using the content id of that attachment.
-        tags = (tag for tag in soup.findAll('img') if tag.get('src') and tag.get('src').startswith('cid:'))
-
-        for tag in tags:
-            # Iterate through the attachments until we get the right one.
-            cid = tag['src'][4:]
-            data = next((attachment.data for attachment in self.attachments if attachment.cid == cid), None)
-            # If we found anything, inject it.
-            if data:
-                tag['src'] = (b'data:image;base64,' + base64.b64encode(data)).decode('utf-8')
-
-        return soup.prettify('utf-8')
-
-    @property
-    def inReplyTo(self) -> str:
-        """
-        Returns the message id that this message is in reply to.
-        """
-        return self._ensureSet('_in_reply_to', '__substg1.0_1042')
-
-    @property
-    def isRead(self) -> bool:
-        """
-        Returns if this email has been marked as read.
-        """
-        return bool(self.mainProperties['0E070003'].value & 1)
-
-    @property
-    def messageId(self):
-        try:
-            return self._messageId
-        except AttributeError:
-            headerResult = None
-            if self.headerInit():
-                headerResult = self._header['message-id']
-            if headerResult is not None:
-                self._messageId = headerResult
-            else:
-                if self.headerInit():
-                    logger.info('Header found, but "Message-Id" is not included. Will be generated from other streams.')
-                self._messageId = self._getStringStream('__substg1.0_1035')
-            return self._messageId
-
-    @property
-    def parsedDate(self):
-        return email.utils.parsedate(self.date)
 
     @property
     def _rawAttachments(self):
@@ -264,74 +185,6 @@ class MessageSignedBase(MessageBase):
         A property to allow access to the non-signed attachments.
         """
         return super().attachments
-
-    @property
-    def recipientSeparator(self) -> str:
-        return self.__recipientSeparator
-
-    @property
-    def recipients(self) -> list:
-        """
-        Returns a list of all recipients.
-        """
-        try:
-            return self._recipients
-        except AttributeError:
-            # Get the recipients
-            recipientDirs = []
-            prefixLen = self.prefixLen
-            for dir_ in self.listDir():
-                if dir_[prefixLen].startswith('__recip') and\
-                        dir_[prefixLen] not in recipientDirs:
-                    recipientDirs.append(dir_[prefixLen])
-
-            self._recipients = []
-
-            for recipientDir in recipientDirs:
-                self._recipients.append(Recipient(recipientDir, self))
-
-            return self._recipients
-
-    @property
-    def rtfBody(self) -> bytes:
-        """
-        Returns the decompressed Rtf body from the message.
-        """
-        try:
-            return self._rtfBody
-        except AttributeError:
-            self._rtfBody = compressed_rtf.decompress(self.compressedRtf) if self.compressedRtf else None
-            return self._rtfBody
-
-    @property
-    def sender(self) -> str:
-        """
-        Returns the message sender, if it exists.
-        """
-        try:
-            return self._sender
-        except AttributeError:
-            # Check header first
-            if self.headerInit():
-                headerResult = self.header['from']
-                if headerResult is not None:
-                    self._sender = headerResult
-                    return headerResult
-                logger.info('Header found, but "sender" is not included. Will be generated from other streams.')
-            # Extract from other fields
-            text = self._getStringStream('__substg1.0_0C1A')
-            email = self._getStringStream('__substg1.0_5D01')
-            # Will not give an email address sometimes. Seems to exclude the email address if YOU are the sender.
-            result = None
-            if text is None:
-                result = email
-            else:
-                result = text
-                if email is not None:
-                    result += ' <' + email + '>'
-
-            self._sender = result
-            return result
 
     @property
     def signedAttachmentClass(self):
@@ -361,17 +214,3 @@ class MessageSignedBase(MessageBase):
         except AttributeError:
             self.attachments
             return self._signedHtmlBody
-
-    @property
-    def subject(self):
-        """
-        Returns the message subject, if it exists.
-        """
-        return self._ensureSet('_subject', '__substg1.0_0037')
-
-    @property
-    def to(self):
-        """
-        Returns the to field, if it exists.
-        """
-        return self._genRecipient('to', 1)

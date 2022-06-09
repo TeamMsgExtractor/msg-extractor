@@ -6,7 +6,8 @@
 * Improved efficiency of `Named` by making it so `get` no longer copied the entire dictionary repeatedly while looking for the property.
 * Fixed typo in `Attachment` that caused embedded msg files to still regenerate the `Named` instance even though they should have been using the parent's.
 * Updated fields in `MSGFile` to use enums.
-* Added additional properties to `MSGFile`.
+* Added additional properties to `MSGFile`. 
+* Significant cleanup. 
 
 **v0.32.0**
 * [[TeamMsgExtractor #217](https://github.com/TeamMsgExtractor/msg-extractor/issues/217)] Redesigned named properties to be much more efficient. All in all, load times for MSG files are significantly improved all around.

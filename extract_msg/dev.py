@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-def setupDevLogger(defaultPath=None, logfile = None, envKey='EXTRACT_MSG_LOG_CFG'):
+def setupDevLogger(defaultPath = None, logfile = None, envKey = 'EXTRACT_MSG_LOG_CFG'):
     utils.setupLogging(defaultPath, 5, logfile, True, envKey)
 
 
@@ -64,4 +64,4 @@ def main(args, argv):
                 logpath = x.baseFilename
             except AttributeError:
                 pass;
-        print(g'Logging complete. Log has been saved to {logpath}')
+        print(f'Logging complete. Log has been saved to {logpath}')

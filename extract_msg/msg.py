@@ -13,13 +13,14 @@ from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment
 from .enums import AttachErrorBehavior, Priority, PropertiesType, Sensitivity
 from .exceptions import InvalidFileFormatError, UnrecognizedMSGTypeError
 from .named import Named, NamedProperties
-from .prop import FixedLengthProp, VariableLengthProp
+from .prop import FixedLengthProp
 from .properties import Properties
 from .utils import divide, getEncodingName, hasLen, inputToMsgpath, inputToString, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
 
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
 
 class MSGFile(olefile.OleFileIO):
     """
@@ -29,9 +30,9 @@ class MSGFile(olefile.OleFileIO):
     def __init__(self, path, **kwargs):
         """
         :param path: path to the msg file in the system or is the raw msg file.
-        :param prefix: Used for extracting embeded msg files inside the main
+        :param prefix: Used for extracting embedded msg files inside the main
             one. Do not set manually unless you know what you are doing.
-        :param parentMsg: Used for syncronizing named properties instances. Do
+        :param parentMsg: Used for synchronizing named properties instances. Do
             not set this unless you know what you are doing.
         :param attachmentClass: Optional, the class the MSGFile object
             will use for attachments. You probably should

@@ -1,22 +1,19 @@
 import base64
 import email.utils
+import html
 import logging
-import os
 import re
 
 import bs4
 import compressed_rtf
 import RTFDE
 
-from . import constants
-from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment
 from .enums import RecipientType
-from .exceptions import UnrecognizedMSGTypeError
 from .msg import MSGFile
 from .recipient import Recipient
-from .utils import addNumToDir, inputToBytes, inputToString, prepareFilename
+from .utils import inputToString, prepareFilename
 from email.parser import Parser as EmailParser
-from imapclient.imapclient import decode_utf7
+
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -26,6 +23,7 @@ class MessageBase(MSGFile):
     """
     Base class for Message like msg files.
     """
+
     def __init__(self, path, **kwargs):
         """
         :param path: path to the msg file in the system or is the raw msg file.
@@ -295,8 +293,8 @@ class MessageBase(MSGFile):
             elif self.body:
                 # Convert the plain text body to html.
                 logger.info('HTML body was not found, attempting to generate from plain text body.')
-                correctedBody = self.body.encode('utf-8').replace('\r', '').replace('\n', '</br>')
-                self._htmlBody = f'<html><body>{correctedBody}</body></head>'
+                correctedBody = html.escpae(self.body).replace('\r', '').replace('\n', '</br>')
+                self._htmlBody = f'<html><body>{correctedBody}</body></head>'.encode('utf-8')
             else:
                 logger.info('HTML body could not be found nor generated.')
 

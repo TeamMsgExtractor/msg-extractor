@@ -1,8 +1,8 @@
 import logging
 
-from . import constants
 from .data import PermanentEntryID
 from .enums import PropertiesType, RecipientType
+from .prop import FixedLengthProp
 from .properties import Properties
 from .utils import verifyPropertyId, verifyType
 

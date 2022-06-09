@@ -7,8 +7,10 @@ from .enums import Guid, NamedPropertyType
 from .utils import bytesToGuid, divide, properHex, roundUp
 from compressed_rtf.crc32 import crc32
 
+
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
 
 class Named:
     __dir = '__nameid_version1.0'

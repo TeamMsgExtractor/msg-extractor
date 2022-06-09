@@ -17,7 +17,7 @@ class FolderID:
     @property
     def globalCounter(self) -> int:
         """
-        An unsigned ineger identifying the folder within its Store object.
+        An unsigned integer identifying the folder within its Store object.
         """
         return self.__globalCounter
 
@@ -42,7 +42,7 @@ class MessageID:
     @property
     def globalCounter(self) -> int:
         """
-        An unsigned ineger identifying the folder within its Store object.
+        An unsigned integer identifying the folder within its Store object.
         """
         return self.__globalCounter
 

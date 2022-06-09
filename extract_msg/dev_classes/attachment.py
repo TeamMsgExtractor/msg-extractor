@@ -1,6 +1,5 @@
 import logging
 
-from .. import constants
 from ..enums import PropertiesType
 from ..properties import Properties
 from ..utils import properHex

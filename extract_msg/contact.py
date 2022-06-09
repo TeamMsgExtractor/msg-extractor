@@ -1,5 +1,3 @@
-from . import constants
-from .attachment import Attachment
 from .msg import MSGFile
 
 
@@ -113,7 +111,7 @@ class Contact(MSGFile):
     @property
     def departmentName(self):
         """
-        The name of the dapartment the contact works in.
+        The name of the department the contact works in.
         """
         return self._ensureSet('_departmentName', '__substg1.0_3A18')
 

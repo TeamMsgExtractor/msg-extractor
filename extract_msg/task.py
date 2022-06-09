@@ -4,8 +4,10 @@ import logging
 from .enums import TaskAcceptance, TaskHistory, TaskMode, TaskOwnership, TaskStatus
 from .message_base import MessageBase
 
+
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
 
 class Task(MessageBase):
     """

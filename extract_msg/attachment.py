@@ -8,9 +8,8 @@ import zipfile
 from . import constants
 from .attachment_base import AttachmentBase
 from .enums import AttachmentType
-from .prop import FixedLengthProp, VariableLengthProp
-from .properties import Properties
-from .utils import createZipOpen, inputToString, openMsg, prepareFilename, verifyPropertyId, verifyType
+from .utils import createZipOpen, inputToString, openMsg, prepareFilename
+
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())

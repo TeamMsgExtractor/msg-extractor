@@ -1,11 +1,11 @@
 import logging
 
-from . import constants
 from .enums import PropertiesType
 from .named import NamedProperties
 from .prop import FixedLengthProp
 from .properties import Properties
 from .utils import verifyPropertyId, verifyType
+
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
