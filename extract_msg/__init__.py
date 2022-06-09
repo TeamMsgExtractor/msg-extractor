@@ -9,7 +9,7 @@ extract_msg:
 https://github.com/TeamMsgExtractor/msg-extractor
 """
 
-# --- LICENSE.txt -----------------------------------------------------------------
+# --- LICENSE.txt --------------------------------------------------------------
 #
 #    Copyright 2013-2022 Matthew Walker and Destiny Peterson
 #
