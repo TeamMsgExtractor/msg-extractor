@@ -9,7 +9,7 @@ extract_msg:
 https://github.com/TeamMsgExtractor/msg-extractor
 """
 
-# --- LICENSE.txt -----------------------------------------------------------------
+# --- LICENSE.txt --------------------------------------------------------------
 #
 #    Copyright 2013-2022 Matthew Walker and Destiny Peterson
 #
@@ -27,8 +27,8 @@ https://github.com/TeamMsgExtractor/msg-extractor
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 __author__ = 'Destiny Peterson & Matthew Walker'
-__date__ = '2022-06-07'
-__version__ = '0.32.0'
+__date__ = '2022-06-08'
+__version__ = '0.33.0'
 
 import logging
 
@@ -45,4 +45,5 @@ from .msg import MSGFile
 from .prop import createProp
 from .properties import Properties
 from .recipient import Recipient
+from .task import Task
 from .utils import openMsg, properHex

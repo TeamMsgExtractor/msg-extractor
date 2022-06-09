@@ -1,5 +1,6 @@
 import codecs
 import copy
+import datetime
 import logging
 import os
 import pathlib
@@ -9,10 +10,10 @@ import olefile
 
 from . import constants
 from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment
-from .enums import AttachErrorBehavior, PropertiesType
+from .enums import AttachErrorBehavior, Priority, PropertiesType, Sensitivity
 from .exceptions import InvalidFileFormatError, UnrecognizedMSGTypeError
 from .named import Named, NamedProperties
-from .prop import FixedLengthProp, VariableLengthProp
+from .prop import FixedLengthProp
 from .properties import Properties
 from .utils import divide, getEncodingName, hasLen, inputToMsgpath, inputToString, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
 
@@ -20,16 +21,18 @@ from .utils import divide, getEncodingName, hasLen, inputToMsgpath, inputToStrin
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
+
 class MSGFile(olefile.OleFileIO):
     """
     Parser for .msg files.
     """
+    
     def __init__(self, path, **kwargs):
         """
         :param path: path to the msg file in the system or is the raw msg file.
-        :param prefix: Used for extracting embeded msg files inside the main
+        :param prefix: Used for extracting embedded msg files inside the main
             one. Do not set manually unless you know what you are doing.
-        :param parentMsg: Used for syncronizing named properties instances. Do
+        :param parentMsg: Used for synchronizing named properties instances. Do
             not set this unless you know what you are doing.
         :param attachmentClass: Optional, the class the MSGFile object
             will use for attachments. You probably should
@@ -103,8 +106,8 @@ class MSGFile(olefile.OleFileIO):
         kwargsCopy = copy.copy(kwargs)
         if 'prefix' in kwargsCopy:
             del kwargsCopy['prefix']
-        if 'parent' in kwargsCopy:
-            del kwargsCopy['parent']
+        if 'parentMsg' in kwargsCopy:
+            del kwargsCopy['parentMsg']
         self.__kwargs = kwargsCopy
 
         prefixl = []
@@ -141,13 +144,21 @@ class MSGFile(olefile.OleFileIO):
         else:
             self.filename = None
 
-    def _ensureSet(self, variable : str, streamID, stringStream : bool = True):
+    def _ensureSet(self, variable : str, streamID, stringStream : bool = True, **kwargs):
         """
         Ensures that the variable exists, otherwise will set it using the
         specified stream. After that, return said variable.
 
         If the specified stream is not a string stream, make sure to set
         :param stringStream: to False.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. By
+            default, this will be completely ignored if the value was not found.
+        :param preserveNone: If true (default), causes the function to ignore
+            :param overrideClass: when the value could not be found (is None).
+            If this is changed to False, then the value will be used regardless.
         """
         try:
             return getattr(self, variable)
@@ -156,25 +167,51 @@ class MSGFile(olefile.OleFileIO):
                 value = self._getStringStream(streamID)
             else:
                 value = self._getStream(streamID)
+            # Check if we should be overriding the data type for this instance.
+            if kwargs:
+                overrideClass = kwargs.get('overrideClass')
+                if overrideClass is not None and (value is not None or not kwargs.get('preserveNone', True)):
+                    value = overrideClass(value)
             setattr(self, variable, value)
             return value
 
-    def _ensureSetNamed(self, variable : str, propertyName):
+    def _ensureSetNamed(self, variable : str, propertyName, **kwargs):
         """
         Ensures that the variable exists, otherwise will set it using the named
         property. After that, return said variable.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. By
+            default, this will be completely ignored if the value was not found.
+        :param preserveNone: If true (default), causes the function to ignore
+            :param overrideClass: when the value could not be found (is None).
+            If this is changed to False, then the value will be used regardless.
         """
         try:
             return getattr(self, variable)
         except AttributeError:
             value = self.namedProperties.get(propertyName)
+            # Check if we should be overriding the data type for this instance.
+            if kwargs:
+                overrideClass = kwargs.get('overrideClass')
+                if overrideClass is not None and (value is not None or not kwargs.get('preserveNone', True)):
+                    value = overrideClass(value)
             setattr(self, variable, value)
             return value
 
-    def _ensureSetProperty(self, variable : str, propertyName):
+    def _ensureSetProperty(self, variable : str, propertyName, **kwargs):
         """
         Ensures that the variable exists, otherwise will set it using the
         property. After that, return said variable.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. By
+            default, this will be completely ignored if the value was not found.
+        :param preserveNone: If true (default), causes the function to ignore
+            :param overrideClass: when the value could not be found (is None).
+            If this is changed to False, then the value will be used regardless.
         """
         try:
             return getattr(self, variable)
@@ -183,19 +220,37 @@ class MSGFile(olefile.OleFileIO):
                 value = self.mainProperties[propertyName].value
             except (KeyError, AttributeError):
                 value = None
+            # Check if we should be overriding the data type for this instance.
+            if kwargs:
+                overrideClass = kwargs.get('overrideClass')
+                if overrideClass is not None and (value is not None or not kwargs.get('preserveNone', True)):
+                    value = overrideClass(value)
             setattr(self, variable, value)
             return value
 
-    def _ensureSetTyped(self, variable : str, _id):
+    def _ensureSetTyped(self, variable : str, _id, **kwargs):
         """
         Like the other ensure set functions, but designed for when something
         could be multiple types (where only one will be present). This way you
         have no need to set the type, it will be handled for you.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. By
+            default, this will be completely ignored if the value was not found.
+        :param preserveNone: If true (default), causes the function to ignore
+            :param overrideClass: when the value could not be found (is None).
+            If this is changed to False, then the value will be used regardless.
         """
         try:
             return getattr(self, variable)
         except AttributeError:
             value = self._getTypedData(_id)
+            # Check if we should be overriding the data type for this instance.
+            if kwargs:
+                overrideClass = kwargs.get('overrideClass')
+                if overrideClass is not None and (value is not None or not kwargs.get('preserveNone', True)):
+                    value = overrideClass(value)
             setattr(self, variable, value)
             return value
 
@@ -558,11 +613,48 @@ class MSGFile(olefile.OleFileIO):
         return self.__attachmentsReady
 
     @property
+    def classified(self) -> bool:
+        """
+        Indicates whether the contents of this message are regarded as
+        classified information.
+        """
+        return self._ensureSetNamed('_classified', '85B5')
+
+    @property
     def classType(self) -> str:
         """
         The class type of the MSG file.
         """
         return self._ensureSet('_classType', '__substg1.0_001A')
+
+    @property
+    def commonEnd(self) -> datetime.datetime:
+        """
+        The end time for the object.
+        """
+        return self._ensureSetNamed('_commonEnd', '8517')
+
+    @property
+    def commonStart(self) -> datetime.datetime:
+        """
+        The start time for the object.
+        """
+        return self._ensureSetNamed('_commonStart', '8516')
+
+    @property
+    def currentVersion(self) -> int:
+        """
+        Specifies the build number of the client application that sent the
+        message.
+        """
+        return self._ensureSetNamed('_currentVersion', '8552')
+
+    @property
+    def currentVersionName(self) -> str:
+        """
+        Specifies the name of the client application that sent the message.
+        """
+        return self._ensureSetNamed('_currentVersionName', '8554')
 
     @property
     def importance(self) -> int:
@@ -654,18 +746,18 @@ class MSGFile(olefile.OleFileIO):
         return copy.deepcopy(self.__prefixList)
 
     @property
-    def priority(self) -> int:
+    def priority(self) -> Priority:
         """
         The specified priority of the msg file.
         """
-        return self._ensureSetProperty('_priority', '00260003')
+        return self._ensureSetProperty('_priority', '00260003', overrideClass = Priority)
 
     @property
-    def sensitivity(self) -> int:
+    def sensitivity(self) -> Sensitivity:
         """
         The specified sensitivity of the msg file.
         """
-        return self._ensureSetProperty('_sensitivity', '00360003')
+        return self._ensureSetProperty('_sensitivity', '00360003', overrideClass = Sensitivity)
 
     @property
     def stringEncoding(self):

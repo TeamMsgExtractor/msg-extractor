@@ -5,7 +5,8 @@ import pprint
 from . import constants
 from .enums import Intelligence, PropertiesType
 from .prop import createProp
-from .utils import divide, fromTimeStamp, filetimeToUtc, properHex
+from .utils import divide, properHex
+
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -105,7 +106,6 @@ class Properties:
         Uses the pprint function on a sorted list of keys.
         """
         pprint.pprint(sorted(tuple(self.__props.keys())))
-
 
     def values(self):
         return self.__props.values()

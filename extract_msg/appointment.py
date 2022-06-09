@@ -1,5 +1,3 @@
-from . import constants
-from .attachment import Attachment
 from .message_base import MessageBase
 
 
@@ -33,8 +31,7 @@ class Appointment(MessageBase):
         try:
             return self.__location
         except AttributeError:
-            self.__location = self.named.getNamedValue('8208')
-            self.__location = self.named.getNamedValue('0002') if self.__location is None else self.__location
+            self.__location = self.named.getNamedValue('8208') or self.named.getNamedValue('0002')
             return self.__location
 
     @property

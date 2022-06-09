@@ -2,7 +2,6 @@ import copy
 import logging
 import olefile
 
-from .. import constants
 from ..enums import PropertiesType
 from ..dev_classes.attachment import Attachment
 from ..properties import Properties
@@ -19,7 +18,7 @@ class Message(olefile.OleFileIO):
     Useful for malformed msg files.
     """
 
-    def __init__(self, path, prefix='', filename=None):
+    def __init__(self, path, prefix = '', filename = None):
         """
         :param path: path to the msg file in the system or is the raw msg file.
         :param prefix: used for extracting embedded msg files
@@ -49,12 +48,12 @@ class Message(olefile.OleFileIO):
         self.__prefixList = prefixl
 
         if tmp_condition:
-            filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix=False)
+            filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix = False)
         if filename is not None:
             self.filename = filename
         else:
-            logger.log(5, f':param path: has __len__ attribute?: {has_len(path)}')
-            if has_len(path):
+            logger.log(5, f':param path: has __len__ attribute?: {hasLen(path)}')
+            if hasLen(path):
                 if len(path) < 1536:
                     self.filename = path
                     logger.log(5, f':param path: length is {len(path)}; Using :param path: as file path')
@@ -68,7 +67,7 @@ class Message(olefile.OleFileIO):
         recipientDirs = []
 
         for dir_ in self.listDir():
-            if dir_[len(self.__prefixList)].startswith('__recip') and\
+            if dir_[len(self.__prefixList)].startswith('__recip') and \
                     dir_[len(self.__prefixList)] not in recipientDirs:
                 recipientDirs.append(dir_[len(self.__prefixList)])
 
@@ -76,7 +75,7 @@ class Message(olefile.OleFileIO):
         self.attachments
         self.date
 
-    def _getStream(self, filename, prefix=True):
+    def _getStream(self, filename, prefix = True):
         filename = self.fix_path(filename, prefix)
         if self.exists(filename):
             stream = self.openstream(filename)
@@ -85,13 +84,13 @@ class Message(olefile.OleFileIO):
             logger.info(f'Stream "{filename}" was requested but could not be found. Returning `None`.')
             return None
 
-    def _getStringStream(self, filename, prefer='unicode', prefix=True):
+    def _getStringStream(self, filename, prefix = True):
         """
         Gets a string representation of the requested filename.
         This should ALWAYS return a string.
         """
 
-        filename = self.fix_path(filename, prefix)
+        filename = self.fixPath(filename, prefix)
         if self.areStringsUnicode:
             return windowsUnicode(self._getStream(filename + '001F', prefix = False))
         else:
@@ -102,14 +101,14 @@ class Message(olefile.OleFileIO):
         """
         Checks if :param filename: exists in the msg file.
         """
-        filename = self.fix_path(filename)
+        filename = self.fixPath(filename)
         return self.exists(filename)
 
     def sExists(self, filename):
         """
         Checks if string stream :param filename: exists in the msg file.
         """
-        filename = self.fix_path(filename)
+        filename = self.fixPath(filename)
         return self.exists(filename + '001F') or self.exists(filename + '001E')
 
     def fixPath(self, filename, prefix=True):
@@ -124,7 +123,7 @@ class Message(olefile.OleFileIO):
             filename = self.__prefix + filename
         return filename
 
-    def listDir(self, streams=True, storages=False):
+    def listDir(self, streams = True, storages = False):
         """
         Replacement for OleFileIO.listdir that runs at the current prefix directory.
         """
@@ -142,15 +141,15 @@ class Message(olefile.OleFileIO):
         for pathEntry in entries:
             good = True
             # If the entry we are looking at is not longer then the prefix, it's not good.
-            if len(x) <= len(prefix):
+            if len(pathEntry) <= len(prefix):
                 continue
 
             for index, entry in enumerate(prefix):
-                if x[y] != entry:
+                if pathEntry[index] != entry:
                     good = False
 
             if good:
-                out.append(x)
+                out.append(pathEntry)
 
         return out
 
@@ -181,7 +180,7 @@ class Message(olefile.OleFileIO):
             attachmentDirs = []
 
             for dir_ in self.listDir():
-                if dir_[len(self.__prefixList)].startswith('__attach') and\
+                if dir_[len(self.__prefixList)].startswith('__attach') and \
                         dir_[len(self.__prefixList)] not in attachmentDirs:
                     attachmentDirs.append(dir_[len(self.__prefixList)])
 
@@ -252,7 +251,7 @@ class Message(olefile.OleFileIO):
             recipientDirs = []
 
             for dir_ in self.listDir():
-                if dir_[len(self.__prefixList)].startswith('__recip') and\
+                if dir_[len(self.__prefixList)].startswith('__recip') and \
                         dir_[len(self.__prefixList)] not in recipientDirs:
                     recipientDirs.append(dir_[len(self.__prefixList)])
 

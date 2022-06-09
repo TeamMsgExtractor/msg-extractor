@@ -4,7 +4,6 @@ import sys
 import traceback
 
 from extract_msg import __doc__, utils
-from extract_msg.message import Message
 
 
 def main() -> None:
@@ -14,7 +13,7 @@ def main() -> None:
     level = logging.INFO if args.verbose else logging.WARNING
 
     # Determine where to save the files to.
-    currentDir = os.getcwd() # Store this incase the path changes.
+    currentDir = os.getcwd() # Store this in case the path changes.
     if not args.zip:
         if args.out_path:
             if not os.path.exists(args.out_path):

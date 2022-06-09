@@ -7,8 +7,10 @@ from .enums import Guid, NamedPropertyType
 from .utils import bytesToGuid, divide, properHex, roundUp
 from compressed_rtf.crc32 import crc32
 
+
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
 
 class Named:
     __dir = '__nameid_version1.0'
@@ -61,15 +63,19 @@ class Named:
 
             for entry in entries:
                 streamID = properHex(0x8000 + entry['pid'])
-                #msg._registerNamedProperty(entry, entry['pkind'], names[entry['id']] if entry['pkind'] == NamedPropertyType.STRING_NAMED else None)
-                if msg.existsTypedProperty(streamID):
-                    self.__properties.append(StringNamedProperty(entry, names[entry['id']]) if entry['pkind'] == NamedPropertyType.STRING_NAMED else NumericalNamedProperty(entry))
+                self.__properties.append(StringNamedProperty(entry, names[entry['id']]) if entry['pkind'] == NamedPropertyType.STRING_NAMED else NumericalNamedProperty(entry))
 
             for property in self.__properties:
                 self.__propertiesDict[property.name if isinstance(property, StringNamedProperty) else property.propertyID] = property
 
     def __getitem__(self, key):
         return self.__propertiesDict[key]
+
+    def __iter__(self):
+        return self.__propertiesDict.__iter__()
+
+    def __len__(self):
+        return self.__propertiesDict.__len__()
 
     def _getStream(self, filename, prefix = True):
         return self.__msg._getStream([self.__dir, filename], prefix = prefix)
@@ -102,19 +108,25 @@ class Named:
         if not found.
         """
         try:
-            return self.namedProperties[propertyName]
+            return self.__propertiesDict[propertyName]
         except KeyError:
             propertyName = propertyName.upper()
-            for key in self.namedProperties.keys():
+            for key in self.__propertiesDict.keys():
                 if propertyName == key.upper():
-                    return self.namedProperties[key]
+                    return self.__propertiesDict[key]
             return default
+
+    def keys(self):
+        return self.__propertiesDict.keys()
 
     def pprintKeys(self):
         """
         Uses the pprint function on a sorted list of keys.
         """
         pprint.pprint(sorted(tuple(self.__propertiesDict.keys())))
+
+    def values(self):
+        return self.__propertiesDict.values()
 
     @property
     def dir(self):
@@ -136,6 +148,7 @@ class Named:
         Returns a copy of the dictionary containing all the named properties.
         """
         return copy.deepcopy(self.__propertiesDict)
+
 
 
 class NamedProperties:

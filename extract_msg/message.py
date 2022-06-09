@@ -9,7 +9,6 @@ import bs4
 from imapclient.imapclient import decode_utf7
 
 from . import constants
-from .attachment import Attachment
 from .exceptions import DataNotFoundError, IncompatibleOptionsError
 from .message_base import MessageBase
 from .utils import addNumToDir, addNumToZipDir, createZipOpen, injectHtmlHeader, injectRtfHeader, inputToBytes, inputToString, prepareFilename
@@ -18,10 +17,12 @@ from .utils import addNumToDir, addNumToZipDir, createZipOpen, injectHtmlHeader,
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
+
 class Message(MessageBase):
     """
     Parser for Microsoft Outlook message files.
     """
+
     def __init__(self, path, **kwargs):
         super().__init__(path, **kwargs)
 
@@ -103,7 +104,7 @@ class Message(MessageBase):
             something parsing the html can properly determine the encoding (as
             not having this tag can cause errors in some programs). Set this to
             `None` or an empty string to not insert the tag (Default: 'utf-8').
-        :param kwargs: Used to allow kwags expansion in the save function.
+        :param kwargs: Used to allow kwargs expansion in the save function.
         :param preparedHtml: When set, prepares the HTML body for standalone
             usage, doing things like adding tags, injecting attachments, etc.
             This is useful for things like trying to convert the HTML body
@@ -232,17 +233,17 @@ class Message(MessageBase):
                 useRtf = False
                 if html:
                     if self.htmlBody:
-                       useHtml = True
-                       fext = 'html'
+                        useHtml = True
+                        fext = 'html'
                     elif not allowFallback:
-                       raise DataNotFoundError('Could not find the htmlBody')
+                        raise DataNotFoundError('Could not find the htmlBody')
 
                 if rtf or (html and not useHtml):
                     if self.rtfBody:
-                       useRtf = True
-                       fext = 'rtf'
+                        useRtf = True
+                        fext = 'rtf'
                     elif not allowFallback:
-                       raise DataNotFoundError('Could not find the rtfBody')
+                        raise DataNotFoundError('Could not find the rtfBody')
 
             if not skipAttachments:
                 # Save the attachments.
@@ -312,7 +313,7 @@ class Message(MessageBase):
             something parsing the html can properly determine the encoding (as
             not having this tag can cause errors in some programs). Set this to
             `None` or an empty string to not insert the tag (Default: 'utf-8').
-        :param **kwargs: Used to allow kwargs expansion in the save function.
+        :param kwargs: Used to allow kwargs expansion in the save function.
             Arguments absorbed by this are simply ignored.
 
         :raises BadHtmlError: if :param preparedHtml: is False and the HTML
@@ -355,7 +356,7 @@ class Message(MessageBase):
         """
         Returns the RTF body that will be used in saving based on the arguments.
 
-        :param **kwargs: Used to allow kwargs expansion in the save function.
+        :param kwargs: Used to allow kwargs expansion in the save function.
             Arguments absorbed by this are simply ignored.
         """
         # Inject the header into the data.

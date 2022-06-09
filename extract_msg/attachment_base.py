@@ -1,11 +1,11 @@
 import logging
 
-from . import constants
 from .enums import PropertiesType
 from .named import NamedProperties
 from .prop import FixedLengthProp
 from .properties import Properties
 from .utils import verifyPropertyId, verifyType
+
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -30,13 +30,21 @@ class AttachmentBase:
         self.__namedProperties = NamedProperties(msg.named, self)
 
 
-    def _ensureSet(self, variable, streamID, stringStream = True):
+    def _ensureSet(self, variable, streamID, stringStream = True, **kwargs):
         """
         Ensures that the variable exists, otherwise will set it using the
         specified stream. After that, return said variable.
 
         If the specified stream is not a string stream, make sure to set
         :param stringStream: to False.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. By
+            default, this will be completely ignored if the value was not found.
+        :param preserveNone: If true (default), causes the function to ignore
+            :param overrideClass: when the value could not be found (is None).
+            If this is changed to False, then the value will be used regardless.
         """
         try:
             return getattr(self, variable)
@@ -45,25 +53,51 @@ class AttachmentBase:
                 value = self._getStringStream(streamID)
             else:
                 value = self._getStream(streamID)
+            # Check if we should be overriding the data type for this instance.
+            if kwargs:
+                overrideClass = kwargs.get('overrideClass')
+                if overrideClass is not None and (value is not None or not kwargs.get('preserveNone', True)):
+                    value = overrideClass(value)
             setattr(self, variable, value)
             return value
 
-    def _ensureSetNamed(self, variable, propertyName):
+    def _ensureSetNamed(self, variable, propertyName, **kwargs):
         """
         Ensures that the variable exists, otherwise will set it using the named
         property. After that, return said variable.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. By
+            default, this will be completely ignored if the value was not found.
+        :param preserveNone: If true (default), causes the function to ignore
+            :param overrideClass: when the value could not be found (is None).
+            If this is changed to False, then the value will be used regardless.
         """
         try:
             return getattr(self, variable)
         except AttributeError:
             value = self.namedProperties.get(propertyName)
+            # Check if we should be overriding the data type for this instance.
+            if kwargs:
+                overrideClass = kwargs.get('overrideClass')
+                if overrideClass is not None and (value is not None or not kwargs.get('preserveNone', True)):
+                    value = overrideClass(value)
             setattr(self, variable, value)
             return value
 
-    def _ensureSetProperty(self, variable, propertyName):
+    def _ensureSetProperty(self, variable, propertyName, **kwargs):
         """
         Ensures that the variable exists, otherwise will set it using the
         property. After that, return said variable.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. By
+            default, this will be completely ignored if the value was not found.
+        :param preserveNone: If true (default), causes the function to ignore
+            :param overrideClass: when the value could not be found (is None).
+            If this is changed to False, then the value will be used regardless.
         """
         try:
             return getattr(self, variable)
@@ -72,19 +106,37 @@ class AttachmentBase:
                 value = self.props[propertyName].value
             except (KeyError, AttributeError):
                 value = None
+            # Check if we should be overriding the data type for this instance.
+            if kwargs:
+                overrideClass = kwargs.get('overrideClass')
+                if overrideClass is not None and (value is not None or not kwargs.get('preserveNone', True)):
+                    value = overrideClass(value)
             setattr(self, variable, value)
             return value
 
-    def _ensureSetTyped(self, variable, _id):
+    def _ensureSetTyped(self, variable, _id, **kwargs):
         """
         Like the other ensure set functions, but designed for when something
         could be multiple types (where only one will be present). This way you
         have no need to set the type, it will be handled for you.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. By
+            default, this will be completely ignored if the value was not found.
+        :param preserveNone: If true (default), causes the function to ignore
+            :param overrideClass: when the value could not be found (is None).
+            If this is changed to False, then the value will be used regardless.
         """
         try:
             return getattr(self, variable)
         except AttributeError:
             value = self._getTypedData(_id)
+            # Check if we should be overriding the data type for this instance.
+            if kwargs:
+                overrideClass = kwargs.get('overrideClass')
+                if overrideClass is not None and (value is not None or not kwargs.get('preserveNone', True)):
+                    value = overrideClass(value)
             setattr(self, variable, value)
             return value
 

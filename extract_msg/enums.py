@@ -118,3 +118,72 @@ class Sensitivity(enum.Enum):
     PERSONAL = 1
     PRIVATE = 2
     CONFIDENTIAL = 3
+
+class TaskAcceptance(enum.Enum):
+    """
+    The acceptance state of the task.
+    """
+    NOT_ASSIGNED = 0x00000000
+    UNKNOWN = 0x00000001
+    ACCEPTED = 0x00000002
+    REJECTED = 0x00000003
+
+class TaskHistory(enum.Enum):
+    """
+    The type of the last change to the Task object.
+    """
+    NONE = 0x00000000
+    ACCEPTED = 0x00000001
+    REJECTED = 0x00000002
+    OTHER = 0x00000003
+    DUE_DATE_CHANGED = 0x00000004
+    ASSIGNED = 0x00000005
+
+class TaskMode(enum.Enum):
+    """
+    The mode of the Task object used in task communication (PidLidTaskMode).
+
+    UNASSIGNED: The Task object is not assigned.
+    EMBEDDED_REQUEST: The Task object is embedded in a task request.
+    ACCEPTED: The Task object has been accepted by the task assignee.
+    REJECTED: The Task object was rejected by the task assignee.
+    EMBEDDED_UPDATE: The Task object is embedded in a task update.
+    SELF_ASSIGNED: The Task object was assigned to the task assigner
+        (self-delegation).
+    """
+    UNASSIGNED = 0
+    EMBEDDED_REQUEST = 1
+    ACCEPTED = 2
+    REJECTED = 3
+    EMBEDDED_UPDATE = 4
+    SELF_ASSIGNED = 5
+
+class TaskOwnership(enum.Enum):
+    """
+    The role of the current user relative to the Task object.
+
+    NOT_ASSIGNED: The Task object is not assigned.
+    ASSIGNERS_COPY: The Task object is the task assigner's copy of the Task
+        object.
+    ASSIGNEES_COPY: The Task object is the task assignee's copy of the Task
+        object.
+    """
+    NOT_ASSIGNED = 0x00000000
+    ASSIGNERS_COPY = 0x00000001
+    ASSIGNEES_COPY = 0x00000002
+
+class TaskStatus(enum.Enum):
+    """
+    The status of a task object (PidLidTaskStatus).
+
+    NOT_STARTED: The user has not started the task.
+    IN_PROGRESS: The users's work on the Task object is in progress.
+    COMPLETE: The user's work on the Task object is complete.
+    WAITING_ON_OTHER: The user is waiting on somebody else.
+    DEFERRED: The user has deffered work on the Task object.
+    """
+    NOT_STARTED = 0x00000000
+    IN_PROGRESS = 0x00000001
+    COMPLETE = 0x00000002
+    WAITING_ON_OTHER = 0x00000003
+    DEFERRED = 0x00000004
