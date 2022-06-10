@@ -593,7 +593,6 @@ def openMsg(path, **kwargs):
     :raises UnrecognizedMSGTypeError: if the type is not recognized.
     """
     from .appointment import Appointment
-    from .attachment import Attachment
     from .contact import Contact
     from .message import Message
     from .msg import MSGFile

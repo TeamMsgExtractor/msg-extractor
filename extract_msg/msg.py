@@ -63,21 +63,12 @@ class MSGFile(olefile.OleFileIO):
         """
         # Retrieve all the kwargs that we need.
         prefix = kwargs.get('prefix', '')
-        parentMsg = kwargs.get('parentMsg')
+        self.__parentMsg = kwargs.get('parentMsg')
+        # Verify it is a valid class.
+        if self.__parentMsg is not None and not isinstance(self.__parentMsg, MSGFile):
+            raise TypeError(':param parentMsg: must be an instance of MSGFile or a subclass.')
         filename = kwargs.get('filename', None)
         overrideEncoding = kwargs.get('overrideEncoding', None)
-
-        # Handle the parent msg file existing.
-        if parentMsg:
-            # Verify it is a valid class.
-            if not isinstance(parentMsg, MSGFile):
-                raise TypeError(':param parentMsg: must be an instance of MSGFile or a subclass.')
-            # Try to get the named properties and use that for our main
-            # instance.
-            try:
-                self.__named = parentMsg.named
-            except Exception:
-                pass
 
         # WARNING DO NOT MANUALLY MODIFY PREFIX. Let the program set it.
         self.__path = path
@@ -131,7 +122,7 @@ class MSGFile(olefile.OleFileIO):
         self.__prefixList = prefixl
         self.__prefixLen = len(prefixl)
         if prefix:
-            filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix=False)
+            filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix = False)
         if filename:
             self.filename = filename
         elif hasLen(path):
@@ -692,7 +683,17 @@ class MSGFile(olefile.OleFileIO):
         try:
             return self.__named
         except AttributeError:
-            self.__named = Named(self)
+            self.__named = None
+            # Handle the parent msg file existing.
+            if self.__parentMsg:
+                # Try to get the named properties and use that for our main
+                # instance.
+                try:
+                    self.__named = self.__parentMsg.named
+                except Exception:
+                    pass
+            if not self.__named:
+                self.__named = Named(self)
             return self.__named
 
     @property
