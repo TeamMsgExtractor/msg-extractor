@@ -115,6 +115,7 @@ class Message(MessageBase):
         html = kwargs.get('html', False)
         rtf = kwargs.get('rtf', False)
         raw = kwargs.get('raw', False)
+        pdf = kwargs.get('pdf', False)
         allowFallback = kwargs.get('allowFallback', False)
         _zip = kwargs.get('zip')
         maxNameLength = kwargs.get('maxNameLength', 256)
@@ -157,8 +158,8 @@ class Message(MessageBase):
         kwargs['customFilename'] = None
 
         # Check if incompatible options have been provided in any way.
-        if _json + html + rtf + raw + attachOnly > 1:
-            raise IncompatibleOptionsError('Only one of the following options may be used at a time: json, raw, html, rtf, attachmentsOnly.')
+        if _json + html + rtf + raw + attachOnly + pdf > 1:
+            raise IncompatibleOptionsError('Only one of the following options may be used at a time: json, raw, html, rtf, attachmentsOnly, pdf.')
 
         # TODO: insert code here that will handle checking all of the msg files to see if the path with overflow.
 

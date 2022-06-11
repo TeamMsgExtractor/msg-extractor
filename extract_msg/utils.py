@@ -183,6 +183,13 @@ def getCommandArgs(args):
     # --html
     parser.add_argument('--html', dest='html', action='store_true',
                         help='Sets whether the output should be HTML. If this is not possible, will error.')
+    # --pdf
+    parser.add_argument('--pdf', dest = 'pdf', action='store_true',
+                        help='Saves the body as a PDF. If this is not possible, will error.')
+
+    # --wk-path
+    parser.add_argument('--wk-path', desk = 'wkPath'
+                        help='Overrides the path for finding wkhtmltopdf.')
     # --prepared-html
     parser.add_argument('--prepared-html', dest='preparedHtml', action='store_true',
                         help='When used in conjunction with --html, sets whether the HTML output should be prepared for embedded attachments.')
@@ -214,8 +221,8 @@ def getCommandArgs(args):
     options = parser.parse_args(args)
 
     # Check if more than one of the following arguments has been specified
-    if options.html + options.rtf + options.json + options.raw + options.attachmentsOnly > 1:
-       raise IncompatibleOptionsError('Only one of these options may be selected at a time: --html, --json, --raw, --rtf, --attachments-only')
+    if options.html + options.rtf + options.json + options.raw + options.pdf + options.attachmentsOnly > 1:
+       raise IncompatibleOptionsError('Only one of these options may be selected at a time: --html, --json, --raw, --rtf, --attachments-only, --pdf')
 
     if options.dev or options.file_logging:
         options.verbose = True
