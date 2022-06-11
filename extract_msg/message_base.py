@@ -5,6 +5,7 @@ import logging
 import re
 
 import bs4
+import chardet
 import compressed_rtf
 import RTFDE
 
@@ -203,7 +204,13 @@ class MessageBase(MSGFile):
             if self.rtfBody:
                 # If there is an RTF body, we try to deencapsulate it.
                 try:
-                    self._deencapsultor = RTFDE.DeEncapsulator(self.rtfBody)
+                    try:
+                        self._deencapsultor = RTFDE.DeEncapsulator(self.rtfBody)
+                    except UnicodeDecodeError:
+                        # There is a known issue that bytes are not well decoded
+                        # by RTFDE right now, so let's see if we can't manually
+                        # decode it and see if that will work.
+                        self._deencapsultor = RTFDE.DeEncapsulator(self.rtfBody.decode(chardet.detect(self.rtfBody)['encoding']))
                     self._deencapsultor.deencapsulate()
                 except RTFDE.exceptions.NotEncapsulatedRtf as e:
                     logger.debug("RTF body is not encapsulated.")

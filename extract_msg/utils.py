@@ -6,11 +6,13 @@ import argparse
 import codecs
 import copy
 import datetime
+import glob
 import json
 import logging
 import logging.config
 import os
 import pathlib
+import shutil
 import struct
 # Not actually sure if this needs to be here for the logging, so just in case.
 import sys
@@ -133,6 +135,29 @@ def divide(string, length : int) -> list:
     """
     return [string[length * x:length * (x + 1)] for x in range(int(ceilDiv(len(string), length)))]
 
+def findWk(path = None):
+    """
+    Attempt to find the path of the wkhtmltopdf executable. If :param path: is
+    provided, verifies that it is executable and returns the path if it is.
+
+    :raises ExecutableNotFound: A valid executable could not be found.
+    """
+    if path:
+        if os.path.isfile(path):
+            # Check if executable.
+            if os.access(path, os.X_OK):
+                return path
+            else:
+                raise ExecutableNotFound('Path provided was not a valid executable (execution bit not set).')
+        else:
+            raise ExecutableNotFound('Path provided was not a valid executable (not a file).')
+
+    candidate = shutil.which('wkhtmltopdf')
+    if candidate:
+        return candidate
+
+    raise ExecutableNotFound('Could not find wkhtmltopdf.')
+
 def fromTimeStamp(stamp) -> datetime.datetime:
     """
     Returns a datetime from the UTC timestamp given the current timezone.
@@ -147,6 +172,8 @@ def getCommandArgs(args):
         incompatible.
     """
     parser = argparse.ArgumentParser(description = constants.MAINDOC, prog = 'extract_msg')
+    outFormat = parser.add_mutually_exclusive_group()
+    inputFormat = parser.add_mutually_exclusive_group()
     # --use-content-id, --cid
     parser.add_argument('--use-content-id', '--cid', dest='cid', action='store_true',
                         help='Save attachments by their Content ID, if they have one. Useful when working with the HTML body.')
@@ -157,10 +184,10 @@ def getCommandArgs(args):
     parser.add_argument('--validate', dest='validate', action='store_true',
                         help='Turns on file validation mode. Turns off regular file output.')
     # --json
-    parser.add_argument('--json', dest='json', action='store_true',
+    outFormat.add_argument('--json', dest='json', action='store_true',
                         help='Changes to write output files as json.')
     # --file-logging
-    parser.add_argument('--file-logging', dest='file_logging', action='store_true',
+    parser.add_argument('--file-logging', dest='fileLogging', action='store_true',
                         help='Enables file logging. Implies --verbose.')
     # --verbose
     parser.add_argument('--verbose', dest='verbose', action='store_true',
@@ -169,27 +196,29 @@ def getCommandArgs(args):
     parser.add_argument('--log', dest='log',
                         help='Set the path to write the file log to.')
     # --config PATH
-    parser.add_argument('--config', dest='config_path',
+    parser.add_argument('--config', dest='configPath',
                         help='Set the path to load the logging config from.')
     # --out PATH
-    parser.add_argument('--out', dest='out_path',
+    parser.add_argument('--out', dest='outPath',
                         help='Set the folder to use for the program output. (Default: Current directory)')
     # --use-filename
-    parser.add_argument('--use-filename', dest='use_filename', action='store_true',
+    parser.add_argument('--use-filename', dest='useFilename', action='store_true',
                         help='Sets whether the name of each output is based on the msg filename.')
     # --dump-stdout
-    parser.add_argument('--dump-stdout', dest='dump_stdout', action='store_true',
+    parser.add_argument('--dump-stdout', dest='dumpStdout', action='store_true',
                         help='Tells the program to dump the message body (plain text) to stdout. Overrides saving arguments.')
     # --html
-    parser.add_argument('--html', dest='html', action='store_true',
+    outFormat.add_argument('--html', dest='html', action='store_true',
                         help='Sets whether the output should be HTML. If this is not possible, will error.')
     # --pdf
-    parser.add_argument('--pdf', dest = 'pdf', action='store_true',
+    outFormat.add_argument('--pdf', dest='pdf', action='store_true',
                         help='Saves the body as a PDF. If this is not possible, will error.')
-
-    # --wk-path
-    parser.add_argument('--wk-path', desk = 'wkPath'
+    # --wk-path PATH
+    parser.add_argument('--wk-path', dest='wkPath',
                         help='Overrides the path for finding wkhtmltopdf.')
+    # --wk-options OPTIONS
+    parser.add_argument('--wk-options', dest='wkOptions', nargs='*',
+                        help='Sets additional options to be used in wkhtmltopdf. Should be a series of options and values, replacing the - or -- in the beginning with + or ++, respectively. For example: --wk-options "+O Landscape"')
     # --prepared-html
     parser.add_argument('--prepared-html', dest='preparedHtml', action='store_true',
                         help='When used in conjunction with --html, sets whether the HTML output should be prepared for embedded attachments.')
@@ -197,10 +226,10 @@ def getCommandArgs(args):
     parser.add_argument('--charset', dest='charset', default='utf-8',
                         help='Character set to use for the prepared HTML in the added tag. (Default: utf-8)')
     # --raw
-    parser.add_argument('--raw', dest='raw', action='store_true',
+    outFormat.add_argument('--raw', dest='raw', action='store_true',
                         help='Sets whether the output should be raw. If this is not possible, will error.')
     # --rtf
-    parser.add_argument('--rtf', dest='rtf', action='store_true',
+    outFormat.add_argument('--rtf', dest='rtf', action='store_true',
                         help='Sets whether the output should be RTF. If this is not possible, will error.')
     # --allow-fallback
     parser.add_argument('--allow-fallback', dest='allowFallback', action='store_true',
@@ -209,55 +238,71 @@ def getCommandArgs(args):
     parser.add_argument('--zip', dest='zip',
                         help='Path to use for saving to a zip file.')
     # --attachments-only
-    parser.add_argument('--attachments-only', dest='attachmentsOnly', action='store_true',
+    outFormat.add_argument('--attachments-only', dest='attachmentsOnly', action='store_true',
                         help='Specify to only save attachments from an msg file.')
     # --out-name NAME
-    parser.add_argument('--out-name', dest='out_name',
-                        help='Name to be used with saving the file output. Should come immediately after the file name.')
+    inputFormat.add_argument('--out-name', dest='outName',
+                        help='Name to be used with saving the file output. Cannot be used if you are saving more than one file.')
+    # --glob
+    inputFormat.add_argument('--glob', '--wildcard', dest='glob', action='store_true',
+                        help='Interpret all paths as having wildcards. Incompatible with --out-name.')
+    # --progress
+    parser.add_argument('--progress', dest='progress', action='store_true',
+                        help='Shows what file the program is currently working on during it\'s progress.')
     # [msg files]
     parser.add_argument('msgs', metavar='msg', nargs='+',
-                        help='An msg file to be parsed.')
+                        help='An MSG file to be parsed.')
 
     options = parser.parse_args(args)
 
-    # Check if more than one of the following arguments has been specified
-    if options.html + options.rtf + options.json + options.raw + options.pdf + options.attachmentsOnly > 1:
-       raise IncompatibleOptionsError('Only one of these options may be selected at a time: --html, --json, --raw, --rtf, --attachments-only, --pdf')
-
-    if options.dev or options.file_logging:
+    if options.dev or options.fileLogging:
         options.verbose = True
+
+    # Handle the wkOptions if they exist.
+    if options.wkOptions:
+        wkOptions = []
+        for option in options.wkOptions:
+            if option.startswith('++'):
+                option = '--' + option[2:]
+            elif option.startswith('+'):
+                option = '-' + option[1:]
+
+            # Now that we have corrected to the correct start, split the argument if
+            # necessary.
+            split = option.split(' ')
+            if len(split) == 1:
+                # No spaces means we just pass that directly.
+                wkOptions.append(option)
+            else:
+                wkOptions.append(split[0])
+                wkOptions.append(' '.join(split[1:]))
+
+        options.wkOptions = wkOptions
 
     # If dump_stdout is True, we need to unset all arguments used in files.
     # Technically we actually only *need* to unset `out_path`, but that may
     # change in the future, so let's be thorough.
-    if options.dump_stdout:
-        options.out_path = None
+    if options.dumpStdout:
+        options.outPath = None
         options.json = False
         options.rtf = False
         options.html = False
-        options.use_filename = False
+        options.useFilename = False
         options.cid = False
 
-    file_args = options.msgs
-    file_tables = []  # This is where we will store the separated files and their arguments
-    temp_table = []  # temp_table will store each table while it is still being built.
-    need_arg = True  # This tells us if the last argument was something like
-    # --out-name which requires a string name after it.
-    # We start on true to make it so that we use don't have to have something checking if we are on the first table.
-    for x in file_args:  # Iterate through each
-        if need_arg:
-            temp_table.append(x)
-            need_arg = False
-        elif x in constants.KNOWN_FILE_FLAGS:
-            temp_table.append(x)
-            if x in constants.NEEDS_ARG:
-                need_arg = True
-        else:
-            file_tables.append(temp_table)
-            temp_table = [x]
+    if options.glob:
+        fileLists = []
+        for path in options.msgs:
+            fileLists += glob.glob(path)
 
-    file_tables.append(temp_table)
-    options.msgs = file_tables
+        if len(fileLists) == 0:
+            raise ValueError('Could not find any msg files using the specified wildcards.')
+        options.msgs = fileLists
+
+    # Make it so outName can only be used on single files.
+    if options.outName and options.fileArgs and len(options.fileArgs) > 0:
+        raise ValueError('--out-name is not supported when saving multiple MSG files.')
+
     return options
 
 def getEncodingName(codepage : int) -> str:
@@ -327,7 +372,7 @@ def injectHtmlHeader(msgFile, prepared : bool = False) -> bytes:
         # <body> tag are missing, we determine where to put the body tag (around
         # everything if there is no <head> tag, otherwise at the end) and then
         # wrap it all in the <html> tag.
-        parser = bs4.BeautifulSoup(body)
+        parser = bs4.BeautifulSoup(body, features = 'html.parser')
         if not parser.find('html') and not parser.find('body'):
             if parser.find('head') or parser.find('footer'):
                 # Create the parser we will be using for the corrections.
@@ -368,7 +413,7 @@ def injectHtmlHeader(msgFile, prepared : bool = False) -> bytes:
             # pointing to the wrong place after that. To compensate we first
             # create a tuple and iterate over that.
             for tag in tuple(parser.find('html').children):
-                if tag.name.lower() not in ('head', 'footer'):
+                if tag.name and tag.name.lower() not in ('head', 'footer'):
                     bodyTag.append(tag)
 
             # All the tags should now be properly in the body, so let's
@@ -395,7 +440,7 @@ def injectHtmlHeader(msgFile, prepared : bool = False) -> bytes:
             'cc': inputToString(htmlEscape(msgFile.cc) if msgFile.cc else '', 'utf-8'),
             'bcc': inputToString(htmlEscape(msgFile.bcc) if msgFile.bcc else '', 'utf-8'),
             'date': inputToString(msgFile.date, 'utf-8'),
-            'subject': inputToString(htmlEscape(msgFile.subject), 'utf-8'),
+            'subject': inputToString(htmlEscape(msgFile.subject) if msgFile.subject else '', 'utf-8'),
         }).encode('utf-8')
 
     # Use the previously defined function to inject the HTML header.
@@ -696,11 +741,16 @@ def parseType(_type : int, stream, encoding, extras):
         return value.decode('utf-16-le')
     elif _type == 0x0040:  # PtypTime
         rawtime = constants.ST3.unpack(value)[0]
-        if rawtime != 915151392000000000:
-            value = fromTimeStamp(filetimeToUtc(rawtime))
+        if rawtime < 116444736000000000:
+            # We can't properly parse this with our current setup, so
+            # we will rely on olefile to handle this one.
+            value = olefile.olefile.filetime2datetime(rawtime)
         else:
-            # Temporarily just set to max time to signify a null date.
-            value = datetime.datetime.max
+            if rawtime != 915151392000000000:
+                value = fromTimeStamp(filetimeToUtc(rawtime))
+            else:
+                # Temporarily just set to max time to signify a null date.
+                value = datetime.datetime.max
         return value
     elif _type == 0x0048:  # PtypGuid
         return bytesToGuid(value)
