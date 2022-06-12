@@ -55,7 +55,6 @@ def main() -> None:
             'customFilename': args.outName,
             'customPath': out,
             'html': args.html,
-            'ignoreRtfDeErrors': args.ignoreRtfDeErrors,
             'json': args.json,
             'pdf': args.pdf,
             'preparedHtml': args.preparedHtml,
@@ -66,11 +65,15 @@ def main() -> None:
             'zip': args.zip,
         }
 
+        openKwargs = {
+            'ignoreRtfDeErrors': args.ignoreRtfDeErrors,
+        }
+
         for x in args.msgs:
             try:
                 if args.progress:
                     print(f'Saving file "{x}"...')
-                with utils.openMsg(x) as msg:
+                with utils.openMsg(x, **openKwargs) as msg:
                     if args.dumpStdout:
                         print(msg.body)
                     else:

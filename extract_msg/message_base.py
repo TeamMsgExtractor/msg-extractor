@@ -252,6 +252,7 @@ class MessageBase(MSGFile):
                     if not self.__ignoreRtfDeErrors:
                         raise
                     logger.exception('Unhandled error happened while using RTFDE. You have choosen to ignore these errors.')
+                    self._deencapsultor = None
             else:
                 self._deencapsultor = None
             return self._deencapsultor
