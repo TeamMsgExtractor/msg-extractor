@@ -5,9 +5,11 @@ import logging
 import re
 
 import bs4
+import chardet
 import compressed_rtf
 import RTFDE
 
+from . import constants
 from .enums import RecipientType
 from .msg import MSGFile
 from .recipient import Recipient
@@ -47,12 +49,15 @@ class MessageBase(MSGFile):
             this.
         :param attachmentErrorBehavior: Optional, the behavior to use in the
             event of an error when parsing the attachments.
-        :param recipientSeparator: Optional, Separator string to use between
+        :param recipientSeparator: Optional, separator string to use between
             recipients.
+        :param ignoreRtfDeErrors: Optional, specifies that any errors that occur
+            from the usage of RTFDE should be ignored (default: False).
         """
         super().__init__(path, **kwargs)
         recipientSeparator = ';'
         self.__recipientSeparator = kwargs.get('recipientSeparator', ';')
+        self.__ignoreRtfDeErrors = kwargs.get('ignoreRtfDeErrors', False)
         # Initialize properties in the order that is least likely to cause bugs.
         # TODO have each function check for initialization of needed data so these
         # lines will be unnecessary.
@@ -202,14 +207,51 @@ class MessageBase(MSGFile):
         except AttributeError:
             if self.rtfBody:
                 # If there is an RTF body, we try to deencapsulate it.
+                body = self.rtfBody
+                # Sometimes you get MSG files whose RTF body has stuff
+                # *after* the body, and RTFDE can't handle that. Here is
+                # how we compensate.
+                while body and body[-1] != 125:
+                    body = body[:-1]
+
                 try:
-                    self._deencapsultor = RTFDE.DeEncapsulator(self.rtfBody)
+                    try:
+                        self._deencapsultor = RTFDE.DeEncapsulator(body)
+                    except UnicodeDecodeError:
+                        # There is a known issue that bytes are not well decoded
+                        # by RTFDE right now, so let's see if we can't manually
+                        # decode it and see if that will work.
+                        #
+                        # There is also the fact that it is decoded *at all*
+                        # before binary data is stripped out. This data should
+                        # almost certainly be stripped out, so let's log it and
+                        # then log if we removed any of them before trying this.
+                        logger.warn(f'RTFDE failed to decode rtfBody for message with subject "{self.subject}". Attempting to cut out unnecessary data and override decoding.')
+
+                        match = constants.RE_BIN.search(body)
+                        # Because we are going to be actively removing things,
+                        # we want to search the entire thing over again.
+                        while match:
+                            logger.info(f'Found match to badData starting at location {match.start()}. Replacing with nothing.')
+                            length = int(match.group(1))
+                            # Extract the entire binary section and replace it.
+                            body = body.replace(body[match.start():match.end() + length], b'', 1)
+                            match = constants.RE_BIN.search(body)
+
+                        self._deencapsultor = RTFDE.DeEncapsulator(body.decode(chardet.detect(body)['encoding']))
                     self._deencapsultor.deencapsulate()
                 except RTFDE.exceptions.NotEncapsulatedRtf as e:
                     logger.debug("RTF body is not encapsulated.")
                     self._deencapsultor = None
                 except RTFDE.exceptions.MalformedEncapsulatedRtf as _e:
                     logger.info("RTF body contains malformed encapsulated content.")
+                    self._deencapsultor = None
+                except Exception:
+                    # If we are just ignoring the errors, log it then set to
+                    # None. Otherwise, continue the exception.
+                    if not self.__ignoreRtfDeErrors:
+                        raise
+                    logger.exception('Unhandled error happened while using RTFDE. You have choosen to ignore these errors.')
                     self._deencapsultor = None
             else:
                 self._deencapsultor = None
@@ -290,12 +332,15 @@ class MessageBase(MSGFile):
                     self._htmlBody = self.deencapsulatedRtf.html.encode('utf-8')
                 else:
                     logger.info('Could not deencapsulate HTML from RTF body.')
-            elif self.body:
+            # This is it's own if statement so we can ensure it will generate
+            # even if there is an rtfBody, in the event it doesn't have HTML.
+            if not self._htmlBody and self.body:
                 # Convert the plain text body to html.
                 logger.info('HTML body was not found, attempting to generate from plain text body.')
-                correctedBody = html.escpae(self.body).replace('\r', '').replace('\n', '</br>')
+                correctedBody = html.escape(self.body).replace('\r', '').replace('\n', '</br>')
                 self._htmlBody = f'<html><body>{correctedBody}</body></head>'.encode('utf-8')
-            else:
+
+            if not self._htmlBody:
                 logger.info('HTML body could not be found nor generated.')
 
             return self._htmlBody

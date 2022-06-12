@@ -1,8 +1,11 @@
 import datetime
 import logging
 
+import olefile
+
 from . import constants
 from .utils import fromTimeStamp, filetimeToUtc, properHex
+
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -90,7 +93,7 @@ class FixedLengthProp(PropBase):
     """
 
     def __init__(self, string):
-        super(FixedLengthProp, self).__init__(string)
+        super().__init__(string)
         self.__value = self.parseType(self.type, constants.STFIX.unpack(string)[0])
 
     def parseType(self, _type, stream):
@@ -134,11 +137,16 @@ class FixedLengthProp(PropBase):
         elif _type == 0x0040:  # PtypTime
             try:
                 rawtime = constants.ST3.unpack(value)[0]
-                if rawtime != 915151392000000000:
-                    value = fromTimeStamp(filetimeToUtc(rawtime))
+                if rawtime < 116444736000000000:
+                    # We can't properly parse this with our current setup, so
+                    # we will rely on olefile to handle this one.
+                    value = olefile.olefile.filetime2datetime(rawtime)
                 else:
-                    # Temporarily just set to max time to signify a null date.
-                    value = datetime.datetime.max
+                    if rawtime != 915151392000000000:
+                        value = fromTimeStamp(filetimeToUtc(rawtime))
+                    else:
+                        # Temporarily just set to max time to signify a null date.
+                        value = datetime.datetime.max
             except Exception as e:
                 logger.exception(e)
                 logger.error(f'Timestamp value of {filetimeToUtc(constants.ST3.unpack(value)[0])} caused an exception. This was probably caused by the time stamp being too far in the future.')
@@ -162,7 +170,7 @@ class VariableLengthProp(PropBase):
     """
 
     def __init__(self, string):
-        super(VariableLengthProp, self).__init__(string)
+        super().__init__(string)
         self.__length, self.__reserved = constants.STVAR.unpack(string)
         if self.type == 0x001E:
             self.__realLength = self.__length - 1

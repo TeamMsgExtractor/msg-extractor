@@ -12,6 +12,7 @@ This module contains the set of extract_msg exceptions.
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
+
 class BadHtmlError(ValueError):
     """
     HTML failed to pass validation.
@@ -27,6 +28,12 @@ class ConversionError(Exception):
 class DataNotFoundError(Exception):
     """
     Requested stream type was unavailable.
+    """
+    pass
+
+class ExecutableNotFound(Exception):
+    """
+    Could not find the specified executable.
     """
     pass
 
@@ -75,5 +82,11 @@ class UnrecognizedMSGTypeError(TypeError):
     """
     An exception that is raised when the module cannot determine how to properly
     open a specific class of msg file.
+    """
+    pass
+
+class WKError(RuntimeError):
+    """
+    An error occured while running wkhtmltopdf.
     """
     pass

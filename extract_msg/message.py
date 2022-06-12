@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import pathlib
+import subprocess
 import zipfile
 
 import bs4
@@ -9,9 +10,9 @@ import bs4
 from imapclient.imapclient import decode_utf7
 
 from . import constants
-from .exceptions import DataNotFoundError, IncompatibleOptionsError
+from .exceptions import DataNotFoundError, IncompatibleOptionsError, WKError
 from .message_base import MessageBase
-from .utils import addNumToDir, addNumToZipDir, createZipOpen, injectHtmlHeader, injectRtfHeader, inputToBytes, inputToString, prepareFilename
+from .utils import addNumToDir, addNumToZipDir, createZipOpen, findWk, injectHtmlHeader, injectRtfHeader, inputToBytes, inputToString, prepareFilename
 
 
 logger = logging.getLogger(__name__)
@@ -109,12 +110,21 @@ class Message(MessageBase):
             usage, doing things like adding tags, injecting attachments, etc.
             This is useful for things like trying to convert the HTML body
             directly to PDF.
+        :param pdf: Used to enable saving the body as a PDF file.
+        :param wkPath: Used to manually specify the path of the wkhtmltopdf
+            executable. If not specified, the function will try to find it.
+            Useful if wkhtmltopdf is not on the path. If :param pdf: is False,
+            this argument is ignored.
+        :param wkOptions: Used to specify additional options to wkhtmltopdf.
+            this must be a list or list-like object composed of strings and
+            bytes.
         """
         # Move keyword arguments into variables.
         _json = kwargs.get('json', False)
         html = kwargs.get('html', False)
         rtf = kwargs.get('rtf', False)
         raw = kwargs.get('raw', False)
+        pdf = kwargs.get('pdf', False)
         allowFallback = kwargs.get('allowFallback', False)
         _zip = kwargs.get('zip')
         maxNameLength = kwargs.get('maxNameLength', 256)
@@ -128,6 +138,9 @@ class Message(MessageBase):
         attachOnly = kwargs.get('attachmentsOnly', False)
         # Track if we are skipping attachments.
         skipAttachments = kwargs.get('skipAttachments', False)
+
+        if pdf:
+            kwargs['preparedHtml'] = True
 
         # ZipFile handling.
         if _zip:
@@ -157,8 +170,8 @@ class Message(MessageBase):
         kwargs['customFilename'] = None
 
         # Check if incompatible options have been provided in any way.
-        if _json + html + rtf + raw + attachOnly > 1:
-            raise IncompatibleOptionsError('Only one of the following options may be used at a time: json, raw, html, rtf, attachmentsOnly.')
+        if _json + html + rtf + raw + attachOnly + pdf > 1:
+            raise IncompatibleOptionsError('Only one of the following options may be used at a time: json, raw, html, rtf, attachmentsOnly, pdf.')
 
         # TODO: insert code here that will handle checking all of the msg files to see if the path with overflow.
 
@@ -226,33 +239,38 @@ class Message(MessageBase):
 
         try:
             if not attachOnly:
-                # Check whether we should be using HTML or RTF.
-                fext = 'txt'
+                # Check what to save the body with.
+                fext = 'json' if _json else 'txt'
 
                 useHtml = False
+                usePdf = False
                 useRtf = False
                 if html:
                     if self.htmlBody:
                         useHtml = True
                         fext = 'html'
                     elif not allowFallback:
-                        raise DataNotFoundError('Could not find the htmlBody')
+                        raise DataNotFoundError('Could not find the htmlBody.')
 
-                if rtf or (html and not useHtml):
+                if pdf:
+                    if self.htmlBody:
+                        usePdf = True
+                        fext = 'pdf'
+                    elif not allowFallback:
+                        raise DataNotFoundError('Count not find the htmlBody to convert to pdf.')
+
+                if rtf or (html and not useHtml) or (pdf and not usePdf):
                     if self.rtfBody:
                         useRtf = True
                         fext = 'rtf'
                     elif not allowFallback:
-                        raise DataNotFoundError('Could not find the rtfBody')
+                        raise DataNotFoundError('Could not find the rtfBody.')
 
             if not skipAttachments:
                 # Save the attachments.
                 attachmentNames = [attachment.save(**kwargs) for attachment in self.attachments]
 
             if not attachOnly:
-                # Determine the extension to use for the body.
-                fext = 'json' if _json else fext
-
                 with _open(str(path / ('message.' + fext)), mode) as f:
                     if _json:
                         emailObj = json.loads(self.getJson())
@@ -262,6 +280,8 @@ class Message(MessageBase):
                         f.write(inputToBytes(json.dumps(emailObj), 'utf-8'))
                     elif useHtml:
                         f.write(self.getSaveHtmlBody(**kwargs))
+                    elif usePdf:
+                        f.write(self.getSavePdfBody(**kwargs))
                     elif useRtf:
                         f.write(self.getSaveRtfBody(**kwargs))
                     else:
@@ -351,6 +371,58 @@ class Message(MessageBase):
             return data
         else:
             return self.htmlBody
+
+    def getSavePdfBody(self, **kwargs) -> bytes:
+        """
+        Returns the PDF body that will be used in saving based on the arguments.
+
+        :param wkPath: Used to manually specify the path of the wkhtmltopdf
+            executable. If not specified, the function will try to find it.
+            Useful if wkhtmltopdf is not on the path. If :param pdf: is False,
+            this argument is ignored.
+        :param wkOptions: Used to specify additional options to wkhtmltopdf.
+            this must be a list or list-like object composed of strings and
+            bytes.
+        :param kwargs: Used to allow kwargs expansion in the save function.
+            Arguments absorbed by this are simply ignored.
+
+        :raises ExecutableNotFound: The wkhtmltopdf executable could not be
+            found.
+        :raises WKError: Something went wrong in creating the PDF body.
+        """
+        # Immediately try to find the executable.
+        wkPath = findWk(kwargs.get('wkPath'))
+
+        # First thing is first, we need to parse our wkOptions if
+        # they exist.
+        wkOptions = kwargs.get('wkOptions')
+        if wkOptions:
+            try:
+                # Try to convert to a list, whatever it is, and
+                # fail if it is not possible.
+                parsedWkOptions = [*wkOptions]
+            except TypeError:
+                raise TypeError(':param wkOptions: must be an iterable, not {type(wkOptions)}.')
+        else:
+            parsedWkOptions = []
+
+        # Confirm that all of our options we now have are either
+        # strings or bytes.
+        if not all(isinstance(option, (str, bytes)) for option in parsedWkOptions):
+            raise TypeError(':param wkOptions: must be an iterable of strings and bytes.')
+
+        # We call the program to convert the html, but give tell it
+        # the data will go in and come out through stdin and stdout,
+        # respectively. This way we don't have to write temporary
+        # files to the disk. We also ask that it be quiet about it.
+        process = subprocess.Popen([wkPath, *parsedWkOptions, '-', '-'], shell = True, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+        # Give the program the data and wait for the program to
+        # finish.
+        output = process.communicate(self.getSaveHtmlBody(**kwargs))
+        if process.returncode != 0:
+            raise WKError(output[1].decode('utf-8'))
+
+        return output[0]
 
     def getSaveRtfBody(self, **kwargs) -> bytes:
         """

@@ -15,7 +15,7 @@ class Recipient:
     """
     Contains the data of one of the recipients in an msg file.
     """
-    
+
     def __init__(self, _dir, msg):
         self.__msg = msg # Allows calls to original msg file.
         self.__dir = _dir
