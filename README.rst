@@ -92,7 +92,7 @@ refer to the usage information provided from the program's help dialog:
     --out-name OUTNAME    Name to be used with saving the file output. Cannot be used if you are saving more than one file.
     --glob, --wildcard    Interpret all paths as having wildcards. Incompatible with --out-name.
     --ignore-rtfde        Ignores all errors thrown from RTFDE when trying to save. Useful for allowing fallback to continue when an exception happens.
---progress            Shows what file the program is currently working on during it's progress.
+    --progress            Shows what file the program is currently working on during it's progress.
 
 **To use this in your own script**, start by using:
 
