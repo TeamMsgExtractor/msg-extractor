@@ -4,6 +4,8 @@
 * Removed per-file output names as they weren't actually functional and currently add too much complexity. If anyone knows a way to handle it directly with `argparse` let me know.
 * Added `chardet` as a requirement to help work around an error in `RTFDE`.
 * Looking into some of the unsupported encodings revealed at least one to be supported, but was missed due to the name not being registered as an alias.
+* Fixed a bug that prevented an HTML body from the plain text body when it couldn't be generated any other way. This happened when the RTF body existed and the plain text body existed, but the RTF body was not encapsulated HTML.
+* Due to several of the issues with RTFDE preventing saving due to exceptions, the option `ignoreRtfDeErrors` has been added to the `MessageBase` class and `openMsg`. It can also be enabled from the command line with `--ignore-rtfde`. This option will make it so all exceptions will be silenced from the module.
 
 **v0.33.0**
 * [[TeamMsgExtractor #212](https://github.com/TeamMsgExtractor/msg-extractor/issues/212)] Added support for Task objects.

@@ -246,6 +246,9 @@ def getCommandArgs(args):
     # --glob
     inputFormat.add_argument('--glob', '--wildcard', dest='glob', action='store_true',
                         help='Interpret all paths as having wildcards. Incompatible with --out-name.')
+    # --ignore-rtfde
+    parser.add_argument('--ignore-rtfde', dest='ignoreRtfDeErrors', action='store_true',
+                        help='Ignores all errors thrown from RTFDE when trying to save. Useful for allowing fallback to continue when an exception happens.')
     # --progress
     parser.add_argument('--progress', dest='progress', action='store_true',
                         help='Shows what file the program is currently working on during it\'s progress.')
@@ -640,6 +643,8 @@ def openMsg(path, **kwargs):
         of an error when parsing the attachments.
     :param recipientSeparator: Optional, Separator string to use between
         recipients.
+    :param ignoreRtfDeErrors: Optional, specifies that any errors that occur
+        from the usage of RTFDE should be ignored (default: False).
 
     If :param strict: is set to `True`, this function will raise an exception
     when it cannot identify what MSGFile derivitive to use. Otherwise, it will

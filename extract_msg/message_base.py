@@ -49,12 +49,15 @@ class MessageBase(MSGFile):
             this.
         :param attachmentErrorBehavior: Optional, the behavior to use in the
             event of an error when parsing the attachments.
-        :param recipientSeparator: Optional, Separator string to use between
+        :param recipientSeparator: Optional, separator string to use between
             recipients.
+        :param ignoreRtfDeErrors: Optional, specifies that any errors that occur
+            from the usage of RTFDE should be ignored (default: False).
         """
         super().__init__(path, **kwargs)
         recipientSeparator = ';'
         self.__recipientSeparator = kwargs.get('recipientSeparator', ';')
+        self.__ignoreRtfDeErrors = kwargs.get('ignoreRtfDeErrors', False)
         # Initialize properties in the order that is least likely to cause bugs.
         # TODO have each function check for initialization of needed data so these
         # lines will be unnecessary.
@@ -243,6 +246,12 @@ class MessageBase(MSGFile):
                 except RTFDE.exceptions.MalformedEncapsulatedRtf as _e:
                     logger.info("RTF body contains malformed encapsulated content.")
                     self._deencapsultor = None
+                except Exception:
+                    # If we are just ignoring the errors, log it then set to
+                    # None. Otherwise, continue the exception.
+                    if not self.__ignoreRtfDeErrors:
+                        raise
+                    logger.exception('Unhandled error happened while using RTFDE. You have choosen to ignore these errors.')
             else:
                 self._deencapsultor = None
             return self._deencapsultor
@@ -322,12 +331,15 @@ class MessageBase(MSGFile):
                     self._htmlBody = self.deencapsulatedRtf.html.encode('utf-8')
                 else:
                     logger.info('Could not deencapsulate HTML from RTF body.')
-            elif self.body:
+            # This is it's own if statement so we can ensure it will generate
+            # even if there is an rtfBody, in the event it doesn't have HTML.
+            if not self._htmlBody and self.body:
                 # Convert the plain text body to html.
                 logger.info('HTML body was not found, attempting to generate from plain text body.')
-                correctedBody = html.escpae(self.body).replace('\r', '').replace('\n', '</br>')
+                correctedBody = html.escape(self.body).replace('\r', '').replace('\n', '</br>')
                 self._htmlBody = f'<html><body>{correctedBody}</body></head>'.encode('utf-8')
-            else:
+
+            if not self._htmlBody:
                 logger.info('HTML body could not be found nor generated.')
 
             return self._htmlBody

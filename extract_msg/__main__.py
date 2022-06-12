@@ -55,6 +55,7 @@ def main() -> None:
             'customFilename': args.outName,
             'customPath': out,
             'html': args.html,
+            'ignoreRtfDeErrors': args.ignoreRtfDeErrors,
             'json': args.json,
             'pdf': args.pdf,
             'preparedHtml': args.preparedHtml,
