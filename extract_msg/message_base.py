@@ -9,6 +9,7 @@ import chardet
 import compressed_rtf
 import RTFDE
 
+from . import constants
 from .enums import RecipientType
 from .msg import MSGFile
 from .recipient import Recipient
@@ -203,14 +204,38 @@ class MessageBase(MSGFile):
         except AttributeError:
             if self.rtfBody:
                 # If there is an RTF body, we try to deencapsulate it.
+                body = self.rtfBody
+                # Sometimes you get MSG files whose RTF body has stuff
+                # *after* the body, and RTFDE can't handle that. Here is
+                # how we compensate.
+                while body and body[-1] != 125:
+                    body = body[:-1]
+
                 try:
                     try:
-                        self._deencapsultor = RTFDE.DeEncapsulator(self.rtfBody)
+                        self._deencapsultor = RTFDE.DeEncapsulator(body)
                     except UnicodeDecodeError:
                         # There is a known issue that bytes are not well decoded
                         # by RTFDE right now, so let's see if we can't manually
                         # decode it and see if that will work.
-                        self._deencapsultor = RTFDE.DeEncapsulator(self.rtfBody.decode(chardet.detect(self.rtfBody)['encoding']))
+                        #
+                        # There is also the fact that it is decoded *at all*
+                        # before binary data is stripped out. This data should
+                        # almost certainly be stripped out, so let's log it and
+                        # then log if we removed any of them before trying this.
+                        logger.warn(f'RTFDE failed to decode rtfBody for message with subject "{self.subject}". Attempting to cut out unnecessary data and override decoding.')
+
+                        match = constants.RE_BIN.search(body)
+                        # Because we are going to be actively removing things,
+                        # we want to search the entire thing over again.
+                        while match:
+                            logger.info(f'Found match to badData starting at location {match.start()}. Replacing with nothing.')
+                            length = int(match.group(1))
+                            # Extract the entire binary section and replace it.
+                            body = body.replace(body[match.start():match.end() + length], b'', 1)
+                            match = constants.RE_BIN.search(body)
+
+                        self._deencapsultor = RTFDE.DeEncapsulator(body.decode(chardet.detect(body)['encoding']))
                     self._deencapsultor.deencapsulate()
                 except RTFDE.exceptions.NotEncapsulatedRtf as e:
                     logger.debug("RTF body is not encapsulated.")

@@ -38,7 +38,9 @@ RE_RTF_ENC_BODY_UGLY = re.compile(br'<body[^>]*>[^}]*?\}')
 RE_RTF_BODY_FALLBACK_FS = re.compile(br'\\fs[0-9]*[^a-zA-Z]')
 RE_RTF_BODY_FALLBACK_F = re.compile(br'\\f[0-9]*[^a-zA-Z]')
 RE_RTF_FALLBACK_PLAIN = re.compile(br'\\plain[^a-zA-Z0-9]')
-
+# This is used in the workaround for decoding issues in RTFDE. We find `\bin`
+# sections and try to remove all of them to help with the decoding.
+RE_BIN = re.compile(br'\\bin([0-9]+) ?')
 
 # EntryID UID Types.
 EUID_PUBLIC_MESSAGE_STORE = b'\x1A\x44\x73\x90\xAA\x66\x11\xCD\x9B\xC8\x00\xAA\x00\x2F\xC4\x5A'
@@ -318,11 +320,11 @@ CODE_PAGES = {
     437: 'IBM437', # OEM United States
     500: 'IBM500', # IBM EBCDIC International
     708: 'ASMO-708', # Arabic (ASMO 708)
-    # UNSUPPORTED
+    # UNSUPPORTED.
     709: '', # Arabic (ASMO-449+, BCON V4)
-    # UNSUPPORTED
+    # UNSUPPORTED.
     710: '', # Arabic - Transparent Arabic
-    # UNSUPPORTED
+    # UNSUPPORTED.
     720: 'DOS-720', # Arabic (Transparent ASMO); Arabic (DOS)
     737: 'cp737', # OEM Greek (formerly 437G); Greek (DOS)
     775: 'ibm775', # OEM Baltic; Baltic (DOS)
@@ -330,8 +332,7 @@ CODE_PAGES = {
     852: 'ibm852', # OEM Latin 2; Central European (DOS)
     855: 'IBM855', # OEM Cyrillic (primarily Russian)
     857: 'ibm857', # OEM Turkish; Turkish (DOS)
-    # UNSUPPORTED
-    858: 'IBM00858', # OEM Multilingual Latin 1 + Euro symbol
+    858: 'cp858', # OEM Multilingual Latin 1 + Euro symbol
     860: 'IBM860', # OEM Portuguese; Portuguese (DOS)
     861: 'ibm861', # OEM Icelandic; Icelandic (DOS)
     862: 'cp862', # OEM Hebrew; Hebrew (DOS)
@@ -341,7 +342,7 @@ CODE_PAGES = {
     866: 'cp866', # OEM Russian; Cyrillic (DOS)
     869: 'ibm869', # OEM Modern Greek; Greek, Modern (DOS)
     870: 'cp870', # IBM870 # IBM EBCDIC Multilingual/ROECE (Latin 2); IBM EBCDIC Multilingual Latin 2
-    # UNSUPPORTED
+    # UNSUPPORTED.
     874: 'windows-874', # ANSI/OEM Thai (ISO 8859-11); Thai (Windows)
     875: 'cp875', # IBM EBCDIC Greek Modern
     932: 'shift_jis', # ANSI/OEM Japanese; Japanese (Shift-JIS)
@@ -374,59 +375,59 @@ CODE_PAGES = {
     1361: 'Johab', # Korean (Johab)
     10000: 'macintosh', # MAC Roman; Western European (Mac)
     10001: 'x-mac-japanese', # Japanese (Mac)
-    # UNSUPPORTED
+    # UNSUPPORTED.
     10002: 'x-mac-chinesetrad', # MAC Traditional Chinese (Big5); Chinese Traditional (Mac)
     10003: 'x-mac-korean', # Korean (Mac)
-    # UNSUPPORTED
+    # UNSUPPORTED.
     10004: 'x-mac-arabic', # Arabic (Mac)
-    # UNSUPPORTED
+    # UNSUPPORTED.
     10005: 'x-mac-hebrew', # Hebrew (Mac)
-    # UNSUPPORTED
+    # UNSUPPORTED.
     10006: 'x-mac-greek', # Greek (Mac)
-    # UNSUPPORTED
+    # UNSUPPORTED.
     10007: 'x-mac-cyrillic', # Cyrillic (Mac)
-    # UNSUPPORTED
+    # UNSUPPORTED.
     10008: 'x-mac-chinesesimp', # MAC Simplified Chinese (GB 2312); Chinese Simplified (Mac)
-    # UNSUPPORTED
+    # UNSUPPORTED.
     10010: 'x-mac-romanian', # Romanian (Mac)
-    # UNSUPPORTED
+    # UNSUPPORTED.
     10017: 'x-mac-ukrainian', # Ukrainian (Mac)
-    # UNSUPPORTED
+    # UNSUPPORTED.
     10021: 'x-mac-thai', # Thai (Mac)
-    # UNSUPPORTED
+    # UNSUPPORTED.
     10029: 'x-mac-ce', # MAC Latin 2; Central European (Mac)
-    # UNSUPPORTED
+    # UNSUPPORTED.
     10079: 'x-mac-icelandic', # Icelandic (Mac)
-    # UNSUPPORTED
+    # UNSUPPORTED.
     10081: 'x-mac-turkish', # Turkish (Mac)
-    # UNSUPPORTED
+    # UNSUPPORTED.
     10082: 'x-mac-croatian', # Croatian (Mac)
     12000: 'utf-32', # Unicode UTF-32, little endian byte order; available only to managed applications
     12001: 'utf-32BE', # Unicode UTF-32, big endian byte order; available only to managed applications
-    # UNSUPPORTED
+    # UNSUPPORTED.
     20000: 'x-Chinese_CNS', # CNS Taiwan; Chinese Traditional (CNS)
-    # UNSUPPORTED
+    # UNSUPPORTED.
     20001: 'x-cp20001', # TCA Taiwan
-    # UNSUPPORTED
+    # UNSUPPORTED.
     20002: 'x_Chinese-Eten', # Eten Taiwan; Chinese Traditional (Eten)
-    # UNSUPPORTED
+    # UNSUPPORTED.
     20003: 'x-cp20003', # IBM5550 Taiwan
-    # UNSUPPORTED
+    # UNSUPPORTED.
     20004: 'x-cp20004', # TeleText Taiwan
-    # UNSUPPORTED
+    # UNSUPPORTED.
     20005: 'x-cp20005', # Wang Taiwan
-    # UNSUPPORTED
+    # UNSUPPORTED.
     20105: 'x-IA5', # IA5 (IRV International Alphabet No. 5, 7-bit); Western European (IA5)
-    # UNSUPPORTED
+    # UNSUPPORTED.
     20106: 'x-IA5-German', # IA5 German (7-bit)
-    # UNSUPPORTED
+    # UNSUPPORTED.
     20107: 'x-IA5-Swedish', # IA5 Swedish (7-bit)
-    # UNSUPPORTED
+    # UNSUPPORTED.
     20108: 'x-IA5-Norwegian', # IA5 Norwegian (7-bit)
     20127: 'us-ascii', # US-ASCII (7-bit)
-    # UNSUPPORTED
+    # UNSUPPORTED.
     20261: 'x-cp20261', # T.61
-    # UNSUPPORTED
+    # UNSUPPORTED.
     20269: 'x-cp20269', # ISO 6937 Non-Spacing Accent
     20273: 'IBM273', # IBM EBCDIC Germany
     20277: 'cp277', # IBM EBCDIC Denmark-Norway
@@ -437,26 +438,26 @@ CODE_PAGES = {
     20290: 'cp290', # IBM EBCDIC Japanese Katakana Extended
     20297: 'cp297', # IBM EBCDIC France
     20420: 'cp420', # IBM EBCDIC Arabic
-    # UNSUPPORTED
+    # UNSUPPORTED.
     20423: 'IBM423', # IBM EBCDIC Greek
     20424: 'IBM424', # IBM EBCDIC Hebrew
     20833: 'cp833', # IBM EBCDIC Korean Extended
     20838: 'cp838', # IBM EBCDIC Thai
     20866: 'koi8-r', # Russian (KOI8-R); Cyrillic (KOI8-R)
     20871: 'cp871', # IBM EBCDIC Icelandic
-    # UNSUPPORTED
+    # UNSUPPORTED.
     20880: 'IBM880', # IBM EBCDIC Cyrillic Russian
-    # UNSUPPORTED
+    # UNSUPPORTED.
     20905: 'IBM905', # IBM EBCDIC Turkish
-    # UNSUPPORTED
+    # UNSUPPORTED.
     20924: 'IBM00924', # IBM EBCDIC Latin 1/Open System (1047 + Euro symbol)
     20932: 'EUC-JP', # Japanese (JIS 0208-1990 and 0212-1990)
-    # UNSUPPORTED
+    # UNSUPPORTED.
     20936: 'x-cp20936', # Simplified Chinese (GB2312); Chinese Simplified (GB2312-80)
-    # UNSUPPORTED
+    # UNSUPPORTED.
     20949: 'x-cp20949', # Korean Wansung
     21025: 'cp1025', # IBM EBCDIC Cyrillic Serbian-Bulgarian
-    # UNSUPPORTED
+    # UNSUPPORTED.
     21027: '', # (deprecated)
     21866: 'koi8-u', # Ukrainian (KOI8-U); Cyrillic (KOI8-U)
     28591: 'iso-8859-1', # ISO 8859-1 Latin 1; Western European (ISO)
@@ -470,58 +471,58 @@ CODE_PAGES = {
     28599: 'iso-8859-9', # ISO 8859-9 Turkish
     28603: 'iso-8859-13', # ISO 8859-13 Estonian
     28605: 'iso-8859-15', # ISO 8859-15 Latin 9
-    # UNSUPPORTED
+    # UNSUPPORTED.
     29001: 'x-Europa', # Europa 3
-    # UNSUPPORTED
+    # UNSUPPORTED.
     38598: 'iso-8859-8-i', # ISO 8859-8 Hebrew; Hebrew (ISO-Logical)
     50220: 'iso-2022-jp', # ISO 2022 Japanese with no halfwidth Katakana; Japanese (JIS)
     50221: 'csISO2022JP', # ISO 2022 Japanese with halfwidth Katakana; Japanese (JIS-Allow 1 byte Kana)
     50222: 'iso-2022-jp', # ISO 2022 Japanese JIS X 0201-1989; Japanese (JIS-Allow 1 byte Kana - SO/SI)
     50225: 'iso-2022-kr', # ISO 2022 Korean
-    # UNSUPPORTED
+    # UNSUPPORTED.
     50227: 'x-cp50227', # ISO 2022 Simplified Chinese; Chinese Simplified (ISO 2022)
-    # UNSUPPORTED
+    # UNSUPPORTED.
     50229: '', # ISO 2022 Traditional Chinese
-    # UNSUPPORTED
+    # UNSUPPORTED.
     50930: '', # EBCDIC Japanese (Katakana) Extended
-    # UNSUPPORTED
+    # UNSUPPORTED.
     50931: '', # EBCDIC US-Canada and Japanese
-    # UNSUPPORTED
+    # UNSUPPORTED.
     50933: '', # EBCDIC Korean Extended and Korean
-    # UNSUPPORTED
+    # UNSUPPORTED.
     50935: '', # EBCDIC Simplified Chinese Extended and Simplified Chinese
-    # UNSUPPORTED
+    # UNSUPPORTED.
     50936: '', # EBCDIC Simplified Chinese
-    # UNSUPPORTED
+    # UNSUPPORTED.
     50937: '', # EBCDIC US-Canada and Traditional Chinese
-    # UNSUPPORTED
+    # UNSUPPORTED.
     50939: '', # EBCDIC Japanese (Latin) Extended and Japanese
     51932: 'euc-jp', # EUC Japanese
     51936: 'EUC-CN', # EUC Simplified Chinese; Chinese Simplified (EUC)
     51949: 'euc-kr', # EUC Korean
-    # UNSUPPORTED
+    # UNSUPPORTED.
     51950: '', # EUC Traditional Chinese
     52936: 'hz-gb-2312', # HZ-GB2312 Simplified Chinese; Chinese Simplified (HZ)
     54936: 'GB18030', # Windows XP and later: GB18030 Simplified Chinese (4 byte); Chinese Simplified (GB18030)
-    # UNSUPPORTED
+    # UNSUPPORTED.
     57002: 'x-iscii-de', # ISCII Devanagari
-    # UNSUPPORTED
+    # UNSUPPORTED.
     57003: 'x-iscii-be', # ISCII Bangla
-    # UNSUPPORTED
+    # UNSUPPORTED.
     57004: 'x-iscii-ta', # ISCII Tamil
-    # UNSUPPORTED
+    # UNSUPPORTED.
     57005: 'x-iscii-te', # ISCII Telugu
-    # UNSUPPORTED
+    # UNSUPPORTED.
     57006: 'x-iscii-as', # ISCII Assamese
-    # UNSUPPORTED
+    # UNSUPPORTED.
     57007: 'x-iscii-or', # ISCII Odia
-    # UNSUPPORTED
+    # UNSUPPORTED.
     57008: 'x-iscii-ka', # ISCII Kannada
-    # UNSUPPORTED
+    # UNSUPPORTED.
     57009: 'x-iscii-ma', # ISCII Malayalam
-    # UNSUPPORTED
+    # UNSUPPORTED.
     57010: 'x-iscii-gu', # ISCII Gujarati
-    # UNSUPPORTED
+    # UNSUPPORTED.
     57011: 'x-iscii-pa', # ISCII Punjabi
     65000: 'utf-7', # Unicode (UTF-7)
     65001: 'utf-8', # Unicode (UTF-8)

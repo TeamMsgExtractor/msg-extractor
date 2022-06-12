@@ -396,8 +396,12 @@ def injectHtmlHeader(msgFile, prepared : bool = False) -> bytes:
                 # insert it.
                 if correctedHtml.find('head'):
                     correctedHtml.find('head').insert_after(bodyTag)
-                else:
+                elif correctedHtml.find('footer'):
                     correctedHtml.find('footer').insert_before(bodyTag)
+                else:
+                    # Neither a head or a body are present, so just append it to
+                    # the main tag.
+                    htmlTag.append(bodyTag)
             else:
                 # If there is no <html>, <head>, <footer>, or <body> tag, then
                 # we just add the tags to the beginning and end of the data and

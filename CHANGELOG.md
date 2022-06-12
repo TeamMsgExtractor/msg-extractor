@@ -3,6 +3,7 @@
 * Added `--glob` option for allowing you to provide an msg path that will evaluate wildcards.
 * Removed per-file output names as they weren't actually functional and currently add too much complexity. If anyone knows a way to handle it directly with `argparse` let me know.
 * Added `chardet` as a requirement to help work around an error in `RTFDE`.
+* Looking into some of the unsupported encodings revealed at least one to be supported, but was missed due to the name not being registered as an alias.
 
 **v0.33.0**
 * [[TeamMsgExtractor #212](https://github.com/TeamMsgExtractor/msg-extractor/issues/212)] Added support for Task objects.
