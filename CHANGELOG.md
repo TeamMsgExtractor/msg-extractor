@@ -1,3 +1,8 @@
+**0.34.1**
+* Added convenience function `utils.openMsgBulk` (imported to `extract_msg` namespace) for opening message paths with wildcards. Allows you to open several messages with one function, returning a list of the opened messages.
+* Added convenience function `utils.unwrapMsg` which recurses through an `MSGFile` and it's attachments, creating a series of linear structures stored in a dictionary. Useful for analyzing, saving, etc. all messages and attachments down through the structure without having to recurse yourself.
+* Fixed an issue that would cause signed attachments to not properly generate.
+
 **v0.34.0**
 * [[TeamMsgExtractor #102](https://github.com/TeamMsgExtractor/msg-extractor/issues/102)] Added the option to directly save body to pdf. This requires that you either have wkhtmltopdf on your path or that you provide a path directly to it in order to work. Simply pass `pdf = True` to save to turn it on. More details in the doc for the save function. You can also do this from the command line using the `--pdf` option, incompatible with other body types.
 * Added `--glob` option for allowing you to provide an msg path that will evaluate wildcards.

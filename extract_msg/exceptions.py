@@ -60,6 +60,13 @@ class InvalidVersionError(Exception):
     """
     pass
 
+class StandardViolationError(Exception):
+    """
+    A critical violation of the MSG standards was detected and could not be
+    recovered from. Recoverable violations will result in log messages instead.
+    """
+    pass
+
 class UnknownCodepageError(Exception):
     """
     The codepage provided was not one we know of.

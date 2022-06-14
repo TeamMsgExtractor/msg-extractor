@@ -5,6 +5,7 @@ import re
 
 import mailbits
 
+from .exceptions import StandardViolationError
 from .message_base import MessageBase
 from .signed_attachment import SignedAttachment
 from .utils import inputToString
@@ -68,25 +69,23 @@ class MessageSignedBase(MessageBase):
     def attachments(self) -> list:
         """
         Returns a list of all attachments.
+
+        :raises StandardViolationError: The standard for signed messages was
+            blatantly violated.
         """
         try:
             return self._sAttachments
         except AttributeError:
             atts = super().attachments
+
+            if len(atts) != 1:
+                raise StandardViolationError('Signed messages without exactly 1 (regular) attachment constitue a violation of the standard.')
+
             self._sAttachments = []
             self._signedBody = None
             self._signedHtmlBody = None
-            if len(atts) > 1:
-                logger.warning('Found more than one regular attachment when parsing signed message.')
-            elif len(atts) == 0:
-                logger.warning('Failed to access any attachments from the signed message.')
-                return self._sAttachments
 
-            try:
-                mainAttachment = next(att for att in atts if hasattr(att, 'getFilename') and att.getFilename() == 'smime.p7m')
-            except StopIteration:
-                logger.warning('Failed to find signed attachment.')
-                return self._sAttachments
+            mainAttachment = atts[0]
 
             # If we are here, we should have the attachment. So now we need to
             # try to parse and unwrap the data.
@@ -103,7 +102,7 @@ class MessageSignedBase(MessageBase):
                     else:
                         output.append(part)
 
-            # At this point, `output` has out parts.
+            # At this point, `output` has our parts.
             for part in output:
                 # Get the mime type.
                 mime = part['headers']['content-type']['content_type']

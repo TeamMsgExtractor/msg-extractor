@@ -27,8 +27,8 @@ https://github.com/TeamMsgExtractor/msg-extractor
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 __author__ = 'Destiny Peterson & Matthew Walker'
-__date__ = '2022-06-11'
-__version__ = '0.34.0'
+__date__ = '2022-06-14'
+__version__ = '0.34.1'
 
 import logging
 
@@ -46,4 +46,4 @@ from .prop import createProp
 from .properties import Properties
 from .recipient import Recipient
 from .task import Task
-from .utils import openMsg, properHex
+from .utils import openMsg, openMsgBulk, properHex
