@@ -22,8 +22,10 @@ import bs4
 import tzlocal
 
 from html import escape as htmlEscape
+from typing import Dict, List, Tuple, Union
 
 from . import constants
+from .enums import AttachmentType
 from .exceptions import BadHtmlError, ConversionError, IncompatibleOptionsError, InvaildPropertyIdError, UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError, UnsupportedMSGTypeError
 
 
@@ -45,6 +47,7 @@ def addNumToDir(dirName : pathlib.Path) -> pathlib.Path:
             pass
     return None
 
+
 def addNumToZipDir(dirName : pathlib.Path, _zip):
     """
     Attempt to create the directory with a '(n)' appended.
@@ -55,6 +58,7 @@ def addNumToZipDir(dirName : pathlib.Path, _zip):
         if not any(x.startswith(pathCompare) for x in _zip.namelist()):
             return newDirName
     return None
+
 
 def bitwiseAdjust(inp : int, mask : int) -> int:
     """
@@ -74,6 +78,7 @@ def bitwiseAdjust(inp : int, mask : int) -> int:
         raise ValueError('Mask MUST be greater than 0')
     return inp >> bin(mask)[::-1].index('1')
 
+
 def bitwiseAdjustedAnd(inp : int, mask : int) -> int:
     """
     Preforms the bitwise AND operation between :param inp: and :param mask: and
@@ -85,12 +90,14 @@ def bitwiseAdjustedAnd(inp : int, mask : int) -> int:
         raise ValueError('Mask MUST be greater than 0')
     return (inp & mask) >> bin(mask)[::-1].index('1')
 
+
 def bytesToGuid(bytesInput : bytes) -> str:
     """
     Converts a bytes instance to a GUID.
     """
     guidVals = constants.ST_GUID.unpack(bytesInput)
     return f'{{{guidVals[0]:08X}-{guidVals[1]:04X}-{guidVals[2]:04X}-{guidVals[3][:2].hex().upper()}-{guidVals[3][2:].hex().upper()}}}'
+
 
 def ceilDiv(n : int, d : int) -> int:
     """
@@ -101,6 +108,7 @@ def ceilDiv(n : int, d : int) -> int:
     outside the precision range of float.
     """
     return -(n // -d)
+
 
 def createZipOpen(func):
     """
@@ -114,6 +122,7 @@ def createZipOpen(func):
         return func(name, mode, *args, **kwargs)
 
     return _open
+
 
 def divide(string, length : int) -> list:
     """
@@ -134,6 +143,7 @@ def divide(string, length : int) -> list:
     ['Hello', ' Worl', 'd!']
     """
     return [string[length * x:length * (x + 1)] for x in range(int(ceilDiv(len(string), length)))]
+
 
 def findWk(path = None):
     """
@@ -158,11 +168,13 @@ def findWk(path = None):
 
     raise ExecutableNotFound('Could not find wkhtmltopdf.')
 
+
 def fromTimeStamp(stamp) -> datetime.datetime:
     """
     Returns a datetime from the UTC timestamp given the current timezone.
     """
     return datetime.datetime.fromtimestamp(stamp, tzlocal.get_localzone())
+
 
 def getCommandArgs(args):
     """
@@ -308,6 +320,7 @@ def getCommandArgs(args):
 
     return options
 
+
 def getEncodingName(codepage : int) -> str:
     """
     Returns the name of the encoding with the specified codepage.
@@ -323,14 +336,17 @@ def getEncodingName(codepage : int) -> str:
     except LookupError:
         raise UnsupportedEncodingError(f'The codepage {codepage} ({constants.CODE_PAGES[codepage]}) is not currently supported by your version of Python.')
 
+
 def getFullClassName(inp):
     return inp.__class__.__module__ + '.' + inp.__class__.__name__
+
 
 def hasLen(obj) -> bool:
     """
     Checks if :param obj: has a __len__ attribute.
     """
     return hasattr(obj, '__len__')
+
 
 def injectHtmlHeader(msgFile, prepared : bool = False) -> bytes:
     """
@@ -357,7 +373,6 @@ def injectHtmlHeader(msgFile, prepared : bool = False) -> bytes:
         # If the body is not valid or not found, raise an AttributeError.
         if not body:
             raise AttributeError('Cannot find a prepared HTML body to inject into.')
-
     else:
         body = msgFile.htmlBody
 
@@ -453,6 +468,7 @@ def injectHtmlHeader(msgFile, prepared : bool = False) -> bytes:
     # Use the previously defined function to inject the HTML header.
     return constants.RE_HTML_BODY_START.sub(replace, body, 1)
 
+
 def injectRtfHeader(msgFile) -> bytes:
     """
     Returns the RTF body from the MSG file (will check that it has one) with the
@@ -533,6 +549,7 @@ def injectRtfHeader(msgFile) -> bytes:
 
     raise RuntimeError('All injection attempts failed. Please report this to the developer.')
 
+
 def inputToBytes(stringInputVar, encoding) -> bytes:
     """
     Converts the input into bytes.
@@ -548,6 +565,7 @@ def inputToBytes(stringInputVar, encoding) -> bytes:
     else:
         raise ConversionError('Cannot convert to bytes.')
 
+
 def inputToMsgpath(inp) -> list:
     """
     Converts the input into an msg path.
@@ -556,6 +574,7 @@ def inputToMsgpath(inp) -> list:
         inp = '/'.join(inp)
     ret = inputToString(inp, 'utf-8').replace('\\', '/').split('/')
     return ret if ret[0] != '' else []
+
 
 def inputToString(bytesInputVar, encoding) -> str:
     """
@@ -572,6 +591,7 @@ def inputToString(bytesInputVar, encoding) -> str:
     else:
         raise ConversionError('Cannot convert to str type.')
 
+
 def isEncapsulatedRtf(inp : bytes) -> bool:
     """
     Currently the destection is made to be *extremly* basic, but this will work
@@ -580,11 +600,13 @@ def isEncapsulatedRtf(inp : bytes) -> bool:
     """
     return b'\\fromhtml' in inp
 
+
 def isEmptyString(inp : str) -> bool:
     """
     Returns true if the input is None or is an Empty string.
     """
     return (inp == '' or inp is None)
+
 
 def knownMsgClass(classType : str) -> bool:
     """
@@ -601,11 +623,13 @@ def knownMsgClass(classType : str) -> bool:
 
     return False
 
+
 def filetimeToUtc(inp : int) -> float:
     """
     Converts a FILETIME into a unix timestamp.
     """
     return (inp - 116444736000000000) / 10000000.0
+
 
 def msgpathToString(inp) -> str:
     """
@@ -618,6 +642,7 @@ def msgpathToString(inp) -> str:
         inp = '/'.join(inp)
     inp.replace('\\', '/')
     return inp
+
 
 def openMsg(path, **kwargs):
     """
@@ -690,6 +715,31 @@ def openMsg(path, **kwargs):
     else:
         logger.error(f'Could not recognize msg class type "{msg.classType}". This most likely means it hasn\'t been implemented yet, and you should ask the developers to add support for it.')
         return msg
+
+
+def openMsgBulk(path, **kwargs) -> Union[List, Tuple]:
+    """
+    Takes the same arguments as openMsg, but opens a collection of msg files
+    based on a wild card. Returns a list if successful, otherwise returns a
+    tuple.
+
+    :param ignoreFailures: If this is True, will return a list of all successful
+        files, ignoring any failures. Otherwise, will close all that
+        successfully opened, and return a tuple of the exception and the path of
+        the file that failed.
+    """
+    files = []
+    for x in glob.glob(path):
+        try:
+            files.append(openMsg(x, **kwargs))
+        except Exception as e:
+            if not kwargs.get('ignoreFailures', False):
+                for msg in files:
+                    msg.close()
+                return (e, x)
+
+    return files
+
 
 def parseType(_type : int, stream, encoding, extras):
     """
@@ -825,6 +875,7 @@ def parseType(_type : int, stream, encoding, extras):
             raise NotImplementedError(f'Parsing for type {_type} has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType {_type}".')
     return value
 
+
 def prepareFilename(filename) -> str:
     """
     Adjusts :param filename: so that it can succesfully be used as an actual
@@ -832,6 +883,7 @@ def prepareFilename(filename) -> str:
     """
     # I would use re here, but it tested to be slightly slower than this.
     return ''.join(i for i in filename if i not in r'\/:*?"<>|' + '\x00')
+
 
 def properHex(inp, length : int = 0) -> str:
     """
@@ -849,11 +901,13 @@ def properHex(inp, length : int = 0) -> str:
         a = '0' + a
     return a.rjust(length, '0').upper()
 
+
 def roundUp(inp : int, mult : int) -> int:
     """
     Rounds :param inp: up to the nearest multiple of :param mult:.
     """
     return inp + (mult - inp) % mult
+
 
 def rtfSanitizeHtml(inp : str) -> str:
     """
@@ -885,6 +939,7 @@ def rtfSanitizeHtml(inp : str) -> str:
 
     return output
 
+
 def rtfSanitizePlain(inp : str) -> str:
     """
     Sanitizes input to a plain RTF stream.
@@ -906,6 +961,7 @@ def rtfSanitizePlain(inp : str) -> str:
             output += '\\u' + str(ord(char)) + '?'
 
     return output
+
 
 def setupLogging(defaultPath = None, defaultLevel = logging.WARN, logfile = None, enableFileLogging : bool = False,
                   env_key = 'EXTRACT_MSG_LOG_CFG') -> bool:
@@ -985,6 +1041,66 @@ def setupLogging(defaultPath = None, defaultLevel = logging.WARN, logfile = None
     logging.getLogger().setLevel(defaultLevel)
     return True
 
+
+def unwrapMsg(msg : "MSGFile") -> Dict:
+    """
+    Takes a recursive message-attachment structure and unwraps it into a linear
+    dictionary for easy iteration. Dictionary contains 4 keys: "attachments" for
+    main message attachments, not including embedded MSG files, "embedded" for
+    attachments representing embedded MSG files, "msg" for all MSG files
+    (including the original in the first index), and "raw_attachments" for raw
+    attachments from signed messages.
+    """
+    from .message_signed_base import MessageSignedBase
+
+    # Here is where we store main attachments.
+    attachments = []
+    # Here is where we are going to store embedded msg files.
+    msgFiles = [msg]
+    # Here is where we store embedded attachments.
+    embedded = []
+    # Here is where we store raw attachments from signed messages.
+    raw = []
+
+    # Normally we would need a recursive function to unwrap a recursive
+    # structure like the message-attachment structure. Essentially, a function
+    # that calls itself. Here, I have designed code capable of circumventing
+    # this to do it in a single function, which is a lot more efficient and
+    # safer. That is why we store the `toProcess` and use a while loop
+    # surrounding a for loop. The for loop would be the main body of the
+    # function, while the append to toProcess would be the recursive call.
+    toProcess = [msg]
+
+    while len(toProcess) > 0:
+        # Remove the last item from the list of things to process, and store it
+        # in `currentItem`. We will be processing it in the for loop.
+        currentItem = toProcess.pop()
+        # iterate through the attachments and
+        for att in currentItem.attachments:
+            # If it is a regular attachment, add it to the list. Otherwise, add
+            # it to be processed
+            if att.type in (AttachmentType.DATA, AttachmentType.SIGNED):
+                attachments.append(att)
+            elif att.type == AttachmentType.MSG:
+                # Here we do two things. The first is we store it to the output
+                # so we can return it. The second is we add it to the processing
+                # list. The reason this is two steps is because we need to be
+                # able to remove items from the processing list, but can't
+                # do that from the output.
+                embedded.append(att)
+                msgFiles.append(att.data)
+                toProcess.append(att.data)
+        if isinstance(currentItem, MessageSignedBase):
+            raw += currentItem._rawAttachments
+
+    return {
+        'attachments': attachments,
+        'embedded': embedded,
+        'msg': msgFiles,
+        'raw_attachments': raw,
+    }
+
+
 def validateHtml(html : bytes) -> bool:
     """
     Checks whether the HTML is considered valid. To be valid, the HTML must, at
@@ -994,6 +1110,7 @@ def validateHtml(html : bytes) -> bool:
     if not bs.find('html') or not bs.find('body'):
         return False
     return True
+
 
 def verifyPropertyId(id : str) -> None:
     """
@@ -1014,6 +1131,7 @@ def verifyPropertyId(id : str) -> None:
         except ValueError:
             raise InvaildPropertyIdError('ID was not a 4 digit hexadecimal string')
 
+
 def verifyType(_type):
     """
     Verifies that the type is valid. Raises an exception if it is not.
@@ -1023,6 +1141,7 @@ def verifyType(_type):
     if _type is not None:
         if (_type not in constants.VARIABLE_LENGTH_PROPS_STRING) and (_type not in constants.FIXED_LENGTH_PROPS_STRING):
             raise UnknownTypeError(f'Unknown type {_type}.')
+
 
 def windowsUnicode(string):
     return str(string, 'utf-16-le') if string is not None else None
