@@ -28,7 +28,7 @@ https://github.com/TeamMsgExtractor/msg-extractor
 
 __author__ = 'Destiny Peterson & Matthew Walker'
 __date__ = '2022-06-14'
-__version__ = '0.34.1'
+__version__ = '0.34.2'
 
 import logging
 

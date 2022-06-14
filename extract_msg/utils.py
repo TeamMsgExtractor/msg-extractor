@@ -4,8 +4,10 @@ Utility functions of extract_msg.
 
 import argparse
 import codecs
+import collections
 import copy
 import datetime
+import email.message
 import glob
 import json
 import logging
@@ -1042,6 +1044,61 @@ def setupLogging(defaultPath = None, defaultLevel = logging.WARN, logfile = None
     return True
 
 
+def unwrapMultipart(mp : Union[bytes, str, email.message.Message]) -> Dict:
+    """
+    Unwraps a recursive multipart structure into a dictionary of linear lists.
+    Similar to unwrapMsg, but for multipart. Dictionary contains X keys:.
+
+    :param mp: The bytes that make up a multipart, the string that makes up a
+        multipart, or a Message instance from the email module created from the
+        multipart to unwrap.
+    """
+    # Convert our input into something usable.
+    if isinstance(mp, email.message.Message):
+        mpMessage = mp
+    elif isinstance(mp, bytes):
+        mpMessage = email.message_from_bytes(mp)
+    elif isinstance(mp, str):
+        mpMessage = email.message_from_str(mp)
+    else:
+        raise TypeError(f'Unsupported type "{type(mp)}" provided to unwrapMultipart.')
+
+    # Okay, now that we have it in a useable form, let's do the most basic
+    # unwrapping possible. Once the most basic unwrapping is done, we can
+    # actually process the data. For this, we only care if the section is
+    # multipart or not. If it is, it get's unwrapped too.
+    #
+    # In case you are curious, this is effectively doing a breadth first
+    # traversal of the tree.
+    dataNodes = []
+
+    toProcess = collections.deque((mpMessage,))
+    while len(toProcess) > 0:
+        currentItem = toProcess.popleft()
+        # 'multipart' indicates that it shouldn't contain any data itself, just
+        # other nodes to go through.
+        if currentItem.get_content_maintype() == 'multipart':
+            payload = currentItem.get_payload()
+            # For multipart, the payload should be a list, but handle it not
+            # being one.
+            if isinstance(payload, list):
+                toProcess.extend(payload)
+            else:
+                logging.warn('Found multipart node that did not return a list. Appending as a data node.')
+                dataNodes.append(currentItem)
+        else:
+            # The opposite is *not* true. If it's not multipart, always add as a
+            # data node.
+            dataNodes.append(currentItem)
+
+    # At this point, all of our nodes should have processed and we should now
+    # have data nodes. Now let's process them. For anything that was parsed as
+    # a message, we actually want to get it's raw bytes back so it can be saved.
+    # If they user wants to process that message in some way, they can do it
+    # themself.
+    return dataNodes # TEMPORARY CODE
+
+
 def unwrapMsg(msg : "MSGFile") -> Dict:
     """
     Takes a recursive message-attachment structure and unwraps it into a linear
@@ -1069,12 +1126,12 @@ def unwrapMsg(msg : "MSGFile") -> Dict:
     # safer. That is why we store the `toProcess` and use a while loop
     # surrounding a for loop. The for loop would be the main body of the
     # function, while the append to toProcess would be the recursive call.
-    toProcess = [msg]
+    toProcess = collections.deque((msg,))
 
     while len(toProcess) > 0:
         # Remove the last item from the list of things to process, and store it
         # in `currentItem`. We will be processing it in the for loop.
-        currentItem = toProcess.pop()
+        currentItem = toProcess.popleft()
         # iterate through the attachments and
         for att in currentItem.attachments:
             # If it is a regular attachment, add it to the list. Otherwise, add

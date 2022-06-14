@@ -1,3 +1,6 @@
+**0.34.2**
+* TODO
+
 **0.34.1**
 * Added convenience function `utils.openMsgBulk` (imported to `extract_msg` namespace) for opening message paths with wildcards. Allows you to open several messages with one function, returning a list of the opened messages.
 * Added convenience function `utils.unwrapMsg` which recurses through an `MSGFile` and it's attachments, creating a series of linear structures stored in a dictionary. Useful for analyzing, saving, etc. all messages and attachments down through the structure without having to recurse yourself.
