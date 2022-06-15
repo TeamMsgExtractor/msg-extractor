@@ -1,5 +1,7 @@
 **0.34.2**
-* TODO
+* [[TeamMsgExtractor #267](https://github.com/TeamMsgExtractor/msg-extractor/issues/267)] Fixed issue that caused signed messages that were .eml files to have their data field *not* be a bytes instance. This field will now *always* be bytes. If a problem making it bytes occurs, an exception will be raised to give you brief details.
+* Added function `utils.unwrapMultipart` that takes a multipart message and acquires a plain text body, an HTML body, and a list of attachments from it. These attachments are returned as `dict`s that can easily be converted to `SignedAttachment`s. It replaces the logic `mailbits` was being used for, and as such `mailbits` is no longer required. The module may be reintroduced in the future.
+* Added new property `emailMessage` to `SignedAttachment`, which returns the email `Message` instance used to get data for the attachment.
 
 **0.34.1**
 * Added convenience function `utils.openMsgBulk` (imported to `extract_msg` namespace) for opening message paths with wildcards. Allows you to open several messages with one function, returning a list of the opened messages.

@@ -8,6 +8,7 @@ import collections
 import copy
 import datetime
 import email.message
+import email.policy
 import glob
 import json
 import logging
@@ -1044,61 +1045,6 @@ def setupLogging(defaultPath = None, defaultLevel = logging.WARN, logfile = None
     return True
 
 
-def unwrapMultipart(mp : Union[bytes, str, email.message.Message]) -> Dict:
-    """
-    Unwraps a recursive multipart structure into a dictionary of linear lists.
-    Similar to unwrapMsg, but for multipart. Dictionary contains X keys:.
-
-    :param mp: The bytes that make up a multipart, the string that makes up a
-        multipart, or a Message instance from the email module created from the
-        multipart to unwrap.
-    """
-    # Convert our input into something usable.
-    if isinstance(mp, email.message.Message):
-        mpMessage = mp
-    elif isinstance(mp, bytes):
-        mpMessage = email.message_from_bytes(mp)
-    elif isinstance(mp, str):
-        mpMessage = email.message_from_str(mp)
-    else:
-        raise TypeError(f'Unsupported type "{type(mp)}" provided to unwrapMultipart.')
-
-    # Okay, now that we have it in a useable form, let's do the most basic
-    # unwrapping possible. Once the most basic unwrapping is done, we can
-    # actually process the data. For this, we only care if the section is
-    # multipart or not. If it is, it get's unwrapped too.
-    #
-    # In case you are curious, this is effectively doing a breadth first
-    # traversal of the tree.
-    dataNodes = []
-
-    toProcess = collections.deque((mpMessage,))
-    while len(toProcess) > 0:
-        currentItem = toProcess.popleft()
-        # 'multipart' indicates that it shouldn't contain any data itself, just
-        # other nodes to go through.
-        if currentItem.get_content_maintype() == 'multipart':
-            payload = currentItem.get_payload()
-            # For multipart, the payload should be a list, but handle it not
-            # being one.
-            if isinstance(payload, list):
-                toProcess.extend(payload)
-            else:
-                logging.warn('Found multipart node that did not return a list. Appending as a data node.')
-                dataNodes.append(currentItem)
-        else:
-            # The opposite is *not* true. If it's not multipart, always add as a
-            # data node.
-            dataNodes.append(currentItem)
-
-    # At this point, all of our nodes should have processed and we should now
-    # have data nodes. Now let's process them. For anything that was parsed as
-    # a message, we actually want to get it's raw bytes back so it can be saved.
-    # If they user wants to process that message in some way, they can do it
-    # themself.
-    return dataNodes # TEMPORARY CODE
-
-
 def unwrapMsg(msg : "MSGFile") -> Dict:
     """
     Takes a recursive message-attachment structure and unwraps it into a linear
@@ -1157,6 +1103,132 @@ def unwrapMsg(msg : "MSGFile") -> Dict:
         'raw_attachments': raw,
     }
 
+
+def unwrapMultipart(mp : Union[bytes, str, email.message.Message]) -> Dict:
+    """
+    Unwraps a recursive multipart structure into a dictionary of linear lists.
+    Similar to unwrapMsg, but for multipart. Dictionary contains 3 keys:
+    "attachments" which contains a list of dicts containing processed attachment
+    data as well as the Message instance associated with it, "plain_body" which
+    contains the plain text body, and "html_body" which contains the HTML body.
+
+    For clarification, each instance of processed attachment data is a dict
+    with keys identical to the args used for the SignedAttachment constructor.
+    This makes it easy to expand for use in constructing a SignedAttachment. The
+    only argument missing is "msg" to ensure this function will not require one.
+
+    :param mp: The bytes that make up a multipart, the string that makes up a
+        multipart, or a Message instance from the email module created from the
+        multipart to unwrap. If providing a Message instance, prefer it to be an
+        instance of EmailMessage. If you are doing so, make sure it's policy is
+        default.
+    """
+    # In the event we are generating it, these are the kwargs to use.
+    genKwargs = {
+        '_class': email.message.EmailMessage,
+        'policy': email.policy.default,
+    }
+    # Convert our input into something usable.
+    if isinstance(mp, email.message.EmailMessage):
+        if mp.policy == email.policy.default:
+            mpMessage = mp
+        else:
+            mpMessage = email.message_from_bytes(mp.as_bytes(), **genKwargs)
+    elif isinstance(mp, email.message.Message):
+        mpMessage = email.message_from_bytes(mp.as_bytes(), **genKwargs)
+    elif isinstance(mp, bytes):
+        mpMessage = email.message_from_bytes(mp, **genKwargs)
+    elif isinstance(mp, str):
+        mpMessage = email.message_from_string(mp, **genKwargs)
+    else:
+        raise TypeError(f'Unsupported type "{type(mp)}" provided to unwrapMultipart.')
+
+    # Okay, now that we have it in a useable form, let's do the most basic
+    # unwrapping possible. Once the most basic unwrapping is done, we can
+    # actually process the data. For this, we only care if the section is
+    # multipart or not. If it is, it get's unwrapped too.
+    #
+    # In case you are curious, this is effectively doing a breadth first
+    # traversal of the tree.
+    dataNodes = []
+
+    toProcess = collections.deque((mpMessage,))
+    # I do know about the walk method, but it might *also* walk embedded
+    # messages which we very much don't want.
+    while len(toProcess) > 0:
+        currentItem = toProcess.popleft()
+        # 'multipart' indicates that it shouldn't contain any data itself, just
+        # other nodes to go through.
+        if currentItem.get_content_maintype() == 'multipart':
+            payload = currentItem.get_payload()
+            # For multipart, the payload should be a list, but handle it not
+            # being one.
+            if isinstance(payload, list):
+                toProcess.extend(payload)
+            else:
+                logging.warn('Found multipart node that did not return a list. Appending as a data node.')
+                dataNodes.append(currentItem)
+        else:
+            # The opposite is *not* true. If it's not multipart, always add as a
+            # data node.
+            dataNodes.append(currentItem)
+
+    # At this point, all of our nodes should have processed and we should now
+    # have data nodes. Now let's process them. For anything that was parsed as
+    # a message, we actually want to get it's raw bytes back so it can be saved.
+    # If they user wants to process that message in some way, they can do it
+    # themself.
+    attachments = []
+    plainBody = None
+    htmlBody = None
+
+    for node in dataNodes:
+        # Let's setup our attachment we are going to use.
+        attachment = {
+            'data': None,
+            'name': node.get_filename(),
+            'mimetype': node.get_content_type(),
+            'node': node,
+        }
+
+        # Finally, we need to get the data. As we need to ensure it is bytes,
+        # we may have to do some special processing.
+        data = node.get_content()
+        if isinstance(data, bytes):
+            # If the data is bytes, we are perfectly good.
+            pass
+        elif isinstance(data, email.message.Message):
+            # If it is a message, get it's bytes directly.
+            data = data.as_bytes()
+        elif isinstance(data, str):
+            # If it is a string, let's reverse encode it where possible.
+            # First thing we want to check is if we can find the encoding type.
+            # If we can, use that to reverse the process. Otherwise use utf-8.
+            data = data.encode(node.get_content_charset('utf-8'))
+        else:
+            # We throw an exception to describe the problem if we can't reverse
+            # the problem.
+            raise TypeError(f'Attempted to get bytes for attachment, but could not convert {type(data)} to bytes.')
+
+        attachment['data'] = data
+
+        # Now for the fun part, figuring out if we actually have an attachment.
+        if attachment['name']:
+            attachments.append(attachment)
+        elif attachment['mimetype'] == 'text/plain':
+            if plainBody:
+                logger.warn('Found multiple candidates for plain text body.')
+            plainBody = data
+        elif attachment['mimetype'] == 'text/html':
+            if htmlBody:
+                logger.warn('Found multiple candidates for HTML body.')
+            htmlBody = data
+
+    return {
+        'attachments': attachments,
+        'plain_body': plainBody,
+        'html_body': htmlBody,
+    }
 
 def validateHtml(html : bytes) -> bool:
     """

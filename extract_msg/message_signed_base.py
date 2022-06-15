@@ -3,12 +3,10 @@ import html
 import logging
 import re
 
-import mailbits
-
 from .exceptions import StandardViolationError
 from .message_base import MessageBase
 from .signed_attachment import SignedAttachment
-from .utils import inputToString
+from .utils import inputToString, unwrapMultipart
 
 
 logger = logging.getLogger(__name__)
@@ -81,45 +79,14 @@ class MessageSignedBase(MessageBase):
             if len(atts) != 1:
                 raise StandardViolationError('Signed messages without exactly 1 (regular) attachment constitue a violation of the standard.')
 
-            self._sAttachments = []
-            self._signedBody = None
-            self._signedHtmlBody = None
+            # We need to unwrap the multipart stream.
+            unwrapped = unwrapMultipart(atts[0].data)
 
-            mainAttachment = atts[0]
-
-            # If we are here, we should have the attachment. So now we need to
-            # try to parse and unwrap the data.
-            toParse = [mailbits.email2dict(email.message_from_bytes(mainAttachment.data))]
-            output = []
-
-            while len(toParse) != 0:
-                parsing = toParse.pop(0)
-                for part in parsing['content']:
-                    # If it is multipart, push it to the toParse list, otherwise add it
-                    # to the output.
-                    if part['headers']['content-type']['content_type'].startswith('multipart'):
-                        toParse.append(part)
-                    else:
-                        output.append(part)
-
-            # At this point, `output` has our parts.
-            for part in output:
-                # Get the mime type.
-                mime = part['headers']['content-type']['content_type']
-
-                # Now try to grab a name. If it doesn't exist, we make one.
-                try:
-                    name = part['headers']['content-type']['params']['name']
-                except KeyError:
-                    if mime == 'text/plain':
-                        self._signedBody = part['content']
-                        continue
-                    elif mime == 'text/html':
-                        self._signedHtmlBody = part['content']
-                        continue
-                    else:
-                        name = 'unknown.bin'
-                self._sAttachments.append(self.__signedAttachmentClass(self, part['content'], name, mime))
+            # Now store everything where it needs to be and make the
+            # attachments.
+            self._sAttachments = [self.__signedAttachmentClass(self, **att) for att in unwrapped['attachments']]
+            self._signedBody = unwrapped['plain_body']
+            self._signedHtmlBody = unwrapped['html_body']
 
             return self._sAttachments
 

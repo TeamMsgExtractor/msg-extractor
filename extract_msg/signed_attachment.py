@@ -1,3 +1,4 @@
+import email
 import logging
 import os
 import pathlib
@@ -12,11 +13,19 @@ logger.addHandler(logging.NullHandler())
 
 
 class SignedAttachment:
-    def __init__(self, msg, data : bytes, name : str, mime : str):
+    def __init__(self, msg, data : bytes, name : str, mimetype : str, node : email.message.Message):
+        """
+        :param msg: The msg file this attachment is associated with.
+        :param data: The bytes that compose this attachment.
+        :param name: The reported name of the attachment.
+        :param mimetype: The reported mimetype of the attachment.
+        :param node: The email Message instance for this node.
+        """
         self.__data = data
         self.__name = name
-        self.__mime = mime
+        self.__mimetype = mimetype
         self.__msg = msg
+        self.__node = node
 
     def save(self, **kwargs):
         """
@@ -121,20 +130,42 @@ class SignedAttachment:
 
     @property
     def data(self) -> bytes:
+        """
+        The bytes that compose this attachment.
+        """
         return self.__data
 
     @property
-    def mimetype(self) -> str:
-        return self.__mime
+    def emailMessage(self) -> email.message.Message:
+        """
+        The email Message instance that is the source for this attachment.
+        """
+        return self.__node
 
     @property
-    def msg(self):
+    def mimetype(self) -> str:
+        """
+        The reported mimetype of the attachment.
+        """
+        return self.__mimetype
+
+    @property
+    def msg(self) -> "MSGFile":
+        """
+        The MSGFile instance this attachment belongs to.
+        """
         return self.__msg
 
     @property
-    def name(self):
+    def name(self) -> str:
+        """
+        The reported name of this attachment.
+        """
         return self.__name
 
     @property
-    def type(self):
+    def type(self) -> AttachmentType:
+        """
+        The AttachmentType.
+        """
         return AttachmentType.SIGNED
