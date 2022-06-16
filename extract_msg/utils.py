@@ -29,7 +29,7 @@ from typing import Dict, List, Tuple, Union
 
 from . import constants
 from .enums import AttachmentType
-from .exceptions import BadHtmlError, ConversionError, IncompatibleOptionsError, InvaildPropertyIdError, UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError, UnsupportedMSGTypeError
+from .exceptions import BadHtmlError, ConversionError, IncompatibleOptionsError, InvalidFileFormatError, InvaildPropertyIdError, UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError, UnsupportedMSGTypeError
 
 
 logger = logging.getLogger(__name__)
@@ -689,7 +689,20 @@ def openMsg(path, **kwargs):
     from .task import Task
 
     msg = MSGFile(path, **kwargs)
-    # After rechecking the docs, all comparisons should be case-insensitive, not case-sensitive. My reading ability is great.
+    # After rechecking the docs, all comparisons should be case-insensitive, not
+    # case-sensitive. My reading ability is great.
+    #
+    # Also after consideration, I realized we need to be very careful here, as
+    # other file types (like doc, ppt, etc.) might open but not return a class
+    # type. If the stream is not found, classType returns None, which has no
+    # lower function. So let's make sure we got a good return first.
+    if not msg.classType:
+        if kwargs.get('strict', True):
+            raise InvalidFileFormatError('File was confirmed to be an olefile, but was not an MSG file.')
+        else:
+            # If strict mode is off, we'll just return an MSGFile anyways.
+            logging.critical('Received file that was an olefile but was not an MSG file. Returning MSGFile anyways because strict mode is off.')
+            return msg
     classType = msg.classType.lower()
     if classType.startswith('ipm.contact') or classType.startswith('ipm.distlist'):
         msg.close()

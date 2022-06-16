@@ -31,6 +31,16 @@ class DataNotFoundError(Exception):
     """
     pass
 
+class DeencapMalformedData(Exception):
+    """
+    Data to deencapsulate was malformed in some way.
+    """
+
+class DeencapNotEncapsulated(Exception):
+    """
+    Data to deencapsulate did not contain any encapsulated data.
+    """
+
 class ExecutableNotFound(Exception):
     """
     Could not find the specified executable.

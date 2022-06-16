@@ -10,7 +10,8 @@ import compressed_rtf
 import RTFDE
 
 from . import constants
-from .enums import RecipientType
+from .enums import DeencapType, RecipientType
+from .exceptions import DeencapMalformedData, DeencapNotEncapsulated
 from .msg import MSGFile
 from .recipient import Recipient
 from .utils import inputToString, prepareFilename
@@ -53,11 +54,23 @@ class MessageBase(MSGFile):
             recipients.
         :param ignoreRtfDeErrors: Optional, specifies that any errors that occur
             from the usage of RTFDE should be ignored (default: False).
+        :param deencapsulationFunc: Optional, if specified must be a callable
+            that will override the way that HTML/text is deencapsulated from the
+            RTF body. This function must take exactly 2 arguments, the first
+            being the RTF body from the message and the second being an instance
+            of the enum DeencapType that will tell the function what type of
+            body is desired. The function should return a string for plain text
+            and bytes for HTML. If any problems occur, the function *must*
+            either return None or raise one of the appropriate functions from
+            extract_msg.exceptions. All other functions must be handled
+            internally or they will continue. The original deencapsulation
+            method will not run if this is set.
         """
         super().__init__(path, **kwargs)
         recipientSeparator = ';'
         self.__recipientSeparator = kwargs.get('recipientSeparator', ';')
         self.__ignoreRtfDeErrors = kwargs.get('ignoreRtfDeErrors', False)
+        self.__deencap = kwargs.get('deencapsulationFunc')
         # Initialize properties in the order that is least likely to cause bugs.
         # TODO have each function check for initialization of needed data so these
         # lines will be unnecessary.
@@ -121,6 +134,49 @@ class MessageBase(MSGFile):
 
             return value
 
+    def deencapsulateBody(self, rtfBody : bytes, bodyType : DeencapType):
+        """
+        A function to deencapsulate the specified body from the rtfBody. Returns
+        a string for plain text and bytes for HTML. If specified, uses the
+        deencapsulation override function. Returns None if nothing could be
+        deencapsulated.
+
+        If you want to change the deencapsulation behaviour in a base class,
+        simply override this function.
+        """
+        if rtfBody:
+            bodyType = DeencapType(bodyType)
+            if bodyType == DeencapType.PLAIN:
+                if self.__deencap:
+                    try:
+                        return self.__deencap(rtfBody, DeencapType.PLAIN)
+                    except DeencapMalformedData:
+                        logger.exception('Custom deencapsulation function reported encapsulated data was malformed.')
+                    except DeencapNotEncapsulated:
+                        logger.exception('Custom deencapsulation function reported data is not encapsulated.')
+                else:
+                    if self.deencapsulatedRtf and self.deencapsulatedRtf.content_type == 'text':
+                        return self.deencapsulatedRtf.text
+            else:
+                if self.__deencap:
+                    try:
+                        return self.__deencap(rtfBody, DeencapType.HTML)
+                    except DeencapMalformedData:
+                        logger.exception('Custom deencapsulation function reported encapsulated data was malformed.')
+                    except DeencapNotEncapsulated:
+                        logger.exception('Custom deencapsulation function reported data is not encapsulated.')
+                else:
+                    if self.deencapsulatedRtf and self.deencapsulatedRtf.content_type == 'html':
+                        return self.deencapsulatedRtf.html.encode('utf-8')
+
+            if bodyType == DeencapType.PLAIN:
+                logger.info('Could not deencapsulate plain text from RTF body.')
+            else:
+                logger.info('Could not deencapsulate HTML from RTF body.')
+        else:
+            logger.info('No RTF body to deencapsulate from.')
+        return None
+
     def headerInit(self) -> bool:
         """
         Checks whether the header has been initialized.
@@ -151,8 +207,8 @@ class MessageBase(MSGFile):
             else:
                 # If the body doesn't exist, see if we can get it from the RTF
                 # body.
-                if self.deencapsulatedRtf and self.deencapsulatedRtf.content_type == 'text':
-                    self._body = self.deencapsulatedRtf.text
+                if self.rtfBody:
+                    self._body = self.deencapsulateBody(self.rtfBody, DeencapType.PLAIN)
 
             if self._body:
                 self._body = inputToString(self._body, 'utf-8')
@@ -232,7 +288,7 @@ class MessageBase(MSGFile):
                         # Because we are going to be actively removing things,
                         # we want to search the entire thing over again.
                         while match:
-                            logger.info(f'Found match to badData starting at location {match.start()}. Replacing with nothing.')
+                            logger.info(f'Found match to bin data starting at location {match.start()}. Replacing with nothing.')
                             length = int(match.group(1))
                             # Extract the entire binary section and replace it.
                             body = body.replace(body[match.start():match.end() + length], b'', 1)
@@ -241,10 +297,10 @@ class MessageBase(MSGFile):
                         self._deencapsultor = RTFDE.DeEncapsulator(body.decode(chardet.detect(body)['encoding']))
                     self._deencapsultor.deencapsulate()
                 except RTFDE.exceptions.NotEncapsulatedRtf as e:
-                    logger.debug("RTF body is not encapsulated.")
+                    logger.debug('RTF body is not encapsulated.')
                     self._deencapsultor = None
                 except RTFDE.exceptions.MalformedEncapsulatedRtf as _e:
-                    logger.info("RTF body contains malformed encapsulated content.")
+                    logger.info('RTF body contains malformed encapsulated content.')
                     self._deencapsultor = None
                 except Exception:
                     # If we are just ignoring the errors, log it then set to
@@ -328,10 +384,7 @@ class MessageBase(MSGFile):
                 pass
             elif self.rtfBody:
                 logger.info('HTML body was not found, attempting to generate from RTF.')
-                if self.deencapsulatedRtf and self.deencapsulatedRtf.content_type == 'html':
-                    self._htmlBody = self.deencapsulatedRtf.html.encode('utf-8')
-                else:
-                    logger.info('Could not deencapsulate HTML from RTF body.')
+                self._htmlBody = self.deencapsulateBody(self.rtfBody, DeencapType.HTML)
             # This is it's own if statement so we can ensure it will generate
             # even if there is an rtfBody, in the event it doesn't have HTML.
             if not self._htmlBody and self.body:

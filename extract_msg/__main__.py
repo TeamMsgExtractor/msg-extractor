@@ -70,16 +70,24 @@ def main() -> None:
         }
 
         for x in args.msgs:
-            try:
-                if args.progress:
+            if args.progress:
+                # This may throw an error sometimes and not othertimes.
+                # Unclear why, so let's just silence it.
+                try:
                     print(f'Saving file "{x}"...')
+                except UnicodeEncodeError:
+                    print(f'Saving file "{repr(x)}" (failed to print without repr)...')
+            try:
                 with utils.openMsg(x, **openKwargs) as msg:
                     if args.dumpStdout:
                         print(msg.body)
                     else:
                         msg.save(**kwargs)
             except Exception as e:
-                print(f'Error with file "{x}": {traceback.format_exc()}')
+                try:
+                    print(f'Error with file "{x}": {traceback.format_exc()}')
+                except UnicodeEncodeError:
+                    print(f'Error with file "{repr(x)}": {traceback.format_exc()}')
 
 
 if __name__ == '__main__':
