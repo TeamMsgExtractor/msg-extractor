@@ -22,6 +22,14 @@ class AttachmentType(enum.Enum):
     WEB = 2
     SIGNED = 3
 
+class DeencapType(enum.Enum):
+    """
+    Enum to specify to custom deencapsulation functions the type of data being
+    requested.
+    """
+    PLAIN = 0
+    HTML = 1
+
 class DisplayType(enum.Enum):
     MAILUSER = 0x0000
     DISTLIST = 0x0001

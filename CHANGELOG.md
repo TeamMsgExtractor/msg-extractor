@@ -1,9 +1,15 @@
-**0.34.2**
+**v0.34.3**
+* Fixed issue that may have caused other olefile types to raise the wrong type of error when passed to `openMsg`.
+* Fixed issues with changelog format.
+* Fixed issue that caused progress to sometimes break the main loop when a file had Unicode characters if the console it was writing to didn't support them.
+* Added option to `MessageBase` (and subsequently `openMsg`) that allows you to override the code being used for deencapsulation. See `MessageBase.__init__` for details on how to create an override function.
+
+**v0.34.2**
 * [[TeamMsgExtractor #267](https://github.com/TeamMsgExtractor/msg-extractor/issues/267)] Fixed issue that caused signed messages that were .eml files to have their data field *not* be a bytes instance. This field will now *always* be bytes. If a problem making it bytes occurs, an exception will be raised to give you brief details.
 * Added function `utils.unwrapMultipart` that takes a multipart message and acquires a plain text body, an HTML body, and a list of attachments from it. These attachments are returned as `dict`s that can easily be converted to `SignedAttachment`s. It replaces the logic `mailbits` was being used for, and as such `mailbits` is no longer required. The module may be reintroduced in the future.
 * Added new property `emailMessage` to `SignedAttachment`, which returns the email `Message` instance used to get data for the attachment.
 
-**0.34.1**
+**v0.34.1**
 * Added convenience function `utils.openMsgBulk` (imported to `extract_msg` namespace) for opening message paths with wildcards. Allows you to open several messages with one function, returning a list of the opened messages.
 * Added convenience function `utils.unwrapMsg` which recurses through an `MSGFile` and it's attachments, creating a series of linear structures stored in a dictionary. Useful for analyzing, saving, etc. all messages and attachments down through the structure without having to recurse yourself.
 * Fixed an issue that would cause signed attachments to not properly generate.
