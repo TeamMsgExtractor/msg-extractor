@@ -449,11 +449,11 @@ class MessageBase(MSGFile):
         return soup.prettify('utf-8')
 
     @property
-    def htmlInjectableHeader(self):
+    def htmlInjectableHeader(self) -> str:
         """
         The header that can be formatted and injected into the html body.
         """
-        return HTML_INJECTABLE_HEADERS['Message']
+        return constants.HTML_INJECTABLE_HEADERS['Message']
 
     @property
     def inReplyTo(self) -> str:
@@ -470,7 +470,7 @@ class MessageBase(MSGFile):
         return bool(self.mainProperties['0E070003'].value & 1)
 
     @property
-    def messageId(self):
+    def messageId(self) -> str:
         try:
             return self._messageId
         except AttributeError:
@@ -528,14 +528,14 @@ class MessageBase(MSGFile):
             return self._rtfBody
 
     @property
-    def rtfEncapInjectableHeader(self):
+    def rtfEncapInjectableHeader(self) -> str:
         """
         The header that can be formatted and injected into the plain RTF body.
         """
         return constants.RTF_ENC_INJECTABLE_HEADER['Message']
 
     @property
-    def rtfPlainInjectableHeader(self):
+    def rtfPlainInjectableHeader(self) -> str:
         """
         The header that can be formatted and injected into the encapsulated RTF
         body.

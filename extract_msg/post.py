@@ -15,6 +15,10 @@ class Post(Message):
         # the work.
 
     @property
+    def conversation(self) -> str:
+        pass
+
+    @property
     def headerFormatProperties(self) -> Tuple[Tuple[str, str], ...]:
         """
         Returns a tuple of tuples of two strings, the first string being a
@@ -34,21 +38,21 @@ class Post(Message):
         )
 
     @property
-    def htmlInjectableHeader(self):
+    def htmlInjectableHeader(self) -> str:
         """
         The header that can be formatted and injected into the html body.
         """
         return constants.HTML_INJECTABLE_HEADERS['Post']
 
     @property
-    def rtfEncapInjectableHeader(self):
+    def rtfEncapInjectableHeader(self) -> str:
         """
         The header that can be formatted and injected into the plain RTF body.
         """
         return constants.RTF_ENC_INJECTABLE_HEADER['Post']
 
     @property
-    def rtfPlainInjectableHeader(self):
+    def rtfPlainInjectableHeader(self) -> str:
         """
         The header that can be formatted and injected into the encapsulated RTF
         body.
