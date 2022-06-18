@@ -532,7 +532,7 @@ class MessageBase(MSGFile):
         """
         The header that can be formatted and injected into the plain RTF body.
         """
-        return constants.RTF_ENC_INJECTABLE_HEADER['Message']
+        return constants.RTF_ENC_INJECTABLE_HEADERS['Message']
 
     @property
     def rtfPlainInjectableHeader(self) -> str:
@@ -540,7 +540,7 @@ class MessageBase(MSGFile):
         The header that can be formatted and injected into the encapsulated RTF
         body.
         """
-        return constants.RTF_PLAIN_INJECTABLE_HEADER['Message']
+        return constants.RTF_PLAIN_INJECTABLE_HEADERS['Message']
 
     @property
     def sender(self) -> str:

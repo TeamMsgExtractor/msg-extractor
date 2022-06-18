@@ -684,6 +684,7 @@ def openMsg(path, **kwargs):
     from .message import Message
     from .msg import MSGFile
     from .message_signed import MessageSigned
+    from .post import Post
     from .task import Task
 
     msg = MSGFile(path, **kwargs)
@@ -711,6 +712,9 @@ def openMsg(path, **kwargs):
             return MessageSigned(path, **kwargs)
         else:
             return Message(path, **kwargs)
+    elif classType.startswith('ipm.post'):
+        msg.close()
+        return Post(path, **kwargs)
     elif classType.startswith('ipm.appointment') or classType.startswith('ipm.schedule'):
         msg.close()
         return Appointment(path, **kwargs)

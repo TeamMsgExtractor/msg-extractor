@@ -1,5 +1,6 @@
 from . import constants
 from .message import Message
+from typing import Tuple
 
 
 # Post is effectively identical to Message, just with a different header.
@@ -16,7 +17,10 @@ class Post(Message):
 
     @property
     def conversation(self) -> str:
-        pass
+        """
+        The name of the conversation being posted to.
+        """
+        return self._ensureSet('_convo', '__substg1.0_0070')
 
     @property
     def headerFormatProperties(self) -> Tuple[Tuple[str, str], ...]:
@@ -49,7 +53,7 @@ class Post(Message):
         """
         The header that can be formatted and injected into the plain RTF body.
         """
-        return constants.RTF_ENC_INJECTABLE_HEADER['Post']
+        return constants.RTF_ENC_INJECTABLE_HEADERS['Post']
 
     @property
     def rtfPlainInjectableHeader(self) -> str:
@@ -57,4 +61,4 @@ class Post(Message):
         The header that can be formatted and injected into the encapsulated RTF
         body.
         """
-        return constants.RTF_PLAIN_INJECTABLE_HEADER['Post']
+        return constants.RTF_PLAIN_INJECTABLE_HEADERS['Post']

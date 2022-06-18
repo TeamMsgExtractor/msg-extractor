@@ -27,8 +27,8 @@ https://github.com/TeamMsgExtractor/msg-extractor
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 __author__ = 'Destiny Peterson & Matthew Walker'
-__date__ = '2022-06-15'
-__version__ = '0.34.3'
+__date__ = '2022-06-17'
+__version__ = '0.35.0'
 
 import logging
 
@@ -42,6 +42,7 @@ from .message_base import MessageBase
 from .message_signed import MessageSigned
 from .message_signed_base import MessageSignedBase
 from .msg import MSGFile
+from .post import Post
 from .prop import createProp
 from .properties import Properties
 from .recipient import Recipient

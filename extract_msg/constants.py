@@ -204,8 +204,8 @@ HTML_INJECTABLE_HEADERS['Post'] = """
 # FYI, < and > will need to be sanitized if you actually want it to be properly
 # compatible. "<" will become "{\*\htmltag84 &lt;}\htmlrtf <\htmlrtf0" and ">"
 # will become "{\*\htmltag84 &gt;}\htmlrtf >\htmlrtf0".
-RTF_PLAIN_INJECTABLE_HEADERS = {}
-RTF_PLAIN_INJECTABLE_HEADERS['Message'] = r"""
+RTF_ENC_INJECTABLE_HEADERS = {}
+RTF_ENC_INJECTABLE_HEADERS['Message'] = r"""
 {{
 {{\*\htmltag96 <div>}}
 {{\*\htmltag96 <div>}}
@@ -230,7 +230,7 @@ Sent: {{\*\htmltag92 </b>}}
 \htmlrtf {{\b\htmlrtf0
 {{\*\htmltag84 <b>}}
 To: {{\*\htmltag92 </b>}}
-\htmlrtf \b0\htmlrtf0 {To}
+\htmlrtf \b0\htmlrtf0 {to}
 \htmlrtf }}\htmlrtf0
 {{\*\htmltag116 <br>}}
 \htmlrtf \line\htmlrtf0
@@ -265,8 +265,8 @@ Subject: {{\*\htmltag92 </b>}}
 {{\*\htmltag104 </div>}}
 \htmlrtf }}\htmlrtf0
 """.replace('\r', '').replace('\n', '')
-RTF_PLAIN_INJECTABLE_HEADERS['MessageSigned'] = RTF_PLAIN_INJECTABLE_HEADERS['Message']
-RTF_PLAIN_INJECTABLE_HEADERS['Post'] = r"""
+RTF_ENC_INJECTABLE_HEADERS['MessageSigned'] = RTF_ENC_INJECTABLE_HEADERS['Message']
+RTF_ENC_INJECTABLE_HEADERS['Post'] = r"""
 {{
 {{\*\htmltag96 <div>}}
 {{\*\htmltag96 <div>}}

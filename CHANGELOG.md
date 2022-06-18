@@ -1,4 +1,5 @@
 **v0.35.0**
+* [[TeamMsgExtractor #206](https://github.com/TeamMsgExtractor/msg-extractor/issues/206)] Implemented support for the Post object, including the ability to save it.
 * Moved a few more minor constants to `enums`.
 * Added support for many internal data structures, specifically Entry ID structures.
 * Refactored classes from `extract_msg.data` to submodule `extract_msg.structures`.
