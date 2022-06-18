@@ -1,6 +1,6 @@
 import logging
 
-from .data import PermanentEntryID
+from .structures.entry_id import PermanentEntryID
 from .enums import PropertiesType, RecipientType
 from .prop import FixedLengthProp
 from .properties import Properties
@@ -224,7 +224,7 @@ class Recipient:
     @property
     def entryID(self):
         """
-        Returns the recipient's name.
+        Returns the recipient's Entry ID.
         """
         try:
             return self.__entryID

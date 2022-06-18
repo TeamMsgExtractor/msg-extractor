@@ -1,6 +1,23 @@
 import enum
 
 
+class AddressBookType(enum.Enum):
+    """
+    The type of object that an address book entry ID represents. MUST be one of
+    these or it is invalid.
+    """
+    LOCAL_MAIL_USER = 0x000
+    DISTRIBUTION_LIST = 0x001
+    BULLETIN_BOARD_OR_PUBLIC_FOLDER = 0x002
+    AUTOMATED_MAILBOX = 0x003
+    ORGANIZATIONAL_MAILBOX = 0x004
+    PRIVATE_DISTRIBUTION_LIST = 0x005
+    REMOTE_MAIL_USER = 0x006
+    CONTAINER = 0x100
+    TEMPLATE = 0x101
+    ONE_OFF_USER = 0x102
+    SEARCH = 0x200
+
 class AttachErrorBehavior(enum.Enum):
     """
     The behavior to follow when handling an error in an attachment.
@@ -43,6 +60,41 @@ class DisplayType(enum.Enum):
     ADDRESS_TEMPLATE = 0x0102
     SEARCH = 0x0200
 
+class EntryIDType(enum.Enum):
+    """
+    Converts a UID to the type of Entry ID structure.
+    """
+    def toHex(self):
+        """
+        Converts an EntryIDType to it's hex equivelent.
+        """
+        return EntryIDTypeHex[self.name]
+
+    PUBLIC_MESSAGE_STORE = b'\x1A\x44\x73\x90\xAA\x66\x11\xCD\x9B\xC8\x00\xAA\x00\x2F\xC4\x5A'
+    ADDRESS_BOOK_RECIPIENT = b'\xDC\xA7\x40\xC8\xC0\x42\x10\x1A\xB4\xB9\x08\x00\x2B\x2F\xE1\x82'
+    ONE_OFF_RECIPIENT = b'\x81\x2B\x1F\xA4\xBE\xA3\x10\x19\x9D\x6E\x00\xDD\x01\x0F\x54\x02'
+    # Contact address or personal distribution list recipient.
+    CA_OR_PDL_RECIPIENT = b'\xFE\x42\xAA\x0A\x18\xC7\x1A\x10\xE8\x85\x0B\x65\x1C\x24\x00\x00'
+    NNTP_NEWSGROUP_FOLDER = b'\x38\xA1\xBB\x10\x05\xE5\x10\x1A\xA1\xBB\x08\x00\x2B\x2A\x56\xC2'
+
+class EntryIDTypeHex(enum.Enum):
+    """
+    Converts a UID to the type of Entry ID structure. Uses a hex string instead
+    of bytes for the value.
+    """
+    def toRaw(self):
+        """
+        Converts and EntryIDTypeHex to it's raw equivelent.
+        """
+        return EntryIDType[self.name]
+
+    PUBLIC_MESSAGE_STORE = '1A447390AA6611CD9BC800AA002FC45A'
+    ADDRESS_BOOK_RECIPIENT = 'DCA740C8C042101AB4B908002B2FE182'
+    ONE_OFF_RECIPIENT = '812B1FA4BEA310199D6E00DD010F5402'
+    # Contact address or personal distribution list recipient.
+    CA_OR_PDL_RECIPIENT = 'FE42AA0A18C71A10E8850B651C240000'
+    NNTP_NEWSGROUP_FOLDER = '38A1BB1005E5101AA1BB08002B2A56C2'
+
 class Guid(enum.Enum):
     PS_MAPI = '{00020328-0000-0000-C000-000000000046}'
     PS_PUBLIC_STRINGS = '{00020329-0000-0000-C000-000000000046}'
@@ -71,9 +123,34 @@ class Intelligence(enum.Enum):
     DUMB = 0
     SMART = 1
 
+class MacintoshEncoding(enum.Enum):
+    """
+    The encoding to use for Macintosh-specific data attachments.
+    """
+    BIN_HEX = 0
+    UUENCODE = 1
+    APPLE_SINGLE = 2
+    APPLE_DOUBLE = 3
+
+class MessageFormat(enum.Enum):
+    TNEF = 0
+    MIME = 1
+
 class NamedPropertyType(enum.Enum):
     NUMERICAL_NAMED = 0
     STRING_NAMED = 1
+
+class OORBodyFormat(enum.Enum):
+    """
+    The body format for One Off Recipients.
+    """
+    TEXT_ONLY = 0b0011
+    HTML_ONLY = 0b0111
+    TEXT_AND_HTML = 0b1011
+    # This one isn't actually listed in the documentation, but I've seen it and
+    # this is my best guess for what a format of `0` is meant to mean. This will
+    # also prevent the code from failing on a 0 format.
+    UNSPECIFIED = 0b0000
 
 class Priority(enum.Enum):
     URGENT = 0x00000001

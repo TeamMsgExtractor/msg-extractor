@@ -1,8 +1,9 @@
 """
-Various small data structures used in extract_msg.
+Miscellaneous ID structures used in MSG files that don't fit into any of the
+other ID structure classifications.
 """
 
-from . import constants
+from .. import constants
 
 
 class FolderID:
@@ -32,7 +33,7 @@ class FolderID:
 
 class MessageID:
     """
-
+    A Message ID structure, as defined in [MS-OXCDATA].
     """
     def __init__(self, data):
         self.__replicaID = constants.STUI16.unpack(data[:2])
@@ -59,46 +60,6 @@ class MessageID:
         An unsigned integer identifying a Store object.
         """
         return self.__replicaID
-
-
-
-class PermanentEntryID:
-    def __init__(self, data : bytes):
-        self.__data = data
-        unpacked = constants.STPEID.unpack(data[:28])
-        if unpacked[0] != 0:
-            raise TypeError(f'Not a PermanentEntryID (expected 0, got {unpacked[0]}).')
-        self.__providerUID = unpacked[1]
-        self.__displayTypeString = unpacked[2]
-        self.__distinguishedName = data[28:-1].decode('ascii') # Cut off the null character at the end and decode the data as ascii
-
-    @property
-    def data(self) -> bytes:
-        """
-        Returns the raw data used to generate this instance.
-        """
-        return self.__data
-
-    @property
-    def displayTypeString(self) -> int:
-        """
-        Returns the display type string. This will be one of the display type constants.
-        """
-        return self.__displayTypeString
-
-    @property
-    def distinguishedName(self) -> str:
-        """
-        Returns the distinguished name.
-        """
-        return self.__distinguishedName
-
-    @property
-    def providerUID(self):
-        """
-        Returns the provider UID.
-        """
-        return self.__providerUID
 
 
 

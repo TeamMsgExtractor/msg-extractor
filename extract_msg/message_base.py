@@ -16,6 +16,7 @@ from .msg import MSGFile
 from .recipient import Recipient
 from .utils import inputToString, prepareFilename
 from email.parser import Parser as EmailParser
+from typing import Tuple
 
 
 logger = logging.getLogger(__name__)
@@ -372,6 +373,27 @@ class MessageBase(MSGFile):
             return self._headerDict
 
     @property
+    def headerFormatProperties(self) -> Tuple[Tuple[str, str], ...]:
+        """
+        Returns a tuple of tuples of two strings, the first string being a
+        name and the second being one of the properties of this class. These are
+        used for controlling how data is inserted into the headers when saving
+        an MSG file. The names used for the first string in the tuple will
+        correspond to the name used for the format string.
+
+        If you need to override the default behavior, override this in your
+        class.
+        """
+        return (
+            ('sender', 'sender'),
+            ('to', 'to'),
+            ('cc', 'cc'),
+            ('bcc', 'bcc'),
+            ('date', 'date'),
+            ('subject', 'subject'),
+        )
+
+    @property
     def htmlBody(self) -> bytes:
         """
         Returns the html body, if it exists.
@@ -425,6 +447,13 @@ class MessageBase(MSGFile):
                 tag['src'] = (b'data:image;base64,' + base64.b64encode(data)).decode('utf-8')
 
         return soup.prettify('utf-8')
+
+    @property
+    def htmlInjectableHeader(self):
+        """
+        The header that can be formatted and injected into the html body.
+        """
+        return HTML_INJECTABLE_HEADERS['Message']
 
     @property
     def inReplyTo(self) -> str:
@@ -497,6 +526,21 @@ class MessageBase(MSGFile):
         except AttributeError:
             self._rtfBody = compressed_rtf.decompress(self.compressedRtf) if self.compressedRtf else None
             return self._rtfBody
+
+    @property
+    def rtfEncapInjectableHeader(self):
+        """
+        The header that can be formatted and injected into the plain RTF body.
+        """
+        return constants.RTF_ENC_INJECTABLE_HEADER['Message']
+
+    @property
+    def rtfPlainInjectableHeader(self):
+        """
+        The header that can be formatted and injected into the encapsulated RTF
+        body.
+        """
+        return constants.RTF_PLAIN_INJECTABLE_HEADER['Message']
 
     @property
     def sender(self) -> str:

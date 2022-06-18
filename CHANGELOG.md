@@ -1,3 +1,13 @@
+**v0.35.0**
+* Moved a few more minor constants to `enums`.
+* Added support for many internal data structures, specifically Entry ID structures.
+* Refactored classes from `extract_msg.data` to submodule `extract_msg.structures`.
+* Added `python_requires` to setup.py as I noticed that it was missing.
+* Due to new saving requirements, adjusted the way header injection worked all around. Calling it is still done in the same way, but the internal logic and constants function differently now to allow for easy extension with a new class. With this comes the following changes:
+    * For saving, MessageBase (being the lowest one to currently contain bodies) has a few new properties. These properties represent the injection strings that will be injected into the bodies for the header, with an additional property to specify what properties map to what part of the format string. See `MessageBase.headerFormatProperties` for more information and an example of how to implement this in your own class.
+    * While all of the injection strings used by the module, definitions can be found in constants. However, the injection functions will request it from the instance of the class rather than the constants.
+* Fixed issue in encapsulated RTF header that caused the to field to not be present. I had to write them by hand, so it was bound to happen.
+
 **v0.34.3**
 * Fixed issue that may have caused other olefile types to raise the wrong type of error when passed to `openMsg`.
 * Fixed issues with changelog format.

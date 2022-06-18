@@ -42,20 +42,6 @@ RE_RTF_FALLBACK_PLAIN = re.compile(br'\\plain[^a-zA-Z0-9]')
 # sections and try to remove all of them to help with the decoding.
 RE_BIN = re.compile(br'\\bin([0-9]+) ?')
 
-# EntryID UID Types.
-EUID_PUBLIC_MESSAGE_STORE = b'\x1A\x44\x73\x90\xAA\x66\x11\xCD\x9B\xC8\x00\xAA\x00\x2F\xC4\x5A'
-EUID_PUBLIC_MESSAGE_STORE_HEX = '1A447390AA6611CD9BC800AA002FC45A'
-EUID_ADDRESS_BOOK_RECIPIENT = b'\xDC\xA7\x40\xC8\xC0\x42\x10\x1A\xB4\xB9\x08\x00\x2B\x2F\xE1\x82'
-EUID_ADDRESS_BOOK_RECIPIENT_HEX = 'DCA740C8C042101AB4B908002B2FE182'
-EUID_ONE_OFF_RECIPIENT = b'\x81\x2B\x1F\xA4\xBE\xA3\x10\x19\x9D\x6E\x00\xDD\x01\x0F\x54\x02'
-EUID_ONE_OFF_RECIPIENT_HEX = '812B1FA4BEA310199D6E00DD010F5402'
-# Contact address or personal distribution list recipient.
-EUID_CA_OR_PDL_RECIPIENT = b'\xFE\x42\xAA\x0A\x18\xC7\x1A\x10\xE8\x85\x0B\x65\x1C\x24\x00\x00'
-EUID_CA_OR_PDL_RECIPIENT_HEX = 'FE42AA0A18C71A10E8850B651C240000'
-EUID_NNTP_NEWSGROUP_FOLDER = b'\x38\xA1\xBB\x10\x05\xE5\x10\x1A\xA1\xBB\x08\x00\x2B\x2A\x56\xC2'
-EUID_NNTP_NEWSGROUP_FOLDER_HEX = '38A1BB1005E5101AA1BB08002B2A56C2'
-
-
 FIXED_LENGTH_PROPS = (
     0x0000,
     0x0001,
@@ -177,9 +163,11 @@ MULTIPLE_16_BYTES_HEX = (
 )
 
 # This is the header that will be injected into the html after being formatted
-# with the applicable data. Used entiries are `date`, `sender`, `to`, `subject`,
-# `cc`, `bcc`
-HTML_INJECTABLE_HEADER = """
+# with the applicable data. On Message instances, used entiries are `date`,
+# `sender`, `to`, `subject`, `cc`, `bcc`. On Post instances, used entries are
+# `sender`, `subject`, `convo`, and `date`.
+HTML_INJECTABLE_HEADERS = {}
+HTML_INJECTABLE_HEADERS['Message'] = """
 <div>
     <div>
         <p class="MsoNormal">
@@ -194,6 +182,20 @@ HTML_INJECTABLE_HEADER = """
     </div>
 </div>
 """.replace('    ', '').replace('\r', '').replace('\n', '')
+HTML_INJECTABLE_HEADERS['MessageSigned'] = HTML_INJECTABLE_HEADERS['Message']
+HTML_INJECTABLE_HEADERS['Post'] = """
+<div>
+    <div>
+        <p class="MsoNormal">
+            <b>From:</b>&nbsp;{sender}<br/>
+            <b>Posted At:</b>&nbsp;{date}<br/>
+            <b>Conversation:</b>&nbsp;{convo}<br/>
+            <b>Subject:</b>&nbsp;{subject}
+            <o:p></o:p>
+        </p>
+    </div>
+</div>
+""".replace('    ', '').replace('\r', '').replace('\n', '')
 
 # The header to be used for RTF files with encapsulated HTML. Uses the same
 # properties as the HTML header.
@@ -202,7 +204,8 @@ HTML_INJECTABLE_HEADER = """
 # FYI, < and > will need to be sanitized if you actually want it to be properly
 # compatible. "<" will become "{\*\htmltag84 &lt;}\htmlrtf <\htmlrtf0" and ">"
 # will become "{\*\htmltag84 &gt;}\htmlrtf >\htmlrtf0".
-RTF_ENC_INJECTABLE_HEADER = r"""
+RTF_PLAIN_INJECTABLE_HEADERS = {}
+RTF_PLAIN_INJECTABLE_HEADERS['Message'] = r"""
 {{
 {{\*\htmltag96 <div>}}
 {{\*\htmltag96 <div>}}
@@ -220,6 +223,14 @@ From: {{\*\htmltag92 </b>}}
 {{\*\htmltag84 <b>}}
 Sent: {{\*\htmltag92 </b>}}
 \htmlrtf \b0\htmlrtf0 {date}
+\htmlrtf }}\htmlrtf0
+{{\*\htmltag116 <br>}}
+\htmlrtf \line\htmlrtf0
+
+\htmlrtf {{\b\htmlrtf0
+{{\*\htmltag84 <b>}}
+To: {{\*\htmltag92 </b>}}
+\htmlrtf \b0\htmlrtf0 {To}
 \htmlrtf }}\htmlrtf0
 {{\*\htmltag116 <br>}}
 \htmlrtf \line\htmlrtf0
@@ -254,10 +265,56 @@ Subject: {{\*\htmltag92 </b>}}
 {{\*\htmltag104 </div>}}
 \htmlrtf }}\htmlrtf0
 """.replace('\r', '').replace('\n', '')
+RTF_PLAIN_INJECTABLE_HEADERS['MessageSigned'] = RTF_PLAIN_INJECTABLE_HEADERS['Message']
+RTF_PLAIN_INJECTABLE_HEADERS['Post'] = r"""
+{{
+{{\*\htmltag96 <div>}}
+{{\*\htmltag96 <div>}}
+{{\*\htmltag64 <p class=MsoNormal>}}
+
+\htmlrtf {{\b\htmlrtf0
+{{\*\htmltag84 <b>}}
+From: {{\*\htmltag92 </b>}}
+\htmlrtf \b0\htmlrtf0 {sender}
+\htmlrtf }}\htmlrtf0
+{{\*\htmltag116 <br>}}
+\htmlrtf \line\htmlrtf0
+
+\htmlrtf {{\b\htmlrtf0
+{{\*\htmltag84 <b>}}
+Posted At: {{\*\htmltag92 </b>}}
+\htmlrtf \b0\htmlrtf0 {date}
+\htmlrtf }}\htmlrtf0
+{{\*\htmltag116 <br>}}
+\htmlrtf \line\htmlrtf0
+
+\htmlrtf {{\b\htmlrtf0
+{{\*\htmltag84 <b>}}
+Conversation: {{\*\htmltag92 </b>}}
+\htmlrtf \b0\htmlrtf0 {convo}
+\htmlrtf }}\htmlrtf0
+{{\*\htmltag116 <br>}}
+\htmlrtf \line\htmlrtf0
+
+\htmlrtf {{\b\htmlrtf0
+{{\*\htmltag84 <b>}}
+Subject: {{\*\htmltag92 </b>}}
+\htmlrtf \b0\htmlrtf0 {subject}
+\htmlrtf }}\htmlrtf0
+{{\*\htmltag244 <o:p>}}
+{{\*\htmlrag252 </o:p>}}
+\htmlrtf \par\par\htmlrtf0
+
+{{\*\htmltag72 </p>}}
+{{\*\htmltag104 </div>}}
+{{\*\htmltag104 </div>}}
+\htmlrtf }}\htmlrtf0
+""".replace('\r', '').replace('\n', '')
 
 # The header to be used for plain RTF files. Uses the same properties as the
 # HTML header.
-RTF_PLAIN_INJECTABLE_HEADER = r"""
+RTF_PLAIN_INJECTABLE_HEADERS = {}
+RTF_PLAIN_INJECTABLE_HEADERS['Message'] = r"""
 {{
     {{\b From: \b0 {sender}}}\line
     {{\b Sent: \b0 {date}}}\line
@@ -267,10 +324,20 @@ RTF_PLAIN_INJECTABLE_HEADER = r"""
     {{\b Subject: \b0 {subject}}}\par\par
 }}
 """.replace('    ', '').replace('\r', '').replace('\n', '')
+RTF_PLAIN_INJECTABLE_HEADERS['MessageSigned'] = RTF_PLAIN_INJECTABLE_HEADERS['Message']
+RTF_PLAIN_INJECTABLE_HEADERS['Post'] = r"""
+{{
+    {{\b From: \b0 {sender}}}\line
+    {{\b Posted At: \b0 {date}}}\line
+    {{\b Conversation: \b0 {convo}}}\line
+    {{\b Subject: \b0 {subject}}}\par\par
+}}
+""".replace('    ', '').replace('\r', '').replace('\n', '')
 
 
 # Used to format the header for saving only the header.
-HEADER_FORMAT = """From: {From}
+HEADER_FORMATS = {}
+HEADER_FORMATS['Message'] = """From: {From}
 To: {To}
 CC: {Cc}
 Bcc: {Bcc}
@@ -572,8 +639,8 @@ STMF32 = struct.Struct('<f')
 STMF64 = struct.Struct('<d')
 # PermanentEntryID parsing struct
 STPEID = struct.Struct('<B3x16s4xI')
-# Structs for reading from a BytesReader (not yet implemented). Some are just
-# aliases for existing structs, used for clarity and consistency in the code.
+# Structs for reading from a BytesReader. Some are just aliases for existing
+# structs, used for clarity and consistency in the code.
 ST_LE_I8 = STI8
 ST_LE_I16 = STMI16
 ST_LE_I32 = STMI32

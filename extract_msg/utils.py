@@ -458,14 +458,16 @@ def injectHtmlHeader(msgFile, prepared : bool = False) -> bytes:
         """
         Internal function to replace the body tag with itself plus the header.
         """
-        return bodyMarker.group() + constants.HTML_INJECTABLE_HEADER.format(
+        # I recently had to change this and how it worked. Now we use a new
+        # property of `MSGFile` that returns a special tuple of tuples to define
+        # how to get all of the properties we are formatting. They are all
+        # processed in the same way, making everything neat. By defining them
+        # in each class, any class can specify a completely different set to be
+        # used.
+        return bodyMarker.group() + msgFile.htmlInjectableHeader.format(
         **{
-            'sender': inputToString(htmlEscape(msgFile.sender) if msgFile.sender else '', 'utf-8'),
-            'to': inputToString(htmlEscape(msgFile.to) if msgFile.to else '', 'utf-8'),
-            'cc': inputToString(htmlEscape(msgFile.cc) if msgFile.cc else '', 'utf-8'),
-            'bcc': inputToString(htmlEscape(msgFile.bcc) if msgFile.bcc else '', 'utf-8'),
-            'date': inputToString(msgFile.date, 'utf-8'),
-            'subject': inputToString(htmlEscape(msgFile.subject) if msgFile.subject else '', 'utf-8'),
+            name: inputToString(htmlEscape(getattr(msgFile, prop)), 'utf-8') if getattr(msgFile, prop) else ''
+            for name, prop in msgFile.headerFormatProperties
         }).encode('utf-8')
 
     # Use the previously defined function to inject the HTML header.
@@ -486,10 +488,10 @@ def injectRtfHeader(msgFile) -> bytes:
     # Try to determine which header to use. Also determines how to sanitize the
     # rtf.
     if isEncapsulatedRtf(msgFile.rtfBody):
-        injectableHeader = constants.RTF_ENC_INJECTABLE_HEADER
+        injectableHeader = msgFile.rtfEncapInjectableHeader
         rtfSanitize = rtfSanitizeHtml
     else:
-        injectableHeader = constants.RTF_PLAIN_INJECTABLE_HEADER
+        injectableHeader = msgFile.rtfPlainInjectableHeader
         rtfSanitize = rtfSanitizePlain
 
     def replace(bodyMarker):
@@ -498,12 +500,8 @@ def injectRtfHeader(msgFile) -> bytes:
         """
         return bodyMarker.group() + injectableHeader.format(
         **{
-            'sender': inputToString(rtfSanitize(msgFile.sender) if msgFile.sender else '', 'utf-8'),
-            'to': inputToString(rtfSanitize(msgFile.to) if msgFile.to else '', 'utf-8'),
-            'cc': inputToString(rtfSanitize(msgFile.cc) if msgFile.cc else '', 'utf-8'),
-            'bcc': inputToString(rtfSanitize(msgFile.bcc) if msgFile.bcc else '', 'utf-8'),
-            'date': inputToString(msgFile.date, 'utf-8'),
-            'subject': inputToString(rtfSanitize(msgFile.subject), 'utf-8'),
+            name: inputToString(rtfSanitize(getattr(msgFile, prop)), 'utf-8') if getattr(msgFile, prop) else ''
+            for name, prop in msgFile.headerFormatProperties
         }).encode('utf-8')
 
     # Use the previously defined function to inject the RTF header. We are
@@ -833,7 +831,7 @@ def parseType(_type : int, stream, encoding, extras):
         count = constants.STUI16.unpack(value[:2])
         # If the first byte is a 1 then it uses the ServerID structure.
         if value[3] == 1:
-            from .data import ServerID
+            from .structures.misc_id import ServerID
             return ServerID(value)
         else:
             return (count, value[2:count + 2])
