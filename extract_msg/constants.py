@@ -336,8 +336,7 @@ RTF_PLAIN_INJECTABLE_HEADERS['Post'] = r"""
 
 
 # Used to format the header for saving only the header.
-HEADER_FORMATS = {}
-HEADER_FORMATS['Message'] = """From: {From}
+HEADER_FORMAT = """From: {From}
 To: {To}
 Cc: {Cc}
 Bcc: {Bcc}
