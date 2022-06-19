@@ -76,6 +76,8 @@ class EntryIDType(enum.Enum):
     # Contact address or personal distribution list recipient.
     CA_OR_PDL_RECIPIENT = b'\xFE\x42\xAA\x0A\x18\xC7\x1A\x10\xE8\x85\x0B\x65\x1C\x24\x00\x00'
     NNTP_NEWSGROUP_FOLDER = b'\x38\xA1\xBB\x10\x05\xE5\x10\x1A\xA1\xBB\x08\x00\x2B\x2A\x56\xC2'
+    # [MS-OXOCNTC] WrappedEntryId Structure.
+    WRAPPED = b'\xC0\x91\xAD\xD3\x51\x9D\xCF\x11\xA4\xA9\x00\xAA\x00\x47\xFA\xA4'
 
 class EntryIDTypeHex(enum.Enum):
     """
@@ -94,6 +96,15 @@ class EntryIDTypeHex(enum.Enum):
     # Contact address or personal distribution list recipient.
     CA_OR_PDL_RECIPIENT = 'FE42AA0A18C71A10E8850B651C240000'
     NNTP_NEWSGROUP_FOLDER = '38A1BB1005E5101AA1BB08002B2A56C2'
+    # [MS-OXOCNTC] WrappedEntryId Structure.
+    WRAPPED = 'C091ADD3519DCF11A4A900AA0047FAA4'
+
+class Gender(enum.Enum):
+    # Seems rather binary, which is less than ideal. We are directly using the
+    # terms used by the documentation.
+    UNSPECIFIED = 0x0000
+    FEMALE = 0x0001
+    MALE = 0x0002
 
 class Guid(enum.Enum):
     PS_MAPI = '{00020328-0000-0000-C000-000000000046}'

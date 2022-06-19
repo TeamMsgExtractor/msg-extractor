@@ -9,6 +9,12 @@
     * While all of the injection strings used by the module, definitions can be found in constants. However, the injection functions will request it from the instance of the class rather than the constants.
 * Fixed issue in encapsulated RTF header that caused the "To" field to not be present. I had to write them by hand, so it was bound to happen.
 * All save code has been moved down from `Message` into `MessageBase` for convenience. `Message` exists now for specific checking and for future specializations. This also means that anything that is a `MessageBase` now has the entire framework for saving built-in, with easy way to change details.
+* Fixed bad property in `Contact`.
+* Created save function for `Contact`. Saving, though it exists, is rather minimal and is limited to plain text and HTML.
+* Significantly extended the `Contact` class's properties.
+* Adjusted the naming of a few `Contact` properties to better match the microsoft names.
+    * `firstName` -> `givenName`.
+    * `lastName` -> `surname`.
 
 **v0.34.3**
 * Fixed issue that may have caused other olefile types to raise the wrong type of error when passed to `openMsg`.
