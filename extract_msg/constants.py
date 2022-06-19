@@ -339,7 +339,7 @@ RTF_PLAIN_INJECTABLE_HEADERS['Post'] = r"""
 HEADER_FORMATS = {}
 HEADER_FORMATS['Message'] = """From: {From}
 To: {To}
-CC: {Cc}
+Cc: {Cc}
 Bcc: {Bcc}
 Subject: {subject}
 Date: {Date}

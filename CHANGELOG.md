@@ -4,10 +4,11 @@
 * Added support for many internal data structures, specifically Entry ID structures.
 * Refactored classes from `extract_msg.data` to submodule `extract_msg.structures`.
 * Added `python_requires` to setup.py as I noticed that it was missing.
-* Due to new saving requirements, adjusted the way header injection worked all around. Calling it is still done in the same way, but the internal logic and constants function differently now to allow for easy extension with a new class. With this comes the following changes:
-    * For saving, MessageBase (being the lowest one to currently contain bodies) has a few new properties. These properties represent the injection strings that will be injected into the bodies for the header, with an additional property to specify what properties map to what part of the format string. See `MessageBase.headerFormatProperties` for more information and an example of how to implement this in your own class.
+* Due to new saving requirements, adjusted the way header injection worked all around. Functions are now built-in to `MessageBase`. `getSaveXBody` functions have also been moved down to be defined in `MessageBase`. If the extension class needs to specify custom behaviors for creating the save bodies, these functions will need to be overridden.
+    * For saving, `MessageBase` (being the lowest one to currently contain bodies) has a few new properties. These properties represent the injection strings that will be injected into the bodies for the header, with an additional property to specify what properties map to what part of the format string. See `MessageBase.headerFormatProperties` for more information and an example of how to implement this in your own class.
     * While all of the injection strings used by the module, definitions can be found in constants. However, the injection functions will request it from the instance of the class rather than the constants.
-* Fixed issue in encapsulated RTF header that caused the to field to not be present. I had to write them by hand, so it was bound to happen.
+* Fixed issue in encapsulated RTF header that caused the "To" field to not be present. I had to write them by hand, so it was bound to happen.
+* All save code has been moved down from `Message` into `MessageBase` for convenience. `Message` exists now for specific checking and for future specializations. This also means that anything that is a `MessageBase` now has the entire framework for saving built-in, with easy way to change details.
 
 **v0.34.3**
 * Fixed issue that may have caused other olefile types to raise the wrong type of error when passed to `openMsg`.
