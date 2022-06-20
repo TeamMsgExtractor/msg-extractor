@@ -1,6 +1,8 @@
 import datetime
 
-from .enums import Gender
+from typing import Tuple, Set
+
+from .enums import ElectronicAddressProperties, Gender
 from .msg import MSGFile
 from .structures.entry_id import EntryID
 
@@ -38,6 +40,23 @@ class Contact(MSGFile):
         """
         # TODO.
         pass
+
+    @property
+    def addressBookProviderArrayType(self) -> Set[ElectronicAddressProperties]:
+        """
+        A set of which Electronic Address properties are set on the contact.
+
+        Property is stored in the MSG file as a sinlge int. The result should be
+        identical to addressBookProviderEmailList.
+        """
+        return self._ensureSetNamed('_addressBookProviderArrayType', '8029', ElectronicAddressProperties.fromBits)
+
+    @property
+    def addressBookProviderEmailList(self) -> Set[ElectronicAddressProperties]:
+        """
+        A set of which Electronic Address properties are set on the contact.
+        """
+        return self._ensureSetNamed('_addressBookProviderEmailList', '8028', overrideClass = lambda x : {ElectronicAddressProperties(y) for y in x})
 
     @property
     def birthday(self) -> datetime.datetime:

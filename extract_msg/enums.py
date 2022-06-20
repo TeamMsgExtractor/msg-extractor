@@ -1,5 +1,7 @@
 import enum
 
+from typing import Set
+
 
 class AddressBookType(enum.Enum):
     """
@@ -59,6 +61,28 @@ class DisplayType(enum.Enum):
     TEMPLATE = 0x0101
     ADDRESS_TEMPLATE = 0x0102
     SEARCH = 0x0200
+
+class ElectronicAddressProperties(enum.Enum):
+    @classmethod
+    def fromBits(cls, value : int) -> Set['ElectronicAddressProperties']:
+        """
+        Converts an int, with the left most bit referring to 0x00000000, to a
+        set of this enum.
+
+        :raises ValueError: The value was less than 0.
+        """
+        if value < 0:
+            raise ValueError('Value must not be negative.')
+        # This is a quick compressed way to convert the bits in the int into
+        # a tuple of instances of this class should any bit be a 1.
+        return tuple(cls(int(x)) for index, val in enumerate(bin(value)[:1:-1]) if val == '1')
+
+    EMAIL_1 = 0x00000000
+    EMAIL_2 = 0x00000001
+    EMAIL_3 = 0x00000002
+    BUSINESS_FAX = 0x00000003
+    HOME_FAX = 0x00000004
+    PRIMARY_FAX = 0x00000005
 
 class EntryIDType(enum.Enum):
     """

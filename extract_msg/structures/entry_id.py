@@ -46,6 +46,9 @@ class EntryID:
             else:
                 return PersonalDistributionList(data)
 
+        # If all else fails and we do recognize it, just return a plain EntryID.
+        return cls(data)
+
     def __init__(self, data : bytes):
         self.__flags = data[:4]
         self.__providerUID = data[4:20]
@@ -57,6 +60,14 @@ class EntryID:
         The flags for this Entry ID.
         """
         return self.__flags
+
+    @property
+    def entryIDType(self) -> EntryIDType:
+        """
+        Returns an instance of EntryIDType corresponding to the provider UID of
+        this EntryID. If none is found, raises a ValueError.
+        """
+        return EntryIDType(self.__providerUID)
 
     @property
     def longTerm(self) -> bool:
