@@ -46,11 +46,62 @@ class Contact(MSGFile):
         return self._ensureSetProperty('_birthday', '3A420040')
 
     @property
-    def businessFax(self) -> str:
+    def businessFax(self) -> dict:
+        """
+        Returns a dict of the data for the business fax. Returns None if no
+        fields are set.
+
+        Keys are "address_type", "email_address", "number",
+        "original_display_name", and "original_entry_id".
+        """
+        try:
+            return self._businessFax
+        except AttributeError:
+            data = {
+                'address_type': self.businessFaxAddressType,
+                'email_address': self.businessFaxEmailAddress,
+                'number': self.businessFaxNumber,
+                'original_display_name': self.businessFaxOriginalDisplayName,
+                'original_entry_id': self.businessFaxOriginalEntryId,
+            }
+            self._businessFax = data if any(data[x] for x in data) else None
+            return self._businessFax
+
+    @property
+    def businessFaxAddressType(self) -> str:
+        """
+        The type of address for the fax. MUST be set to "FAX" if present.
+        """
+        return self._ensureSetNamed('_businessFaxAddressType', '80C2')
+
+    @property
+    def businessFaxEmailAddress(self) -> str:
+        """
+        Contains a user-readable display name, followed by the "@" character,
+        followed by a fax number.
+        """
+        return self._ensureSetNamed('_businessFaxAddressType', '80C3')
+
+    @property
+    def businessFaxNumber(self) -> str:
         """
         Contains the number of the contact's business fax.
         """
-        return self._ensureSet('_businessFax', '__substg1.0_3A24')
+        return self._ensureSet('_businessFaxNumber', '__substg1.0_3A24')
+
+    @property
+    def businessFaxOriginalDisplayName(self) -> str:
+        """
+        The normalized subject for the contact.
+        """
+        return self._ensureSetNamed('_businessFaxAddressType', '80C4')
+
+    @property
+    def businessFaxOriginalEntryId(self) -> EntryID:
+        """
+        The one-off EntryID corresponding to this fax address.
+        """
+        return self._ensureSetNamed('_businessFaxAddressType', '80C5', overrideClass = EntryID.autoCreate)
 
     @property
     def businessPhone(self) -> str:
@@ -136,10 +187,14 @@ class Contact(MSGFile):
         """
         return self._ensureSet('_displayNamePrefix', '__substg1.0_3A45')
 
+    @property
     def email1(self) -> dict:
         """
         Returns a dict of the data for email 1. Returns None if no fields are
         set.
+
+        Keys are "address_type", "display_name", "email_address",
+        "original_display_name", and "original_entry_id".
         """
         try:
             return self._email1
@@ -190,6 +245,7 @@ class Contact(MSGFile):
         """
         return self._ensureSetNamed('_email1OriginalEntryId', '8085', overrideClass = EntryID.autoCreate)
 
+    @property
     def email2(self) -> dict:
         """
         Returns a dict of the data for email 2. Returns None if no fields are
@@ -315,7 +371,9 @@ class Contact(MSGFile):
     def faxNumbers(self) -> dict:
         """
         Returns a dictionary of the fax numbers. Entry will be None if no fields
-        were set. Keys are "primary", "business", and "home".
+        were set.
+        
+        Keys are "business", "home", and "primary".
         """
         try:
             return self._faxNumbers
@@ -363,6 +421,64 @@ class Contact(MSGFile):
         The first name of the contact.
         """
         return self._ensureSet('_givenName', '__substg1.0_3A06')
+
+    @property
+    def homeFax(self) -> dict:
+        """
+        Returns a dict of the data for the home fax. Returns None if no fields
+        are set.
+
+        Keys are "address_type", "email_address", "number",
+        "original_display_name", and "original_entry_id".
+        """
+        try:
+            return self._homeFax
+        except AttributeError:
+            data = {
+                'address_type': self.homeFaxAddressType,
+                'email_address': self.homeFaxEmailAddress,
+                'number': self.homeFaxNumber,
+                'original_display_name': self.homeFaxOriginalDisplayName,
+                'original_entry_id': self.homeFaxOriginalEntryId,
+            }
+            self._homeFax = data if any(data[x] for x in data) else None
+            return self._homeFax
+
+    @property
+    def homeFaxAddressType(self) -> str:
+        """
+        The type of address for the fax. MUST be set to "FAX" if present.
+        """
+        return self._ensureSetNamed('_businessFaxAddressType', '80D2')
+
+    @property
+    def homeFaxEmailAddress(self) -> str:
+        """
+        Contains a user-readable display name, followed by the "@" character,
+        followed by a fax number.
+        """
+        return self._ensureSetNamed('_homeFaxAddressType', '80D3')
+
+    @property
+    def homeFaxNumber(self) -> str:
+        """
+        Contains the number of the contact's home fax.
+        """
+        return self._ensureSet('_homeFaxNumber', '__substg1.0_3A25')
+
+    @property
+    def homeFaxOriginalDisplayName(self) -> str:
+        """
+        The normalized subject for the contact.
+        """
+        return self._ensureSetNamed('_homeFaxAddressType', '80D4')
+
+    @property
+    def homeFaxOriginalEntryId(self) -> EntryID:
+        """
+        The one-off EntryID corresponding to this fax address.
+        """
+        return self._ensureSetNamed('_homeFaxAddressType', '80D5', overrideClass = EntryID.autoCreate)
 
     @property
     def honorificTitle(self):
@@ -440,6 +556,64 @@ class Contact(MSGFile):
         The phonetic pronunciation of the given name of the contact.
         """
         return self._ensureSetNamed('_phoneticSurname', '802D')
+
+    @property
+    def primaryFax(self) -> dict:
+        """
+        Returns a dict of the data for the primary fax. Returns None if no
+        fields are set.
+
+        Keys are "address_type", "email_address", "number",
+        "original_display_name", and "original_entry_id".
+        """
+        try:
+            return self._primaryFax
+        except AttributeError:
+            data = {
+                'address_type': self.primaryFaxAddressType,
+                'email_address': self.primaryFaxEmailAddress,
+                'number': self.primaryFaxNumber,
+                'original_display_name': self.primaryFaxOriginalDisplayName,
+                'original_entry_id': self.primaryFaxOriginalEntryId,
+            }
+            self._primaryFax = data if any(data[x] for x in data) else None
+            return self._primaryFax
+
+    @property
+    def primaryFaxAddressType(self) -> str:
+        """
+        The type of address for the fax. MUST be set to "FAX" if present.
+        """
+        return self._ensureSetNamed('_primaryFaxAddressType', '80B2')
+
+    @property
+    def primaryFaxEmailAddress(self) -> str:
+        """
+        Contains a user-readable display name, followed by the "@" character,
+        followed by a fax number.
+        """
+        return self._ensureSetNamed('_primaryFaxAddressType', '80B3')
+
+    @property
+    def primaryFaxNumber(self) -> str:
+        """
+        Contains the number of the contact's primary fax.
+        """
+        return self._ensureSet('_primaryFaxNumber', '__substg1.0_3A23')
+
+    @property
+    def primaryFaxOriginalDisplayName(self) -> str:
+        """
+        The normalized subject for the contact.
+        """
+        return self._ensureSetNamed('_primaryFaxAddressType', '80B4')
+
+    @property
+    def primaryFaxOriginalEntryId(self) -> EntryID:
+        """
+        The one-off EntryID corresponding to this fax address.
+        """
+        return self._ensureSetNamed('_primaryFaxAddressType', '80B5', overrideClass = EntryID.autoCreate)
 
     @property
     def spouseName(self) -> str:
