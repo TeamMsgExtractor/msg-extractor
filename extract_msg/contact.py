@@ -2,6 +2,7 @@ import datetime
 
 from .enums import Gender
 from .msg import MSGFile
+from .structures.entry_id import EntryID
 
 
 class Contact(MSGFile):
@@ -372,7 +373,7 @@ class Contact(MSGFile):
         """
         Returns a dictionary of the fax numbers. Entry will be None if no fields
         were set.
-        
+
         Keys are "business", "home", and "primary".
         """
         try:
