@@ -59,6 +59,13 @@ class Contact(MSGFile):
         return self._ensureSetNamed('_addressBookProviderEmailList', '8028', overrideClass = lambda x : {ElectronicAddressProperties(y) for y in x})
 
     @property
+    def assistantTelephoneNumber(self) -> str:
+        """
+        Contains the telephone number of the contact's administrative assistant.
+        """
+        return self._ensureSet('_assistantTelephoneNumber', '__substg1.0_3A2E')
+
+    @property
     def birthday(self) -> datetime.datetime:
         """
         The birthday of the contact.
@@ -124,18 +131,18 @@ class Contact(MSGFile):
         return self._ensureSetNamed('_businessFaxOriginalEntryId', '80C5', overrideClass = EntryID.autoCreate)
 
     @property
-    def businessTelephone(self) -> str:
+    def businessTelephoneNumber(self) -> str:
         """
         Contains the number of the contact's business telephone.
         """
-        return self._ensureSet('_businessTelephone', '__substg1.0_3A08')
+        return self._ensureSet('_businessTelephoneNumber', '__substg1.0_3A08')
 
     @property
-    def businessTelephone2(self) -> Union[str, List[str]]:
+    def businessTelephone2Number(self) -> Union[str, List[str]]:
         """
         Contains the second number or numbers of the contact's business.
         """
-        return self._ensureSet('_businessTelephone2', '__substg1.0_3A1B')
+        return self._ensureSetTyped('_businessTelephone2Number', '3A1B')
 
     @property
     def businessUrl(self) -> str:
@@ -145,25 +152,25 @@ class Contact(MSGFile):
         return self._ensureSet('_businessUrl', '__substg1.0_3A51')
 
     @property
-    def callbackPhone(self) -> str:
+    def callbackTelephoneNumber(self) -> str:
         """
-        Contains the contact's callback phone number.
+        Contains the contact's callback telephone number.
         """
-        return self._ensureSet('_callbackPhone', '__substg1.0_3A02')
+        return self._ensureSet('_callbackTelephoneNumber', '__substg1.0_3A02')
 
     @property
-    def carPhone(self) -> str:
+    def carTelephoneNumber(self) -> str:
         """
-        Contains the number of the contact's car phone.
+        Contains the number of the contact's car telephone.
         """
-        return self._ensureSet('_carPhone', '__substg1.0_3A1E')
+        return self._ensureSet('_carTelephoneNumber', '__substg1.0_3A1E')
 
     @property
-    def companyMainPhone(self) -> str:
+    def companyMainTelephoneNumber(self) -> str:
         """
-        Contains the number of the main phone of the contact's company.
+        Contains the number of the main telephone of the contact's company.
         """
-        return self._ensureSet('_companyMainPhone', '__substg1.0_3A57')
+        return self._ensureSet('_companyMainTelephoneNumber', '__substg1.0_3A57')
 
     @property
     def companyName(self) -> str:
@@ -543,21 +550,43 @@ class Contact(MSGFile):
         return self._ensureSetNamed('_homeFaxOriginalEntryId', '80D5', overrideClass = EntryID.autoCreate)
 
     @property
-    def initials(self):
+    def homeTelephoneNumber(self) -> str:
+        """
+        The number of the contact's home telephone.
+        """
+        return self._ensureSet('_homeTelephoneNumber', '__substg1.0_3A09')
+
+    @property
+    def homeTelephone2Number(self) -> Union[str, List[str]]:
+        """
+        The number(s) of the contact's second home telephone.
+        """
+        return self._ensureSetTyped('_homeTelephoneNumber', '3A2F')
+
+    @property
+    def initials(self) -> str:
         """
         The initials of the contact.
         """
         return self._ensureSet('_initials', '__substg1.0_3A0A')
 
     @property
-    def instantMessagingAddress(self):
+    def instantMessagingAddress(self) -> str:
         """
         The instant messaging address of the contact.
         """
         return self._ensureSetNamed('_instantMessagingAddress', '8062')
 
     @property
-    def jobTitle(self):
+    def isdnNumber(self) -> str:
+        """
+        The Integrated Services Digital Network (ISDN) telephone number of the
+        contact.
+        """
+        return self._ensureSet('_isdnNumber', '__substg1.0_3A2D')
+
+    @property
+    def jobTitle(self) -> str:
         """
         The job title of the contact.
         """
@@ -634,11 +663,11 @@ class Contact(MSGFile):
         return self._ensureSet('_middleNames', '__substg1.0_3A44')
 
     @property
-    def mobileTelephone(self) -> str:
+    def mobileTelephoneNumber(self) -> str:
         """
         The mobile telephone number of the contact.
         """
-        return self._ensureSet('_mobileTelephone', '__substg1.0_3A1C')
+        return self._ensureSet('_mobileTelephoneNumber', '__substg1.0_3A1C')
 
     @property
     def nickname(self) -> str:
@@ -702,6 +731,13 @@ class Contact(MSGFile):
         The street portion of the contact's other address.
         """
         return self._ensureSet('_otherAddressStreet', '__substg1.0_3A63')
+
+    @property
+    def otherTelephoneNumber(self) -> str:
+        """
+        Contains the number of the contact's other telephone.
+        """
+        return self._ensureSet('_otherTelephoneNumber', '__substg1.0_3A1F')
 
     @property
     def pagerTelephoneNumber(self) -> str:
@@ -791,6 +827,20 @@ class Contact(MSGFile):
         return self._ensureSetNamed('_primaryFaxOriginalEntryId', '80B5', overrideClass = EntryID.autoCreate)
 
     @property
+    def primaryTelephoneNumber(self) -> str:
+        """
+        Contains the number of the contact's primary telephone.
+        """
+        return self._ensureSet('_primaryTelephoneNumber', '__substg1.0_3A1A')
+
+    @property
+    def radioTelephoneNumber(self) -> str:
+        """
+        Contains the number of the contact's radio telephone.
+        """
+        return self._ensureSet('_radioTelephoneNumber', '__substg1.0_3A1D')
+
+    @property
     def spouseName(self) -> str:
         """
         The name of the contact's spouse.
@@ -803,6 +853,21 @@ class Contact(MSGFile):
         The surname of the contact.
         """
         return self._ensureSet('_surname', '__substg1.0_3A11')
+
+    @property
+    def tddTelephoneNumber(self) -> str:
+        """
+        The telephone number for the contact's text telephone (TTY) or
+        telecommunication device for the deaf (TDD).
+        """
+        return self._ensureSet('_homeTelephoneNumber', '__substg1.0_3A4B')
+
+    @property
+    def telexNumber(self) -> Union[str, List[str]]:
+        """
+        The contact's telex number(s).
+        """
+        return self._ensureSetTyped('_telexNumber', '3A2C')
 
     @property
     def workAddress(self) -> str:

@@ -21,8 +21,8 @@ def main(args):
             with open(name, 'r', encoding = 'utf-8') as f:
                 data = f.read()
 
-            names = [x.group(5) for x in pattern.finditer(data)]
-            ids = [x.group(6) for x in pattern.finditer(data)]
+            names = tuple(sorted(x.group(5) for x in pattern.finditer(data)))
+            ids = tuple(sorted(x.group(6) for x in pattern.finditer(data)))
 
             duplicateNamesFound = len(names) != len(list(set(names)))
             duplicateIdsFound = len(ids) != len(list(set(names)))
@@ -48,7 +48,7 @@ def main(args):
                         print(f'\t\t{x}')
 
             if not duplicateIdsFound and not duplicateNamesFound:
-                print('\tNo Duplicates detected.')
+                print('\tNo duplicates detected.')
 
             print()
 
