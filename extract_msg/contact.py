@@ -59,6 +59,13 @@ class Contact(MSGFile):
         return self._ensureSetNamed('_addressBookProviderEmailList', '8028', overrideClass = lambda x : {ElectronicAddressProperties(y) for y in x})
 
     @property
+    def assistant(self) -> str:
+        """
+        The nme of the contact's assistant.
+        """
+        return self._ensureSet('_assistant', '__substg1.0_3A30')
+
+    @property
     def assistantTelephoneNumber(self) -> str:
         """
         Contains the telephone number of the contact's administrative assistant.
@@ -68,9 +75,24 @@ class Contact(MSGFile):
     @property
     def birthday(self) -> datetime.datetime:
         """
-        The birthday of the contact.
+        The birthday of the contact at 11:59 UTC.
         """
         return self._ensureSetProperty('_birthday', '3A420040')
+
+    @property
+    def birthdayEventEntryID(self) -> EntryID:
+        """
+        The EntryID of an optional Appointement object that represents the
+        contact's birtday.
+        """
+        return self._ensureSetNamed('_birthdayEventEntryID', '804D', overrideClass = EntryID.autoCreate)
+
+    @property
+    def birthdayLocal(self) -> datetime.datetime:
+        """
+        The birthday of the contact at 0:00 in the client's local time zone.
+        """
+        return self._ensureSetNamed('_birthdayLocal', '80DE')
 
     @property
     def businessFax(self) -> dict:
@@ -656,7 +678,14 @@ class Contact(MSGFile):
         return self._ensureSet('_mailAddressStreet', '__substg1.0_3A29')
 
     @property
-    def middleNames(self) -> str:
+    def managerName(self) -> str:
+        """
+        The name of the contact's manager.
+        """
+        return self._ensureSet('_managerName', '__substg1.0_3A4E')
+
+    @property
+    def middleName(self) -> str:
         """
         The middle name(s) of the contact.
         """
@@ -675,6 +704,13 @@ class Contact(MSGFile):
         The nickname of the contanct.
         """
         return self._ensureSet('_nickname', '__substg1.0_3A4F')
+
+    @property
+    def officeLocation(self) -> str:
+        """
+        The location of the office that the contact works in.
+        """
+        return self.__ensureSet('_officeLocation', '__substg1.0_3A19')
 
     @property
     def otherAddress(self) -> str:
@@ -747,9 +783,16 @@ class Contact(MSGFile):
         return self._ensureSet('_pagerTelephoneNumber', '__substg1.0_3A21')
 
     @property
+    def phoneticCompanyName(self) -> str:
+        """
+        The phonetic pronunciation of the contact's company name.
+        """
+        return self._ensureSetNamed('_phoneticCompanyName', '802E')
+
+    @property
     def phoneticGivenName(self) -> str:
         """
-        The phonetic pronunciation of the given name of the contact.
+        The phonetic pronunciation of the contact's given name.
         """
         return self._ensureSetNamed('_phoneticGivenName', '802C')
 
@@ -868,6 +911,29 @@ class Contact(MSGFile):
         The contact's telex number(s).
         """
         return self._ensureSetTyped('_telexNumber', '3A2C')
+
+    @property
+    def weddingAnniversary(self) -> datetime.datetime:
+        """
+        The wedding anniversary of the contact at 11:59 UTC.
+        """
+        return self._ensureSetProperty('_weddingAnniversary', '3A410040')
+
+    @property
+    def weddingAnniversaryEventEntryID(self) -> EntryID:
+        """
+        The EntryID of an optional Appointement object that represents the
+        contact's wedding anniversary.
+        """
+        return self._ensureSetNamed('_weddingAnniversaryEventEntryID', '804E', overrideClass = EntryID.autoCreate)
+
+    @property
+    def weddingAnniversaryLocal(self) -> datetime.datetime:
+        """
+        The wedding anniversary of the contact at 0:00 in the client's local
+        time zone.
+        """
+        return self._ensureSetNamed('_weddingAnniversaryLocal', '80DF')
 
     @property
     def workAddress(self) -> str:

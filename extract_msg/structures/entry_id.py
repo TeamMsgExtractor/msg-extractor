@@ -46,6 +46,7 @@ class EntryID:
             else:
                 return PersonalDistributionList(data)
 
+        logger.warn(f'UID for EntryID found in database, but no class was specified for it: {providerUID}')
         # If all else fails and we do recognize it, just return a plain EntryID.
         return cls(data)
 
