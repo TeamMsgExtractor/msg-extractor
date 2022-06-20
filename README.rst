@@ -182,7 +182,6 @@ Here is a list of things that are currently on our todo list:
 * Tests (ie. unittest)
 * Finish writing a usage guide
 * Improve the intelligence of the saving functions
-* Improve handling of named properties
 * Improve README
 * Create a wiki for advanced usage information
 
