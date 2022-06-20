@@ -1,6 +1,6 @@
 import datetime
 
-from typing import Tuple, Set
+from typing import List, Set, Tuple, Union
 
 from .enums import ElectronicAddressProperties, Gender, PostalAddressID
 from .msg import MSGFile
@@ -100,7 +100,7 @@ class Contact(MSGFile):
         Contains a user-readable display name, followed by the "@" character,
         followed by a fax number.
         """
-        return self._ensureSetNamed('_businessFaxAddressType', '80C3')
+        return self._ensureSetNamed('_businessFaxEmailAddress', '80C3')
 
     @property
     def businessFaxNumber(self) -> str:
@@ -114,35 +114,35 @@ class Contact(MSGFile):
         """
         The normalized subject for the contact.
         """
-        return self._ensureSetNamed('_businessFaxAddressType', '80C4')
+        return self._ensureSetNamed('_businessFaxOriginalDisplayName', '80C4')
 
     @property
     def businessFaxOriginalEntryId(self) -> EntryID:
         """
         The one-off EntryID corresponding to this fax address.
         """
-        return self._ensureSetNamed('_businessFaxAddressType', '80C5', overrideClass = EntryID.autoCreate)
+        return self._ensureSetNamed('_businessFaxOriginalEntryId', '80C5', overrideClass = EntryID.autoCreate)
 
     @property
-    def businessPhone(self) -> str:
+    def businessTelephone(self) -> str:
         """
-        Contains the number of the contact's business phone.
+        Contains the number of the contact's business telephone.
         """
-        return self._ensureSet('_businessPhone', '__substg1.0_3A08')
+        return self._ensureSet('_businessTelephone', '__substg1.0_3A08')
 
     @property
-    def businessPhone2(self) -> str:
+    def businessTelephone2(self) -> Union[str, List[str]]:
         """
         Contains the second number or numbers of the contact's business.
         """
-        return self._ensureSetTyped('_businessPhone2', '3A1B')
+        return self._ensureSet('_businessTelephone2', '__substg1.0_3A1B')
 
     @property
     def businessUrl(self) -> str:
         """
         Contains the url of the homepage of the contact's business.
         """
-        return self._ensureSet('_businessPhone', '__substg1.0_3A51')
+        return self._ensureSet('_businessUrl', '__substg1.0_3A51')
 
     @property
     def callbackPhone(self) -> str:
@@ -163,7 +163,7 @@ class Contact(MSGFile):
         """
         Contains the number of the main phone of the contact's company.
         """
-        return self._ensureSet('_businessPhone', '__substg1.0_3A57')
+        return self._ensureSet('_companyMainPhone', '__substg1.0_3A57')
 
     @property
     def companyName(self) -> str:
@@ -511,7 +511,7 @@ class Contact(MSGFile):
         """
         The type of address for the fax. MUST be set to "FAX" if present.
         """
-        return self._ensureSetNamed('_businessFaxAddressType', '80D2')
+        return self._ensureSetNamed('_homeFaxAddressType', '80D2')
 
     @property
     def homeFaxEmailAddress(self) -> str:
@@ -519,7 +519,7 @@ class Contact(MSGFile):
         Contains a user-readable display name, followed by the "@" character,
         followed by a fax number.
         """
-        return self._ensureSetNamed('_homeFaxAddressType', '80D3')
+        return self._ensureSetNamed('_homeFaxEmailAddress', '80D3')
 
     @property
     def homeFaxNumber(self) -> str:
@@ -533,14 +533,14 @@ class Contact(MSGFile):
         """
         The normalized subject for the contact.
         """
-        return self._ensureSetNamed('_homeFaxAddressType', '80D4')
+        return self._ensureSetNamed('_homeFaxOriginalDisplayName', '80D4')
 
     @property
     def homeFaxOriginalEntryId(self) -> EntryID:
         """
         The one-off EntryID corresponding to this fax address.
         """
-        return self._ensureSetNamed('_homeFaxAddressType', '80D5', overrideClass = EntryID.autoCreate)
+        return self._ensureSetNamed('_homeFaxOriginalEntryId', '80D5', overrideClass = EntryID.autoCreate)
 
     @property
     def initials(self):
@@ -634,11 +634,11 @@ class Contact(MSGFile):
         return self._ensureSet('_middleNames', '__substg1.0_3A44')
 
     @property
-    def mobilePhone(self) -> str:
+    def mobileTelephone(self) -> str:
         """
-        The mobile phone number of the contact.
+        The mobile telephone number of the contact.
         """
-        return self._ensureSet('_mobilePhone', '__substg1.0_3A1C')
+        return self._ensureSet('_mobileTelephone', '__substg1.0_3A1C')
 
     @property
     def nickname(self) -> str:
@@ -704,6 +704,13 @@ class Contact(MSGFile):
         return self._ensureSet('_otherAddressStreet', '__substg1.0_3A63')
 
     @property
+    def pagerTelephoneNumber(self) -> str:
+        """
+        The contact's pager telephone number.
+        """
+        return self._ensureSet('_pagerTelephoneNumber', '__substg1.0_3A21')
+
+    @property
     def phoneticGivenName(self) -> str:
         """
         The phonetic pronunciation of the given name of the contact.
@@ -760,7 +767,7 @@ class Contact(MSGFile):
         Contains a user-readable display name, followed by the "@" character,
         followed by a fax number.
         """
-        return self._ensureSetNamed('_primaryFaxAddressType', '80B3')
+        return self._ensureSetNamed('_primaryFaxEmailAddress', '80B3')
 
     @property
     def primaryFaxNumber(self) -> str:
@@ -774,14 +781,14 @@ class Contact(MSGFile):
         """
         The normalized subject for the contact.
         """
-        return self._ensureSetNamed('_primaryFaxAddressType', '80B4')
+        return self._ensureSetNamed('_primaryFaxOriginalDisplayName', '80B4')
 
     @property
     def primaryFaxOriginalEntryId(self) -> EntryID:
         """
         The one-off EntryID corresponding to this fax address.
         """
-        return self._ensureSetNamed('_primaryFaxAddressType', '80B5', overrideClass = EntryID.autoCreate)
+        return self._ensureSetNamed('_primaryFaxOriginalEntryId', '80B5', overrideClass = EntryID.autoCreate)
 
     @property
     def spouseName(self) -> str:

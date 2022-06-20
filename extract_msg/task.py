@@ -30,7 +30,7 @@ class Task(MessageBase):
         """
         Indicates the acceptance state of the task.
         """
-        return self._ensureSetNamed('_percentComplete', '812A', overrideClass = TaskAcceptance)
+        return self._ensureSetNamed('_taskAcceptanceState', '812A', overrideClass = TaskAcceptance)
 
     @property
     def taskActualEffort(self) -> int:
@@ -45,7 +45,7 @@ class Task(MessageBase):
         """
         Specifies the name of the user that last assigned the task.
         """
-        return self._ensureSetNamed('_taskAssigner', '811F')
+        return self._ensureSetNamed('_taskAssigner', '8121')
 
     @property
     def taskComplete(self) -> bool:
@@ -67,7 +67,7 @@ class Task(MessageBase):
         Specifies the date by which the user expects work on the task to be
         complete.
         """
-        return self._ensureSetNamed('_taskStartDate', '8105')
+        return self._ensureSetNamed('_taskDueDate', '8105')
 
     @property
     def taskEstimatedEffort(self) -> int:

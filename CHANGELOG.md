@@ -15,7 +15,10 @@
 * Adjusted the naming of a few `Contact` properties to better match the microsoft names.
     * `firstName` -> `givenName`.
     * `lastName` -> `surname`.
+    * `businessPhone` -> `businessTelephone`
+    * Etc.
 * Changed existing fax properties to give a dictionary of the properties they actually contain rather than just the number. This makes them behave like the newly added email properties.
+* Fixed issues with `Task` properties being incorrect.
 
 **v0.34.3**
 * Fixed issue that may have caused other olefile types to raise the wrong type of error when passed to `openMsg`.
