@@ -138,15 +138,21 @@ class Contact(MSGFile):
 
     def email1(self) -> dict:
         """
-        Returns a dict of the data for email 1.
+        Returns a dict of the data for email 1. Returns None if no fields are
+        set.
         """
-        return {
-            'address_type': self.email1AddressType,
-            'display_name': self.email1DisplayName,
-            'email_address': self.email1EmailAddress,
-            'original_display_name': self.email1OriginalDisplayName,
-            'original_entry_id': self.email1OriginalEntryId,
-        }
+        try:
+            return self._email1
+        except AttributeError:
+            data = {
+                'address_type': self.email1AddressType,
+                'display_name': self.email1DisplayName,
+                'email_address': self.email1EmailAddress,
+                'original_display_name': self.email1OriginalDisplayName,
+                'original_entry_id': self.email1OriginalEntryId,
+            }
+            self._email1 = data if any(data[x] for x in data) else None
+            return self._email1
 
     @property
     def email1AddressType(self) -> str:
@@ -186,15 +192,21 @@ class Contact(MSGFile):
 
     def email2(self) -> dict:
         """
-        Returns a dict of the data for email 2.
+        Returns a dict of the data for email 2. Returns None if no fields are
+        set.
         """
-        return {
-            'address_type': self.email2AddressType,
-            'display_name': self.email2DisplayName,
-            'email_address': self.email2EmailAddress,
-            'original_display_name': self.email2OriginalDisplayName,
-            'original_entry_id': self.email2OriginalEntryId,
-        }
+        try:
+            return self._email2
+        except AttributeError:
+            data = {
+                'address_type': self.email2AddressType,
+                'display_name': self.email2DisplayName,
+                'email_address': self.email2EmailAddress,
+                'original_display_name': self.email2OriginalDisplayName,
+                'original_entry_id': self.email2OriginalEntryId,
+            }
+            self._email2 = data if any(data[x] for x in data) else None
+            return self._email2
 
     @property
     def email2AddressType(self) -> str:
@@ -235,15 +247,21 @@ class Contact(MSGFile):
     @property
     def email3(self) -> dict:
         """
-        Returns a dict of the data for email 3.
+        Returns a dict of the data for email 3. Returns None if no fields are
+        set.
         """
-        return {
-            'address_type': self.email3AddressType,
-            'display_name': self.email3DisplayName,
-            'email_address': self.email3EmailAddress,
-            'original_display_name': self.email3OriginalDisplayName,
-            'original_entry_id': self.email3OriginalEntryId,
-        }
+        try:
+            return self._email3
+        except AttributeError:
+            data = {
+                'address_type': self.email3AddressType,
+                'display_name': self.email3DisplayName,
+                'email_address': self.email3EmailAddress,
+                'original_display_name': self.email3OriginalDisplayName,
+                'original_entry_id': self.email3OriginalEntryId,
+            }
+            self._email3 = data if any(data[x] for x in data) else None
+            return self._email3
 
     @property
     def email3AddressType(self) -> str:
@@ -282,6 +300,33 @@ class Contact(MSGFile):
         return self._ensureSetNamed('_email3OriginalEntryId', '80A5', overrideClass = EntryID.autoCreate)
 
     @property
+    def emails(self) -> tuple:
+        """
+        Returns a tuple of all the email dicts. Value for an email will be None
+        if no fields were set.
+        """
+        try:
+            return self._emails
+        except AttributeError:
+            self._emails = (self.email1, self.email2, self.email3)
+            return self._emails
+
+    @property
+    def faxNumbers(self) -> dict:
+        """
+        Returns a dictionary of the fax numbers. Entry will be None if no fields
+        were set. Keys are "primary", "business", and "home".
+        """
+        try:
+            return self._faxNumbers
+        except AttributeError:
+            self._faxNumbers = {
+                'business': self.businessFax,
+                'home': self.homeFax,
+                'primary': self.primaryFax,
+            }
+
+    @property
     def fileUnder(self) -> str:
         """
         The name under which to file a contact when displaying a list of
@@ -302,6 +347,7 @@ class Contact(MSGFile):
         """
         The gender of the contact.
         """
+        return self._ensureSet('_gender', '__substg1.0_3A4D')
 
     @property
     def generation(self):
@@ -382,42 +428,42 @@ class Contact(MSGFile):
         return self._ensureSet('_nickname', '__substg1.0_3A4F')
 
     @property
-    def phoneticGivenName(self):
+    def phoneticGivenName(self) -> str:
         """
         The phonetic pronunciation of the given name of the contact.
         """
         return self._ensureSetNamed('_phoneticGivenName', '802C')
 
     @property
-    def phoneticSurname(self):
+    def phoneticSurname(self) -> str:
         """
         The phonetic pronunciation of the given name of the contact.
         """
         return self._ensureSetNamed('_phoneticSurname', '802D')
 
     @property
-    def spouseName(self):
+    def spouseName(self) -> str:
         """
         The name of the contact's spouse.
         """
         return self._ensureSet('_spouseName', '__substg1.0_3A48')
 
     @property
-    def state(self):
+    def state(self) -> str:
         """
         The state or province that the contact lives in.
         """
         return self._ensureSet('_state', '__substg1.0_3A28')
 
     @property
-    def surname(self):
+    def surname(self) -> str:
         """
         The surname of the contact.
         """
         return self._ensureSet('_surname', '__substg1.0_3A11')
 
     @property
-    def workAddress(self):
+    def workAddress(self) -> str:
         """
         The work address of the contact.
         """
