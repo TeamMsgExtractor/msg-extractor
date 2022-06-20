@@ -187,6 +187,12 @@ class OORBodyFormat(enum.Enum):
     # also prevent the code from failing on a 0 format.
     UNSPECIFIED = 0b0000
 
+class PostalAddressID(enum.Enum):
+    UNSPECIFIED = 0x00000000
+    HOME = 0x00000001
+    WORK = 0x00000002
+    OTHER = 0x00000003
+
 class Priority(enum.Enum):
     URGENT = 0x00000001
     NORMAL = 0x00000000

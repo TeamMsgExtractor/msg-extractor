@@ -2,7 +2,7 @@ import datetime
 
 from typing import Tuple, Set
 
-from .enums import ElectronicAddressProperties, Gender
+from .enums import ElectronicAddressProperties, Gender, PostalAddressID
 from .msg import MSGFile
 from .structures.entry_id import EntryID
 
@@ -147,16 +147,9 @@ class Contact(MSGFile):
     @property
     def callbackPhone(self) -> str:
         """
-        Contains the number of the contact's car phone.
-        """
-        return self._ensureSet('_carPhone', '__substg1.0_3A1E')
-
-    @property
-    def callbackPhone(self) -> str:
-        """
         Contains the contact's callback phone number.
         """
-        return self._ensureSet('_callbackPhone', '__substg1.0_3A1E')
+        return self._ensureSet('_callbackPhone', '__substg1.0_3A02')
 
     @property
     def carPhone(self) -> str:
@@ -178,13 +171,6 @@ class Contact(MSGFile):
         The name of the company the contact works at.
         """
         return self._ensureSet('_companyName', '__substg1.0_3A16')
-
-    @property
-    def country(self) -> str:
-        """
-        The country the contact lives in.
-        """
-        return self._ensureSet('_country', '__substg1.0_3A26')
 
     @property
     def departmentName(self) -> str:
@@ -443,6 +429,62 @@ class Contact(MSGFile):
         return self._ensureSet('_givenName', '__substg1.0_3A06')
 
     @property
+    def homeAddress(self) -> str:
+        """
+        The complete home address of the contact.
+        """
+        return self._ensureSetNamed('_homeAddress', '801A')
+
+    @property
+    def homeAddressCountry(self) -> str:
+        """
+        The country portion of the contact's home address.
+        """
+        return self._ensureSet('_homeAddressCountry', '__substg1.0_3A5A')
+
+    @property
+    def homeAddressCountryCode(self) -> str:
+        """
+        The country code portion of the contact's home address.
+        """
+        return self._ensureSetNamed('_homeAddressCountryCode', '80DA')
+
+    @property
+    def homeAddressLocality(self) -> str:
+        """
+        The locality or city portion of the contact's home address.
+        """
+        return self._ensureSet('_homeAddressLocality', '__substg1.0_3A59')
+
+    @property
+    def homeAddressPostalCode(self) -> str:
+        """
+        The postal code portion of the contact's home address.
+        """
+        return self._ensureSet('_homeAddressPostalCode', '__substg1.0_3A5B')
+
+    @property
+    def homeAddressPostOfficeBox(self) -> str:
+        """
+        The number or identifier of the contact's home post office box.
+        """
+        return self._ensureSet('_homeAddressPostOfficeBox', '__substg1.0_3A5E')
+
+    @property
+    def homeAddressStateOrProvince(self) -> str:
+        """
+        The state or province portion of the contact's home address.
+        """
+        return self._ensureSet('_homeAddressStateOrProvince', '__substg1.0_3A5C')
+
+    @property
+    def homeAddressStreet(self) -> str:
+        """
+        The street portion of the contact's home address.
+        """
+        return self._ensureSet('_homeAddressStreet', '__substg1.0_3A5D')
+
+    @property
     def homeFax(self) -> dict:
         """
         Returns a dict of the data for the home fax. Returns None if no fields
@@ -501,13 +543,6 @@ class Contact(MSGFile):
         return self._ensureSetNamed('_homeFaxAddressType', '80D5', overrideClass = EntryID.autoCreate)
 
     @property
-    def honorificTitle(self):
-        """
-        The honorific title of the contact.
-        """
-        return self._ensureSet('_honorificTitle', '__substg1.0_3A45')
-
-    @property
     def initials(self):
         """
         The initials of the contact.
@@ -529,39 +564,144 @@ class Contact(MSGFile):
         return self._ensureSet('_jobTitle', '__substg1.0_3A17')
 
     @property
-    def lastModifiedBy(self):
+    def lastModifiedBy(self) -> str:
         """
         The name of the last user to modify the contact file.
         """
         return self._ensureSet('_lastModifiedBy', '__substg1.0_3FFA')
 
     @property
-    def locality(self):
+    def mailAddress(self) -> str:
         """
-        The locality (such as town or city) of the contact.
+        The complete mail address of the contact.
         """
-        return self._ensureSet('_locality', '__substg1.0_3A27')
+        return self._ensureSet('_mailAddress', '__substg1.0_3A15')
 
     @property
-    def middleNames(self):
+    def mailAddressCountry(self) -> str:
+        """
+        The country portion of the contact's mail address.
+        """
+        return self._ensureSet('_mailAddressCountry', '__substg1.0_3A26')
+
+    @property
+    def mailAddressCountryCode(self) -> str:
+        """
+        The country code portion of the contact's mail address.
+        """
+        return self._ensureSetNamed('_mailAddressCountryCode', '80DD')
+
+    @property
+    def mailAddressLocality(self) -> str:
+        """
+        The locality or city portion of the contact's mail address.
+        """
+        return self._ensureSet('_mailAddressLocality', '__substg1.0_3A27')
+
+    @property
+    def mailAddressPostalCode(self) -> str:
+        """
+        The postal code portion of the contact's mail address.
+        """
+        return self._ensureSet('_mailAddressPostalCode', '__substg1.0_3A2A')
+
+    @property
+    def mailAddressPostOfficeBox(self) -> str:
+        """
+        The number or identifier of the contact's mail post office box.
+        """
+        return self._ensureSet('_mailAddressPostOfficeBox', '__substg1.0_3A2B')
+
+    @property
+    def mailAddressStateOrProvince(self) -> str:
+        """
+        The state or province portion of the contact's mail address.
+        """
+        return self._ensureSet('_mailAddressStateOrProvince', '__substg1.0_3A28')
+
+    @property
+    def mailAddressStreet(self) -> str:
+        """
+        The street portion of the contact's mail address.
+        """
+        return self._ensureSet('_mailAddressStreet', '__substg1.0_3A29')
+
+    @property
+    def middleNames(self) -> str:
         """
         The middle name(s) of the contact.
         """
         return self._ensureSet('_middleNames', '__substg1.0_3A44')
 
     @property
-    def mobilePhone(self):
+    def mobilePhone(self) -> str:
         """
         The mobile phone number of the contact.
         """
         return self._ensureSet('_mobilePhone', '__substg1.0_3A1C')
 
     @property
-    def nickname(self):
+    def nickname(self) -> str:
         """
         The nickname of the contanct.
         """
         return self._ensureSet('_nickname', '__substg1.0_3A4F')
+
+    @property
+    def otherAddress(self) -> str:
+        """
+        The complete other address of the contact.
+        """
+        return self._ensureSetNamed('_otherAddress', '801C')
+
+    @property
+    def otherAddressCountry(self) -> str:
+        """
+        The country portion of the contact's other address.
+        """
+        return self._ensureSet('_otherAddressCountry', '__substg1.0_3A60')
+
+    @property
+    def otherAddressCountryCode(self) -> str:
+        """
+        The country code portion of the contact's other address.
+        """
+        return self._ensureSetNamed('_otherAddressCountryCode', '80DC')
+
+    @property
+    def otherAddressLocality(self) -> str:
+        """
+        The locality or city portion of the contact's other address.
+        """
+        return self._ensureSet('_otherAddressLocality', '__substg1.0_3A5F')
+
+    @property
+    def otherAddressPostalCode(self) -> str:
+        """
+        The postal code portion of the contact's other address.
+        """
+        return self._ensureSet('_otherAddressPostalCode', '__substg1.0_3A61')
+
+    @property
+    def otherAddressPostOfficeBox(self) -> str:
+        """
+        The number or identifier of the contact's other post office box.
+        """
+        return self._ensureSet('_otherAddressPostOfficeBox', '__substg1.0_3A64')
+
+    @property
+    def otherAddressStateOrProvince(self) -> str:
+        """
+        The state or province portion of the contact's other address.
+        """
+        return self._ensureSet('_otherAddressStateOrProvince', '__substg1.0_3A62')
+
+    @property
+    def otherAddressStreet(self) -> str:
+        """
+        The street portion of the contact's other address.
+        """
+        return self._ensureSet('_otherAddressStreet', '__substg1.0_3A63')
 
     @property
     def phoneticGivenName(self) -> str:
@@ -576,6 +716,14 @@ class Contact(MSGFile):
         The phonetic pronunciation of the given name of the contact.
         """
         return self._ensureSetNamed('_phoneticSurname', '802D')
+
+    @property
+    def postalAddressID(self) -> PostalAddressID:
+        """
+        Indicates which physical address is the Mailing Address for this
+        contact.
+        """
+        return self._ensureSetNamed('_postalAddressID', '8022', overrideClass = lambda x : PostalAddressID(x or 0), preserveNone = False)
 
     @property
     def primaryFax(self) -> dict:
@@ -643,13 +791,6 @@ class Contact(MSGFile):
         return self._ensureSet('_spouseName', '__substg1.0_3A48')
 
     @property
-    def state(self) -> str:
-        """
-        The state or province that the contact lives in.
-        """
-        return self._ensureSet('_state', '__substg1.0_3A28')
-
-    @property
     def surname(self) -> str:
         """
         The surname of the contact.
@@ -659,6 +800,55 @@ class Contact(MSGFile):
     @property
     def workAddress(self) -> str:
         """
-        The work address of the contact.
+        The complete work address of the contact.
         """
         return self._ensureSetNamed('_workAddress', '801B')
+
+    @property
+    def workAddressCountry(self) -> str:
+        """
+        The country portion of the contact's work address.
+        """
+        return self._ensureSetNamed('_workAddressCountry', '8049')
+
+    @property
+    def workAddressCountryCode(self) -> str:
+        """
+        The country code portion of the contact's work address.
+        """
+        return self._ensureSetNamed('_workAddressCountryCode', '80DB')
+
+    @property
+    def workAddressLocality(self) -> str:
+        """
+        The locality or city portion of the contact's work address.
+        """
+        return self._ensureSetNamed('_workAddressLocality', '8046')
+
+    @property
+    def workAddressPostalCode(self) -> str:
+        """
+        The postal code portion of the contact's work address.
+        """
+        return self._ensureSetNamed('_workAddressPostalCode', '8048')
+
+    @property
+    def workAddressPostOfficeBox(self) -> str:
+        """
+        The number or identifier of the contact's work post office box.
+        """
+        return self._ensureSetNamed('_workAddressPostOfficeBox', '804A')
+
+    @property
+    def workAddressStateOrProvince(self) -> str:
+        """
+        The state or province portion of the contact's work address.
+        """
+        return self._ensureSetNamed('_workAddressStateOrProvince', '8047')
+
+    @property
+    def workAddressStreet(self) -> str:
+        """
+        The street portion of the contact's work address.
+        """
+        return self._ensureSetNamed('_workAddressStreet', '8045')
