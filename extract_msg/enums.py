@@ -41,6 +41,124 @@ class AttachmentType(enum.Enum):
     WEB = 2
     SIGNED = 3
 
+class BCImageAlignment(enum.Enum):
+    STRETCH = 0x00
+    TOP_LEFT = 0x01
+    TOP_CENTER = 0x02
+    TOP_RIGHT = 0x03
+    MIDDLE_LEFT = 0x04
+    MIDDLE_CENTER = 0x05
+    MIDDLE_RIGHT = 0x06
+    BOTTOM_LEFT = 0x07
+    BOTTOM_CENTER = 0x08
+    BOTTOM_RIGHT = 0x09
+
+class BCImageSource(enum.Enum):
+    CONTACT_PHOTO = 0
+    CARD_PHOTO = 1
+
+class BCLabelFormat(enum.Enum):
+    """
+    The format for a label of a business card. Left of the underscore represents
+    the alignment, right indicates reading order.
+    A
+    """
+    NO_LABEL = 0b000
+    RIGHT_LTR = 0b001
+    LEFT_LTR = 0b010
+    UNKNOWN = 0b100
+    RIGHT_RTL = 0b101
+    LEFT_RTL = 0b110
+
+class BCTemplateID(enum.Enum):
+    """
+    The template ID for a business card.
+
+    IM_ALIGN_LEFT: The image area will be left aligned, stretching the full
+        height of the card vertically; text fields will appear to the right of
+        the image area.
+    IM_ALIGN_RIGHT: The image area will be right aligned, stretching the full
+        height of the card vertically; text fields will appear to the left of
+        the image area.
+    IM_ALIGN_TOP: The image area will be aligned to the top, stretching the full
+        width of the card horizontally; text fields will appear under the image
+        area.
+    IM_ALIGN_BOTTOM: The image area will be aligned to the bottom, stretching
+        the full width of the card horizontally; text fields will appear above
+        the image area.
+    NO_IMAGE: No image area is included in the card, only text fields are
+        included.
+    BACKGROUND: The image area will be used as a background for the card,
+        stretching the full height and width of the card. Text fields are
+        displayed on top of the image area.
+    """
+    IM_ALIGN_LEFT = 0x00
+    IM_ALIGN_RIGHT = 0x01
+    IM_ALIGN_TOP = 0x02
+    IM_ALIGN_BOTTOM = 0x03
+    NO_IMAGE = 0x04
+    BACKGROUND = 0x05
+
+class BCTextFormat(enum.Enum):
+    """
+    Converts the bits of the text format to an understandable enum value.
+
+    Right value is the alignment, with left is the flags. The following flags
+    exist and will be in the following order if present:
+        U: Underline.
+        I: Italics.
+        B: Bold.
+        M: The text is multiline.
+    """
+    LEFT = 0b00000000
+    LEFT_M = 0b00000001
+    LEFT_B = 0b00000010
+    LEFT_BM = 0b00000011
+    LEFT_I = 0b00000100
+    LEFT_IM = 0b00000101
+    LEFT_IB = 0b00000110
+    LEFT_IBM = 0b00000111
+    LEFT_U = 0b00001000
+    LEFT_UM = 0b00001001
+    LEFT_UB = 0b00001010
+    LEFT_UBM = 0b00001011
+    LEFT_UI = 0b00001100
+    LEFT_UIM = 0b00001101
+    LEFT_UIB = 0b00001110
+    LEFT_UIBM = 0b00001111
+    CENTER = 0b00100000
+    CENTER_M = 0b00100001
+    CENTER_B = 0b00100010
+    CENTER_BM = 0b00100011
+    CENTER_I = 0b00100100
+    CENTER_IM = 0b00100101
+    CENTER_IB = 0b00100110
+    CENTER_IBM = 0b00100111
+    CENTER_U = 0b00101000
+    CENTER_UM = 0b00101001
+    CENTER_UB = 0b00101010
+    CENTER_UBM = 0b00101011
+    CENTER_UI = 0b00101100
+    CENTER_UIM = 0b00101101
+    CENTER_UIB = 0b00101110
+    CENTER_UIBM = 0b00101111
+    RIGHT = 0b00010000
+    RIGHT_M = 0b00010001
+    RIGHT_B = 0b00010010
+    RIGHT_BM = 0b00010011
+    RIGHT_I = 0b00010100
+    RIGHT_IM = 0b00010101
+    RIGHT_IB = 0b00010110
+    RIGHT_IBM = 0b00010111
+    RIGHT_U = 0b00011000
+    RIGHT_UM = 0b00011001
+    RIGHT_UB = 0b00011010
+    RIGHT_UBM = 0b00011011
+    RIGHT_UI = 0b00011100
+    RIGHT_UIM = 0b00011101
+    RIGHT_UIB = 0b00011110
+    RIGHT_UIBM = 0b00011111
+
 class DeencapType(enum.Enum):
     """
     Enum to specify to custom deencapsulation functions the type of data being

@@ -5,6 +5,7 @@ from typing import List, Set, Tuple, Union
 from .enums import ElectronicAddressProperties, Gender, PostalAddressID
 from .msg import MSGFile
 from .structures.entry_id import EntryID
+from .structures.business_card import BusinessCardDisplayDefinition
 
 
 class Contact(MSGFile):
@@ -93,6 +94,14 @@ class Contact(MSGFile):
         The birthday of the contact at 0:00 in the client's local time zone.
         """
         return self._ensureSetNamed('_birthdayLocal', '80DE')
+
+    @property
+    def businessCardDisplayDefinition(self) -> BusinessCardDisplayDefinition:
+        """
+        Specifies the customization details for displaying a contact as a
+        business card.
+        """
+        return self._ensureSetNamed('_businessCardDisplayDefinition', '8040', overrideClass = BusinessCardDisplayDefinition)
 
     @property
     def businessFax(self) -> dict:

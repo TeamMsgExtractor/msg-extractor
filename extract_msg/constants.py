@@ -638,6 +638,11 @@ STMF32 = struct.Struct('<f')
 STMF64 = struct.Struct('<d')
 # PermanentEntryID parsing struct
 STPEID = struct.Struct('<B3x16s4xI')
+# Struct for unpacking the first part of the BusinessCardDisplayDefinition
+# structure.
+ST_BC_HEAD = struct.Struct('BBBBBBBBIB')
+# Struct for completely unpacking the FieldInfo structure.
+ST_BC_FIELD_INFO = struct.Struct('HBBBxHII')
 # Structs for reading from a BytesReader. Some are just aliases for existing
 # structs, used for clarity and consistency in the code.
 ST_LE_I8 = STI8
@@ -911,6 +916,5 @@ PROPERTIES = {
     '403E': 'To email (uncertain)',
     '5FF6': 'To (uncertain)',
 }
-
 
 # END CONSTANTS
