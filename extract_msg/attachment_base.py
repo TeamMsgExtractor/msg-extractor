@@ -274,28 +274,35 @@ class AttachmentBase:
         return self.__dir
 
     @property
-    def extension(self):
+    def extension(self) -> str:
         """
         The reported extension for the file.
         """
         return self._ensureSet('_extension', '__substg1.0_3703')
 
     @property
-    def longFilename(self):
+    def isAttachmentContactPhoto(self) -> bool:
+        """
+        Whether the attachment is a contact photo for a Contact object.
+        """
+        return self._ensureSetProperty('_isAttachmentContactPhoto', '7FFF000B', overrideClass = bool, preserveNone = False)
+
+    @property
+    def longFilename(self) -> str:
         """
         Returns the long file name of the attachment, if it exists.
         """
         return self._ensureSet('_longFilename', '__substg1.0_3707')
 
     @property
-    def mimetype(self):
+    def mimetype(self) -> str:
         """
         The content-type mime header of the attachment, if specified.
         """
         return self._ensureSet('_mimetype', '__substg1.0_370E')
 
     @property
-    def msg(self):
+    def msg(self) -> 'MSGFile':
         """
         Returns the Message instance the attachment belongs to.
         """

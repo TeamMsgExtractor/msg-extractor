@@ -96,6 +96,14 @@ class Contact(MSGFile):
         return self._ensureSetNamed('_birthdayLocal', '80DE')
 
     @property
+    def businessCardCardPicture(self) -> bytes:
+        """
+        The image to be used on a business card. Must be either a PNG file or a
+        JPEG file.
+        """
+        return self._ensureSetNamed('_businessCardCardPicture', '8041')
+
+    @property
     def businessCardDisplayDefinition(self) -> BusinessCardDisplayDefinition:
         """
         Specifies the customization details for displaying a contact as a
@@ -209,6 +217,50 @@ class Contact(MSGFile):
         The name of the company the contact works at.
         """
         return self._ensureSet('_companyName', '__substg1.0_3A16')
+
+    @property
+    def contactPhoto(self) -> bytes:
+        """
+        The contact photo, if it exists.
+        """
+        try:
+            return self._contactPhoto
+        except AttributeError:
+            self._contactPhoto = None
+            if self.hasPicture:
+                if len(self.attachments) > 0:
+                    contactPhotoAtt = next((att for att in self.attachments if att.isAttachmentContactPhoto), None)
+                    if contactPhotoAtt:
+                        self._contactPhoto = contactPhotoAtt.data
+            return self._contactPhoto
+
+    @property
+    def contactUserField1(self) -> str:
+        """
+        Used to store custom text for a business card.
+        """
+        return self._ensureSetNamed('_contactUserField1', '804F')
+
+    @property
+    def contactUserField2(self) -> str:
+        """
+        Used to store custom text for a business card.
+        """
+        return self._ensureSetNamed('_contactUserField2', '8050')
+
+    @property
+    def contactUserField3(self) -> str:
+        """
+        Used to store custom text for a business card.
+        """
+        return self._ensureSetNamed('_contactUserField3', '8051')
+
+    @property
+    def contactUserField4(self) -> str:
+        """
+        Used to store custom text for a business card.
+        """
+        return self._ensureSetNamed('_contactUserField4', '8052')
 
     @property
     def departmentName(self) -> str:
@@ -452,7 +504,7 @@ class Contact(MSGFile):
         return self._ensureSet('_gender', '__substg1.0_3A4D')
 
     @property
-    def generation(self):
+    def generation(self) -> str:
         """
         A generational abbreviation that follows the full
         name of the contact.
@@ -460,11 +512,18 @@ class Contact(MSGFile):
         return self._ensureSet('_generation', '__substg1.0_3A05')
 
     @property
-    def givenName(self):
+    def givenName(self) -> str:
         """
         The first name of the contact.
         """
         return self._ensureSet('_givenName', '__substg1.0_3A06')
+
+    @property
+    def hasPicture(self) -> bool:
+        """
+        Whether the contact has a contact photo.
+        """
+        return self._ensureSetNamed('_hasPicture', '8015', overrideClass = bool, preserveNone = False)
 
     @property
     def homeAddress(self) -> str:
