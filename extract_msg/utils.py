@@ -596,11 +596,20 @@ def parseType(_type : int, stream, encoding, extras):
         value = constants.STF64.unpack(value)[0]
         return constants.PYTPFLOATINGTIME_START + datetime.timedelta(days = value)
     elif _type == 0x000A:  # PtypErrorCode
+        from .enums import ErrorCode, ErrorCodeType
         value = constants.STUI32.unpack(value)[0]
-        # TODO parsing for this.
-        # I can't actually find any msg properties that use this, so it should
-        # be okay to release this function without support for it.
-        raise NotImplementedError('Parsing for type 0x000A (PtypErrorCode) has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType 0x000A PtypErrorCode".')
+        try:
+            value = ErrorCodeType(value)
+        except ValueError:
+            logger.warn(f'Error type found that was not from Additional Error Codes. Value was {value}. You should report this to the developers.')
+            # So here, the value should be from Additional Error Codes, but it
+            # wasn't. So we are just returning the int. However, we want to see
+            # if it is a normal error type.
+            try:
+                logger.warn(f'REPORT TO DEVELOPERS: Error type of {ErrorType(value)} was found.')
+            except ValueError:
+                pass
+        return value
     elif _type == 0x000B:  # PtypBoolean
         return constants.ST3.unpack(value)[0] == 1
     elif _type == 0x000D:  # PtypObject/PtypEmbeddedTable
@@ -639,15 +648,15 @@ def parseType(_type : int, stream, encoding, extras):
         else:
             return (count, value[2:count + 2])
     elif _type == 0x00FD:  # PtypRestriction
-        # TODO parsing for this
+        # TODO parsing for this.
         raise NotImplementedError('Parsing for type 0x00FD (PtypRestriction) has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType 0x00FD PtypRestriction".')
     elif _type == 0x00FE:  # PtypRuleAction
-        # TODO parsing for this
+        # TODO parsing for this.
         raise NotImplementedError('Parsing for type 0x00FE (PtypRuleAction) has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType 0x00FE PtypRuleAction".')
     elif _type == 0x0102:  # PtypBinary
         return value
     elif _type & 0x1000 == 0x1000:  # PtypMultiple
-        # TODO parsing for `multiple` types
+        # TODO parsing for `multiple` types.
         if _type in (0x101F, 0x101E): # PtypMultipleString/PtypMultipleString8
             ret = [x.decode(encoding) for x in extras]
             lengths = struct.unpack(f'<{len(ret)}i', stream)

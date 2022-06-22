@@ -4,6 +4,7 @@ import logging
 import olefile
 
 from . import constants
+from .enum import ErrorCode, ErrorCodeType
 from .utils import fromTimeStamp, filetimeToUtc, properHex
 
 
@@ -96,7 +97,7 @@ class FixedLengthProp(PropBase):
         super().__init__(string)
         self.__value = self.parseType(self.type, constants.STFIX.unpack(string)[0])
 
-    def parseType(self, _type, stream):
+    def parseType(self, _type, stream) -> Any:
         """
         Converts the data in :param stream: to a much more accurate type,
         specified by :param _type:, if possible.
@@ -128,8 +129,17 @@ class FixedLengthProp(PropBase):
             return constants.PYTPFLOATINGTIME_START + datetime.timedelta(days = value)
         elif _type == 0x000A:  # PtypErrorCode
             value = constants.STI32.unpack(value)[0]
-            # TODO parsing for this
-            pass
+            try:
+                value = ErrorCodeType(value)
+            except ValueError:
+                logger.warn(f'Error type found that was not from Additional Error Codes. Value was {value}. You should report this to the developers.')
+                # So here, the value should be from Additional Error Codes, but it
+                # wasn't. So we are just returning the int. However, we want to see
+                # if it is a normal error type.
+                try:
+                    logger.warn(f'REPORT TO DEVELOPERS: Error type of {ErrorType(value)} was found.')
+                except ValueError:
+                    pass
         elif _type == 0x000B:  # PtypBoolean
             value = constants.ST3.unpack(value)[0] == 1
         elif _type == 0x0014:  # PtypInteger64
