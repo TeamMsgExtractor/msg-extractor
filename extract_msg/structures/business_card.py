@@ -33,7 +33,7 @@ class BusinessCardDisplayDefinition:
         self.__fields = tuple(FieldInfo(reader.read(16), self.__extraInfoField) for x in range(self.__countOfFields))
 
     @property
-    def backgrounColor(self) -> Tuple[int, int, int]:
+    def backgroundColor(self) -> Tuple[int, int, int]:
         """
         A tuple of the RGB value of the color of the background.
         """

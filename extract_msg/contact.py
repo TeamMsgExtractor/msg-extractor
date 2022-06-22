@@ -96,6 +96,32 @@ class Contact(MSGFile):
         return self._ensureSetNamed('_birthdayLocal', '80DE')
 
     @property
+    def businessCard(self) -> 'PIL.Image.Image':
+        # First import PIL here so it's an optional dependency.
+        try:
+            import PIL.Image
+            import PIL.ImageDraw
+        except ImportError:
+            raise ImportError('PIL or Pillow is required for generating the business card.') from None
+
+        raise NotImplementedError('This function is not complete and as such is not yet functional. Please wait until later in the work cycle for this version.')
+
+        # See "contact business card details.txt" for details.
+        cardDef = self.businessCardDisplayDefinition
+        # First things first, let's make the image we will be placing everything
+        # onto.
+        im = PIL.Image.new('RGB', (250, 150), cardDef.backgroundColor)
+        # Create the ImageDraw instance so we can draw on it easily.
+        imDraw = PIL.ImageDraw.ImageDraw(im)
+
+        # Create the border of the image:
+        imDraw.rectangle(((0, 0,), (249, 149)), outline = (109, 109, 109))
+
+
+        # Finally, return the image.
+        return im
+
+    @property
     def businessCardCardPicture(self) -> bytes:
         """
         The image to be used on a business card. Must be either a PNG file or a
