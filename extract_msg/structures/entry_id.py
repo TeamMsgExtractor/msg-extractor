@@ -35,17 +35,23 @@ class EntryID:
             raise ValueError(f'Unrecognized UID "{"".join(f"{x:02X}" for x in providerUID)}". You should probably report this to the developers.') from None
 
         # Now check the Provider UID against the known ones.
-        if providerUID == EntryIDType.ONE_OFF_RECIPIENT:
-            return OneOffRecipient(data)
-        elif providerUID == EntryIDType.CA_OR_PDL_RECIPIENT:
+        if providerUID == EntryIDType.ADDRESS_BOOK_RECIPIENT:
+            return AddressBookEntryID(data)
+        if providerUID == EntryIDType.CA_OR_PDL_RECIPIENT:
             # Verify that the type signature is correct.
             if data[24:28] not in (b'\x04\x00\x00\x00', b'\x05\x00\x00\x00'):
                 raise ValueError(f'Found Entry ID matching ContactAddress or PersonalDistributionList but the type was invalid ({data[24:28]}).')
             if data[24] == 4:
-                return ContactAddress(data)
+                return ContactAddressEntryID(data)
             else:
-                return PersonalDistributionList(data)
-        elif providerUID == EntryIDType.WRAPPED:
+                return PersonalDistributionListEntryID(data)
+        if providerUID == EntryIDType.PERMANENT:
+            return PermanentEntryID(data)
+        if providerUID == EntryIDType.PUBLIC_MESSAGE_STORE:
+            return MessageEntryID(data)
+        if providerUID == EntryIDType.ONE_OFF_RECIPIENT:
+            return OneOffRecipient(data)
+        if providerUID == EntryIDType.WRAPPED:
             return WrappedEntryID(data)
 
         logger.warn(f'UID for EntryID found in database, but no class was specified for it: {providerUID}')
@@ -65,12 +71,15 @@ class EntryID:
         return self.__flags
 
     @property
-    def entryIDType(self) -> EntryIDType:
+    def entryIDType(self) -> Union[EntryIDType, bytes]:
         """
         Returns an instance of EntryIDType corresponding to the provider UID of
-        this EntryID. If none is found, raises a ValueError.
+        this EntryID. If none is found, returns the bytes.
         """
-        return EntryIDType(self.__providerUID)
+        try:
+            return EntryIDType(self.__providerUID)
+        except ValueError:
+            return self.__providerUID
 
     @property
     def longTerm(self) -> bool:
@@ -135,7 +144,7 @@ class AddressBookEntryID(EntryID):
 
 
 
-class ContactAddress(EntryID):
+class ContactAddressEntryID(EntryID):
     """
 
     """
@@ -315,7 +324,7 @@ class OneOffRecipient(EntryID):
 
 class PermanentEntryID(EntryID):
     """
-
+    A Permanent EntryID structure, as defined in [MS-OXNSPI].
     """
 
     def __init__(self, data : bytes):
@@ -339,6 +348,15 @@ class PermanentEntryID(EntryID):
         Returns the distinguished name.
         """
         return self.__distinguishedName
+
+
+
+class PersonalDistributionListEntryID(EntryID):
+    """
+    A Personal Distribution List EntryID structure, as defined in [MS-OXCDATA].
+    """
+    def __init__(self, data : bytes):
+        super().__init__(data)
 
 
 
