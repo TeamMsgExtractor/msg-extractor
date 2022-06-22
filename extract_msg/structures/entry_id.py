@@ -362,3 +362,24 @@ class WrappedEntryID(EntryID):
             raise ValueError(f'Found wrapped entry id with invalid type (type bits were {bits}).')
 
         self.__embeddedIsOneOff = self.__type & 0x80 == 0
+
+    @property
+    def embeddedEntryID(self) -> EntryID:
+        """
+        The embedded EntryID of this object.
+        """
+        return self.__embeddedEntryID
+
+    @property
+    def embeddedIsOneOff(self) -> bool:
+        """
+        Whether the embedded EntryID is a One-Off EntryID.
+        """
+        return self.__embeddedIsOneOff
+
+    @property
+    def type(self) -> int:
+        """
+        The type bits of this object.
+        """
+        return self.__type
