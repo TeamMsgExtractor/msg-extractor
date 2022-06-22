@@ -3,7 +3,7 @@ from typing import Union
 
 from ._helpers import BytesReader
 from .. import constants
-from ..enums import AddressBookType, DisplayType, EntryIDType, MacintoshEncoding, MessageFormat, OORBodyFormat
+from ..enums import AddressBookType, DisplayType, EntryIDType, MacintoshEncoding, MessageFormat, MessageType, OORBodyFormat
 from ..utils import bitwiseAdjustedAnd
 
 
@@ -45,6 +45,8 @@ class EntryID:
                 return ContactAddress(data)
             else:
                 return PersonalDistributionList(data)
+        elif providerUID == EntryIDType.WRAPPED:
+            return WrappedEntryID(data)
 
         logger.warn(f'UID for EntryID found in database, but no class was specified for it: {providerUID}')
         # If all else fails and we do recognize it, just return a plain EntryID.
@@ -94,7 +96,11 @@ class EntryID:
 
 
 # Now for the specific types.
-class AddressBook(EntryID):
+class AddressBookEntryID(EntryID):
+    """
+    An Address Book EntryID structure, as specified in [MS-OXCDATA].
+    """
+
     def __init__(self, data : bytes):
         super().__init__(data)
         reader = BytesReader(data[20:])
@@ -106,15 +112,107 @@ class AddressBook(EntryID):
         self.__type = AddressBookType(reader.readUnsignedInt())
         self.__X500DN = reader.readByteString()
 
+    @property
+    def type(self) -> AddressBookType:
+        """
+        The type of the object.
+        """
+        return self.__type
+
+    @property
+    def version(self) -> int:
+        """
+        The version. MUST be 1.
+        """
+        return self.__version
+
+    @property
+    def X5000DN(self) -> bytes:
+        """
+        The X500 DN of the Address Book object.
+        """
+        return self.__X500DN
+
 
 
 class ContactAddress(EntryID):
+    """
+
+    """
+
     def __init__(self, data : bytes):
         super().__init__(data)
 
 
 
+class MessageEntryID(EntryID):
+    """
+    A Message EntryID structure, as defined in [MS-OXCDATA].
+    """
+
+    def __init__(self, data : bytes):
+        super().__init__(data)
+        reader = BytesReader(data[20:])
+        self.__messageType = MessageType(reader.readUnsignedShort())
+        self.__folderDatabaseGuid = reader.read(16)
+        # This entry is 6 bytes, so we pull some shenanigans to unpack it.
+        self.__folderGlobalCounter = constants.STUI64.unpack(reader.read(6) + b'\x00\x00')
+        if reader.read(2) != b'\x00\x00':
+            raise ValueError('Pad bytes were not 0.')
+        self.__messageDatabaseGuid = reader.read(16)
+        # This entry is 6 bytes, so we pull some shenanigans to unpack it.
+        self.__messageGlobalCounter = constants.STUI64.unpack(reader.read(6) + b'\x00\x00')
+        if reader.read(2) != b'\x00\x00':
+            raise ValueError('Pad bytes were not 0.')
+        # Not sure why Microsoft decided to say "yes, let's do 2 6-byte integers
+        # followed by 2 pad bits each" instead of just 2 8-byte integers with a
+        # maximum value, but here we are.
+
+    @property
+    def folderDatabaseGuid(self) -> bytes:
+        """
+        A GUID associated with the Store object of the folder in which the
+        message resides and corresponding to the ReplicaId field in the folder
+        ID structure.
+        """
+        return self.__folderDatabaseGuid
+
+    @property
+    def folderGlobalCounter(self) -> int:
+        """
+        An unsigned integer identifying the folder in which the message resides.
+        """
+        return self.__folderGlobalCounter
+
+    @property
+    def messageDatabaseGuid(self) -> bytes:
+        """
+        A GUID associated with the Store object of the message and corresponding
+        to the ReplicaId field of the Message ID structure.
+        """
+        return self.__messageDatabaseGuid
+
+    @property
+    def messageGlobalCounter(self) -> int:
+        """
+        An unsigned integer identifying the message.
+        """
+        return self.__messageGlobalCounter
+
+    @property
+    def messageType(self) -> MessageType:
+        """
+        The Store object type.
+        """
+        return self.__messageType
+
+
+
 class OneOffRecipient(EntryID):
+    """
+
+    """
+
     def __init__(self, data : bytes):
         super().__init__(data)
         # Create a reader to easily
@@ -216,6 +314,10 @@ class OneOffRecipient(EntryID):
 
 
 class PermanentEntryID(EntryID):
+    """
+
+    """
+
     def __init__(self, data : bytes):
         super().__init__(data)
         unpacked = constants.STPEID.unpack(data[:28])
@@ -237,3 +339,26 @@ class PermanentEntryID(EntryID):
         Returns the distinguished name.
         """
         return self.__distinguishedName
+
+
+
+class WrappedEntryID(EntryID):
+    """
+    A WrappedEntryId structure, as specified in [MS-OXOCNTC].
+    """
+
+    def __init__(self, data : bytes):
+        super().__init__(data)
+        # Grab the type byte and parse it.
+        self.__type = data[20]
+        bits = self.__type & 0xF
+        if bits == 0:
+            self.__embeddedEntryID = OneOffRecipient(data[21:])
+        elif bits == 3 or bits == 4:
+            self.__embeddedEntryID = MessageEntryID(data[21:])
+        elif bits == 5 or bits == 6:
+            self.__embeddedEntryID = AddressBookEntryID(data[21:])
+        else:
+            raise ValueError(f'Found wrapped entry id with invalid type (type bits were {bits}).')
+
+        self.__embeddedIsOneOff = self.__type & 0x80 == 0
