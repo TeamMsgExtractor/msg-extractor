@@ -2,7 +2,7 @@ import datetime
 
 from typing import List, Set, Tuple, Union
 
-from .enums import ElectronicAddressProperties, Gender, PostalAddressID
+from .enums import ContactLinkState, ElectronicAddressProperties, Gender, PostalAddressID
 from .msg import MSGFile
 from .structures.entry_id import EntryID
 from .structures.business_card import BusinessCardDisplayDefinition
@@ -35,12 +35,19 @@ class Contact(MSGFile):
         self.named
         self.namedProperties
 
-    def save(self, **kwargs):
+    def save(self, **kwargs) -> 'Contact':
         """
         Save function.
         """
         # TODO.
         pass
+
+    @property
+    def account(self) -> str:
+        """
+        The account name of the contact.
+        """
+        return self._ensureSet('_account', '__substg1.0_3A00')
 
     @property
     def addressBookProviderArrayType(self) -> Set[ElectronicAddressProperties]:
@@ -72,6 +79,21 @@ class Contact(MSGFile):
         Contains the telephone number of the contact's administrative assistant.
         """
         return self._ensureSet('_assistantTelephoneNumber', '__substg1.0_3A2E')
+
+    @property
+    def autoLog(self) -> bool:
+        """
+        Whether the client should create a Journal object for each action
+        associated with the Contact object.
+        """
+        return self._ensureSetNamed('_autoLog', '8025')
+
+    @property
+    def billing(self) -> str:
+        """
+        Billing information for the contact.
+        """
+        return self._ensureSetNamed('_billing', '8535')
 
     @property
     def birthday(self) -> datetime.datetime:
@@ -210,11 +232,11 @@ class Contact(MSGFile):
         return self._ensureSetTyped('_businessTelephone2Number', '3A1B')
 
     @property
-    def businessUrl(self) -> str:
+    def businessHomePage(self) -> str:
         """
         Contains the url of the homepage of the contact's business.
         """
-        return self._ensureSet('_businessUrl', '__substg1.0_3A51')
+        return self._ensureSet('_businessHomePage', '__substg1.0_3A51')
 
     @property
     def callbackTelephoneNumber(self) -> str:
@@ -231,6 +253,13 @@ class Contact(MSGFile):
         return self._ensureSet('_carTelephoneNumber', '__substg1.0_3A1E')
 
     @property
+    def childrensNames(self) -> List[str]:
+        """
+        A list of the named of the contact's children.
+        """
+        return self._ensureSetTyped('_childrensNames', '3A58')
+
+    @property
     def companyMainTelephoneNumber(self) -> str:
         """
         Contains the number of the main telephone of the contact's company.
@@ -243,6 +272,64 @@ class Contact(MSGFile):
         The name of the company the contact works at.
         """
         return self._ensureSet('_companyName', '__substg1.0_3A16')
+
+    @property
+    def computerNetworkName(self) -> str:
+        """
+        The name of the network to wwhich the contact's computer is connected.
+        """
+        return self._ensureSet('_computerNetworkName', '__substg1.0_3A49')
+
+    @property
+    def contactCharacterSet(self) -> int:
+        """
+        The character set that is used for this Contact object.
+        """
+        return self._ensureSetNamed('_contactCharacterSet', '8023')
+
+    @property
+    def contactItemData(self) -> List[int]:
+        """
+        Used to help display the contact information.
+        """
+        return self._ensureSetNamed('_contactItemData', '8007')
+
+    @property
+    def contactLinkedGlobalAddressListEntryID(self) -> EntryID:
+        """
+        The EntryID of the GAL object to which the duplicate contact is linked.
+        """
+        return self._ensureSetNamed('_contactLinkedGlobalAddressListEntryID', '80E2', overrideClass = EntryID.autoCreate)
+
+    @property
+    def contactLinkGlobalAddressListLinkID(self) -> str:
+        """
+        The GUID of the GAL contact to which the duplicate contact is linked.
+        """
+        return self._ensureSetNamed('_contactLinkGlobalAddressListLinkId', '80E8')
+
+    @property
+    def contactLinkGlobalAddressListLinkState(self) -> ContactLinkState:
+        """
+        The state of linking between the GAL contact and the duplicate contact.
+        """
+        return self._ensureSetNamed('_contactLinkGlobalAddressListLinkState', '80E6', overrideClass = ContactLinkState)
+
+    @property
+    def contactLinkLinkRejectHistory(self) -> List[bytes]:
+        """
+        A list of any contacts that were previously rejected for linking with
+        the duplicate contact.
+        """
+        return self._ensureSetNamed('_contactLinkLinkRejectHistory', '80E5')
+
+    @property
+    def contactLinkSMTPAddressCache(self) -> List[str]:
+        """
+        A list of the SMTP addresses that are used by the GAL contact that are
+        linked to the duplicate contact.
+        """
+        return self._ensureSetNamed('_contactLinkSMTPAddressCache', '80E3')
 
     @property
     def contactPhoto(self) -> bytes:
@@ -287,6 +374,13 @@ class Contact(MSGFile):
         Used to store custom text for a business card.
         """
         return self._ensureSetNamed('_contactUserField4', '8052')
+
+    @property
+    def customerID(self) -> str:
+        """
+        The contact's customer ID number.
+        """
+        return self._ensureSet('_customerID', '__substg1.0_3A4A')
 
     @property
     def departmentName(self) -> str:
@@ -523,11 +617,26 @@ class Contact(MSGFile):
         return self._ensureSetNamed('_fileUnderID', '8006')
 
     @property
+    def freeBusyLocation(self) -> str:
+        """
+        A URL path from which a client can retrieve free/busy status information
+        for the contact as an iCalendat file.
+        """
+        return self._ensureSetNamed('_freeBusyLocation', '80D8')
+
+    @property
+    def ftpSite(self) -> str:
+        """
+        The contact's File Transfer Protocol url.
+        """
+        return self._ensureSet('_ftpSite', '__substg1.0_3A4C')
+
+    @property
     def gender(self) -> Gender:
         """
         The gender of the contact.
         """
-        return self._ensureSet('_gender', '__substg1.0_3A4D')
+        return self._ensureSet('_gender', '__substg1.0_3A4D', overrideClass = Gender)
 
     @property
     def generation(self) -> str:
@@ -545,11 +654,25 @@ class Contact(MSGFile):
         return self._ensureSet('_givenName', '__substg1.0_3A06')
 
     @property
+    def governmentIDNumber(self) -> str:
+        """
+        The contact's government ID number.
+        """
+        return self._ensureSet('_governmentIDNumber', '__substg1.0_3A07')
+
+    @property
     def hasPicture(self) -> bool:
         """
         Whether the contact has a contact photo.
         """
         return self._ensureSetNamed('_hasPicture', '8015', overrideClass = bool, preserveNone = False)
+
+    @property
+    def hobbies(self) -> str:
+        """
+        The hobies of the contact.
+        """
+        return self._ensureSet('_hobbies', '__substg1.0_3A43')
 
     @property
     def homeAddress(self) -> str:
@@ -677,7 +800,7 @@ class Contact(MSGFile):
         """
         The number(s) of the contact's second home telephone.
         """
-        return self._ensureSetTyped('_homeTelephoneNumber', '3A2F')
+        return self._ensureSetTyped('_homeTelephone2Number', '3A2F')
 
     @property
     def initials(self) -> str:
@@ -692,6 +815,13 @@ class Contact(MSGFile):
         The instant messaging address of the contact.
         """
         return self._ensureSetNamed('_instantMessagingAddress', '8062')
+
+    @property
+    def isContactLinked(self) -> bool:
+        """
+        Whether the contact is linked to other contacts.
+        """
+        return self._ensureSetNamed('_isContactLinked', '80E0')
 
     @property
     def isdnNumber(self) -> str:
@@ -709,11 +839,26 @@ class Contact(MSGFile):
         return self._ensureSet('_jobTitle', '__substg1.0_3A17')
 
     @property
+    def language(self) -> str:
+        """
+        The language that the contact uses.
+        """
+        return self._ensureSet('_language', '__substg1.0_3A0C')
+
+    @property
     def lastModifiedBy(self) -> str:
         """
         The name of the last user to modify the contact file.
         """
         return self._ensureSet('_lastModifiedBy', '__substg1.0_3FFA')
+
+    @property
+    def location(self) -> str:
+        """
+        The location of the contact. For example, this could be the building or
+        office number of the contact.
+        """
+        return self._ensureSet('_location', '__substg1.0_3A0D')
 
     @property
     def mailAddress(self) -> str:
@@ -804,7 +949,23 @@ class Contact(MSGFile):
         """
         The location of the office that the contact works in.
         """
-        return self.__ensureSet('_officeLocation', '__substg1.0_3A19')
+        return self._ensureSet('_officeLocation', '__substg1.0_3A19')
+
+    @property
+    def organizationalIDNumber(self) -> str:
+        """
+        The organizational ID number for the contact, such as an employee ID
+        number.
+        """
+        return self._ensureSet('_organizationalIdNumber', '__substg1.0_3A10')
+
+    @property
+    def oscSyncEnabled(self) -> bool:
+        """
+        Whether contact synchronization with an external source (such as a
+        social networking site) is handled by the server.
+        """
+        return self._ensureSetProperty('_oscSyncEnabled', '7C24000B')
 
     @property
     def otherAddress(self) -> str:
@@ -875,6 +1036,13 @@ class Contact(MSGFile):
         The contact's pager telephone number.
         """
         return self._ensureSet('_pagerTelephoneNumber', '__substg1.0_3A21')
+
+    @property
+    def personalHomePage(self) -> str:
+        """
+        The contact's personal web page UL.
+        """
+        return self._ensureSet('_personalHomePage', '__substg1.0_3A50')
 
     @property
     def phoneticCompanyName(self) -> str:
@@ -978,6 +1146,22 @@ class Contact(MSGFile):
         return self._ensureSet('_radioTelephoneNumber', '__substg1.0_3A1D')
 
     @property
+    def referenceEntryID(self) -> EntryID:
+        """
+        Contains a value that is equal to the value of the EntryID of the
+        Contact object unless the Contact object is a copy of an earlier
+        original.
+        """
+        return self._ensureSetNamed('_referenceEntryID', '85BD', overrideClass = EntryID.autoCreate)
+
+    @property
+    def referredByName(self) -> str:
+        """
+        The name of the person who referred this contact to the user.
+        """
+        return self._ensureSet('_referredByName', '__substg1.0_3A47')
+
+    @property
     def spouseName(self) -> str:
         """
         The name of the contact's spouse.
@@ -997,7 +1181,7 @@ class Contact(MSGFile):
         The telephone number for the contact's text telephone (TTY) or
         telecommunication device for the deaf (TDD).
         """
-        return self._ensureSet('_homeTelephoneNumber', '__substg1.0_3A4B')
+        return self._ensureSet('_tddTelephoneNumber', '__substg1.0_3A4B')
 
     @property
     def telexNumber(self) -> Union[str, List[str]]:
@@ -1005,6 +1189,13 @@ class Contact(MSGFile):
         The contact's telex number(s).
         """
         return self._ensureSetTyped('_telexNumber', '3A2C')
+
+    @property
+    def userX509Certificate(self) -> List[bytes]:
+        """
+        A list of certificates for the contact.
+        """
+        return self._ensureSetTyped('_userX509Certificate', '3A70')
 
     @property
     def weddingAnniversary(self) -> datetime.datetime:
@@ -1028,6 +1219,13 @@ class Contact(MSGFile):
         time zone.
         """
         return self._ensureSetNamed('_weddingAnniversaryLocal', '80DF')
+
+    @property
+    def webpageUrl(self) -> str:
+        """
+        The contact's business web page url. SHOULD be the same as businessUrl.
+        """
+        return self._ensureSetNamed('_webpageUrl', '802B')
 
     @property
     def workAddress(self) -> str:

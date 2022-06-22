@@ -167,6 +167,20 @@ class ContactAddressIndex(enum.Enum):
     FAX_2 = 4
     FAX_3 = 5
 
+class ContactLinkState(enum.Enum):
+    """
+    Values for PidLidContactLinkGlobalAddressListLinkState.
+
+    DUPLICATE_NOT_LINKED: The duplicate contact is not linked to the GAL contact
+        or the GAL contact is not downloaded.
+    DUPLICATE_LINKED: The duplicate contact is linked to the GAL contact.
+    DUPLICATE_CANNOT_LINK: The duplicate contact cannot be automatically linked
+        to the GAL contact.
+    """
+    DUPLICATE_NOT_LINKED = 0
+    DUPLICATE_LINKED = 1
+    DUPLICATE_CANNOT_LINK = 2
+
 class DeencapType(enum.Enum):
     """
     Enum to specify to custom deencapsulation functions the type of data being

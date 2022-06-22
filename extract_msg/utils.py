@@ -613,7 +613,7 @@ def parseType(_type : int, stream, encoding, extras):
     elif _type == 0x000B:  # PtypBoolean
         return constants.ST3.unpack(value)[0] == 1
     elif _type == 0x000D:  # PtypObject/PtypEmbeddedTable
-        # TODO parsing for this
+        # TODO parsing for this.
         # Wait, that's the extension for an attachment folder, so parsing this
         # might not be as easy as we would hope. The function may be released
         # without support for this.
