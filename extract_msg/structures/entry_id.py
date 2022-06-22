@@ -3,7 +3,7 @@ from typing import Union
 
 from ._helpers import BytesReader
 from .. import constants
-from ..enums import AddressBookType, DisplayType, EntryIDType, MacintoshEncoding, MessageFormat, MessageType, OORBodyFormat
+from ..enums import AddressBookType, ContactAddressIndex, DisplayType, EntryIDType, MacintoshEncoding, MessageFormat, MessageType, OORBodyFormat
 from ..utils import bitwiseAdjustedAnd
 
 
@@ -146,11 +146,42 @@ class AddressBookEntryID(EntryID):
 
 class ContactAddressEntryID(EntryID):
     """
-
+    A Contact Address EntryID structure, as defined in [MS-OXCDATA]. Specifies a
+    set of data representing recipients whose information is stored in a Contact
+    object.
     """
 
     def __init__(self, data : bytes):
         super().__init__(data)
+        reader = BytesReader(data[20:])
+        if reader.readUnsignedInt() != 3:
+            raise ValueError(f'Version must be 3 (got {self.__version}).')
+        if reader.readUnsignedInt() != 5:
+            raise ValueError(f'Type must be 4 (got {self.__version}).')
+        self.__index = ContactAddressIndex(reader.readUnsignedInt())
+        self.__entryIdCount = reader.readUnsignedInt()
+        self.__entryID = MessageEntryID(reader.read(self.__entryIdCount))
+
+    @property
+    def entryID(self) -> 'MessageEntryID':
+        """
+        The EntryID contained in this object.
+        """
+        return self.__entryID
+
+    @property
+    def entryIDCount(self) -> int:
+        """
+        The size, in bytes, of the EntryID contained in this object.
+        """
+        return self.__entryIdCount
+
+    @property
+    def index(self) -> ContactAddressIndex:
+        """
+        The electronic address in the contact information to use.
+        """
+        return self.__index
 
 
 
@@ -219,7 +250,7 @@ class MessageEntryID(EntryID):
 
 class OneOffRecipient(EntryID):
     """
-
+    A One-Off EntryID structure, as specified in [MS-OXCDATA].
     """
 
     def __init__(self, data : bytes):
@@ -355,8 +386,32 @@ class PersonalDistributionListEntryID(EntryID):
     """
     A Personal Distribution List EntryID structure, as defined in [MS-OXCDATA].
     """
+
     def __init__(self, data : bytes):
         super().__init__(data)
+        reader = BytesReader(data[20:])
+        if reader.readUnsignedInt() != 3:
+            raise ValueError(f'Version must be 3 (got {self.__version}).')
+        if reader.readUnsignedInt() != 5:
+            raise ValueError(f'Type must be 5 (got {self.__version}).')
+        if reader.readUnsignedInt() != 0xFF:
+            raise ValueError(f'Index must be 255 (got {self.__version}).')
+        self.__entryIdCount = reader.readUnsignedInt()
+        self.__entryID = MessageEntryID(reader.read(self.__entryIdCount))
+
+    @property
+    def entryID(self) -> MessageEntryID:
+        """
+        The EntryID contained in this object.
+        """
+        return self.__entryID
+
+    @property
+    def entryIDCount(self) -> int:
+        """
+        The size, in bytes, of the EntryID contained in this object.
+        """
+        return self.__entryIdCount
 
 
 

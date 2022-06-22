@@ -159,6 +159,14 @@ class BCTextFormat(enum.Enum):
     RIGHT_UIB = 0b00011110
     RIGHT_UIBM = 0b00011111
 
+class ContactAddressIndex(enum.Enum):
+    EMAIL_1 = 0
+    EMAIL_2 = 1
+    EMAIL_3 = 2
+    FAX_1 = 3
+    FAX_2 = 4
+    FAX_3 = 5
+
 class DeencapType(enum.Enum):
     """
     Enum to specify to custom deencapsulation functions the type of data being
