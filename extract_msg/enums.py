@@ -861,7 +861,6 @@ class ErrorCodeType(enum.Enum):
     ISAM_ERROR_FILE_IO_BEYOND_EOF = 0xFFFFF05F
     ISAM_ERROR_FILE_COMPRESSED = 0xFFFFF05B
 
-
 class Gender(enum.Enum):
     # Seems rather binary, which is less than ideal. We are directly using the
     # terms used by the documentation.
@@ -909,6 +908,15 @@ class MacintoshEncoding(enum.Enum):
 class MessageFormat(enum.Enum):
     TNEF = 0
     MIME = 1
+
+class MessageType(enum.Enum):
+    PRIVATE_FOLDER = 0x0001
+    PUBLIC_FOLDER = 0x0003
+    MAPPED_PUBLIC_FOLDER = 0x0005
+    PRIVATE_MESSAGE = 0x0007
+    PUBLIC_MESSAGE = 0x0009
+    MAPPED_PUBLIC_MESSAGE = 0x000B
+    PUBLIC_NEWSGROUP_FOLDER = 0x000C
 
 class NamedPropertyType(enum.Enum):
     NUMERICAL_NAMED = 0

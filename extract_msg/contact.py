@@ -1,14 +1,14 @@
 import datetime
 
-from typing import List, Set, Tuple, Union
+from typing import Dict, List, Set, Tuple, Union
 
 from .enums import ContactLinkState, ElectronicAddressProperties, Gender, PostalAddressID
-from .msg import MSGFile
+from .message_base import MessageBase
 from .structures.entry_id import EntryID
 from .structures.business_card import BusinessCardDisplayDefinition
 
 
-class Contact(MSGFile):
+class Contact(MessageBase):
     """
     Class used for parsing contacts.
     """
@@ -666,6 +666,24 @@ class Contact(MSGFile):
         Whether the contact has a contact photo.
         """
         return self._ensureSetNamed('_hasPicture', '8015', overrideClass = bool, preserveNone = False)
+
+    @property
+    def headerFormatProperties(self) -> Dict[str, Union[str, Tuple[Union[str, None], bool], None]]:
+        """
+        Returns a dictionary of properties, in order, to be formatted into the
+        header. Keys are the names to use in the header while the values are one
+        of the following:
+        None: Signifies no data was found for the property and it should be
+            omitted from the header.
+        str: A string to be formatted into the header using the string encoding.
+        Tuple[Union[str, None], bool]: A string should be formatted into the
+            header. If the bool is True, then place an empty string if the value
+            is None, otherwise follow the same behavior as regular None.
+        """
+        return {
+
+        }
+
 
     @property
     def hobbies(self) -> str:

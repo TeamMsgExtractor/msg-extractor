@@ -16,7 +16,7 @@ import RTFDE
 
 from email.parser import Parser as EmailParser
 from html import escape as htmlEscape
-from typing import Tuple
+from typing import Callable, Dict, Tuple, Union
 
 from . import constants
 from .enums import DeencapType, RecipientType
@@ -199,6 +199,37 @@ class MessageBase(MSGFile):
         print('Date:', self.date)
         print('Body:')
         print(self.body)
+
+    def getInjectableHeader(self, prefix : str, joinStr : str, suffix : str, formatter : Callable[str, str]) -> str:
+        """
+        Using the specified prefix, suffix, formatter, and join string,
+        generates the injectable header. Prefix is placed at the beginning,
+        followed by a series of format strings joined together with the join
+        string, with the suffix placed afterwards. Effectively makes this
+        structure:
+        {prefix}{formatter()}{joinStr}{formatter()}{joinStr}...{formatter()}{suffix}
+
+        Formatter be a function that takes first a name variable then a value
+        variable and formats the line.
+        """
+        formattedProps = []
+        props = self.headerFormatProperties
+
+        for name in props:
+            if props[name] is not None:
+                if isinstance(props[name], tuple):
+                    if props[name][1]:
+                        value = props[name][0] or ''
+                    elif props[name][0] is not None:
+                        value = props[name][0]
+                    else:
+                        continue
+                else:
+                    value = props[name]
+
+                formattedProps.append(formatter(name, value))
+
+        return prefix + joinStr.join(formattedProps) + suffix
 
     def getJson(self) -> str:
         """
@@ -471,11 +502,7 @@ class MessageBase(MSGFile):
             # processed in the same way, making everything neat. By defining them
             # in each class, any class can specify a completely different set to be
             # used.
-            return bodyMarker.group() + self.htmlInjectableHeader.format(
-            **{
-                name: inputToString(htmlEscape(getattr(self, prop)), 'utf-8') if getattr(self, prop) else ''
-                for name, prop in self.headerFormatProperties
-            }).encode('utf-8')
+            return bodyMarker.group() + self.htmlInjectableHeader.encode('utf-8')
 
         # Use the previously defined function to inject the HTML header.
         return constants.RE_HTML_BODY_START.sub(replace, body, 1)
@@ -495,20 +522,14 @@ class MessageBase(MSGFile):
         # rtf.
         if isEncapsulatedRtf(self.rtfBody):
             injectableHeader = self.rtfEncapInjectableHeader
-            rtfSanitize = rtfSanitizeHtml
         else:
             injectableHeader = self.rtfPlainInjectableHeader
-            rtfSanitize = rtfSanitizePlain
 
         def replace(bodyMarker):
             """
             Internal function to replace the body tag with itself plus the header.
             """
-            return bodyMarker.group() + injectableHeader.format(
-            **{
-                name: inputToString(rtfSanitize(getattr(self, prop)), 'utf-8') if getattr(self, prop) else ''
-                for name, prop in self.headerFormatProperties
-            }).encode('utf-8')
+            return bodyMarker.group() + injectableHeader.encode('utf-8')
 
         # Use the previously defined function to inject the RTF header. We are
         # trying a few different methods to determine where to place the header.
@@ -989,25 +1010,26 @@ class MessageBase(MSGFile):
             return self._headerDict
 
     @property
-    def headerFormatProperties(self) -> Tuple[Tuple[str, str], ...]:
+    def headerFormatProperties(self) -> Dict[str, Union[str, Tuple[Union[str, None], bool], None]]:
         """
-        Returns a tuple of tuples of two strings, the first string being a
-        name and the second being one of the properties of this class. These are
-        used for controlling how data is inserted into the headers when saving
-        an MSG file. The names used for the first string in the tuple will
-        correspond to the name used for the format string.
-
-        If you need to override the default behavior, override this in your
-        class.
+        Returns a dictionary of properties, in order, to be formatted into the
+        header. Keys are the names to use in the header while the values are one
+        of the following:
+        None: Signifies no data was found for the property and it should be
+            omitted from the header.
+        str: A string to be formatted into the header using the string encoding.
+        Tuple[Union[str, None], bool]: A string should be formatted into the
+            header. If the bool is True, then place an empty string if the value
+            is None, otherwise follow the same behavior as regular None.
         """
-        return (
-            ('sender', 'sender'),
-            ('to', 'to'),
-            ('cc', 'cc'),
-            ('bcc', 'bcc'),
-            ('date', 'date'),
-            ('subject', 'subject'),
-        )
+        return {
+            'From': self.sender,
+            'Sent': self.date,
+            'To': self.to,
+            'Cc': self.cc,
+            'Bcc': self.bcc,
+            'Subject': (self.subject, True),
+        }
 
     @property
     def htmlBody(self) -> bytes:
@@ -1069,7 +1091,12 @@ class MessageBase(MSGFile):
         """
         The header that can be formatted and injected into the html body.
         """
-        return constants.HTML_INJECTABLE_HEADERS['Message']
+        prefix = '<div><div><p class="MsoNormal">'
+        suffix = '<o:p></o:p></p></div></div>'
+        joinStr = '<br/>'
+        formatter = (lambda name, value : f'<b>{name}:</b>&nbsp;{inputToString(htmlEscape(value), self.stringEncoding)}')
+
+        return self.getInjectableHeader(prefix, joinStr, suffix, formatter)
 
     @property
     def inReplyTo(self) -> str:
@@ -1148,7 +1175,13 @@ class MessageBase(MSGFile):
         """
         The header that can be formatted and injected into the plain RTF body.
         """
-        return constants.RTF_ENC_INJECTABLE_HEADERS['Message']
+        prefix = r'\htmlrtf {\htmlrtf0 {\*\htmltag96 <div>}{\*\htmltag96 <div>}{\*\htmltag64 <p class=MsoNormal>}'
+        suffix = r'{\*\htmltag244 <o:p>}{\*\htmlrag252 </o:p>}\htmlrtf \par\par\htmlrtf0 {\*\htmltag72 </p>}{\*\htmltag104 </div>}{\*\htmltag104 </div>}\htmlrtf }\htmlrtf0 '
+        joinStr = r'{\*\htmltag116 <br>}\htmlrtf \line\htmlrtf0 '
+        formatter = (lambda name, value : fr'\htmlrtf {{\b\htmlrtf0{{\*\htmltag84 <b>}}{name}: {{\*\htmltag92 </b>}}\htmlrtf \b0\htmlrtf0 {inputToString(rtfSanitizeHtml(value), self.stringEncoding)}\htmlrtf }}\htmlrtf0')
+
+        return self.getInjectableHeader(prefix, joinStr, suffix, formatter)
+
 
     @property
     def rtfPlainInjectableHeader(self) -> str:
@@ -1156,7 +1189,14 @@ class MessageBase(MSGFile):
         The header that can be formatted and injected into the encapsulated RTF
         body.
         """
-        return constants.RTF_PLAIN_INJECTABLE_HEADERS['Message']
+        prefix = '{'
+        suffix = r'\par\par}'
+        joinStr = r'\line'
+        formatter = (lambda name, value : fr'{{\b {name}: \b0 {inputToString(rtfSanitizePlain(value), self.stringEncoding)}}}')
+
+        return self.getInjectableHeader(prefix, joinStr, suffix, formatter)
+
+
 
     @property
     def sender(self) -> str:

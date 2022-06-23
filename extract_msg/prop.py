@@ -3,8 +3,10 @@ import logging
 
 import olefile
 
+from typing import Any
+
 from . import constants
-from .enum import ErrorCode, ErrorCodeType
+from .enums import ErrorCode, ErrorCodeType
 from .utils import fromTimeStamp, filetimeToUtc, properHex
 
 
