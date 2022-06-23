@@ -47,6 +47,9 @@ class Post(MessageBase):
         Tuple[Union[str, None], bool]: A string should be formatted into the
             header. If the bool is True, then place an empty string if the value
             is None, otherwise follow the same behavior as regular None.
+
+        Additional note: If the value is an empty string, it will be dropped as
+        well by default.
         """
         return {
             'From': self.sender,

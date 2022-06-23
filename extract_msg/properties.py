@@ -128,20 +128,9 @@ class Properties:
         try:
             return self.__date
         except AttributeError:
+            self.__date = None
             if self.has_key('00390040'):
                 self.__date = self.get('00390040').value.__format__('%a, %d %b %Y %H:%M:%S %z')
-            elif self.has_key('30080040'):
-                self.__date = self.get('30080040').value.__format__('%a, %d %b %Y %H:%M:%S %z')
-            elif self.has_key('30070040'):
-                self.__date = self.get('30070040').value.__format__('%a, %d %b %Y %H:%M:%S %z')
-            else:
-                # DEBUG
-                logger.warning(
-                    'Error retrieving date. Setting as "Unknown". Please send the following data to developer:\n--------------------')
-                logger.warning(properHex(self.__stream))
-                logger.warning(self.keys())
-                logger.warning('--------------------')
-                self.__date = 'Unknown'
             return self.__date
 
     @property

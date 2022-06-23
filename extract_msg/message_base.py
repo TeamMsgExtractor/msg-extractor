@@ -216,7 +216,7 @@ class MessageBase(MSGFile):
         props = self.headerFormatProperties
 
         for name in props:
-            if props[name] is not None:
+            if props[name]:
                 if isinstance(props[name], tuple):
                     if props[name][1]:
                         value = props[name][0] or ''
@@ -236,12 +236,12 @@ class MessageBase(MSGFile):
         Returns the JSON representation of the Message.
         """
         return json.dumps({
-            'from': inputToString(self.sender, 'utf-8'),
-            'to': inputToString(self.to, 'utf-8'),
-            'cc': inputToString(self.cc, 'utf-8'),
-            'bcc': inputToString(self.bcc, 'utf-8'),
-            'subject': inputToString(self.subject, 'utf-8'),
-            'date': inputToString(self.date, 'utf-8'),
+            'from': inputToString(self.sender, self.stringEncoding),
+            'to': inputToString(self.to, self.stringEncoding),
+            'cc': inputToString(self.cc, self.stringEncoding),
+            'bcc': inputToString(self.bcc, self.stringEncoding),
+            'subject': inputToString(self.subject, self.stringEncoding),
+            'date': inputToString(self.date, self.stringEncoding),
             'body': decode_utf7(self.body),
         })
 
@@ -256,16 +256,13 @@ class MessageBase(MSGFile):
         # Get the type of line endings.
         crlf = inputToBytes(self.crlf, 'utf-8')
 
-        outputBytes = b'From: ' + inputToBytes(self.sender, 'utf-8') + crlf
-        outputBytes += b'To: ' + inputToBytes(self.to, 'utf-8') + crlf
-        outputBytes += b'Cc: ' + inputToBytes(self.cc, 'utf-8') + crlf
-        outputBytes += b'Bcc: ' + inputToBytes(self.bcc, 'utf-8') + crlf
-        outputBytes += b'Subject: ' + inputToBytes(self.subject, 'utf-8') + crlf
-        outputBytes += b'Date: ' + inputToBytes(self.date, 'utf-8') + crlf
-        outputBytes += b'-----------------' + crlf + crlf
-        outputBytes += inputToBytes(self.body, 'utf-8')
+        prefix = b''
+        suffix = crlf + b'-----------------' + crlf + crlf
+        joinStr = crlf
+        formatter = (lambda name, value : f'{name}: {value}'.encode('utf-8'))
 
-        return outputBytes
+        header = self.getInjectableHeader(prefix, joinStr, suffix, formatter)
+        return header + inputToBytes(self.body, 'utf-8')
 
     def getSaveHtmlBody(self, preparedHtml : bool = False, charset : str = 'utf-8', **kwargs) -> bytes:
         """
@@ -887,7 +884,7 @@ class MessageBase(MSGFile):
         try:
             return self._date
         except AttributeError:
-            self._date = self._prop.date
+            self._date = self._prop.date if self.isSent else None
             return self._date
 
     @property
@@ -1021,14 +1018,21 @@ class MessageBase(MSGFile):
         Tuple[Union[str, None], bool]: A string should be formatted into the
             header. If the bool is True, then place an empty string if the value
             is None, otherwise follow the same behavior as regular None.
+
+        Additional note: If the value is an empty string, it will be dropped as
+        well by default.
         """
+        # Checking outlook printing, default behavior is to completely omit
+        # *any* field that is not present. So while for extensability the
+        # option exists to have it be present even if no data is found, we are
+        # specifically not doing that.
         return {
             'From': self.sender,
             'Sent': self.date,
             'To': self.to,
             'Cc': self.cc,
             'Bcc': self.bcc,
-            'Subject': (self.subject, True),
+            'Subject': self.subject,
         }
 
     @property
@@ -1111,6 +1115,17 @@ class MessageBase(MSGFile):
         Returns if this email has been marked as read.
         """
         return bool(self.mainProperties['0E070003'].value & 1)
+
+    @property
+    def isSent(self) -> bool:
+        """
+        Returns if this email has been marked as sent. Assumes True if no flags
+        are found.
+        """
+        if not self.mainProperties.get('0E070003'):
+            return True
+        else:
+            return bool(self.mainProperties['0E070003'].value & 8)
 
     @property
     def messageId(self) -> str:

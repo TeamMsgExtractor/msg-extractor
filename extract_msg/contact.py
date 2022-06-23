@@ -35,13 +35,6 @@ class Contact(MessageBase):
         self.named
         self.namedProperties
 
-    def save(self, **kwargs) -> 'Contact':
-        """
-        Save function.
-        """
-        # TODO.
-        pass
-
     @property
     def account(self) -> str:
         """
@@ -69,7 +62,7 @@ class Contact(MessageBase):
     @property
     def assistant(self) -> str:
         """
-        The nme of the contact's assistant.
+        The name of the contact's assistant.
         """
         return self._ensureSet('_assistant', '__substg1.0_3A30')
 
@@ -679,11 +672,43 @@ class Contact(MessageBase):
         Tuple[Union[str, None], bool]: A string should be formatted into the
             header. If the bool is True, then place an empty string if the value
             is None, otherwise follow the same behavior as regular None.
+
+        Additional note: If the value is an empty string, it will be dropped as
+        well by default.
         """
+        # Checking outlook printing, default behavior is to completely omit
+        # *any* field that is not present. So while for extensability the
+        # option exists to have it be present even if no data is found, we are
+        # specifically not doing that.
         return {
-
+            'Full Name': self.displayName,
+            'Last Name': self.surname,
+            'First Name': self.givenName,
+            'Job Title': self.jobTitle,
+            'Department': self.departmentName,
+            'Company': self.companyName,
+            'Business Address': self.workAddress,
+            'Home Address': self.homeAddress,
+            'Other Address': self.otherAddress,
+            'IM Address': self.instantMessagingAddress,
+            'Business:': self.businessTelephoneNumber,
+            'Assistant': self.assistantTelephoneNumber,
+            'Home': self.homeTelephoneNumber,
+            'Mobile': self.mobileTelephoneNumber,
+            'Business Fax': self.businessFaxNumber,
+            'Email': self.email1EmailAddress or self.email1OriginalDisplayName,
+            'Email Display As': self.email1DisplayName,
+            'Email 2': self.email2EmailAddress or self.email2OriginalDisplayName,
+            'Email2 Display As': self.email2DisplayName,
+            'Email 3': self.email3EmailAddress or self.email3OriginalDisplayName,
+            'Email3 Display As': self.email3DisplayName,
+            'Birthday': self.birthdayLocal.__format__('%B %d, %Y') if self.birthdayLocal else None,
+            'Anniversary': self.weddingAnniversaryLocal.__format__('%B %d, %Y') if self.weddingAnniversaryLocal else None,
+            'Spouse/Partner': self.spouseName,
+            'Profession': self.profession,
+            'Assistant': self.assistant,
+            'Web Page': self.webpageUrl,
         }
-
 
     @property
     def hobbies(self) -> str:
@@ -1155,6 +1180,13 @@ class Contact(MessageBase):
         Contains the number of the contact's primary telephone.
         """
         return self._ensureSet('_primaryTelephoneNumber', '__substg1.0_3A1A')
+
+    @property
+    def profession(self) -> str:
+        """
+        The profession of the contact.
+        """
+        return self._ensureSet('_profession', '__substg1.0_3A46')
 
     @property
     def radioTelephoneNumber(self) -> str:
