@@ -734,8 +734,8 @@ class Contact(MessageBase):
                 'Email3 Display As': self.email3DisplayName,
             },
             '-other-': {
-                'Birthday': self.birthdayLocal.__format__('%B %d, %Y') if self.birthdayLocal else None,
-                'Anniversary': self.weddingAnniversaryLocal.__format__('%B %d, %Y') if self.weddingAnniversaryLocal else None,
+                'Birthday': self.birthday.__format__('%B %d, %Y') if self.birthdayLocal else None,
+                'Anniversary': self.weddingAnniversary.__format__('%B %d, %Y') if self.weddingAnniversaryLocal else None,
                 'Spouse/Partner': self.spouseName,
                 'Profession': self.profession,
                 'Children': ', '.join(self.childrensNames),
