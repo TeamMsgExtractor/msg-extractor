@@ -677,6 +677,15 @@ class Contact(MessageBase):
         Additional note: If the value is an empty string, it will be dropped as
         well by default.
         """
+        def strListToStr(inp : Union[str, List[str]]):
+            """
+            Small internal function for things that may return a string or list.
+            """
+            if isinstance(inp, str):
+                return inp
+            else:
+                return ', '.join(inp)
+
         # Checking outlook printing, default behavior is to completely omit
         # *any* field that is not present. So while for extensability the
         # option exists to have it be present even if no data is found, we are
@@ -698,10 +707,23 @@ class Contact(MessageBase):
             },
             '-phone numbers-': {
                 'Business:': self.businessTelephoneNumber,
+                'Business 2': strListToStr(self.businessTelephone2Number),
                 'Assistant': self.assistantTelephoneNumber,
+                'Company Main Phone': self.companyMainTelephoneNumber,
                 'Home': self.homeTelephoneNumber,
+                'Home 2': strListToStr(self.homeTelephone2Number),
                 'Mobile': self.mobileTelephoneNumber,
+                'Car': self.carTelephoneNumber,
+                'Radio': self.radioTelephoneNumber,
+                'Pager': self.pagerTelephoneNumber,
+                'Callback': self.callbackTelephoneNumber,
+                'Other': self.otherTelephoneNumber,
+                'Primary Phone': self.primaryTelephoneNumber,
+                'Telex': self.telexNumber,
+                'TTY/TDD Phone': self.tddTelephoneNumber,
+                'ISDN': self.isdnNumber,
                 'Business Fax': self.businessFaxNumber,
+                'Home Fax': self.homeFaxNumber,
             },
             '-emails-': {
                 'Email': self.email1EmailAddress or self.email1OriginalDisplayName,
@@ -716,6 +738,8 @@ class Contact(MessageBase):
                 'Anniversary': self.weddingAnniversaryLocal.__format__('%B %d, %Y') if self.weddingAnniversaryLocal else None,
                 'Spouse/Partner': self.spouseName,
                 'Profession': self.profession,
+                'Children': ', '.join(self.childrensNames),
+                'Hobbies': self.hobbies,
                 'Assistant': self.assistant,
                 'Web Page': self.webpageUrl,
             },
