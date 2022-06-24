@@ -10,14 +10,23 @@ import struct
 
 import ebcdic
 
+from typing import Dict, Tuple, Union
+
 
 # DEFINE CONSTANTS
 # WARNING DO NOT CHANGE ANY OF THESE VALUES UNLESS YOU KNOW
 # WHAT YOU ARE DOING! FAILURE TO FOLLOW THIS INSTRUCTION
 # CAN AND WILL BREAK THIS SCRIPT!
 
+# Typing Constants.
+HEADER_FORMAT_VALUE_TYPE = Union[str, Tuple[Union[str, None], bool], None]
+# Basically a dict of HEADER_FORMAT_TYPE and dicts containing them.
+HEADER_FORMAT_TYPE = Dict[str, Union[HEADER_FORMAT_VALUE_TYPE, Dict[str, HEADER_FORMAT_VALUE_TYPE]]]
+
 # Regular expresion constants.
 RE_INVALID_FILENAME_CHARACTERS = re.compile(r'[\\/:*?"<>|]')
+# Regular expression to find sections of spaces for htmlSanitize.
+RE_HTML_SAN_SPACE = re.compile('  +')
 # Regular expression to find the start of the html body.
 RE_HTML_BODY_START = re.compile(b'<body[^>]*>')
 # Regular expression to find the start of the html body in encapsulated RTF.

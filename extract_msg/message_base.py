@@ -15,15 +15,21 @@ import compressed_rtf
 import RTFDE
 
 from email.parser import Parser as EmailParser
-from html import escape as htmlEscape
 from typing import Callable, Dict, Tuple, Union
 
 from . import constants
 from .enums import DeencapType, RecipientType
-from .exceptions import DataNotFoundError, DeencapMalformedData, DeencapNotEncapsulated, IncompatibleOptionsError, WKError
+from .exceptions import (
+        DataNotFoundError, DeencapMalformedData, DeencapNotEncapsulated,
+        IncompatibleOptionsError, WKError
+    )
 from .msg import MSGFile
 from .recipient import Recipient
-from .utils import addNumToDir, addNumToZipDir, createZipOpen, findWk, inputToBytes, inputToString, isEncapsulatedRtf, prepareFilename, rtfSanitizeHtml, rtfSanitizePlain, validateHtml
+from .utils import (
+        addNumToDir, addNumToZipDir, createZipOpen, findWk, htmlSanitize,
+        inputToBytes, inputToString, isEncapsulatedRtf, prepareFilename,
+        rtfSanitizeHtml, rtfSanitizePlain, validateHtml
+    )
 from imapclient.imapclient import decode_utf7
 
 
@@ -213,21 +219,43 @@ class MessageBase(MSGFile):
         variable and formats the line.
         """
         formattedProps = []
-        props = self.headerFormatProperties
+        allProps = self.headerFormatProperties
 
-        for name in props:
-            if props[name]:
-                if isinstance(props[name], tuple):
-                    if props[name][1]:
-                        value = props[name][0] or ''
-                    elif props[name][0] is not None:
-                        value = props[name][0]
+        for entry in allProps:
+            isGroup = False
+            entryUsed = False
+            # This is how we handle the groups.
+            if isinstance(allProps[entry], dict):
+                props = allProps[entry]
+                isGroup = True
+            else:
+                props = {entry: allProps[entry]}
+
+            for name in props:
+                if props[name]:
+                    if isinstance(props[name], tuple):
+                        if props[name][1]:
+                            value = props[name][0] or ''
+                        elif props[name][0] is not None:
+                            value = props[name][0]
+                        else:
+                            continue
                     else:
-                        continue
-                else:
-                    value = props[name]
+                        value = props[name]
 
-                formattedProps.append(formatter(name, value))
+                    entryUsed = True
+                    formattedProps.append(formatter(name, value))
+
+            # Now if we are working with a group, add an empty entry to get a
+            # second join string between this section and the last, but *only*
+            # if any of the entries were used.
+            if isGroup and entryUsed:
+                formattedProps.append('')
+
+        # If the last entry is empty, remove it. We don't want extra spacing at
+        # the end.
+        if formattedProps[-1] == '':
+            formattedProps.pop()
 
         return prefix + joinStr.join(formattedProps) + suffix
 
@@ -1007,7 +1035,7 @@ class MessageBase(MSGFile):
             return self._headerDict
 
     @property
-    def headerFormatProperties(self) -> Dict[str, Union[str, Tuple[Union[str, None], bool], None]]:
+    def headerFormatProperties(self) -> constants.HEADER_FORMAT_TYPE:
         """
         Returns a dictionary of properties, in order, to be formatted into the
         header. Keys are the names to use in the header while the values are one
@@ -1021,6 +1049,11 @@ class MessageBase(MSGFile):
 
         Additional note: If the value is an empty string, it will be dropped as
         well by default.
+
+        Additionally you can group members of a header together by placing them
+        in an embedded dictionary. Groups will be spaced out using a second
+        instance of the join string. If any member of a group is being printed,
+        it will be spaced apart from the next group/item.
         """
         # Checking outlook printing, default behavior is to completely omit
         # *any* field that is not present. So while for extensability the
@@ -1098,7 +1131,7 @@ class MessageBase(MSGFile):
         prefix = '<div><div><p class="MsoNormal">'
         suffix = '<o:p></o:p></p></div></div>'
         joinStr = '<br/>'
-        formatter = (lambda name, value : f'<b>{name}:</b>&nbsp;{inputToString(htmlEscape(value), self.stringEncoding)}')
+        formatter = (lambda name, value : f'<b>{name}:</b>&nbsp;{inputToString(htmlSanitize(value), self.stringEncoding)}')
 
         return self.getInjectableHeader(prefix, joinStr, suffix, formatter)
 

@@ -2,6 +2,7 @@ import datetime
 
 from typing import Dict, List, Set, Tuple, Union
 
+from . import constants
 from .enums import ContactLinkState, ElectronicAddressProperties, Gender, PostalAddressID
 from .message_base import MessageBase
 from .structures.entry_id import EntryID
@@ -661,7 +662,7 @@ class Contact(MessageBase):
         return self._ensureSetNamed('_hasPicture', '8015', overrideClass = bool, preserveNone = False)
 
     @property
-    def headerFormatProperties(self) -> Dict[str, Union[str, Tuple[Union[str, None], bool], None]]:
+    def headerFormatProperties(self) -> constants.HEADER_FORMAT_TYPE:
         """
         Returns a dictionary of properties, in order, to be formatted into the
         header. Keys are the names to use in the header while the values are one
@@ -681,33 +682,43 @@ class Contact(MessageBase):
         # option exists to have it be present even if no data is found, we are
         # specifically not doing that.
         return {
-            'Full Name': self.displayName,
-            'Last Name': self.surname,
-            'First Name': self.givenName,
-            'Job Title': self.jobTitle,
-            'Department': self.departmentName,
-            'Company': self.companyName,
-            'Business Address': self.workAddress,
-            'Home Address': self.homeAddress,
-            'Other Address': self.otherAddress,
-            'IM Address': self.instantMessagingAddress,
-            'Business:': self.businessTelephoneNumber,
-            'Assistant': self.assistantTelephoneNumber,
-            'Home': self.homeTelephoneNumber,
-            'Mobile': self.mobileTelephoneNumber,
-            'Business Fax': self.businessFaxNumber,
-            'Email': self.email1EmailAddress or self.email1OriginalDisplayName,
-            'Email Display As': self.email1DisplayName,
-            'Email 2': self.email2EmailAddress or self.email2OriginalDisplayName,
-            'Email2 Display As': self.email2DisplayName,
-            'Email 3': self.email3EmailAddress or self.email3OriginalDisplayName,
-            'Email3 Display As': self.email3DisplayName,
-            'Birthday': self.birthdayLocal.__format__('%B %d, %Y') if self.birthdayLocal else None,
-            'Anniversary': self.weddingAnniversaryLocal.__format__('%B %d, %Y') if self.weddingAnniversaryLocal else None,
-            'Spouse/Partner': self.spouseName,
-            'Profession': self.profession,
-            'Assistant': self.assistant,
-            'Web Page': self.webpageUrl,
+            '-personal details-': {
+                'Full Name': self.displayName,
+                'Last Name': self.surname,
+                'First Name': self.givenName,
+                'Job Title': self.jobTitle,
+                'Department': self.departmentName,
+                'Company': self.companyName,
+            },
+            '-addresses-': {
+                'Business Address': self.workAddress,
+                'Home Address': self.homeAddress,
+                'Other Address': self.otherAddress,
+                'IM Address': self.instantMessagingAddress,
+            },
+            '-phone numbers-': {
+                'Business:': self.businessTelephoneNumber,
+                'Assistant': self.assistantTelephoneNumber,
+                'Home': self.homeTelephoneNumber,
+                'Mobile': self.mobileTelephoneNumber,
+                'Business Fax': self.businessFaxNumber,
+            },
+            '-emails-': {
+                'Email': self.email1EmailAddress or self.email1OriginalDisplayName,
+                'Email Display As': self.email1DisplayName,
+                'Email 2': self.email2EmailAddress or self.email2OriginalDisplayName,
+                'Email2 Display As': self.email2DisplayName,
+                'Email 3': self.email3EmailAddress or self.email3OriginalDisplayName,
+                'Email3 Display As': self.email3DisplayName,
+            },
+            '-other-': {
+                'Birthday': self.birthdayLocal.__format__('%B %d, %Y') if self.birthdayLocal else None,
+                'Anniversary': self.weddingAnniversaryLocal.__format__('%B %d, %Y') if self.weddingAnniversaryLocal else None,
+                'Spouse/Partner': self.spouseName,
+                'Profession': self.profession,
+                'Assistant': self.assistant,
+                'Web Page': self.webpageUrl,
+            },
         }
 
     @property

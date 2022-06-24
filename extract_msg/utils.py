@@ -24,6 +24,7 @@ import zipfile
 import bs4
 import tzlocal
 
+from html import escape as htmlEscape
 from typing import Dict, List, Tuple, Union
 
 from . import constants
@@ -350,6 +351,23 @@ def hasLen(obj) -> bool:
     return hasattr(obj, '__len__')
 
 
+def htmlSanitize(inp : str) -> str:
+    """
+    Santizes the input for injection into an HTML string. Converts characters
+    into forms that will not be misinterpreted, if necessary.
+    """
+    # First step, do a basic escape of the HTML.
+    inp = htmlEscape(inp)
+
+    # Change newlines to <br/> to they won't be ignored.
+    inp = inp.replace('\r\n', '\n').replace('\n', '<br/>')
+
+    # Escape long sections of spaces to ensure they won't be ignored.
+    inp = constants.RE_HTML_SAN_SPACE.sub((lambda spaces : '&nbsp;' * len(spaces.group(0))),inp)
+
+    return inp
+
+
 def inputToBytes(stringInputVar, encoding) -> bytes:
     """
     Converts the input into bytes.
@@ -394,8 +412,8 @@ def inputToString(bytesInputVar, encoding) -> str:
 
 def isEncapsulatedRtf(inp : bytes) -> bool:
     """
-    Currently the destection is made to be *extremly* basic, but this will work
-    for now. In the future this will be fixed to that literal text in the body
+    Currently the detection is made to be *extremly* basic, but this will work
+    for now. In the future this will be fixed so that literal text in the body
     of a message won't cause false detection.
     """
     return b'\\fromhtml' in inp

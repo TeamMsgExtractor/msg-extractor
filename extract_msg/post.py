@@ -1,5 +1,3 @@
-from typing import Dict, Tuple, Union
-
 from . import constants
 from .message_base import MessageBase
 from .utils import inputToBytes, inputToString
@@ -36,7 +34,7 @@ class Post(MessageBase):
         return self._ensureSet('_convo', '__substg1.0_0070')
 
     @property
-    def headerFormatProperties(self) -> Dict[str, Union[str, Tuple[Union[str, None], bool], None]]:
+    def headerFormatProperties(self) -> constants.HEADER_FORMAT_TYPE:
         """
         Returns a dictionary of properties, in order, to be formatted into the
         header. Keys are the names to use in the header while the values are one

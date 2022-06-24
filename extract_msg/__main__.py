@@ -10,7 +10,7 @@ def main() -> None:
     # Setup logging to stdout, indicate running from cli
     CLI_LOGGING = 'extract_msg_cli'
     args = utils.getCommandArgs(sys.argv[1:])
-    level = logging.INFO if args.verbose else logging.WARNING
+    level = 5 if args.verbose else logging.WARNING
 
     # Determine where to save the files to.
     currentDir = os.getcwd() # Store this in case the path changes.
