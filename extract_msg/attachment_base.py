@@ -309,6 +309,13 @@ class AttachmentBase:
         return self.__msg
 
     @property
+    def name(self) -> str:
+        """
+        The best name available for the file. Uses long filename before short.
+        """
+        return self.longFilename or self.shortFilename
+
+    @property
     def namedProperties(self):
         """
         The NamedAttachmentProperties instance for this attachment.

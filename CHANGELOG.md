@@ -24,6 +24,8 @@
 * Changed behavior of `Properties.date` to *only* return the submit time. This is to ensure messages that were never sent do not have a sent date.
 * Changed behavior of `MessageBase.date` to only return a send date if the message has been sent. For messages with no flags, it assumes `True`.
 * Generally brought saving behavior closer to the way outlook handles it.
+* Made `SignedAttachment` and `BaseAttachment` more similar by adding properties to each that are shared. `BaseAttachment` now have a `name` property and `SignedAttachment` now have `longFilename` and `shortFilename`.
+* Fixed issue in HTML saving that would cause some characters to be dropped when rendering them due to how the header injection worked.
 
 **v0.34.3**
 * Fixed issue that may have caused other olefile types to raise the wrong type of error when passed to `openMsg`.
