@@ -1128,7 +1128,7 @@ class MessageBase(MSGFile):
         """
         The header that can be formatted and injected into the html body.
         """
-        prefix = '<div><div><p class="MsoNormal">'
+        prefix = '<div id="injectedHeader"><div><p class="MsoNormal">'
         suffix = '<o:p></o:p></p></div></div>'
         joinStr = '<br/>'
         formatter = (lambda name, value : f'<b>{name}:</b>&nbsp;{inputToString(htmlSanitize(value), self.stringEncoding)}')

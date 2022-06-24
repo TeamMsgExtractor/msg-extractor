@@ -779,7 +779,8 @@ def rtfSanitizeHtml(inp : str) -> str:
             output += "\\'" + properHex(char, 2)
         else:
             # Handle Unicode characters.
-            output += '\\u' + str(ord(char)) + '?'
+            enc = char.encode('utf-16-le')
+            output += ''.join(f'\\u{x}?' for x in struct.unpack(f'<{len(enc) // 2}h', enc))
 
     return output
 
@@ -802,7 +803,9 @@ def rtfSanitizePlain(inp : str) -> str:
             output += "\\'" + properHex(char, 2)
         else:
             # Handle Unicode characters.
-            output += '\\u' + str(ord(char)) + '?'
+            # Handle Unicode characters.
+            enc = char.encode('utf-16-le')
+            output += ''.join(f'\\u{x}?' for x in struct.unpack(f'<{len(enc) // 2}h', enc))
 
     return output
 
