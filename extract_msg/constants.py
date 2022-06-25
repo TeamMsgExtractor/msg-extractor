@@ -185,8 +185,9 @@ Message-ID: {Message-Id}
 
 KNOWN_CLASS_TYPES = (
     'ipm.activity',
-    'ipm.appointment',
-    'ipm.contact',
+    'ipm.appointment', # [MS-OXOCAL]
+    'ipm.contact', # [MS-OXOCNTC]
+    'ipm.configuration', # [MS-OXOCFG]
     'ipm.distlist',
     'ipm.document',
     'ipm.ole.class',

@@ -32,6 +32,7 @@
 * Fixed issues with changelog format.
 * Fixed issue that caused progress to sometimes break the main loop when a file had Unicode characters if the console it was writing to didn't support them.
 * Added option to `MessageBase` (and subsequently `openMsg`) that allows you to override the code being used for deencapsulation. See `MessageBase.__init__` for details on how to create an override function.
+* Added additional msg class types that I found to the list of known class types.
 
 **v0.34.2**
 * [[TeamMsgExtractor #267](https://github.com/TeamMsgExtractor/msg-extractor/issues/267)] Fixed issue that caused signed messages that were .eml files to have their data field *not* be a bytes instance. This field will now *always* be bytes. If a problem making it bytes occurs, an exception will be raised to give you brief details.
