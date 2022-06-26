@@ -26,6 +26,8 @@
 * Generally brought saving behavior closer to the way outlook handles it.
 * Made `SignedAttachment` and `BaseAttachment` more similar by adding properties to each that are shared. `BaseAttachment` now have a `name` property and `SignedAttachment` now have `longFilename` and `shortFilename`.
 * Fixed issue in HTML saving that would cause some characters to be dropped when rendering them due to how the header injection worked.
+* Removed `__init__` methods from MSG classes that don't change it. This ensures notes are easily passed down.
+* Rewrote the system used for Appointment objects to include all of the objects specified in [MS-OXOCAL].
 
 **v0.34.3**
 * Fixed issue that may have caused other olefile types to raise the wrong type of error when passed to `openMsg`.

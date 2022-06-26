@@ -1,70 +1,53 @@
-from .message_base import MessageBase
+import datetime
+
+from .enums import BusyStatus
+from .calendar import Calendar
 
 
-class Appointment(MessageBase):
+class AppointmentMeeting(Calendar):
     """
-    Parser for Microsoft Outlook Appointment files.
+    Parser for Microsoft Outlook Appointment or Meeting files.
+
+    Both Appointment and Meeting have the same class type but Meeting has
+    additional properties. These properties are meaningless on an Appointment
+    object.
     """
 
-    def __init__(self, path, **kwargs):
-        super().__init__(path, **kwargs)
+    @property
+    def appointmentLastSequence(self) -> int:
+        """
+        The last sequence number that was sent to any attendee.
+        """
+        return self._ensureSetNamed('_appointmentLastSequence', '8203')
 
     @property
-    def appointmentClassType(self):
+    def appointmentReplyTime(self) -> datetime.datetime:
         """
-        The class type of the appointment.
+        The date and time at which the attendee responded to a received Meeting
+        Request object of Meeting Update object in UTC.
         """
-        return self._ensureSetNamed('_appointmentClassType', '0024')
+        return self._ensureSetNamed('_appointmentReplyTime', '8220')
 
     @property
-    def endDate(self):
+    def appointmentSequenceTime(self) -> datetime.datetime:
         """
-        The end date of the appointment.
+        The date and time at which the appointmentSequence property was last
+        modified.
         """
-        return self._ensureSetProperty('_endDate', '00610040')
+        return self._ensureSetNamed('_appointmentSequenceTime', '8202')
 
     @property
-    def location(self):
+    def fInvited(self) -> bool:
         """
-        Returns the location of the meeting.
+        Whether a Meeting Request object has been sent out.
         """
-        try:
-            return self.__location
-        except AttributeError:
-            self.__location = self.named.getNamedValue('8208') or self.named.getNamedValue('0002')
-            return self.__location
+        return self._ensureSetNamed('_fInvited', '8229', overrideClass = bool, preserveNone = False)
 
     @property
-    def optionalAttendees(self):
+    def isMeeting(self) -> bool:
         """
-        Returns the optional attendees of the meeting.
+        Attempts to determine if the object is a Meeting. True if meeting, False
+        if appointment.
         """
-        return self._ensureSetNamed('_optionalAttendees', '0007')
-
-    @property
-    def requiredAttendees(self):
-        """
-        Returns the required attendees of the meeting.
-        """
-        return self._ensureSetNamed('_requiredAttendees', '0006')
-
-    @property
-    def resourceAttendees(self):
-        """
-        Returns the resource attendees of the meeting.
-        """
-        return self._ensureSetNamed('_resourceAttendees', '0008')
-
-    @property
-    def startDate(self):
-        """
-        The start date of the appointment.
-        """
-        return self._ensureSetProperty('_startDate', '00600040')
-
-    @property
-    def timeZone(self):
-        """
-        Returns the time zone of the meeting.
-        """
-        return self._ensureSetNamed('_timeZone', '000C')
+        # TODO.
+        pass

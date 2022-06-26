@@ -8,12 +8,6 @@ class Post(MessageBase):
     Class for parsing Post messages.
     """
 
-    def __init__(self, path, **kwargs):
-        super().__init__(path, **kwargs)
-        # We don't need any special data, just need to override the save
-        # functions for getting the body. Past that, we just let Message do all
-        # the work.
-
     def getJson(self) -> str:
         """
         Returns the JSON representation of the Post.

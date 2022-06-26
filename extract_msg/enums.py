@@ -3,6 +3,8 @@ import enum
 from typing import Set
 
 
+
+
 class AddressBookType(enum.Enum):
     """
     The type of object that an address book entry ID represents. MUST be one of
@@ -20,6 +22,66 @@ class AddressBookType(enum.Enum):
     ONE_OFF_USER = 0x102
     SEARCH = 0x200
 
+
+
+class AppointmentAuxilaryFlag(enum.Enum):
+    """
+    Describes the auxilary state of the object.
+
+    COPIED: The Calendar object was copied from another Calendar folder.
+    FORCE_MEETING_RESPONSE: The client of server can require that a Meeting
+        Response object be sent to the organizer when a response is chosen.
+    FORWARDED: The object was forwarded by the organizer or another recipient.
+    REPAIR_UPDATE_MESSAGE: The meeting request is a Repair Update Message sent
+        from a server-side calendar repair system.
+    """
+    @classmethod
+    def fromBits(cls, value : int) -> Set['AppointmentAuxilaryFlag']:
+        """
+        Takes an int and returns a set of the flags.
+        """
+        flags = set()
+        for x in range(7):
+            bit = value & (1 << x)
+            if bit != 0:
+                if x in (3, 4, 6):
+                    raise ValueError('Reserved bit was set.')
+                flags.add(cls(bit))
+
+        return flags
+
+    COPIED = 0b1
+    FORCE_MEETING_RESPONSE = 0b10
+    FORWARDED = 0b100
+    REPAIR_UPDATE_MESSAGE = 0b100000
+
+
+
+class AppointmentStateFlag(enum.Enum):
+    """
+    MEETING: The object is a Meeting object or meeting-related object.
+    RECEIVED: The represented object was received from someone else.
+    CANCELED: The Meeting object that is represented has been canceled.
+    """
+    @classmethod
+    def fromBits(cls, value : int) -> Set['AppointmentStateFlag']:
+        """
+        Takes an int and returns a set of the flags.
+        """
+        flags = set()
+        for x in range(3):
+            bit = value & (1 << x)
+            if bit != 0:
+                flags.add(cls(bit))
+
+        return flags
+
+    MEETING = 0b1
+    RECEIVED = 0b10
+    CANCELED = 0b100
+
+
+
 class AttachErrorBehavior(enum.Enum):
     """
     The behavior to follow when handling an error in an attachment.
@@ -32,6 +94,8 @@ class AttachErrorBehavior(enum.Enum):
     NOT_IMPLEMENTED = 1
     BROKEN = 2
 
+
+
 class AttachmentType(enum.Enum):
     """
     The type represented by the attachment.
@@ -40,6 +104,8 @@ class AttachmentType(enum.Enum):
     MSG = 1
     WEB = 2
     SIGNED = 3
+
+
 
 class BCImageAlignment(enum.Enum):
     STRETCH = 0x00
@@ -53,9 +119,13 @@ class BCImageAlignment(enum.Enum):
     BOTTOM_CENTER = 0x08
     BOTTOM_RIGHT = 0x09
 
+
+
 class BCImageSource(enum.Enum):
     CONTACT_PHOTO = 0
     CARD_PHOTO = 1
+
+
 
 class BCLabelFormat(enum.Enum):
     """
@@ -69,6 +139,8 @@ class BCLabelFormat(enum.Enum):
     UNKNOWN = 0b100
     RIGHT_RTL = 0b101
     LEFT_RTL = 0b110
+
+
 
 class BCTemplateID(enum.Enum):
     """
@@ -98,6 +170,8 @@ class BCTemplateID(enum.Enum):
     IM_ALIGN_BOTTOM = 0x03
     NO_IMAGE = 0x04
     BACKGROUND = 0x05
+
+
 
 class BCTextFormat(enum.Enum):
     """
@@ -159,6 +233,52 @@ class BCTextFormat(enum.Enum):
     RIGHT_UIB = 0b00011110
     RIGHT_UIBM = 0b00011111
 
+
+
+class BusyStatus(enum.Enum):
+    """
+    The availability of a use for the event described by the object.
+
+    OL_FREE: The user is available.
+    OL_TENTATIVE: The user has a tentative event scheduled.
+    OL_BUSY: The user is busy.
+    OL_OUT_OF_OFFICE: The user is Out of Office.
+    OL_WORKING_ELSEWHERE: The user is working from a location other than the
+        office.
+    """
+    OL_FREE = 0x00000000
+    OL_TENTATIVE = 0x00000001
+    OL_BUSY = 0x00000002
+    OL_OUT_OF_OFFICE = 0x00000003
+    OL_WORKING_ELSEWHERE = 0x00000004
+
+
+
+class CalendarType(enum.Enum):
+    DEFAULT = 0x0000
+    CAL_GREGORIAN = 0x0001
+    CAL_GREGORIAN_US = 0x0002
+    CAL_JAPAN = 0x0003
+    CAL_TAIWAN = 0x0004
+    CAL_KOREA = 0x0005
+    CAL_HIJRI = 0x0006
+    CAL_THAI = 0x0007
+    CAL_HEBREW = 0x0008
+    CAL_GREGORIAN_ME_FRENCH = 0x0009
+    CAL_GREGORIAN_ARABIC = 0x000A
+    CAL_GREGORIAN_XLIT_ENGLISH = 0x000B
+    CAL_GREGORIAN_XLIT_FRENCH = 0x000C
+    CAL_LUNAR_JAPANESE = 0x000E
+    CAL_CHINESE_LUNAR = 0x000F
+    CAL_SAKA = 0x0010
+    CAL_LUNAR_ETO_CHN = 0x0011
+    CAL_LUNAR_ETO_KOR = 0x0012
+    CAL_LUNAR_ROKUYOU = 0x0013
+    CAL_LUNAR_KOREAN = 0x0014
+    CAL_UMALQURA = 0x0017
+
+
+
 class ContactAddressIndex(enum.Enum):
     EMAIL_1 = 0
     EMAIL_2 = 1
@@ -166,6 +286,8 @@ class ContactAddressIndex(enum.Enum):
     FAX_1 = 3
     FAX_2 = 4
     FAX_3 = 5
+
+
 
 class ContactLinkState(enum.Enum):
     """
@@ -181,6 +303,8 @@ class ContactLinkState(enum.Enum):
     DUPLICATE_LINKED = 1
     DUPLICATE_CANNOT_LINK = 2
 
+
+
 class DeencapType(enum.Enum):
     """
     Enum to specify to custom deencapsulation functions the type of data being
@@ -188,6 +312,8 @@ class DeencapType(enum.Enum):
     """
     PLAIN = 0
     HTML = 1
+
+
 
 class DisplayType(enum.Enum):
     MAILUSER = 0x0000
@@ -202,6 +328,8 @@ class DisplayType(enum.Enum):
     ADDRESS_TEMPLATE = 0x0102
     SEARCH = 0x0200
 
+
+
 class ElectronicAddressProperties(enum.Enum):
     @classmethod
     def fromBits(cls, value : int) -> Set['ElectronicAddressProperties']:
@@ -215,7 +343,7 @@ class ElectronicAddressProperties(enum.Enum):
             raise ValueError('Value must not be negative.')
         # This is a quick compressed way to convert the bits in the int into
         # a tuple of instances of this class should any bit be a 1.
-        return tuple(cls(int(x)) for index, val in enumerate(bin(value)[:1:-1]) if val == '1')
+        return {cls(int(x)) for index, val in enumerate(bin(value)[:1:-1]) if val == '1'}
 
     EMAIL_1 = 0x00000000
     EMAIL_2 = 0x00000001
@@ -223,6 +351,8 @@ class ElectronicAddressProperties(enum.Enum):
     BUSINESS_FAX = 0x00000003
     HOME_FAX = 0x00000004
     PRIMARY_FAX = 0x00000005
+
+
 
 class EntryIDType(enum.Enum):
     """
@@ -244,6 +374,8 @@ class EntryIDType(enum.Enum):
     # [MS-OXOCNTC] WrappedEntryId Structure.
     WRAPPED = b'\xC0\x91\xAD\xD3\x51\x9D\xCF\x11\xA4\xA9\x00\xAA\x00\x47\xFA\xA4'
 
+
+
 class EntryIDTypeHex(enum.Enum):
     """
     Converts a UID to the type of Entry ID structure. Uses a hex string instead
@@ -264,6 +396,8 @@ class EntryIDTypeHex(enum.Enum):
     PUBLIC_MESSAGE_STORE = '1A447390AA6611CD9BC800AA002FC45A'
     # [MS-OXOCNTC] WrappedEntryId Structure.
     WRAPPED = 'C091ADD3519DCF11A4A900AA0047FAA4'
+
+
 
 class ErrorCode(enum.Enum):
     SUCCESS = 0x00000000
@@ -335,6 +469,8 @@ class ErrorCode(enum.Enum):
     NOT_SYNCHRONIZED = 0x80040805
     NAMED_PROPERTY_QUOTA = 0x80040900
     NOT_IMPLEMENTED = 0x80040FFF
+
+
 
 class ErrorCodeType(enum.Enum):
     """
@@ -861,12 +997,16 @@ class ErrorCodeType(enum.Enum):
     ISAM_ERROR_FILE_IO_BEYOND_EOF = 0xFFFFF05F
     ISAM_ERROR_FILE_COMPRESSED = 0xFFFFF05B
 
+
+
 class Gender(enum.Enum):
     # Seems rather binary, which is less than ideal. We are directly using the
     # terms used by the documentation.
     UNSPECIFIED = 0x0000
     FEMALE = 0x0001
     MALE = 0x0002
+
+
 
 class Guid(enum.Enum):
     PS_MAPI = '{00020328-0000-0000-C000-000000000046}'
@@ -887,14 +1027,20 @@ class Guid(enum.Enum):
     PSETID_XMLEXTRACTEDENTITIES = '{23239608-685D-4732-9C55-4C95CB4E8E33}'
     PSETID_ATTACHMENT = '{96357F7F-59E1-47D0-99A7-46515C183B54}'
 
+
+
 class Importance(enum.Enum):
     LOW = 0
     MEDIUM = 1
     IMPORTANCE_HIGH = 2
 
+
+
 class Intelligence(enum.Enum):
     DUMB = 0
     SMART = 1
+
+
 
 class MacintoshEncoding(enum.Enum):
     """
@@ -905,9 +1051,91 @@ class MacintoshEncoding(enum.Enum):
     APPLE_SINGLE = 2
     APPLE_DOUBLE = 3
 
+
+
+class MeetingObjectChange(enum.Enum):
+    """
+    Indicates a property that has changed on a meeting object.
+
+    START: The start has changed.
+    END: The end has changed.
+    RECUR: The recurrence pattern has changed.
+    LOCATION: The location has changed.
+    SUBJECT: The subject has changed.
+    REQUIRED_ATTENDEE: One or more required attendees were added.
+    OPTIONAL_ATTENDEE: One or more optional attendees were added.
+    BODY: The body was modified.
+    RESPONSE: The responseRequested or replyRequested property has changed.
+    ALLOW_PROPOSE: The appointmentNotAllowPropose property has changed.
+    """
+    @classmethod
+    def fromBits(cls, value : int) -> Set['MeetingObjectChange']:
+        """
+        Takes an int and returns a set of the changes.
+        """
+        changes = set()
+        for x in range(32):
+            if x in (8, 11) or (12 < x < 31):
+                continue
+            bit = value & (1 << x)
+            if bit != 0:
+                if x in (12, 31):
+                    raise ValueError('Reserved bit was set.')
+                changes.add(cls(bit))
+
+        return changes
+
+    START = 0b1
+    END = 0b10
+    RECUR = 0b100
+    LOCATION = 0b1000
+    SUBJECT = 0b10000
+    REQUIRED_ATTENDEE = 0b100000
+    OPTIONAL_ATTENDEE = 0b1000000
+    BODY = 0b10000000
+    RESPONSE = 0b1000000000
+    ALLOW_PROPOSE = 0b10000000000
+    DEPRECATED = 0b100000000000
+
+
+
+class MeetingRecipientType(enum.Enum):
+    ORGANIZER = 0x01
+    SENDABLE_REQUIRED_ATTENDEE = 0x01
+    SENDABLE_OPTIONAL_ATTENDEE = 0x02
+    SENDABLE_RESOURCE_OBJECT = 0x03
+
+
+class MeetingType(enum.Enum):
+    """
+    The type of Meeting Request object of Meeting Update object.
+
+    EMPTY: Unspecified.
+    REQUEST: The meeting request is the initial request.
+    FULL: Attendees were added, the meeting was cancelled and the organizer is
+        uncancelling it, and or the start, end, or recurrance property was
+        changed.
+    INFO: An informational update was made to the meeting and it is not one of
+        the conditions for FULL.
+    OUT_OF_DATE: A newer Meeting Request object or MeetingUpdate object was
+        received after this one.
+    DELEGATOR_COPY: Set on the delegator's copy when a delegate will handle
+        meeting-related objects.
+    """
+    EMPTY = 0x00000000
+    REQUEST = 0x00000001
+    FULL = 0x00010000
+    INFO = 0x00020000
+    OUT_OF_DATE = 0x00080000
+    DELEGATOR_COPY = 0x00100000
+
+
+
 class MessageFormat(enum.Enum):
     TNEF = 0
     MIME = 1
+
+
 
 class MessageType(enum.Enum):
     PRIVATE_FOLDER = 0x0001
@@ -918,9 +1146,13 @@ class MessageType(enum.Enum):
     MAPPED_PUBLIC_MESSAGE = 0x000B
     PUBLIC_NEWSGROUP_FOLDER = 0x000C
 
+
+
 class NamedPropertyType(enum.Enum):
     NUMERICAL_NAMED = 0
     STRING_NAMED = 1
+
+
 
 class OORBodyFormat(enum.Enum):
     """
@@ -934,16 +1166,22 @@ class OORBodyFormat(enum.Enum):
     # also prevent the code from failing on a 0 format.
     UNSPECIFIED = 0b0000
 
+
+
 class PostalAddressID(enum.Enum):
     UNSPECIFIED = 0x00000000
     HOME = 0x00000001
     WORK = 0x00000002
     OTHER = 0x00000003
 
+
+
 class Priority(enum.Enum):
     URGENT = 0x00000001
     NORMAL = 0x00000000
     NOT_URGENT = 0xFFFFFFFF
+
+
 
 class PropertiesType(enum.Enum):
     """
@@ -953,6 +1191,8 @@ class PropertiesType(enum.Enum):
     MESSAGE_EMBED = 1
     ATTACHMENT = 2
     RECIPIENT = 3
+
+
 
 class RecipientRowFlagType(enum.Enum):
     NOTYPE = 0x0
@@ -964,6 +1204,8 @@ class RecipientRowFlagType(enum.Enum):
     PERSONALDESTRIBUTIONLIST1 = 0x6
     PERSONALDESTRIBUTIONLIST2 = 0x7
 
+
+
 class RecipientType(enum.Enum):
     """
     The type of recipient.
@@ -972,6 +1214,28 @@ class RecipientType(enum.Enum):
     TO = 1
     CC = 2
     BCC = 3
+
+
+
+class ResponseStatus(enum.Enum):
+    """
+    The response status of an attendee.
+
+    NONE: No response is required for this object.
+    ORGANIZED: This Meeting object belongs to the organizer.
+    TENTATIVE: The attendee has tentatively accepted.
+    ACCEPTED: The attendee has accepted.
+    DECLINED: The attendee has declined.
+    NOT_RESPONDED: The attendee has not yet responded.
+    """
+    NONE = 0x00000000
+    ORGANIZED = 0x00000001
+    TENTATIVE = 0x00000002
+    ACCEPTED = 0x00000003
+    DECLINED = 0x00000004
+    NOT_RESPONDED = 0x00000005
+
+
 
 class RuleActionType(enum.Enum):
     OP_MOVE = 0x01
@@ -986,11 +1250,15 @@ class RuleActionType(enum.Enum):
     OP_DELETE = 0x0A
     OP_MARK_AS_READ = 0x0B
 
+
+
 class Sensitivity(enum.Enum):
     NORMAL = 0
     PERSONAL = 1
     PRIVATE = 2
     CONFIDENTIAL = 3
+
+
 
 class TaskAcceptance(enum.Enum):
     """
@@ -1000,6 +1268,8 @@ class TaskAcceptance(enum.Enum):
     UNKNOWN = 0x00000001
     ACCEPTED = 0x00000002
     REJECTED = 0x00000003
+
+
 
 class TaskHistory(enum.Enum):
     """
@@ -1011,6 +1281,8 @@ class TaskHistory(enum.Enum):
     OTHER = 0x00000003
     DUE_DATE_CHANGED = 0x00000004
     ASSIGNED = 0x00000005
+
+
 
 class TaskMode(enum.Enum):
     """
@@ -1031,6 +1303,8 @@ class TaskMode(enum.Enum):
     EMBEDDED_UPDATE = 4
     SELF_ASSIGNED = 5
 
+
+
 class TaskOwnership(enum.Enum):
     """
     The role of the current user relative to the Task object.
@@ -1044,6 +1318,8 @@ class TaskOwnership(enum.Enum):
     NOT_ASSIGNED = 0x00000000
     ASSIGNERS_COPY = 0x00000001
     ASSIGNEES_COPY = 0x00000002
+
+
 
 class TaskStatus(enum.Enum):
     """

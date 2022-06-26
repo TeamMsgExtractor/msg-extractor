@@ -14,9 +14,6 @@ class Task(MessageBase):
     Class used for parsing task files.
     """
 
-    def __init__(self, path, **kwargs):
-        super().__init__(path, **kwargs)
-
     @property
     def percentComplete(self) -> float:
         """

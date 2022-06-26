@@ -27,16 +27,17 @@ https://github.com/TeamMsgExtractor/msg-extractor
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 __author__ = 'Destiny Peterson & Matthew Walker'
-__date__ = '2022-06-20'
+__date__ = '2022-06-25'
 __version__ = '0.35.0'
 
 import logging
 
 from . import constants, enums
-from .appointment import Appointment
+from .appointment import AppointmentMeeting
 from .attachment import Attachment
 from .contact import Contact
 from .exceptions import UnrecognizedMSGTypeError
+from .meeting_request import MeetingRequest
 from .message import Message
 from .message_base import MessageBase
 from .message_signed import MessageSigned

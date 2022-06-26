@@ -496,8 +496,9 @@ def openMsg(path, **kwargs):
     :raises UnsupportedMSGTypeError: if the type is recognized but not suppoted.
     :raises UnrecognizedMSGTypeError: if the type is not recognized.
     """
-    from .appointment import Appointment
+    from .appointment import AppointmentMeeting
     from .contact import Contact
+    from .meeting_request import MeetingRequest
     from .message import Message
     from .msg import MSGFile
     from .message_signed import MessageSigned
@@ -532,9 +533,12 @@ def openMsg(path, **kwargs):
     elif classType.startswith('ipm.post'):
         msg.close()
         return Post(path, **kwargs)
-    elif classType.startswith('ipm.appointment') or classType.startswith('ipm.schedule'):
+    elif classType.startswith('ipm.schedule.meeting.request'):
         msg.close()
-        return Appointment(path, **kwargs)
+        return MeetingRequest(path, **kwargs)
+    elif classType.startswith('ipm.appointment'):
+        msg.close()
+        return AppointmentMeeting(path, **kwargs)
     elif classType.startswith('ipm.task'):
         msg.close()
         return Task(path, **kwargs)

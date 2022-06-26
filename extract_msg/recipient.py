@@ -1,9 +1,11 @@
 import logging
 
-from .structures.entry_id import PermanentEntryID
-from .enums import PropertiesType, RecipientType
+from typing import Union
+
+from .enums import MeetingRecipientType, PropertiesType, RecipientType
 from .prop import FixedLengthProp
 from .properties import Properties
+from .structures.entry_id import PermanentEntryID
 from .utils import verifyPropertyId, verifyType
 
 
@@ -25,7 +27,11 @@ class Recipient:
             self.__email = self._getStringStream('__substg1.0_3003')
         self.__name = self._getStringStream('__substg1.0_3001')
         self.__typeFlags = self.__props.get('0C150003').value or 0
-        self.__type = RecipientType(0xF & self.__typeFlags)
+        from .appointment import AppointmentMeeting
+        if isinstance(msg, AppointmentMeeting):
+            self.__type == MeetingRecipientType(0xF & self.__typeFlags)
+        else:
+            self.__type = RecipientType(0xF & self.__typeFlags)
         self.__formatted = f'{self.__name} <{self.__email}>'
 
     def _ensureSet(self, variable, streamID, stringStream : bool = True, **kwargs):
@@ -289,7 +295,7 @@ class Recipient:
         return self._ensureSet('_transmittableDisplayName', '__substg1.0_3A20')
 
     @property
-    def type(self) -> RecipientType:
+    def type(self) -> Union[RecipientType, MeetingRecipientType]:
         """
         Returns the recipient type. Type is:
             * Sender if `type & 0xf == 0`
