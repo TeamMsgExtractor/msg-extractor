@@ -29,7 +29,7 @@ class Recipient:
         self.__typeFlags = self.__props.get('0C150003').value or 0
         from .appointment import AppointmentMeeting
         if isinstance(msg, AppointmentMeeting):
-            self.__type == MeetingRecipientType(0xF & self.__typeFlags)
+            self.__type = MeetingRecipientType(0xF & self.__typeFlags)
         else:
             self.__type = RecipientType(0xF & self.__typeFlags)
         self.__formatted = f'{self.__name} <{self.__email}>'
