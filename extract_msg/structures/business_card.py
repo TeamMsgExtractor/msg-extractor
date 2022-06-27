@@ -13,7 +13,7 @@ class BusinessCardDisplayDefinition:
     """
 
     def __init__(self, data : bytes):
-        self.__raw = data
+        self.__rawData = data
         reader = BytesReader(data)
         unpacked = constants.ST_BC_HEAD.unpack(reader.read(13))
         reader.read(4)
@@ -118,7 +118,7 @@ class BusinessCardDisplayDefinition:
         """
         The bytes used to generate this instance.
         """
-        return self.__raw
+        return self.__rawData
 
     @property
     def templateID(self) -> BCTemplateID:

@@ -433,6 +433,7 @@ CODE_PAGES = {
 }
 
 PYTPFLOATINGTIME_START = datetime.datetime(1899, 12, 30)
+NULL_DATE = datetime.datetime(4500, 8, 31, 23, 59)
 
 # Constants used for argparse stuff
 KNOWN_FILE_FLAGS = (

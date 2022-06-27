@@ -7,7 +7,7 @@ from typing import Any
 
 from . import constants
 from .enums import ErrorCode, ErrorCodeType
-from .utils import fromTimeStamp, filetimeToUtc, properHex
+from .utils import filetimeToDatetime, properHex
 
 
 logger = logging.getLogger(__name__)
@@ -147,21 +147,11 @@ class FixedLengthProp(PropBase):
         elif _type == 0x0014:  # PtypInteger64
             value = constants.STI64.unpack(value)[0]
         elif _type == 0x0040:  # PtypTime
+            rawTime = constants.ST3.unpack(value)[0]
             try:
-                rawtime = constants.ST3.unpack(value)[0]
-                if rawtime < 116444736000000000:
-                    # We can't properly parse this with our current setup, so
-                    # we will rely on olefile to handle this one.
-                    value = olefile.olefile.filetime2datetime(rawtime)
-                else:
-                    if rawtime != 915151392000000000:
-                        value = fromTimeStamp(filetimeToUtc(rawtime))
-                    else:
-                        # Temporarily just set to max time to signify a null date.
-                        value = datetime.datetime.max
-            except Exception as e:
+                value = filetimeToDatetime(rawTime)
+            except ValueError as e:
                 logger.exception(e)
-                logger.error(f'Timestamp value of {filetimeToUtc(constants.ST3.unpack(value)[0])} caused an exception. This was probably caused by the time stamp being too far in the future.')
                 logger.error(self.raw)
         elif _type == 0x0048:  # PtypGuid
             # TODO parsing for this

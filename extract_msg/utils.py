@@ -148,6 +148,36 @@ def divide(string, length : int) -> list:
     return [string[length * x:length * (x + 1)] for x in range(int(ceilDiv(len(string), length)))]
 
 
+def filetimeToDatetime(rawTime : int):
+    """
+    Converts a filetime into a datetime.
+
+    Some values have specialized meanings, listed below:
+        915151392000000000: December 31, 4500, representing a null time. Returns
+            extract_msg.constants.NULL_DATE.
+        915046235400000000: 23:59 on August 31, 4500, representing a null time.
+            Returns extract_msg.constants.NULL_DATE.
+    """
+    try:
+        if rawTime < 116444736000000000:
+            # We can't properly parse this with our current setup, so
+            # we will rely on olefile to handle this one.
+            return olefile.olefile.filetime2datetime(rawTime)
+        elif rawTime == 915151392000000000:
+            # So this is actually a different null date, specifically
+            # supposed to be December 31, 4500, but it's weird that the
+            # same spec has 2 different ones, so we just return the same
+            # one for both.
+            return constants.NULL_DATE
+        elif rawTime == 915046235400000000:
+            return constants.NULL_DATE
+        else:
+            return fromTimeStamp(filetimeToUtc(rawTime))
+    except Exception as e:
+        raise ValueError(f'Timestamp value of {filetimeToUtc(constants.ST3.unpack(value)[0])} caused an exception. This was probably caused by the time stamp being too far in the future.')
+
+
+
 def findWk(path = None):
     """
     Attempt to find the path of the wkhtmltopdf executable. If :param path: is
@@ -647,18 +677,8 @@ def parseType(_type : int, stream, encoding, extras):
     elif _type == 0x001F:  # PtypString
         return value.decode('utf-16-le')
     elif _type == 0x0040:  # PtypTime
-        rawtime = constants.ST3.unpack(value)[0]
-        if rawtime < 116444736000000000:
-            # We can't properly parse this with our current setup, so
-            # we will rely on olefile to handle this one.
-            value = olefile.olefile.filetime2datetime(rawtime)
-        else:
-            if rawtime != 915151392000000000:
-                value = fromTimeStamp(filetimeToUtc(rawtime))
-            else:
-                # Temporarily just set to max time to signify a null date.
-                value = datetime.datetime.max
-        return value
+        rawTime = constants.ST3.unpack(value)[0]
+        return filetimeToDatetime(rawTime)
     elif _type == 0x0048:  # PtypGuid
         return bytesToGuid(value)
     elif _type == 0x00FB:  # PtypServerId
