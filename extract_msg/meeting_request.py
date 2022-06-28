@@ -8,7 +8,7 @@ from .enums import BusyStatus, CalendarType, MeetingObjectChange, MeetingType
 
 class MeetingRequest(Calendar):
     """
-
+    
     """
 
     @property

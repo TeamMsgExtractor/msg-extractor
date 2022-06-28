@@ -14,6 +14,9 @@ class FolderID:
     """
     A Folder ID structure specified in [MS-OXCDATA].
     """
+
+    __SIZE__ : int = 16
+
     def __init__(self, data : bytes):
         self.__rawData = data
         self.__replicaID = constants.STUI16.unpack(data[:2])
@@ -47,6 +50,9 @@ class MessageID:
     """
     A Message ID structure, as defined in [MS-OXCDATA].
     """
+
+    __SIZE__ : int = 8
+
     def __init__(self, data : bytes):
         self.__rawData = data
         self.__replicaID = constants.STUI16.unpack(data[:2])
@@ -91,18 +97,16 @@ class GlobalObjectID:
     def __init__(self, data : bytes):
         self.__rawData = data
         reader = BytesReader(data)
-        self.__byteArrayID = reader.read(16)
-        if self.__byteArrayID != '\x04\x00\x00\x00\x82\x00\xE0\x00\x74\xC5\xB7\x10\x1A\x82\xE0\x08':
-            raise ValueError(f'Byte Array ID did not match for GlobalObjectID (got {self.__byteArrayID}).')
-
+        expectedBytes = '\x04\x00\x00\x00\x82\x00\xE0\x00\x74\xC5\xB7\x10\x1A\x82\xE0\x08'
+        errorMsg = 'Byte Array ID did not match for GlobalObjectID (got {actual}).'
+        self.__byteArrayID = reader.assertRead(expectedBytes, errorMsg)
         self.__yh = reader.read(1)
         self.__yl = reader.read(1)
         self.__year = constants.ST_BE_UI16.unpack(self.__yh + self.__yl)[0]
-        self.__month = reader.read(1)
-        self.__day = reader.read(1)
+        self.__month = reader.readUnsignedByte(1)
+        self.__day = reader.readUnsignedByte(1)
         self.__creationTime = filetimeToDatetime(reader.readUnsignedLong())
-        if reader.read(8) != b'\x00\x00\x00\x00\x00\x00\x00\x00':
-            raise ValueError('Reserved was not set to null.')
+        reader.assertNull(8, 'Reserved was not set to null.')
         size = reader.readUnsignedInt()
         self.__data = reader.read(size)
 

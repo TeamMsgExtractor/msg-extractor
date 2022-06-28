@@ -445,20 +445,23 @@ NEEDS_ARG = (
 MAINDOC = "extract_msg:\n\tExtracts emails and attachments saved in Microsoft Outlook's .msg files.\n\n" \
           "https://github.com/TeamMsgExtractor/msg-extractor"
 
-# Define pre-compiled structs to make unpacking slightly faster
-# General structs
+# Define pre-compiled structs to make unpacking slightly faster.
+# General structs.
 ST1 = struct.Struct('<8x4I')
 ST2 = struct.Struct('<H2xI8x')
 ST3 = struct.Struct('<Q')
 # Struct used for unpacking a GUID from bytes.
 ST_GUID = struct.Struct('<IHH8s')
+# Struct for unpacking a TimeZoneStruct from bytes.
+ST_TZ = struct.Struct('<iiiH16sH16s')
 # Structs used by data.py
 ST_DATA_UI32 = struct.Struct('<I')
 ST_DATA_UI16 = struct.Struct('<H')
 ST_DATA_UI8 = struct.Struct('<B')
 # Structs used by named.py
 STNP_NAM = struct.Struct('<i')
-STNP_ENT = struct.Struct('<IHH') # Struct used for unpacking the entries in the entry stream
+# Struct used for unpacking the entries in the entry stream
+STNP_ENT = struct.Struct('<IHH')
 # Structs used by prop.py
 STFIX = struct.Struct('<8x8s')
 STVAR = struct.Struct('<8xi4s')

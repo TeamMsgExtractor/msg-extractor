@@ -3,6 +3,9 @@ Module for helper classes to different data structures.
 """
 
 import io
+import struct
+
+from typing import Any, Tuple, Union
 
 from .. import constants
 
@@ -12,6 +15,7 @@ class BytesReader(io.BytesIO):
     Extension of io.BytesIO that allows you to read specific data types from the
     stream.
     """
+
     def __init__(self, *args, littleEndian = True, **kwargs):
         super().__init__(*args, **kwargs)
         self.__le = bool(littleEndian)
@@ -38,7 +42,7 @@ class BytesReader(io.BytesIO):
             self.__float_t = constants.ST_BE_F32
             self.__double_t = constants.ST_BE_F64
 
-    def _readDecodedString(self, encoding, width : int = 1):
+    def _readDecodedString(self, encoding, width : int = 1) -> str:
         """
         Reads a null terminated string with the specified character width
         decoded using the specified encoding. If it cannot be read or cannot be
@@ -47,10 +51,72 @@ class BytesReader(io.BytesIO):
         position = self.tell()
         try:
             return self.readByteString(width).decode(encoding)
-        except:
+        except Exception:
             while self.tell() != position:
                 self.seek(position)
             raise
+
+    def assertNull(length : int, errorMsg : str = None) -> bytes:
+        """
+        Reads the number of bytes specified and ensures they are all null.
+
+        Ensures the reader returns back to the spot before attempting to read if
+        there are not enough bytes to read.
+
+        :param length: The amount of bytes to read.
+        :param errorMsg: Optional, the error message to use if the bytes are not
+            all null.
+
+        :returns: The bytes read, if you need them.
+
+        :raise IOError: Not enough bytes left to read.
+        :raises ValueError: Assertion failed.
+        """
+        # Quick return for reading 0 bytes.
+        if length == 0:
+            return b''
+
+        valueRead = self.tryReadBytes(len(value))
+        if valueRead:
+            if sum(valueRead) != 0:
+                errorMsg = errorMsg or 'Bytes read were not all null.'
+                raise ValueError(errorMsg)
+        else:
+            raise IOError('Not enough bytes left in buffer.')
+
+        return valueRead
+
+    def assertRead(value : bytes, errorMsg : str = None) -> bytes:
+        """
+        Reads the number of bytes and compares them to the value provided. If it
+        does not match, throws a value error.
+
+        Ensures the reader returns back to the spot before attempting to read if
+        there are not enough bytes to read.
+
+        :param value: Value to compare read bytes to.
+        :param errorMsg: Optional, an error message to emit on mismatch. Does
+            not apply to the buffer being too small. Allows for a format string
+            with the keyword values "expected" and "actual", representing the
+            value given to the function and the actual value read, respectively.
+
+        :returns: The bytes read, if you need them.
+
+        :raises ValueError: Assertion failed.
+        """
+        # Quick return for a value being empty.
+        if len(value) == 0:
+            return b''
+
+        valueRead = self.tryReadBytes(len(value))
+        if valueRead:
+            if valueRead != value:
+                errorMessage = errorMessage or 'Value did not match (expected {expected}, got {actual}).'
+                raise ValueError(errorMsg.format(expected = value, actual = valueRead))
+        else:
+            raise IOError('Not enough bytes left in buffer.')
+
+        return valueRead
 
     def readAnsiString(self) -> str:
         """
@@ -106,6 +172,21 @@ class BytesReader(io.BytesIO):
                 # Otherwise add the character to our string.
                 string += nextChar
 
+    def readClass(self, _class):
+        """
+        Takes anything with a __SIZE__ property and a call function that takes
+        a single bytes argument and returns the result of that function.
+
+        Generally, this is intended to take a fixed-size class and return an
+        instance of the class created with that amount of bytes. However, there
+        is little reason to truly limit it to only that.
+        """
+        value = self.tryReadBytes(_class.__SIZE__)
+        if value:
+            return _class(value)
+        else:
+            raise IOError('Not enough bytes left in buffer.')
+
     def readDouble(self) -> float:
         """
         Reads a double from the stream.
@@ -153,6 +234,23 @@ class BytesReader(io.BytesIO):
         value = self.tryReadBytes(2)
         if value:
             return self.__int16_t.unpack(value)[0]
+        else:
+            raise IOError('Not enough bytes left in buffer.')
+
+    def readStruct(self, _struct : Union[struct.Struct, Any]) -> Tuple:
+        """
+        Read enough bytes for a struct and unpack it, returning the tuple of
+        values.
+
+        :param _struct: A struct or struct-like object using duck-typing. Only
+            requires the object have an unpack method that takes a single
+            argument and a size property to tell how many bytes to read.
+
+        :raises IOError: If there are not enough bytes left to read.
+        """
+        value = self.tryReadBytes(_struct.size)
+        if value:
+            return _struct.unpack(value)
         else:
             raise IOError('Not enough bytes left in buffer.')
 

@@ -16,6 +16,7 @@ class BusinessCardDisplayDefinition:
         self.__rawData = data
         reader = BytesReader(data)
         unpacked = constants.ST_BC_HEAD.unpack(reader.read(13))
+        # Because doc says it must be ignored, we don't check the reserved here.
         reader.read(4)
         self.__majorVersion = unpacked[0]
         self.__minorVersion = unpacked[1]

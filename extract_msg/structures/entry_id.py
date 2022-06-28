@@ -190,6 +190,8 @@ class MessageEntryID(EntryID):
     A Message EntryID structure, as defined in [MS-OXCDATA].
     """
 
+    __SIZE__ : int = 70
+
     def __init__(self, data : bytes):
         super().__init__(data)
         reader = BytesReader(data[20:])
@@ -197,13 +199,11 @@ class MessageEntryID(EntryID):
         self.__folderDatabaseGuid = reader.read(16)
         # This entry is 6 bytes, so we pull some shenanigans to unpack it.
         self.__folderGlobalCounter = constants.STUI64.unpack(reader.read(6) + b'\x00\x00')
-        if reader.read(2) != b'\x00\x00':
-            raise ValueError('Pad bytes were not 0.')
+        reader.assertNull(2, 'Pad bytes were not 0.')
         self.__messageDatabaseGuid = reader.read(16)
         # This entry is 6 bytes, so we pull some shenanigans to unpack it.
         self.__messageGlobalCounter = constants.STUI64.unpack(reader.read(6) + b'\x00\x00')
-        if reader.read(2) != b'\x00\x00':
-            raise ValueError('Pad bytes were not 0.')
+        reader.assertNull(2, 'Pad bytes were not 0.')
         # Not sure why Microsoft decided to say "yes, let's do 2 6-byte integers
         # followed by 2 pad bits each" instead of just 2 8-byte integers with a
         # maximum value, but here we are.

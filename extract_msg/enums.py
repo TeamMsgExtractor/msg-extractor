@@ -3,8 +3,6 @@ import enum
 from typing import Set
 
 
-
-
 class AddressBookType(enum.Enum):
     """
     The type of object that an address book entry ID represents. MUST be one of
@@ -1336,3 +1334,22 @@ class TaskStatus(enum.Enum):
     COMPLETE = 0x00000002
     WAITING_ON_OTHER = 0x00000003
     DEFERRED = 0x00000004
+
+
+
+class TZFlag(enum.Enum):
+    """
+    Flags for a TZRule object as defined in [MS-OXOCAL].
+
+    RECUR_CURRENT_TZREG: The rule is associated with a recurring series.
+    EFFECTIVE_TZREG: The rule is the effective rule.
+    """
+    @classmethod
+    def fromBits(cls, value : int) -> Set['TZFlag']:
+        """
+        Takes an int and returns a set of the changes.
+        """
+        return {csl(1 << x) for x in range(2) if (value & (1 << x)) != 0}
+
+    RECUR_CURRENT_TZREG = 0b1
+    EFFECTIVE_TZREG = 0b10

@@ -5,6 +5,8 @@ from typing import List, Set
 from .enums import AppointmentAuxilaryFlag, AppointmentStateFlag, BusyStatus, ResponseStatus
 from .message_base import MessageBase
 from .structures.misc_id import GlobalObjectID
+from .structures.time_zone_definition import TimeZoneDefinition
+from .structures.time_zone_struct import TimeZoneStruct
 
 
 class CalendarBase(MessageBase):
@@ -77,6 +79,30 @@ class CalendarBase(MessageBase):
         Whether the event is an all-day event or not.
         """
         return self._ensureSetNamed('_appointmentSubType', '8215', overrideClass = bool)
+
+    @property
+    def appointmentTimeZoneDefinitionEndDisplay(self) -> TimeZoneDefinition:
+        """
+        Specifies the time zone information for the appointmentEndWhole property
+        Used to convert the end date and time to and from UTC.
+        """
+        return self._ensureSetNamed('_appointmentTimeZoneDefinitionEndDisplay', '825F', overrideClass = TimeZoneDefinition)
+
+    @property
+    def appointmentTimeZoneDefinitionRecur(self) -> TimeZoneDefinition:
+        """
+        Specified the time zone information that specifies how to convert the
+        meeting date and time on a recurring series to and from UTC.
+        """
+        return self._ensureSetNamed('_appointmentTimeZoneDefinitionRecur', '8260', overrideClass = TimeZoneDefinition)
+
+    @property
+    def appointmentTimeZoneDefinitionStartDisplay(self) -> TimeZoneDefinition:
+        """
+        Specifies the time zone information for the appointmentStartWhole
+        property. Used to convert the start date and time to and from UTC.
+        """
+        return self._ensureSetNamed('_appointmentTimeZoneDefinitionStartDisplay', '825E', overrideClass = TimeZoneDefinition)
 
     @property
     def appointmentUnsendableRecipients(self) -> bytes:
@@ -311,11 +337,20 @@ class CalendarBase(MessageBase):
         return self._ensureSetProperty('_startDate', '00600040')
 
     @property
-    def timeZone(self) -> int:
+    def timeZoneDescription(self) -> str:
         """
-        Returns the time zone of the meeting.
+        A human-readable description of the time zone that is represented by the
+        data in the timeZoneStruct property.
         """
-        return self._ensureSetNamed('_timeZone', '000C')
+        return self._ensureSetNamed('_timeZoneDescription', '8234')
+
+    @property
+    def timeZoneStruct(self) -> TimeZoneStruct:
+        """
+        Set on a recurring series to specify time zone information. Specifies
+        how to convert time fields between local time and UTC.
+        """
+        return self._ensureSetNamed('_timeZoneStruct', '8233', overrideClass = TimeZoneStruct)
 
     @property
     def toAttendeesString(self) -> str:
