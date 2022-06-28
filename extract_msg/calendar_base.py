@@ -2,8 +2,9 @@ import datetime
 
 from typing import List, Set
 
-from .enums import AppointmentAuxilaryFlag, AppointmentStateFlag, BusyStatus, ResponseStatus
+from .enums import AppointmentAuxilaryFlag, AppointmentColor, AppointmentStateFlag, BusyStatus, IconIndex, ResponseStatus
 from .message_base import MessageBase
+from .structures.entry_id import EntryID
 from .structures.misc_id import GlobalObjectID
 from .structures.time_zone_definition import TimeZoneDefinition
 from .structures.time_zone_struct import TimeZoneStruct
@@ -29,6 +30,13 @@ class CalendarBase(MessageBase):
         return self._ensureSetNamed('_appointmentAuxilaryFlags', '8207', overrideClass = AppointmentAuxilaryFlag.fromBits)
 
     @property
+    def appointmentColor(self) -> AppointmentColor:
+        """
+        The color to be used when displaying a Calendar object.
+        """
+        return self._ensureSetNamed('_appointmentColor', '8214', overrideClass = AppointmentColor)
+
+    @property
     def appointmentDuration(self) -> int:
         """
         The length of the event, in minutes.
@@ -49,6 +57,19 @@ class CalendarBase(MessageBase):
         time for the meeting if True.
         """
         return self._ensureSetNamed('_appointmentNotAllowPropose', '8259')
+
+    @property
+    def appointmentRecur(self) -> bytes:
+        """
+        Specifies the dates and times when a recurring series occurs by using
+        one of the recurrence patterns and ranges specified in this section.
+
+        Unfinished, so currently just returns plain bytes.
+        """
+        # TODO: Make this return a structure that understands the data. I would
+        # do it immediately, but it looks way too complicated to be worth it for
+        # now.
+        return self._ensureSetNamed('_appointmentRecur', '8216')
 
     @property
     def appointmentSequence(self) -> int:
@@ -114,6 +135,28 @@ class CalendarBase(MessageBase):
         to run a verification on it.
         """
         return self._ensureSetNamed('_appointmentUnsendableRecipients', '825D')
+
+    @property
+    def birthdayContactAttributionDisplayName(self) -> str:
+        """
+        Indicated the name of the contact associated with the birthday event.
+        """
+        return self._ensureSetNamed('_birthdayContactAttributionDisplayName', 'BirthdayContactAttributionDisplayName')
+
+    @property
+    def birthdayContactEntryID(self) -> EntryID:
+        """
+        Indicates the EntryID of the contact associated with the birthday event.
+        """
+        return self._ensureSetNamed('_birthdayContactEntryID', 'BirthdayContactEntryId', overrideClass = EntryID.autoCreate)
+
+    @property
+    def birthdayContactPersonGuid(self) -> bytes:
+        """
+        Indicates the person ID's GUID of the contact associated with the
+        birthday event.
+        """
+        return self._ensureSetNamed('_birthdayContactPersonGuid', 'BirthdayContactPersonGuid')
 
     @property
     def busyStatus(self) -> BusyStatus:
@@ -193,6 +236,21 @@ class CalendarBase(MessageBase):
         return self._ensureSetNamed('_globalObjectID', '0023', overrideClass = GlobalObjectID)
 
     @property
+    def iconIndex(self) -> Union[IconIndex, int]:
+        """
+        The icon to use for the object.
+        """
+        return self._ensureSetProperty('_iconIndex', '10800003', overrideClass = IconIndex.tryMake)
+
+    @property
+    def isBirthdayContactWritable(self) -> bool:
+        """
+        Indicates whether the contact associated with the birthday event is
+        writable.
+        """
+        return self._ensureSetNamed('_isBirthdayContactWritable', 'IsBirthdayContactWritable')
+
+    @property
     def isException(self) -> bool:
         """
         Whether the object represents an exception. False indicates that the
@@ -215,11 +273,34 @@ class CalendarBase(MessageBase):
         return self._ensureSet('_keywords', 'Keywords')
 
     @property
+    def linkedTaskItems(self) -> Tuple[EntryID]:
+        """
+        A list of PidTagEntryId properties of Task objects related to the
+        Calendar object that are set by a client.
+        """
+        return self._ensureSetNamed('_linkedTaskItems', '820C', overrideClass = lambda x : tuple(EntryID.autoCreate(y) for y in x))
+
+    @property
     def location(self) -> str:
         """
         Returns the location of the meeting.
         """
         return self._ensureSetNamed('_location', '8208')
+
+    @property
+    def meetingDoNotForward(self) -> bool:
+        """
+        Whether to allow the meeting to be forwarded. True disallows forwarding.
+        """
+        return self._ensureSetNamed('_meetingDoNotForward', 'DoNotForward')
+
+    @property
+    def meetingWorkspaceUrl(self) -> str:
+        """
+        The URL of the Meeting Workspace, as specified in [MS-MEETS], that is
+        associated with a Calendar object.
+        """
+        return self._ensureSetNamed('_meetingWorkspaceUrl', '8209')
 
     @property
     def nonSendableBcc(self) -> str:
@@ -286,6 +367,14 @@ class CalendarBase(MessageBase):
         organizer, in UTC.
         """
         return self._ensureSetNamed('_ownerCriticalChange', '001A')
+
+    @property
+    def recurrencePattern(self) -> str:
+        """
+        A description of the recurrence specified by the appointmentRecur
+        property.
+        """
+        return self._ensureSetNamed('_recurrencePattern', '8232')
 
     @property
     def recurring(self) -> bool:

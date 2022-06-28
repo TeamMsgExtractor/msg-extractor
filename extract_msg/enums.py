@@ -55,6 +55,21 @@ class AppointmentAuxilaryFlag(enum.Enum):
 
 
 
+class AppointmentColor(enum.Enum):
+    NONE = 0x00000000
+    RED = 0x00000001
+    BLUE = 0x00000002
+    GREEN = 0x00000003
+    GREY = = 0x00000004
+    ORANGE = 0x00000005
+    CYAN = 0x00000006
+    OLIVE = 0x00000007
+    PURPLE = 0x00000008
+    TEAL = 0x00000009
+    YELLOW = 0x0000000A
+
+
+
 class AppointmentStateFlag(enum.Enum):
     """
     MEETING: The object is a Meeting object or meeting-related object.
@@ -1024,6 +1039,32 @@ class Guid(enum.Enum):
     PSETID_SHARING = '{00062040-0000-0000-C000-000000000046}'
     PSETID_XMLEXTRACTEDENTITIES = '{23239608-685D-4732-9C55-4C95CB4E8E33}'
     PSETID_ATTACHMENT = '{96357F7F-59E1-47D0-99A7-46515C183B54}'
+
+
+
+class IconIndex(enum.Enum):
+    @classmethod
+    def tryMake(cls, value : int) -> Union['IconIndex', int]:
+        """
+        Try to make an instance, returning the value on failure.
+        """
+        try:
+            return cls(value)
+        except ValueError:
+            return value
+
+    UNSPECIFIED = 0xFFFFFFFF
+    SINGLE_INSTANCE_APPOINTMENT = 0x00000400
+    RECURRING_APPOINTMENT = 0x00000401
+    SINGLE_INSTANCE_MEETING = 0x00000402
+    RECURRING_MEETING = 0x00000403
+    MEETING_REQUEST_UPDATE = 0x00000404
+    ACCEPT_MEETING_REQUEST = 0x00000405
+    DECLINE_MEETING_REQUEST = 0x00000406
+    TENTATIVELY_ACCEPT_MEETING_REQUEST = 0x00000407
+    MEETING_CANCELLATION = 0x00000408
+    MEETING_UPDATE_INFORMATIONAL = 0x00000409
+    FORWARD_NOTIFICATION = 0x0000040B
 
 
 
