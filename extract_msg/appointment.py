@@ -67,6 +67,7 @@ class AppointmentMeeting(Calendar):
             {
                 'Start': self.startDate,
                 'End': self.endDate,
+                'Show Time As': None, # TODO: Figure this one out.
             },
             {
                 'Recurrance': None, # TODO: Requires recurrance property to be finished.
