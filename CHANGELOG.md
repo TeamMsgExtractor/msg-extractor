@@ -1,5 +1,6 @@
 **v0.35.0**
 * [[TeamMsgExtractor #206](https://github.com/TeamMsgExtractor/msg-extractor/issues/206)] Implemented support for the Post object, including the ability to save it.
+* [[TeamMsgExtractor #256](https://github.com/TeamMsgExtractor/msg-extractor/issues/256)] Added optional dependency `mimetype-magic` (installable using the `mime` extra) which helps to identify attachments that do not give a mime-type.
 * Moved a few more minor constants to `enums`.
 * Added support for many internal data structures, specifically Entry ID structures.
 * Refactored classes from `extract_msg.data` to submodule `extract_msg.structures`.
@@ -79,7 +80,6 @@
 * Actually removed the exception I meant to remove in 0.31.0.
 * Changed `Attachment.type` to an enum instead of a string. This makes it easier to see all of the possible values.
 * Added option to allow attachment saving to be skipped when calling `Message.save`.
-* Added optional dependency `mimetype-magic` (installable using the `mime` extra) which helps to identify attachments that do not give a mime-type.
 * Added `type` property to all attachment types. `AttachmentBase` uses `AttachmentType.UNKNOWN`, `BrokenAttachment` uses `AttachmentType.BROKEN`, and `UnsupportedAttachment` uses `AttachmentType.UNSUPPORTED`.
 
 **v0.31.1**
