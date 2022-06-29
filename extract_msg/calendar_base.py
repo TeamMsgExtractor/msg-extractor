@@ -352,6 +352,13 @@ class CalendarBase(MessageBase):
         return self._ensureSetNamed('_optionalAttendees', '0007')
 
     @property
+    def organizer(self) -> str:
+        """
+        The meeting organizer.
+        """
+        return self._ensureSet('_organizer', '__substg1.0_0042')
+
+    @property
     def ownerAppointmentID(self) -> int:
         """
         A quasi-unique value amond all Calendar objects in a user's mailbox.
