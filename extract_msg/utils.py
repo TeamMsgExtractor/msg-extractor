@@ -939,7 +939,7 @@ def tryGetMimetype(att, mimetype : Union[str, None]):
             logger.info('Mimetype not found on attachment, and `mime` dependency not installed. Won\'t try to generate.')
 
         except Exception:
-            logger.exception('Error occured while using mimetype-magic. This error will be ignored.')
+            logger.exception('Error occured while using python-magic. This error will be ignored.')
 
     return mimetype
 
