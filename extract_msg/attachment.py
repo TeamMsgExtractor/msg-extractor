@@ -243,10 +243,22 @@ class BrokenAttachment(AttachmentBase):
     An attachment that has suffered a fatal error. Will not generate from a
     NotImplementedError exception.
     """
-    pass
+
+    @property
+    def type(self) -> AttachmentType:
+        """
+        Returns the (internally used) type of the data.
+        """
+        return AttachmentType.BROKEN
 
 class UnsupportedAttachment(AttachmentBase):
     """
     An attachment whose type is not currently supported.
     """
-    pass
+
+    @property
+    def type(self) -> AttachmentType:
+        """
+        Returns the (internally used) type of the data.
+        """
+        return AttachmentType.UNSUPPORTED

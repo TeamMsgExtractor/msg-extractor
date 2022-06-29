@@ -1,6 +1,6 @@
 import enum
 
-from typing import Set
+from typing import Set, Union
 
 
 class AddressBookType(enum.Enum):
@@ -41,7 +41,7 @@ class AppointmentAuxilaryFlag(enum.Enum):
         flags = set()
         for x in range(7):
             bit = value & (1 << x)
-            if bit != 0:
+            if bit:
                 if x in (3, 4, 6):
                     raise ValueError('Reserved bit was set.')
                 flags.add(cls(bit))
@@ -60,7 +60,7 @@ class AppointmentColor(enum.Enum):
     RED = 0x00000001
     BLUE = 0x00000002
     GREEN = 0x00000003
-    GREY = = 0x00000004
+    GREY = 0x00000004
     ORANGE = 0x00000005
     CYAN = 0x00000006
     OLIVE = 0x00000007
@@ -81,13 +81,7 @@ class AppointmentStateFlag(enum.Enum):
         """
         Takes an int and returns a set of the flags.
         """
-        flags = set()
-        for x in range(3):
-            bit = value & (1 << x)
-            if bit != 0:
-                flags.add(cls(bit))
-
-        return flags
+        return {csl(1 << x) for x in range(3) if (value & (1 << x)) != 0}
 
     MEETING = 0b1
     RECEIVED = 0b10
@@ -117,6 +111,10 @@ class AttachmentType(enum.Enum):
     MSG = 1
     WEB = 2
     SIGNED = 3
+    BROKEN = 4
+    UNSUPPORTED = 5
+
+    UNKNOWN = 0xFFFFFFFF
 
 
 
@@ -289,6 +287,53 @@ class CalendarType(enum.Enum):
     CAL_LUNAR_ROKUYOU = 0x0013
     CAL_LUNAR_KOREAN = 0x0014
     CAL_UMALQURA = 0x0017
+
+
+
+class ClientIntentFlag(enum.Enum):
+    """
+    An action a user has taken on a Meeting object.
+
+    MANAGER: The user is the owner of the Meeting object's Calendar folder. If
+        set, DELEGATE SHOULD NOT be set.
+    DELEGATE: The user is a delegate acting on a Meeting object in a delegator's
+        Calendar folder. If set, MANAGER SHOULD NOT be set.
+    DELETED_WITH_NO_RESPONSE: The user deleted the Meeting object with no
+        response sent to the organizer.
+    DELETED_EXCEPTION_WITH_NO_RESPONSE: The user deleted an exception to a
+        recurring series with no response sent to the organizer.
+    RESPONDED_TENTATIVE: The user tentatively accepted the meeting request.
+    RESPONSED_ACCEPT: The user accepted the meeting request.
+    RESPONDED_DECLINE: The user declined the meeting request.
+    MODIFIED_START_TIME: The user modified the start time.
+    MODIFIED_END_TIME: The user modified the end time.
+    MODIFIED_LOCATION: The user changed the location of the meeting.
+    RESPONDED_EXCEPTION_DECLINE: The user declined an exception to a recurring
+        series.
+    CANCELED: The user canceled a meeting request.
+    EXCEPTION_CANCELED: The user canceled an exception to a recurring series.
+    """
+    @classmethod
+    def fromBits(cls, value : int) -> Set['SideEffect']:
+        """
+        Takes an int and returns a set of the changes.
+        """
+        return {csl(1 << x) for x in range(13) if (value & (1 << x))}
+
+    MANAGER = 0b1
+    DELEGATE = 0b10
+    DELETED_WITH_NO_RESPONSE = 0b100
+    DELETED_EXCEPTION_WITH_NO_RESPONSE = 0b1000
+    RESPONDED_TENTATIVE = 0b10000
+    RESPONSED_ACCEPT = 0b100000
+    RESPONDED_DECLINE = 0b1000000
+    MODIFIED_START_TIME = 0b10000000
+    MODIFIED_END_TIME = 0b100000000
+    MODIFIED_LOCATION = 0b1000000000
+    RESPONDED_EXCEPTION_DECLINE = 0b10000000000
+    CANCELED = 0b100000000000
+    EXCEPTION_CANCELED = 0b1000000000000
+
 
 
 
@@ -1117,7 +1162,7 @@ class MeetingObjectChange(enum.Enum):
             if x in (8, 11) or (12 < x < 31):
                 continue
             bit = value & (1 << x)
-            if bit != 0:
+            if bit:
                 if x in (12, 31):
                     raise ValueError('Reserved bit was set.')
                 changes.add(cls(bit))
@@ -1299,6 +1344,53 @@ class Sensitivity(enum.Enum):
 
 
 
+class SideEffect(enum.Enum):
+    """
+    A flag for how a Message object is handled by the client in relation to
+    certain user interface actions.
+
+    OPEN_TO_DELETE: The client opens the Message object when deleting.
+    NO_FRAME: No UI is associated with the Message object.
+    COERCE_TO_INDEX: The client moves the Message object to the Inbox folder
+        when moving or copying to a Folder object with the PidTagContainerClass
+        property set to "IPF.Note".
+    OPEN_TO_COPY: The client opens the Message object when copying to another
+        folder.
+    OPEN_TO_MOVE: The client opens the Message object when moving to another
+        folder.
+    OPEN_FOR_CTX_MENU: The client opens the Message object when displaying
+        context-sensitive commands, such as a context menu, to the end user.
+    CANNOT_UNDO_DELETE: The client cannot undo a delete operation. Must not be
+        set unless the OPEN_TO_DELETE flag is set.
+    CANNOT_UNDO_COPY: The client cannot undo a copy operation. Must not be set
+        unless the OPEN_TO_COPY flag is set.
+    CANNOT_UNDO_MOVE: The client cannot undo a move operation. Must not be set
+        unless the OPEN_TO_MOVE flag is set.
+    HAS_SCRIPT: The Message object contains end-user script.
+    OPEN_TO_PERM_DELETE: The client opens the Message object to permanently
+        delete it.
+    """
+    @classmethod
+    def fromBits(cls, value : int) -> Set['SideEffect']:
+        """
+        Takes an int and returns a set of the changes.
+        """
+        return {csl(1 << x) for x in range(15) if (value & (1 << x))}
+
+    OPEN_TO_DELETE = 0b1
+    NO_FRAME = 0b1000
+    COERCE_TO_INDEX = 0b10000
+    OPEN_TO_COPY = 0b100000
+    OPEN_TO_MOVE = 0b1000000
+    OPEN_FOR_CTX_MENU = 0b100000000
+    CANNOT_UNDO_DELETE = 0b10000000000
+    CANNOT_UNDO_COPY = 0b100000000000
+    CANNOT_UNDO_MOVE = 0b1000000000000
+    HAS_SCRIPT = 0b10000000000000
+    OPEN_TO_PERM_DELETE = 0b100000000000000
+
+
+
 class TaskAcceptance(enum.Enum):
     """
     The acceptance state of the task.
@@ -1390,7 +1482,7 @@ class TZFlag(enum.Enum):
         """
         Takes an int and returns a set of the changes.
         """
-        return {csl(1 << x) for x in range(2) if (value & (1 << x)) != 0}
+        return {csl(1 << x) for x in range(2) if (value & (1 << x))}
 
     RECUR_CURRENT_TZREG = 0b1
     EFFECTIVE_TZREG = 0b10

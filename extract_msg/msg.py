@@ -8,9 +8,11 @@ import zipfile
 
 import olefile
 
+from typing import Set
+
 from . import constants
 from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment
-from .enums import AttachErrorBehavior, Priority, PropertiesType, Sensitivity
+from .enums import AttachErrorBehavior, Priority, PropertiesType, Sensitivity, SideEffect
 from .exceptions import InvalidFileFormatError, UnrecognizedMSGTypeError
 from .named import Named, NamedProperties
 from .prop import FixedLengthProp
@@ -26,7 +28,7 @@ class MSGFile(olefile.OleFileIO):
     """
     Parser for .msg files.
     """
-    
+
     def __init__(self, path, **kwargs):
         """
         :param path: path to the msg file in the system or is the raw msg file.
@@ -759,6 +761,14 @@ class MSGFile(olefile.OleFileIO):
         The specified sensitivity of the msg file.
         """
         return self._ensureSetProperty('_sensitivity', '00360003', overrideClass = Sensitivity)
+
+    @property
+    def sideEffects(self) -> Set[SideEffect]:
+        """
+        Controls how a Message object is handled by the client in relation to
+        certain user interface actions by the user, such as deleting a message.
+        """
+        return self._ensureSetNamed('_sideEffects', '8510', overrideClass = SideEffect.fromBits)
 
     @property
     def stringEncoding(self):

@@ -1,4 +1,5 @@
 import base64
+import datetime
 import email.utils
 import html
 import json
@@ -1181,6 +1182,13 @@ class MessageBase(MSGFile):
         return email.utils.parsedate(self.date)
 
     @property
+    def receivedTime(self) -> datetime.datetime:
+        """
+        The date and time the message was received by the server.
+        """
+        return self._ensureSetProperty('_receivedTime', '0E060040')
+
+    @property
     def recipientSeparator(self) -> str:
         return self.__recipientSeparator
 
@@ -1230,7 +1238,6 @@ class MessageBase(MSGFile):
 
         return self.getInjectableHeader(prefix, joinStr, suffix, formatter)
 
-
     @property
     def rtfPlainInjectableHeader(self) -> str:
         """
@@ -1243,8 +1250,6 @@ class MessageBase(MSGFile):
         formatter = (lambda name, value : fr'{{\b {name}: \b0 {inputToString(rtfSanitizePlain(value), self.stringEncoding)}}}')
 
         return self.getInjectableHeader(prefix, joinStr, suffix, formatter)
-
-
 
     @property
     def sender(self) -> str:

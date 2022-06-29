@@ -913,6 +913,37 @@ def setupLogging(defaultPath = None, defaultLevel = logging.WARN, logfile = None
     return True
 
 
+def tryGetMimetype(att, mimetype : Union[str, None]):
+    """
+    Uses an optional dependency to try and get the mimetype of an attachment. If
+    the mimetype has already been found, the optional dependency does not exist,
+    or an error occurs in the optional dependency, then the provided mimetype is
+    returned.
+
+    :param att: The attachment to use for getting the mimetype.
+    :param mimetype: The mimetype acquired directly from an attachment stream.
+        If this value evaluates to False, the function will try to determine it.
+    """
+    if mimetype:
+        return mimetype
+
+    # We only try anything if it is a plain attachment or signed attachment.
+    # Web attachments and embedded MSG files are completely ignored.
+    if att.type in (AttachmentType.DATA, AttachmentType.SIGNED):
+        # Try to import our dependency module to use it.
+        try:
+            import magic
+
+            return magic.from_buffer(att.data, mime = True)
+        except ImportError:
+            logger.info('Mimetype not found on attachment, and `mime` dependency not installed. Won\'t try to generate.')
+
+        except Exception:
+            logger.exception('Error occured while using mimetype-magic. This error will be ignored.')
+
+    return mimetype
+
+
 def unwrapMsg(msg : "MSGFile") -> Dict:
     """
     Takes a recursive message-attachment structure and unwraps it into a linear

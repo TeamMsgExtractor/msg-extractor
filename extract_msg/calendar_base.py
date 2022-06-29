@@ -1,6 +1,6 @@
 import datetime
 
-from typing import List, Set
+from typing import List, Set, Tuple, Union
 
 from .enums import AppointmentAuxilaryFlag, AppointmentColor, AppointmentStateFlag, BusyStatus, IconIndex, ResponseStatus
 from .message_base import MessageBase
