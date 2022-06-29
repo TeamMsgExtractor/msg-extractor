@@ -22,6 +22,7 @@ import sys
 import zipfile
 
 import bs4
+import olefile
 import tzlocal
 
 from html import escape as htmlEscape
@@ -173,8 +174,11 @@ def filetimeToDatetime(rawTime : int):
             return constants.NULL_DATE
         else:
             return fromTimeStamp(filetimeToUtc(rawTime))
+    except TZError:
+        # For TZError we just raise it again. It is a fatal error.
+        raise
     except Exception as e:
-        raise ValueError(f'Timestamp value of {filetimeToUtc(constants.ST3.unpack(value)[0])} caused an exception. This was probably caused by the time stamp being too far in the future.')
+        raise ValueError(f'Timestamp value of {filetimeToUtc(rawTime)} caused an exception. This was probably caused by the time stamp being too far in the future.')
 
 
 def findWk(path = None):
@@ -208,7 +212,7 @@ def fromTimeStamp(stamp) -> datetime.datetime:
     try:
         tz = tzlocal.get_localzone()
     except Exception as e:
-        raise TZError(f'Error occured using tzlocal. If you are seeing this, this is likely a problem with your installation ot tzlocal or tzdata. Details: {e}')
+        raise TZError(f'Error occured using tzlocal. If you are seeing this, this is likely a problem with your installation ot tzlocal or tzdata.')
     return datetime.datetime.fromtimestamp(stamp, tz)
 
 

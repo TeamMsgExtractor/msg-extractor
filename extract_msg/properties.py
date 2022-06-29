@@ -1,4 +1,5 @@
 import copy
+import datetime
 import logging
 import pprint
 
@@ -130,7 +131,11 @@ class Properties:
         except AttributeError:
             self.__date = None
             if self.has_key('00390040'):
-                self.__date = self.get('00390040').value.__format__('%a, %d %b %Y %H:%M:%S %z')
+                dateValue = self.get('00390040').value
+                # A date can by bytes if it fails to initialize, so we check it
+                # first.
+                if isinstance(dateValue, datetime.datetime):
+                    self.__date = dateValue.__format__('%a, %d %b %Y %H:%M:%S %z')
             return self.__date
 
     @property
