@@ -77,6 +77,16 @@ class StandardViolationError(Exception):
     """
     pass
 
+class TZError(Exception):
+    """
+    Specifically not an OSError to avoid being caught by parts of the module.
+    This error represents a fatal error in the datetime parsing as it usually
+    means your installation of tzlocal or tzdata are broken. If you have
+    received this error after using PyInstaller, you must include the resource
+    files for tzdata for it to work properly. See TeamMsgExtractor#272 and
+    TeamMsgExtractor#169 for information on why you are getting this error.
+    """
+
 class UnknownCodepageError(Exception):
     """
     The codepage provided was not one we know of.

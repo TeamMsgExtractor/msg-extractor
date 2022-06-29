@@ -30,7 +30,9 @@
 * Removed `__init__` methods from MSG classes that don't change it. This ensures notes are easily passed down.
 * Rewrote the system used for Appointment objects to include all of the objects specified in [MS-OXOCAL].
 * Changed behavior for max date. Apparently it looks like it is supposed to be August 31, 4500 at 11:59 PM. However, in case this needs to change, we have created a constant called `extract_msg.constants.NULL_DATE` to represent this that you can use in your code to not have to worry about changing your code if we check it.
+* Correction to last comment, *one* max date was supposed to be at that date, but another max date is at a different date of the same year.
 * Changed the way that `PtypTime` is handled, making it a single function in `utils`.
+* Upgraded dependencies to newer versions (some really need to be newer, like `tzlocal`, for best results). Included dependencies are `beautifulsoup4` and `tzlocal`.
 
 **v0.34.3**
 * Fixed issue that may have caused other olefile types to raise the wrong type of error when passed to `openMsg`.

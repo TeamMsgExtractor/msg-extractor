@@ -29,7 +29,7 @@ from typing import Dict, List, Tuple, Union
 
 from . import constants
 from .enums import AttachmentType
-from .exceptions import BadHtmlError, ConversionError, IncompatibleOptionsError, InvalidFileFormatError, InvaildPropertyIdError, UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError, UnsupportedMSGTypeError
+from .exceptions import BadHtmlError, ConversionError, IncompatibleOptionsError, InvalidFileFormatError, InvaildPropertyIdError, TZError, UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError, UnsupportedMSGTypeError
 
 
 logger = logging.getLogger(__name__)
@@ -177,7 +177,6 @@ def filetimeToDatetime(rawTime : int):
         raise ValueError(f'Timestamp value of {filetimeToUtc(constants.ST3.unpack(value)[0])} caused an exception. This was probably caused by the time stamp being too far in the future.')
 
 
-
 def findWk(path = None):
     """
     Attempt to find the path of the wkhtmltopdf executable. If :param path: is
@@ -206,7 +205,11 @@ def fromTimeStamp(stamp) -> datetime.datetime:
     """
     Returns a datetime from the UTC timestamp given the current timezone.
     """
-    return datetime.datetime.fromtimestamp(stamp, tzlocal.get_localzone())
+    try:
+        tz = tzlocal.get_localzone()
+    except Exception as e:
+        raise TZError(f'Error occured using tzlocal. If you are seeing this, this is likely a problem with your installation ot tzlocal or tzdata. Details: {e}')
+    return datetime.datetime.fromtimestamp(stamp, tz)
 
 
 def getCommandArgs(args):
