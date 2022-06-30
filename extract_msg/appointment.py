@@ -1,7 +1,7 @@
 import datetime
 
 from . import constants
-from .enums import BusyStatus
+from .enums import AppointmentStateFlag, BusyStatus, ResponseStatus
 from .calendar import Calendar
 
 
@@ -60,6 +60,15 @@ class AppointmentMeeting(Calendar):
         Additional note: If the value is an empty string, it will be dropped as
         well by default.
         """
+        meetingOrganizerString = {
+            ResponseStatus.NONE: None,
+            ResponseStatus.ORGANIZED: 'Meeting organizer',
+            ResponseStatus.TENTATIVE: 'Tentatively accepted',
+            ResponseStatus.ACCEPTED: 'Accepted',
+            ResponseStatus.DECLINED: 'Declined',
+            ResponseStatus.NOT_RESPONDED: 'Not yet responded',
+        }
+
         return {
             {
                 'Subject': self.subject,
@@ -75,6 +84,9 @@ class AppointmentMeeting(Calendar):
                 'Recurrence Pattern': self.recurrencePattern,
             },
             {
+                'Meeting Status': self.responseStatus,
+            },
+            {
                 'Organizer': self.organizer,
             },
         }
@@ -85,5 +97,4 @@ class AppointmentMeeting(Calendar):
         Attempts to determine if the object is a Meeting. True if meeting, False
         if appointment.
         """
-        # TODO.
-        pass
+        return AppointmentStateFlag.MEETING in self.appointmentStateFlags
