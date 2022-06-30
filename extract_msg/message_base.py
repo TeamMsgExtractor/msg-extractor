@@ -1159,7 +1159,7 @@ class MessageBase(MSGFile):
         if not self.mainProperties.get('0E070003'):
             return True
         else:
-            return bool(self.mainProperties['0E070003'].value & 8)
+            return not bool(self.mainProperties['0E070003'].value & 8)
 
     @property
     def messageId(self) -> str:
