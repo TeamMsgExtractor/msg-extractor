@@ -160,14 +160,14 @@ class Attachment(AttachmentBase):
 
         fullFilename = customPath / filename
 
-        if self.__type == AttachmentType.DATA:
+        if self.type == AttachmentType.DATA:
             if _zip:
                 name, ext = os.path.splitext(filename)
                 nameList = _zip.namelist()
-                if fullFilename in nameList:
+                if str(fullFilename).replace('\\', '/') in nameList:
                     for i in range(2, 100):
                         testName = customPath / f'{name} ({i}){ext}'
-                        if testName not in nameList:
+                        if str(testName).replace('\\', '/') not in nameList:
                             fullFilename = testName
                             break
                     else:

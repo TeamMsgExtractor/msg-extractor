@@ -765,7 +765,7 @@ class MessageBase(MSGFile):
         else:
             # In my testing I ended up with multiple files in a zip at the same
             # location so let's try to handle that.
-            pathCompare = str(path).rstrip('/') + '/'
+            pathCompare = str(path).replace('\\', '/').rstrip('/') + '/'
             if any(x.startswith(pathCompare) for x in _zip.namelist()):
                 newDirName = addNumToZipDir(path, _zip)
                 if newDirName:
@@ -946,7 +946,7 @@ class MessageBase(MSGFile):
                         # before binary data is stripped out. This data should
                         # almost certainly be stripped out, so let's log it and
                         # then log if we removed any of them before trying this.
-                        logger.warn(f'RTFDE failed to decode rtfBody for message with subject "{self.subject}". Attempting to cut out unnecessary data and override decoding.')
+                        logger.warning(f'RTFDE failed to decode rtfBody for message with subject "{self.subject}". Attempting to cut out unnecessary data and override decoding.')
 
                         match = constants.RE_BIN.search(body)
                         # Because we are going to be actively removing things,

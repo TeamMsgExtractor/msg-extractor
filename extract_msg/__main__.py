@@ -69,6 +69,16 @@ def main() -> None:
             'ignoreRtfDeErrors': args.ignoreRtfDeErrors,
         }
 
+        def strSanitize(inp):
+            """
+            Small function to santize parts of a string when failing to print
+            them.
+            """
+            return ''.join((x if x.isascii() else
+                    f'\\x{ord(x):02X}' if ord(x) <= 0xFF else
+                    f'\\u{ord(x):04X}' if ord(x) <= 0xFFFF else
+                    f'\\U{ord(x):08X}') for x in repr(inp))
+
         for x in args.msgs:
             if args.progress:
                 # This may throw an error sometimes and not othertimes.
@@ -76,7 +86,7 @@ def main() -> None:
                 try:
                     print(f'Saving file "{x}"...')
                 except UnicodeEncodeError:
-                    print(f'Saving file "{repr(x)}" (failed to print without repr)...')
+                    print(f'Saving file "{strSanitize(x)}" (failed to print without repr)...')
             try:
                 with utils.openMsg(x, **openKwargs) as msg:
                     if args.dumpStdout:
@@ -87,7 +97,7 @@ def main() -> None:
                 try:
                     print(f'Error with file "{x}": {traceback.format_exc()}')
                 except UnicodeEncodeError:
-                    print(f'Error with file "{repr(x)}": {traceback.format_exc()}')
+                    print(f'Error with file "{strSanitize(x)}": {traceback.format_exc()}')
 
 
 if __name__ == '__main__':

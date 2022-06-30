@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-class MSGFile(olefile.OleFileIO):
+class MSGFile:
     """
     Parser for .msg files.
     """
@@ -87,14 +87,23 @@ class MSGFile(olefile.OleFileIO):
 
         self.__listDirRes = {}
 
-        try:
-            super().__init__(path)
-        except IOError as e:    # py2 and py3 compatible
-            logger.error(e)
-            if str(e) == 'not an OLE2 structured storage file':
-                raise InvalidFileFormatError(e)
-            else:
-                raise
+        # This is a variable that tells whether we own the olefile. Used for
+        # closing.
+        self.__oleOwner = True
+        if self.__parentMsg:
+            # We should be able to directly access the private variables of
+            # another instance with no issue.
+            self.__ole = self.__parentMsg.__ole
+            self.__oleOwner = False
+        else:
+            try:
+                self.__ole = olefile.OleFileIO(path)
+            except OSError as e:
+                logger.error(e)
+                if str(e) == 'not an OLE2 structured storage file':
+                    raise InvalidFileFormatError(e)
+                else:
+                    raise
 
         kwargsCopy = copy.copy(kwargs)
         if 'prefix' in kwargsCopy:
@@ -136,6 +145,18 @@ class MSGFile(olefile.OleFileIO):
             self.filename = str(path)
         else:
             self.filename = None
+
+        self.__open = True
+
+        # Now, load the attachments if we are not delaying them.
+        if not self.__attachmentsDelayed:
+            self.attachments
+
+    def __enter__(self):
+        self.__ole.__enter__()
+
+    def __exit__(self):
+        self.close()
 
     def _ensureSet(self, variable : str, streamID, stringStream : bool = True, **kwargs):
         """
@@ -256,7 +277,7 @@ class MSGFile(olefile.OleFileIO):
         """
         filename = self.fixPath(filename, prefix)
         if self.exists(filename, False):
-            with self.openstream(filename) as stream:
+            with self.__ole.openstream(filename) as stream:
                 return stream.read() or b''
         else:
             logger.info(f'Stream "{filename}" was requested but could not be found. Returning `None`.')
@@ -371,15 +392,19 @@ class MSGFile(olefile.OleFileIO):
         return False, None # We didn't find the stream.
 
     def close(self) -> None:
-        try:
-            # If this throws an AttributeError then we have not loaded the attachments.
-            self._attachments
-            for attachment in self.attachments:
-                if attachment.type == 'msg':
-                    attachment.data.close()
-        except AttributeError:
-            pass
-        super().close()
+        if self.__open:
+            try:
+                # If this throws an AttributeError then we have not loaded the attachments.
+                self._attachments
+                for attachment in self.attachments:
+                    if attachment.type == 'msg':
+                        attachment.data.close()
+            except AttributeError:
+                pass
+            if self.__oleOwner:
+                self.__ole.close()
+
+            self.__open = False
 
     def debug(self) -> None:
         for dir_ in self.listDir():
@@ -392,7 +417,7 @@ class MSGFile(olefile.OleFileIO):
         Checks if :param inp: exists in the msg file.
         """
         inp = self.fixPath(inp, prefix)
-        return super().exists(inp)
+        return self.__ole.exists(inp)
 
     def sExists(self, inp, prefix : bool = True) -> bool:
         """
@@ -457,7 +482,7 @@ class MSGFile(olefile.OleFileIO):
         try:
             return self.__listDirRes[(streams, storages)]
         except KeyError:
-            entries = self.listdir(streams, storages)
+            entries = self.__ole.listdir(streams, storages)
             if not self.__prefix:
                 return entries
             prefix = self.__prefix.split('/')
@@ -785,7 +810,7 @@ class MSGFile(olefile.OleFileIO):
                 if not self.mainProperties.has_key('3FFD0003'):
                     # If this property is not set by the client, we SHOULD set
                     # it to ISO-8859-15, but MAY set it to ISO-8859-1.
-                    logger.warn('Encoding property not found. Defaulting to ISO-8859-15.')
+                    logger.warning('Encoding property not found. Defaulting to ISO-8859-15.')
                     self.__stringEncoding = 'iso-8859-15'
                 else:
                     enc = self.mainProperties['3FFD0003'].value

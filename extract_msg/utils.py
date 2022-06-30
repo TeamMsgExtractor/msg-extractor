@@ -660,12 +660,12 @@ def parseType(_type : int, stream, encoding, extras):
         try:
             value = ErrorCodeType(value)
         except ValueError:
-            logger.warn(f'Error type found that was not from Additional Error Codes. Value was {value}. You should report this to the developers.')
+            logger.warning(f'Error type found that was not from Additional Error Codes. Value was {value}. You should report this to the developers.')
             # So here, the value should be from Additional Error Codes, but it
             # wasn't. So we are just returning the int. However, we want to see
             # if it is a normal error type.
             try:
-                logger.warn(f'REPORT TO DEVELOPERS: Error type of {ErrorType(value)} was found.')
+                logger.warning(f'REPORT TO DEVELOPERS: Error type of {ErrorType(value)} was found.')
             except ValueError:
                 pass
         return value
@@ -1072,7 +1072,7 @@ def unwrapMultipart(mp : Union[bytes, str, email.message.Message]) -> Dict:
             if isinstance(payload, list):
                 toProcess.extend(payload)
             else:
-                logging.warn('Found multipart node that did not return a list. Appending as a data node.')
+                logging.warning('Found multipart node that did not return a list. Appending as a data node.')
                 dataNodes.append(currentItem)
         else:
             # The opposite is *not* true. If it's not multipart, always add as a
@@ -1123,11 +1123,11 @@ def unwrapMultipart(mp : Union[bytes, str, email.message.Message]) -> Dict:
             attachments.append(attachment)
         elif attachment['mimetype'] == 'text/plain':
             if plainBody:
-                logger.warn('Found multiple candidates for plain text body.')
+                logger.warning('Found multiple candidates for plain text body.')
             plainBody = data
         elif attachment['mimetype'] == 'text/html':
             if htmlBody:
-                logger.warn('Found multiple candidates for HTML body.')
+                logger.warning('Found multiple candidates for HTML body.')
             htmlBody = data
 
     return {

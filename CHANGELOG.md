@@ -33,6 +33,10 @@
 * Correction to last comment, *one* max date was supposed to be at that date, but another max date is at a different date of the same year.
 * Changed the way that `PtypTime` is handled, making it a single function in `utils`.
 * Upgraded dependencies to newer versions (some really need to be newer, like `tzlocal`, for best results). Included dependencies are `beautifulsoup4` and `tzlocal`.
+* Fixed an issue where zip file naming conflicts *always* failed in zip files for attachments. Both the embedded msg and the plain attachments would fail.
+* *Actually* fixed the issue that would break the main loop.
+* MSGFile no longer inherits directly from `OleFileIO`. While I would prefer to do that, the `__init__` method for it is rather expensive, and allowing embedded msg files to directly share each other's instances of `OleFileIO` would improve speed immensely.
+* Fixed attachments not being preemptively loaded when `delayAttachments` was `False`.
 
 **v0.34.3**
 * Fixed issue that may have caused other olefile types to raise the wrong type of error when passed to `openMsg`.
