@@ -81,7 +81,7 @@ class AppointmentStateFlag(enum.Enum):
         """
         Takes an int and returns a set of the flags.
         """
-        return {csl(1 << x) for x in range(3) if (value & (1 << x)) != 0}
+        return {cls(1 << x) for x in range(3) if (value & (1 << x)) != 0}
 
     MEETING = 0b1
     RECEIVED = 0b10
@@ -265,31 +265,6 @@ class BusyStatus(enum.Enum):
 
 
 
-class CalendarType(enum.Enum):
-    DEFAULT = 0x0000
-    CAL_GREGORIAN = 0x0001
-    CAL_GREGORIAN_US = 0x0002
-    CAL_JAPAN = 0x0003
-    CAL_TAIWAN = 0x0004
-    CAL_KOREA = 0x0005
-    CAL_HIJRI = 0x0006
-    CAL_THAI = 0x0007
-    CAL_HEBREW = 0x0008
-    CAL_GREGORIAN_ME_FRENCH = 0x0009
-    CAL_GREGORIAN_ARABIC = 0x000A
-    CAL_GREGORIAN_XLIT_ENGLISH = 0x000B
-    CAL_GREGORIAN_XLIT_FRENCH = 0x000C
-    CAL_LUNAR_JAPANESE = 0x000E
-    CAL_CHINESE_LUNAR = 0x000F
-    CAL_SAKA = 0x0010
-    CAL_LUNAR_ETO_CHN = 0x0011
-    CAL_LUNAR_ETO_KOR = 0x0012
-    CAL_LUNAR_ROKUYOU = 0x0013
-    CAL_LUNAR_KOREAN = 0x0014
-    CAL_UMALQURA = 0x0017
-
-
-
 class ClientIntentFlag(enum.Enum):
     """
     An action a user has taken on a Meeting object.
@@ -314,11 +289,11 @@ class ClientIntentFlag(enum.Enum):
     EXCEPTION_CANCELED: The user canceled an exception to a recurring series.
     """
     @classmethod
-    def fromBits(cls, value : int) -> Set['SideEffect']:
+    def fromBits(cls, value : int) -> Set['ClientIntentFlag']:
         """
-        Takes an int and returns a set of the changes.
+        Takes an int and returns a set of the flags.
         """
-        return {csl(1 << x) for x in range(13) if (value & (1 << x))}
+        return {cls(1 << x) for x in range(13) if (value & (1 << x))}
 
     MANAGER = 0b1
     DELEGATE = 0b10
@@ -1301,6 +1276,111 @@ class RecipientType(enum.Enum):
 
 
 
+class RecurCalendarType(enum.Enum):
+    DEFAULT = 0x0000
+    CAL_GREGORIAN = 0x0001
+    CAL_GREGORIAN_US = 0x0002
+    CAL_JAPAN = 0x0003
+    CAL_TAIWAN = 0x0004
+    CAL_KOREA = 0x0005
+    CAL_HIJRI = 0x0006
+    CAL_THAI = 0x0007
+    CAL_HEBREW = 0x0008
+    CAL_GREGORIAN_ME_FRENCH = 0x0009
+    CAL_GREGORIAN_ARABIC = 0x000A
+    CAL_GREGORIAN_XLIT_ENGLISH = 0x000B
+    CAL_GREGORIAN_XLIT_FRENCH = 0x000C
+    CAL_LUNAR_JAPANESE = 0x000E
+    CAL_CHINESE_LUNAR = 0x000F
+    CAL_SAKA = 0x0010
+    CAL_LUNAR_ETO_CHN = 0x0011
+    CAL_LUNAR_ETO_KOR = 0x0012
+    CAL_LUNAR_ROKUYOU = 0x0013
+    CAL_LUNAR_KOREAN = 0x0014
+    CAL_UMALQURA = 0x0017
+
+
+
+class RecurDOW(enum.Enum):
+    SUNDAY = 0x00000000
+    MONDAY = 0x00000001
+    TUESDAY = 0x00000002
+    WEDNESDAY = 0x00000003
+    THURSDAY = 0x00000004
+    FRIDAY = 0x00000005
+    SATURDAY = 0x00000006
+
+
+
+class RecurEndType(enum.Enum):
+    @classmethod
+    def fromInt(cls, value) -> 'RecurEndType':
+        """
+        Some enum values CAN be created from more than one int, so handle that.
+        """
+        return cls(0x00002023) if value == 0xFFFFFFFF else cls(value)
+
+    END_AFTER_DATE = 0x00002021
+    END_AFTER_N_OCCURRENCES = 0x00002022
+    NEVER_END = 0x00002023
+
+
+class RecurFrequency(enum.Enum):
+    """
+    See [MS-OXOCAL] for details.
+    """
+    DAILY = 0x200A
+    WEEKLY = 0x200B
+    MONTHLY = 0x200C
+    YEARLY = 0x200D
+
+
+
+class RecurMonthNthWeek(enum.Enum):
+    FIRST = 0x00000001
+    SECOND = 0x00000002
+    THIRD = 0x00000003
+    FOURTH = 0x00000004
+    LAST = 0x00000005
+
+
+
+class RecurPatternTypeSpecificWeekday(enum.Enum):
+    """
+    See [MS-OXOCAL] for details.
+    """
+    @classmethod
+    def fromBits(cls, value : int) -> Set['RecurPatternTypeSpecificWeekday']:
+        """
+        Takes an int and returns a set of the weekdays.
+        """
+        return {cls(1 << x) for x in range(1, 8) if (value & (1 << x))}
+
+    SATURDAY = 0b10
+    FRIDAY = 0b100
+    THURSDAY = 0b1000
+    WEDNESDAY = 0b10000
+    TUESDAY = 0b100000
+    MONDAY = 0b1000000
+    SUNDAY = 0b10000000
+
+
+
+class RecurPatternType(enum.Enum):
+    """
+    See [MS-OXOCAL] for details.
+    """
+    DAY = 0x0000
+    WEEK = 0x0001
+    MONTH = 0x0002
+    MONTH_NTH = 0x0003
+    MONTH_END = 0x0004
+    HJ_MONTH = 0x000A
+    HJ_MONTH_NTH = 0x000B
+    HJ_MONTH_END = 0x000C
+
+
+
 class ResponseStatus(enum.Enum):
     """
     The response status of an attendee.
@@ -1373,9 +1453,9 @@ class SideEffect(enum.Enum):
     @classmethod
     def fromBits(cls, value : int) -> Set['SideEffect']:
         """
-        Takes an int and returns a set of the changes.
+        Takes an int and returns a set of the side effects.
         """
-        return {csl(1 << x) for x in range(15) if (value & (1 << x))}
+        return {cls(1 << x) for x in range(15) if (value & (1 << x))}
 
     OPEN_TO_DELETE = 0b1
     NO_FRAME = 0b1000
@@ -1480,9 +1560,9 @@ class TZFlag(enum.Enum):
     @classmethod
     def fromBits(cls, value : int) -> Set['TZFlag']:
         """
-        Takes an int and returns a set of the changes.
+        Takes an int and returns a set of the flags.
         """
-        return {csl(1 << x) for x in range(2) if (value & (1 << x))}
+        return {cls(1 << x) for x in range(2) if (value & (1 << x))}
 
     RECUR_CURRENT_TZREG = 0b1
     EFFECTIVE_TZREG = 0b10

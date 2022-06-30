@@ -1,7 +1,7 @@
 import datetime
 
 from . import constants
-from .enums import AppointmentStateFlag, BusyStatus, ResponseStatus
+from .enums import AppointmentStateFlag, BusyStatus, RecurPatternType, ResponseStatus
 from .calendar import Calendar
 
 
@@ -69,6 +69,20 @@ class AppointmentMeeting(Calendar):
             ResponseStatus.NOT_RESPONDED: 'Not yet responded',
         }
 
+        # Get the recurrence string.
+        recur = '(none)'
+        if self.appointmentRecur:
+            recur = {
+                RecurPatternType.DAY: 'Daily',
+                RecurPatternType.WEEK: 'Weekly',
+                RecurPatternType.MONTH: 'Monthly',
+                RecurPatternType.MONTH_NTH: 'Monthly',
+                RecurPatternType.MONTH_END: 'Monthly',
+                RecurPatternType.HJ_MONTH: 'Monthly',
+                RecurPatternType.HJ_MONTH_NTH: 'Monthly',
+                RecurPatternType.HJ_MONTH_END: 'Monthly',
+            }[self.appointmentRecur.patternType]
+
         return {
             {
                 'Subject': self.subject,
@@ -77,17 +91,18 @@ class AppointmentMeeting(Calendar):
             {
                 'Start': self.startDate,
                 'End': self.endDate,
-                'Show Time As': None, # TODO: Figure this one out.
             },
             {
-                'Recurrance': None, # TODO: Requires recurrance property to be finished.
+                'Recurrance': recur,
                 'Recurrence Pattern': self.recurrencePattern,
             },
             {
-                'Meeting Status': self.responseStatus,
+                'Meeting Status': meetingOrganizerString,
             },
             {
                 'Organizer': self.organizer,
+                'Required Attendees': self.requiredAttendees,
+                'Optional Attendees': self.optionalAttendees,
             },
         }
 

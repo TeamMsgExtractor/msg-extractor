@@ -3,12 +3,12 @@ import datetime
 from typing import List, Set
 
 from .calendar import Calendar
-from .enums import BusyStatus, CalendarType, MeetingObjectChange, MeetingType
+from .enums import BusyStatus, RecurCalendarType, MeetingObjectChange, MeetingType
 
 
 class MeetingRequest(Calendar):
     """
-    
+
     """
 
     @property
@@ -21,13 +21,13 @@ class MeetingRequest(Calendar):
         return self._ensureSetNamed('_appointmentClassType', '0024')
 
     @property
-    def calendarType(self) -> CalendarType:
+    def calendarType(self) -> RecurCalendarType:
         """
         The value of the CalendarType field from the PidLidAppointmentRecur
         property if the Meeting Request object represents a recurring series or
         an exception.
         """
-        return self._ensureSetNamed('_calendarType', '001C', overrideClass = CalendarType)
+        return self._ensureSetNamed('_calendarType', '001C', overrideClass = RecurCalendarType)
 
     @property
     def changeHighlight(self) -> Set[MeetingObjectChange]:

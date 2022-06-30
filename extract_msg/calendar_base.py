@@ -6,6 +6,7 @@ from .enums import AppointmentAuxilaryFlag, AppointmentColor, AppointmentStateFl
 from .message_base import MessageBase
 from .structures.entry_id import EntryID
 from .structures.misc_id import GlobalObjectID
+from .structures.recurrence_pattern import RecurrencePattern
 from .structures.time_zone_definition import TimeZoneDefinition
 from .structures.time_zone_struct import TimeZoneStruct
 
@@ -59,17 +60,12 @@ class CalendarBase(MessageBase):
         return self._ensureSetNamed('_appointmentNotAllowPropose', '8259')
 
     @property
-    def appointmentRecur(self) -> bytes:
+    def appointmentRecur(self) -> RecurrencePattern:
         """
         Specifies the dates and times when a recurring series occurs by using
         one of the recurrence patterns and ranges specified in this section.
-
-        Unfinished, so currently just returns plain bytes.
         """
-        # TODO: Make this return a structure that understands the data. I would
-        # do it immediately, but it looks way too complicated to be worth it for
-        # now.
-        return self._ensureSetNamed('_appointmentRecur', '8216')
+        return self._ensureSetNamed('_appointmentRecur', '8216', overrideClass = RecurrencePattern)
 
     @property
     def appointmentSequence(self) -> int:
