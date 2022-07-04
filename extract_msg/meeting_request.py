@@ -2,8 +2,9 @@ import datetime
 
 from typing import List, Set
 
+from . import constants
 from .meeting_related import MeetingRelated
-from .enums import BusyStatus, RecurCalendarType, MeetingObjectChange, MeetingType
+from .enums import BusyStatus, MeetingObjectChange, MeetingType, RecurCalendarType, RecurPatternType, ResponseStatus
 
 
 class MeetingRequest(MeetingRelated):
@@ -108,11 +109,11 @@ class MeetingRequest(MeetingRelated):
             },
             '-attendees-': {
                 'Organizer': self.organizer,
-                'Required Attendees': self.requiredAttendees,
-                'Optional Attendees': self.optionalAttendees,
+                'Required Attendees': self.to,
+                'Optional Attendees': self.cc,
             },
             '-resources-': {
-                'Resources':
+                'Resources': self.bcc,
             }
         }
 

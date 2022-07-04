@@ -137,8 +137,8 @@ class AppointmentMeeting(Calendar):
             },
             '-attendees-': {
                 'Organizer': self.organizer,
-                'Required Attendees': self.requiredAttendees,
-                'Optional Attendees': self.optionalAttendees,
+                'Required Attendees': self.to,
+                'Optional Attendees': self.cc,
             },
         }
 

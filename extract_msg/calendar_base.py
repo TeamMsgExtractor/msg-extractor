@@ -21,7 +21,7 @@ class CalendarBase(MessageBase):
         Returns the specified recipient field.
         """
         private = '_' + recipientType
-        recipientInt = RecipientType(recipientInt)
+        recipientInt = MeetingRecipientType(recipientInt)
         try:
             return getattr(self, private)
         except AttributeError:
@@ -45,7 +45,7 @@ class CalendarBase(MessageBase):
                 # If we found recipients, join them with the recipient separator
                 # and a space.
                 if len(foundRecipients) > 0:
-                    value = (self.__recipientSeparator + ' ').join(foundRecipients)
+                    value = (self.recipientSeparator + ' ').join(foundRecipients)
 
             # Code to fix the formatting so it's all a single line. This allows
             # the user to format it themself if they want. This should probably
@@ -179,6 +179,13 @@ class CalendarBase(MessageBase):
         return self._ensureSetNamed('_appointmentUnsendableRecipients', '825D')
 
     @property
+    def bcc(self):
+        """
+        Returns the bcc field, if it exists.
+        """
+        return self._genRecipient('bcc', MeetingRecipientType.SENDABLE_RESOURCE_OBJECT)
+
+    @property
     def birthdayContactAttributionDisplayName(self) -> str:
         """
         Indicated the name of the contact associated with the birthday event.
@@ -207,6 +214,13 @@ class CalendarBase(MessageBase):
         object.
         """
         return self._ensureSetNamed('_busyStatus', '8205', overrideClass = BusyStatus)
+
+    @property
+    def cc(self):
+        """
+        Returns the cc field, if it exists.
+        """
+        return self._genRecipient('cc', MeetingRecipientType.SENDABLE_OPTIONAL_ATTENDEE)
 
     @property
     def ccAttendeesString(self) -> str:
@@ -489,6 +503,13 @@ class CalendarBase(MessageBase):
         how to convert time fields between local time and UTC.
         """
         return self._ensureSetNamed('_timeZoneStruct', '8233', overrideClass = TimeZoneStruct)
+
+    @property
+    def to(self):
+        """
+        Returns the to field, if it exists.
+        """
+        return self._genRecipient('to', MeetingRecipientType.SENDABLE_REQUIRED_ATTENDEE)
 
     @property
     def toAttendeesString(self) -> str:

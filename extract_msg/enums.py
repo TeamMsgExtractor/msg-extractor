@@ -1165,6 +1165,7 @@ class MeetingRecipientType(enum.Enum):
     SENDABLE_RESOURCE_OBJECT = 0x03
 
 
+
 class MeetingType(enum.Enum):
     """
     The type of Meeting Request object of Meeting Update object.
