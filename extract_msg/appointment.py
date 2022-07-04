@@ -3,6 +3,7 @@ import datetime
 from . import constants
 from .enums import AppointmentStateFlag, BusyStatus, RecurPatternType, ResponseStatus
 from .calendar import Calendar
+from .structures.entry_id import EntryID
 
 
 class AppointmentMeeting(Calendar):
@@ -15,11 +16,34 @@ class AppointmentMeeting(Calendar):
     """
 
     @property
+    def appointmentCounterProposal(self) -> bool:
+        """
+        Indicates to the organizer that there are counter proposals that have
+        not been accepted or rejected by the organizer.
+        """
+        return self._ensureSetNamed('_appointmentCounterProposal', '8257')
+
+    @property
     def appointmentLastSequence(self) -> int:
         """
         The last sequence number that was sent to any attendee.
         """
         return self._ensureSetNamed('_appointmentLastSequence', '8203')
+
+    @property
+    def appointmentProposalNumber(self) -> int:
+        """
+        The number of attendees who have sent counter propostals that have not
+        been accepted or rejected by the organizer.
+        """
+        return self._ensureSetNamed('_appointmentProposalNumber', '8259')
+
+    @property
+    def appointmentReplyName(self) -> datetime.datetime:
+        """
+        The user who last replied to the meeting request or meeting update.
+        """
+        return self._ensureSetNamed('_appointmentReplyTime', '8230')
 
     @property
     def appointmentReplyTime(self) -> datetime.datetime:
@@ -36,6 +60,18 @@ class AppointmentMeeting(Calendar):
         modified.
         """
         return self._ensureSetNamed('_appointmentSequenceTime', '8202')
+
+    @property
+    def autoFillLocation(self) -> bool:
+        """
+        A value of True indicates that the value of the location property is set
+        to the value of the displayName property from the recipientRow structure
+        that represents a Resource object.
+
+        A value of False indicates that the value of the location property is
+        not automatically set.
+        """
+        return self._ensureSetNamed('_autoFillLocation', '823A', overrideClass = bool)
 
     @property
     def fInvited(self) -> bool:
@@ -113,3 +149,10 @@ class AppointmentMeeting(Calendar):
         if appointment.
         """
         return AppointmentStateFlag.MEETING in self.appointmentStateFlags
+
+    @property
+    def originalStoreEntryID(self) -> EntryID:
+        """
+        The EntryID of the delegator's message store.
+        """
+        return self._ensureSetNamed('_originalStoreEntryID', '8237', overrideClass = EntryID.autoCreate)
