@@ -1293,4 +1293,4 @@ class MessageBase(MSGFile):
         """
         Returns the to field, if it exists.
         """
-        return self._genRecipient('to', RecipientType.SENDABLE_REQUIRED_ATTENDEE)
+        return self._genRecipient('to', RecipientType.TO)
