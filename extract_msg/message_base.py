@@ -251,11 +251,11 @@ class MessageBase(MSGFile):
             # second join string between this section and the last, but *only*
             # if any of the entries were used.
             if isGroup and entryUsed:
-                formattedProps.append('')
+                formattedProps.append(b'')
 
         # If the last entry is empty, remove it. We don't want extra spacing at
         # the end.
-        if formattedProps[-1] == '':
+        if formattedProps[-1] == b'':
             formattedProps.pop()
 
         return prefix + joinStr.join(formattedProps) + suffix

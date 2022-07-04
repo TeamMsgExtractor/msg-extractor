@@ -65,14 +65,14 @@ class MeetingRequest(MeetingRelated):
         Additional note: If the value is an empty string, it will be dropped as
         well by default.
         """
-        meetingOrganizerString = {
+        meetingStatusString = {
             ResponseStatus.NONE: None,
             ResponseStatus.ORGANIZED: 'Meeting organizer',
             ResponseStatus.TENTATIVE: 'Tentatively accepted',
             ResponseStatus.ACCEPTED: 'Accepted',
             ResponseStatus.DECLINED: 'Declined',
             ResponseStatus.NOT_RESPONDED: 'Not yet responded',
-        }
+        }[self.responseStatus]
 
         # Get the recurrence string.
         recur = '(none)'
@@ -96,8 +96,8 @@ class MeetingRequest(MeetingRelated):
                 'Location': self.location,
             },
             '-date-': {
-                'Start': self.startDate,
-                'End': self.endDate,
+                'Start': self.startDate.__format__('%a, %d %b %Y %H:%M %z') if self.startDate else None,
+                'End': self.endDate.__format__('%a, %d %b %Y %H:%M %z') if self.endDate else None,
                 'Show Time As': showTime,
             },
             '-recurrence-': {
@@ -105,7 +105,7 @@ class MeetingRequest(MeetingRelated):
                 'Recurrence Pattern': self.recurrencePattern,
             },
             '-status-': {
-                'Meeting Status': meetingOrganizerString,
+                'Meeting Status': meetingStatusString,
             },
             '-attendees-': {
                 'Organizer': self.organizer,
