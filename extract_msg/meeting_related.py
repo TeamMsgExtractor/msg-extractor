@@ -1,3 +1,5 @@
+import datetime
+
 from typing import Set
 
 from . import constants
@@ -9,6 +11,13 @@ class MeetingRelated(CalendarBase):
     """
     Base class for meeting-related objects.
     """
+
+    @property
+    def attendeeCriticalChange(self) -> datetime.datetime:
+        """
+        The date and time at which the meeting-related object was sent.
+        """
+        return self._ensureSetNamed('_attendeeCriticalChange', '0001')
 
     @property
     def processed(self) -> bool:
