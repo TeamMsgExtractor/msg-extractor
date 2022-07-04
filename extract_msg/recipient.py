@@ -27,8 +27,8 @@ class Recipient:
             self.__email = self._getStringStream('__substg1.0_3003')
         self.__name = self._getStringStream('__substg1.0_3001')
         self.__typeFlags = self.__props.get('0C150003').value or 0
-        from .appointment import AppointmentMeeting
-        if isinstance(msg, AppointmentMeeting):
+        from .calendar_base import CalendarBase
+        if isinstance(msg, CalendarBase):
             self.__type = MeetingRecipientType(0xF & self.__typeFlags)
         else:
             self.__type = RecipientType(0xF & self.__typeFlags)

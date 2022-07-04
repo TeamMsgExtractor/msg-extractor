@@ -120,22 +120,22 @@ class AppointmentMeeting(Calendar):
             }[self.appointmentRecur.patternType]
 
         return {
-            {
+            '-main info-': {
                 'Subject': self.subject,
                 'Location': self.location,
             },
-            {
+            '-date-': {
                 'Start': self.startDate,
                 'End': self.endDate,
             },
-            {
+            '-recurrence-': {
                 'Recurrance': recur,
                 'Recurrence Pattern': self.recurrencePattern,
             },
-            {
+            '-status-': {
                 'Meeting Status': meetingOrganizerString,
             },
-            {
+            '-attendees-': {
                 'Organizer': self.organizer,
                 'Required Attendees': self.requiredAttendees,
                 'Optional Attendees': self.optionalAttendees,

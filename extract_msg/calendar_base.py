@@ -2,7 +2,7 @@ import datetime
 
 from typing import List, Set, Tuple, Union
 
-from .enums import AppointmentAuxilaryFlag, AppointmentColor, AppointmentStateFlag, BusyStatus, IconIndex, ResponseStatus
+from .enums import AppointmentAuxilaryFlag, AppointmentColor, AppointmentStateFlag, BusyStatus, IconIndex, MeetingRecipientType, ResponseStatus
 from .message_base import MessageBase
 from .structures.entry_id import EntryID
 from .structures.misc_id import GlobalObjectID
@@ -15,6 +15,52 @@ class CalendarBase(MessageBase):
     """
     Common base for all Appointment and Meeting objects.
     """
+
+    def _genRecipient(self, recipientType, recipientInt : MeetingRecipientType):
+        """
+        Returns the specified recipient field.
+        """
+        private = '_' + recipientType
+        recipientInt = RecipientType(recipientInt)
+        try:
+            return getattr(self, private)
+        except AttributeError:
+            value = None
+            # Check header first.
+            if self.headerInit():
+                value = self.header[recipientType]
+                if value:
+                    value = value.replace(',', self.recipientSeparator)
+
+            # If the header had a blank field or didn't have the field, generate
+            # it manually.
+            if not value:
+                # Check if the header has initialized.
+                if self.headerInit():
+                    logger.info(f'Header found, but "{recipientType}" is not included. Will be generated from other streams.')
+
+                # Get a list of the recipients of the specified type.
+                foundRecipients = tuple(recipient.formatted for recipient in self.recipients if recipient.type == recipientInt)
+
+                # If we found recipients, join them with the recipient separator
+                # and a space.
+                if len(foundRecipients) > 0:
+                    value = (self.__recipientSeparator + ' ').join(foundRecipients)
+
+            # Code to fix the formatting so it's all a single line. This allows
+            # the user to format it themself if they want. This should probably
+            # be redone to use re or something, but I can do that later. This
+            # shouldn't be a huge problem for now.
+            if value:
+                value = value.replace(' \r\n\t', ' ').replace('\r\n\t ', ' ').replace('\r\n\t', ' ')
+                value = value.replace('\r\n', ' ').replace('\r', ' ').replace('\n', ' ')
+                while value.find('  ') != -1:
+                    value = value.replace('  ', ' ')
+
+            # Set the field in the class.
+            setattr(self, private, value)
+
+            return value
 
     @property
     def allAttendeesString(self) -> str:

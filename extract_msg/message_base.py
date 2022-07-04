@@ -19,7 +19,7 @@ from email.parser import Parser as EmailParser
 from typing import Callable, Dict, Tuple, Union
 
 from . import constants
-from .enums import DeencapType, RecipientType
+from .enums import DeencapType, RecipientType, MeetingRecipientType
 from .exceptions import (
         DataNotFoundError, DeencapMalformedData, DeencapNotEncapsulated,
         IncompatibleOptionsError, WKError
@@ -108,7 +108,7 @@ class MessageBase(MSGFile):
         self.named
         self.namedProperties
 
-    def _genRecipient(self, recipientType, recipientInt : RecipientType):
+    def _genRecipient(self, recipientType, recipientInt : Union[RecipientType, MeetingRecipientType]):
         """
         Returns the specified recipient field.
         """
