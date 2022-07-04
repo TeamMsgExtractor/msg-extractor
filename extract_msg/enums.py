@@ -1424,6 +1424,27 @@ class Sensitivity(enum.Enum):
 
 
 
+class ServerProcessingAction(enum.Enum):
+    """
+    Actions taken on a meeting-related object.
+    """
+    @classmethod
+    def fromBits(cls, value : int) -> Set['ServerProcessingAction']:
+        """
+        Takes an int and returns a set of the weekdays.
+        """
+        return {cls(1 << x) for x in range(16) if (value & (1 << x))}
+
+    DELEGATOR_WANTS_COPY = 0x00000002
+    CREATED_ON_PRINCIPLE = 0x00000010
+    UPDATED_CAL_ITEM = 0x00000080
+    COPIED_OLD_PROPERTIES = 0x00000100
+    SEND_AUTO_RESPONSE = 0x00000400
+    REVIVED_EXCEPTION = 0x00000800
+    PROCESSED_MEETING_FORWARD_NOTIFICATION = 0x00001000
+
+
+
 class SideEffect(enum.Enum):
     """
     A flag for how a Message object is handled by the client in relation to

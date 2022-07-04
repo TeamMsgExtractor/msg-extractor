@@ -2,13 +2,13 @@ import datetime
 
 from typing import List, Set
 
-from .calendar import Calendar
+from .meeting_related import MeetingRelated
 from .enums import BusyStatus, RecurCalendarType, MeetingObjectChange, MeetingType
 
 
-class MeetingRequest(Calendar):
+class MeetingRequest(MeetingRelated):
     """
-
+    Class for handling Meeting Request and Meeting Update objects.
     """
 
     @property

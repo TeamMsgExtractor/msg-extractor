@@ -450,10 +450,3 @@ class CalendarBase(MessageBase):
         A list of all the sendable attendees, who are also required attendees.
         """
         return self._ensureSetNamed('_toAttendeesString', '823B')
-
-    @property
-    def where(self) -> str:
-        """
-        PidLidWhere. Should be the same as location.
-        """
-        return self._ensureSetNamed('_where', '0002')
