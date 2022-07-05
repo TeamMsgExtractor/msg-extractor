@@ -97,14 +97,14 @@ class GlobalObjectID:
     def __init__(self, data : bytes):
         self.__rawData = data
         reader = BytesReader(data)
-        expectedBytes = '\x04\x00\x00\x00\x82\x00\xE0\x00\x74\xC5\xB7\x10\x1A\x82\xE0\x08'
+        expectedBytes = b'\x04\x00\x00\x00\x82\x00\xE0\x00\x74\xC5\xB7\x10\x1A\x82\xE0\x08'
         errorMsg = 'Byte Array ID did not match for GlobalObjectID (got {actual}).'
         self.__byteArrayID = reader.assertRead(expectedBytes, errorMsg)
         self.__yh = reader.read(1)
         self.__yl = reader.read(1)
         self.__year = constants.ST_BE_UI16.unpack(self.__yh + self.__yl)[0]
-        self.__month = reader.readUnsignedByte(1)
-        self.__day = reader.readUnsignedByte(1)
+        self.__month = reader.readUnsignedByte()
+        self.__day = reader.readUnsignedByte()
         self.__creationTime = filetimeToDatetime(reader.readUnsignedLong())
         reader.assertNull(8, 'Reserved was not set to null.')
         size = reader.readUnsignedInt()

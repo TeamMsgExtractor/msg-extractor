@@ -189,7 +189,7 @@ class MSGFile:
             setattr(self, variable, value)
             return value
 
-    def _ensureSetNamed(self, variable : str, propertyName, **kwargs):
+    def _ensureSetNamed(self, variable : str, propertyName : str, guid : str, **kwargs):
         """
         Ensures that the variable exists, otherwise will set it using the named
         property. After that, return said variable.
@@ -205,7 +205,7 @@ class MSGFile:
         try:
             return getattr(self, variable)
         except AttributeError:
-            value = self.namedProperties.get(propertyName)
+            value = self.namedProperties.get((propertyName, guid))
             # Check if we should be overriding the data type for this instance.
             if kwargs:
                 overrideClass = kwargs.get('overrideClass')
@@ -636,7 +636,7 @@ class MSGFile:
         Indicates whether the contents of this message are regarded as
         classified information.
         """
-        return self._ensureSetNamed('_classified', '85B5')
+        return self._ensureSetNamed('_classified', '85B5', constants.PSETID_COMMON)
 
     @property
     def classType(self) -> str:
@@ -650,14 +650,14 @@ class MSGFile:
         """
         The end time for the object.
         """
-        return self._ensureSetNamed('_commonEnd', '8517')
+        return self._ensureSetNamed('_commonEnd', '8517', constants.PSETID_COMMON)
 
     @property
     def commonStart(self) -> datetime.datetime:
         """
         The start time for the object.
         """
-        return self._ensureSetNamed('_commonStart', '8516')
+        return self._ensureSetNamed('_commonStart', '8516', constants.PSETID_COMMON)
 
     @property
     def currentVersion(self) -> int:
@@ -665,14 +665,14 @@ class MSGFile:
         Specifies the build number of the client application that sent the
         message.
         """
-        return self._ensureSetNamed('_currentVersion', '8552')
+        return self._ensureSetNamed('_currentVersion', '8552', constants.PSETID_COMMON)
 
     @property
     def currentVersionName(self) -> str:
         """
         Specifies the name of the client application that sent the message.
         """
-        return self._ensureSetNamed('_currentVersionName', '8554')
+        return self._ensureSetNamed('_currentVersionName', '8554', constants.PSETID_COMMON)
 
     @property
     def importance(self) -> Importance:
@@ -806,7 +806,7 @@ class MSGFile:
         Controls how a Message object is handled by the client in relation to
         certain user interface actions by the user, such as deleting a message.
         """
-        return self._ensureSetNamed('_sideEffects', '8510', overrideClass = SideEffect.fromBits)
+        return self._ensureSetNamed('_sideEffects', '8510', constants.PSETID_COMMON, overrideClass = SideEffect.fromBits)
 
     @property
     def stringEncoding(self):

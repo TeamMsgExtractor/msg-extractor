@@ -21,14 +21,14 @@ class AppointmentMeeting(Calendar):
         Indicates to the organizer that there are counter proposals that have
         not been accepted or rejected by the organizer.
         """
-        return self._ensureSetNamed('_appointmentCounterProposal', '8257')
+        return self._ensureSetNamed('_appointmentCounterProposal', '8257', constants.PSETID_APPOINTMENT)
 
     @property
     def appointmentLastSequence(self) -> int:
         """
         The last sequence number that was sent to any attendee.
         """
-        return self._ensureSetNamed('_appointmentLastSequence', '8203')
+        return self._ensureSetNamed('_appointmentLastSequence', '8203', constants.PSETID_APPOINTMENT)
 
     @property
     def appointmentProposalNumber(self) -> int:
@@ -36,14 +36,14 @@ class AppointmentMeeting(Calendar):
         The number of attendees who have sent counter propostals that have not
         been accepted or rejected by the organizer.
         """
-        return self._ensureSetNamed('_appointmentProposalNumber', '8259')
+        return self._ensureSetNamed('_appointmentProposalNumber', '8259', constants.PSETID_APPOINTMENT)
 
     @property
     def appointmentReplyName(self) -> datetime.datetime:
         """
         The user who last replied to the meeting request or meeting update.
         """
-        return self._ensureSetNamed('_appointmentReplyTime', '8230')
+        return self._ensureSetNamed('_appointmentReplyTime', '8230', constants.PSETID_APPOINTMENT)
 
     @property
     def appointmentReplyTime(self) -> datetime.datetime:
@@ -51,7 +51,7 @@ class AppointmentMeeting(Calendar):
         The date and time at which the attendee responded to a received Meeting
         Request object of Meeting Update object in UTC.
         """
-        return self._ensureSetNamed('_appointmentReplyTime', '8220')
+        return self._ensureSetNamed('_appointmentReplyTime', '8220', constants.PSETID_APPOINTMENT)
 
     @property
     def appointmentSequenceTime(self) -> datetime.datetime:
@@ -59,7 +59,7 @@ class AppointmentMeeting(Calendar):
         The date and time at which the appointmentSequence property was last
         modified.
         """
-        return self._ensureSetNamed('_appointmentSequenceTime', '8202')
+        return self._ensureSetNamed('_appointmentSequenceTime', '8202', constants.PSETID_APPOINTMENT)
 
     @property
     def autoFillLocation(self) -> bool:
@@ -71,14 +71,14 @@ class AppointmentMeeting(Calendar):
         A value of False indicates that the value of the location property is
         not automatically set.
         """
-        return self._ensureSetNamed('_autoFillLocation', '823A', overrideClass = bool)
+        return self._ensureSetNamed('_autoFillLocation', '823A', constants.PSETID_APPOINTMENT, overrideClass = bool)
 
     @property
     def fInvited(self) -> bool:
         """
         Whether a Meeting Request object has been sent out.
         """
-        return self._ensureSetNamed('_fInvited', '8229', overrideClass = bool, preserveNone = False)
+        return self._ensureSetNamed('_fInvited', '8229', constants.PSETID_APPOINTMENT, overrideClass = bool, preserveNone = False)
 
     @property
     def headerFormatProperties(self) -> constants.HEADER_FORMAT_TYPE:
@@ -159,4 +159,4 @@ class AppointmentMeeting(Calendar):
         """
         The EntryID of the delegator's message store.
         """
-        return self._ensureSetNamed('_originalStoreEntryID', '8237', overrideClass = EntryID.autoCreate)
+        return self._ensureSetNamed('_originalStoreEntryID', '8237', constants.PSETID_APPOINTMENT, overrideClass = EntryID.autoCreate)

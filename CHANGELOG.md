@@ -38,6 +38,8 @@
 * MSGFile no longer inherits directly from `OleFileIO`. While I would prefer to do that, the `__init__` method for it is rather expensive, and allowing embedded msg files to directly share each other's instances of `OleFileIO` would improve speed immensely.
 * Fixed attachments not being preemptively loaded when `delayAttachments` was `False`.
 * `utils.openMsg` now delays attachments while loading the file to get the class type. This means all time for attachments is cut in half as they are only ever loaded once. It also means that files that won't open due to attachments will error a little later, but this shouldn't be a problem.
+* Changed named properties `Guid` back to constants. This has to do with the next entry.
+* Fixed a major issue in named properties. Apparently the ID is not enough and you *must* have the GUID as well, as multiple properties can share the exact same ID.
 
 **v0.34.3**
 * Fixed issue that may have caused other olefile types to raise the wrong type of error when passed to `openMsg`.

@@ -19,7 +19,7 @@ class MeetingRequest(MeetingRelated):
         object that is to be generated from the Meeting Request object. MUST
         start with "IPM.Appointment".
         """
-        return self._ensureSetNamed('_appointmentMessageClass', '0024')
+        return self._ensureSetNamed('_appointmentMessageClass', '0024', constants.PSETID_MEETING)
 
     @property
     def calendarType(self) -> RecurCalendarType:
@@ -28,7 +28,7 @@ class MeetingRequest(MeetingRelated):
         property if the Meeting Request object represents a recurring series or
         an exception.
         """
-        return self._ensureSetNamed('_calendarType', '001C', overrideClass = RecurCalendarType)
+        return self._ensureSetNamed('_calendarType', '001C', constants.PSETID_MEETING, overrideClass = RecurCalendarType)
 
     @property
     def changeHighlight(self) -> Set[MeetingObjectChange]:
@@ -38,7 +38,7 @@ class MeetingRequest(MeetingRelated):
 
         Returns a set of flags.
         """
-        return self._ensureSetNamed('_changeHighlight', '8204', overrideClass = MeetingObjectChange.fromBits)
+        return self._ensureSetNamed('_changeHighlight', '8204', constants.PSETID_APPOINTMENT, overrideClass = MeetingObjectChange.fromBits)
 
     @property
     def forwardInstance(self) -> bool:
@@ -47,7 +47,7 @@ class MeetingRequest(MeetingRelated):
         recurring series, and it was forwarded (even when forwarded by the
         organizer) rather than being an invitation sent by the organizer.
         """
-        return self._ensureSetNamed('_forwardInstance', '820A')
+        return self._ensureSetNamed('_forwardInstance', '820A', constants.PSETID_APPOINTMENT)
 
     @property
     def headerFormatProperties(self) -> constants.HEADER_FORMAT_TYPE:
@@ -126,21 +126,21 @@ class MeetingRequest(MeetingRelated):
         calendar at the time the Meeting Request object or Meeting Update object
         was sent.
         """
-        return self._ensureSetNamed('_intendedBusyStatus', '8224', overrideClass = BusyStatus)
+        return self._ensureSetNamed('_intendedBusyStatus', '8224', constants.PSETID_APPOINTMENT, overrideClass = BusyStatus)
 
     @property
     def meetingType(self) -> MeetingType:
         """
-        The type of Meeting Request object or Meeting UpdateObject.
+        The type of Meeting Request object or Meeting Update object.
         """
-        return self._ensureSetNamed('meetingType', '0026', overrideClass = MeetingType)
+        return self._ensureSetNamed('_meetingType', '0026', constants.PSETID_MEETING, overrideClass = MeetingType)
 
     @property
     def oldLocation(self) -> str:
         """
         The original value of the location property before a meeting update.
         """
-        return self._ensureSetNamed('_oldLocation', '0028')
+        return self._ensureSetNamed('_oldLocation', '0028', constants.PSETID_MEETING)
 
     @property
     def oldWhenEndWhole(self) -> datetime.datetime:
@@ -148,7 +148,7 @@ class MeetingRequest(MeetingRelated):
         The original value of the appointmentEndWhole property before a meeting
         update.
         """
-        return self._ensureSetNamed('_oldWhenEndWhole', '002A')
+        return self._ensureSetNamed('_oldWhenEndWhole', '002A', constants.PSETID_MEETING)
 
     @property
     def oldWhenStartWhole(self) -> datetime.datetime:
@@ -156,4 +156,4 @@ class MeetingRequest(MeetingRelated):
         The original value of the appointmentStartWhole property before a
         meeting update.
         """
-        return self._ensureSetNamed('_oldWhenStartWhole', '0029')
+        return self._ensureSetNamed('_oldWhenStartWhole', '0029', constants.PSETID_MEETING)

@@ -536,6 +536,8 @@ def openMsg(path, **kwargs):
     from .appointment import AppointmentMeeting
     from .contact import Contact
     from .meeting_cancellation import MeetingCancellation
+    from .meeting_exception import MeetingException
+    from .meeting_forward import MeetingForwardNotification
     from .meeting_request import MeetingRequest
     from .meeting_response import MeetingResponse
     from .message import Message
@@ -576,7 +578,7 @@ def openMsg(path, **kwargs):
     # Put the message class first as it is most common.
     if classType.startswith('ipm.note') or classType.startswith('report'):
         msg.close()
-        if classType.endswith('smime.multipartsigned'):
+        if classType.endswith('smime.multipartsigned') or classType.endswith('smime'):
             return MessageSigned(path, **kwargs)
         else:
             return Message(path, **kwargs)
@@ -595,13 +597,22 @@ def openMsg(path, **kwargs):
     elif classType.startswith('ipm.schedule.meeting.canceled'):
         msg.close()
         return MeetingCancellation(path, **kwargs)
+    elif classType.startswith('ipm.schedule.meeting.notification.forward'):
+        msg.close()
+        return MeetingForwardNotification(path, **kwargs)
     elif classType.startswith('ipm.schedule.meeting.resp'):
         msg.close()
         return MeetingResponse(path, **kwargs)
     elif classType.startswith('ipm.task'):
         msg.close()
         return Task(path, **kwargs)
-    elif classType == 'ipm': # Unspecified format. It should be equal to this and not just start with it.
+    elif classType.startswith('ipm.ole.class.{00061055-0000-0000-c000-000000000046}'):
+        # Exception object have a weird class type.
+        msg.close()
+        return MeetingException(path, **kwargs)
+    elif classType == 'ipm':
+        # Unspecified format. It should be equal to this and not just start with
+        # it.
         if not delayAttachments:
             msg.attachments
         return msg

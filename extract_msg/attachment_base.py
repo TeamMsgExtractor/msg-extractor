@@ -2,6 +2,7 @@ import logging
 
 from functools import partial
 
+from . import constants
 from .enums import AttachmentType, PropertiesType
 from .named import NamedProperties
 from .prop import FixedLengthProp
@@ -63,7 +64,7 @@ class AttachmentBase:
             setattr(self, variable, value)
             return value
 
-    def _ensureSetNamed(self, variable, propertyName, **kwargs):
+    def _ensureSetNamed(self, variable, propertyName : str, guid : str, **kwargs):
         """
         Ensures that the variable exists, otherwise will set it using the named
         property. After that, return said variable.
@@ -79,7 +80,7 @@ class AttachmentBase:
         try:
             return getattr(self, variable)
         except AttributeError:
-            value = self.namedProperties.get(propertyName)
+            value = self.namedProperties.get((propertyName, guid))
             # Check if we should be overriding the data type for this instance.
             if kwargs:
                 overrideClass = kwargs.get('overrideClass')

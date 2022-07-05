@@ -21,7 +21,8 @@ class TZRule:
         reader.assertRead(b'\x3E\x00')
         self.__flags = TZFlag.fromBits(reader.readUnsignedShort())
         self.__year = reader.readShort()
-        reader.assertNull(14)
+        # We *should* be doing this, but Outlook is violating the standard so...
+        #reader.assertNull(14)
         self.__bias = reader.readInt()
         self.__standardBias = reader.readInt()
         self.__daylightBias = reader.readInt()

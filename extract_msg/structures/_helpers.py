@@ -56,7 +56,7 @@ class BytesReader(io.BytesIO):
                 self.seek(position)
             raise
 
-    def assertNull(length : int, errorMsg : str = None) -> bytes:
+    def assertNull(self, length : int, errorMsg : str = None) -> bytes:
         """
         Reads the number of bytes specified and ensures they are all null.
 
@@ -76,7 +76,7 @@ class BytesReader(io.BytesIO):
         if length == 0:
             return b''
 
-        valueRead = self.tryReadBytes(len(value))
+        valueRead = self.tryReadBytes(length)
         if valueRead:
             if sum(valueRead) != 0:
                 errorMsg = errorMsg or 'Bytes read were not all null.'
@@ -86,7 +86,7 @@ class BytesReader(io.BytesIO):
 
         return valueRead
 
-    def assertRead(value : bytes, errorMsg : str = None) -> bytes:
+    def assertRead(self, value : bytes, errorMsg : str = None) -> bytes:
         """
         Reads the number of bytes and compares them to the value provided. If it
         does not match, throws a value error.
@@ -102,16 +102,20 @@ class BytesReader(io.BytesIO):
 
         :returns: The bytes read, if you need them.
 
+        :raises TypeError: The value given was not bytes.
         :raises ValueError: Assertion failed.
         """
         # Quick return for a value being empty.
         if len(value) == 0:
             return b''
 
+        if not isinstance(value, bytes):
+            raise TypeError(':param value: was not bytes.')
+
         valueRead = self.tryReadBytes(len(value))
         if valueRead:
             if valueRead != value:
-                errorMessage = errorMessage or 'Value did not match (expected {expected}, got {actual}).'
+                errorMsg = errorMsg or 'Value did not match (expected {expected}, got {actual}).'
                 raise ValueError(errorMsg.format(expected = value, actual = valueRead))
         else:
             raise IOError('Not enough bytes left in buffer.')

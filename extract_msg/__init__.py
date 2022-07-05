@@ -37,7 +37,9 @@ from .appointment import AppointmentMeeting
 from .attachment import Attachment
 from .contact import Contact
 from .exceptions import UnrecognizedMSGTypeError
+from .meeting_forward import MeetingForwardNotification
 from .meeting_request import MeetingRequest
+from .meeting_response import MeetingResponse
 from .message import Message
 from .message_base import MessageBase
 from .message_signed import MessageSigned

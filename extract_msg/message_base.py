@@ -251,11 +251,11 @@ class MessageBase(MSGFile):
             # second join string between this section and the last, but *only*
             # if any of the entries were used.
             if isGroup and entryUsed:
-                formattedProps.append(b'')
+                formattedProps.append('')
 
         # If the last entry is empty, remove it. We don't want extra spacing at
         # the end.
-        if formattedProps[-1] == b'':
+        if formattedProps[-1] == '':
             formattedProps.pop()
 
         return prefix + joinStr.join(formattedProps) + suffix
@@ -283,14 +283,14 @@ class MessageBase(MSGFile):
             Arguments absorbed by this are simply ignored.
         """
         # Get the type of line endings.
-        crlf = inputToBytes(self.crlf, 'utf-8')
+        crlf = inputToString(self.crlf, 'utf-8')
 
-        prefix = b''
-        suffix = crlf + b'-----------------' + crlf + crlf
+        prefix = ''
+        suffix = crlf + '-----------------' + crlf + crlf
         joinStr = crlf
-        formatter = (lambda name, value : f'{name}: {value}'.encode('utf-8'))
+        formatter = (lambda name, value : f'{name}: {value}')
 
-        header = self.getInjectableHeader(prefix, joinStr, suffix, formatter)
+        header = self.getInjectableHeader(prefix, joinStr, suffix, formatter).encode('utf-8')
         return header + inputToBytes(self.body, 'utf-8')
 
     def getSaveHtmlBody(self, preparedHtml : bool = False, charset : str = 'utf-8', **kwargs) -> bytes:
