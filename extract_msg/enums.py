@@ -1091,7 +1091,7 @@ class IconIndex(enum.Enum):
 class Importance(enum.Enum):
     LOW = 0
     MEDIUM = 1
-    IMPORTANCE_HIGH = 2
+    HIGH = 2
 
 
 
@@ -1399,6 +1399,16 @@ class ResponseStatus(enum.Enum):
     ACCEPTED = 0x00000003
     DECLINED = 0x00000004
     NOT_RESPONDED = 0x00000005
+
+
+
+class ResponseType(enum.Enum):
+    """
+    The type of response for a Meeting Response object.
+    """
+    ACCEPT = 'pos'
+    DECLINE = 'neg'
+    TENTATIVE = 'tent'
 
 
 

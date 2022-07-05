@@ -1,7 +1,7 @@
 from typing import Any, Tuple
 
 from .. import constants
-from ..enums import RecurCalendarType, RecurDOW, RecurEndType, RecurFrequency, RecurMonthNthWeek, RecurPatternType
+from ..enums import RecurCalendarType, RecurDOW, RecurEndType, RecurFrequency, RecurMonthNthWeek, RecurPatternType, RecurPatternTypeSpecificWeekday
 from ._helpers import BytesReader
 
 

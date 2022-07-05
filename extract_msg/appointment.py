@@ -139,6 +139,10 @@ class AppointmentMeeting(Calendar):
                 'Organizer': self.organizer,
                 'Required Attendees': self.to,
                 'Optional Attendees': self.cc,
+                'Resources': self.bcc,
+            },
+            '-importance-': {
+                'Importance': self.importanceString,
             },
         }
 

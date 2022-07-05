@@ -13,13 +13,13 @@ class MeetingRequest(MeetingRelated):
     """
 
     @property
-    def appointmentClassType(self) -> str:
+    def appointmentMessageClass(self) -> str:
         """
         Indicates the value of the PidTagMessageClass property of the Meeting
         object that is to be generated from the Meeting Request object. MUST
         start with "IPM.Appointment".
         """
-        return self._ensureSetNamed('_appointmentClassType', '0024')
+        return self._ensureSetNamed('_appointmentMessageClass', '0024')
 
     @property
     def calendarType(self) -> RecurCalendarType:
@@ -111,10 +111,11 @@ class MeetingRequest(MeetingRelated):
                 'Organizer': self.organizer,
                 'Required Attendees': self.to,
                 'Optional Attendees': self.cc,
-            },
-            '-resources-': {
                 'Resources': self.bcc,
-            }
+            },
+            '-importance-': {
+                'Importance': self.importanceString,
+            },
         }
 
 

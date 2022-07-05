@@ -1,4 +1,5 @@
 import datetime
+import logging
 
 from typing import List, Set, Tuple, Union
 
@@ -9,6 +10,10 @@ from .structures.misc_id import GlobalObjectID
 from .structures.recurrence_pattern import RecurrencePattern
 from .structures.time_zone_definition import TimeZoneDefinition
 from .structures.time_zone_struct import TimeZoneStruct
+
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class CalendarBase(MessageBase):
@@ -479,7 +484,7 @@ class CalendarBase(MessageBase):
         """
         The response status of an attendee.
         """
-        return self._ensureSetNamed('_responseStatus', '8218', overrideClass = ResponseStatus)
+        return self._ensureSetNamed('_responseStatus', '8218', overrideClass = lambda x: ResponseStatus(x or 0), preserveNone = False)
 
     @property
     def startDate(self) -> datetime.datetime:

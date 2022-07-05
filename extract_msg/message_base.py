@@ -1061,12 +1061,17 @@ class MessageBase(MSGFile):
         # option exists to have it be present even if no data is found, we are
         # specifically not doing that.
         return {
-            'From': self.sender,
-            'Sent': self.date,
-            'To': self.to,
-            'Cc': self.cc,
-            'Bcc': self.bcc,
-            'Subject': self.subject,
+            '-basic info-': {
+                'From': self.sender,
+                'Sent': self.date,
+                'To': self.to,
+                'Cc': self.cc,
+                'Bcc': self.bcc,
+                'Subject': self.subject,
+            },
+            '-importance-': {
+                'Importance': self.importanceString,
+            },
         }
 
     @property

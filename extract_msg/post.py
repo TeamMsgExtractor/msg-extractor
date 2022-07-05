@@ -44,8 +44,15 @@ class Post(MessageBase):
         well by default.
         """
         return {
-            'From': self.sender,
-            'Posted At': self.date,
-            'Conversation': self.conversation,
-            'Subject': self.subject,
+            '-main details-': {
+                'From': self.sender,
+                'Posted At': self.date,
+                'Conversation': self.conversation,
+            },
+            '-subject-': {
+                'Subject': self.subject,
+            },
+            '-importance-': {
+                'Importance': self.importanceString,
+            },
         }

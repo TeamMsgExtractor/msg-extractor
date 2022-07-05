@@ -8,11 +8,11 @@ import zipfile
 
 import olefile
 
-from typing import Set
+from typing import List, Set, Union
 
 from . import constants
 from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment
-from .enums import AttachErrorBehavior, Priority, PropertiesType, Sensitivity, SideEffect
+from .enums import AttachErrorBehavior, Importance, Priority, PropertiesType, Sensitivity, SideEffect
 from .exceptions import InvalidFileFormatError, UnrecognizedMSGTypeError
 from .named import Named, NamedProperties
 from .prop import FixedLengthProp
@@ -558,7 +558,7 @@ class MSGFile:
             return self.__bStringsUnicode
 
     @property
-    def attachments(self):
+    def attachments(self) -> List:
         """
         Returns a list of all attachments.
         """
@@ -675,11 +675,24 @@ class MSGFile:
         return self._ensureSetNamed('_currentVersionName', '8554')
 
     @property
-    def importance(self) -> int:
+    def importance(self) -> Importance:
         """
         The specified importance of the msg file.
         """
-        return self._ensureSetProperty('_importance', '00170003')
+        return self._ensureSetProperty('_importance', '00170003', overrideClass = Importance)
+
+    @property
+    def importanceString(self) -> Union[str, None]:
+        """
+        Returns the string to use for saving. If the importance is medium then
+        it returns None. Mainly used for saving.
+        """
+        return {
+            Importance.HIGH: 'High',
+            Importance.MEDIUM: None,
+            Importance.LOW: 'low',
+            None: None,
+        }[self.importance]
 
     @property
     def kwargs(self) -> dict:
@@ -724,7 +737,7 @@ class MSGFile:
             return self.__named
 
     @property
-    def namedProperties(self) -> None:
+    def namedProperties(self) -> NamedProperties:
         """
         The NamedProperties instances usable to access the data for named
         properties.

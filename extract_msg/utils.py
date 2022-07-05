@@ -535,14 +535,29 @@ def openMsg(path, **kwargs):
     """
     from .appointment import AppointmentMeeting
     from .contact import Contact
+    from .meeting_cancellation import MeetingCancellation
     from .meeting_request import MeetingRequest
+    from .meeting_response import MeetingResponse
     from .message import Message
     from .msg import MSGFile
     from .message_signed import MessageSigned
     from .post import Post
     from .task import Task
 
+    # When the initial MSG file is opened, it should *always* delay attachments
+    # so it can get the main class type. We only need to load them after that
+    # if we are directly returning the MSGFile instance *and* delayAttachments
+    # is False.
+    #
+    # So first let's store the original value.
+    delayAttachments = kwargs.get('delayAttachments', False)
+    kwargs['delayAttachments'] = True
+
     msg = MSGFile(path, **kwargs)
+
+    # Restore the option in the kwargs so we don't have to worry about it.
+    kwargs['delayAttachments'] = delayAttachments
+
     # After rechecking the docs, all comparisons should be case-insensitive, not
     # case-sensitive. My reading ability is great.
     #
@@ -558,28 +573,37 @@ def openMsg(path, **kwargs):
             logging.critical('Received file that was an olefile but was not an MSG file. Returning MSGFile anyways because strict mode is off.')
             return msg
     classType = msg.classType.lower()
-    if classType.startswith('ipm.contact') or classType.startswith('ipm.distlist'):
-        msg.close()
-        return Contact(path, **kwargs)
-    elif classType.startswith('ipm.note') or classType.startswith('report'):
+    # Put the message class first as it is most common.
+    if classType.startswith('ipm.note') or classType.startswith('report'):
         msg.close()
         if classType.endswith('smime.multipartsigned'):
             return MessageSigned(path, **kwargs)
         else:
             return Message(path, **kwargs)
+    elif classType.startswith('ipm.appointment'):
+        msg.close()
+        return AppointmentMeeting(path, **kwargs)
+    elif classType.startswith('ipm.contact') or classType.startswith('ipm.distlist'):
+        msg.close()
+        return Contact(path, **kwargs)
     elif classType.startswith('ipm.post'):
         msg.close()
         return Post(path, **kwargs)
     elif classType.startswith('ipm.schedule.meeting.request'):
         msg.close()
         return MeetingRequest(path, **kwargs)
-    elif classType.startswith('ipm.appointment'):
+    elif classType.startswith('ipm.schedule.meeting.canceled'):
         msg.close()
-        return AppointmentMeeting(path, **kwargs)
+        return MeetingCancellation(path, **kwargs)
+    elif classType.startswith('ipm.schedule.meeting.resp'):
+        msg.close()
+        return MeetingResponse(path, **kwargs)
     elif classType.startswith('ipm.task'):
         msg.close()
         return Task(path, **kwargs)
     elif classType == 'ipm': # Unspecified format. It should be equal to this and not just start with it.
+        if not delayAttachments:
+            msg.attachments
         return msg
     elif kwargs.get('strict', True):
         # Because we are closing it, we need to store it in a variable first.
@@ -590,6 +614,8 @@ def openMsg(path, **kwargs):
         raise UnrecognizedMSGTypeError(f'Could not recognize msg class type "{ct}".')
     else:
         logger.error(f'Could not recognize msg class type "{msg.classType}". This most likely means it hasn\'t been implemented yet, and you should ask the developers to add support for it.')
+        if not delayAttachments:
+            msg.attachments
         return msg
 
 
