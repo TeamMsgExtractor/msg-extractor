@@ -160,7 +160,7 @@ class Attachment(AttachmentBase):
 
         fullFilename = customPath / filename
 
-        if self.type == AttachmentType.DATA:
+        if self.type is AttachmentType.DATA:
             if _zip:
                 name, ext = os.path.splitext(filename)
                 nameList = _zip.namelist()

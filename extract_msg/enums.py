@@ -1543,6 +1543,27 @@ class TaskOwnership(enum.Enum):
 
 
 
+class TaskState(enum.Enum):
+    """
+    NOT_ASSIGNED: The Task object is not assigned.
+    ASSIGNEES_COPY_ACCEPTED: The Task object is the task assignee's copy of an
+        assigned Task object.
+    ASSIGNERS_COPY_ACCEPTED: The Task object is the task assigner's copy of an
+        assigned Task object.
+    ASSIGNERS_COPY_REJECTED: The Task object is the task assigner's copy of a
+        rejected Task object.
+    EMBEDDED_REJECTION: This Task object was created to correspond to a Task
+        object that was embedded in a task rejection but could not be found
+        locally.
+    """
+    NOT_ASSIGNED = 0x00000001
+    ASSIGNEES_COPY_ACCEPTED = 0x00000002
+    ASSIGNERS_COPY_ACCEPTED = 0x00000003
+    ASSIGNERS_COPY_REJECTED = 0x00000004
+    EMBEDDED_REJECTION = 0x00000005
+
+
+
 class TaskStatus(enum.Enum):
     """
     The status of a task object (PidLidTaskStatus).

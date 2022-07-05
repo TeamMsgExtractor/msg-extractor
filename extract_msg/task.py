@@ -2,8 +2,9 @@ import datetime
 import logging
 
 from . import constants
-from .enums import TaskAcceptance, TaskHistory, TaskMode, TaskOwnership, TaskStatus
+from .enums import TaskAcceptance, TaskHistory, TaskMode, TaskOwnership, TaskState, TaskStatus
 from .message_base import MessageBase
+from .structures.recurrence_pattern import RecurrencePattern
 
 
 logger = logging.getLogger(__name__)
@@ -31,6 +32,14 @@ class Task(MessageBase):
         return self._ensureSetNamed('_taskAcceptanceState', '812A', constants.PSETID_TASK, overrideClass = TaskAcceptance)
 
     @property
+    def taskAccepted(self) -> bool:
+        """
+        Indicates whether a task assignee has replied to a tesk request for this
+        task object. Does not indicate if it was accepted or rejected.
+        """
+        return self._ensureSetNamed('_taskAccepted', '8108', constants.PSETID_TASK)
+
+    @property
     def taskActualEffort(self) -> int:
         """
         Indicates the number of minutes that the user actually spent working on
@@ -44,6 +53,16 @@ class Task(MessageBase):
         Specifies the name of the user that last assigned the task.
         """
         return self._ensureSetNamed('_taskAssigner', '8121', constants.PSETID_TASK)
+
+    @property
+    def taskAssigners(self) -> bytes:
+        """
+        A stack of entries, each representing a task assigner. The most recent
+        task assigner (that is, the top) appears at the bottom.
+
+        The documentation on this is weird, so I don't know how to parse it.
+        """
+        return self._ensureSetNamed('_taskAssigners', '8117', constants.PSETID_TASK)
 
     @property
     def taskComplete(self) -> bool:
@@ -60,6 +79,22 @@ class Task(MessageBase):
         return self._ensureSetNamed('_taskCustomFlags', '8139', constants.PSETID_TASK)
 
     @property
+    def taskDateCompleted(self) -> datetime.datetime:
+        """
+        The date when the user completed work on the task.
+        """
+        return self._ensureSetNamed('_taskDateCompleted', '810F', constants.PSETID_TASK)
+
+    @property
+    def taskDeadOccurrence(self) -> bool:
+        """
+        Indicates whether a new recurring task remains to be generated. Set to
+        False on a new Task object and True when the client generates the last
+        recurring task.
+        """
+        return self._ensureSetNamed('_taskDeadOccurrence', '8109', constants.PSETID_TASK)
+
+    @property
     def taskDueDate(self) -> datetime.datetime:
         """
         Specifies the date by which the user expects work on the task to be
@@ -73,6 +108,15 @@ class Task(MessageBase):
         Indicates the number of minutes that the user expects to work on a task.
         """
         return self._ensureSetNamed('_taskEstimatedEffort', '8111', constants.PSETID_TASK)
+
+    @property
+    def taskFCreator(self) -> bool:
+        """
+        Indicates that the task object was originally created by the action of
+        the current user or user agent instead of by the processing of a task
+        request.
+        """
+        return self._ensureSetNamed('_taskFCreator', '811E', constants.PSETID_TASK)
 
     @property
     def taskFRecurring(self) -> bool:
@@ -95,6 +139,13 @@ class Task(MessageBase):
         the user to whom it was most recently assigned.
         """
         return self._ensureSetNamed('_taskLastDelegate', '8125', constants.PSETID_TASK)
+
+    @property
+    def taskLastUpdate(self) -> datetime.datetime:
+        """
+        The date and time of the most recent change made to the task object.
+        """
+        return self._ensureSetNamed('_taskLastUpdate', '8115', constants.PSETID_TASK)
 
     @property
     def taskLastUser(self) -> str:
@@ -126,11 +177,33 @@ class Task(MessageBase):
         return self._ensureSetNamed('_taskOwnership', '8129', constants.PSETID_TASK, overrideClass = TaskOwnership)
 
     @property
+    def taskRecurrence(self) -> RecurrencePattern:
+        """
+        Contains a RecurrencePattern structure that provides information about
+        recurring tasks.
+        """
+        return self._ensureSetNamed('_taskRecurrence', '8116', constants.PSETID_TASK, overrideClass = RecurrencePattern)
+
+    @property
+    def taskResetReminder(self) -> bool:
+        """
+        Indicates whether future recurring tasks need reminders.
+        """
+        return self._ensureSetNamed('_taskResetReminder', '8107', constants.PSETID_TASK)
+
+    @property
     def taskStartDate(self) -> datetime.datetime:
         """
         Specifies the date on which the user expects work on the task to begin.
         """
         return self._ensureSetNamed('_taskStartDate', '8104', constants.PSETID_TASK)
+
+    @property
+    def taskState(self) -> TaskState:
+        """
+        Indicates the current assignment state of the Task object.
+        """
+        return self._ensureSetNamed('_taskState', '8113', constants.PSETID_TASK, overrideClass = TaskState)
 
     @property
     def taskStatus(self) -> TaskStatus:

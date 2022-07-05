@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 from functools import partial
@@ -277,11 +278,28 @@ class AttachmentBase:
         return self.__dir
 
     @property
+    def exceptionReplaceTime(self) -> datetime.datetime:
+        """
+        The original date and time at which the instance in the recurrence
+        pattern would have occurred if it were not an exception.
+
+        Only applicable if the attachment is an Exception object.
+        """
+        return self._ensureSetProperty('_exceptionReplaceTime', '7FF90040')
+
+    @property
     def extension(self) -> str:
         """
         The reported extension for the file.
         """
         return self._ensureSet('_extension', '__substg1.0_3703')
+
+    @property
+    def hidden(self) -> bool:
+        """
+        Indicates whether an Attachment object is hidden from the end user.
+        """
+        return self._ensureSetProperty('_hidden', '7FFE000B')
 
     @property
     def isAttachmentContactPhoto(self) -> bool:
