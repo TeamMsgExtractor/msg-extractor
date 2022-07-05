@@ -1527,6 +1527,19 @@ class TaskMode(enum.Enum):
 
 
 
+class TaskMultipleRecipients(enum.Enum):
+    @classmethod
+    def fromBits(cls, value : int) -> Set['TaskMultipleRecipients']:
+        """
+        Takes an int and returns a set of the flags.
+        """
+        return {cls(1 << x) for x in range(2) if (value & (1 << x))}
+
+    SENT = 0x00000001
+    RECEIVED = 0x00000002
+
+
+
 class TaskOwnership(enum.Enum):
     """
     The role of the current user relative to the Task object.
@@ -1572,7 +1585,7 @@ class TaskStatus(enum.Enum):
     IN_PROGRESS: The users's work on the Task object is in progress.
     COMPLETE: The user's work on the Task object is complete.
     WAITING_ON_OTHER: The user is waiting on somebody else.
-    DEFERRED: The user has deffered work on the Task object.
+    DEFERRED: The user has deferred work on the Task object.
     """
     NOT_STARTED = 0x00000000
     IN_PROGRESS = 0x00000001

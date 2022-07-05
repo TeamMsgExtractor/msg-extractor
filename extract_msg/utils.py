@@ -545,6 +545,7 @@ def openMsg(path, **kwargs):
     from .message_signed import MessageSigned
     from .post import Post
     from .task import Task
+    from .task_request import TaskRequest
 
     # When the initial MSG file is opened, it should *always* delay attachments
     # so it can get the main class type. We only need to load them after that
@@ -603,11 +604,14 @@ def openMsg(path, **kwargs):
     elif classType.startswith('ipm.schedule.meeting.resp'):
         msg.close()
         return MeetingResponse(path, **kwargs)
+    elif classType.startswith('ipm.taskrequest'):
+        msg.close()
+        return TaskRequest(path, **kwargs)
     elif classType.startswith('ipm.task'):
         msg.close()
         return Task(path, **kwargs)
     elif classType.startswith('ipm.ole.class.{00061055-0000-0000-c000-000000000046}'):
-        # Exception object have a weird class type.
+        # Exception objects have a weird class type.
         msg.close()
         return MeetingException(path, **kwargs)
     elif classType == 'ipm':

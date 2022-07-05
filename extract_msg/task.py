@@ -1,8 +1,10 @@
 import datetime
 import logging
 
+from typing import Set
+
 from . import constants
-from .enums import TaskAcceptance, TaskHistory, TaskMode, TaskOwnership, TaskState, TaskStatus
+from .enums import TaskAcceptance, TaskHistory, TaskMode, TaskMultipleRecipients, TaskOwnership, TaskState, TaskStatus
 from .message_base import MessageBase
 from .structures.recurrence_pattern import RecurrencePattern
 
@@ -15,6 +17,57 @@ class Task(MessageBase):
     """
     Class used for parsing task files.
     """
+
+    @property
+    def headerFormatProperties(self) -> constants.HEADER_FORMAT_TYPE:
+        """
+        Returns a dictionary of properties, in order, to be formatted into the
+        header. Keys are the names to use in the header while the values are one
+        of the following:
+        None: Signifies no data was found for the property and it should be
+            omitted from the header.
+        str: A string to be formatted into the header using the string encoding.
+        Tuple[Union[str, None], bool]: A string should be formatted into the
+            header. If the bool is True, then place an empty string if the value
+            is None, otherwise follow the same behavior as regular None.
+
+        Additional note: If the value is an empty string, it will be dropped as
+        well by default.
+
+        Additionally you can group members of a header together by placing them
+        in an embedded dictionary. Groups will be spaced out using a second
+        instance of the join string. If any member of a group is being printed,
+        it will be spaced apart from the next group/item.
+        """
+        status = {
+            TaskStatus.NOT_STARTED: 'Not Started',
+            TaskStatus.IN_PROGRESS: 'In Progress',
+            TaskStatus.COMPLETE: 'Completed',
+            TaskStatus.WAITING_ON_OTHER: 'Waiting on someone else',
+            TaskStatus.DEFERRED: 'Deferred',
+            None: None,
+        }[self.taskStatus]
+
+        return {
+            '-basic info-': {
+                'Subject': self.subject,
+            },
+            '-status-': {
+                'Status': status,
+                'Percent Complete': f'{self.percentComplete*100:.0f}%',
+                'Date Completed': '',
+            },
+            '-work-': {
+                'Total Work': f'{self.taskEstimatedEffort or 0} minutes',
+                'Actual Work': f'{self.taskActualEffort or 0} minutes',
+            },
+            '-owner-': {
+                'Owner': self.taskOwner,
+            },
+            '-importance-': {
+                'Importance': self.importanceString,
+            },
+        }
 
     @property
     def percentComplete(self) -> float:
@@ -161,6 +214,14 @@ class Task(MessageBase):
         Used in a task communication. Should be 0 (UNASSIGNED) on task objects.
         """
         return self._ensureSetNamed('_taskMode', '8518', constants.PSETID_COMMON, overrideClass = TaskMode)
+
+    @property
+    def taskMultipleRecipients(self) -> Set[TaskMultipleRecipients]:
+        """
+        Returns a set of flags that specify optimization hints about the
+        recipients of a Task object.
+        """
+        return self._ensureSetNamed('_taskMultipleRecipients', '8120', constants.PSETID_TASK, overrideClass = TaskMultipleRecipients.fromBits)
 
     @property
     def taskOwner(self) -> str:
