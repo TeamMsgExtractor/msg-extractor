@@ -1,5 +1,5 @@
 from . import constants
-from .enums import TaskMode
+from .enums import TaskMode, TaskRequestType
 from .message_base import MessageBase
 
 
@@ -51,8 +51,23 @@ class TaskRequest(MessageBase):
         }
 
     @property
+    def processed(self) -> bool:
+        """
+        Indicates whether a client has already processed a received task
+        communication.
+        """
+        return self._ensureSetProperty('_taskMode', '7D01000B')
+
+    @property
     def taskMode(self) -> TaskMode:
         """
         The assignment status of the embedded Task object.
         """
         return self._ensureSetNamed('_taskMode', '8518', constants.PSETID_COMMON, overrideClass = TaskMode)
+
+    @property
+    def taskRequestType(self) -> TaskRequestType:
+        """
+        The type of task request.
+        """
+        return self._ensureSet('_taskRequestType', '__substg1.0_001A', TaskRequestType.fromClassType)

@@ -7,6 +7,7 @@ from . import constants
 from .enums import TaskAcceptance, TaskHistory, TaskMode, TaskMultipleRecipients, TaskOwnership, TaskState, TaskStatus
 from .message_base import MessageBase
 from .structures.recurrence_pattern import RecurrencePattern
+from .utils import unsignedToSignedInt
 
 
 logger = logging.getLogger(__name__)
@@ -172,11 +173,26 @@ class Task(MessageBase):
         return self._ensureSetNamed('_taskFCreator', '811E', constants.PSETID_TASK)
 
     @property
+    def taskFFixOffline(self) -> bool:
+        """
+        Indicates whether the value of the taskOwner property is correct.
+        """
+        return self._ensureSetNamed('taskFFixOffline', '812C', constants.PSETID_TASK)
+
+    @property
     def taskFRecurring(self) -> bool:
         """
         Indicates whether the task includes a recurrence pattern.
         """
         return self._ensureSetNamed('_taskFRecurring', '8126', constants.PSETID_TASK)
+
+    @property
+    def taskGlobalID(self) -> bytes:
+        """
+        Specifies a unique GUID for this task, used to locate an existing task
+        upon receipt of a task response or task update.
+        """
+        return self._ensureSetNamed('_taskGlobalID', '8519', constants.PSETID_COMMON)
 
     @property
     def taskHistory(self) -> TaskHistory:
@@ -224,6 +240,21 @@ class Task(MessageBase):
         return self._ensureSetNamed('_taskMultipleRecipients', '8120', constants.PSETID_TASK, overrideClass = TaskMultipleRecipients.fromBits)
 
     @property
+    def taskNoCompute(self) -> bool:
+        """
+        This value is not used and has no impact on a Task, but is provided for
+        completeness.
+        """
+        return self._ensureSetNamed('_taskLastUpdate', '8124', constants.PSETID_TASK)
+
+    @property
+    def taskOrdinal(self) -> int:
+        """
+        Specifies a number that aids custom sorting of Task objects.
+        """
+        return self._ensureSetNamed('_taskOrdinal', '8123', constants.PSETID_TASK, overrideClass = unsignedToSignedInt)
+
+    @property
     def taskOwner(self) -> str:
         """
         Contains the name of the owner of the task.
@@ -251,6 +282,14 @@ class Task(MessageBase):
         Indicates whether future recurring tasks need reminders.
         """
         return self._ensureSetNamed('_taskResetReminder', '8107', constants.PSETID_TASK)
+
+    @property
+    def taskRole(self) -> str:
+        """
+        This value is not used and has no impact on a Task, but is provided for
+        completeness.
+        """
+        return self._ensureSetNamed('_taskLastUpdate', '8127', constants.PSETID_TASK)
 
     @property
     def taskStartDate(self) -> datetime.datetime:
@@ -295,3 +334,11 @@ class Task(MessageBase):
         Indicates which copy is the latest update of a Task object.
         """
         return self._ensureSetNamed('_taskVersion', '8113', constants.PSETID_TASK)
+
+    @property
+    def teamTask(self) -> bool:
+        """
+        This value is not used and has no impact on a Task, but is provided for
+        completeness.
+        """
+        return self._ensureSetNamed('_taskLastUpdate', '8103', constants.PSETID_TASK)

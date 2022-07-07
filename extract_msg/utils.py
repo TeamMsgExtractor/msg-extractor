@@ -992,6 +992,19 @@ def tryGetMimetype(att, mimetype : Union[str, None]):
     return mimetype
 
 
+def unsignedToSignedInt(uInt : int) -> int:
+    """
+    Convert the bits of an unsigned int (32-bit) to an int.
+
+    :raises ValueError: The number was not valid.
+    """
+    if uInt > 0xFFFFFFFF:
+        raise ValueError('Value is too large.')
+    if uInt < 0:
+        raise ValueError('Value is already signed.')
+    return constants.STI32.unpack(constants.STUI32.pack(uInt))[0]
+
+
 def unwrapMsg(msg : "MSGFile") -> Dict:
     """
     Takes a recursive message-attachment structure and unwraps it into a linear

@@ -35,7 +35,7 @@ class Properties:
                 self.__naid, self.__nrid, self.__ac, self.__rc = constants.ST1.unpack(self.__stream[:24])
             elif type == PropertiesType.MESSAGE_EMBED:
                 skip = 24
-                self.__naid, self.__nrid, self.__ac, self.__rc = constants.ST1.unpack(self.__stream[:24])
+                self.__nrid, self.__naid, self.__rc, self.__ac = constants.ST1.unpack(self.__stream[:24])
             else:
                 skip = 8
         else:

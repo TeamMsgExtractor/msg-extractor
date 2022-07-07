@@ -1556,6 +1556,36 @@ class TaskOwnership(enum.Enum):
 
 
 
+class TaskRequestType(enum.Enum):
+    """
+    The type of task request.
+
+    REQUEST: A plain request.
+    ACCEPT: Task has been accepted.
+    DECLINE: Task has been declined.
+    UPDATE: Task has been updated.
+    """
+    @classmethod
+    def fromClassType(cls, classType : str) -> 'TaskRequestType':
+        """
+        Convert a class type string into a TaskRequestType.
+        """
+        classType = classType.lower()
+        if 'accept' in classType:
+            return cls(1)
+        if 'decline' in classType:
+            return cls(2)
+        if 'update' in classType:
+            return cls(3)
+        return cls(0)
+
+    REQUEST = 0
+    ACCEPT = 1
+    DECLINE = 2
+    UPDATE = 3
+
+
+
 class TaskState(enum.Enum):
     """
     NOT_ASSIGNED: The Task object is not assigned.
