@@ -54,8 +54,11 @@ class Properties:
                     skip = 32
         streams = divide(self.__stream[skip:], 16)
         for st in streams:
-            prop = createProp(st)
-            self.__props[prop.name] = prop
+            if len(st) == 16:
+                prop = createProp(st)
+                self.__props[prop.name] = prop
+            else:
+                logger.warning(f'Found stream from divide that was not 16 bytes: {st}. Ignoring.')
         self.__pl = len(self.__props)
 
     def __contains__(self, key):
