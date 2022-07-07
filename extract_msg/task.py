@@ -55,7 +55,7 @@ class Task(MessageBase):
             '-status-': {
                 'Status': status,
                 'Percent Complete': f'{self.percentComplete*100:.0f}%',
-                'Date Completed': '',
+                'Date Completed': self.taskDateCompleted.__format__('%w, %B %d, %Y') if self.taskDateCompleted else None,
             },
             '-work-': {
                 'Total Work': f'{self.taskEstimatedEffort or 0} minutes',
