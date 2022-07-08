@@ -42,6 +42,14 @@ class Post(MessageBase):
 
         Additional note: If the value is an empty string, it will be dropped as
         well by default.
+
+        Additionally you can group members of a header together by placing them
+        in an embedded dictionary. Groups will be spaced out using a second
+        instance of the join string. If any member of a group is being printed,
+        it will be spaced apart from the next group/item.
+
+        If you class should not do *any* header injection, return None from this
+        property.
         """
         return {
             '-main details-': {

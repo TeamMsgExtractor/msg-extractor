@@ -39,6 +39,9 @@ class Task(MessageBase):
         in an embedded dictionary. Groups will be spaced out using a second
         instance of the join string. If any member of a group is being printed,
         it will be spaced apart from the next group/item.
+
+        If you class should not do *any* header injection, return None from this
+        property.
         """
         status = {
             TaskStatus.NOT_STARTED: 'Not Started',

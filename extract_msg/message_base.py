@@ -218,9 +218,15 @@ class MessageBase(MSGFile):
 
         Formatter be a function that takes first a name variable then a value
         variable and formats the line.
+
+        If self.headerFormatProperties is None, immediately returns an empty
+        string.
         """
         formattedProps = []
         allProps = self.headerFormatProperties
+
+        if allProps is None:
+            return ''
 
         for entry in allProps:
             isGroup = False
@@ -1073,6 +1079,9 @@ class MessageBase(MSGFile):
         in an embedded dictionary. Groups will be spaced out using a second
         instance of the join string. If any member of a group is being printed,
         it will be spaced apart from the next group/item.
+
+        If you class should not do *any* header injection, return None from this
+        property.
         """
         # Checking outlook printing, default behavior is to completely omit
         # *any* field that is not present. So while for extensability the

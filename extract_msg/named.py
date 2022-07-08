@@ -66,10 +66,8 @@ class Named:
                 self.__properties.append(StringNamedProperty(entry, names[entry['id']]) if entry['pkind'] == NamedPropertyType.STRING_NAMED else NumericalNamedProperty(entry))
 
             for property in self.__properties:
-                key = property.name if isinstance(property, StringNamedProperty) else property.propertyID
-                if key not in self.__propertiesDict:
-                    self.__propertiesDict[key] = {}
-                self.__propertiesDict[key][property.guid] = property
+                name = property.name if isinstance(property, StringNamedProperty) else property.propertyID
+                self.__propertiesDict[(name, property.guid)] = property
 
     def __getitem__(self, key):
         return self.__propertiesDict[key]
@@ -107,8 +105,8 @@ class Named:
 
     def get(self, propertyName, default = None):
         """
-        Tries to get a named property based on its name. Returns :param default:
-        if not found.
+        Tries to get a named property based on its key. Returns :param default:
+        if not found. Key is a tuple of the name and the property set GUID.
         """
         try:
             return self.__propertiesDict[propertyName]
@@ -126,7 +124,7 @@ class Named:
         """
         Uses the pprint function on a sorted list of keys.
         """
-        pprint.pprint(sorted(tuple(self.__propertiesDict.keys())))
+        pprint.pprint(sorted(self.__propertiesDict.keys()))
 
     def values(self):
         return self.__propertiesDict.values()
@@ -172,19 +170,17 @@ class NamedProperties:
     def __getitem__(self, item):
         """
         Get a named property using the [] operator. Item must be a named
-        property instance or a tuple or list with 2 items: the name and the GUID
-        string.
+        property instance or a tuple with 2 items: the name and the GUID string.
         """
         if isinstance(item, NamedPropertyBase):
             return self.__streamSource._getTypedData(item.propertyStreamID)
         else:
-            return self.__streamSource._getTypedData(self.__named[item[0]][item[1]].propertyStreamID)
+            return self.__streamSource._getTypedData(self.__named[item].propertyStreamID)
 
     def get(self, item, default = None):
         """
         Get a named property, returning the value of :param default: if not
-        found. Item must be a tuple or list with 2 items: the name and the GUID
-        string.
+        found. Item must be a tuple with 2 items: the name and the GUID string.
         """
         try:
             return self[item]
