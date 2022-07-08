@@ -154,8 +154,9 @@ class MSGFile:
 
     def __enter__(self):
         self.__ole.__enter__()
+        return self
 
-    def __exit__(self):
+    def __exit__(self, *args, **kwargs):
         self.close()
 
     def _ensureSet(self, variable : str, streamID, stringStream : bool = True, **kwargs):

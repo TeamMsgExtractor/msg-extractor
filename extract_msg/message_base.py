@@ -794,6 +794,7 @@ class MessageBase(MSGFile):
                 # Check what to save the body with.
                 fext = 'json' if _json else 'txt'
 
+                fallbackToPlain = False
                 useHtml = False
                 usePdf = False
                 useRtf = False
@@ -817,6 +818,23 @@ class MessageBase(MSGFile):
                         fext = 'rtf'
                     elif not allowFallback:
                         raise DataNotFoundError('Could not find the rtfBody.')
+                    else:
+                        # This was the last resort before plain text, so fall
+                        # back to that.
+                        fallbackToPlain = True
+
+                # After all other options, try to go with plain text if
+                # possible.
+                if not (rtf or html or pdf) or fallbackToPlain:
+                    # We need to check if the plain text body was found. If it
+                    # was found but was empty that is considered valid, so we
+                    # specifically check against None.
+                    if self.body is None:
+                        if allowFallback:
+                            raise DataNotFoundError('Could not find a valid body using current options.')
+                        else:
+                            raise DataNotFoundError('Plain text body could not be found.')
+
 
             if not skipAttachments:
                 # Save the attachments.

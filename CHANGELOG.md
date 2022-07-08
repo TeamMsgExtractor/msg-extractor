@@ -2,6 +2,7 @@
 * [[TeamMsgExtractor #206](https://github.com/TeamMsgExtractor/msg-extractor/issues/206)] Implemented support for the Post object, including the ability to save it.
 * [[TeamMsgExtractor #256](https://github.com/TeamMsgExtractor/msg-extractor/issues/256)] Added optional dependency `mimetype-magic` (installable using the `mime` extra) which helps to identify attachments that do not give a mime-type.
 * [[TeamMsgExtractor #274](https://github.com/TeamMsgExtractor/msg-extractor/issues/274)] Apparently the properties stream can have random garbage at the end of it (outlook generate the file that showed this) so code was added to ensure it wouldn't break everything.
+* [[TeamMsgExtractor #274](https://github.com/TeamMsgExtractor/msg-extractor/issues/274)] Made sure that the save function would report if it failed to find or generate a valid body. Specifically, if you were just trying to use the plain text body but it didn't exist (the stream didn't exist, not that the stream was empty) it would silently pass, which was bad behavior. Additionally, `allowFallback` will change the message to specify that current options were not usable for getting a valid body.
 * Moved a few more minor constants to `enums`.
 * Added support for many internal data structures, specifically Entry ID structures.
 * Refactored classes from `extract_msg.data` to submodule `extract_msg.structures`.
