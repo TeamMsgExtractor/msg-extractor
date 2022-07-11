@@ -1,8 +1,12 @@
 **v0.35.0**
-* [[TeamMsgExtractor #206](https://github.com/TeamMsgExtractor/msg-extractor/issues/206)] Implemented support for the Post object, including the ability to save it.
-* [[TeamMsgExtractor #256](https://github.com/TeamMsgExtractor/msg-extractor/issues/256)] Added optional dependency `mimetype-magic` (installable using the `mime` extra) which helps to identify attachments that do not give a mime-type.
+* [[TeamMsgExtractor #206](https://github.com/TeamMsgExtractor/msg-extractor/issues/206)] Implemented full support for Post objects, including the ability to save them.
+* [[TeamMsgExtractor #212](https://github.com/TeamMsgExtractor/msg-extractor/issues/212)] Implemented full support for Task objects, including the ability to save them. This also includes TaskRequest objects.
+* [[TeamMsgExtractor #110](https://github.com/TeamMsgExtractor/msg-extractor/issues/110)] Implemented full support for Contact objects, including the ability to save them.
+* [[TeamMsgExtractor #143](https://github.com/TeamMsgExtractor/msg-extractor/issues/143)] Rewrote the system used for `Appointment` objects to include all of the objects specified in [MS-OXOCAL]. Name changed to `AppointmentMeeting`. Completed support for Appointment objects, including the ability to save them.
+* [[TeamMsgExtractor #243](https://github.com/TeamMsgExtractor/msg-extractor/issues/256)] Added optional dependency `mimetype-magic` (installable using the `mime` extra) which helps to identify attachments that do not give a mime-type.
 * [[TeamMsgExtractor #274](https://github.com/TeamMsgExtractor/msg-extractor/issues/274)] Apparently the properties stream can have random garbage at the end of it (outlook generate the file that showed this) so code was added to ensure it wouldn't break everything.
 * [[TeamMsgExtractor #274](https://github.com/TeamMsgExtractor/msg-extractor/issues/274)] Made sure that the save function would report if it failed to find or generate a valid body. Specifically, if you were just trying to use the plain text body but it didn't exist (the stream didn't exist, not that the stream was empty) it would silently pass, which was bad behavior. Additionally, `allowFallback` will change the message to specify that current options were not usable for getting a valid body.
+* [[TeamMsgExtractor #207](https://github.com/TeamMsgExtractor/msg-extractor/issues/207)] Changed behavior for max date. Apparently it looks like it is supposed to be August 31, 4500 at 11:59 PM. However, in case this needs to change, we have created a constant called `extract_msg.constants.NULL_DATE` to represent this that you can use in your code to not have to worry about changing your code if we check it.
 * Moved a few more minor constants to `enums`.
 * Added support for many internal data structures, specifically Entry ID structures.
 * Refactored classes from `extract_msg.data` to submodule `extract_msg.structures`.
@@ -30,8 +34,6 @@
 * Made `SignedAttachment` and `BaseAttachment` more similar by adding properties to each that are shared. `BaseAttachment` now have a `name` property and `SignedAttachment` now have `longFilename` and `shortFilename`.
 * Fixed issue in HTML saving that would cause some characters to be dropped when rendering them due to how the header injection worked.
 * Removed `__init__` methods from MSG classes that don't change it. This ensures notes are easily passed down.
-* Rewrote the system used for Appointment objects to include all of the objects specified in [MS-OXOCAL].
-* Changed behavior for max date. Apparently it looks like it is supposed to be August 31, 4500 at 11:59 PM. However, in case this needs to change, we have created a constant called `extract_msg.constants.NULL_DATE` to represent this that you can use in your code to not have to worry about changing your code if we check it.
 * Correction to last comment, *one* max date was supposed to be at that date, but another max date is at a different date of the same year.
 * Changed the way that `PtypTime` is handled, making it a single function in `utils`.
 * Upgraded dependencies to newer versions (some really need to be newer, like `tzlocal`, for best results). Included dependencies are `beautifulsoup4` and `tzlocal`.
