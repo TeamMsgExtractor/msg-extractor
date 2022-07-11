@@ -52,7 +52,7 @@ class TaskRequest(MessageBase):
         Indicates whether a client has already processed a received task
         communication.
         """
-        return self._ensureSetProperty('_taskMode', '7D01000B')
+        return self._ensureSetProperty('_processed', '7D01000B')
 
     @property
     def taskMode(self) -> TaskMode:

@@ -1,3 +1,6 @@
+**v0.35.1**
+* Fixed a few property conflicts that I missed in the last release (forgot to run the helper script before releasing).
+
 **v0.35.0**
 * [[TeamMsgExtractor #206](https://github.com/TeamMsgExtractor/msg-extractor/issues/206)] Implemented full support for Post objects, including the ability to save them.
 * [[TeamMsgExtractor #212](https://github.com/TeamMsgExtractor/msg-extractor/issues/212)] Implemented full support for Task objects, including the ability to save them. This also includes TaskRequest objects.

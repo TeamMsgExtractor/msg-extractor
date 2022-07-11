@@ -242,7 +242,7 @@ class CalendarBase(MessageBase):
         an Exception object to a recurring series, where the year, month, and
         day fields are all 0.
         """
-        return self._ensureSetNamed('_globalObjectID', '0023', constants.PSETID_MEETING, overrideClass = GlobalObjectID)
+        return self._ensureSetNamed('_cleanGlobalObjectID', '0023', constants.PSETID_MEETING, overrideClass = GlobalObjectID)
 
     @property
     def clipEnd(self) -> datetime.datetime:
@@ -255,7 +255,7 @@ class CalendarBase(MessageBase):
 
         Honestly, not sure what this is. [MS-OXOCAL]: PidLidClipEnd.
         """
-        return self._ensureSetNamed('_clipStart', '8236', constants.PSETID_APPOINTMENT)
+        return self._ensureSetNamed('_clipEnd', '8236', constants.PSETID_APPOINTMENT)
 
     @property
     def clipStart(self) -> datetime.datetime:
