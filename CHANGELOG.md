@@ -1,3 +1,7 @@
+**v0.35.2**
+* Made a change to the argument handling for `--no-folders`. Since it requires `--attachmentsOnly` to work, I simply made it error when it's not given to avoid confusion.
+* Updated README.
+
 **v0.35.1**
 * Fixed a few property conflicts that I missed in the last release (forgot to run the helper script before releasing).
 
@@ -51,7 +55,7 @@
 * Added option `--skip-embedded` to the command line to skip saving embedded MSG files.
 * Added option `skipEmbedded` to `Attachment.save` (and all other related save methods that call it) to skip saving an embedded MSG file.
 * Changed `__main__` so that it opens the zip file there instead of relying on everything it calls to do it again and again.
-* Changed the behavior of `--verbose` to allow it to be stacked for more verboseness. Specifying it once turns on warnings, twice for info, and three times for debug. Not specifying it only turns on error logging.
+* Changed the behavior of `--verbose` to allow it to be stacked for more verbosity. Specifying it once turns on warnings, twice for info, and three times for debug. Not specifying it only turns on error logging.
 
 **v0.34.3**
 * Fixed issue that may have caused other olefile types to raise the wrong type of error when passed to `openMsg`.

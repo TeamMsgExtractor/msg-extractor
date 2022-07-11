@@ -294,7 +294,7 @@ def getCommandArgs(args):
                            help='Specify to only save attachments from an msg file.')
     # --no-folders
     parser.add_argument('--no-folders', dest='noFolders', action='store_true',
-                        help='When used with --attachments-only, stores everything in the location specified by --out. Incompatible with --out-name.')
+                        help='Stores everything in the location specified by --out. Requires --attachments-only and is incompatible with --out-name.')
 
     parser.add_argument('--skip-embedded', dest = 'skipEmbedded', action='store_true',
                         help='Skips all embedded MSG files when saving attachments.')
@@ -367,7 +367,7 @@ def getCommandArgs(args):
     if options.outName and options.fileArgs and len(options.fileArgs) > 0:
         raise ValueError('--out-name is not supported when saving multiple MSG files.')
 
-
+    # Handle the verbosity level.
     if options.verbose == 0:
         options.logLevel = logging.ERROR
     elif options.verbose == 1:
@@ -377,6 +377,9 @@ def getCommandArgs(args):
     else:
         options.logLevel = 5
 
+    # If --no-folders is turned on but --attachments-only is not, error.
+    if options.noFolders and not options.attachmentsOnly:
+        raise ValueError('--no-folders requires the --attachments-only option.')
 
     return options
 
