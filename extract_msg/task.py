@@ -248,7 +248,7 @@ class Task(MessageBase):
         This value is not used and has no impact on a Task, but is provided for
         completeness.
         """
-        return self._ensureSetNamed('_taskLastUpdate', '8124', constants.PSETID_TASK)
+        return self._ensureSetNamed('_taskNoCompute', '8124', constants.PSETID_TASK)
 
     @property
     def taskOrdinal(self) -> int:
@@ -292,7 +292,7 @@ class Task(MessageBase):
         This value is not used and has no impact on a Task, but is provided for
         completeness.
         """
-        return self._ensureSetNamed('_taskLastUpdate', '8127', constants.PSETID_TASK)
+        return self._ensureSetNamed('_taskRole', '8127', constants.PSETID_TASK)
 
     @property
     def taskStartDate(self) -> datetime.datetime:
@@ -336,7 +336,7 @@ class Task(MessageBase):
         """
         Indicates which copy is the latest update of a Task object.
         """
-        return self._ensureSetNamed('_taskVersion', '8113', constants.PSETID_TASK)
+        return self._ensureSetNamed('_taskVersion', '8112', constants.PSETID_TASK)
 
     @property
     def teamTask(self) -> bool:
@@ -344,4 +344,4 @@ class Task(MessageBase):
         This value is not used and has no impact on a Task, but is provided for
         completeness.
         """
-        return self._ensureSetNamed('_taskLastUpdate', '8103', constants.PSETID_TASK)
+        return self._ensureSetNamed('_teamTask', '8103', constants.PSETID_TASK)

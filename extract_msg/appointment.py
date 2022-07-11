@@ -43,7 +43,7 @@ class AppointmentMeeting(Calendar):
         """
         The user who last replied to the meeting request or meeting update.
         """
-        return self._ensureSetNamed('_appointmentReplyTime', '8230', constants.PSETID_APPOINTMENT)
+        return self._ensureSetNamed('_appointmentReplyName', '8230', constants.PSETID_APPOINTMENT)
 
     @property
     def appointmentReplyTime(self) -> datetime.datetime:
