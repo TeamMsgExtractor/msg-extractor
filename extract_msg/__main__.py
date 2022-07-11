@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 import traceback
+import zipfile
 
 from extract_msg import __doc__, utils
 
@@ -10,7 +11,6 @@ def main() -> None:
     # Setup logging to stdout, indicate running from cli
     CLI_LOGGING = 'extract_msg_cli'
     args = utils.getCommandArgs(sys.argv[1:])
-    level = logging.INFO if args.verbose else logging.WARNING
 
     # Determine where to save the files to.
     currentDir = os.getcwd() # Store this in case the path changes.
@@ -44,7 +44,14 @@ def main() -> None:
         input('Press enter to exit...')
     else:
         if not args.dumpStdout:
-            utils.setupLogging(args.configPath, level, args.log, args.fileLogging)
+            utils.setupLogging(args.configPath, args.logLevel, args.log, args.fileLogging)
+
+        if args.zip:
+            createdZip = True
+            _zip = zipfile.ZipFile(args.zip, 'a', zipfile.ZIP_DEFLATED)
+        else:
+            createdZip = False
+            _zip = None
 
         # Quickly make a dictionary for the keyword arguments.
         kwargs = {
@@ -59,15 +66,26 @@ def main() -> None:
             'pdf': args.pdf,
             'preparedHtml': args.preparedHtml,
             'rtf': args.rtf,
+            'skipEmbedded': args.skipEmbedded,
             'useMsgFilename': args.useFilename,
             'wkOptions': args.wkOptions,
             'wkPath': args.wkPath,
-            'zip': args.zip,
+            'zip': _zip,
         }
 
         openKwargs = {
             'ignoreRtfDeErrors': args.ignoreRtfDeErrors,
         }
+
+        def strSanitize(inp):
+            """
+            Small function to santize parts of a string when failing to print
+            them.
+            """
+            return ''.join((x if x.isascii() else
+                    f'\\x{ord(x):02X}' if ord(x) <= 0xFF else
+                    f'\\u{ord(x):04X}' if ord(x) <= 0xFFFF else
+                    f'\\U{ord(x):08X}') for x in repr(inp))
 
         for x in args.msgs:
             if args.progress:
@@ -76,19 +94,24 @@ def main() -> None:
                 try:
                     print(f'Saving file "{x}"...')
                 except UnicodeEncodeError:
-                    print(f'Saving file "{repr(x)}" (failed to print without repr)...')
+                    print(f'Saving file "{strSanitize(x)}" (failed to print without repr)...')
             try:
                 with utils.openMsg(x, **openKwargs) as msg:
                     if args.dumpStdout:
                         print(msg.body)
+                    elif args.noFolders:
+                        msg.saveAttachments(**kwargs)
                     else:
                         msg.save(**kwargs)
             except Exception as e:
                 try:
                     print(f'Error with file "{x}": {traceback.format_exc()}')
                 except UnicodeEncodeError:
-                    print(f'Error with file "{repr(x)}": {traceback.format_exc()}')
+                    print(f'Error with file "{strSanitize(x)}": {traceback.format_exc()}')
 
+        # Close the zip file if we opened it.
+        if createdZip:
+            _zip.close()
 
 if __name__ == '__main__':
     main()

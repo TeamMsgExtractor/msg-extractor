@@ -120,6 +120,11 @@ class Attachment(AttachmentBase):
         to :param zip:. If :param zip: is an instance, :param customPath: will
         refer to a location inside the zip file.
         """
+        # First check if we are skipping embedded messages and stop
+        # *immediately* if we are.
+        if self.type is AttachmentType.MSG and kwargs.get('skipEmbedded'):
+            return None
+
         # Check if the user has specified a custom filename
         filename = self.getFilename(**kwargs)
 
@@ -160,14 +165,14 @@ class Attachment(AttachmentBase):
 
         fullFilename = customPath / filename
 
-        if self.__type == AttachmentType.DATA:
+        if self.type is AttachmentType.DATA:
             if _zip:
                 name, ext = os.path.splitext(filename)
                 nameList = _zip.namelist()
-                if fullFilename in nameList:
+                if str(fullFilename).replace('\\', '/') in nameList:
                     for i in range(2, 100):
                         testName = customPath / f'{name} ({i}){ext}'
-                        if testName not in nameList:
+                        if str(testName).replace('\\', '/') not in nameList:
                             fullFilename = testName
                             break
                     else:
@@ -243,10 +248,22 @@ class BrokenAttachment(AttachmentBase):
     An attachment that has suffered a fatal error. Will not generate from a
     NotImplementedError exception.
     """
-    pass
+
+    @property
+    def type(self) -> AttachmentType:
+        """
+        Returns the (internally used) type of the data.
+        """
+        return AttachmentType.BROKEN
 
 class UnsupportedAttachment(AttachmentBase):
     """
     An attachment whose type is not currently supported.
     """
-    pass
+
+    @property
+    def type(self) -> AttachmentType:
+        """
+        Returns the (internally used) type of the data.
+        """
+        return AttachmentType.UNSUPPORTED

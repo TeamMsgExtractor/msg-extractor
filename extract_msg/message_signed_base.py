@@ -53,16 +53,6 @@ class MessageSignedBase(MessageBase):
         if not kwargs.get('delayAttachments', False):
             self.attachments
 
-    def headerInit(self) -> bool:
-        """
-        Checks whether the header has been initialized.
-        """
-        try:
-            self._header
-            return True
-        except AttributeError:
-            return False
-
     @property
     def attachments(self) -> list:
         """

@@ -41,7 +41,10 @@ setup(
     license='GPL',
     packages=[main_module],
     py_modules=[main_module],
-    entry_points={'console_scripts': ['extract_msg = extract_msg.__main__:main',]},
+    entry_points={
+        'console_scripts': ['extract_msg = extract_msg.__main__:main',]
+    },
     include_package_data=True,
     install_requires=dependencies,
+    python_requires='>=3.6',
 )

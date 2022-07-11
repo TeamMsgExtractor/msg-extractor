@@ -163,6 +163,9 @@ class SignedAttachment:
         """
         return self.__name
 
+    longFilename = name
+    shortFilename = name
+
     @property
     def type(self) -> AttachmentType:
         """

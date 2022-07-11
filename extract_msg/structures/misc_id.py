@@ -1,15 +1,24 @@
 """
-Various small data structures used in extract_msg.
+Miscellaneous ID structures used in MSG files that don't fit into any of the
+other ID structure classifications.
 """
 
-from . import constants
+import datetime
+
+from .. import constants
+from ._helpers import BytesReader
+from ..utils import filetimeToDatetime
 
 
 class FolderID:
     """
     A Folder ID structure specified in [MS-OXCDATA].
     """
+
+    __SIZE__ : int = 16
+
     def __init__(self, data : bytes):
+        self.__rawData = data
         self.__replicaID = constants.STUI16.unpack(data[:2])
         # This entry is 6 bytes, so we pull some shenanigans to unpack it.
         self.__globalCounter = constants.STUI64.unpack(data[2:8] + b'\x00\x00')
@@ -22,6 +31,13 @@ class FolderID:
         return self.__globalCounter
 
     @property
+    def rawData(self) -> bytes:
+        """
+        The raw bytes used to create this object.
+        """
+        return self.__rawData
+
+    @property
     def replicaID(self) -> int:
         """
         An unsigned integer identifying a Store object.
@@ -32,9 +48,13 @@ class FolderID:
 
 class MessageID:
     """
-
+    A Message ID structure, as defined in [MS-OXCDATA].
     """
-    def __init__(self, data):
+
+    __SIZE__ : int = 8
+
+    def __init__(self, data : bytes):
+        self.__rawData = data
         self.__replicaID = constants.STUI16.unpack(data[:2])
         # This entry is 6 bytes, so we pull some shenanigans to unpack it.
         self.__globalCounter = constants.STUI64.unpack(data[2:8] + b'\x00\x00')
@@ -54,6 +74,13 @@ class MessageID:
         return self.__globalCounter == 0 and self.__replicaID == 0
 
     @property
+    def rawData(self) -> bytes:
+        """
+        The raw bytes used to create this object.
+        """
+        return self.__rawData
+
+    @property
     def replicaID(self) -> int:
         """
         An unsigned integer identifying a Store object.
@@ -62,44 +89,80 @@ class MessageID:
 
 
 
-class PermanentEntryID:
+class GlobalObjectID:
+    """
+    A GlobalObjectID structure, as specified in [MS-OXOCAL].
+    """
+
     def __init__(self, data : bytes):
-        self.__data = data
-        unpacked = constants.STPEID.unpack(data[:28])
-        if unpacked[0] != 0:
-            raise TypeError(f'Not a PermanentEntryID (expected 0, got {unpacked[0]}).')
-        self.__providerUID = unpacked[1]
-        self.__displayTypeString = unpacked[2]
-        self.__distinguishedName = data[28:-1].decode('ascii') # Cut off the null character at the end and decode the data as ascii
+        self.__rawData = data
+        reader = BytesReader(data)
+        expectedBytes = b'\x04\x00\x00\x00\x82\x00\xE0\x00\x74\xC5\xB7\x10\x1A\x82\xE0\x08'
+        errorMsg = 'Byte Array ID did not match for GlobalObjectID (got {actual}).'
+        self.__byteArrayID = reader.assertRead(expectedBytes, errorMsg)
+        self.__yh = reader.read(1)
+        self.__yl = reader.read(1)
+        self.__year = constants.ST_BE_UI16.unpack(self.__yh + self.__yl)[0]
+        self.__month = reader.readUnsignedByte()
+        self.__day = reader.readUnsignedByte()
+        self.__creationTime = filetimeToDatetime(reader.readUnsignedLong())
+        reader.assertNull(8, 'Reserved was not set to null.')
+        size = reader.readUnsignedInt()
+        self.__data = reader.read(size)
+
+    @property
+    def byteArrayID(self) -> bytes:
+        """
+        An array of 16 bytes identifying the bytes this BLOB as a Global Object
+        ID.
+        """
+        return self.__byteArrayID
+
+    @property
+    def creationTime(self) -> datetime.datetime:
+        """
+        The date and time when this Global Object ID was generated.
+        """
+        return self.__creationTime
 
     @property
     def data(self) -> bytes:
         """
-        Returns the raw data used to generate this instance.
+        An array of bytes that ensures the uniqueness of the Global Object ID
+        amoung all Calendar objects in all mailboxes.
         """
         return self.__data
 
     @property
-    def displayTypeString(self) -> int:
+    def day(self) -> int:
         """
-        Returns the display type string. This will be one of the display type constants.
+        The day from the PidLidExceptionReplaceTime property if the object
+        represents an exception. Otherwise, this is 0.
         """
-        return self.__displayTypeString
+        return self.__day
 
     @property
-    def distinguishedName(self) -> str:
+    def month(self) -> int:
         """
-        Returns the distinguished name.
+        The month from the PidLidExceptionReplaceTime property if the object
+        represents an exception. Otherwise, this is 0.
         """
-        return self.__distinguishedName
+        return self.__month
 
     @property
-    def providerUID(self):
+    def rawData(self) -> bytes:
         """
-        Returns the provider UID.
+        The raw bytes used to create this object.
         """
-        return self.__providerUID
+        return self.__rawData
 
+    @property
+    def year(self) -> int:
+        """
+        The year from the PidLidExceptionReplaceTime property if the object
+        represents an exception. Otherwise, this is 0.
+        """
+        return self.__year
 
 
 class ServerID:
@@ -116,7 +179,7 @@ class ServerID:
         # structure. A value of 0 means it does not.
         if data[0] != 1:
             raise TypeError('Not a standard ServerID.')
-        self.__raw = data
+        self.__rawData = data
         self.__folderID = FolderID(data[1:9])
         self.__messageID = MessageID(data[9:17])
         self.__instance = constants.STUI32.unpack(data[17:21])
@@ -146,8 +209,8 @@ class ServerID:
         return self.__messageID
 
     @property
-    def raw(self) -> bytes:
+    def rawData(self) -> bytes:
         """
         The raw data used to create this object.
         """
-        return self.__raw
+        return self.__rawData

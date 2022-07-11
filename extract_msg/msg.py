@@ -8,9 +8,11 @@ import zipfile
 
 import olefile
 
+from typing import List, Set, Union
+
 from . import constants
 from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment
-from .enums import AttachErrorBehavior, Priority, PropertiesType, Sensitivity
+from .enums import AttachErrorBehavior, Importance, Priority, PropertiesType, Sensitivity, SideEffect
 from .exceptions import InvalidFileFormatError, UnrecognizedMSGTypeError
 from .named import Named, NamedProperties
 from .prop import FixedLengthProp
@@ -22,11 +24,11 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-class MSGFile(olefile.OleFileIO):
+class MSGFile:
     """
     Parser for .msg files.
     """
-    
+
     def __init__(self, path, **kwargs):
         """
         :param path: path to the msg file in the system or is the raw msg file.
@@ -85,14 +87,23 @@ class MSGFile(olefile.OleFileIO):
 
         self.__listDirRes = {}
 
-        try:
-            super().__init__(path)
-        except IOError as e:    # py2 and py3 compatible
-            logger.error(e)
-            if str(e) == 'not an OLE2 structured storage file':
-                raise InvalidFileFormatError(e)
-            else:
-                raise
+        # This is a variable that tells whether we own the olefile. Used for
+        # closing.
+        self.__oleOwner = True
+        if self.__parentMsg:
+            # We should be able to directly access the private variables of
+            # another instance with no issue.
+            self.__ole = self.__parentMsg.__ole
+            self.__oleOwner = False
+        else:
+            try:
+                self.__ole = olefile.OleFileIO(path)
+            except OSError as e:
+                logger.error(e)
+                if str(e) == 'not an OLE2 structured storage file':
+                    raise InvalidFileFormatError(e)
+                else:
+                    raise
 
         kwargsCopy = copy.copy(kwargs)
         if 'prefix' in kwargsCopy:
@@ -135,6 +146,19 @@ class MSGFile(olefile.OleFileIO):
         else:
             self.filename = None
 
+        self.__open = True
+
+        # Now, load the attachments if we are not delaying them.
+        if not self.__attachmentsDelayed:
+            self.attachments
+
+    def __enter__(self):
+        self.__ole.__enter__()
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        self.close()
+
     def _ensureSet(self, variable : str, streamID, stringStream : bool = True, **kwargs):
         """
         Ensures that the variable exists, otherwise will set it using the
@@ -166,7 +190,7 @@ class MSGFile(olefile.OleFileIO):
             setattr(self, variable, value)
             return value
 
-    def _ensureSetNamed(self, variable : str, propertyName, **kwargs):
+    def _ensureSetNamed(self, variable : str, propertyName : str, guid : str, **kwargs):
         """
         Ensures that the variable exists, otherwise will set it using the named
         property. After that, return said variable.
@@ -182,7 +206,7 @@ class MSGFile(olefile.OleFileIO):
         try:
             return getattr(self, variable)
         except AttributeError:
-            value = self.namedProperties.get(propertyName)
+            value = self.namedProperties.get((propertyName, guid))
             # Check if we should be overriding the data type for this instance.
             if kwargs:
                 overrideClass = kwargs.get('overrideClass')
@@ -254,7 +278,7 @@ class MSGFile(olefile.OleFileIO):
         """
         filename = self.fixPath(filename, prefix)
         if self.exists(filename, False):
-            with self.openstream(filename) as stream:
+            with self.__ole.openstream(filename) as stream:
                 return stream.read() or b''
         else:
             logger.info(f'Stream "{filename}" was requested but could not be found. Returning `None`.')
@@ -369,15 +393,19 @@ class MSGFile(olefile.OleFileIO):
         return False, None # We didn't find the stream.
 
     def close(self) -> None:
-        try:
-            # If this throws an AttributeError then we have not loaded the attachments.
-            self._attachments
-            for attachment in self.attachments:
-                if attachment.type == 'msg':
-                    attachment.data.close()
-        except AttributeError:
-            pass
-        super().close()
+        if self.__open:
+            try:
+                # If this throws an AttributeError then we have not loaded the attachments.
+                self._attachments
+                for attachment in self.attachments:
+                    if attachment.type == 'msg':
+                        attachment.data.close()
+            except AttributeError:
+                pass
+            if self.__oleOwner:
+                self.__ole.close()
+
+            self.__open = False
 
     def debug(self) -> None:
         for dir_ in self.listDir():
@@ -390,7 +418,7 @@ class MSGFile(olefile.OleFileIO):
         Checks if :param inp: exists in the msg file.
         """
         inp = self.fixPath(inp, prefix)
-        return super().exists(inp)
+        return self.__ole.exists(inp)
 
     def sExists(self, inp, prefix : bool = True) -> bool:
         """
@@ -455,7 +483,7 @@ class MSGFile(olefile.OleFileIO):
         try:
             return self.__listDirRes[(streams, storages)]
         except KeyError:
-            entries = self.listdir(streams, storages)
+            entries = self.__ole.listdir(streams, storages)
             if not self.__prefix:
                 return entries
             prefix = self.__prefix.split('/')
@@ -531,7 +559,7 @@ class MSGFile(olefile.OleFileIO):
             return self.__bStringsUnicode
 
     @property
-    def attachments(self):
+    def attachments(self) -> List:
         """
         Returns a list of all attachments.
         """
@@ -609,7 +637,7 @@ class MSGFile(olefile.OleFileIO):
         Indicates whether the contents of this message are regarded as
         classified information.
         """
-        return self._ensureSetNamed('_classified', '85B5')
+        return self._ensureSetNamed('_classified', '85B5', constants.PSETID_COMMON)
 
     @property
     def classType(self) -> str:
@@ -623,14 +651,14 @@ class MSGFile(olefile.OleFileIO):
         """
         The end time for the object.
         """
-        return self._ensureSetNamed('_commonEnd', '8517')
+        return self._ensureSetNamed('_commonEnd', '8517', constants.PSETID_COMMON)
 
     @property
     def commonStart(self) -> datetime.datetime:
         """
         The start time for the object.
         """
-        return self._ensureSetNamed('_commonStart', '8516')
+        return self._ensureSetNamed('_commonStart', '8516', constants.PSETID_COMMON)
 
     @property
     def currentVersion(self) -> int:
@@ -638,21 +666,34 @@ class MSGFile(olefile.OleFileIO):
         Specifies the build number of the client application that sent the
         message.
         """
-        return self._ensureSetNamed('_currentVersion', '8552')
+        return self._ensureSetNamed('_currentVersion', '8552', constants.PSETID_COMMON)
 
     @property
     def currentVersionName(self) -> str:
         """
         Specifies the name of the client application that sent the message.
         """
-        return self._ensureSetNamed('_currentVersionName', '8554')
+        return self._ensureSetNamed('_currentVersionName', '8554', constants.PSETID_COMMON)
 
     @property
-    def importance(self) -> int:
+    def importance(self) -> Importance:
         """
         The specified importance of the msg file.
         """
-        return self._ensureSetProperty('_importance', '00170003')
+        return self._ensureSetProperty('_importance', '00170003', overrideClass = Importance)
+
+    @property
+    def importanceString(self) -> Union[str, None]:
+        """
+        Returns the string to use for saving. If the importance is medium then
+        it returns None. Mainly used for saving.
+        """
+        return {
+            Importance.HIGH: 'High',
+            Importance.MEDIUM: None,
+            Importance.LOW: 'low',
+            None: None,
+        }[self.importance]
 
     @property
     def kwargs(self) -> dict:
@@ -697,7 +738,7 @@ class MSGFile(olefile.OleFileIO):
             return self.__named
 
     @property
-    def namedProperties(self) -> None:
+    def namedProperties(self) -> NamedProperties:
         """
         The NamedProperties instances usable to access the data for named
         properties.
@@ -761,6 +802,14 @@ class MSGFile(olefile.OleFileIO):
         return self._ensureSetProperty('_sensitivity', '00360003', overrideClass = Sensitivity)
 
     @property
+    def sideEffects(self) -> Set[SideEffect]:
+        """
+        Controls how a Message object is handled by the client in relation to
+        certain user interface actions by the user, such as deleting a message.
+        """
+        return self._ensureSetNamed('_sideEffects', '8510', constants.PSETID_COMMON, overrideClass = SideEffect.fromBits)
+
+    @property
     def stringEncoding(self):
         try:
             return self.__stringEncoding
@@ -775,7 +824,7 @@ class MSGFile(olefile.OleFileIO):
                 if not self.mainProperties.has_key('3FFD0003'):
                     # If this property is not set by the client, we SHOULD set
                     # it to ISO-8859-15, but MAY set it to ISO-8859-1.
-                    logger.warn('Encoding property not found. Defaulting to ISO-8859-15.')
+                    logger.warning('Encoding property not found. Defaulting to ISO-8859-15.')
                     self.__stringEncoding = 'iso-8859-15'
                 else:
                     enc = self.mainProperties['3FFD0003'].value

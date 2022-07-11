@@ -10,14 +10,23 @@ import struct
 
 import ebcdic
 
+from typing import Dict, Tuple, Union
+
 
 # DEFINE CONSTANTS
 # WARNING DO NOT CHANGE ANY OF THESE VALUES UNLESS YOU KNOW
 # WHAT YOU ARE DOING! FAILURE TO FOLLOW THIS INSTRUCTION
 # CAN AND WILL BREAK THIS SCRIPT!
 
+# Typing Constants.
+HEADER_FORMAT_VALUE_TYPE = Union[str, Tuple[Union[str, None], bool], None]
+# Basically a dict of HEADER_FORMAT_TYPE and dicts containing them.
+HEADER_FORMAT_TYPE = Dict[str, Union[HEADER_FORMAT_VALUE_TYPE, Dict[str, HEADER_FORMAT_VALUE_TYPE]]]
+
 # Regular expresion constants.
 RE_INVALID_FILENAME_CHARACTERS = re.compile(r'[\\/:*?"<>|]')
+# Regular expression to find sections of spaces for htmlSanitize.
+RE_HTML_SAN_SPACE = re.compile('  +')
 # Regular expression to find the start of the html body.
 RE_HTML_BODY_START = re.compile(b'<body[^>]*>')
 # Regular expression to find the start of the html body in encapsulated RTF.
@@ -41,20 +50,6 @@ RE_RTF_FALLBACK_PLAIN = re.compile(br'\\plain[^a-zA-Z0-9]')
 # This is used in the workaround for decoding issues in RTFDE. We find `\bin`
 # sections and try to remove all of them to help with the decoding.
 RE_BIN = re.compile(br'\\bin([0-9]+) ?')
-
-# EntryID UID Types.
-EUID_PUBLIC_MESSAGE_STORE = b'\x1A\x44\x73\x90\xAA\x66\x11\xCD\x9B\xC8\x00\xAA\x00\x2F\xC4\x5A'
-EUID_PUBLIC_MESSAGE_STORE_HEX = '1A447390AA6611CD9BC800AA002FC45A'
-EUID_ADDRESS_BOOK_RECIPIENT = b'\xDC\xA7\x40\xC8\xC0\x42\x10\x1A\xB4\xB9\x08\x00\x2B\x2F\xE1\x82'
-EUID_ADDRESS_BOOK_RECIPIENT_HEX = 'DCA740C8C042101AB4B908002B2FE182'
-EUID_ONE_OFF_RECIPIENT = b'\x81\x2B\x1F\xA4\xBE\xA3\x10\x19\x9D\x6E\x00\xDD\x01\x0F\x54\x02'
-EUID_ONE_OFF_RECIPIENT_HEX = '812B1FA4BEA310199D6E00DD010F5402'
-# Contact address or personal distribution list recipient.
-EUID_CA_OR_PDL_RECIPIENT = b'\xFE\x42\xAA\x0A\x18\xC7\x1A\x10\xE8\x85\x0B\x65\x1C\x24\x00\x00'
-EUID_CA_OR_PDL_RECIPIENT_HEX = 'FE42AA0A18C71A10E8850B651C240000'
-EUID_NNTP_NEWSGROUP_FOLDER = b'\x38\xA1\xBB\x10\x05\xE5\x10\x1A\xA1\xBB\x08\x00\x2B\x2A\x56\xC2'
-EUID_NNTP_NEWSGROUP_FOLDER_HEX = '38A1BB1005E5101AA1BB08002B2A56C2'
-
 
 FIXED_LENGTH_PROPS = (
     0x0000,
@@ -176,103 +171,11 @@ MULTIPLE_16_BYTES_HEX = (
     0x1048,
 )
 
-# This is the header that will be injected into the html after being formatted
-# with the applicable data. Used entiries are `date`, `sender`, `to`, `subject`,
-# `cc`, `bcc`
-HTML_INJECTABLE_HEADER = """
-<div>
-    <div>
-        <p class="MsoNormal">
-            <b>From:</b>&nbsp;{sender}<br/>
-            <b>Sent:</b>&nbsp;{date}<br/>
-            <b>To:</b>&nbsp;{to}<br/>
-            <b>Cc:</b>&nbsp;{cc}<br/>
-            <b>Bcc:</b>&nbsp;{bcc}<br/>
-            <b>Subject:</b>&nbsp;{subject}
-            <o:p></o:p>
-        </p>
-    </div>
-</div>
-""".replace('    ', '').replace('\r', '').replace('\n', '')
-
-# The header to be used for RTF files with encapsulated HTML. Uses the same
-# properties as the HTML header.
-# I'm just going to appologize in advance for how bad this looks. RTF in general
-# is just not pretty to look at, and the garbage I had to do here didn't help.
-# FYI, < and > will need to be sanitized if you actually want it to be properly
-# compatible. "<" will become "{\*\htmltag84 &lt;}\htmlrtf <\htmlrtf0" and ">"
-# will become "{\*\htmltag84 &gt;}\htmlrtf >\htmlrtf0".
-RTF_ENC_INJECTABLE_HEADER = r"""
-{{
-{{\*\htmltag96 <div>}}
-{{\*\htmltag96 <div>}}
-{{\*\htmltag64 <p class=MsoNormal>}}
-
-\htmlrtf {{\b\htmlrtf0
-{{\*\htmltag84 <b>}}
-From: {{\*\htmltag92 </b>}}
-\htmlrtf \b0\htmlrtf0 {sender}
-\htmlrtf }}\htmlrtf0
-{{\*\htmltag116 <br>}}
-\htmlrtf \line\htmlrtf0
-
-\htmlrtf {{\b\htmlrtf0
-{{\*\htmltag84 <b>}}
-Sent: {{\*\htmltag92 </b>}}
-\htmlrtf \b0\htmlrtf0 {date}
-\htmlrtf }}\htmlrtf0
-{{\*\htmltag116 <br>}}
-\htmlrtf \line\htmlrtf0
-
-\htmlrtf {{\b\htmlrtf0
-{{\*\htmltag84 <b>}}
-Cc: {{\*\htmltag92 </b>}}
-\htmlrtf \b0\htmlrtf0 {cc}
-\htmlrtf }}\htmlrtf0
-{{\*\htmltag116 <br>}}
-\htmlrtf \line\htmlrtf0
-
-\htmlrtf {{\b\htmlrtf0
-{{\*\htmltag84 <b>}}
-Bcc: {{\*\htmltag92 </b>}}
-\htmlrtf \b0\htmlrtf0 {bcc}
-\htmlrtf }}\htmlrtf0
-{{\*\htmltag116 <br>}}
-\htmlrtf \line\htmlrtf0
-
-\htmlrtf {{\b\htmlrtf0
-{{\*\htmltag84 <b>}}
-Subject: {{\*\htmltag92 </b>}}
-\htmlrtf \b0\htmlrtf0 {subject}
-\htmlrtf }}\htmlrtf0
-{{\*\htmltag244 <o:p>}}
-{{\*\htmlrag252 </o:p>}}
-\htmlrtf \par\par\htmlrtf0
-
-{{\*\htmltag72 </p>}}
-{{\*\htmltag104 </div>}}
-{{\*\htmltag104 </div>}}
-\htmlrtf }}\htmlrtf0
-""".replace('\r', '').replace('\n', '')
-
-# The header to be used for plain RTF files. Uses the same properties as the
-# HTML header.
-RTF_PLAIN_INJECTABLE_HEADER = r"""
-{{
-    {{\b From: \b0 {sender}}}\line
-    {{\b Sent: \b0 {date}}}\line
-    {{\b To: \b0 {to}}}\line
-    {{\b Cc: \b0 {cc}}}\line
-    {{\b Bcc: \b0 {bcc}}}\line
-    {{\b Subject: \b0 {subject}}}\par\par
-}}
-""".replace('    ', '').replace('\r', '').replace('\n', '')
-
 
 # Used to format the header for saving only the header.
 HEADER_FORMAT = """From: {From}
 To: {To}
-CC: {Cc}
+Cc: {Cc}
 Bcc: {Bcc}
 Subject: {subject}
 Date: {Date}
@@ -282,8 +185,9 @@ Message-ID: {Message-Id}
 
 KNOWN_CLASS_TYPES = (
     'ipm.activity',
-    'ipm.appointment',
-    'ipm.contact',
+    'ipm.appointment', # [MS-OXOCAL]
+    'ipm.contact', # [MS-OXOCNTC]
+    'ipm.configuration', # [MS-OXOCFG]
     'ipm.distlist',
     'ipm.document',
     'ipm.ole.class',
@@ -529,6 +433,7 @@ CODE_PAGES = {
 }
 
 PYTPFLOATINGTIME_START = datetime.datetime(1899, 12, 30)
+NULL_DATE = datetime.datetime(4500, 8, 31, 23, 59)
 
 # Constants used for argparse stuff
 KNOWN_FILE_FLAGS = (
@@ -540,20 +445,25 @@ NEEDS_ARG = (
 MAINDOC = "extract_msg:\n\tExtracts emails and attachments saved in Microsoft Outlook's .msg files.\n\n" \
           "https://github.com/TeamMsgExtractor/msg-extractor"
 
-# Define pre-compiled structs to make unpacking slightly faster
-# General structs
+# Define pre-compiled structs to make unpacking slightly faster.
+# General structs.
 ST1 = struct.Struct('<8x4I')
 ST2 = struct.Struct('<H2xI8x')
 ST3 = struct.Struct('<Q')
+# Struct used for unpacking a system time.
+ST_SYSTEMTIME = struct.Struct('<8H')
 # Struct used for unpacking a GUID from bytes.
 ST_GUID = struct.Struct('<IHH8s')
+# Struct for unpacking a TimeZoneStruct from bytes.
+ST_TZ = struct.Struct('<iiiH16sH16s')
 # Structs used by data.py
 ST_DATA_UI32 = struct.Struct('<I')
 ST_DATA_UI16 = struct.Struct('<H')
 ST_DATA_UI8 = struct.Struct('<B')
 # Structs used by named.py
 STNP_NAM = struct.Struct('<i')
-STNP_ENT = struct.Struct('<IHH') # Struct used for unpacking the entries in the entry stream
+# Struct used for unpacking the entries in the entry stream
+STNP_ENT = struct.Struct('<IHH')
 # Structs used by prop.py
 STFIX = struct.Struct('<8x8s')
 STVAR = struct.Struct('<8xi4s')
@@ -572,8 +482,13 @@ STMF32 = struct.Struct('<f')
 STMF64 = struct.Struct('<d')
 # PermanentEntryID parsing struct
 STPEID = struct.Struct('<B3x16s4xI')
-# Structs for reading from a BytesReader (not yet implemented). Some are just
-# aliases for existing structs, used for clarity and consistency in the code.
+# Struct for unpacking the first part of the BusinessCardDisplayDefinition
+# structure.
+ST_BC_HEAD = struct.Struct('BBBBBBBBIB')
+# Struct for completely unpacking the FieldInfo structure.
+ST_BC_FIELD_INFO = struct.Struct('HBBBxHII')
+# Structs for reading from a BytesReader. Some are just aliases for existing
+# structs, used for clarity and consistency in the code.
 ST_LE_I8 = STI8
 ST_LE_I16 = STMI16
 ST_LE_I32 = STMI32
@@ -846,5 +761,23 @@ PROPERTIES = {
     '5FF6': 'To (uncertain)',
 }
 
+PS_MAPI = '{00020328-0000-0000-C000-000000000046}'
+PS_PUBLIC_STRINGS = '{00020329-0000-0000-C000-000000000046}'
+PSETID_COMMON = '{00062008-0000-0000-C000-000000000046}'
+PSETID_ADDRESS = '{00062004-0000-0000-C000-000000000046}'
+PS_INTERNET_HEADERS = '{00020386-0000-0000-C000-000000000046}'
+PSETID_APPOINTMENT = '{00062002-0000-0000-C000-000000000046}'
+PSETID_MEETING = '{6ED8DA90-450B-101B-98DA-00AA003F1305}'
+PSETID_LOG = '{0006200A-0000-0000-C000-000000000046}'
+PSETID_MESSAGING = '{41F28F13-83F4-4114-A584-EEDB5A6B0BFF}'
+PSETID_NOTE = '{0006200E-0000-0000-C000-000000000046}'
+PSETID_POSTRSS = '{00062041-0000-0000-C000-000000000046}'
+PSETID_TASK = '{00062003-0000-0000-C000-000000000046}'
+PSETID_UNIFIEDMESSAGING = '{4442858E-A9E3-4E80-B900-317A210CC15B}'
+PSETID_AIRSYNC = '{71035549-0739-4DCB-9163-00F0580DBBDF}'
+PSETID_SHARING = '{00062040-0000-0000-C000-000000000046}'
+PSETID_XMLEXTRACTEDENTITIES = '{23239608-685D-4732-9C55-4C95CB4E8E33}'
+PSETID_ATTACHMENT = '{96357F7F-59E1-47D0-99A7-46515C183B54}'
+PSETID_CALENDAR_ASSISTANT = '{11000E07-B51B-40D6-AF21-CAA85EDAB1D0}'
 
 # END CONSTANTS

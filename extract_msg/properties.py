@@ -1,4 +1,5 @@
 import copy
+import datetime
 import logging
 import pprint
 
@@ -34,7 +35,7 @@ class Properties:
                 self.__naid, self.__nrid, self.__ac, self.__rc = constants.ST1.unpack(self.__stream[:24])
             elif type == PropertiesType.MESSAGE_EMBED:
                 skip = 24
-                self.__naid, self.__nrid, self.__ac, self.__rc = constants.ST1.unpack(self.__stream[:24])
+                self.__nrid, self.__naid, self.__rc, self.__ac = constants.ST1.unpack(self.__stream[:24])
             else:
                 skip = 8
         else:
@@ -53,8 +54,11 @@ class Properties:
                     skip = 32
         streams = divide(self.__stream[skip:], 16)
         for st in streams:
-            prop = createProp(st)
-            self.__props[prop.name] = prop
+            if len(st) == 16:
+                prop = createProp(st)
+                self.__props[prop.name] = prop
+            else:
+                logger.warning(f'Found stream from divide that was not 16 bytes: {st}. Ignoring.')
         self.__pl = len(self.__props)
 
     def __contains__(self, key):
@@ -128,20 +132,13 @@ class Properties:
         try:
             return self.__date
         except AttributeError:
+            self.__date = None
             if self.has_key('00390040'):
-                self.__date = self.get('00390040').value.__format__('%a, %d %b %Y %H:%M:%S %z')
-            elif self.has_key('30080040'):
-                self.__date = self.get('30080040').value.__format__('%a, %d %b %Y %H:%M:%S %z')
-            elif self.has_key('30070040'):
-                self.__date = self.get('30070040').value.__format__('%a, %d %b %Y %H:%M:%S %z')
-            else:
-                # DEBUG
-                logger.warning(
-                    'Error retrieving date. Setting as "Unknown". Please send the following data to developer:\n--------------------')
-                logger.warning(properHex(self.__stream))
-                logger.warning(self.keys())
-                logger.warning('--------------------')
-                self.__date = 'Unknown'
+                dateValue = self.get('00390040').value
+                # A date can by bytes if it fails to initialize, so we check it
+                # first.
+                if isinstance(dateValue, datetime.datetime):
+                    self.__date = dateValue.__format__('%a, %d %b %Y %H:%M:%S %z')
             return self.__date
 
     @property

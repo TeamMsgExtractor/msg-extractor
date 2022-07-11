@@ -1,84 +1,53 @@
 import datetime
 
+from typing import List, Set
+
 from . import constants
-from .enums import AppointmentStateFlag, BusyStatus, RecurPatternType, ResponseStatus
-from .calendar import Calendar
-from .structures.entry_id import EntryID
+from .meeting_related import MeetingRelated
+from .enums import BusyStatus, MeetingObjectChange, MeetingType, RecurCalendarType, RecurPatternType, ResponseStatus
 
 
-class AppointmentMeeting(Calendar):
+class MeetingRequest(MeetingRelated):
     """
-    Parser for Microsoft Outlook Appointment or Meeting files.
-
-    Both Appointment and Meeting have the same class type but Meeting has
-    additional properties. These properties are meaningless on an Appointment
-    object.
+    Class for handling Meeting Request and Meeting Update objects.
     """
 
     @property
-    def appointmentCounterProposal(self) -> bool:
+    def appointmentMessageClass(self) -> str:
         """
-        Indicates to the organizer that there are counter proposals that have
-        not been accepted or rejected by the organizer.
+        Indicates the value of the PidTagMessageClass property of the Meeting
+        object that is to be generated from the Meeting Request object. MUST
+        start with "IPM.Appointment".
         """
-        return self._ensureSetNamed('_appointmentCounterProposal', '8257', constants.PSETID_APPOINTMENT)
+        return self._ensureSetNamed('_appointmentMessageClass', '0024', constants.PSETID_MEETING)
 
     @property
-    def appointmentLastSequence(self) -> int:
+    def calendarType(self) -> RecurCalendarType:
         """
-        The last sequence number that was sent to any attendee.
+        The value of the CalendarType field from the PidLidAppointmentRecur
+        property if the Meeting Request object represents a recurring series or
+        an exception.
         """
-        return self._ensureSetNamed('_appointmentLastSequence', '8203', constants.PSETID_APPOINTMENT)
+        return self._ensureSetNamed('_calendarType', '001C', constants.PSETID_MEETING, overrideClass = RecurCalendarType)
 
     @property
-    def appointmentProposalNumber(self) -> int:
+    def changeHighlight(self) -> Set[MeetingObjectChange]:
         """
-        The number of attendees who have sent counter propostals that have not
-        been accepted or rejected by the organizer.
+        Soecifies a bit field that indicates how the Meeting object has been
+        changed.
+
+        Returns a set of flags.
         """
-        return self._ensureSetNamed('_appointmentProposalNumber', '8259', constants.PSETID_APPOINTMENT)
+        return self._ensureSetNamed('_changeHighlight', '8204', constants.PSETID_APPOINTMENT, overrideClass = MeetingObjectChange.fromBits)
 
     @property
-    def appointmentReplyName(self) -> datetime.datetime:
+    def forwardInstance(self) -> bool:
         """
-        The user who last replied to the meeting request or meeting update.
+        Indicates that the Meeting Request object represents an exception to a
+        recurring series, and it was forwarded (even when forwarded by the
+        organizer) rather than being an invitation sent by the organizer.
         """
-        return self._ensureSetNamed('_appointmentReplyTime', '8230', constants.PSETID_APPOINTMENT)
-
-    @property
-    def appointmentReplyTime(self) -> datetime.datetime:
-        """
-        The date and time at which the attendee responded to a received Meeting
-        Request object of Meeting Update object in UTC.
-        """
-        return self._ensureSetNamed('_appointmentReplyTime', '8220', constants.PSETID_APPOINTMENT)
-
-    @property
-    def appointmentSequenceTime(self) -> datetime.datetime:
-        """
-        The date and time at which the appointmentSequence property was last
-        modified.
-        """
-        return self._ensureSetNamed('_appointmentSequenceTime', '8202', constants.PSETID_APPOINTMENT)
-
-    @property
-    def autoFillLocation(self) -> bool:
-        """
-        A value of True indicates that the value of the location property is set
-        to the value of the displayName property from the recipientRow structure
-        that represents a Resource object.
-
-        A value of False indicates that the value of the location property is
-        not automatically set.
-        """
-        return self._ensureSetNamed('_autoFillLocation', '823A', constants.PSETID_APPOINTMENT, overrideClass = bool)
-
-    @property
-    def fInvited(self) -> bool:
-        """
-        Whether a Meeting Request object has been sent out.
-        """
-        return self._ensureSetNamed('_fInvited', '8229', constants.PSETID_APPOINTMENT, overrideClass = bool, preserveNone = False)
+        return self._ensureSetNamed('_forwardInstance', '820A', constants.PSETID_APPOINTMENT)
 
     @property
     def headerFormatProperties(self) -> constants.HEADER_FORMAT_TYPE:
@@ -127,6 +96,8 @@ class AppointmentMeeting(Calendar):
                 RecurPatternType.HJ_MONTH_END: 'Monthly',
             }[self.appointmentRecur.patternType]
 
+        showTime = None if self.appointmentNotAllowPropose else 'Tentative'
+
         return {
             '-main info-': {
                 'Subject': self.subject,
@@ -135,6 +106,7 @@ class AppointmentMeeting(Calendar):
             '-date-': {
                 'Start': self.startDate.__format__('%a, %d %b %Y %H:%M %z') if self.startDate else None,
                 'End': self.endDate.__format__('%a, %d %b %Y %H:%M %z') if self.endDate else None,
+                'Show Time As': showTime,
             },
             '-recurrence-': {
                 'Recurrance': recur,
@@ -154,17 +126,42 @@ class AppointmentMeeting(Calendar):
             },
         }
 
-    @property
-    def isMeeting(self) -> bool:
-        """
-        Attempts to determine if the object is a Meeting. True if meeting, False
-        if appointment.
-        """
-        return AppointmentStateFlag.MEETING in self.appointmentStateFlags
 
     @property
-    def originalStoreEntryID(self) -> EntryID:
+    def intendedBusyStatus(self) -> BusyStatus:
         """
-        The EntryID of the delegator's message store.
+        The value of the busyStatus on the Meeting object in the organizer's
+        calendar at the time the Meeting Request object or Meeting Update object
+        was sent.
         """
-        return self._ensureSetNamed('_originalStoreEntryID', '8237', constants.PSETID_APPOINTMENT, overrideClass = EntryID.autoCreate)
+        return self._ensureSetNamed('_intendedBusyStatus', '8224', constants.PSETID_APPOINTMENT, overrideClass = BusyStatus)
+
+    @property
+    def meetingType(self) -> MeetingType:
+        """
+        The type of Meeting Request object or Meeting Update object.
+        """
+        return self._ensureSetNamed('_meetingType', '0026', constants.PSETID_MEETING, overrideClass = MeetingType)
+
+    @property
+    def oldLocation(self) -> str:
+        """
+        The original value of the location property before a meeting update.
+        """
+        return self._ensureSetNamed('_oldLocation', '0028', constants.PSETID_MEETING)
+
+    @property
+    def oldWhenEndWhole(self) -> datetime.datetime:
+        """
+        The original value of the appointmentEndWhole property before a meeting
+        update.
+        """
+        return self._ensureSetNamed('_oldWhenEndWhole', '002A', constants.PSETID_MEETING)
+
+    @property
+    def oldWhenStartWhole(self) -> datetime.datetime:
+        """
+        The original value of the appointmentStartWhole property before a
+        meeting update.
+        """
+        return self._ensureSetNamed('_oldWhenStartWhole', '0029', constants.PSETID_MEETING)

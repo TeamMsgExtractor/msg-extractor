@@ -3,8 +3,11 @@ import logging
 
 import olefile
 
+from typing import Any
+
 from . import constants
-from .utils import fromTimeStamp, filetimeToUtc, properHex
+from .enums import ErrorCode, ErrorCodeType
+from .utils import filetimeToDatetime, properHex
 
 
 logger = logging.getLogger(__name__)
@@ -96,7 +99,7 @@ class FixedLengthProp(PropBase):
         super().__init__(string)
         self.__value = self.parseType(self.type, constants.STFIX.unpack(string)[0])
 
-    def parseType(self, _type, stream):
+    def parseType(self, _type, stream) -> Any:
         """
         Converts the data in :param stream: to a much more accurate type,
         specified by :param _type:, if possible.
@@ -128,28 +131,27 @@ class FixedLengthProp(PropBase):
             return constants.PYTPFLOATINGTIME_START + datetime.timedelta(days = value)
         elif _type == 0x000A:  # PtypErrorCode
             value = constants.STI32.unpack(value)[0]
-            # TODO parsing for this
-            pass
+            try:
+                value = ErrorCodeType(value)
+            except ValueError:
+                logger.warning(f'Error type found that was not from Additional Error Codes. Value was {value}. You should report this to the developers.')
+                # So here, the value should be from Additional Error Codes, but it
+                # wasn't. So we are just returning the int. However, we want to see
+                # if it is a normal error type.
+                try:
+                    logger.warning(f'REPORT TO DEVELOPERS: Error type of {ErrorType(value)} was found.')
+                except ValueError:
+                    pass
         elif _type == 0x000B:  # PtypBoolean
             value = constants.ST3.unpack(value)[0] == 1
         elif _type == 0x0014:  # PtypInteger64
             value = constants.STI64.unpack(value)[0]
         elif _type == 0x0040:  # PtypTime
+            rawTime = constants.ST3.unpack(value)[0]
             try:
-                rawtime = constants.ST3.unpack(value)[0]
-                if rawtime < 116444736000000000:
-                    # We can't properly parse this with our current setup, so
-                    # we will rely on olefile to handle this one.
-                    value = olefile.olefile.filetime2datetime(rawtime)
-                else:
-                    if rawtime != 915151392000000000:
-                        value = fromTimeStamp(filetimeToUtc(rawtime))
-                    else:
-                        # Temporarily just set to max time to signify a null date.
-                        value = datetime.datetime.max
-            except Exception as e:
+                value = filetimeToDatetime(rawTime)
+            except ValueError as e:
                 logger.exception(e)
-                logger.error(f'Timestamp value of {filetimeToUtc(constants.ST3.unpack(value)[0])} caused an exception. This was probably caused by the time stamp being too far in the future.')
                 logger.error(self.raw)
         elif _type == 0x0048:  # PtypGuid
             # TODO parsing for this

@@ -22,6 +22,7 @@ import sys
 import zipfile
 
 import bs4
+import olefile
 import tzlocal
 
 from html import escape as htmlEscape
@@ -29,7 +30,7 @@ from typing import Dict, List, Tuple, Union
 
 from . import constants
 from .enums import AttachmentType
-from .exceptions import BadHtmlError, ConversionError, IncompatibleOptionsError, InvalidFileFormatError, InvaildPropertyIdError, UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError, UnsupportedMSGTypeError
+from .exceptions import BadHtmlError, ConversionError, IncompatibleOptionsError, InvalidFileFormatError, InvaildPropertyIdError, TZError, UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError, UnsupportedMSGTypeError
 
 
 logger = logging.getLogger(__name__)
@@ -148,6 +149,38 @@ def divide(string, length : int) -> list:
     return [string[length * x:length * (x + 1)] for x in range(int(ceilDiv(len(string), length)))]
 
 
+def filetimeToDatetime(rawTime : int):
+    """
+    Converts a filetime into a datetime.
+
+    Some values have specialized meanings, listed below:
+        915151392000000000: December 31, 4500, representing a null time. Returns
+            extract_msg.constants.NULL_DATE.
+        915046235400000000: 23:59 on August 31, 4500, representing a null time.
+            Returns extract_msg.constants.NULL_DATE.
+    """
+    try:
+        if rawTime < 116444736000000000:
+            # We can't properly parse this with our current setup, so
+            # we will rely on olefile to handle this one.
+            return olefile.olefile.filetime2datetime(rawTime)
+        elif rawTime == 915151392000000000:
+            # So this is actually a different null date, specifically
+            # supposed to be December 31, 4500, but it's weird that the
+            # same spec has 2 different ones, so we just return the same
+            # one for both.
+            return constants.NULL_DATE
+        elif rawTime == 915046235400000000:
+            return constants.NULL_DATE
+        else:
+            return fromTimeStamp(filetimeToUtc(rawTime))
+    except TZError:
+        # For TZError we just raise it again. It is a fatal error.
+        raise
+    except Exception as e:
+        raise ValueError(f'Timestamp value of {filetimeToUtc(rawTime)} caused an exception. This was probably caused by the time stamp being too far in the future.')
+
+
 def findWk(path = None):
     """
     Attempt to find the path of the wkhtmltopdf executable. If :param path: is
@@ -176,7 +209,11 @@ def fromTimeStamp(stamp) -> datetime.datetime:
     """
     Returns a datetime from the UTC timestamp given the current timezone.
     """
-    return datetime.datetime.fromtimestamp(stamp, tzlocal.get_localzone())
+    try:
+        tz = tzlocal.get_localzone()
+    except Exception as e:
+        raise TZError(f'Error occured using tzlocal. If you are seeing this, this is likely a problem with your installation ot tzlocal or tzdata.')
+    return datetime.datetime.fromtimestamp(stamp, tz)
 
 
 def getCommandArgs(args):
@@ -203,9 +240,9 @@ def getCommandArgs(args):
                         help='Changes to write output files as json.')
     # --file-logging
     parser.add_argument('--file-logging', dest='fileLogging', action='store_true',
-                        help='Enables file logging. Implies --verbose.')
+                        help='Enables file logging. Implies --verbose level 1.')
     # --verbose
-    parser.add_argument('--verbose', dest='verbose', action='store_true',
+    parser.add_argument('--verbose', dest='verbose', action='count', default=0,
                         help='Turns on console logging.')
     # --log PATH
     parser.add_argument('--log', dest='log',
@@ -227,7 +264,7 @@ def getCommandArgs(args):
                         help='Sets whether the output should be HTML. If this is not possible, will error.')
     # --pdf
     outFormat.add_argument('--pdf', dest='pdf', action='store_true',
-                        help='Saves the body as a PDF. If this is not possible, will error.')
+                           help='Saves the body as a PDF. If this is not possible, will error.')
     # --wk-path PATH
     parser.add_argument('--wk-path', dest='wkPath',
                         help='Overrides the path for finding wkhtmltopdf.')
@@ -242,10 +279,10 @@ def getCommandArgs(args):
                         help='Character set to use for the prepared HTML in the added tag. (Default: utf-8)')
     # --raw
     outFormat.add_argument('--raw', dest='raw', action='store_true',
-                        help='Sets whether the output should be raw. If this is not possible, will error.')
+                           help='Sets whether the output should be raw. If this is not possible, will error.')
     # --rtf
     outFormat.add_argument('--rtf', dest='rtf', action='store_true',
-                        help='Sets whether the output should be RTF. If this is not possible, will error.')
+                           help='Sets whether the output should be RTF. If this is not possible, will error.')
     # --allow-fallback
     parser.add_argument('--allow-fallback', dest='allowFallback', action='store_true',
                         help='Tells the program to fallback to a different save type if the selected one is not possible.')
@@ -254,7 +291,13 @@ def getCommandArgs(args):
                         help='Path to use for saving to a zip file.')
     # --attachments-only
     outFormat.add_argument('--attachments-only', dest='attachmentsOnly', action='store_true',
-                        help='Specify to only save attachments from an msg file.')
+                           help='Specify to only save attachments from an msg file.')
+    # --no-folders
+    parser.add_argument('--no-folders', dest='noFolders', action='store_true',
+                        help='When used with --attachments-only, stores everything in the location specified by --out. Incompatible with --out-name.')
+
+    parser.add_argument('--skip-embedded', dest = 'skipEmbedded', action='store_true',
+                        help='Skips all embedded MSG files when saving attachments.')
     # --out-name NAME
     inputFormat.add_argument('--out-name', dest='outName',
                         help='Name to be used with saving the file output. Cannot be used if you are saving more than one file.')
@@ -273,8 +316,11 @@ def getCommandArgs(args):
 
     options = parser.parse_args(args)
 
+    if options.outName and options.noFolders:
+        raise ValueError('--out-name is not compatible with --no-folders.')
+
     if options.dev or options.fileLogging:
-        options.verbose = True
+        options.verbose = options.verbose or 1
 
     # Handle the wkOptions if they exist.
     if options.wkOptions:
@@ -321,6 +367,17 @@ def getCommandArgs(args):
     if options.outName and options.fileArgs and len(options.fileArgs) > 0:
         raise ValueError('--out-name is not supported when saving multiple MSG files.')
 
+
+    if options.verbose == 0:
+        options.logLevel = logging.ERROR
+    elif options.verbose == 1:
+        options.logLevel = logging.WARNING
+    elif options.verbose == 2:
+        options.logLevel = logging.INFO
+    else:
+        options.logLevel = 5
+
+
     return options
 
 
@@ -351,206 +408,21 @@ def hasLen(obj) -> bool:
     return hasattr(obj, '__len__')
 
 
-def injectHtmlHeader(msgFile, prepared : bool = False) -> bytes:
+def htmlSanitize(inp : str) -> str:
     """
-    Returns the HTML body from the MSG file (will check that it has one) with
-    the HTML header injected into it.
-
-    :param prepared: Determines whether to be using the standard HTML (False) or
-        the prepared HTML (True) body (Default: False).
-
-    :raises AttributeError: if the correct HTML body cannot be acquired.
-    :raises BadHtmlError: if :param preparedHtml: is False and the HTML fails to
-        validate.
+    Santizes the input for injection into an HTML string. Converts characters
+    into forms that will not be misinterpreted, if necessary.
     """
-    if not hasattr(msgFile, 'htmlBody') or not msgFile.htmlBody:
-        raise AttributeError('Cannot inject the HTML header without an HTML body attribute.')
+    # First step, do a basic escape of the HTML.
+    inp = htmlEscape(inp)
 
-    body = None
+    # Change newlines to <br/> to they won't be ignored.
+    inp = inp.replace('\r\n', '\n').replace('\n', '<br/>')
 
-    # We don't do this all at once because the prepared body is not cached.
-    if prepared:
-        if hasattr(msgFile, 'htmlBodyPrepared'):
-            body = msgFile.htmlBodyPrepared
+    # Escape long sections of spaces to ensure they won't be ignored.
+    inp = constants.RE_HTML_SAN_SPACE.sub((lambda spaces : '&nbsp;' * len(spaces.group(0))),inp)
 
-        # If the body is not valid or not found, raise an AttributeError.
-        if not body:
-            raise AttributeError('Cannot find a prepared HTML body to inject into.')
-    else:
-        body = msgFile.htmlBody
-
-    # Validate the HTML.
-    if not validateHtml(body):
-        # If we are not preparing the HTML body, then raise an
-        # exception.
-        if not prepared:
-            raise BadHtmlError('HTML body failed to pass validation.')
-
-        # If we are here, then we need to do what we can to fix the HTML body.
-        # Unfortunately this gets complicated because of the various ways the
-        # body could be wrong. If only the <body> tag is missing, then we just
-        # need to insert it at the end and be done. If both the <html> and
-        # <body> tag are missing, we determine where to put the body tag (around
-        # everything if there is no <head> tag, otherwise at the end) and then
-        # wrap it all in the <html> tag.
-        parser = bs4.BeautifulSoup(body, features = 'html.parser')
-        if not parser.find('html') and not parser.find('body'):
-            if parser.find('head') or parser.find('footer'):
-                # Create the parser we will be using for the corrections.
-                correctedHtml = bs4.BeautifulSoup(b'<html></html>', features = 'html.parser')
-                htmlTag = correctedHtml.find('html')
-
-                # Iterate over each of the direct descendents of the parser and
-                # add each to a new tag if they are not the head or footer.
-                bodyTag = parser.new_tag('body')
-                # What we are going to be doing will be causing some of the tags
-                # to be moved out of the parser, and so the iterator will end up
-                # pointing to the wrong place after that. To compensate we first
-                # create a tuple and iterate over that.
-                for tag in tuple(parser.children):
-                    if tag.name.lower() in ('head', 'footer'):
-                        correctedHtml.append(tag)
-                    else:
-                        bodyTag.append(tag)
-
-                # All the tags should now be properly in the body, so let's
-                # insert it.
-                if correctedHtml.find('head'):
-                    correctedHtml.find('head').insert_after(bodyTag)
-                elif correctedHtml.find('footer'):
-                    correctedHtml.find('footer').insert_before(bodyTag)
-                else:
-                    # Neither a head or a body are present, so just append it to
-                    # the main tag.
-                    htmlTag.append(bodyTag)
-            else:
-                # If there is no <html>, <head>, <footer>, or <body> tag, then
-                # we just add the tags to the beginning and end of the data and
-                # move on.
-                body = b'<html><body>' + body + b'</body></html>'
-        elif parser.find('html'):
-            # Found <html> but not <body>.
-            # Iterate over each of the direct descendents of the parser and
-            # add each to a new tag if they are not the head or footer.
-            bodyTag = parser.new_tag('body')
-            # What we are going to be doing will be causing some of the tags
-            # to be moved out of the parser, and so the iterator will end up
-            # pointing to the wrong place after that. To compensate we first
-            # create a tuple and iterate over that.
-            for tag in tuple(parser.find('html').children):
-                if tag.name and tag.name.lower() not in ('head', 'footer'):
-                    bodyTag.append(tag)
-
-            # All the tags should now be properly in the body, so let's
-            # insert it.
-            if parser.find('head'):
-                parser.find('head').insert_after(bodyTag)
-            elif parser.find('footer'):
-                parser.find('footer').insert_before(bodyTag)
-            else:
-                parser.find('html').insert(0, bodyTag)
-        else:
-            # Found <body> but not <html>. Just wrap everything in the <html>
-            # tags.
-            body = b'<html>' + body + b'</html>'
-
-    def replace(bodyMarker):
-        """
-        Internal function to replace the body tag with itself plus the header.
-        """
-        return bodyMarker.group() + constants.HTML_INJECTABLE_HEADER.format(
-        **{
-            'sender': inputToString(htmlEscape(msgFile.sender) if msgFile.sender else '', 'utf-8'),
-            'to': inputToString(htmlEscape(msgFile.to) if msgFile.to else '', 'utf-8'),
-            'cc': inputToString(htmlEscape(msgFile.cc) if msgFile.cc else '', 'utf-8'),
-            'bcc': inputToString(htmlEscape(msgFile.bcc) if msgFile.bcc else '', 'utf-8'),
-            'date': inputToString(msgFile.date, 'utf-8'),
-            'subject': inputToString(htmlEscape(msgFile.subject) if msgFile.subject else '', 'utf-8'),
-        }).encode('utf-8')
-
-    # Use the previously defined function to inject the HTML header.
-    return constants.RE_HTML_BODY_START.sub(replace, body, 1)
-
-
-def injectRtfHeader(msgFile) -> bytes:
-    """
-    Returns the RTF body from the MSG file (will check that it has one) with the
-    RTF header injected into it.
-
-    :raises AttributeError: if the RTF body cannot be acquired.
-    :raises RuntimeError: if all injection attempts fail.
-    """
-    if not hasattr(msgFile, 'rtfBody') or not msgFile.rtfBody:
-        raise AttributeError('Cannot inject the RTF header without an RTF body attribute.')
-
-    # Try to determine which header to use. Also determines how to sanitize the
-    # rtf.
-    if isEncapsulatedRtf(msgFile.rtfBody):
-        injectableHeader = constants.RTF_ENC_INJECTABLE_HEADER
-        rtfSanitize = rtfSanitizeHtml
-    else:
-        injectableHeader = constants.RTF_PLAIN_INJECTABLE_HEADER
-        rtfSanitize = rtfSanitizePlain
-
-    def replace(bodyMarker):
-        """
-        Internal function to replace the body tag with itself plus the header.
-        """
-        return bodyMarker.group() + injectableHeader.format(
-        **{
-            'sender': inputToString(rtfSanitize(msgFile.sender) if msgFile.sender else '', 'utf-8'),
-            'to': inputToString(rtfSanitize(msgFile.to) if msgFile.to else '', 'utf-8'),
-            'cc': inputToString(rtfSanitize(msgFile.cc) if msgFile.cc else '', 'utf-8'),
-            'bcc': inputToString(rtfSanitize(msgFile.bcc) if msgFile.bcc else '', 'utf-8'),
-            'date': inputToString(msgFile.date, 'utf-8'),
-            'subject': inputToString(rtfSanitize(msgFile.subject), 'utf-8'),
-        }).encode('utf-8')
-
-    # Use the previously defined function to inject the RTF header. We are
-    # trying a few different methods to determine where to place the header.
-    data = constants.RE_RTF_BODY_START.sub(replace, msgFile.rtfBody, 1)
-    # If after any method the data does not match the RTF body, then we have
-    # succeeded.
-    if data != msgFile.rtfBody:
-        logger.debug('Successfully injected RTF header using first method.')
-        return data
-
-    # This second method only applies to encapsulated HTML, so we need to check
-    # for that first.
-    if isEncapsulatedRtf(msgFile.rtfBody):
-        data = constants.RE_RTF_ENC_BODY_START_1.sub(replace, msgFile.rtfBody, 1)
-        if data != msgFile.rtfBody:
-            logger.debug('Successfully injected RTF header using second method.')
-            return data
-
-        # This third method is a lot less reliable, and actually would just
-        # simply violate the encapuslated html, so for this one we don't even
-        # try to worry about what the html will think about it. If it injects,
-        # we swap to basic and then inject again, more worried about it working
-        # than looking nice inside.
-        if constants.RE_RTF_ENC_BODY_UGLY.sub(replace, msgFile.rtfBody, 1) != msgFile.rtfBody:
-            injectableHeader = constants.RTF_PLAIN_INJECTABLE_HEADER
-            data = constants.RE_RTF_ENC_BODY_UGLY.sub(replace, msgFile.rtfBody, 1)
-            logger.debug('Successfully injected RTF header using third method.')
-            return data
-
-    # Severe fallback attempts.
-    data = constants.RE_RTF_BODY_FALLBACK_FS.sub(replace, msgFile.rtfBody, 1)
-    if data != msgFile.rtfBody:
-        logger.debug('Successfully injected RTF header using forth method.')
-        return data
-
-    data = constants.RE_RTF_BODY_FALLBACK_F.sub(replace, msgFile.rtfBody, 1)
-    if data != msgFile.rtfBody:
-        logger.debug('Successfully injected RTF header using fifth method.')
-        return data
-
-    data = constants.RE_RTF_BODY_FALLBACK_PLAIN.sub(replace, msgFile.rtfBody, 1)
-    if data != msgFile.rtfBody:
-        logger.debug('Successfully injected RTF header using sixth method.')
-        return data
-
-    raise RuntimeError('All injection attempts failed. Please report this to the developer.')
+    return inp
 
 
 def inputToBytes(stringInputVar, encoding) -> bytes:
@@ -597,8 +469,8 @@ def inputToString(bytesInputVar, encoding) -> str:
 
 def isEncapsulatedRtf(inp : bytes) -> bool:
     """
-    Currently the destection is made to be *extremly* basic, but this will work
-    for now. In the future this will be fixed to that literal text in the body
+    Currently the detection is made to be *extremly* basic, but this will work
+    for now. In the future this will be fixed so that literal text in the body
     of a message won't cause false detection.
     """
     return b'\\fromhtml' in inp
@@ -681,14 +553,34 @@ def openMsg(path, **kwargs):
     :raises UnsupportedMSGTypeError: if the type is recognized but not suppoted.
     :raises UnrecognizedMSGTypeError: if the type is not recognized.
     """
-    from .appointment import Appointment
+    from .appointment import AppointmentMeeting
     from .contact import Contact
+    from .meeting_cancellation import MeetingCancellation
+    from .meeting_exception import MeetingException
+    from .meeting_forward import MeetingForwardNotification
+    from .meeting_request import MeetingRequest
+    from .meeting_response import MeetingResponse
     from .message import Message
     from .msg import MSGFile
     from .message_signed import MessageSigned
+    from .post import Post
     from .task import Task
+    from .task_request import TaskRequest
+
+    # When the initial MSG file is opened, it should *always* delay attachments
+    # so it can get the main class type. We only need to load them after that
+    # if we are directly returning the MSGFile instance *and* delayAttachments
+    # is False.
+    #
+    # So first let's store the original value.
+    delayAttachments = kwargs.get('delayAttachments', False)
+    kwargs['delayAttachments'] = True
 
     msg = MSGFile(path, **kwargs)
+
+    # Restore the option in the kwargs so we don't have to worry about it.
+    kwargs['delayAttachments'] = delayAttachments
+
     # After rechecking the docs, all comparisons should be case-insensitive, not
     # case-sensitive. My reading ability is great.
     #
@@ -704,22 +596,49 @@ def openMsg(path, **kwargs):
             logging.critical('Received file that was an olefile but was not an MSG file. Returning MSGFile anyways because strict mode is off.')
             return msg
     classType = msg.classType.lower()
-    if classType.startswith('ipm.contact') or classType.startswith('ipm.distlist'):
+    # Put the message class first as it is most common.
+    if classType.startswith('ipm.note') or classType.startswith('report'):
         msg.close()
-        return Contact(path, **kwargs)
-    elif classType.startswith('ipm.note') or classType.startswith('report'):
-        msg.close()
-        if classType.endswith('smime.multipartsigned'):
+        if classType.endswith('smime.multipartsigned') or classType.endswith('smime'):
             return MessageSigned(path, **kwargs)
         else:
             return Message(path, **kwargs)
-    elif classType.startswith('ipm.appointment') or classType.startswith('ipm.schedule'):
+    elif classType.startswith('ipm.appointment'):
         msg.close()
-        return Appointment(path, **kwargs)
+        return AppointmentMeeting(path, **kwargs)
+    elif classType.startswith('ipm.contact') or classType.startswith('ipm.distlist'):
+        msg.close()
+        return Contact(path, **kwargs)
+    elif classType.startswith('ipm.post'):
+        msg.close()
+        return Post(path, **kwargs)
+    elif classType.startswith('ipm.schedule.meeting.request'):
+        msg.close()
+        return MeetingRequest(path, **kwargs)
+    elif classType.startswith('ipm.schedule.meeting.canceled'):
+        msg.close()
+        return MeetingCancellation(path, **kwargs)
+    elif classType.startswith('ipm.schedule.meeting.notification.forward'):
+        msg.close()
+        return MeetingForwardNotification(path, **kwargs)
+    elif classType.startswith('ipm.schedule.meeting.resp'):
+        msg.close()
+        return MeetingResponse(path, **kwargs)
+    elif classType.startswith('ipm.taskrequest'):
+        msg.close()
+        return TaskRequest(path, **kwargs)
     elif classType.startswith('ipm.task'):
         msg.close()
         return Task(path, **kwargs)
-    elif classType == 'ipm': # Unspecified format. It should be equal to this and not just start with it.
+    elif classType.startswith('ipm.ole.class.{00061055-0000-0000-c000-000000000046}'):
+        # Exception objects have a weird class type.
+        msg.close()
+        return MeetingException(path, **kwargs)
+    elif classType == 'ipm':
+        # Unspecified format. It should be equal to this and not just start with
+        # it.
+        if not delayAttachments:
+            msg.attachments
         return msg
     elif kwargs.get('strict', True):
         # Because we are closing it, we need to store it in a variable first.
@@ -730,6 +649,8 @@ def openMsg(path, **kwargs):
         raise UnrecognizedMSGTypeError(f'Could not recognize msg class type "{ct}".')
     else:
         logger.error(f'Could not recognize msg class type "{msg.classType}". This most likely means it hasn\'t been implemented yet, and you should ask the developers to add support for it.')
+        if not delayAttachments:
+            msg.attachments
         return msg
 
 
@@ -795,15 +716,24 @@ def parseType(_type : int, stream, encoding, extras):
         value = constants.STF64.unpack(value)[0]
         return constants.PYTPFLOATINGTIME_START + datetime.timedelta(days = value)
     elif _type == 0x000A:  # PtypErrorCode
+        from .enums import ErrorCode, ErrorCodeType
         value = constants.STUI32.unpack(value)[0]
-        # TODO parsing for this.
-        # I can't actually find any msg properties that use this, so it should
-        # be okay to release this function without support for it.
-        raise NotImplementedError('Parsing for type 0x000A (PtypErrorCode) has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType 0x000A PtypErrorCode".')
+        try:
+            value = ErrorCodeType(value)
+        except ValueError:
+            logger.warning(f'Error type found that was not from Additional Error Codes. Value was {value}. You should report this to the developers.')
+            # So here, the value should be from Additional Error Codes, but it
+            # wasn't. So we are just returning the int. However, we want to see
+            # if it is a normal error type.
+            try:
+                logger.warning(f'REPORT TO DEVELOPERS: Error type of {ErrorType(value)} was found.')
+            except ValueError:
+                pass
+        return value
     elif _type == 0x000B:  # PtypBoolean
         return constants.ST3.unpack(value)[0] == 1
     elif _type == 0x000D:  # PtypObject/PtypEmbeddedTable
-        # TODO parsing for this
+        # TODO parsing for this.
         # Wait, that's the extension for an attachment folder, so parsing this
         # might not be as easy as we would hope. The function may be released
         # without support for this.
@@ -815,38 +745,28 @@ def parseType(_type : int, stream, encoding, extras):
     elif _type == 0x001F:  # PtypString
         return value.decode('utf-16-le')
     elif _type == 0x0040:  # PtypTime
-        rawtime = constants.ST3.unpack(value)[0]
-        if rawtime < 116444736000000000:
-            # We can't properly parse this with our current setup, so
-            # we will rely on olefile to handle this one.
-            value = olefile.olefile.filetime2datetime(rawtime)
-        else:
-            if rawtime != 915151392000000000:
-                value = fromTimeStamp(filetimeToUtc(rawtime))
-            else:
-                # Temporarily just set to max time to signify a null date.
-                value = datetime.datetime.max
-        return value
+        rawTime = constants.ST3.unpack(value)[0]
+        return filetimeToDatetime(rawTime)
     elif _type == 0x0048:  # PtypGuid
         return bytesToGuid(value)
     elif _type == 0x00FB:  # PtypServerId
         count = constants.STUI16.unpack(value[:2])
         # If the first byte is a 1 then it uses the ServerID structure.
         if value[3] == 1:
-            from .data import ServerID
+            from .structures.misc_id import ServerID
             return ServerID(value)
         else:
             return (count, value[2:count + 2])
     elif _type == 0x00FD:  # PtypRestriction
-        # TODO parsing for this
+        # TODO parsing for this.
         raise NotImplementedError('Parsing for type 0x00FD (PtypRestriction) has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType 0x00FD PtypRestriction".')
     elif _type == 0x00FE:  # PtypRuleAction
-        # TODO parsing for this
+        # TODO parsing for this.
         raise NotImplementedError('Parsing for type 0x00FE (PtypRuleAction) has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType 0x00FE PtypRuleAction".')
     elif _type == 0x0102:  # PtypBinary
         return value
     elif _type & 0x1000 == 0x1000:  # PtypMultiple
-        # TODO parsing for `multiple` types
+        # TODO parsing for `multiple` types.
         if _type in (0x101F, 0x101E): # PtypMultipleString/PtypMultipleString8
             ret = [x.decode(encoding) for x in extras]
             lengths = struct.unpack(f'<{len(ret)}i', stream)
@@ -951,7 +871,8 @@ def rtfSanitizeHtml(inp : str) -> str:
             output += "\\'" + properHex(char, 2)
         else:
             # Handle Unicode characters.
-            output += '\\u' + str(ord(char)) + '?'
+            enc = char.encode('utf-16-le')
+            output += ''.join(f'\\u{x}?' for x in struct.unpack(f'<{len(enc) // 2}h', enc))
 
     return output
 
@@ -974,7 +895,9 @@ def rtfSanitizePlain(inp : str) -> str:
             output += "\\'" + properHex(char, 2)
         else:
             # Handle Unicode characters.
-            output += '\\u' + str(ord(char)) + '?'
+            # Handle Unicode characters.
+            enc = char.encode('utf-16-le')
+            output += ''.join(f'\\u{x}?' for x in struct.unpack(f'<{len(enc) // 2}h', enc))
 
     return output
 
@@ -1058,6 +981,50 @@ def setupLogging(defaultPath = None, defaultLevel = logging.WARN, logfile = None
     return True
 
 
+def tryGetMimetype(att, mimetype : Union[str, None]):
+    """
+    Uses an optional dependency to try and get the mimetype of an attachment. If
+    the mimetype has already been found, the optional dependency does not exist,
+    or an error occurs in the optional dependency, then the provided mimetype is
+    returned.
+
+    :param att: The attachment to use for getting the mimetype.
+    :param mimetype: The mimetype acquired directly from an attachment stream.
+        If this value evaluates to False, the function will try to determine it.
+    """
+    if mimetype:
+        return mimetype
+
+    # We only try anything if it is a plain attachment or signed attachment.
+    # Web attachments and embedded MSG files are completely ignored.
+    if att.type in (AttachmentType.DATA, AttachmentType.SIGNED):
+        # Try to import our dependency module to use it.
+        try:
+            import magic
+
+            return magic.from_buffer(att.data, mime = True)
+        except ImportError:
+            logger.info('Mimetype not found on attachment, and `mime` dependency not installed. Won\'t try to generate.')
+
+        except Exception:
+            logger.exception('Error occured while using python-magic. This error will be ignored.')
+
+    return mimetype
+
+
+def unsignedToSignedInt(uInt : int) -> int:
+    """
+    Convert the bits of an unsigned int (32-bit) to an int.
+
+    :raises ValueError: The number was not valid.
+    """
+    if uInt > 0xFFFFFFFF:
+        raise ValueError('Value is too large.')
+    if uInt < 0:
+        raise ValueError('Value is already signed.')
+    return constants.STI32.unpack(constants.STUI32.pack(uInt))[0]
+
+
 def unwrapMsg(msg : "MSGFile") -> Dict:
     """
     Takes a recursive message-attachment structure and unwraps it into a linear
@@ -1097,7 +1064,7 @@ def unwrapMsg(msg : "MSGFile") -> Dict:
             # it to be processed
             if att.type in (AttachmentType.DATA, AttachmentType.SIGNED):
                 attachments.append(att)
-            elif att.type == AttachmentType.MSG:
+            elif att.type is AttachmentType.MSG:
                 # Here we do two things. The first is we store it to the output
                 # so we can return it. The second is we add it to the processing
                 # list. The reason this is two steps is because we need to be
@@ -1179,7 +1146,7 @@ def unwrapMultipart(mp : Union[bytes, str, email.message.Message]) -> Dict:
             if isinstance(payload, list):
                 toProcess.extend(payload)
             else:
-                logging.warn('Found multipart node that did not return a list. Appending as a data node.')
+                logging.warning('Found multipart node that did not return a list. Appending as a data node.')
                 dataNodes.append(currentItem)
         else:
             # The opposite is *not* true. If it's not multipart, always add as a
@@ -1230,11 +1197,11 @@ def unwrapMultipart(mp : Union[bytes, str, email.message.Message]) -> Dict:
             attachments.append(attachment)
         elif attachment['mimetype'] == 'text/plain':
             if plainBody:
-                logger.warn('Found multiple candidates for plain text body.')
+                logger.warning('Found multiple candidates for plain text body.')
             plainBody = data
         elif attachment['mimetype'] == 'text/html':
             if htmlBody:
-                logger.warn('Found multiple candidates for HTML body.')
+                logger.warning('Found multiple candidates for HTML body.')
             htmlBody = data
 
     return {
