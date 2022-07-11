@@ -845,6 +845,8 @@ class MessageBase(MSGFile):
             if not skipAttachments:
                 # Save the attachments.
                 attachmentNames = [attachment.save(**kwargs) for attachment in self.attachments]
+                # Remove skipped attachments.
+                attachmentNames = [x for x in attachmentNames if x]
 
             if not attachOnly:
                 with _open(str(path / ('message.' + fext)), mode) as f:

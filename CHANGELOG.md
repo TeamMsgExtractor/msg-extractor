@@ -42,6 +42,11 @@
 * `utils.openMsg` now delays attachments while loading the file to get the class type. This means all time for attachments is cut in half as they are only ever loaded once. It also means that files that won't open due to attachments will error a little later, but this shouldn't be a problem.
 * Changed named properties `Guid` back to constants. This has to do with the next entry.
 * Fixed a major issue in named properties. Apparently the ID is not enough and you *must* have the GUID as well, as multiple properties can share the exact same ID.
+* Added option `--no-folders` to the command line allowing you to save all attachments from a set of MSG files into a single folder.
+* Added option `--skip-embedded` to the command line to skip saving embedded MSG files.
+* Added option `skipEmbedded` to `Attachment.save` (and all other related save methods that call it) to skip saving an embedded MSG file.
+* Changed `__main__` so that it opens the zip file there instead of relying on everything it calls to do it again and again.
+* Changed the behavior of `--verbose` to allow it to be stacked for more verboseness. Specifying it once turns on warnings, twice for info, and three times for debug. Not specifying it only turns on error logging.
 
 **v0.34.3**
 * Fixed issue that may have caused other olefile types to raise the wrong type of error when passed to `openMsg`.

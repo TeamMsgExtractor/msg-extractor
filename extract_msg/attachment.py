@@ -120,6 +120,11 @@ class Attachment(AttachmentBase):
         to :param zip:. If :param zip: is an instance, :param customPath: will
         refer to a location inside the zip file.
         """
+        # First check if we are skipping embedded messages and stop
+        # *immediately* if we are.
+        if self.type is AttachmentType.MSG and kwargs.get('skipEmbedded'):
+            return None
+
         # Check if the user has specified a custom filename
         filename = self.getFilename(**kwargs)
 

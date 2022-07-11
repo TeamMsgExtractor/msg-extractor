@@ -240,9 +240,9 @@ def getCommandArgs(args):
                         help='Changes to write output files as json.')
     # --file-logging
     parser.add_argument('--file-logging', dest='fileLogging', action='store_true',
-                        help='Enables file logging. Implies --verbose.')
+                        help='Enables file logging. Implies --verbose level 1.')
     # --verbose
-    parser.add_argument('--verbose', dest='verbose', action='store_true',
+    parser.add_argument('--verbose', dest='verbose', action='count', default=0,
                         help='Turns on console logging.')
     # --log PATH
     parser.add_argument('--log', dest='log',
@@ -264,7 +264,7 @@ def getCommandArgs(args):
                         help='Sets whether the output should be HTML. If this is not possible, will error.')
     # --pdf
     outFormat.add_argument('--pdf', dest='pdf', action='store_true',
-                        help='Saves the body as a PDF. If this is not possible, will error.')
+                           help='Saves the body as a PDF. If this is not possible, will error.')
     # --wk-path PATH
     parser.add_argument('--wk-path', dest='wkPath',
                         help='Overrides the path for finding wkhtmltopdf.')
@@ -279,10 +279,10 @@ def getCommandArgs(args):
                         help='Character set to use for the prepared HTML in the added tag. (Default: utf-8)')
     # --raw
     outFormat.add_argument('--raw', dest='raw', action='store_true',
-                        help='Sets whether the output should be raw. If this is not possible, will error.')
+                           help='Sets whether the output should be raw. If this is not possible, will error.')
     # --rtf
     outFormat.add_argument('--rtf', dest='rtf', action='store_true',
-                        help='Sets whether the output should be RTF. If this is not possible, will error.')
+                           help='Sets whether the output should be RTF. If this is not possible, will error.')
     # --allow-fallback
     parser.add_argument('--allow-fallback', dest='allowFallback', action='store_true',
                         help='Tells the program to fallback to a different save type if the selected one is not possible.')
@@ -291,7 +291,13 @@ def getCommandArgs(args):
                         help='Path to use for saving to a zip file.')
     # --attachments-only
     outFormat.add_argument('--attachments-only', dest='attachmentsOnly', action='store_true',
-                        help='Specify to only save attachments from an msg file.')
+                           help='Specify to only save attachments from an msg file.')
+    # --no-folders
+    parser.add_argument('--no-folders', dest='noFolders', action='store_true',
+                        help='When used with --attachments-only, stores everything in the location specified by --out. Incompatible with --out-name.')
+
+    parser.add_argument('--skip-embedded', dest = 'skipEmbedded', action='store_true',
+                        help='Skips all embedded MSG files when saving attachments.')
     # --out-name NAME
     inputFormat.add_argument('--out-name', dest='outName',
                         help='Name to be used with saving the file output. Cannot be used if you are saving more than one file.')
@@ -310,8 +316,11 @@ def getCommandArgs(args):
 
     options = parser.parse_args(args)
 
+    if options.outName and options.noFolders:
+        raise ValueError('--out-name is not compatible with --no-folders.')
+
     if options.dev or options.fileLogging:
-        options.verbose = True
+        options.verbose = options.verbose or 1
 
     # Handle the wkOptions if they exist.
     if options.wkOptions:
@@ -357,6 +366,17 @@ def getCommandArgs(args):
     # Make it so outName can only be used on single files.
     if options.outName and options.fileArgs and len(options.fileArgs) > 0:
         raise ValueError('--out-name is not supported when saving multiple MSG files.')
+
+
+    if options.verbose == 0:
+        options.logLevel = logging.ERROR
+    elif options.verbose == 1:
+        options.logLevel = logging.WARNING
+    elif options.verbose == 2:
+        options.logLevel = logging.INFO
+    else:
+        options.logLevel = 5
+
 
     return options
 
