@@ -242,8 +242,8 @@ def getCommandArgs(args):
     parser.add_argument('--file-logging', dest='fileLogging', action='store_true',
                         help='Enables file logging. Implies --verbose level 1.')
     # --verbose
-    parser.add_argument('--verbose', dest='verbose', action='count', default=0,
-                        help='Turns on console logging.')
+    parser.add_argument('-v', '--verbose', dest='verbose', action='count', default=0,
+                        help='Turns on console logging. Specify more than once for higher verbosity.')
     # --log PATH
     parser.add_argument('--log', dest='log',
                         help='Set the path to write the file log to.')

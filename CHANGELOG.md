@@ -1,6 +1,7 @@
 **v0.35.2**
 * Made a change to the argument handling for `--no-folders`. Since it requires `--attachmentsOnly` to work, I simply made it error when it's not given to avoid confusion.
 * Updated README.
+* Added `-v` to be used instead of `--verbose`. This allows you to do `-vvv` for verbosity level 3.
 
 **v0.35.1**
 * Fixed a few property conflicts that I missed in the last release (forgot to run the helper script before releasing).

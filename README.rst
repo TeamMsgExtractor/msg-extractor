@@ -70,7 +70,7 @@ refer to the usage information provided from the program's help dialog:
       --validate            Turns on file validation mode. Turns off regular file output.
       --json                Changes to write output files as json.
       --file-logging        Enables file logging. Implies --verbose level 1.
-      --verbose             Turns on console logging.
+      -v, --verbose         Turns on console logging. Specify more than once for higher verbosity.
       --log LOG             Set the path to write the file log to.
       --config CONFIGPATH   Set the path to load the logging config from.
       --out OUTPATH         Set the folder to use for the program output. (Default: Current directory)
