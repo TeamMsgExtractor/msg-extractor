@@ -70,7 +70,7 @@ refer to the usage information provided from the program's help dialog:
       --validate            Turns on file validation mode. Turns off regular file output.
       --json                Changes to write output files as json.
       --file-logging        Enables file logging. Implies --verbose level 1.
-      --verbose             Turns on console logging.
+      -v, --verbose         Turns on console logging. Specify more than once for higher verbosity.
       --log LOG             Set the path to write the file log to.
       --config CONFIGPATH   Set the path to load the logging config from.
       --out OUTPATH         Set the folder to use for the program output. (Default: Current directory)
@@ -176,6 +176,12 @@ or you can include this in your list of python dependencies with:
        dependency_links=['https://github.com/TeamMsgExtractor/msg-extractor/zipball/master'],
    )
 
+Additionally, this module has the following extras which can be optionally
+installed:
+
+* ``all``: Installs all of the extras.
+* ``mime``: Installs dependency used for mimetype generation when a mimetype is not specified.
+
 Todo
 ----
 
@@ -220,8 +226,8 @@ your access to the newest major version of extract-msg.
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
 
-.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.35.1-blue.svg
-   :target: https://pypi.org/project/extract-msg/0.35.1/
+.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.35.2-blue.svg
+   :target: https://pypi.org/project/extract-msg/0.35.2/
 
 .. |PyPI2| image:: https://img.shields.io/badge/python-3.6+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-367/

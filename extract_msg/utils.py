@@ -242,8 +242,8 @@ def getCommandArgs(args):
     parser.add_argument('--file-logging', dest='fileLogging', action='store_true',
                         help='Enables file logging. Implies --verbose level 1.')
     # --verbose
-    parser.add_argument('--verbose', dest='verbose', action='count', default=0,
-                        help='Turns on console logging.')
+    parser.add_argument('-v', '--verbose', dest='verbose', action='count', default=0,
+                        help='Turns on console logging. Specify more than once for higher verbosity.')
     # --log PATH
     parser.add_argument('--log', dest='log',
                         help='Set the path to write the file log to.')
@@ -294,7 +294,7 @@ def getCommandArgs(args):
                            help='Specify to only save attachments from an msg file.')
     # --no-folders
     parser.add_argument('--no-folders', dest='noFolders', action='store_true',
-                        help='When used with --attachments-only, stores everything in the location specified by --out. Incompatible with --out-name.')
+                        help='Stores everything in the location specified by --out. Requires --attachments-only and is incompatible with --out-name.')
 
     parser.add_argument('--skip-embedded', dest = 'skipEmbedded', action='store_true',
                         help='Skips all embedded MSG files when saving attachments.')
@@ -367,7 +367,7 @@ def getCommandArgs(args):
     if options.outName and options.fileArgs and len(options.fileArgs) > 0:
         raise ValueError('--out-name is not supported when saving multiple MSG files.')
 
-
+    # Handle the verbosity level.
     if options.verbose == 0:
         options.logLevel = logging.ERROR
     elif options.verbose == 1:
@@ -377,6 +377,9 @@ def getCommandArgs(args):
     else:
         options.logLevel = 5
 
+    # If --no-folders is turned on but --attachments-only is not, error.
+    if options.noFolders and not options.attachmentsOnly:
+        raise ValueError('--no-folders requires the --attachments-only option.')
 
     return options
 
