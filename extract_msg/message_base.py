@@ -207,7 +207,7 @@ class MessageBase(MSGFile):
         print('Body:')
         print(self.body)
 
-    def getInjectableHeader(self, prefix : str, joinStr : str, suffix : str, formatter : Callable[str, str]) -> str:
+    def getInjectableHeader(self, prefix : str, joinStr : str, suffix : str, formatter : Callable[[str, str], str]) -> str:
         """
         Using the specified prefix, suffix, formatter, and join string,
         generates the injectable header. Prefix is placed at the beginning,
