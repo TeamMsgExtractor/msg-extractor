@@ -1,5 +1,7 @@
 import datetime
 
+from typing import Optional
+
 from . import constants
 from .meeting_related import MeetingRelated
 
@@ -21,7 +23,7 @@ class MeetingException(MeetingRelated):
         return self
 
     @property
-    def exceptionReplaceTime(self) -> datetime.datetime:
+    def exceptionReplaceTime(self) -> Optional[datetime.datetime]:
         """
         The date and time within the recurrence pattern that the exception will
         replace. The value is specified in UTC.
@@ -35,11 +37,11 @@ class MeetingException(MeetingRelated):
         differs from the Recurring Calendar object. If True, the Exception MUST
         have a body.
         """
-        return self._ensureSetNamed('_fExceptionalBody', '8206', constants.PSETID_APPOINTMENT)
+        return self._ensureSetNamed('_fExceptionalBody', '8206', constants.PSETID_APPOINTMENT, overrideClass = bool, preserveNone = False)
 
     @property
     def fInvited(self) -> bool:
         """
         Indicates if invitations have been sent for this exception.
         """
-        return self._ensureSetNamed('_fInvited', '8229', constants.PSETID_APPOINTMENT)
+        return self._ensureSetNamed('_fInvited', '8229', constants.PSETID_APPOINTMENT, overrideClass = bool, preserveNone = False)

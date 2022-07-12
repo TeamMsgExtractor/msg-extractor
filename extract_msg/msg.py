@@ -8,7 +8,7 @@ import zipfile
 
 import olefile
 
-from typing import List, Set, Union
+from typing import List, Optional, Set, Union
 
 from . import constants
 from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment
@@ -269,7 +269,7 @@ class MSGFile:
             setattr(self, variable, value)
             return value
 
-    def _getStream(self, filename, prefix : bool = True) -> bytes:
+    def _getStream(self, filename, prefix : bool = True) -> Optional[bytes]:
         """
         Gets a binary representation of the requested filename.
 
@@ -284,7 +284,7 @@ class MSGFile:
             logger.info(f'Stream "{filename}" was requested but could not be found. Returning `None`.')
             return None
 
-    def _getStringStream(self, filename, prefix : bool = True) -> str:
+    def _getStringStream(self, filename, prefix : bool = True) -> Optional[str]:
         """
         Gets a string representation of the requested filename.
 
@@ -464,7 +464,7 @@ class MSGFile:
                     foundNumber += 1
         return (foundNumber > 0), foundNumber
 
-    def fixPath(self, inp, prefix : bool = True):
+    def fixPath(self, inp, prefix : bool = True) -> str:
         """
         Changes paths so that they have the proper prefix (should :param prefix:
         be True) and are strings rather than lists or tuples.
@@ -637,31 +637,31 @@ class MSGFile:
         Indicates whether the contents of this message are regarded as
         classified information.
         """
-        return self._ensureSetNamed('_classified', '85B5', constants.PSETID_COMMON)
+        return self._ensureSetNamed('_classified', '85B5', constants.PSETID_COMMON, overrideClass = bool, preserveNone = False)
 
     @property
-    def classType(self) -> str:
+    def classType(self) -> Optional[str]:
         """
         The class type of the MSG file.
         """
         return self._ensureSet('_classType', '__substg1.0_001A')
 
     @property
-    def commonEnd(self) -> datetime.datetime:
+    def commonEnd(self) -> Optional[datetime.datetime]:
         """
         The end time for the object.
         """
         return self._ensureSetNamed('_commonEnd', '8517', constants.PSETID_COMMON)
 
     @property
-    def commonStart(self) -> datetime.datetime:
+    def commonStart(self) -> Optional[datetime.datetime]:
         """
         The start time for the object.
         """
         return self._ensureSetNamed('_commonStart', '8516', constants.PSETID_COMMON)
 
     @property
-    def currentVersion(self) -> int:
+    def currentVersion(self) -> Optional[int]:
         """
         Specifies the build number of the client application that sent the
         message.
@@ -669,14 +669,14 @@ class MSGFile:
         return self._ensureSetNamed('_currentVersion', '8552', constants.PSETID_COMMON)
 
     @property
-    def currentVersionName(self) -> str:
+    def currentVersionName(self) -> Optional[str]:
         """
         Specifies the name of the client application that sent the message.
         """
         return self._ensureSetNamed('_currentVersionName', '8554', constants.PSETID_COMMON)
 
     @property
-    def importance(self) -> Importance:
+    def importance(self) -> Optional[Importance]:
         """
         The specified importance of the msg file.
         """
@@ -788,21 +788,21 @@ class MSGFile:
         return copy.deepcopy(self.__prefixList)
 
     @property
-    def priority(self) -> Priority:
+    def priority(self) -> Optional[Priority]:
         """
         The specified priority of the msg file.
         """
         return self._ensureSetProperty('_priority', '00260003', overrideClass = Priority)
 
     @property
-    def sensitivity(self) -> Sensitivity:
+    def sensitivity(self) -> Optional[Sensitivity]:
         """
         The specified sensitivity of the msg file.
         """
         return self._ensureSetProperty('_sensitivity', '00360003', overrideClass = Sensitivity)
 
     @property
-    def sideEffects(self) -> Set[SideEffect]:
+    def sideEffects(self) -> Optional[Set[SideEffect]]:
         """
         Controls how a Message object is handled by the client in relation to
         certain user interface actions by the user, such as deleting a message.

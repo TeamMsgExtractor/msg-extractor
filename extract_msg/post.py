@@ -1,3 +1,5 @@
+from typing import Optional
+
 from . import constants
 from .message_base import MessageBase
 from .utils import inputToBytes, inputToString
@@ -21,7 +23,7 @@ class Post(MessageBase):
         })
 
     @property
-    def conversation(self) -> str:
+    def conversation(self) -> Optional[str]:
         """
         The name of the conversation being posted to.
         """

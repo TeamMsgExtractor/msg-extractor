@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-def createProp(string):
+def createProp(string) -> 'PropBase':
     temp = constants.ST2.unpack(string)[0]
     if temp in constants.FIXED_LENGTH_PROPS:
         return FixedLengthProp(string)
@@ -192,14 +192,14 @@ class VariableLengthProp(PropBase):
             self.__realLength = self.__length
 
     @property
-    def length(self):
+    def length(self) -> int:
         """
         The length field of the variable length property.
         """
         return self.__length
 
     @property
-    def realLength(self):
+    def realLength(self) -> int:
         """
         The ACTUAL length of the stream that this property corresponds to.
         """

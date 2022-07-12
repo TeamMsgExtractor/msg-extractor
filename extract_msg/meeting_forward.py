@@ -1,3 +1,5 @@
+from typing import Optional
+
 from . import constants
 from .meeting_related import MeetingRelated
 from .enums import BusyStatus, MeetingObjectChange, MeetingType, RecurCalendarType, RecurPatternType, ResponseStatus
@@ -9,7 +11,7 @@ class MeetingForwardNotification(MeetingRelated):
     """
 
     @property
-    def forwardNotificationRecipients(self) -> bytes:
+    def forwardNotificationRecipients(self) -> Optional[bytes]:
         """
         Bytes containing a list of RecipientRow structures that indicate the
         recipients of a meeting forward.
@@ -87,4 +89,4 @@ class MeetingForwardNotification(MeetingRelated):
         Indicates that the Meeting Forward Notification object was out-of-date
         when it was received.
         """
-        return self._ensureSetNamed('_promptSendUpdate', '8045', constants.PSETID_COMMON)
+        return self._ensureSetNamed('_promptSendUpdate', '8045', constants.PSETID_COMMON, overrideClass = bool, preserveNone = False)

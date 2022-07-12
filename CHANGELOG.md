@@ -1,3 +1,9 @@
+**v0.35.4**
+* Improved type hints to tell when a function may not return anything.
+* Added support for the `reportTag` property to `MessageBase`.
+* Fixed a few minor issues in some properties.
+* Fixed `Attachment.save` returning a `pathlib.Path` object instead of a `str` after the conversion to `pathlib`.
+
 **v0.35.3**
 * [[TeamMsgExtractor #280](https://github.com/TeamMsgExtractor/msg-extractor/issues/280)] Fix typing issue in `message_base.py`.
 

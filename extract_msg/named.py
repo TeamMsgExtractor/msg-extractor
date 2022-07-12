@@ -2,6 +2,8 @@ import copy
 import logging
 import pprint
 
+from typing import Optional
+
 from . import constants
 from .enums import NamedPropertyType
 from .utils import bytesToGuid, divide, properHex, roundUp
@@ -78,10 +80,10 @@ class Named:
     def __len__(self):
         return self.__propertiesDict.__len__()
 
-    def _getStream(self, filename, prefix = True):
+    def _getStream(self, filename, prefix = True) -> Optional[bytes]:
         return self.__msg._getStream([self.__dir, filename], prefix = prefix)
 
-    def _getStringStream(self, filename, prefix = True):
+    def _getStringStream(self, filename, prefix = True) -> Optional[str]:
         """
         Gets a string representation of the requested filename.
         Checks for both ASCII and Unicode representations and returns
@@ -91,13 +93,13 @@ class Named:
         """
         return self.__msg._getStringStream([self.__dir, filename], prefix = prefix)
 
-    def exists(self, filename):
+    def exists(self, filename) -> bool:
         """
         Checks if stream exists inside the named properties folder.
         """
         return self.__msg.exists([self.__dir, filename])
 
-    def sExists(self, filename):
+    def sExists(self, filename) -> bool:
         """
         Checks if the string stream exists inside the named properties folder.
         """
@@ -198,28 +200,28 @@ class NamedPropertyBase:
         self.__propertyStreamID = f'{0x8000 + self.__namedPropertyID:04X}'
 
     @property
-    def guid(self):
+    def guid(self) -> str:
         """
         The guid of the property's property set.
         """
         return self.__guid
 
     @property
-    def guidIndex(self):
+    def guidIndex(self) -> int:
         """
         The guid index of the property's property set.
         """
         return self.__guidIndex
 
     @property
-    def namedPropertyID(self):
+    def namedPropertyID(self) -> int:
         """
         The named property id.
         """
         return self.__namedPropertyID
 
     @property
-    def propertyStreamID(self):
+    def propertyStreamID(self) -> str:
         """
         An ID usable for grabbing the value stream.
         """
@@ -230,11 +232,18 @@ class NamedPropertyBase:
         return copy.deepcopy(entry)
 
     @property
-    def rawEntryStream(self):
+    def rawEntryStream(self) -> bytes:
         """
         The raw data used for the entry.
         """
         return self.__entry['rawStream']
+
+    @property
+    def type(self) -> NamedPropertyType:
+        """
+        The type of named property.
+        """
+        raise NotImplementedError('NamedPropertyBase cannot be used directly. Subclass it before using it.')
 
 
 
@@ -271,21 +280,21 @@ class StringNamedProperty(NamedPropertyBase):
             self.__streamID = 0x1000 + (crc32(name.encode('utf-16-le')) ^ (self.guidIndex << 1 | 1)) % 0x1F
 
     @property
-    def name(self):
+    def name(self) -> str:
         """
         The name of the property.
         """
         return self.__name
 
     @property
-    def streamID(self):
+    def streamID(self) -> int:
         """
         Returns the streamID of the named property. This may not be accurate.
         """
         return self.__streamID
 
     @property
-    def type(self):
+    def type(self) -> NamedPropertyType:
         """
         Returns the type of the named property. This will either be NUMERICAL_NAMED or STRING_NAMED.
         """
@@ -300,21 +309,21 @@ class NumericalNamedProperty(NamedPropertyBase):
         self.__streamID = 0x1000 + (entry['id'] ^ (self.guidIndex << 1)) % 0x1F
 
     @property
-    def propertyID(self):
+    def propertyID(self) -> str:
         """
         The actualy property id of the named property.
         """
         return self.__propertyID
 
     @property
-    def streamID(self):
+    def streamID(self) -> int:
         """
         Returns the streamID of the named property. This may not be accurate
         """
         return self.__streamID
 
     @property
-    def type(self):
+    def type(self) -> NamedPropertyType:
         """
         Returns the type of the named property. This will either be NUMERICAL_NAMED or STRING_NAMED.
         """

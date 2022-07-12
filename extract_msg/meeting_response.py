@@ -1,5 +1,7 @@
 import datetime
 
+from typing import Optional
+
 from . import constants
 from .enums import ResponseType
 from .meeting_related import MeetingRelated
@@ -15,10 +17,10 @@ class MeetingResponse(MeetingRelated):
         """
         Indicates if the response is a counter proposal.
         """
-        return self._ensureSetNamed('_appointmentCounterProposal', '8257', constants.PSETID_APPOINTMENT)
+        return self._ensureSetNamed('_appointmentCounterProposal', '8257', constants.PSETID_APPOINTMENT, overrideClass = bool, preserveNone = False)
 
     @property
-    def appointmentProposedDuration(self) -> int:
+    def appointmentProposedDuration(self) -> Optional[int]:
         """
         The proposed value for the appointmentDuration property for a counter
         proposal.
@@ -26,7 +28,7 @@ class MeetingResponse(MeetingRelated):
         return self._ensureSetNamed('_appointmentProposedDuration', '8256', constants.PSETID_APPOINTMENT)
 
     @property
-    def appointmentProposedEndWhole(self) -> datetime.datetime:
+    def appointmentProposedEndWhole(self) -> Optional[datetime.datetime]:
         """
         The proposal value for the appointmentEndWhole property for a counter
         proposal.
@@ -34,7 +36,7 @@ class MeetingResponse(MeetingRelated):
         return self._ensureSetNamed('_appointmentProposedEndWhole', '8251', constants.PSETID_APPOINTMENT)
 
     @property
-    def appointmentProposedStartWhole(self) -> datetime.datetime:
+    def appointmentProposedStartWhole(self) -> Optional[datetime.datetime]:
         """
         The proposal value for the appointmentStartWhole property for a counter
         proposal.
@@ -47,7 +49,7 @@ class MeetingResponse(MeetingRelated):
         Indicates if the user did not include any text in the body of the
         Meeting Response object.
         """
-        return self._ensureSetNamed('_isSilent', '0004', constants.PSETID_MEETING)
+        return self._ensureSetNamed('_isSilent', '0004', constants.PSETID_MEETING, overrideClass = bool, preserveNone = False)
 
     @property
     def promptSendUpdate(self) -> bool:
@@ -55,10 +57,10 @@ class MeetingResponse(MeetingRelated):
         Indicates that the Meeting Response object was out-of-date when it was
         received.
         """
-        return self._ensureSetNamed('_promptSendUpdate', '8045', constants.PSETID_COMMON)
+        return self._ensureSetNamed('_promptSendUpdate', '8045', constants.PSETID_COMMON, overrideClass = bool, preserveNone = False)
 
     @property
-    def responseType(self) -> ResponseType:
+    def responseType(self) -> Optional[ResponseType]:
         """
         The type of Meeting Response object.
         """

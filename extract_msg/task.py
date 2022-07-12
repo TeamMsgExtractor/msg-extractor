@@ -1,7 +1,7 @@
 import datetime
 import logging
 
-from typing import Set
+from typing import Optional, Set
 
 from . import constants
 from .enums import TaskAcceptance, TaskHistory, TaskMode, TaskMultipleRecipients, TaskOwnership, TaskState, TaskStatus
@@ -74,7 +74,7 @@ class Task(MessageBase):
         }
 
     @property
-    def percentComplete(self) -> float:
+    def percentComplete(self) -> Optional[float]:
         """
         Indicates whether a time-flagged Message object is complete. Returns a
         percentage in decimal form. 1.0 indicates it is complete.
@@ -82,7 +82,7 @@ class Task(MessageBase):
         return self._ensureSetNamed('_percentComplete', '8102', constants.PSETID_TASK)
 
     @property
-    def taskAcceptanceState(self) -> TaskAcceptance:
+    def taskAcceptanceState(self) -> Optional[TaskAcceptance]:
         """
         Indicates the acceptance state of the task.
         """
@@ -94,10 +94,10 @@ class Task(MessageBase):
         Indicates whether a task assignee has replied to a tesk request for this
         task object. Does not indicate if it was accepted or rejected.
         """
-        return self._ensureSetNamed('_taskAccepted', '8108', constants.PSETID_TASK)
+        return self._ensureSetNamed('_taskAccepted', '8108', constants.PSETID_TASK, overrideClass = bool, preserveNone = False)
 
     @property
-    def taskActualEffort(self) -> int:
+    def taskActualEffort(self) -> Optional[int]:
         """
         Indicates the number of minutes that the user actually spent working on
         a task.
@@ -105,14 +105,14 @@ class Task(MessageBase):
         return self._ensureSetNamed('_taskActualEffort', '8110', constants.PSETID_TASK)
 
     @property
-    def taskAssigner(self) -> str:
+    def taskAssigner(self) -> Optional[str]:
         """
         Specifies the name of the user that last assigned the task.
         """
         return self._ensureSetNamed('_taskAssigner', '8121', constants.PSETID_TASK)
 
     @property
-    def taskAssigners(self) -> bytes:
+    def taskAssigners(self) -> Optional[bytes]:
         """
         A stack of entries, each representing a task assigner. The most recent
         task assigner (that is, the top) appears at the bottom.
@@ -126,17 +126,17 @@ class Task(MessageBase):
         """
         Indicates if the task is complete.
         """
-        return self._ensureSetNamed('_taskComplete', '811C', constants.PSETID_TASK)
+        return self._ensureSetNamed('_taskComplete', '811C', constants.PSETID_TASK, overrideClass = bool, preserveNone = False)
 
     @property
-    def taskCustomFlags(self) -> int:
+    def taskCustomFlags(self) -> Optional[int]:
         """
         Custom flags set on the task.
         """
         return self._ensureSetNamed('_taskCustomFlags', '8139', constants.PSETID_TASK)
 
     @property
-    def taskDateCompleted(self) -> datetime.datetime:
+    def taskDateCompleted(self) -> Optional[datetime.datetime]:
         """
         The date when the user completed work on the task.
         """
@@ -149,10 +149,10 @@ class Task(MessageBase):
         False on a new Task object and True when the client generates the last
         recurring task.
         """
-        return self._ensureSetNamed('_taskDeadOccurrence', '8109', constants.PSETID_TASK)
+        return self._ensureSetNamed('_taskDeadOccurrence', '8109', constants.PSETID_TASK, overrideClass = bool, preserveNone = False)
 
     @property
-    def taskDueDate(self) -> datetime.datetime:
+    def taskDueDate(self) -> Optional[datetime.datetime]:
         """
         Specifies the date by which the user expects work on the task to be
         complete.
@@ -160,7 +160,7 @@ class Task(MessageBase):
         return self._ensureSetNamed('_taskDueDate', '8105', constants.PSETID_TASK)
 
     @property
-    def taskEstimatedEffort(self) -> int:
+    def taskEstimatedEffort(self) -> Optional[int]:
         """
         Indicates the number of minutes that the user expects to work on a task.
         """
@@ -173,24 +173,24 @@ class Task(MessageBase):
         the current user or user agent instead of by the processing of a task
         request.
         """
-        return self._ensureSetNamed('_taskFCreator', '811E', constants.PSETID_TASK)
+        return self._ensureSetNamed('_taskFCreator', '811E', constants.PSETID_TASK, overrideClass = bool, preserveNone = False)
 
     @property
     def taskFFixOffline(self) -> bool:
         """
         Indicates whether the value of the taskOwner property is correct.
         """
-        return self._ensureSetNamed('taskFFixOffline', '812C', constants.PSETID_TASK)
+        return self._ensureSetNamed('taskFFixOffline', '812C', constants.PSETID_TASK, overrideClass = bool, preserveNone = False)
 
     @property
     def taskFRecurring(self) -> bool:
         """
         Indicates whether the task includes a recurrence pattern.
         """
-        return self._ensureSetNamed('_taskFRecurring', '8126', constants.PSETID_TASK)
+        return self._ensureSetNamed('_taskFRecurring', '8126', constants.PSETID_TASK, overrideClass = bool, preserveNone = False)
 
     @property
-    def taskGlobalID(self) -> bytes:
+    def taskGlobalID(self) -> Optional[bytes]:
         """
         Specifies a unique GUID for this task, used to locate an existing task
         upon receipt of a task response or task update.
@@ -198,14 +198,14 @@ class Task(MessageBase):
         return self._ensureSetNamed('_taskGlobalID', '8519', constants.PSETID_COMMON)
 
     @property
-    def taskHistory(self) -> TaskHistory:
+    def taskHistory(self) -> Optional[TaskHistory]:
         """
         Indicates the type of change that was last made to the Task object.
         """
         return self._ensureSetNamed('_taskHistory', '811A', constants.PSETID_TASK, overrideClass = TaskHistory)
 
     @property
-    def taskLastDelegate(self) -> str:
+    def taskLastDelegate(self) -> Optional[str]:
         """
         Contains the name of the user who most recently assigned the task, or
         the user to whom it was most recently assigned.
@@ -213,14 +213,14 @@ class Task(MessageBase):
         return self._ensureSetNamed('_taskLastDelegate', '8125', constants.PSETID_TASK)
 
     @property
-    def taskLastUpdate(self) -> datetime.datetime:
+    def taskLastUpdate(self) -> Optional[datetime.datetime]:
         """
         The date and time of the most recent change made to the task object.
         """
         return self._ensureSetNamed('_taskLastUpdate', '8115', constants.PSETID_TASK)
 
     @property
-    def taskLastUser(self) -> str:
+    def taskLastUser(self) -> Optional[str]:
         """
         Contains the name of the most recent user to have been the owner of the
         task.
@@ -228,14 +228,14 @@ class Task(MessageBase):
         return self._ensureSetNamed('_taskLastUser', '8122', constants.PSETID_TASK)
 
     @property
-    def taskMode(self) -> TaskMode:
+    def taskMode(self) -> Optional[TaskMode]:
         """
         Used in a task communication. Should be 0 (UNASSIGNED) on task objects.
         """
         return self._ensureSetNamed('_taskMode', '8518', constants.PSETID_COMMON, overrideClass = TaskMode)
 
     @property
-    def taskMultipleRecipients(self) -> Set[TaskMultipleRecipients]:
+    def taskMultipleRecipients(self) -> Optional[Set[TaskMultipleRecipients]]:
         """
         Returns a set of flags that specify optimization hints about the
         recipients of a Task object.
@@ -243,7 +243,7 @@ class Task(MessageBase):
         return self._ensureSetNamed('_taskMultipleRecipients', '8120', constants.PSETID_TASK, overrideClass = TaskMultipleRecipients.fromBits)
 
     @property
-    def taskNoCompute(self) -> bool:
+    def taskNoCompute(self) -> Optional[bool]:
         """
         This value is not used and has no impact on a Task, but is provided for
         completeness.
@@ -251,28 +251,28 @@ class Task(MessageBase):
         return self._ensureSetNamed('_taskNoCompute', '8124', constants.PSETID_TASK)
 
     @property
-    def taskOrdinal(self) -> int:
+    def taskOrdinal(self) -> Optional[int]:
         """
         Specifies a number that aids custom sorting of Task objects.
         """
         return self._ensureSetNamed('_taskOrdinal', '8123', constants.PSETID_TASK, overrideClass = unsignedToSignedInt)
 
     @property
-    def taskOwner(self) -> str:
+    def taskOwner(self) -> Optional[str]:
         """
         Contains the name of the owner of the task.
         """
         return self._ensureSetNamed('_taskOwner', '811F', constants.PSETID_TASK)
 
     @property
-    def taskOwnership(self) -> TaskOwnership:
+    def taskOwnership(self) -> Optional[TaskOwnership]:
         """
         Contains the name of the owner of the task.
         """
         return self._ensureSetNamed('_taskOwnership', '8129', constants.PSETID_TASK, overrideClass = TaskOwnership)
 
     @property
-    def taskRecurrence(self) -> RecurrencePattern:
+    def taskRecurrence(self) -> Optional[RecurrencePattern]:
         """
         Contains a RecurrencePattern structure that provides information about
         recurring tasks.
@@ -284,10 +284,10 @@ class Task(MessageBase):
         """
         Indicates whether future recurring tasks need reminders.
         """
-        return self._ensureSetNamed('_taskResetReminder', '8107', constants.PSETID_TASK)
+        return self._ensureSetNamed('_taskResetReminder', '8107', constants.PSETID_TASK, overrideClass = bool, preserveNone = False)
 
     @property
-    def taskRole(self) -> str:
+    def taskRole(self) -> Optional[str]:
         """
         This value is not used and has no impact on a Task, but is provided for
         completeness.
@@ -295,21 +295,21 @@ class Task(MessageBase):
         return self._ensureSetNamed('_taskRole', '8127', constants.PSETID_TASK)
 
     @property
-    def taskStartDate(self) -> datetime.datetime:
+    def taskStartDate(self) -> Optional[datetime.datetime]:
         """
         Specifies the date on which the user expects work on the task to begin.
         """
         return self._ensureSetNamed('_taskStartDate', '8104', constants.PSETID_TASK)
 
     @property
-    def taskState(self) -> TaskState:
+    def taskState(self) -> Optional[TaskState]:
         """
         Indicates the current assignment state of the Task object.
         """
         return self._ensureSetNamed('_taskState', '8113', constants.PSETID_TASK, overrideClass = TaskState)
 
     @property
-    def taskStatus(self) -> TaskStatus:
+    def taskStatus(self) -> Optional[TaskStatus]:
         """
         The completion status of a task.
         """
@@ -321,7 +321,7 @@ class Task(MessageBase):
         Indicates whether the task assignee has been requested to send an email
         message upon completion of the assigned task.
         """
-        return self._ensureSetNamed('_taskStatusOnComplete', '8119', constants.PSETID_TASK)
+        return self._ensureSetNamed('_taskStatusOnComplete', '8119', constants.PSETID_TASK, overrideClass = bool, preserveNone = False)
 
     @property
     def taskUpdates(self) -> bool:
@@ -329,17 +329,17 @@ class Task(MessageBase):
         Indicates whether the task assignee has been requested to send a task
         update when the assigned Task object changes.
         """
-        return self._ensureSetNamed('_taskUpdates', '811B', constants.PSETID_TASK)
+        return self._ensureSetNamed('_taskUpdates', '811B', constants.PSETID_TASK, overrideClass = bool, preserveNone = False)
 
     @property
-    def taskVersion(self) -> int:
+    def taskVersion(self) -> Optional[int]:
         """
         Indicates which copy is the latest update of a Task object.
         """
         return self._ensureSetNamed('_taskVersion', '8112', constants.PSETID_TASK)
 
     @property
-    def teamTask(self) -> bool:
+    def teamTask(self) -> Optional[bool]:
         """
         This value is not used and has no impact on a Task, but is provided for
         completeness.
