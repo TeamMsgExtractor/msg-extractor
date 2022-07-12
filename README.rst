@@ -180,8 +180,7 @@ Additionally, this module has the following extras which can be optionally
 installed:
 
 * ``all``: Installs all of the extras.
-* ``mime``: Installs dependency used for mimetype generation when a mimetype is
-    not specified.
+* ``mime``: Installs dependency used for mimetype generation when a mimetype is not specified.
 
 Todo
 ----
