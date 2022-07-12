@@ -1,3 +1,6 @@
+**v0.35.3**
+* [[TeamMsgExtractor #280](https://github.com/TeamMsgExtractor/msg-extractor/issues/280)] Fix typing issue in `message_base.py`.
+
 **v0.35.2**
 * Made a change to the argument handling for `--no-folders`. Since it requires `--attachmentsOnly` to work, I simply made it error when it's not given to avoid confusion.
 * Updated README.
