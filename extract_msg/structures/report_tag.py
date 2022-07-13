@@ -11,7 +11,7 @@ class ReportTag:
 
     def __init__(self, data : bytes):
         self.__rawData = data
-        reader = BytesReader(reader)
+        reader = BytesReader(data)
 
         self.__cookie = reader.assertRead(b'PCDFEB09\x00')
 
