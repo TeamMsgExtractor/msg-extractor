@@ -1255,7 +1255,7 @@ class MessageBase(MSGFile):
         """
         Data that is used to correlate the report and the original message.
         """
-        return self.__ensureSet('_reportTag', '__substg1.0_00310102', False, overrideClass = ReportTag)
+        return self._ensureSet('_reportTag', '__substg1.0_00310102', False, overrideClass = ReportTag)
 
     @property
     def rtfBody(self) -> Optional[bytes]:

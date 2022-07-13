@@ -26,7 +26,7 @@ import olefile
 import tzlocal
 
 from html import escape as htmlEscape
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 from . import constants
 from .enums import AttachmentType
@@ -38,7 +38,7 @@ logger.addHandler(logging.NullHandler())
 logging.addLevelName(5, 'DEVELOPER')
 
 
-def addNumToDir(dirName : pathlib.Path) -> pathlib.Path:
+def addNumToDir(dirName : pathlib.Path) -> Optional[pathlib.Path]:
     """
     Attempt to create the directory with a '(n)' appended.
     """
@@ -52,7 +52,7 @@ def addNumToDir(dirName : pathlib.Path) -> pathlib.Path:
     return None
 
 
-def addNumToZipDir(dirName : pathlib.Path, _zip):
+def addNumToZipDir(dirName : pathlib.Path, _zip) -> Optional[pathlib.Path]:
     """
     Attempt to create the directory with a '(n)' appended.
     """
@@ -128,7 +128,7 @@ def createZipOpen(func):
     return _open
 
 
-def divide(string, length : int) -> list:
+def divide(string, length : int) -> List:
     """
     Divides a string into multiple substrings of equal length. If there is not
     enough for the last substring to be equal, it will simply use the rest of
@@ -149,7 +149,7 @@ def divide(string, length : int) -> list:
     return [string[length * x:length * (x + 1)] for x in range(int(ceilDiv(len(string), length)))]
 
 
-def filetimeToDatetime(rawTime : int):
+def filetimeToDatetime(rawTime : int) -> datetime.datetime:
     """
     Converts a filetime into a datetime.
 
@@ -205,23 +205,29 @@ def findWk(path = None):
     raise ExecutableNotFound('Could not find wkhtmltopdf.')
 
 
-def fromTimeStamp(stamp) -> datetime.datetime:
+def fromTimeStamp(stamp : int) -> datetime.datetime:
     """
     Returns a datetime from the UTC timestamp given the current timezone.
     """
     try:
         tz = tzlocal.get_localzone()
     except Exception as e:
+        # I know "generalized exception catching is bad" but if *any* exception
+        # happens here that is a subclass of Exception then something has gone
+        # wrong with tzlocal.
         raise TZError(f'Error occured using tzlocal. If you are seeing this, this is likely a problem with your installation ot tzlocal or tzdata.')
     return datetime.datetime.fromtimestamp(stamp, tz)
 
 
-def getCommandArgs(args):
+def getCommandArgs(args) -> argparse.Namespace:
     """
     Parse command-line arguments.
 
-    :raises IncompatibleOptionsError: if options are provided that are
+    :raises IncompatibleOptionsError: Some options were provided that are
         incompatible.
+    :raises ValueError: Something about the options was invalid. This could mean
+        an option was specified that requires another option or it could mean
+        that an option was looking for data that was not found.
     """
     parser = argparse.ArgumentParser(description = constants.MAINDOC, prog = 'extract_msg')
     outFormat = parser.add_mutually_exclusive_group()
@@ -317,7 +323,7 @@ def getCommandArgs(args):
     options = parser.parse_args(args)
 
     if options.outName and options.noFolders:
-        raise ValueError('--out-name is not compatible with --no-folders.')
+        raise IncompatibleOptionsError('--out-name is not compatible with --no-folders.')
 
     if options.dev or options.fileLogging:
         options.verbose = options.verbose or 1
@@ -365,7 +371,7 @@ def getCommandArgs(args):
 
     # Make it so outName can only be used on single files.
     if options.outName and options.fileArgs and len(options.fileArgs) > 0:
-        raise ValueError('--out-name is not supported when saving multiple MSG files.')
+        raise IncompatibleOptionsError('--out-name is not supported when saving multiple MSG files.')
 
     # Handle the verbosity level.
     if options.verbose == 0:
@@ -400,7 +406,7 @@ def getEncodingName(codepage : int) -> str:
         raise UnsupportedEncodingError(f'The codepage {codepage} ({constants.CODE_PAGES[codepage]}) is not currently supported by your version of Python.')
 
 
-def getFullClassName(inp):
+def getFullClassName(inp) -> str:
     return inp.__class__.__module__ + '.' + inp.__class__.__name__
 
 
@@ -444,7 +450,7 @@ def inputToBytes(stringInputVar, encoding) -> bytes:
         raise ConversionError('Cannot convert to bytes.')
 
 
-def inputToMsgpath(inp) -> list:
+def inputToMsgpath(inp) -> List:
     """
     Converts the input into an msg path.
     """
@@ -522,7 +528,7 @@ def msgpathToString(inp) -> str:
     return inp
 
 
-def openMsg(path, **kwargs):
+def openMsg(path, **kwargs) -> 'MSGFile':
     """
     Function to automatically open an MSG file and detect what type it is.
 
@@ -657,7 +663,7 @@ def openMsg(path, **kwargs):
         return msg
 
 
-def openMsgBulk(path, **kwargs) -> Union[List, Tuple]:
+def openMsgBulk(path, **kwargs) -> Union[List['MSGFile'], Tuple[Exception, Union[str, bytes]]]:
     """
     Takes the same arguments as openMsg, but opens a collection of msg files
     based on a wild card. Returns a list if successful, otherwise returns a
@@ -669,7 +675,7 @@ def openMsgBulk(path, **kwargs) -> Union[List, Tuple]:
         the file that failed.
     """
     files = []
-    for x in glob.glob(path):
+    for x in glob.glob(str(path)):
         try:
             files.append(openMsg(x, **kwargs))
         except Exception as e:
@@ -984,7 +990,7 @@ def setupLogging(defaultPath = None, defaultLevel = logging.WARN, logfile = None
     return True
 
 
-def tryGetMimetype(att, mimetype : Union[str, None]):
+def tryGetMimetype(att, mimetype : Union[str, None]) -> Union[str, None]:
     """
     Uses an optional dependency to try and get the mimetype of an attachment. If
     the mimetype has already been found, the optional dependency does not exist,
@@ -1028,7 +1034,7 @@ def unsignedToSignedInt(uInt : int) -> int:
     return constants.STI32.unpack(constants.STUI32.pack(uInt))[0]
 
 
-def unwrapMsg(msg : "MSGFile") -> Dict:
+def unwrapMsg(msg : 'MSGFile') -> Dict:
     """
     Takes a recursive message-attachment structure and unwraps it into a linear
     dictionary for easy iteration. Dictionary contains 4 keys: "attachments" for
@@ -1244,7 +1250,7 @@ def verifyPropertyId(id : str) -> None:
             raise InvaildPropertyIdError('ID was not a 4 digit hexadecimal string')
 
 
-def verifyType(_type):
+def verifyType(_type) -> str:
     """
     Verifies that the type is valid. Raises an exception if it is not.
 
@@ -1255,5 +1261,5 @@ def verifyType(_type):
             raise UnknownTypeError(f'Unknown type {_type}.')
 
 
-def windowsUnicode(string):
+def windowsUnicode(string) -> Optional[str]:
     return str(string, 'utf-16-le') if string is not None else None
