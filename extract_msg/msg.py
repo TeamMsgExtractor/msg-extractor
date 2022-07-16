@@ -232,7 +232,7 @@ class MSGFile:
             return getattr(self, variable)
         except AttributeError:
             try:
-                value = self.mainProperties[propertyName].value
+                value = self.props[propertyName].value
             except (KeyError, AttributeError):
                 value = None
             # Check if we should be overriding the data type for this instance.
@@ -333,9 +333,9 @@ class MSGFile:
         verifyPropertyId(propertyID)
         verifyType(_type)
         propertyID = propertyID.upper()
-        for x in (propertyID + _type,) if _type is not None else self.mainProperties:
+        for x in (propertyID + _type,) if _type is not None else self.props:
             if x.startswith(propertyID):
-                prop = self.mainProperties[x]
+                prop = self.props[x]
                 return True, (prop.value if isinstance(prop, FixedLengthProp) else prop)
         return False, None
 
@@ -375,7 +375,7 @@ class MSGFile:
                         streams = len(contents) // 8 # These lengths have 4 0x00 bytes at the end for seemingly no reason. They are "reserved" bytes
                     elif _type in ('1002', '1003', '1004', '1005', '1007', '1014', '1040', '1048'):
                         try:
-                            streams = self.mainProperties[x[-8:]].realLength
+                            streams = self.props[x[-8:]].realLength
                         except Exception:
                             logger.error(f'Could not find matching VariableLengthProp for stream {x}')
                             streams = len(contents) // (2 if _type in constants.MULTIPLE_2_BYTES else 4 if _type in constants.MULTIPLE_4_BYTES else 8 if _type in constants.MULTIPLE_8_BYTES else 16)
@@ -442,7 +442,7 @@ class MSGFile:
         verifyType(_type)
         _id = _id.upper()
         if propertiesInstance is None:
-            propertiesInstance = self.mainProperties
+            propertiesInstance = self.props
         prefixList = self.prefixList if prefix else []
         if location is not None:
             prefixList.append(location)
@@ -474,7 +474,7 @@ class MSGFile:
             inp = self.__prefix + inp
         return inp
 
-    def listDir(self, streams : bool = True, storages : bool = False):
+    def listDir(self, streams : bool = True, storages : bool = False) -> List[List]:
         """
         Replacement for OleFileIO.listdir that runs at the current prefix
         directory.
@@ -494,7 +494,7 @@ class MSGFile:
             self.__listDirRes[(streams, storages)] = [x for x in entries if len(x) > prefixLength and x[:prefixLength] == prefix]
             return self.__listDirRes[(streams, storages)]
 
-    def slistDir(self, streams : bool = True, storages : bool = False):
+    def slistDir(self, streams : bool = True, storages : bool = False) -> List[str]:
         """
         Replacement for OleFileIO.listdir that runs at the current prefix
         directory. Returns a list of strings instead of lists.
@@ -551,8 +551,8 @@ class MSGFile:
         try:
             return self.__bStringsUnicode
         except AttributeError:
-            if self.mainProperties.has_key('340D0003'):
-                if (self.mainProperties['340D0003'].value & 0x40000) != 0:
+            if self.props.has_key('340D0003'):
+                if (self.props['340D0003'].value & 0x40000) != 0:
                     self.__bStringsUnicode = True
                     return self.__bStringsUnicode
             self.__bStringsUnicode = False
@@ -705,6 +705,13 @@ class MSGFile:
 
     @property
     def mainProperties(self) -> Properties:
+        warnings.warn('`MSGFile.mainProperties` is deprecated and will soon' + \
+                      ' be removed. Please use `MSGFile.props` instead.',
+                      warnings.DeprecationWarning)
+        return self.props
+
+    @property
+    def props(self) -> Properties:
         """
         Returns the Properties instance used by the MSGFile instance.
         """
@@ -821,13 +828,13 @@ class MSGFile:
                 return self.__stringEncoding
             else:
                 # Well, it's not unicode. Now we have to figure out what it IS.
-                if not self.mainProperties.has_key('3FFD0003'):
+                if not self.props.has_key('3FFD0003'):
                     # If this property is not set by the client, we SHOULD set
                     # it to ISO-8859-15, but MAY set it to ISO-8859-1.
                     logger.warning('Encoding property not found. Defaulting to ISO-8859-15.')
                     self.__stringEncoding = 'iso-8859-15'
                 else:
-                    enc = self.mainProperties['3FFD0003'].value
+                    enc = self.props['3FFD0003'].value
                     # Now we just need to translate that value.
                     self.__stringEncoding = getEncodingName(enc)
                 return self.__stringEncoding

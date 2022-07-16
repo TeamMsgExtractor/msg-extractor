@@ -1,7 +1,7 @@
 from typing import Optional
 
 from ._helpers import BytesReader
-from .entry_id import EntryID
+from .entry_id import EntryID, FolderEntryID, MessageEntryID, StoreObjectEntryID
 
 
 class ReportTag:
@@ -18,25 +18,25 @@ class ReportTag:
         self.__version = reader.readUnsignedInt()
         entrySize = reader.readInt()
         if entrySize:
-            self.__storeEntryID = EntryID.autoCreate(reader.read(entrySize))
+            self.__storeEntryID = StoreObjectEntryID(reader.read(entrySize))
         else:
             self.__storeEntryID = None
 
         entrySize = reader.readInt()
         if entrySize:
-            self.__folderEntryID = EntryID.autoCreate(reader.read(entrySize))
+            self.__folderEntryID = FolderEntryID(reader.read(entrySize))
         else:
             self.__folderEntryID = None
 
         entrySize = reader.readInt()
         if entrySize:
-            self.__messageEntryID = EntryID.autoCreate(reader.read(entrySize))
+            self.__messageEntryID = MessageEntryID(reader.read(entrySize))
         else:
             self.__messageEntryID = None
 
         entrySize = reader.readInt()
         if entrySize:
-            self.__searchFolderEntryID = EntryID.autoCreate(reader.read(entrySize))
+            self.__searchFolderEntryID = FolderEntryID(reader.read(entrySize))
         else:
             self.__searchFolderEntryID = None
 

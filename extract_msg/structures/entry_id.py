@@ -4,7 +4,7 @@ from typing import Union
 from ._helpers import BytesReader
 from .. import constants
 from ..enums import AddressBookType, ContactAddressIndex, DisplayType, EntryIDType, MacintoshEncoding, MessageFormat, MessageType, OORBodyFormat
-from ..utils import bitwiseAdjustedAnd
+from ..utils import bitwiseAdjustedAnd, bytesToGuid
 
 
 logger = logging.getLogger(__name__)
@@ -45,12 +45,21 @@ class EntryID:
                 return ContactAddressEntryID(data)
             else:
                 return PersonalDistributionListEntryID(data)
-        if providerUID == EntryIDType.PERMANENT:
-            return PermanentEntryID(data)
-        if providerUID == EntryIDType.PUBLIC_MESSAGE_STORE:
-            return MessageEntryID(data)
+        if providerUID == EntryIDType.NNTP_NEWSGROUP_FOLDER:
+            # This is, of course, another one with a shared unique identifier.
+            # Technically it's the UID of the provider, but why do multiple
+            # structures use the same provider?
+            if data[20] == 0xC:
+                return NNTPNewsgroupFolderEntryID(data)
+            else:
+                return StoreObjectEntryID(data)
         if providerUID == EntryIDType.ONE_OFF_RECIPIENT:
             return OneOffRecipient(data)
+        if providerUID == EntryIDType.PUBLIC_MESSAGE_STORE:
+            if len(data) == 46:
+                return FolderEntryID(data)
+            else:
+                return MessageEntryID(data)
         if providerUID == EntryIDType.WRAPPED:
             return WrappedEntryID(data)
 
@@ -185,6 +194,46 @@ class ContactAddressEntryID(EntryID):
 
 
 
+class FolderEntryID(EntryID):
+    """
+    A Folder EntryID structure, as defined in [MS-OXCDATA].
+    """
+
+    __SIZE__ : int = 46
+
+    def __init__(self, data : bytes):
+        super().__init__(data)
+        reader = BytesReader(data[20:])
+        self.__folderType = MessageType(reader.readUnsignedShort())
+        self.__databaseGuid = bytesToGuid(reader.read(16))
+        # This entry is 6 bytes, so we pull some shenanigans to unpack it.
+        self.__globalCounter = constants.ST_LE_UI64.unpack(reader.read(6) + b'\x00\x00')
+        reader.assertNull(2, 'Pad bytes were not 0.')
+
+    @property
+    def databaseGuid(self) -> str:
+        """
+        A GUID associated with the Store Object and corresponding to the
+        ReplicaID field of the FID structure.
+        """
+        return self.__databaseGuid
+
+    @property
+    def folderType(self) -> MessageType:
+        """
+        The type of folder.
+        """
+        return self.__folderType
+
+    @property
+    def globalCounter(self) -> int:
+        """
+        An unsigned integer identifying the folder.
+        """
+        return self.__globalCounter
+
+
+
 class MessageEntryID(EntryID):
     """
     A Message EntryID structure, as defined in [MS-OXCDATA].
@@ -196,20 +245,20 @@ class MessageEntryID(EntryID):
         super().__init__(data)
         reader = BytesReader(data[20:])
         self.__messageType = MessageType(reader.readUnsignedShort())
-        self.__folderDatabaseGuid = reader.read(16)
+        self.__folderDatabaseGuid = bytesToGuid(reader.read(16))
         # This entry is 6 bytes, so we pull some shenanigans to unpack it.
-        self.__folderGlobalCounter = constants.STUI64.unpack(reader.read(6) + b'\x00\x00')
+        self.__folderGlobalCounter = constants.ST_LE_UI64.unpack(reader.read(6) + b'\x00\x00')
         reader.assertNull(2, 'Pad bytes were not 0.')
-        self.__messageDatabaseGuid = reader.read(16)
+        self.__messageDatabaseGuid = bytesToGuid(reader.read(16))
         # This entry is 6 bytes, so we pull some shenanigans to unpack it.
-        self.__messageGlobalCounter = constants.STUI64.unpack(reader.read(6) + b'\x00\x00')
+        self.__messageGlobalCounter = constants.ST_LE_UI64.unpack(reader.read(6) + b'\x00\x00')
         reader.assertNull(2, 'Pad bytes were not 0.')
         # Not sure why Microsoft decided to say "yes, let's do 2 6-byte integers
         # followed by 2 pad bits each" instead of just 2 8-byte integers with a
         # maximum value, but here we are.
 
     @property
-    def folderDatabaseGuid(self) -> bytes:
+    def folderDatabaseGuid(self) -> str:
         """
         A GUID associated with the Store object of the folder in which the
         message resides and corresponding to the ReplicaId field in the folder
@@ -225,7 +274,7 @@ class MessageEntryID(EntryID):
         return self.__folderGlobalCounter
 
     @property
-    def messageDatabaseGuid(self) -> bytes:
+    def messageDatabaseGuid(self) -> str:
         """
         A GUID associated with the Store object of the message and corresponding
         to the ReplicaId field of the Message ID structure.
@@ -245,6 +294,35 @@ class MessageEntryID(EntryID):
         The Store object type.
         """
         return self.__messageType
+
+
+
+class NNTPNewsgroupFolderEntryID(EntryID):
+    """
+    A NNTP Newsgroup Folder EntryID structure, as defined in [MS-OXCDATA].
+    """
+
+    def __init__(self, data : bytes):
+        super().__init__(data)
+        reader = BytesReader(data[20:])
+        self.__folderType = reader.readUnsignedShort()
+        if self.__folderType != 0x000C:
+            raise ValueError(f'Folder type was not 0x000C (got {self.__folderType})')
+        self.__newsgroupName = reader.readAnsiString()
+
+    @property
+    def folderType(self) -> int:
+        """
+        The type of folder. MUST be 0x000C.
+        """
+        return self.__folderType
+
+    @property
+    def newsgroupName(self) -> str:
+        """
+        The name of the newsgroup.
+        """
+        return self.__newsgroupName
 
 
 
@@ -413,6 +491,44 @@ class PersonalDistributionListEntryID(EntryID):
         """
         return self.__entryIdCount
 
+
+class StoreObjectEntryID(EntryID):
+    """
+    A Store Object EntryID structure, as defined in [MS-OXCDATA].
+    """
+
+    def __init__(self, data : bytes):
+        super().__init__(data)
+        reader = BytesReader(data[20:])
+
+        self.__version = reader.readUnsignedByte()
+        if self.__version != 0:
+            raise ValueError(f'Version was not set to 0 (got {self.__version}).')
+
+        self.__flag = reader.readUnsignedByte()
+        if self.__flag != 0:
+            raise ValueError(f'Flag was not set to 0 (got {self.__flag}).')
+
+        self.__dllFileName = reader.read(14)
+
+        self.__wrappedFlags = reader.readUnsignedInt()
+        if self.__wrappedFlags != 0:
+            raise ValueError(f'Wrapped flags was not set to 0 (got {self.__wrappedFlags}).')
+
+    @property
+    def dllFileName(self) -> bytes:
+        """
+        Must be set to b'emsmdb.dll\\x00\\x00\\x00\\x00'.
+        """
+        return self.__dllFileName
+
+    @property
+    def flag(self) -> int:
+        return self.__flag
+
+    @property
+    def version(self) -> int:
+        return self.__version
 
 
 class WrappedEntryID(EntryID):

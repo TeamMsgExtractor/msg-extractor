@@ -77,7 +77,7 @@ class Named:
     def __iter__(self):
         return self.__propertiesDict.__iter__()
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.__propertiesDict.__len__()
 
     def _getStream(self, filename, prefix = True) -> Optional[bytes]:
@@ -139,14 +139,14 @@ class Named:
         return self.__dir
 
     @property
-    def msg(self):
+    def msg(self) -> 'MSGFile':
         """
         Returns the Message instance the attachment belongs to.
         """
         return self.__msg
 
     @property
-    def namedProperties(self):
+    def namedProperties(self) -> Dict:
         """
         Returns a copy of the dictionary containing all the named properties.
         """

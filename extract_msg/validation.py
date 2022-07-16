@@ -25,8 +25,8 @@ def getStringDetails(instance, stream):
 
 def stringFE(instance):
     temp = '001E'
-    if instance.mainProperties.has_key('340D0003'):
-        temp = '001F' if instance.mainProperties['340D0003'].value & 0x40000 else '001E'
+    if instance.props.has_key('340D0003'):
+        temp = '001F' if instance.props['340D0003'].value & 0x40000 else '001E'
     tempnot = '001F' if temp == '001E' else '001E'
     confirmation = all(not x[-1].endswith(tempnot) for x in instance.listDir())
     if confirmation:

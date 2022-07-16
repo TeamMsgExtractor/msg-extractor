@@ -91,7 +91,7 @@ class MessageBase(MSGFile):
         # Initialize properties in the order that is least likely to cause bugs.
         # TODO have each function check for initialization of needed data so
         # these lines will be unnecessary.
-        self.mainProperties
+        self.props
         self.header
         self.recipients
 
@@ -1183,7 +1183,7 @@ class MessageBase(MSGFile):
         """
         Returns if this email has been marked as read.
         """
-        return bool(self.mainProperties['0E070003'].value & 1)
+        return bool(self.props['0E070003'].value & 1)
 
     @property
     def isSent(self) -> bool:
@@ -1191,10 +1191,10 @@ class MessageBase(MSGFile):
         Returns if this email has been marked as sent. Assumes True if no flags
         are found.
         """
-        if not self.mainProperties.get('0E070003'):
+        if not self.props.get('0E070003'):
             return True
         else:
-            return not bool(self.mainProperties['0E070003'].value & 8)
+            return not bool(self.props['0E070003'].value & 8)
 
     @property
     def messageId(self) -> Optional[str]:

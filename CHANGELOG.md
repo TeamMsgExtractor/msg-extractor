@@ -1,9 +1,14 @@
-**v0.35.4**
+**v0.36.0**
 * Improved type hints to tell when a function may not return anything.
 * Added support for the `reportTag` property to `MessageBase`. I noticed this was one of the properties for `IPM.Outlook.Recall` so I decided to implement it. I'll work on ensuring all of `[MS-OXOMSG]` and `[MS-OXCMSG]` are implemented at a later date, including splitting off `REPORT` into it's own class, because it is it's own class.
 * Fixed a few minor issues in some properties. Mostly some `bool` returning properties should have been returning False when they were not found instead of None. Ones that may return None are specifically typed as optional in the source code. Unfortunately using the `help` command doesn't seem to show the return type for properties for me at least on Python 3.9 and below.
 * Fixed `Attachment.save` returning a `pathlib.Path` object instead of a `str` after the conversion to `pathlib`.
 * Added code to allow `pathlib` objects in `utils.openMsgBulk`. It uses `glob.glob` which *cannot* take a `pathlib` object.
+* Removed `PermanentEntryID` from `EntryID.autoCreate`. It shares a provider ID with `AddressBookEntryID`, and as such would never generate from it anyways. If you specifically need a `PermanentEntryID` you will have to instantiate it manually. Additionally, the entry has been removed from `enums.EntryIDType`.
+* Fixed the GUIDs for some of the EntryID structures being returned as bytes instead of a standard GUID string. This is considered a breaking change and is the reason for the full version increase.
+* Improved consistency of properties (the Python kind, not the MSG kind) so that properties for the raw data used to create an instance will all use the same name. Not all classes have this, but the ones that do will now all use `rawData` as the property name.
+* Fixed the properties header being read in a way that actually swapped the values in it.
+* Modified `MSGFile` to use the same name for Properties instances as all other classes. `MSGFile.mainProperties` will currently raise a `DeprecationWarning` instead of outright failing to help ease the transition. Use `MSGFile.props` instead.
 
 **v0.35.3**
 * [[TeamMsgExtractor #280](https://github.com/TeamMsgExtractor/msg-extractor/issues/280)] Fix typing issue in `message_base.py`.

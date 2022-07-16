@@ -30,8 +30,8 @@ class PropBase:
     Base class for Prop instances.
     """
 
-    def __init__(self, string):
-        self.__raw = string
+    def __init__(self, data : bytes):
+        self.__rawData = data
         self.__name = properHex(string[3::-1]).upper()
         self.__type, self.__flags = constants.ST2.unpack(string)
         self.__fm = self.__flags & 1 == 1
@@ -39,49 +39,49 @@ class PropBase:
         self.__fw = self.__flags & 4 == 4
 
     @property
-    def flagMandatory(self):
+    def flagMandatory(self) -> bool:
         """
         Boolean, is the "mandatory" flag set?
         """
         return self.__fm
 
     @property
-    def flagReadable(self):
+    def flagReadable(self) -> bool:
         """
         Boolean, is the "readable" flag set?
         """
         return self.__fr
 
     @property
-    def flagWritable(self):
+    def flagWritable(self) -> bool:
         """
         Boolean, is the "writable" flag set?
         """
         return self.__fw
 
     @property
-    def flags(self):
+    def flags(self) -> int:
         """
         Integer that contains property flags.
         """
         return self.__flags
 
     @property
-    def name(self):
+    def name(self) -> str:
         """
         Property "name".
         """
         return self.__name
 
     @property
-    def raw(self):
+    def rawData(self) -> bytes:
         """
-        Raw binary string that defined the property.
+        The raw bytes used to create this object.
         """
         return self.__raw
 
     @property
-    def type(self):
+    def type(self) -> int:
         """
         The type of property.
         """
@@ -95,41 +95,41 @@ class FixedLengthProp(PropBase):
     Currently a work in progress.
     """
 
-    def __init__(self, string):
-        super().__init__(string)
-        self.__value = self.parseType(self.type, constants.STFIX.unpack(string)[0])
+    def __init__(self, data : bytes):
+        super().__init__(data)
+        self.__value = self.parseType(self.type, constants.STFIX.unpack(data)[0])
 
-    def parseType(self, _type, stream) -> Any:
+    def parseType(self, _type : int, stream : bytes) -> Any:
         """
         Converts the data in :param stream: to a much more accurate type,
         specified by :param _type:, if possible.
-        :param stream: #TODO what is stream for?
+        :param stream: The data that the value is extracted from.
 
         WARNING: Not done.
         """
         # WARNING Not done.
         value = stream
-        if _type == 0x0000:  # PtypUnspecified
+        if _type == 0x0000: # PtypUnspecified
             pass
-        elif _type == 0x0001:  # PtypNull
+        elif _type == 0x0001: # PtypNull
             if value != b'\x00\x00\x00\x00\x00\x00\x00\x00':
-                # DEBUG
+                # DEBUG.
                 logger.warning('Property type is PtypNull, but is not equal to 0.')
             value = None
-        elif _type == 0x0002:  # PtypInteger16
+        elif _type == 0x0002: # PtypInteger16
             value = constants.STI16.unpack(value)[0]
-        elif _type == 0x0003:  # PtypInteger32
+        elif _type == 0x0003: # PtypInteger32
             value = constants.STI32.unpack(value)[0]
-        elif _type == 0x0004:  # PtypFloating32
+        elif _type == 0x0004: # PtypFloating32
             value = constants.STF32.unpack(value)[0]
-        elif _type == 0x0005:  # PtypFloating64
+        elif _type == 0x0005: # PtypFloating64
             value = constants.STF64.unpack(value)[0]
-        elif _type == 0x0006:  # PtypCurrency
+        elif _type == 0x0006: # PtypCurrency
             value = (constants.STI64.unpack(value))[0] / 10000.0
-        elif _type == 0x0007:  # PtypFloatingTime
+        elif _type == 0x0007: # PtypFloatingTime
             value = constants.STF64.unpack(value)[0]
             return constants.PYTPFLOATINGTIME_START + datetime.timedelta(days = value)
-        elif _type == 0x000A:  # PtypErrorCode
+        elif _type == 0x000A: # PtypErrorCode
             value = constants.STI32.unpack(value)[0]
             try:
                 value = ErrorCodeType(value)
@@ -159,7 +159,7 @@ class FixedLengthProp(PropBase):
         return value
 
     @property
-    def value(self):
+    def value(self) -> Any:
         """
         Property value.
         """
@@ -171,9 +171,9 @@ class VariableLengthProp(PropBase):
     Class to contain the data for a single variable length property.
     """
 
-    def __init__(self, string):
-        super().__init__(string)
-        self.__length, self.__reserved = constants.STVAR.unpack(string)
+    def __init__(self, data : bytes):
+        super().__init__(data)
+        self.__length, self.__reserved = constants.STVAR.unpack(data)
         if self.type == 0x001E:
             self.__realLength = self.__length - 1
         elif self.type == 0x001F:
@@ -206,7 +206,7 @@ class VariableLengthProp(PropBase):
         return self.__realLength
 
     @property
-    def reservedFlags(self):
+    def reservedFlags(self) -> int:
         """
         The reserved flags field of the variable length property.
         """

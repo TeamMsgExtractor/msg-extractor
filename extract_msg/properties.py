@@ -3,9 +3,11 @@ import datetime
 import logging
 import pprint
 
+from typing import Any, Dict, Optional, Union
+
 from . import constants
 from .enums import Intelligence, PropertiesType
-from .prop import createProp
+from .prop import createProp, PropBase
 from .utils import divide, properHex
 
 
@@ -18,10 +20,10 @@ class Properties:
     Parser for msg properties files.
     """
 
-    def __init__(self, stream, type : PropertiesType = None, skip = None):
-        self.__stream = stream
+    def __init__(self, data : bytes, type : Optional[PropertiesType] = None, skip : Optional[int] = None):
+        self.__rawData = data
         self.__pos = 0
-        self.__len = len(stream)
+        self.__len = len(data)
         self.__props = {}
         self.__naid = None
         self.__nrid = None
@@ -32,10 +34,10 @@ class Properties:
             self.__intel = Intelligence.SMART
             if type == PropertiesType.MESSAGE:
                 skip = 32
-                self.__naid, self.__nrid, self.__ac, self.__rc = constants.ST1.unpack(self.__stream[:24])
+                self.__nrid, self.__naid, self.__rc, self.__ac = constants.ST1.unpack(self.__rawData[:24])
             elif type == PropertiesType.MESSAGE_EMBED:
                 skip = 24
-                self.__nrid, self.__naid, self.__rc, self.__ac = constants.ST1.unpack(self.__stream[:24])
+                self.__nrid, self.__naid, self.__rc, self.__ac = constants.ST1.unpack(self.__rawData[:24])
             else:
                 skip = 8
         else:
@@ -52,7 +54,7 @@ class Properties:
                 skip = self.__len % 16
                 if skip == 0:
                     skip = 32
-        streams = divide(self.__stream[skip:], 16)
+        streams = divide(self.__rawData[skip:], 16)
         for st in streams:
             if len(st) == 16:
                 prop = createProp(st)
@@ -61,7 +63,7 @@ class Properties:
                 logger.warning(f'Found stream from divide that was not 16 bytes: {st}. Ignoring.')
         self.__pl = len(self.__props)
 
-    def __contains__(self, key):
+    def __contains__(self, key) -> bool:
         self.__props.__contains__(key)
 
     def __getitem__(self, key):
@@ -70,19 +72,19 @@ class Properties:
     def __iter__(self):
         return self.__props.__iter__()
 
-    def __len__(self):
+    def __len__(self) -> int:
         """
         Returns the number of properties.
         """
         return self.__pl
 
-    @property
-    def __repr__(self):
-        return self.__props.__repr__
+    def __repr__(self) -> str:
+        return self.__props.__repr__()
 
-    def get(self, name, default = None):
+    def get(self, name, default = None) -> Optional[Union[PropBase, Any]]:
         """
-        Retrieve the property of :param name:.
+        Retrieve the property of :param name:. Returns the value of
+        :param default: if the property could not be found.
         """
         try:
             return self.__props[name]
@@ -119,13 +121,18 @@ class Properties:
     values.__doc__ = dict.values.__doc__
 
     @property
-    def attachmentCount(self):
+    def attachmentCount(self) -> int:
+        """
+        The number of Attachment objects for the MSGFile object.
+
+        :raises TypeError: The Properties instance is not for an MSGFile object.
+        """
         if self.__ac is None:
-            raise TypeError('Properties instance must be intelligent and of type TYPE_MESSAGE to get attachment count.')
+            raise TypeError('Properties instance must be intelligent and of type MESSAGE to get attachment count.')
         return self.__ac
 
     @property
-    def date(self):
+    def date(self) -> Optional[datetime.datetime]:
         """
         Returns the send date contained in the Properties file.
         """
@@ -149,35 +156,50 @@ class Properties:
         return self.__intel
 
     @property
-    def nextAttachmentId(self):
+    def nextAttachmentId(self) -> int:
+        """
+        The ID to use for naming the next Attachment object storage if one is
+        created inside the .msg file.
+
+        :raises TypeError: The Properties instance is not for an MSGFile object.
+        """
         if self.__naid is None:
-            raise TypeError(
-                'Properties instance must be intelligent and of type TYPE_MESSAGE to get next attachment id.')
+            raise TypeError('Properties instance must be intelligent and of type MESSAGE to get next attachment id.')
         return self.__naid
 
     @property
-    def nextRecipientId(self):
+    def nextRecipientId(self) -> int:
+        """
+        The ID to use for naming the next Recipient object storage if one is
+        created inside the .msg file.
+
+        :raises TypeError: The Properties instance is not for an MSGFile object.
+        """
         if self.__nrid is None:
-            raise TypeError(
-                'Properties instance must be intelligent and of type TYPE_MESSAGE to get next recipient id.')
+            raise TypeError('Properties instance must be intelligent and of type MESSAGE to get next recipient id.')
         return self.__nrid
 
     @property
-    def props(self):
+    def props(self) -> Dict:
         """
         Returns a copy of the internal properties dict.
         """
         return copy.deepcopy(self.__props)
 
     @property
-    def recipientCount(self) -> int:
-        if self.__rc is None:
-            raise TypeError('Properties instance must be intelligent and of type TYPE_MESSAGE to get recipient count.')
-        return self.__rc
+    def rawData(self) -> bytes:
+        """
+        The raw bytes used to create this object.
+        """
+        return self.__rawData
 
     @property
-    def stream(self):
+    def recipientCount(self) -> int:
         """
-        Returns the data stream used to generate this Properties instance.
+        The number of Recipient objects for the MSGFile object.
+
+        :raises TypeError: The Properties instance is not for an MSGFile object.
         """
-        return self.__stream
+        if self.__rc is None:
+            raise TypeError('Properties instance must be intelligent and of type MESSAGE to get recipient count.')
+        return self.__rc

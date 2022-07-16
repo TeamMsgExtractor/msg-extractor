@@ -119,7 +119,7 @@ class Recipient:
             setattr(self, variable, value)
             return value
 
-    def _getStream(self, filename):
+    def _getStream(self, filename) -> Optional[bytes]:
         """
         Gets a binary representation of the requested filename.
 
@@ -128,7 +128,7 @@ class Recipient:
         """
         return self.__msg._getStream([self.__dir, filename])
 
-    def _getStringStream(self, filename):
+    def _getStringStream(self, filename) -> Optional[str]:
         """
         Gets a string representation of the requested filename. Checks for both
         Unicode and Non-Unicode representations and returns a value if possible.
@@ -249,7 +249,7 @@ class Recipient:
         return self._ensureSet('_instanceKey', '__substg1.0_0FF60102', False)
 
     @property
-    def name(self):
+    def name(self) -> Optional[str]:
         """
         Returns the recipient's name.
         """
