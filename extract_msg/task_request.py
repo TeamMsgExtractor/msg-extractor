@@ -1,5 +1,7 @@
 import logging
 
+from typing import Optional
+
 from . import constants
 from .enums import TaskMode, TaskRequestType
 from .exceptions import StandardViolationError
@@ -52,10 +54,10 @@ class TaskRequest(MessageBase):
         Indicates whether a client has already processed a received task
         communication.
         """
-        return self._ensureSetProperty('_processed', '7D01000B')
+        return self._ensureSetProperty('_processed', '7D01000B', overrideClass = bool, preserveNone = False)
 
     @property
-    def taskMode(self) -> TaskMode:
+    def taskMode(self) -> Optional[TaskMode]:
         """
         The assignment status of the embedded Task object.
         """

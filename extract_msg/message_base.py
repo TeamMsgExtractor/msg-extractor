@@ -16,7 +16,7 @@ import compressed_rtf
 import RTFDE
 
 from email.parser import Parser as EmailParser
-from typing import Callable, Dict, Tuple, Union
+from typing import Callable, Dict, Optional, Tuple, Union
 
 from . import constants
 from .enums import DeencapType, RecipientType
@@ -25,6 +25,7 @@ from .exceptions import (
         IncompatibleOptionsError, WKError
     )
 from .msg import MSGFile
+from .structures.report_tag import ReportTag
 from .recipient import Recipient
 from .utils import (
         addNumToDir, addNumToZipDir, createZipOpen, findWk, htmlSanitize,
@@ -90,7 +91,7 @@ class MessageBase(MSGFile):
         # Initialize properties in the order that is least likely to cause bugs.
         # TODO have each function check for initialization of needed data so
         # these lines will be unnecessary.
-        self.mainProperties
+        self.props
         self.header
         self.recipients
 
@@ -108,7 +109,7 @@ class MessageBase(MSGFile):
         self.named
         self.namedProperties
 
-    def _genRecipient(self, recipientType, recipientInt : RecipientType):
+    def _genRecipient(self, recipientType, recipientInt : RecipientType) -> Optional[str]:
         """
         Returns the specified recipient field.
         """
@@ -154,7 +155,7 @@ class MessageBase(MSGFile):
 
             return value
 
-    def deencapsulateBody(self, rtfBody : bytes, bodyType : DeencapType):
+    def deencapsulateBody(self, rtfBody : bytes, bodyType : DeencapType) -> Optional[Union[bytes, str]]:
         """
         A function to deencapsulate the specified body from the rtfBody. Returns
         a string for plain text and bytes for HTML. If specified, uses the
@@ -878,14 +879,14 @@ class MessageBase(MSGFile):
         return self
 
     @property
-    def bcc(self):
+    def bcc(self) -> Optional[str]:
         """
         Returns the bcc field, if it exists.
         """
         return self._genRecipient('bcc', RecipientType.BCC)
 
     @property
-    def body(self):
+    def body(self) -> Optional[str]:
         """
         Returns the message body, if it exists.
         """
@@ -909,21 +910,21 @@ class MessageBase(MSGFile):
             return self._body
 
     @property
-    def cc(self):
+    def cc(self) -> Optional[str]:
         """
         Returns the cc field, if it exists.
         """
         return self._genRecipient('cc', RecipientType.CC)
 
     @property
-    def compressedRtf(self):
+    def compressedRtf(self) -> Optional[bytes]:
         """
         Returns the compressed RTF stream, if it exists.
         """
         return self._ensureSet('_compressedRtf', '__substg1.0_10090102', False)
 
     @property
-    def crlf(self):
+    def crlf(self) -> str:
         """
         Returns the value of self.__crlf, should you need it for whatever
         reason.
@@ -932,7 +933,7 @@ class MessageBase(MSGFile):
         return self.__crlf
 
     @property
-    def date(self):
+    def date(self) -> Optional[str]:
         """
         Returns the send date, if it exists.
         """
@@ -943,7 +944,7 @@ class MessageBase(MSGFile):
             return self._date
 
     @property
-    def deencapsulatedRtf(self) -> RTFDE.DeEncapsulator:
+    def deencapsulatedRtf(self) -> Optional[RTFDE.DeEncapsulator]:
         """
         Returns the instance of the deencapsulated RTF body. If there is no RTF
         body or the body is not encasulated, returns None.
@@ -1104,7 +1105,7 @@ class MessageBase(MSGFile):
         }
 
     @property
-    def htmlBody(self) -> bytes:
+    def htmlBody(self) -> Optional[bytes]:
         """
         Returns the html body, if it exists.
         """
@@ -1131,7 +1132,7 @@ class MessageBase(MSGFile):
             return self._htmlBody
 
     @property
-    def htmlBodyPrepared(self) -> bytes:
+    def htmlBodyPrepared(self) -> Optional[bytes]:
         """
         Returns the HTML body that has (where possible) the embedded attachments
         inserted into the body.
@@ -1171,7 +1172,7 @@ class MessageBase(MSGFile):
         return self.getInjectableHeader(prefix, joinStr, suffix, formatter)
 
     @property
-    def inReplyTo(self) -> str:
+    def inReplyTo(self) -> Optional[str]:
         """
         Returns the message id that this message is in reply to.
         """
@@ -1182,7 +1183,7 @@ class MessageBase(MSGFile):
         """
         Returns if this email has been marked as read.
         """
-        return bool(self.mainProperties['0E070003'].value & 1)
+        return bool(self.props['0E070003'].value & 1)
 
     @property
     def isSent(self) -> bool:
@@ -1190,13 +1191,13 @@ class MessageBase(MSGFile):
         Returns if this email has been marked as sent. Assumes True if no flags
         are found.
         """
-        if not self.mainProperties.get('0E070003'):
+        if not self.props.get('0E070003'):
             return True
         else:
-            return not bool(self.mainProperties['0E070003'].value & 8)
+            return not bool(self.props['0E070003'].value & 8)
 
     @property
-    def messageId(self) -> str:
+    def messageId(self) -> Optional[str]:
         try:
             return self._messageId
         except AttributeError:
@@ -1216,7 +1217,7 @@ class MessageBase(MSGFile):
         return email.utils.parsedate(self.date)
 
     @property
-    def receivedTime(self) -> datetime.datetime:
+    def receivedTime(self) -> Optional[datetime.datetime]:
         """
         The date and time the message was received by the server.
         """
@@ -1250,7 +1251,14 @@ class MessageBase(MSGFile):
             return self._recipients
 
     @property
-    def rtfBody(self) -> bytes:
+    def reportTag(self) -> Optional[ReportTag]:
+        """
+        Data that is used to correlate the report and the original message.
+        """
+        return self._ensureSet('_reportTag', '__substg1.0_00310102', False, overrideClass = ReportTag)
+
+    @property
+    def rtfBody(self) -> Optional[bytes]:
         """
         Returns the decompressed Rtf body from the message.
         """
@@ -1286,7 +1294,7 @@ class MessageBase(MSGFile):
         return self.getInjectableHeader(prefix, joinStr, suffix, formatter)
 
     @property
-    def sender(self) -> str:
+    def sender(self) -> Optional[str]:
         """
         Returns the message sender, if it exists.
         """
@@ -1316,14 +1324,14 @@ class MessageBase(MSGFile):
             return result
 
     @property
-    def subject(self):
+    def subject(self) -> Optional[str]:
         """
         Returns the message subject, if it exists.
         """
         return self._ensureSet('_subject', '__substg1.0_0037')
 
     @property
-    def to(self):
+    def to(self) -> Optional[str]:
         """
         Returns the to field, if it exists.
         """

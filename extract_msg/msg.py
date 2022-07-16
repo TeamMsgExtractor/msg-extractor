@@ -8,7 +8,8 @@ import zipfile
 
 import olefile
 
-from typing import List, Set, Union
+from typing import List, Optional, Set, Union
+from warnings import warn
 
 from . import constants
 from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment
@@ -232,7 +233,7 @@ class MSGFile:
             return getattr(self, variable)
         except AttributeError:
             try:
-                value = self.mainProperties[propertyName].value
+                value = self.props[propertyName].value
             except (KeyError, AttributeError):
                 value = None
             # Check if we should be overriding the data type for this instance.
@@ -269,7 +270,7 @@ class MSGFile:
             setattr(self, variable, value)
             return value
 
-    def _getStream(self, filename, prefix : bool = True) -> bytes:
+    def _getStream(self, filename, prefix : bool = True) -> Optional[bytes]:
         """
         Gets a binary representation of the requested filename.
 
@@ -284,7 +285,7 @@ class MSGFile:
             logger.info(f'Stream "{filename}" was requested but could not be found. Returning `None`.')
             return None
 
-    def _getStringStream(self, filename, prefix : bool = True) -> str:
+    def _getStringStream(self, filename, prefix : bool = True) -> Optional[str]:
         """
         Gets a string representation of the requested filename.
 
@@ -333,9 +334,9 @@ class MSGFile:
         verifyPropertyId(propertyID)
         verifyType(_type)
         propertyID = propertyID.upper()
-        for x in (propertyID + _type,) if _type is not None else self.mainProperties:
+        for x in (propertyID + _type,) if _type is not None else self.props:
             if x.startswith(propertyID):
-                prop = self.mainProperties[x]
+                prop = self.props[x]
                 return True, (prop.value if isinstance(prop, FixedLengthProp) else prop)
         return False, None
 
@@ -375,7 +376,7 @@ class MSGFile:
                         streams = len(contents) // 8 # These lengths have 4 0x00 bytes at the end for seemingly no reason. They are "reserved" bytes
                     elif _type in ('1002', '1003', '1004', '1005', '1007', '1014', '1040', '1048'):
                         try:
-                            streams = self.mainProperties[x[-8:]].realLength
+                            streams = self.props[x[-8:]].realLength
                         except Exception:
                             logger.error(f'Could not find matching VariableLengthProp for stream {x}')
                             streams = len(contents) // (2 if _type in constants.MULTIPLE_2_BYTES else 4 if _type in constants.MULTIPLE_4_BYTES else 8 if _type in constants.MULTIPLE_8_BYTES else 16)
@@ -442,7 +443,7 @@ class MSGFile:
         verifyType(_type)
         _id = _id.upper()
         if propertiesInstance is None:
-            propertiesInstance = self.mainProperties
+            propertiesInstance = self.props
         prefixList = self.prefixList if prefix else []
         if location is not None:
             prefixList.append(location)
@@ -464,7 +465,7 @@ class MSGFile:
                     foundNumber += 1
         return (foundNumber > 0), foundNumber
 
-    def fixPath(self, inp, prefix : bool = True):
+    def fixPath(self, inp, prefix : bool = True) -> str:
         """
         Changes paths so that they have the proper prefix (should :param prefix:
         be True) and are strings rather than lists or tuples.
@@ -474,7 +475,7 @@ class MSGFile:
             inp = self.__prefix + inp
         return inp
 
-    def listDir(self, streams : bool = True, storages : bool = False):
+    def listDir(self, streams : bool = True, storages : bool = False) -> List[List]:
         """
         Replacement for OleFileIO.listdir that runs at the current prefix
         directory.
@@ -494,7 +495,7 @@ class MSGFile:
             self.__listDirRes[(streams, storages)] = [x for x in entries if len(x) > prefixLength and x[:prefixLength] == prefix]
             return self.__listDirRes[(streams, storages)]
 
-    def slistDir(self, streams : bool = True, storages : bool = False):
+    def slistDir(self, streams : bool = True, storages : bool = False) -> List[str]:
         """
         Replacement for OleFileIO.listdir that runs at the current prefix
         directory. Returns a list of strings instead of lists.
@@ -551,8 +552,8 @@ class MSGFile:
         try:
             return self.__bStringsUnicode
         except AttributeError:
-            if self.mainProperties.has_key('340D0003'):
-                if (self.mainProperties['340D0003'].value & 0x40000) != 0:
+            if self.props.has_key('340D0003'):
+                if (self.props['340D0003'].value & 0x40000) != 0:
                     self.__bStringsUnicode = True
                     return self.__bStringsUnicode
             self.__bStringsUnicode = False
@@ -637,31 +638,31 @@ class MSGFile:
         Indicates whether the contents of this message are regarded as
         classified information.
         """
-        return self._ensureSetNamed('_classified', '85B5', constants.PSETID_COMMON)
+        return self._ensureSetNamed('_classified', '85B5', constants.PSETID_COMMON, overrideClass = bool, preserveNone = False)
 
     @property
-    def classType(self) -> str:
+    def classType(self) -> Optional[str]:
         """
         The class type of the MSG file.
         """
         return self._ensureSet('_classType', '__substg1.0_001A')
 
     @property
-    def commonEnd(self) -> datetime.datetime:
+    def commonEnd(self) -> Optional[datetime.datetime]:
         """
         The end time for the object.
         """
         return self._ensureSetNamed('_commonEnd', '8517', constants.PSETID_COMMON)
 
     @property
-    def commonStart(self) -> datetime.datetime:
+    def commonStart(self) -> Optional[datetime.datetime]:
         """
         The start time for the object.
         """
         return self._ensureSetNamed('_commonStart', '8516', constants.PSETID_COMMON)
 
     @property
-    def currentVersion(self) -> int:
+    def currentVersion(self) -> Optional[int]:
         """
         Specifies the build number of the client application that sent the
         message.
@@ -669,14 +670,14 @@ class MSGFile:
         return self._ensureSetNamed('_currentVersion', '8552', constants.PSETID_COMMON)
 
     @property
-    def currentVersionName(self) -> str:
+    def currentVersionName(self) -> Optional[str]:
         """
         Specifies the name of the client application that sent the message.
         """
         return self._ensureSetNamed('_currentVersionName', '8554', constants.PSETID_COMMON)
 
     @property
-    def importance(self) -> Importance:
+    def importance(self) -> Optional[Importance]:
         """
         The specified importance of the msg file.
         """
@@ -705,6 +706,12 @@ class MSGFile:
 
     @property
     def mainProperties(self) -> Properties:
+        warn('`MSGFile.mainProperties` is deprecated and will soon be ' + \
+             'removed. Please use `MSGFile.props` instead.', DeprecationWarning)
+        return self.props
+
+    @property
+    def props(self) -> Properties:
         """
         Returns the Properties instance used by the MSGFile instance.
         """
@@ -788,21 +795,21 @@ class MSGFile:
         return copy.deepcopy(self.__prefixList)
 
     @property
-    def priority(self) -> Priority:
+    def priority(self) -> Optional[Priority]:
         """
         The specified priority of the msg file.
         """
         return self._ensureSetProperty('_priority', '00260003', overrideClass = Priority)
 
     @property
-    def sensitivity(self) -> Sensitivity:
+    def sensitivity(self) -> Optional[Sensitivity]:
         """
         The specified sensitivity of the msg file.
         """
         return self._ensureSetProperty('_sensitivity', '00360003', overrideClass = Sensitivity)
 
     @property
-    def sideEffects(self) -> Set[SideEffect]:
+    def sideEffects(self) -> Optional[Set[SideEffect]]:
         """
         Controls how a Message object is handled by the client in relation to
         certain user interface actions by the user, such as deleting a message.
@@ -821,13 +828,13 @@ class MSGFile:
                 return self.__stringEncoding
             else:
                 # Well, it's not unicode. Now we have to figure out what it IS.
-                if not self.mainProperties.has_key('3FFD0003'):
+                if not self.props.has_key('3FFD0003'):
                     # If this property is not set by the client, we SHOULD set
                     # it to ISO-8859-15, but MAY set it to ISO-8859-1.
                     logger.warning('Encoding property not found. Defaulting to ISO-8859-15.')
                     self.__stringEncoding = 'iso-8859-15'
                 else:
-                    enc = self.mainProperties['3FFD0003'].value
+                    enc = self.props['3FFD0003'].value
                     # Now we just need to translate that value.
                     self.__stringEncoding = getEncodingName(enc)
                 return self.__stringEncoding

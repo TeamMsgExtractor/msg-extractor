@@ -2,6 +2,7 @@ import datetime
 import logging
 
 from functools import partial
+from typing import Optional
 
 from . import constants
 from .enums import AttachmentType, PropertiesType
@@ -144,10 +145,10 @@ class AttachmentBase:
             setattr(self, variable, value)
             return value
 
-    def _getStream(self, filename):
+    def _getStream(self, filename) -> Optional[bytes]:
         return self.__msg._getStream([self.__dir, filename])
 
-    def _getStringStream(self, filename):
+    def _getStringStream(self, filename) -> Optional[str]:
         """
         Gets a string representation of the requested filename.
         Checks for both ASCII and Unicode representations and returns
@@ -241,7 +242,7 @@ class AttachmentBase:
         return self.__msg.existsTypedProperty(id, self.__dir, _type, True, self.__props)
 
     @property
-    def attachmentEncoding(self) -> bytes:
+    def attachmentEncoding(self) -> Optional[bytes]:
         """
         The encoding information about the attachment object. Will return
         b'*\x86H\x86\xf7\x14\x03\x0b\x01' if encoded in MacBinary format,
@@ -250,7 +251,7 @@ class AttachmentBase:
         return self._ensureSet('_attachmentEncoding', '__substg1.0_37020102', False)
 
     @property
-    def additionalInformation(self) -> str:
+    def additionalInformation(self) -> Optional[str]:
         """
         The additional information about the attachment. This property MUST be
         an empty string if attachmentEncoding is not set. Otherwise it MUST be
@@ -261,7 +262,7 @@ class AttachmentBase:
         return self._ensureSet('_additionalInformation', '__substg1.0_370F')
 
     @property
-    def cid(self) -> str:
+    def cid(self) -> Optional[str]:
         """
         Returns the Content ID of the attachment, if it exists.
         """
@@ -278,7 +279,7 @@ class AttachmentBase:
         return self.__dir
 
     @property
-    def exceptionReplaceTime(self) -> datetime.datetime:
+    def exceptionReplaceTime(self) -> Optional[datetime.datetime]:
         """
         The original date and time at which the instance in the recurrence
         pattern would have occurred if it were not an exception.
@@ -288,7 +289,7 @@ class AttachmentBase:
         return self._ensureSetProperty('_exceptionReplaceTime', '7FF90040')
 
     @property
-    def extension(self) -> str:
+    def extension(self) -> Optional[str]:
         """
         The reported extension for the file.
         """
@@ -299,7 +300,7 @@ class AttachmentBase:
         """
         Indicates whether an Attachment object is hidden from the end user.
         """
-        return self._ensureSetProperty('_hidden', '7FFE000B')
+        return self._ensureSetProperty('_hidden', '7FFE000B', overrideClass = bool, preserveNone = False)
 
     @property
     def isAttachmentContactPhoto(self) -> bool:
@@ -309,14 +310,14 @@ class AttachmentBase:
         return self._ensureSetProperty('_isAttachmentContactPhoto', '7FFF000B', overrideClass = bool, preserveNone = False)
 
     @property
-    def longFilename(self) -> str:
+    def longFilename(self) -> Optional[str]:
         """
         Returns the long file name of the attachment, if it exists.
         """
         return self._ensureSet('_longFilename', '__substg1.0_3707')
 
     @property
-    def mimetype(self) -> str:
+    def mimetype(self) -> Optional[str]:
         """
         The content-type mime header of the attachment, if specified.
         """
@@ -330,7 +331,7 @@ class AttachmentBase:
         return self.__msg
 
     @property
-    def name(self) -> str:
+    def name(self) -> Optional[str]:
         """
         The best name available for the file. Uses long filename before short.
         """
@@ -344,7 +345,7 @@ class AttachmentBase:
         return self.__namedProperties
 
     @property
-    def payloadClass(self) -> str:
+    def payloadClass(self) -> Optional[str]:
         """
         The class name of an object that can display the contents of the
         message.
@@ -359,7 +360,7 @@ class AttachmentBase:
         return self.__props
 
     @property
-    def renderingPosition(self) -> int:
+    def renderingPosition(self) -> Optional[int]:
         """
         The offset, in redered characters, to use when rendering the attachment
         within the main message text. A value of 0xFFFFFFFF indicates a hidden
@@ -368,7 +369,7 @@ class AttachmentBase:
         return self._ensureSetProperty('_renderingPosition', '370B0003')
 
     @property
-    def shortFilename(self) -> str:
+    def shortFilename(self) -> Optional[str]:
         """
         Returns the short file name of the attachment, if it exists.
         """

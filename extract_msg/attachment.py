@@ -5,6 +5,8 @@ import random
 import string
 import zipfile
 
+from typing import Optional, Union
+
 from . import constants
 from .attachment_base import AttachmentBase
 from .enums import AttachmentType
@@ -51,7 +53,7 @@ class Attachment(AttachmentBase):
         else:
             raise TypeError('Unknown attachment type.')
 
-    def getFilename(self, **kwargs):
+    def getFilename(self, **kwargs) -> str:
         """
         Returns the filename to use for the attachment.
 
@@ -71,13 +73,14 @@ class Attachment(AttachmentBase):
             filename = customFilename
         else:
             # If not...
-            # Check if user wants to save the file under the Content-id
+            # Check if user wants to save the file under the Content-ID.
             if kwargs.get('contentId', False):
                 filename = self.cid
-            # If filename is None at this point, use long filename as first preference
+            # If filename is None at this point, use long filename as first
+            # preference.
             if not filename:
                 filename = self.longFilename
-            # Otherwise use the short filename
+            # Otherwise use the short filename.
             if not filename:
                 filename = self.shortFilename
             # Otherwise just make something up!
@@ -86,7 +89,7 @@ class Attachment(AttachmentBase):
 
         return filename
 
-    def regenerateRandomName(self):
+    def regenerateRandomName(self) -> str:
         """
         Used to regenerate the random filename used if the attachment cannot
         find a usable filename.
@@ -95,7 +98,7 @@ class Attachment(AttachmentBase):
                    ''.join(random.choice(string.ascii_uppercase + string.digits)
                            for _ in range(5)) + '.bin', 'ascii')
 
-    def save(self, **kwargs):
+    def save(self, **kwargs) -> Optional[Union[str, 'MSGFile']]:
         """
         Saves the attachment data.
 
@@ -199,7 +202,7 @@ class Attachment(AttachmentBase):
             if _zip and createdZip:
                 _zip.close()
 
-            return fullFilename
+            return str(fullFilename)
         else:
             self.saveEmbededMessage(**kwargs)
 
@@ -209,7 +212,7 @@ class Attachment(AttachmentBase):
 
             return self.msg
 
-    def saveEmbededMessage(self, **kwargs):
+    def saveEmbededMessage(self, **kwargs) -> None:
         """
         Seperate function from save to allow it to easily be overridden by a
         subclass.
@@ -217,14 +220,14 @@ class Attachment(AttachmentBase):
         self.data.save(**kwargs)
 
     @property
-    def data(self):
+    def data(self) -> Optional[Union[bytes, 'MSGFile']]:
         """
         Returns the attachment data.
         """
         return self.__data
 
     @property
-    def randomFilename(self):
+    def randomFilename(self) -> str:
         """
         Returns the random filename to be used by this attachment.
         """

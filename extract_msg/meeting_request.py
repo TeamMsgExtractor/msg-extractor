@@ -1,6 +1,6 @@
 import datetime
 
-from typing import List, Set
+from typing import List, Optional, Set
 
 from . import constants
 from .meeting_related import MeetingRelated
@@ -13,7 +13,7 @@ class MeetingRequest(MeetingRelated):
     """
 
     @property
-    def appointmentMessageClass(self) -> str:
+    def appointmentMessageClass(self) -> Optional[str]:
         """
         Indicates the value of the PidTagMessageClass property of the Meeting
         object that is to be generated from the Meeting Request object. MUST
@@ -22,7 +22,7 @@ class MeetingRequest(MeetingRelated):
         return self._ensureSetNamed('_appointmentMessageClass', '0024', constants.PSETID_MEETING)
 
     @property
-    def calendarType(self) -> RecurCalendarType:
+    def calendarType(self) -> Optional[RecurCalendarType]:
         """
         The value of the CalendarType field from the PidLidAppointmentRecur
         property if the Meeting Request object represents a recurring series or
@@ -31,7 +31,7 @@ class MeetingRequest(MeetingRelated):
         return self._ensureSetNamed('_calendarType', '001C', constants.PSETID_MEETING, overrideClass = RecurCalendarType)
 
     @property
-    def changeHighlight(self) -> Set[MeetingObjectChange]:
+    def changeHighlight(self) -> Optional[Set[MeetingObjectChange]]:
         """
         Soecifies a bit field that indicates how the Meeting object has been
         changed.
@@ -47,7 +47,7 @@ class MeetingRequest(MeetingRelated):
         recurring series, and it was forwarded (even when forwarded by the
         organizer) rather than being an invitation sent by the organizer.
         """
-        return self._ensureSetNamed('_forwardInstance', '820A', constants.PSETID_APPOINTMENT)
+        return self._ensureSetNamed('_forwardInstance', '820A', constants.PSETID_APPOINTMENT, overrideClass = bool, preserveNone = False)
 
     @property
     def headerFormatProperties(self) -> constants.HEADER_FORMAT_TYPE:
@@ -128,7 +128,7 @@ class MeetingRequest(MeetingRelated):
 
 
     @property
-    def intendedBusyStatus(self) -> BusyStatus:
+    def intendedBusyStatus(self) -> Optional[BusyStatus]:
         """
         The value of the busyStatus on the Meeting object in the organizer's
         calendar at the time the Meeting Request object or Meeting Update object
@@ -137,21 +137,21 @@ class MeetingRequest(MeetingRelated):
         return self._ensureSetNamed('_intendedBusyStatus', '8224', constants.PSETID_APPOINTMENT, overrideClass = BusyStatus)
 
     @property
-    def meetingType(self) -> MeetingType:
+    def meetingType(self) -> Optional[MeetingType]:
         """
         The type of Meeting Request object or Meeting Update object.
         """
         return self._ensureSetNamed('_meetingType', '0026', constants.PSETID_MEETING, overrideClass = MeetingType)
 
     @property
-    def oldLocation(self) -> str:
+    def oldLocation(self) -> Optional[str]:
         """
         The original value of the location property before a meeting update.
         """
         return self._ensureSetNamed('_oldLocation', '0028', constants.PSETID_MEETING)
 
     @property
-    def oldWhenEndWhole(self) -> datetime.datetime:
+    def oldWhenEndWhole(self) -> Optional[datetime.datetime]:
         """
         The original value of the appointmentEndWhole property before a meeting
         update.
@@ -159,7 +159,7 @@ class MeetingRequest(MeetingRelated):
         return self._ensureSetNamed('_oldWhenEndWhole', '002A', constants.PSETID_MEETING)
 
     @property
-    def oldWhenStartWhole(self) -> datetime.datetime:
+    def oldWhenStartWhole(self) -> Optional[datetime.datetime]:
         """
         The original value of the appointmentStartWhole property before a
         meeting update.

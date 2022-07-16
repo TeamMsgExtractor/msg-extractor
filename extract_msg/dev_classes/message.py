@@ -63,7 +63,7 @@ class Message(olefile.OleFileIO):
             else:
                 self.filename = None
 
-        self.mainProperties
+        self.props
         recipientDirs = []
 
         for dir_ in self.listDir():
@@ -161,8 +161,8 @@ class Message(olefile.OleFileIO):
         try:
             return self.__bStringsUnicode
         except AttributeError:
-            if self.mainProperties.has_key('340D0003'):
-                if (self.mainProperties['340D0003'].value & 0x40000) != 0:
+            if self.props.has_key('340D0003'):
+                if (self.props['340D0003'].value & 0x40000) != 0:
                     self.__bStringsUnicode = True
                     return self.__bStringsUnicode
             self.__bStringsUnicode = False
@@ -203,7 +203,7 @@ class Message(olefile.OleFileIO):
             return self._date
 
     @property
-    def mainProperties(self):
+    def props(self):
         """
         Returns the Properties instance used by the Message instance.
         """
@@ -274,11 +274,11 @@ class Message(olefile.OleFileIO):
                 return self.__stringEncoding
             else:
                 # Well, it's not unicode. Now we have to figure out what it IS.
-                if not self.mainProperties.has_key('3FFD0003'):
+                if not self.props.has_key('3FFD0003'):
                     logger.error("String encoding is not unicode, but was also not specified. Malformed MSG file detected. Defaulting to utf-8")
                     self.__stringEncoding = 'utf-8'
                     return self.__stringEncoding
-                enc = self.mainProperties['3FFD0003'].value
+                enc = self.props['3FFD0003'].value
                 # Now we just need to translate that value
                 # Now, this next line SHOULD work, but it is possible that it might not...
                 self.__stringEncoding = str(enc)

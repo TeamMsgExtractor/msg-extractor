@@ -1,6 +1,6 @@
 import logging
 
-from typing import Union
+from typing import Optional, Union
 
 from .enums import MeetingRecipientType, PropertiesType, RecipientType
 from .prop import FixedLengthProp
@@ -119,7 +119,7 @@ class Recipient:
             setattr(self, variable, value)
             return value
 
-    def _getStream(self, filename):
+    def _getStream(self, filename) -> Optional[bytes]:
         """
         Gets a binary representation of the requested filename.
 
@@ -128,7 +128,7 @@ class Recipient:
         """
         return self.__msg._getStream([self.__dir, filename])
 
-    def _getStringStream(self, filename):
+    def _getStringStream(self, filename) -> Optional[str]:
         """
         Gets a string representation of the requested filename. Checks for both
         Unicode and Non-Unicode representations and returns a value if possible.
@@ -214,29 +214,25 @@ class Recipient:
         return self.__msg.existsTypedProperty(id, self.__dir, _type, True, self.__props)
 
     @property
-    def account(self):
+    def account(self) -> Optional[str]:
         """
         Returns the account of this recipient.
         """
         return self._ensureSet('_account', '__substg1.0_3A00')
 
     @property
-    def email(self):
+    def email(self) -> Optional[str]:
         """
         Returns the recipient's email.
         """
         return self.__email
 
     @property
-    def entryID(self):
+    def entryID(self) -> Optional[PermanentEntryID]:
         """
         Returns the recipient's Entry ID.
         """
-        try:
-            return self.__entryID
-        except AttributeError:
-            self.__entryID = PermanentEntryID(self._getStream('__substg1.0_0FFF0102'))
-            return self.__entryID
+        return self._ensureSet('_entryID', '__substg1.0_0FFF0102', False, overrideClass = PermanentEntryID)
 
     @property
     def formatted(self) -> str:
@@ -246,14 +242,14 @@ class Recipient:
         return self.__formatted
 
     @property
-    def instanceKey(self):
+    def instanceKey(self) -> Optional[bytes]:
         """
         Returns the instance key of this recipient.
         """
         return self._ensureSet('_instanceKey', '__substg1.0_0FF60102', False)
 
     @property
-    def name(self):
+    def name(self) -> Optional[str]:
         """
         Returns the recipient's name.
         """
@@ -267,28 +263,28 @@ class Recipient:
         return self.__props
 
     @property
-    def recordKey(self):
+    def recordKey(self) -> Optional[bytes]:
         """
         Returns the instance key of this recipient.
         """
         return self._ensureSet('_recordKey', '__substg1.0_0FF90102', False)
 
     @property
-    def searchKey(self):
+    def searchKey(self) -> Optional[bytes]:
         """
         Returns the search key of this recipient.
         """
         return self._ensureSet('_searchKey', '__substg1.0_300B0102', False)
 
     @property
-    def smtpAddress(self):
+    def smtpAddress(self) -> Optional[str]:
         """
         Returns the SMTP address of this recipient.
         """
         return self._ensureSet('_smtpAddress', '__substg1.0_39FE')
 
     @property
-    def transmittableDisplayName(self):
+    def transmittableDisplayName(self) -> Optional[str]:
         """
         Returns the transmittable display name of this recipient.
         """

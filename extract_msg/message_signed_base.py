@@ -3,6 +3,8 @@ import html
 import logging
 import re
 
+from typing import List, Optional
+
 from .exceptions import StandardViolationError
 from .message_base import MessageBase
 from .signed_attachment import SignedAttachment
@@ -54,7 +56,7 @@ class MessageSignedBase(MessageBase):
             self.attachments
 
     @property
-    def attachments(self) -> list:
+    def attachments(self) -> List:
         """
         Returns a list of all attachments.
 
@@ -76,12 +78,12 @@ class MessageSignedBase(MessageBase):
             # attachments.
             self._sAttachments = [self.__signedAttachmentClass(self, **att) for att in unwrapped['attachments']]
             self._signedBody = unwrapped['plain_body']
-            self._signedHtmlBody = unwrapped['html_body']
+            self._signedHtmlBody = inputToBytes(unwrapped['html_body'], 'utf-8')
 
             return self._sAttachments
 
     @property
-    def body(self):
+    def body(self) -> Optional[str]:
         """
         Returns the message body, if it exists.
         """
@@ -107,7 +109,7 @@ class MessageSignedBase(MessageBase):
             return self._body
 
     @property
-    def htmlBody(self) -> bytes:
+    def htmlBody(self) -> Optional[bytes]:
         """
         Returns the html body, if it exists.
         """
@@ -136,7 +138,7 @@ class MessageSignedBase(MessageBase):
             return self._htmlBody
 
     @property
-    def _rawAttachments(self):
+    def _rawAttachments(self) -> List:
         """
         A property to allow access to the non-signed attachments.
         """
@@ -150,7 +152,7 @@ class MessageSignedBase(MessageBase):
         return self.__signedAttachmentClass
 
     @property
-    def signedBody(self):
+    def signedBody(self) -> Optional[str]:
         """
         Returns the body from the signed message if it exists.
         """
@@ -161,7 +163,7 @@ class MessageSignedBase(MessageBase):
             return self._signedBody
 
     @property
-    def signedHtmlBody(self):
+    def signedHtmlBody(self) -> Optional[bytes]:
         """
         Returns the HTML body from the signed message if it exists.
         """
