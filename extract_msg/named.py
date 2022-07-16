@@ -2,7 +2,7 @@ import copy
 import logging
 import pprint
 
-from typing import Optional
+from typing import Dict, Optional
 
 from . import constants
 from .enums import NamedPropertyType
