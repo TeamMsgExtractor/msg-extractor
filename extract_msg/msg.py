@@ -581,6 +581,7 @@ class MSGFile:
                 try:
                     self._attachments.append(self.attachmentClass(self, attachmentDir))
                 except (NotImplementedError, UnrecognizedMSGTypeError) as e:
+                    print("Hello")
                     if self.attachmentErrorBehavior != AttachErrorBehavior.THROW:
                         logger.error(f'Error processing attachment at {attachmentDir}')
                         logger.exception(e)

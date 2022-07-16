@@ -301,9 +301,12 @@ def getCommandArgs(args) -> argparse.Namespace:
     # --no-folders
     parser.add_argument('--no-folders', dest='noFolders', action='store_true',
                         help='Stores everything in the location specified by --out. Requires --attachments-only and is incompatible with --out-name.')
-
-    parser.add_argument('--skip-embedded', dest = 'skipEmbedded', action='store_true',
+    # --skip-embedded
+    parser.add_argument('--skip-embedded', dest='skipEmbedded', action='store_true',
                         help='Skips all embedded MSG files when saving attachments.')
+    # --skip-not-implemented
+    parser.add_argument('--skip-not-implemented', '--skip-ni', dest='skipNotImplemented', action='store_true',
+                        help='Skips any attachments that are not implemented, allowing saving of the rest of the message.')
     # --out-name NAME
     inputFormat.add_argument('--out-name', dest='outName',
                         help='Name to be used with saving the file output. Cannot be used if you are saving more than one file.')
