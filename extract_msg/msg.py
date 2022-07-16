@@ -9,6 +9,7 @@ import zipfile
 import olefile
 
 from typing import List, Optional, Set, Union
+from warnings import warn
 
 from . import constants
 from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment
@@ -705,9 +706,8 @@ class MSGFile:
 
     @property
     def mainProperties(self) -> Properties:
-        warnings.warn('`MSGFile.mainProperties` is deprecated and will soon' + \
-                      ' be removed. Please use `MSGFile.props` instead.',
-                      warnings.DeprecationWarning)
+        warn('`MSGFile.mainProperties` is deprecated and will soon be ' + \
+             'removed. Please use `MSGFile.props` instead.', DeprecationWarning)
         return self.props
 
     @property

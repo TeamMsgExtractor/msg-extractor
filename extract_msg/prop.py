@@ -14,15 +14,15 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-def createProp(string) -> 'PropBase':
-    temp = constants.ST2.unpack(string)[0]
+def createProp(data : bytes) -> 'PropBase':
+    temp = constants.ST2.unpack(data)[0]
     if temp in constants.FIXED_LENGTH_PROPS:
-        return FixedLengthProp(string)
+        return FixedLengthProp(data)
     else:
         if temp not in constants.VARIABLE_LENGTH_PROPS:
             # DEBUG
             logger.warning(f'Unknown property type: {properHex(temp)}')
-        return VariableLengthProp(string)
+        return VariableLengthProp(data)
 
 
 class PropBase:
@@ -32,8 +32,8 @@ class PropBase:
 
     def __init__(self, data : bytes):
         self.__rawData = data
-        self.__name = properHex(string[3::-1]).upper()
-        self.__type, self.__flags = constants.ST2.unpack(string)
+        self.__name = properHex(data[3::-1]).upper()
+        self.__type, self.__flags = constants.ST2.unpack(data)
         self.__fm = self.__flags & 1 == 1
         self.__fr = self.__flags & 2 == 2
         self.__fw = self.__flags & 4 == 4
