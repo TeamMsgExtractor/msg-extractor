@@ -5,6 +5,7 @@ import traceback
 import zipfile
 
 from extract_msg import __doc__, utils
+from extract_msg.enums import AttachErrorBehavior
 
 
 def main() -> None:
@@ -67,6 +68,7 @@ def main() -> None:
             'preparedHtml': args.preparedHtml,
             'rtf': args.rtf,
             'skipEmbedded': args.skipEmbedded,
+            'skipNotImplemented': args.skipNotImplemented,
             'useMsgFilename': args.useFilename,
             'wkOptions': args.wkOptions,
             'wkPath': args.wkPath,
@@ -76,6 +78,11 @@ def main() -> None:
         openKwargs = {
             'ignoreRtfDeErrors': args.ignoreRtfDeErrors,
         }
+
+        # If we are skipping the NotImplementedError attachments, we need to
+        # suppress the error.
+        if args.skipNotImplemented:
+            openKwargs['attachmentErrorBehavior'] = AttachErrorBehavior.NOT_IMPLEMENTED
 
         def strSanitize(inp):
             """

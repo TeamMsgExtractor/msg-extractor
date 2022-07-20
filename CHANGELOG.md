@@ -1,3 +1,7 @@
+**v0.36.1**
+* [[TeamMsgExtractor #283](https://github.com/TeamMsgExtractor/msg-extractor/issues/283)] Added file for typing recognition.
+* Added new option to allow messages with `NotImplementedError` attachments to at least save everything not related to them. From the command line this would be `--skip-not-implemented` or `--skip-ni`. From the save function, this would be the `skipNotImplemented` option.
+
 **v0.36.0**
 * Improved type hints to tell when a function may not return anything.
 * Added support for the `reportTag` property to `MessageBase`. I noticed this was one of the properties for `IPM.Outlook.Recall` so I decided to implement it. I'll work on ensuring all of `[MS-OXOMSG]` and `[MS-OXCMSG]` are implemented at a later date, including splitting off `REPORT` into it's own class, because it is it's own class.
