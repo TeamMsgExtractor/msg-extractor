@@ -1,3 +1,6 @@
+**v0.36.2**
+* [[TeamMsgExtractor #286](https://github.com/TeamMsgExtractor/msg-extractor/issues/286)] Fix missing import.
+
 **v0.36.1**
 * [[TeamMsgExtractor #283](https://github.com/TeamMsgExtractor/msg-extractor/issues/283)] Added file for typing recognition.
 * Added new option to allow messages with `NotImplementedError` attachments to at least save everything not related to them. From the command line this would be `--skip-not-implemented` or `--skip-ni`. From the save function, this would be the `skipNotImplemented` option.
