@@ -1,7 +1,3 @@
-**v0.36.2**
-* Added an option to skip the body if it could not be found, rather than throwing an error. This will cause no file to be made for it in the event no valid body exists. For the save functions, this option is `skipBodyNotFound` and from the command line the option is `--skip-body-not-found`.
-* Fixed a bug that caused contacts to save the business phone with two colons instead of 1.
-
 **v0.36.1**
 * [[TeamMsgExtractor #283](https://github.com/TeamMsgExtractor/msg-extractor/issues/283)] Added file for typing recognition.
 * Added new option to allow messages with `NotImplementedError` attachments to at least save everything not related to them. From the command line this would be `--skip-not-implemented` or `--skip-ni`. From the save function, this would be the `skipNotImplemented` option.
