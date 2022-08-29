@@ -67,6 +67,7 @@ def main() -> None:
             'pdf': args.pdf,
             'preparedHtml': args.preparedHtml,
             'rtf': args.rtf,
+            'skipBodyNotFound': args.skipBodyNotFound,
             'skipEmbedded': args.skipEmbedded,
             'skipNotImplemented': args.skipNotImplemented,
             'useMsgFilename': args.useFilename,

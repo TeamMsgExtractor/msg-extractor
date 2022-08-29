@@ -8,7 +8,7 @@ from typing import List, Optional
 from .exceptions import StandardViolationError
 from .message_base import MessageBase
 from .signed_attachment import SignedAttachment
-from .utils import inputToBytes, inputToString, unwrapMultipart
+from .utils import inputToString, unwrapMultipart
 
 
 logger = logging.getLogger(__name__)

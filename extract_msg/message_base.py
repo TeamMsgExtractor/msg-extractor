@@ -659,6 +659,8 @@ class MessageBase(MSGFile):
         :param attachmentsOnly: Turns off saving the body and only saves the
             attachments when set.
         :param skipAttachments: Turns off saving attachments.
+        :param skipBodyNotFound: Suppresses errors if no valid body could be
+            found, simply skipping the step of saving the body.
         :param charset: If the html is being prepared, the charset to use for
             the Content-Type meta tag to insert. This exists to ensure that
             something parsing the html can properly determine the encoding (as
@@ -697,6 +699,9 @@ class MessageBase(MSGFile):
         attachOnly = kwargs.get('attachmentsOnly', False)
         # Track if we are skipping attachments.
         skipAttachments = kwargs.get('skipAttachments', False)
+        # Track if we should skip the body if no valid body is found instead of
+        # raising an exception.
+        skipBodyNotFound = kwargs.get('skipBodyNotFound', False)
 
         if pdf:
             kwargs['preparedHtml'] = True
@@ -810,21 +815,30 @@ class MessageBase(MSGFile):
                         useHtml = True
                         fext = 'html'
                     elif not allowFallback:
-                        raise DataNotFoundError('Could not find the htmlBody.')
+                        if skipBodyNotFound:
+                            fext = None
+                        else:
+                            raise DataNotFoundError('Could not find the htmlBody.')
 
                 if pdf:
                     if self.htmlBody:
                         usePdf = True
                         fext = 'pdf'
                     elif not allowFallback:
-                        raise DataNotFoundError('Count not find the htmlBody to convert to pdf.')
+                        if skipBodyNotFound:
+                            fext = None
+                        else:
+                            raise DataNotFoundError('Count not find the htmlBody to convert to pdf.')
 
                 if rtf or (html and not useHtml) or (pdf and not usePdf):
                     if self.rtfBody:
                         useRtf = True
                         fext = 'rtf'
                     elif not allowFallback:
-                        raise DataNotFoundError('Could not find the rtfBody.')
+                        if skipBodyNotFound:
+                            fext = None
+                        else:
+                            raise DataNotFoundError('Could not find the rtfBody.')
                     else:
                         # This was the last resort before plain text, so fall
                         # back to that.
@@ -837,10 +851,13 @@ class MessageBase(MSGFile):
                     # was found but was empty that is considered valid, so we
                     # specifically check against None.
                     if self.body is None:
-                        if allowFallback:
-                            raise DataNotFoundError('Could not find a valid body using current options.')
+                        if skipBodyNotFound:
+                            fext = None
                         else:
-                            raise DataNotFoundError('Plain text body could not be found.')
+                            if allowFallback:
+                                raise DataNotFoundError('Could not find a valid body using current options.')
+                            else:
+                                raise DataNotFoundError('Plain text body could not be found.')
 
 
             if not skipAttachments:
@@ -849,7 +866,7 @@ class MessageBase(MSGFile):
                 # Remove skipped attachments.
                 attachmentNames = [x for x in attachmentNames if x]
 
-            if not attachOnly:
+            if not attachOnly and fext:
                 with _open(str(path / ('message.' + fext)), mode) as f:
                     if _json:
                         emailObj = json.loads(self.getJson())

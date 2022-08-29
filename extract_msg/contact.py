@@ -714,7 +714,7 @@ class Contact(MessageBase):
                 'IM Address': self.instantMessagingAddress,
             },
             '-phone numbers-': {
-                'Business:': self.businessTelephoneNumber,
+                'Business': self.businessTelephoneNumber,
                 'Business 2': strListToStr(self.businessTelephone2Number),
                 'Assistant': self.assistantTelephoneNumber,
                 'Company Main Phone': self.companyMainTelephoneNumber,
