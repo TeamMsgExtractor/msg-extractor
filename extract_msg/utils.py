@@ -293,7 +293,7 @@ def getCommandArgs(args) -> argparse.Namespace:
     parser.add_argument('--allow-fallback', dest='allowFallback', action='store_true',
                         help='Tells the program to fallback to a different save type if the selected one is not possible.')
     # --skip-body-not-found
-    parser.add_argument('--skip-body-not-found', dest=skipBodyNotFound, action='store_true',
+    parser.add_argument('--skip-body-not-found', dest='skipBodyNotFound', action='store_true',
                         help='Skips saving the body if the body cannot be found, rather than throwing an error.')
     # --zip
     parser.add_argument('--zip', dest='zip',
