@@ -381,7 +381,7 @@ class MessageBase(MSGFile):
                 # fail if it is not possible.
                 parsedWkOptions = [*wkOptions]
             except TypeError:
-                raise TypeError(':param wkOptions: must be an iterable, not {type(wkOptions)}.')
+                raise TypeError(f':param wkOptions: must be an iterable, not {type(wkOptions)}.')
         else:
             parsedWkOptions = []
 
@@ -394,7 +394,9 @@ class MessageBase(MSGFile):
         # the data will go in and come out through stdin and stdout,
         # respectively. This way we don't have to write temporary
         # files to the disk. We also ask that it be quiet about it.
-        process = subprocess.Popen([wkPath, *parsedWkOptions, '-', '-'], shell = True, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+        processArgs = [wkPath, *parsedWkOptions, '-', '-']
+        logger.info(f'Converting to PDF with the following arguments: {processArgs}')
+        process = subprocess.Popen(processArgs, shell = True, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
         # Give the program the data and wait for the program to
         # finish.
         output = process.communicate(self.getSaveHtmlBody(**kwargs))
