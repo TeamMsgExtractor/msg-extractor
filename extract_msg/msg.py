@@ -523,7 +523,7 @@ class MSGFile:
             raise FileExistsError(f'File "{path}" already exists.')
         with zipfile.ZipFile(path, 'w', zipfile.ZIP_DEFLATED) as zfile:
             # Loop through all the directories
-            for dir_ in self.listdir():
+            for dir_ in self.listDir():
                 sysdir = '/'.join(dir_)
                 code = dir_[-1][-8:]
                 if constants.PROPERTIES.get(code):

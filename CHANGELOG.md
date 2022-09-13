@@ -1,3 +1,7 @@
+**v0.36.4**
+* [[TeamMsgExtractor #291](https://github.com/TeamMsgExtractor/msg-extractor/issues/291)] Fixed typo in `MSGFile.saveRaw` that may have existed for a significant amount of time. It was using the wrong function (same name, but with different capitalization) but was hidden until `MSGFile` stopped being derived from `OleFileIO`.
+* Updating funding information on GitHub and the `README` with more ways to support the module's development.
+
 **v0.36.3**
 * Added an option to skip the body if it could not be found, rather than throwing an error. This will cause no file to be made for it in the event no valid body exists. For the save functions, this option is `skipBodyNotFound` and from the command line the option is `--skip-body-not-found`.
 * Fixed a bug that caused contacts to save the business phone with two colons instead of 1.
