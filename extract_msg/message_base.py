@@ -393,7 +393,7 @@ class MessageBase(MSGFile):
         # args to Popen. I couldn't replicate it, but for some reason making it
         # a string fixed the issue.
         #processArgs = ' '.join(f'"{x}"' if ' ' in x and x[0] != '"' else x
-        #                      for x in (wkPath, *parsedWkOptions, '-', '-'))
+        #                      for x in map(os.fsdecode, (wkPath, *parsedWkOptions, '-', '-')))
         processArgs = [wkPath, *parsedWkOptions, '-', '-']
         # Log the arguments.
         logger.info(f'Converting to PDF with the following arguments: {processArgs}')
