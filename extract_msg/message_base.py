@@ -392,10 +392,12 @@ class MessageBase(MSGFile):
         # TeamMsgExtractor#291 showed a user who had issues with the list of
         # args to Popen. I couldn't replicate it, but for some reason making it
         # a string fixed the issue.
-        processArgs = ''.join(f'"{x}"' if ' ' in x and x[0] != '"'
-                              for x in (wkPath, *parsedWkOptions, '-', '-'))
+        #processArgs = ' '.join(f'"{x}"' if ' ' in x and x[0] != '"' else x
+        #                      for x in (wkPath, *parsedWkOptions, '-', '-'))
+        processArgs = [wkPath, *parsedWkOptions, '-', '-']
         # Log the arguments.
         logger.info(f'Converting to PDF with the following arguments: {processArgs}')
+
 
         # Get the html body *before* calling Popen.
         htmlBody = self.getSaveHtmlBody(**kwargs)
@@ -404,15 +406,15 @@ class MessageBase(MSGFile):
         # will go in and come out through stdin and stdout, respectively. This
         # way we don't have to write temporary files to the disk. We also ask
         # that it be quiet about it.
-        process = subprocess.Popen(processArgs, shell = True, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+        process = subprocess.run(processArgs, input = htmlBody, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
         # Give the program the data and wait for the program to finish.
-        output = process.communicate(htmlBody)
+        #output = process.communicate(htmlBody)
 
         # If it errored, throw it as an exception.
         if process.returncode != 0:
-            raise WKError(output[1].decode('utf-8'))
+            raise WKError(process.stderr.decode('utf-8'))
 
-        return output[0]
+        return process.stdout
 
     def getSaveRtfBody(self, **kwargs) -> bytes:
         """
