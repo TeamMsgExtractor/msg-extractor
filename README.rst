@@ -147,7 +147,10 @@ Supporting The Module
 ---------------------
 
 If you'd like to donate to help support the development of the module, you can
-donate to Destiny at her Buy Me a Coffee page here: `Buy Me a Coffee`_
+donate to Destiny using one of the following services:
+* `Buy Me a Coffee`_
+* `Ko-fi`_
+* `Patreon`_
 
 Installation
 ------------
@@ -227,8 +230,8 @@ your access to the newest major version of extract-msg.
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
 
-.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.36.3-blue.svg
-   :target: https://pypi.org/project/extract-msg/0.36.3/
+.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.36.4-blue.svg
+   :target: https://pypi.org/project/extract-msg/0.36.4/
 
 .. |PyPI2| image:: https://img.shields.io/badge/python-3.6+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-367/
@@ -242,4 +245,6 @@ your access to the newest major version of extract-msg.
 .. _Seamus Tuohy: https://github.com/seamustuohy
 .. _Discord: https://discord.com/invite/B77McRmzdc
 .. _Buy Me a Coffee: https://www.buymeacoffee.com/DestructionE
+.. _Ko-fi: https://ko-fi.com/destructione
+.. _Patreon: https://www.patreon.com/DestructionE
 .. _msg-explorer: https://pypi.org/project/msg-explorer/

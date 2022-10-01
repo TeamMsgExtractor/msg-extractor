@@ -372,36 +372,44 @@ class MessageBase(MSGFile):
         # Immediately try to find the executable.
         wkPath = findWk(kwargs.get('wkPath'))
 
-        # First thing is first, we need to parse our wkOptions if
-        # they exist.
+        # First thing is first, we need to parse our wkOptions if they exist.
         wkOptions = kwargs.get('wkOptions')
         if wkOptions:
             try:
-                # Try to convert to a list, whatever it is, and
-                # fail if it is not possible.
+                # Try to convert to a list, whatever it is, and fail if it is
+                # not possible.
                 parsedWkOptions = [*wkOptions]
             except TypeError:
-                raise TypeError(':param wkOptions: must be an iterable, not {type(wkOptions)}.')
+                raise TypeError(f':param wkOptions: must be an iterable, not {type(wkOptions)}.')
         else:
             parsedWkOptions = []
 
-        # Confirm that all of our options we now have are either
-        # strings or bytes.
+        # Confirm that all of our options we now have are either strings or
+        # bytes.
         if not all(isinstance(option, (str, bytes)) for option in parsedWkOptions):
             raise TypeError(':param wkOptions: must be an iterable of strings and bytes.')
 
-        # We call the program to convert the html, but give tell it
-        # the data will go in and come out through stdin and stdout,
-        # respectively. This way we don't have to write temporary
-        # files to the disk. We also ask that it be quiet about it.
-        process = subprocess.Popen([wkPath, *parsedWkOptions, '-', '-'], shell = True, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-        # Give the program the data and wait for the program to
-        # finish.
-        output = process.communicate(self.getSaveHtmlBody(**kwargs))
-        if process.returncode != 0:
-            raise WKError(output[1].decode('utf-8'))
+        processArgs = [wkPath, *parsedWkOptions, '-', '-']
+        # Log the arguments.
+        logger.info(f'Converting to PDF with the following arguments: {processArgs}')
 
-        return output[0]
+
+        # Get the html body *before* calling Popen.
+        htmlBody = self.getSaveHtmlBody(**kwargs)
+
+        # We call the program to convert the html, but give tell it the data
+        # will go in and come out through stdin and stdout, respectively. This
+        # way we don't have to write temporary files to the disk. We also ask
+        # that it be quiet about it.
+        process = subprocess.run(processArgs, input = htmlBody, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+        # Give the program the data and wait for the program to finish.
+        #output = process.communicate(htmlBody)
+
+        # If it errored, throw it as an exception.
+        if process.returncode != 0:
+            raise WKError(process.stderr.decode('utf-8'))
+
+        return process.stdout
 
     def getSaveRtfBody(self, **kwargs) -> bytes:
         """
