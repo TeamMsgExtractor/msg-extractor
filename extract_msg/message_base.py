@@ -389,11 +389,6 @@ class MessageBase(MSGFile):
         if not all(isinstance(option, (str, bytes)) for option in parsedWkOptions):
             raise TypeError(':param wkOptions: must be an iterable of strings and bytes.')
 
-        # TeamMsgExtractor#291 showed a user who had issues with the list of
-        # args to Popen. I couldn't replicate it, but for some reason making it
-        # a string fixed the issue.
-        #processArgs = ' '.join(f'"{x}"' if ' ' in x and x[0] != '"' else x
-        #                      for x in map(os.fsdecode, (wkPath, *parsedWkOptions, '-', '-')))
         processArgs = [wkPath, *parsedWkOptions, '-', '-']
         # Log the arguments.
         logger.info(f'Converting to PDF with the following arguments: {processArgs}')

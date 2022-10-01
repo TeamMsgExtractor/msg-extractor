@@ -231,7 +231,7 @@ your access to the newest major version of extract-msg.
    :target: LICENSE.txt
 
 .. |PyPI3| image:: https://img.shields.io/badge/pypi-0.36.4-blue.svg
-   :target: https://pypi.org/project/extract-msg/0.36.5/
+   :target: https://pypi.org/project/extract-msg/0.36.4/
 
 .. |PyPI2| image:: https://img.shields.io/badge/python-3.6+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-367/
