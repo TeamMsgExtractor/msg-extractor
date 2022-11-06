@@ -1,3 +1,6 @@
+**v0.36.5**
+* Documented and exposed to the command line the ability to save the headers to it's own file when saving the msg file. Thanks to martin-mueller-cemas on GitHub for fixing this (and telling me I can switch the branch a pull request points to). I don't know when I added the code to allow the user to do it, but somehow it was never documented and never exposed to the command line.
+
 **v0.36.4**
 * [[TeamMsgExtractor #291](https://github.com/TeamMsgExtractor/msg-extractor/issues/291)] Fixed typo in `MSGFile.saveRaw` that may have existed for a significant amount of time. It was using the wrong function (same name, but with different capitalization) but was hidden until `MSGFile` stopped being derived from `OleFileIO`.
 * Added logging code to `MessageBase.getSavePdfBody` to log the list that is going to be used to run `wkhtmltopdf`. This is mainly for debugging purposes, to allow users to potentially see why their arguments may be failing.

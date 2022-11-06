@@ -298,6 +298,9 @@ def getCommandArgs(args) -> argparse.Namespace:
     # --zip
     parser.add_argument('--zip', dest='zip',
                         help='Path to use for saving to a zip file.')
+    # --save-header
+    parser.add_argument('--save-header', dest='saveHeader', action='store_true',
+                        help='Store the header in a separate file.')
     # --attachments-only
     outFormat.add_argument('--attachments-only', dest='attachmentsOnly', action='store_true',
                            help='Specify to only save attachments from an msg file.')
