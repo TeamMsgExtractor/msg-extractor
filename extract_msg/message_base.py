@@ -664,10 +664,10 @@ class MessageBase(MSGFile):
         to :param zip:. If :param zip: is set, :param customPath: will refer to
         a location inside the zip file.
 
-        :param saveHeader: Turns on saving the header as separate file when
-            set.
         :param attachmentsOnly: Turns off saving the body and only saves the
             attachments when set.
+        :param saveHeader: Turns on saving the header as a separate file when
+        set.
         :param skipAttachments: Turns off saving attachments.
         :param skipBodyNotFound: Suppresses errors if no valid body could be
             found, simply skipping the step of saving the body.
