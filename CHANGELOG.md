@@ -1,3 +1,10 @@
+**v0.37.0**
+* [[TeamMsgExtractor #303](https://github.com/TeamMsgExtractor/msg-extractor/issues/303)] Renamed internal variable that wasn't changed when the other instances or it were renamed.
+* [[TeamMsgExtractor #302](https://github.com/TeamMsgExtractor/msg-extractor/issues/302)] Fixed properties missing (a fatal MSG error) raising an unclear exception. It now uses `InvalidFileFormatError`.
+* Updated `README` to contain documentation on command line option added in previous version.
+* Removed `MSGFile.mainProperties` after deprecating it in v0.36.0.
+* Added new `Properties` `Intelligence` type: `ERROR`. This type is used when a properties instance is created but has something wrong with it that is not necessarily fatal. Currently the only thing that will cause it is the properties stream being 0 bytes.
+
 **v0.36.5**
 * Documented and exposed to the command line the ability to save the headers to it's own file when saving the msg file. Thanks to martin-mueller-cemas on GitHub for fixing this (and telling me I can switch the branch a pull request points to). I don't know when I added the code to allow the user to do it, but somehow it was never documented and never exposed to the command line.
 

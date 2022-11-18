@@ -53,7 +53,8 @@ class MSGFile:
             specified by the msg file. Do not report encoding errors caused by
             this.
 
-        :raises InvalidFileFormatError: If the file is not an OleFile.
+        :raises InvalidFileFormatError: If the file is not an OleFile or could
+            not be parsed as an MSG file.
         :raises IOError: If there is an issue opening the MSG file.
         :raises NameError: If the encoding provided is not supported.
         :raises TypeError: If the prefix is not a supported type.
@@ -706,12 +707,6 @@ class MSGFile:
         return self.__kwargs
 
     @property
-    def mainProperties(self) -> Properties:
-        warn('`MSGFile.mainProperties` is deprecated and will soon be ' + \
-             'removed. Please use `MSGFile.props` instead.', DeprecationWarning)
-        return self.props
-
-    @property
     def props(self) -> Properties:
         """
         Returns the Properties instance used by the MSGFile instance.
@@ -719,7 +714,12 @@ class MSGFile:
         try:
             return self._prop
         except AttributeError:
-            self._prop = Properties(self._getStream('__properties_version1.0'),
+            stream = self._getStream('__properties_version1.0')
+            if not stream:
+                # Raise the exception from None so we don't get all the "during
+                # the handling of the above exception" stuff.
+                raise InvalidFileFormatError('File does not contain a properties stream.') from None
+            self._prop = Properties(stream,
                                     PropertiesType.MESSAGE if self.prefix == '' else PropertiesType.MESSAGE_EMBED)
             return self._prop
 

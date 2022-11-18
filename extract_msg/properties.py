@@ -20,7 +20,9 @@ class Properties:
     Parser for msg properties files.
     """
 
-    def __init__(self, data : bytes, type : Optional[PropertiesType] = None, skip : Optional[int] = None):
+    def __init__(self, data : bytes, _type : Optional[PropertiesType] = None, skip : Optional[int] = None):
+        if not isinstance(data, bytes):
+            raise TypeError(':param data: MUST be bytes.')
         self.__rawData = data
         self.__pos = 0
         self.__len = len(data)
@@ -29,31 +31,34 @@ class Properties:
         self.__nrid = None
         self.__ac = None
         self.__rc = None
-        if type is not None:
-            type = PropertiesType(type)
-            self.__intel = Intelligence.SMART
-            if type == PropertiesType.MESSAGE:
-                skip = 32
-                self.__nrid, self.__naid, self.__rc, self.__ac = constants.ST1.unpack(self.__rawData[:24])
-            elif type == PropertiesType.MESSAGE_EMBED:
-                skip = 24
-                self.__nrid, self.__naid, self.__rc, self.__ac = constants.ST1.unpack(self.__rawData[:24])
-            else:
-                skip = 8
+        # Handle an empty properties stream.
+        if self.__len == 0:
+            self.__intel = Intelligence.ERROR
+            skip = 0
+        elif _type is not None:
+                _type = PropertiesType(_type)
+                self.__intel = Intelligence.SMART
+                if _type == PropertiesType.MESSAGE:
+                    skip = 32
+                    self.__nrid, self.__naid, self.__rc, self.__ac = constants.ST1.unpack(self.__rawData[:24])
+                elif _type == PropertiesType.MESSAGE_EMBED:
+                    skip = 24
+                    self.__nrid, self.__naid, self.__rc, self.__ac = constants.ST1.unpack(self.__rawData[:24])
+                else:
+                    skip = 8
         else:
             self.__intel = Intelligence.DUMB
             if skip is None:
-                # This section of the skip handling is not very good.
-                # While it does work, it is likely to create extra
-                # properties that are created from the properties file's
-                # header data. While that won't actually mess anything
-                # up, it is far from ideal. Basically, this is the dumb
-                # skip length calculation. Preferably, we want the type
-                # to have been specified so all of the additional fields
-                # will have been filled out
-                skip = self.__len % 16
-                if skip == 0:
-                    skip = 32
+                # This section of the skip handling is not very good. While it
+                # does work, it is likely to create extra properties that are
+                # created from the properties file's header data. While that
+                # won't actually mess anything up, it is far from ideal.
+                # Basically, this is the dumb skip length calculation.
+                # Preferably, we want the type to have been specified so all of
+                # the additional fields will have been filled out.
+                #
+                # If the skip would end up at 0, set it to 32.
+                skip = (self.__len % 16) or 32
         streams = divide(self.__rawData[skip:], 16)
         for st in streams:
             if len(st) == 16:
@@ -91,11 +96,11 @@ class Properties:
         except KeyError:
             # DEBUG
             logger.debug('KeyError exception.')
-            logger.debug(properHex(self.__stream))
+            logger.debug(properHex(self.__rawData))
             logger.debug(self.__props)
             return default
 
-    def has_key(self, key):
+    def has_key(self, key) -> bool:
         """
         Checks if :param key: is a key in the properties dictionary.
         """
@@ -107,7 +112,7 @@ class Properties:
     def keys(self):
         return self.__props.keys()
 
-    def pprintKeys(self):
+    def pprintKeys(self) -> None:
         """
         Uses the pprint function on a sorted list of keys.
         """
