@@ -91,7 +91,7 @@ class Properties:
         except KeyError:
             # DEBUG
             logger.debug('KeyError exception.')
-            logger.debug(properHex(self.__stream))
+            logger.debug(properHex(self.__rawData))
             logger.debug(self.__props)
             return default
 
