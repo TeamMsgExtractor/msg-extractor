@@ -89,6 +89,7 @@ refer to the usage information provided from the program's help dialog:
       --allow-fallback      Tells the program to fallback to a different save type if the selected one is not possible.
       --skip-body-not-found Skips saving the body if the body cannot be found, rather than throwing an error.
       --zip ZIP             Path to use for saving to a zip file.
+      --save-header         Store the header in a separate file.
       --attachments-only    Specify to only save attachments from an msg file.
       --no-folders          When used with --attachments-only, stores everything in the location specified by --out. Incompatible with --out-name.
       --skip-embedded       Skips all embedded MSG files when saving attachments.
@@ -230,8 +231,8 @@ your access to the newest major version of extract-msg.
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
 
-.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.36.5-blue.svg
-   :target: https://pypi.org/project/extract-msg/0.36.5/
+.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.37.0 -blue.svg
+   :target: https://pypi.org/project/extract-msg/0.37.0/
 
 .. |PyPI2| image:: https://img.shields.io/badge/python-3.6+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-367/

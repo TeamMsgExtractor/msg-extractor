@@ -1077,6 +1077,7 @@ class Importance(enum.Enum):
 
 
 class Intelligence(enum.Enum):
+    ERROR = -1
     DUMB = 0
     SMART = 1
 
