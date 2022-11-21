@@ -7,7 +7,7 @@ from . import constants
 from .utils import ceilDiv
 
 
-class OleWritter:
+class OleWriter:
     """
     Takes data to write to a compound binary format file, as specified in
     [MS-CFB].
@@ -87,9 +87,11 @@ class OleWritter:
         # were all a part of it.
         f.write(b'\xFC\xFF\xFF\xFF' * numDifat)
         # Second write that the next x sectors are all FAT sectors.
-        f.write(b'\xFD\xFF\xFF\xFF' * numberOfFat)
+        f.write(b'\xFD\xFF\xFF\xFF' * numFat)
 
         ### TODO: handle the rest of the actual sectors.
+        # TEMP!!!
+        f.write(b'\x88\x88\x88\x88' * (totalSectors - numDifat - numFat))
 
         # Finally, fill fat with markers to specify no block exists.
         freeSectors = totalSectors & 0x7F
@@ -132,7 +134,7 @@ class OleWritter:
         # an error.
         try:
             ### First we need to write the header.
-            self._writeHeader(f)
+            self._writeBeginning(f)
 
         finally:
             if opened:
