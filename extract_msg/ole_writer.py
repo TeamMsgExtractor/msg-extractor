@@ -7,6 +7,35 @@ from . import constants
 from .utils import ceilDiv
 
 
+class _DirectoryEntry:
+    """
+    Hidden class, will probably be modified later.
+    """
+    name : str = ''
+
+    def __init__(self):
+        pass
+
+    def toBytes(self):
+        """
+        Converts the entry to bytes to be writen to a file.
+        """
+        ret = b''
+        # First write the name and the name length.
+        if len(self.name) > 31:
+            raise ValueError('Name is too long for directory entry.')
+        if len(self.name) < 1:
+            raise ValueError('Directory entry must have a name.')
+
+        ret += self.name.encode('utf-16-le')
+        ret += b'\x00\x00' * (32 - len(self.name))
+
+        ret += constants.ST_LE_UI16.pack(len(self.name) + 1)
+
+        # TODO.
+
+
+
 class OleWriter:
     """
     Takes data to write to a compound binary format file, as specified in
@@ -78,6 +107,8 @@ class OleWriter:
         # Finally, fill out the last DIFAT sector with null entries.
         if numFat > 109:
             f.write(b'\xFF\xFF\xFF\xFF' * ((numFat - 109) % 127))
+            # Finally, make sure to write the end of chain marker for the DIFAT.
+            f.write(b'\xFE\xFF\xFF\xFF')
         else:
             f.write(b'\xFF\xFF\xFF\xFF' * (109 - numFat))
 
@@ -114,6 +145,8 @@ class OleWriter:
             newNumFat = ceilDiv(self.__numberOfSectors + numDifat, 127)
 
         return (numFat, numDifat, self.__numberOfSectors + numDifat + numFat)
+
+    def _writeDirectoryEntry(entry : _DirectoryEntry)
 
 
     def write(self, path) -> None:
