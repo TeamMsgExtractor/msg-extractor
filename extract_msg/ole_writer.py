@@ -404,40 +404,44 @@ class OleWriter:
         # First, find the current place in our dict to add the item.
         _dir = self.__dirEntries
         while len(pathList) > 1:
-            if pathlist[0] not in _dir:
+            if pathList[0] not in _dir:
+                print(pathList[0])
+                print(_dir)
+                print(self.__dirEntries)
                 # If no entry has been provided already for the directory, that
                 # is considered a fatal error.
                 raise ValueError('Path not found.')
-            _dir = _dir[pathlist[0]]
+            _dir = _dir[pathList[0]]
+            pathList.pop(0)
 
         # Now that we are in the right place, add our data.
         newEntry = _DirectoryEntry()
         if entry.entry_type == DirectoryEntryType.STORAGE:
             # Handle a storage entry.
             # First add the dict to our tree of items.
-            _dir[pathlist[0]] = {'::DirectoryEntry': newEntry}
+            _dir[pathList[0]] = {'::DirectoryEntry': newEntry}
 
             # Finally, setup the values for the stream.
             newEntry.name = entry.name
             newEntry.type = DirectoryEntryType.STORAGE
             newEntry.clsid = _unClsid(entry.clsid)
-            newEntry.stateBits = dwUserFlags
+            newEntry.stateBits = entry.dwUserFlags
         else:
             # Handle a stream entry.
             # First add the entry to out dict of entries.
-            _dir[pathlist[0]] = newEntry
+            _dir[pathList[0]] = newEntry
             newEntry.name = entry.name
             newEntry.type = DirectoryEntryType.STREAM
             newEntry.clsid = _unClsid(entry.clsid)
-            newEntry.stateBits = dwUserFlags
+            newEntry.stateBits = entry.dwUserFlags
 
             # Finally, handle the data.
             newEntry.data = data or b''
-            if len < 4096:
-                self.__numMinifatSectors += ceilDiv(len(data), 64)
+            if len(newEntry.data) < 4096:
+                self.__numMinifatSectors += ceilDiv(len(newEntry.data), 64)
             else:
                 self.__largeEntries.append(newEntry)
-                self.__largeEntrySectors += ceilDiv(len(data), 512)
+                self.__largeEntrySectors += ceilDiv(len(newEntry.data), 512)
 
 
         self.__dirEntryCount += 1
@@ -449,11 +453,14 @@ class OleWriter:
         """
         # List both storages and directories, but sort them by shortest length
         # first to prevent errors.
-        entries = msg.listDir(True, True)
+        entries = msg.listDir(True, True, False)
         entries.sort(key = len)
 
         for x in entries:
-            self.addOleEntry(x, msg._getOleEntry(x), msg._getStream(x))
+            print(x)
+            entry = msg._getOleEntry(x)
+            data = msg._getStream(x) if entry.entry_type == DirectoryEntryType.STREAM else None
+            self.addOleEntry(x, entry, data)
 
     def write(self, path) -> None:
         """
@@ -487,22 +494,27 @@ def _unClsid(clsid : str) -> bytes:
     """
     Converts the clsid from olefile.olefile._clsid back to bytes.
     """
+    if not clsid:
+        return b''
     clsid = clsid.replace('-', '')
-    return bytes((
-        int(clsid[6:8], 16),
-        int(clsid[4:6], 16),
-        int(clsid[2:4], 16),
-        int(clsid[0:2], 16),
-        int(clsid[10:12], 16),
-        int(clsid[8:10], 16),
-        int(clsid[14:16], 16),
-        int(clsid[12:14], 16),
-        int(clsid[16:18], 16),
-        int(clsid[18:20], 16),
-        int(clsid[20:22], 16),
-        int(clsid[22:24], 16),
-        int(clsid[24:26], 16),
-        int(clsid[26:28], 16),
-        int(clsid[28:30], 16),
-        int(clsid[30:32], 16),
-    ))
+    try:
+        return bytes((
+            int(clsid[6:8], 16),
+            int(clsid[4:6], 16),
+            int(clsid[2:4], 16),
+            int(clsid[0:2], 16),
+            int(clsid[10:12], 16),
+            int(clsid[8:10], 16),
+            int(clsid[14:16], 16),
+            int(clsid[12:14], 16),
+            int(clsid[16:18], 16),
+            int(clsid[18:20], 16),
+            int(clsid[20:22], 16),
+            int(clsid[22:24], 16),
+            int(clsid[24:26], 16),
+            int(clsid[26:28], 16),
+            int(clsid[28:30], 16),
+            int(clsid[30:32], 16),
+        ))
+    finally:
+        print(clsid)

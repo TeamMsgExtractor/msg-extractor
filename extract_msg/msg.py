@@ -492,14 +492,17 @@ class MSGFile:
             inp = self.__prefix + inp
         return inp
 
-    def listDir(self, streams : bool = True, storages : bool = False) -> List[List]:
+    def listDir(self, streams : bool = True, storages : bool = False, includePrefix : bool = True) -> List[List]:
         """
         Replacement for OleFileIO.listdir that runs at the current prefix
         directory.
+
+        :param includePrefix: If false, removed the part of the path that is the
+            prefix.
         """
         # Get the items from OleFileIO.
         try:
-            return self.__listDirRes[(streams, storages)]
+            return self.__listDirRes[(streams, storages, includePrefix)]
         except KeyError:
             entries = self.__ole.listdir(streams, storages)
             if not self.__prefix:
@@ -509,8 +512,12 @@ class MSGFile:
                 prefix.pop()
 
             prefixLength = self.__prefixLen
-            self.__listDirRes[(streams, storages)] = [x for x in entries if len(x) > prefixLength and x[:prefixLength] == prefix]
-            return self.__listDirRes[(streams, storages)]
+            entries = [x for x in entries if len(x) > prefixLength and x[:prefixLength] == prefix]
+            if not includePrefix:
+                entries = [x[prefixLength:] for x in entries]
+            self.__listDirRes[(streams, storages, includePrefix)] = entries
+
+            return self.__listDirRes[(streams, storages, includePrefix)]
 
     def slistDir(self, streams : bool = True, storages : bool = False) -> List[str]:
         """
