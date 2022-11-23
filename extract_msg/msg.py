@@ -18,7 +18,7 @@ from .exceptions import InvalidFileFormatError, UnrecognizedMSGTypeError
 from .named import Named, NamedProperties
 from .prop import FixedLengthProp
 from .properties import Properties
-from .utils import divide, getEncodingName, hasLen, inputToMsgpath, inputToString, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
+from .utils import divide, getEncodingName, hasLen, inputToMsgPath, inputToString, msgPathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
 
 
 logger = logging.getLogger(__name__)
@@ -271,6 +271,22 @@ class MSGFile:
             setattr(self, variable, value)
             return value
 
+    def _getOleEntry(self, filename, prefix : bool = True) -> olefile.OleDirectoryEntry:
+        """
+        Finds the directory entry from the olefile for the stream or storage
+        specified. Use '/' to get the root entry.
+        """
+        sid = -1
+        if filename == '/':
+            if prefix:
+                sid = self.__ole._find(self.__prefix)
+            else:
+                return self.__ole.direntries[sid = 0]
+        else:
+            sid = self.__ole._find(self.fixPath(filename, prefix))
+
+        return self.__ole.direntries[sid]
+
     def _getStream(self, filename, prefix : bool = True) -> Optional[bytes]:
         """
         Gets a binary representation of the requested filename.
@@ -448,7 +464,7 @@ class MSGFile:
         prefixList = self.prefixList if prefix else []
         if location is not None:
             prefixList.append(location)
-        prefixList = inputToMsgpath(prefixList)
+        prefixList = inputToMsgPath(prefixList)
         usableId = _id + _type if _type else _id
         foundNumber = 0
         foundStreams = []
@@ -471,7 +487,7 @@ class MSGFile:
         Changes paths so that they have the proper prefix (should :param prefix:
         be True) and are strings rather than lists or tuples.
         """
-        inp = msgpathToString(inp)
+        inp = msgPathToString(inp)
         if prefix:
             inp = self.__prefix + inp
         return inp
@@ -501,7 +517,7 @@ class MSGFile:
         Replacement for OleFileIO.listdir that runs at the current prefix
         directory. Returns a list of strings instead of lists.
         """
-        return [msgpathToString(x) for x in self.listDir(streams, storages)]
+        return [msgPathToString(x) for x in self.listDir(streams, storages)]
 
     def save(self, *args, **kwargs):
         raise NotImplementedError(f'Saving is not yet supported for the {self.__class__.__name__} class.')

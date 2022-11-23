@@ -459,14 +459,14 @@ def inputToBytes(stringInputVar, encoding) -> bytes:
         raise ConversionError('Cannot convert to bytes.')
 
 
-def inputToMsgpath(inp) -> List:
+def inputToMsgPath(inp) -> List:
     """
     Converts the input into an msg path.
     """
     if isinstance(inp, (list, tuple)):
         inp = '/'.join(inp)
-    ret = inputToString(inp, 'utf-8').replace('\\', '/').split('/')
-    return ret if ret[0] != '' else []
+    ret = [x for x in inputToString(inp, 'utf-8').replace('\\', '/').split('/') if x]
+    return ret
 
 
 def inputToString(bytesInputVar, encoding) -> str:
@@ -524,9 +524,9 @@ def filetimeToUtc(inp : int) -> float:
     return (inp - 116444736000000000) / 10000000.0
 
 
-def msgpathToString(inp) -> str:
+def msgPathToString(inp) -> str:
     """
-    Converts an msgpath (one of the internal paths inside an msg file) into a
+    Converts an MSG path (one of the internal paths inside an MSG file) into a
     string.
     """
     if inp is None:

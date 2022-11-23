@@ -456,6 +456,8 @@ ST_SYSTEMTIME = struct.Struct('<8H')
 ST_GUID = struct.Struct('<IHH8s')
 # Struct for unpacking a TimeZoneStruct from bytes.
 ST_TZ = struct.Struct('<iiiH16sH16s')
+# Struct for packing a compount file directory entry.
+ST_CF_DIR_ENTRY = struct.Struct('<64sHBBIII16sIQQIII')
 # Structs used by data.py
 ST_DATA_UI32 = struct.Struct('<I')
 ST_DATA_UI16 = struct.Struct('<H')
