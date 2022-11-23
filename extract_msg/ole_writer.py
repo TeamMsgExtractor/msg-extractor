@@ -131,7 +131,7 @@ class OleWriter:
         root.name = "Root Entry"
         root.type = DirectoryEntryType.ROOT_STORAGE
         # Add the location of the start of the mini stream.
-        root.startingSectorLocation = (startingSector + ceilDiv(self.__dirEntryCount, 4) + self.__numMinifat) if self.__numMinifat > 0 else 0xFFFFFFFE
+        root.startingSectorLocation = (startingSector + ceilDiv(self.__dirEntryCount, 4) + ceilDiv(self.__numMinifatSectors, 128)) if self.__numMinifat > 0 else 0xFFFFFFFE
         root.streamSize = self.__numMinifatSectors * 64
         entries = [root]
 
