@@ -5,9 +5,10 @@ import re
 from typing import List, Optional, Union
 
 from . import constants
-from .enums import Color
+from .enums import Color, DirectoryEntryType
 from .utils import ceilDiv, inputToMsgPath
-from red_black_tree_mod import RedBlackTree
+from olefile.olefile import OleDirectoryEntry
+from red_black_dict_mod import RedBlackTree
 
 
 class _DirectoryEntry:
@@ -32,7 +33,7 @@ class _DirectoryEntry:
     # This is the ID for the root of the child tree, if any.
     childID : int = 0xFFFFFFFF
     startingSectorLocation : int = 0
-    color : Color = Color.Black
+    color : Color = Color.BLACK
 
     clsid : bytes = b''
     data : bytes = b''
@@ -56,7 +57,7 @@ class _DirectoryEntry:
 
         return constants.ST_CF_DIR_ENTRY.pack(
                                               nameBytes,
-                                              len(nameBytes),
+                                              len(nameBytes) + 2,
                                               self.type,
                                               self.color,
                                               self.leftSiblingID,
@@ -67,7 +68,7 @@ class _DirectoryEntry:
                                               self.creationTime,
                                               self.modifiedTime,
                                               self.startingSectorLocation,
-                                              len(self.data)
+                                              getattr(self, 'streamSize', len(self.data)),
                                              )
 
 
@@ -78,13 +79,15 @@ class OleWriter:
     [MS-CFB].
     """
     def __init__(self):
-        raise NotImplementedError('This class is unfinished and not ready to be used.')
+        #raise NotImplementedError('This class is unfinished and not ready to be used.')
 
         #self.__numberOfSectors = 0
         # The root entry will always exist, so this must be at least 1.
         self.__dirEntryCount = 1
         self.__dirEntries = {}
         self.__largeEntries = []
+        self.__largeEntrySectors = 0
+        self.__numMinifatSectors = 0
 
     @property
     def __numberOfSectors(self) -> int:
@@ -92,7 +95,14 @@ class OleWriter:
         TODO: finish the calculation needed. For now this just notes how many
         sectors are needed for the directory entries.
         """
-        return ceilDiv(self.__dirEntryCount, 4)
+        return ceilDiv(self.__dirEntryCount, 4) + \
+               self.__numMinifat + \
+               ceilDiv(self.__numMinifat, 4) + \
+               self.__largeEntrySectors
+
+    @property
+    def __numMinifat(self) -> int:
+        return ceilDiv(self.__numMinifatSectors, 8)
 
     def _getFatSectors(self):
         """
@@ -110,6 +120,95 @@ class OleWriter:
             newNumFat = ceilDiv(self.__numberOfSectors + numDifat, 127)
 
         return (numFat, numDifat, self.__numberOfSectors + numDifat + numFat)
+
+    def _treeSort(self, startingSector : int) -> List[_DirectoryEntry]:
+        """
+        Uses red-black trees to sort the internal data in preparation for
+        writing the file, returning a list, in order, of the entries to write.
+        """
+        # First, create the root entry.
+        root = _DirectoryEntry()
+        root.name = "Root Entry"
+        root.type = DirectoryEntryType.ROOT_STORAGE
+        # Add the location of the start of the mini stream.
+        root.startingSectorLocation = (startingSector + ceilDiv(self.__dirEntryCount, 4) + self.__numMinifat) if self.__numMinifat > 0 else 0xFFFFFFFE
+        root.streamSize = self.__numMinifatSectors * 64
+        entries = [root]
+
+        toProcess = [(root, self.__dirEntries)]
+        # Continue looping while there is more to process.
+        while toProcess:
+            entry, currentItem = toProcess.pop()
+            if not currentItem:
+                continue
+            # If the current item *only* has the directory's entry and no stream
+            # entries, we are actually done.
+            # Create a tree and add all the items to it. We will add it as a
+            # tuple of the name and entry so it will actually sort.
+            tree = RedBlackTree()
+            for name in currentItem:
+                if not name.startswith('::'):
+                    val = currentItem[name]
+                    # If we find a directory entry, then we need to add it to
+                    # the processing list.
+                    if isinstance(val, dict):
+                        toProcess.append((val['::DirectoryEntry'], val))
+                        entries.append(val['::DirectoryEntry'])
+                    else:
+                        entries.append(val)
+
+                    # Add the data to the tree.
+                    tree.add(name, val)
+
+            # Now that everything is added, we need to take our root and add it
+            # as the child of the current entry.
+            entry.childTreeRoot = tree.value
+
+            # Now we need to go through each node and set it's data based on
+            # it's sort position.
+            for node in tree.in_order():
+                item = node.value
+                # Set the color immediately.
+                item.color = Color.BLACK if node.is_black else Color.RED
+                if node.left:
+                    val = node.left.value
+                    if isinstance(val, _DirectoryEntry):
+                        item.leftChild = val
+                    else:
+                        item.leftChild = val['::DirectoryEntry']
+                else:
+                    item.leftChild = None
+                if node.right:
+                    val = node.right.value
+                    if isinstance(val, _DirectoryEntry):
+                        item.rightChild = val
+                    else:
+                        item.rightChild = val['::DirectoryEntry']
+                else:
+                    item.rightChild = None
+
+        # Now that everything is connected, we loop over the entries list a few
+        # times and set the data values.
+        for _id, entry in enumerate(entries):
+            entry.id = _id
+
+        for entry in entries:
+            entry.leftSiblingID = entry.leftChild.id if entry.leftChild else 0xFFFFFFFF
+            entry.childID = entry.childTreeRoot.id if entry.childTreeRoot else 0xFFFFFFFF
+            entry.rightSiblingID = entry.rightChild.id if entry.rightChild else 0xFFFFFFFF
+
+        # Finally, let's figure out the sector IDs to be used for the mini data.
+        # We only need to do this for streams with a size less than 4096.
+
+        # Use this to track where the next thing goes in the mini FAT.
+        miniFATLocation = 0
+
+        for entry in entries:
+            if entry.type == DirectoryEntryType.STREAM and len(entry.data) < 4096:
+                entry.startingSectorLocation = miniFATLocation
+                miniFATLocation += ceilDiv(len(entry.data), 64)
+
+        return entries
 
     def _writeBeginning(self, f) -> int:
         """
@@ -220,8 +319,9 @@ class OleWriter:
         # them by checking a list that was make of entries which were only added
         # to that list if the size was more than 4096. The order in the list is
         # how they will eventually be stored into the file correctly.
-        for entry in largeStorage:
+        for entry in self.__largeEntries:
             size = ceilDiv(len(entry.data), 512)
+            entry.startingSectorLocation = offset + size
             for x in range(offset + 1, offset + size):
                 f.write(constants.ST_LE_UI32.pack(x))
 
@@ -238,101 +338,60 @@ class OleWriter:
         # Finally, return the current sector index for use in other places.
         return numDifat + numFat
 
-    def _writeDirectoryEntries(self, f, startingSector : int) -> List[_DirectorEntry]:
+    def _writeDirectoryEntries(self, f, startingSector : int) -> List[_DirectoryEntry]:
         """
         Writes out all the directory entries. Returns the list generated.
         """
         entries = self._treeSort(startingSector)
         for x in entries:
-            self._writeDirectoryEntry(self, f, x)
+            self._writeDirectoryEntry(f, x)
         if len(entries) & 3:
             f.write(((b'\x00\x00' * 34) + (b'\xFF\xFF' * 6) + (b'\x00\x00' * 24)) * (4 - (len(entries) & 3)))
 
         return entries
 
-    def _writeDirectoryEntry(self, f, entry : _DirectoryEntry):
+    def _writeDirectoryEntry(self, f, entry : _DirectoryEntry) -> None:
         """
         Writes the directory entry to the file f.
         """
         f.write(entry.toBytes())
 
-    def _treeSort(self, startingSector : int) -> List[_DirectoryEntry]:
+    def _writeFinal(self, f) -> None:
         """
-        Uses red-black trees to sort the internal data in preparation for
-        writing the file, returning a list, in order, of the entries to write.
+        Writes the final sectors of the file, consisting of the streams too
+        large for the mini FAT.
         """
-        # First, create the root entry.
-        root = _DirectorEntry()
-        root.name = "Root Entry"
-        root.type = DirectoryEntryType.ROOT_STORAGE
-        # Add the location of the start of the mini stream.
-        root.startingSectorLocation = (startingSector + ceilDiv(self.__dirEntryCount, 4) + self.__numMinifat) if self.__numMinifat > 0 else 0xFFFFFFFE
+        for x in self.__largeEntries:
+            f.write(x.data)
+            if len(x.data) & 511:
+                f.write(b'\x00' * (512 - (len(x.data) & 511)))
 
-        entries = [root]
+    def _writeMini(self, f, entries : List[_DirectoryEntry]) -> None:
+        """
+        Writes the mini FAT followed by the full mini stream.
+        """
+        # For each of the entires that are streams and less than 4096.
+        currentSector = 0
+        for x in entries:
+            if x.type == DirectoryEntryType.STREAM and len(x.data) < 4096:
+                size = ceilDiv(len(x.data), 64)
+                for x in range(currentSector + 1, currentSector + size):
+                    f.write(constants.ST_LE_UI32.pack(x))
+                f.write(b'\xFE\xFF\xFF\xFF')
+                currentSector += size
 
-        toProcess = [(root, self.__dirEntries)]
-        # Continue looping while there is more to process.
-        while toProcess:
-            entry, currentItem = toProcess.pop()
-            # If the current item *only* has the directory's entry and no stream
-            # entries, we are actually done.
-            # Create a tree and add all the items to it. We will add it as a
-            # tuple of the name and entry so it will actually sort.
-            tree = RedBlackTree()
-            for name in currentItem:
-                if not name.startswith('::'):
-                    val = currentItem[name]
-                    # If we find a directory entry, then we need to add it to
-                    # the processing list.
-                    if isinstance(val, dict):
-                        toProcess.append((val['::DirectoryEntry'], val))
-                        tree.append(val['::DirectoryEntry'])
-                    else:
-                        tree.append(val)
+        # Finally, write the remaining slots.
+        f.write(b'\xFF\xFF\xFF\xFF' * (128 - (currentSector & 127)))
 
-                    # Add the data to the tree.
-                    tree.add((name, val))
+        # Write the mini stream.
+        for x in entries:
+            f.write(x.data)
+            if len(x.data) & 63:
+                f.write(b'\x00' * (64 - (len(x.data) & 63)))
 
-            # Now that everything is added, we need to take our root and add it
-            # as the child of the current entry.
-            entry.childTreeRoot = tree.value[1]
-
-            # Now we need to go through each node and set it's data based on
-            # it's sort position.
-            for node in tree:
-                item = node.value[1]
-                # Set the color immediately.
-                item.color = Color.BLACK if node.is_black else Color.RED
-                if node.left:
-                    val = node.left.value[1]
-                    if isinstance(val, _DirectoryEntry):
-                        item.leftChild = val
-                    else:
-                        item.leftChild = val['::DirectoryEntry']
-                else:
-                    item.leftChild = None
-                if node.right:
-                    val = node.right.value[1]
-                    if isinstance(val, _DirectoryEntry):
-                        item.rightChild = val
-                    else:
-                        item.rightChild = val['::DirectoryEntry']
-                else:
-                    item.rightChild = None
-
-        # Now that everything is connected, we loop over the entries list a few
-        # times and set the data values.
-        for _id, entry in enumerate(entries):
-            entry.id = _id
-
-        for entry in entries:
-            entry.leftSiblingID = entry.leftChild.id if entry.leftChild else 0xFFFFFFFF
-            entry.childID = entry.childTreeRoot.id if entry.childTreeRoot else 0xFFFFFFFF
-            entry.rightSiblingID = entry.rightChild.id if entry.rightChild else 0xFFFFFFFF
-
-        # Finally, let's figure out the sector IDs to be used for the data.
-
-        return entries
+        # Pad the final mini stream block.
+        if self.__numMinifatSectors & 7:
+            f.write((b'\x00' * 64) * (8 - (self.__numMinifatSectors & 7)))
 
     def addOleEntry(self, path, entry : OleDirectoryEntry, data : Optional[bytes] = None) -> None:
         """
@@ -352,6 +411,34 @@ class OleWriter:
             _dir = _dir[pathlist[0]]
 
         # Now that we are in the right place, add our data.
+        newEntry = _DirectoryEntry()
+        if entry.entry_type == DirectoryEntryType.STORAGE:
+            # Handle a storage entry.
+            # First add the dict to our tree of items.
+            _dir[pathlist[0]] = {'::DirectoryEntry': newEntry}
+
+            # Finally, setup the values for the stream.
+            newEntry.name = entry.name
+            newEntry.type = DirectoryEntryType.STORAGE
+            newEntry.clsid = _unClsid(entry.clsid)
+            newEntry.stateBits = dwUserFlags
+        else:
+            # Handle a stream entry.
+            # First add the entry to out dict of entries.
+            _dir[pathlist[0]] = newEntry
+            newEntry.name = entry.name
+            newEntry.type = DirectoryEntryType.STREAM
+            newEntry.clsid = _unClsid(entry.clsid)
+            newEntry.stateBits = dwUserFlags
+
+            # Finally, handle the data.
+            newEntry.data = data or b''
+            if len < 4096:
+                self.__numMinifatSectors += ceilDiv(len(data), 64)
+            else:
+                self.__largeEntries.append(newEntry)
+                self.__largeEntrySectors += ceilDiv(len(data), 512)
+
 
         self.__dirEntryCount += 1
 
@@ -360,8 +447,13 @@ class OleWriter:
         """
         Copies the streams and stream information necessary from the MSG file.
         """
+        # List both storages and directories, but sort them by shortest length
+        # first to prevent errors.
+        entries = msg.listDir(True, True)
+        entries.sort(key = len)
 
-
+        for x in entries:
+            self.addOleEntry(x, msg._getOleEntry(x), msg._getStream(x))
 
     def write(self, path) -> None:
         """
@@ -381,8 +473,36 @@ class OleWriter:
         # an error.
         try:
             ### First we need to write the header.
-            self._writeBeginning(f)
-
+            offset = self._writeBeginning(f)
+            entries = self._writeDirectoryEntries(f, offset)
+            self._writeMini(f, entries)
+            self._writeFinal(f)
         finally:
             if opened:
                 f.close()
+
+
+
+def _unClsid(clsid : str) -> bytes:
+    """
+    Converts the clsid from olefile.olefile._clsid back to bytes.
+    """
+    clsid = clsid.replace('-', '')
+    return bytes((
+        int(clsid[6:8], 16),
+        int(clsid[4:6], 16),
+        int(clsid[2:4], 16),
+        int(clsid[0:2], 16),
+        int(clsid[10:12], 16),
+        int(clsid[8:10], 16),
+        int(clsid[14:16], 16),
+        int(clsid[12:14], 16),
+        int(clsid[16:18], 16),
+        int(clsid[18:20], 16),
+        int(clsid[20:22], 16),
+        int(clsid[22:24], 16),
+        int(clsid[24:26], 16),
+        int(clsid[26:28], 16),
+        int(clsid[28:30], 16),
+        int(clsid[30:32], 16),
+    ))

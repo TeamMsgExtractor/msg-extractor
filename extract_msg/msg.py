@@ -271,7 +271,7 @@ class MSGFile:
             setattr(self, variable, value)
             return value
 
-    def _getOleEntry(self, filename, prefix : bool = True) -> olefile.OleDirectoryEntry:
+    def _getOleEntry(self, filename, prefix : bool = True) -> olefile.olefile.OleDirectoryEntry:
         """
         Finds the directory entry from the olefile for the stream or storage
         specified. Use '/' to get the root entry.
@@ -281,7 +281,7 @@ class MSGFile:
             if prefix:
                 sid = self.__ole._find(self.__prefix)
             else:
-                return self.__ole.direntries[sid = 0]
+                return self.__ole.direntries[0]
         else:
             sid = self.__ole._find(self.fixPath(filename, prefix))
 
