@@ -78,7 +78,8 @@ class OleWriter:
     Takes data to write to a compound binary format file, as specified in
     [MS-CFB].
     """
-    def __init__(self):
+    def __init__(self, rootClsid : bytes = constants.DEFAULT_CLSID):
+        self.__rootClsid = rootClsid
         # The root entry will always exist, so this must be at least 1.
         self.__dirEntryCount = 1
         self.__dirEntries = {}
@@ -127,6 +128,7 @@ class OleWriter:
         root = _DirectoryEntry()
         root.name = "Root Entry"
         root.type = DirectoryEntryType.ROOT_STORAGE
+        root.clsid = self.__rootClsid
         # Add the location of the start of the mini stream.
         root.startingSectorLocation = (startingSector + ceilDiv(self.__dirEntryCount, 4) + ceilDiv(self.__numMinifatSectors, 128)) if self.__numMinifat > 0 else 0xFFFFFFFE
         root.streamSize = self.__numMinifatSectors * 64
@@ -206,7 +208,7 @@ class OleWriter:
             if len(entry.data) == 0 and entry != entries[0]:
                 # If there is no data, just set the starting location to none.
                 entry.startingSectorLocation = 0xFFFFFFFE
-            if entry.type == DirectoryEntryType.STREAM and len(entry.data) < 4096:
+            elif entry.type == DirectoryEntryType.STREAM and len(entry.data) < 4096:
                 entry.startingSectorLocation = miniFATLocation
                 miniFATLocation += ceilDiv(len(entry.data), 64)
 
@@ -323,7 +325,7 @@ class OleWriter:
         # how they will eventually be stored into the file correctly.
         for entry in self.__largeEntries:
             size = ceilDiv(len(entry.data), 512)
-            entry.startingSectorLocation = offset + size
+            entry.startingSectorLocation = offset
             for x in range(offset + 1, offset + size):
                 f.write(constants.ST_LE_UI32.pack(x))
 

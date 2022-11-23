@@ -445,6 +445,8 @@ NEEDS_ARG = (
 MAINDOC = "extract_msg:\n\tExtracts emails and attachments saved in Microsoft Outlook's .msg files.\n\n" \
           "https://github.com/TeamMsgExtractor/msg-extractor"
 
+DEFAULT_CLSID = b'\x0b\r\x02\x00\x00\x00\x00\x00\xc0\x00\x00\x00\x00\x00\x00F'
+
 # Define pre-compiled structs to make unpacking slightly faster.
 # General structs.
 ST1 = struct.Struct('<8x4I')
