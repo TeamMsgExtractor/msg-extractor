@@ -97,7 +97,7 @@ class OleWriter:
         """
         return ceilDiv(self.__dirEntryCount, 4) + \
                self.__numMinifat + \
-               ceilDiv(self.__numMinifat, 4) + \
+               ceilDiv(self.__numMinifat, 16) + \
                self.__largeEntrySectors
 
     @property
@@ -169,6 +169,8 @@ class OleWriter:
             for node in tree.in_order():
                 item = node.value
                 # Set the color immediately.
+                if isinstance(item, dict):
+                    item = item['::DirectoryEntry']
                 item.color = Color.BLACK if node.is_black else Color.RED
                 if node.left:
                     val = node.left.value
@@ -219,6 +221,7 @@ class OleWriter:
         """
         # Since we are going to need these multiple times, get them now.
         numFat, numDifat, totalSectors = self._getFatSectors()
+        print(numFat, numDifat, totalSectors)
 
         # Header signature.
         f.write(b'\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1')
@@ -248,9 +251,9 @@ class OleWriter:
         # Mini stream cutoff size.
         f.write(b'\x00\x10\x00\x00')
         # First mini FAT sector location.
-        f.write(constants.ST_LE_UI32.pack((numFat + numDifat + self.__dirEntryCount) if self.__numMinifat > 0 else 0xFFFFFFFE))
+        f.write(constants.ST_LE_UI32.pack((numFat + numDifat + ceilDiv(self.__dirEntryCount, 4)) if self.__numMinifat > 0 else 0xFFFFFFFE))
         # Number of mini FAT sectors.
-        f.write(constants.ST_LE_UI32.pack(self.__numMinifat))
+        f.write(constants.ST_LE_UI32.pack(ceilDiv(self.__numMinifatSectors, 128)))
         # First DIFAT sector location. If there are none, set to 0xFFFFFFFE (End
         # of chain).
         f.write(constants.ST_LE_UI32.pack(0 if numDifat else 0xFFFFFFFE))
@@ -298,13 +301,13 @@ class OleWriter:
         offset += ceilDiv(self.__dirEntryCount, 4)
 
         # Mini FAT chain.
-        for x in range(offset + 1, offset + ceilDiv(self.__numMinifat, 128)):
+        for x in range(offset + 1, offset + ceilDiv(self.__numMinifat, 16)):
             f.write(constants.ST_LE_UI32.pack(x))
 
         # Write the end of chain marker.
         f.write(b'\xFE\xFF\xFF\xFF')
 
-        offset += ceilDiv(self.__numMinifat, 128)
+        offset += ceilDiv(self.__numMinifat, 16)
 
         # The mini stream sectors.
         for x in range(offset + 1, offset + self.__numMinifat):
@@ -457,7 +460,6 @@ class OleWriter:
         entries.sort(key = len)
 
         for x in entries:
-            print(x)
             entry = msg._getOleEntry(x)
             data = msg._getStream(x) if entry.entry_type == DirectoryEntryType.STREAM else None
             self.addOleEntry(x, entry, data)
