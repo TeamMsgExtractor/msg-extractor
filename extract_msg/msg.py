@@ -482,6 +482,24 @@ class MSGFile:
                     foundNumber += 1
         return (foundNumber > 0), foundNumber
 
+    def export(self, path) -> None:
+        """
+        Exports the contents of this MSG file to a new MSG files specified by
+        the path given. If this is an embedded MSG file, the embedded streams
+        and directories will be added to it as if they were at the root,
+        allowing you to save it as it's own MSG file.
+
+        :param path: An IO device with a write method which accepts bytes or a
+            path-like object (including strings and pathlib.Path objects).
+        """
+        from .ole_writer import OleWriter
+
+        # Create an instance of the class used for writing a new OLE file.
+        writer = OleWriter()
+        # Add all file and directory entries to it. If this
+        writer.fromMsg(self)
+        writer.write(path)
+
     def fixPath(self, inp, prefix : bool = True) -> str:
         """
         Changes paths so that they have the proper prefix (should :param prefix:

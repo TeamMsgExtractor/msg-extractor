@@ -79,10 +79,7 @@ class Attachment(AttachmentBase):
             # If filename is None at this point, use long filename as first
             # preference.
             if not filename:
-                filename = self.longFilename
-            # Otherwise use the short filename.
-            if not filename:
-                filename = self.shortFilename
+                filename = self.name
             # Otherwise just make something up!
             if not filename:
                 return self.randomFilename
@@ -204,7 +201,12 @@ class Attachment(AttachmentBase):
 
             return str(fullFilename)
         else:
-            self.saveEmbededMessage(**kwargs)
+            if kwargs.get('extractEmbedded', False):
+                # TODO
+                with _open(str(fullFilename), mode) as f:
+                    self.data.export(f)
+            else:
+                self.saveEmbededMessage(**kwargs)
 
             # Close the ZipFile if this function created it.
             if _zip and createdZip:

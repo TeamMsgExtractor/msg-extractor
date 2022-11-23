@@ -79,9 +79,6 @@ class OleWriter:
     [MS-CFB].
     """
     def __init__(self):
-        #raise NotImplementedError('This class is unfinished and not ready to be used.')
-
-        #self.__numberOfSectors = 0
         # The root entry will always exist, so this must be at least 1.
         self.__dirEntryCount = 1
         self.__dirEntries = {}

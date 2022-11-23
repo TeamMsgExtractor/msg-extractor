@@ -310,6 +310,9 @@ def getCommandArgs(args) -> argparse.Namespace:
     # --skip-embedded
     parser.add_argument('--skip-embedded', dest='skipEmbedded', action='store_true',
                         help='Skips all embedded MSG files when saving attachments.')
+    # --extract-embedded
+    parser.add_argument('--extract-embedded', dest='extractEmbedded', action='store_true',
+                        help='Extracts the embedded MSG files as MSG files instead of running their save functions.')
     # --skip-not-implemented
     parser.add_argument('--skip-not-implemented', '--skip-ni', dest='skipNotImplemented', action='store_true',
                         help='Skips any attachments that are not implemented, allowing saving of the rest of the message.')
