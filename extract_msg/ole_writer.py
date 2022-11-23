@@ -206,6 +206,9 @@ class OleWriter:
         miniFATLocation = 0
 
         for entry in entries:
+            if len(entry.data) == 0 and entry != entries[0]:
+                # If there is no data, just set the starting location to none.
+                entry.startingSectorLocation = 0xFFFFFFFE
             if entry.type == DirectoryEntryType.STREAM and len(entry.data) < 4096:
                 entry.startingSectorLocation = miniFATLocation
                 miniFATLocation += ceilDiv(len(entry.data), 64)
@@ -221,7 +224,6 @@ class OleWriter:
         """
         # Since we are going to need these multiple times, get them now.
         numFat, numDifat, totalSectors = self._getFatSectors()
-        print(numFat, numDifat, totalSectors)
 
         # Header signature.
         f.write(b'\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1')
@@ -380,7 +382,8 @@ class OleWriter:
                 size = ceilDiv(len(x.data), 64)
                 for x in range(currentSector + 1, currentSector + size):
                     f.write(constants.ST_LE_UI32.pack(x))
-                f.write(b'\xFE\xFF\xFF\xFF')
+                if size > 0:
+                    f.write(b'\xFE\xFF\xFF\xFF')
                 currentSector += size
 
         # Finally, write the remaining slots.
@@ -388,9 +391,10 @@ class OleWriter:
 
         # Write the mini stream.
         for x in entries:
-            f.write(x.data)
-            if len(x.data) & 63:
-                f.write(b'\x00' * (64 - (len(x.data) & 63)))
+            if len(x.data) > 0 and len(x.data) < 4096:
+                f.write(x.data)
+                if len(x.data) & 63:
+                    f.write(b'\x00' * (64 - (len(x.data) & 63)))
 
         # Pad the final mini stream block.
         if self.__numMinifatSectors & 7:
