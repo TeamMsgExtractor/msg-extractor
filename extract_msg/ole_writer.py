@@ -449,9 +449,7 @@ class OleWriter:
                 self.__largeEntries.append(newEntry)
                 self.__largeEntrySectors += ceilDiv(len(newEntry.data), 512)
 
-
         self.__dirEntryCount += 1
-
 
     def fromMsg(self, msg : 'MSGFile') -> None:
         """
@@ -466,6 +464,25 @@ class OleWriter:
             entry = msg._getOleEntry(x)
             data = msg._getStream(x) if entry.entry_type == DirectoryEntryType.STREAM else None
             self.addOleEntry(x, entry, data)
+
+        # Now check if it is an embedded file. If so, we need to copy the named
+        # properties streams (the metadata, not the values).
+        if msg.prefixLength > 0:
+            try:
+                # Get the entry for the named properties directory and add it
+                # immediately if it exists. If it doesn't exist, this whole
+                # section will be skipped.
+                self.addOleEntry('__nameid_version1.0', msg._getOleEntry('__nameid_version1.0'), None)
+
+                # Now that we know it exists, grab all the file inside and copy
+                # them to our root.
+                # Create our generator.
+                gen = (x for x in msg._oleListDir() if len(x) > 1 and x[0] == '__nameid_version1.0')
+                for x in gen:
+                    self.addOleEntry(x, msg._getOleEntry(x, prefix = False), msg._getStream(x, prefix = False))
+            except Exception:
+                # If there is an issue, just ignore the named properties.
+                pass
 
     def write(self, path) -> None:
         """

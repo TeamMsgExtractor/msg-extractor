@@ -313,7 +313,6 @@ class MSGFile:
         This should ALWAYS return a string if it was found, otherwise returns
         None.
         """
-
         filename = self.fixPath(filename, prefix)
         if self.areStringsUnicode:
             return windowsUnicode(self._getStream(filename + '001F', prefix = False))
@@ -409,6 +408,17 @@ class MSGFile:
                         contents = streams
                 return True, parseType(int(_type, 16), contents, self.stringEncoding, extras)
         return False, None # We didn't find the stream.
+
+    def _oleListDir(self, streams : bool = True, storages : bool = False) -> List:
+        """
+        Calls :method OleFileIO.listdir: from the OleFileIO instance associated
+        with this MSG file. Useful for if you need access to all the top level
+        streams if this is an embedded MSG file.
+
+        Returns a list of the streams and or storages depending on the arguments
+        given.
+        """
+        return self.__ole.listdir(streams, storages)
 
     def close(self) -> None:
         if self.__open:
