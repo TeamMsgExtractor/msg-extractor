@@ -157,7 +157,7 @@ class OleWriter:
                         entries.append(val)
 
                     # Add the data to the tree.
-                    tree.add(name, val)
+                    tree.add(name.upper(), val)
 
             # Now that everything is added, we need to take our root and add it
             # as the child of the current entry.

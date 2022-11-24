@@ -445,6 +445,8 @@ NEEDS_ARG = (
 MAINDOC = "extract_msg:\n\tExtracts emails and attachments saved in Microsoft Outlook's .msg files.\n\n" \
           "https://github.com/TeamMsgExtractor/msg-extractor"
 
+# Default class ID for the root entry for OleWriter. This should be
+# referencing Outlook if I understand it correctly.
 DEFAULT_CLSID = b'\x0b\r\x02\x00\x00\x00\x00\x00\xc0\x00\x00\x00\x00\x00\x00F'
 
 # Define pre-compiled structs to make unpacking slightly faster.
