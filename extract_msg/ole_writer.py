@@ -463,6 +463,13 @@ class OleWriter:
         for x in entries:
             entry = msg._getOleEntry(x)
             data = msg._getStream(x) if entry.entry_type == DirectoryEntryType.STREAM else None
+            # THe properties stream on embedded messages actualy needs to be
+            # transformed a little (*why* it is like that is a mystery to me).
+            # Basically we just need to add a "reserved" section to it in a
+            # specific place. So let's check if we are doing the properties
+            # stream and then if we are embedded.
+            if x[0] == '__properties_version1.0' and msg.prefixLength > 0:
+                data = data[:24] + b'\x00\x00\x00\x00\x00\x00\x00\x00' + data[24:]
             self.addOleEntry(x, entry, data)
 
         # Now check if it is an embedded file. If so, we need to copy the named
