@@ -163,6 +163,10 @@ class OleWriter:
             # as the child of the current entry.
             entry.childTreeRoot = tree.value
 
+            print('-----DOT START-----')
+            tree.to_dot()
+            print('-----DOT END-----')
+
             # Now we need to go through each node and set it's data based on
             # it's sort position.
             for node in tree.in_order():
@@ -468,13 +472,13 @@ class OleWriter:
             # Basically we just need to add a "reserved" section to it in a
             # specific place. So let's check if we are doing the properties
             # stream and then if we are embedded.
-            if x[0] == '__properties_version1.0' and msg.prefixLength > 0:
+            if x[0] == '__properties_version1.0' and msg.prefixLen > 0:
                 data = data[:24] + b'\x00\x00\x00\x00\x00\x00\x00\x00' + data[24:]
             self.addOleEntry(x, entry, data)
 
         # Now check if it is an embedded file. If so, we need to copy the named
         # properties streams (the metadata, not the values).
-        if msg.prefixLength > 0:
+        if msg.prefixLen > 0:
             try:
                 # Get the entry for the named properties directory and add it
                 # immediately if it exists. If it doesn't exist, this whole
