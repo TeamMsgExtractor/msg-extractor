@@ -163,10 +163,6 @@ class OleWriter:
             # as the child of the current entry.
             entry.childTreeRoot = tree.value
 
-            print('-----DOT START-----')
-            tree.to_dot()
-            print('-----DOT END-----')
-
             # Now we need to go through each node and set it's data based on
             # it's sort position.
             for node in tree.in_order():
