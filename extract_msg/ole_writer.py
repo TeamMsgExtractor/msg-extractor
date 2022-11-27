@@ -7,7 +7,7 @@ from typing import List, Optional, Union
 from . import constants
 from .enums import Color, DirectoryEntryType
 from .utils import ceilDiv, inputToMsgPath
-from olefile.olefile import OleDirectoryEntry
+from olefile.olefile import OleDirectoryEntry, OleFileIO
 from red_black_dict_mod import RedBlackTree
 
 
@@ -301,23 +301,25 @@ class OleWriter:
 
         offset += ceilDiv(self.__dirEntryCount, 4)
 
-        # Mini FAT chain.
-        for x in range(offset + 1, offset + ceilDiv(self.__numMinifat, 16)):
-            f.write(constants.ST_LE_UI32.pack(x))
+        # Check if we have minifat *at all* first.
+        if self.__numMinifatSectors > 0:
+            # Mini FAT chain.
+            for x in range(offset + 1, offset + ceilDiv(self.__numMinifat, 16)):
+                f.write(constants.ST_LE_UI32.pack(x))
 
-        # Write the end of chain marker.
-        f.write(b'\xFE\xFF\xFF\xFF')
+            # Write the end of chain marker.
+            f.write(b'\xFE\xFF\xFF\xFF')
 
-        offset += ceilDiv(self.__numMinifat, 16)
+            offset += ceilDiv(self.__numMinifat, 16)
 
-        # The mini stream sectors.
-        for x in range(offset + 1, offset + self.__numMinifat):
-            f.write(constants.ST_LE_UI32.pack(x))
+            # The mini stream sectors.
+            for x in range(offset + 1, offset + self.__numMinifat):
+                f.write(constants.ST_LE_UI32.pack(x))
 
-        # Write the end of chain marker.
-        f.write(b'\xFE\xFF\xFF\xFF')
+            # Write the end of chain marker.
+            f.write(b'\xFE\xFF\xFF\xFF')
 
-        offset += self.__numMinifat
+            offset += self.__numMinifat
 
         # Regular stream chains. These are the most complex to handle. We handle
         # them by checking a list that was make of entries which were only added
@@ -491,6 +493,25 @@ class OleWriter:
                 # If there is an issue, just ignore the named properties.
                 pass
 
+    def fromOleFile(self, ole : OleFileIO) -> None:
+        """
+        Copies all the streams from the proided OLE file into this writer.
+        """
+        # Copy the clsid of the root entry.
+        self.__rootClsid = _unClsid(ole.direntries[0].clsid)
+
+        # Copy all of the other entries.
+        for x in ole.listdir(True, True):
+            entry = ole.direntries[ole._find(x)]
+
+            if entry.entry_type == DirectoryEntryType.STREAM:
+                with ole.openstream(x) as f:
+                    data = f.read()
+            else:
+                data = None
+
+            self.addOleEntry(x, entry, data)
+
     def write(self, path) -> None:
         """
         Writes the data to the path specified. If :param path: has a write
@@ -545,5 +566,6 @@ def _unClsid(clsid : str) -> bytes:
             int(clsid[28:30], 16),
             int(clsid[30:32], 16),
         ))
-    finally:
+    except Exception:
         print(clsid)
+        raise
