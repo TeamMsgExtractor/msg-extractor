@@ -304,6 +304,9 @@ def getCommandArgs(args) -> argparse.Namespace:
     # --attachments-only
     outFormat.add_argument('--attachments-only', dest='attachmentsOnly', action='store_true',
                            help='Specify to only save attachments from an msg file.')
+    # --skip-hidden
+    parser.add_argument('--skip-hidden', dest='skipHidden', action='store_true',
+                        help='Skips any attachment marked as hidden (usually ones embedded in the body).')
     # --no-folders
     parser.add_argument('--no-folders', dest='noFolders', action='store_true',
                         help='Stores everything in the location specified by --out. Requires --attachments-only and is incompatible with --out-name.')
@@ -839,7 +842,7 @@ def prepareFilename(filename) -> str:
     file name.
     """
     # I would use re here, but it tested to be slightly slower than this.
-    return ''.join(i for i in filename if i not in r'\/:*?"<>|' + '\x00')
+    return ''.join(i for i in filename if i not in r'\/:*?"<>|' + '\x00').strip()
 
 
 def properHex(inp, length : int = 0) -> str:

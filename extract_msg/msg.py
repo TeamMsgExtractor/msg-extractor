@@ -560,9 +560,14 @@ class MSGFile:
     def saveAttachments(self, **kwargs) -> None:
         """
         Saves only attachments in the same folder.
+
+        :params skipHidden: If True, skips attachments marked as hidden.
+            (Default: False)
         """
+        skipHidden = kwargs.get('skipHidden', False)
         for attachment in self.attachments:
-            attachment.save(**kwargs)
+            if not (skipHidden and attachment.hidden):
+                attachment.save(**kwargs)
 
     def saveRaw(self, path):
         # Create a 'raw' folder.

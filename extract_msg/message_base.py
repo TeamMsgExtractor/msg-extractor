@@ -669,6 +669,8 @@ class MessageBase(MSGFile):
         :param saveHeader: Turns on saving the header as a separate file when
         set.
         :param skipAttachments: Turns off saving attachments.
+        :param skipHidden: If True, skips attachments marked as hidden.
+            (Default: False)
         :param skipBodyNotFound: Suppresses errors if no valid body could be
             found, simply skipping the step of saving the body.
         :param charset: If the html is being prepared, the charset to use for
@@ -709,6 +711,7 @@ class MessageBase(MSGFile):
         attachOnly = kwargs.get('attachmentsOnly', False)
         # Track if we are skipping attachments.
         skipAttachments = kwargs.get('skipAttachments', False)
+        skipHidden = kwargs.get('skipHidden', False)
         # Track if we should skip the body if no valid body is found instead of
         # raising an exception.
         skipBodyNotFound = kwargs.get('skipBodyNotFound', False)
@@ -721,7 +724,8 @@ class MessageBase(MSGFile):
             # `raw` and `zip` are incompatible.
             if raw:
                 raise IncompatibleOptionsError('The options `raw` and `zip` are incompatible.')
-            # If we are doing a zip file, first check that we have been given a path.
+            # If we are doing a zip file, first check that we have been given a
+            # path.
             if isinstance(_zip, (str, pathlib.Path)):
                 # If we have a path then we use the zip file.
                 _zip = zipfile.ZipFile(_zip, 'a', zipfile.ZIP_DEFLATED)
@@ -747,12 +751,17 @@ class MessageBase(MSGFile):
         if _json + html + rtf + raw + attachOnly + pdf > 1:
             raise IncompatibleOptionsError('Only one of the following options may be used at a time: json, raw, html, rtf, attachmentsOnly, pdf.')
 
-        # TODO: insert code here that will handle checking all of the msg files to see if the path with overflow.
+        # TODO: insert code here that will handle checking all of the msg files
+        # to see if the path with overflow.
 
         if customFilename:
-            # First we need to validate it. If there are invalid characters, this will detect it.
+            # First we need to validate it. If there are invalid characters,
+            # this will detect it.
             if constants.RE_INVALID_FILENAME_CHARACTERS.search(customFilename):
                 raise ValueError('Invalid character found in customFilename. Must not contain any of the following characters: \\/:*?"<>|')
+            # Quick fix to remove spaces from the end of the filename, if any
+            # are there.
+            customFilename = customFilename.strip()
             path /= customFilename[:maxNameLength]
         elif useMsgFilename:
             if not self.filename:
@@ -872,9 +881,9 @@ class MessageBase(MSGFile):
 
             if not skipAttachments:
                 # Save the attachments.
-                attachmentNames = [attachment.save(**kwargs) for attachment in self.attachments]
+                attachmentNames = [attachment.save(**kwargs) for attachment in self.attachments if not (skipHidden and attachment.hidden)]
                 # Remove skipped attachments.
-                attachmentNames = [x for x in attachmentNames if x]
+                attachmentNames = [x for x in attachmentNames if x and isinstance(x, str)]
 
             if not attachOnly and fext:
                 with _open(str(path / ('message.' + fext)), mode) as f:
@@ -1043,6 +1052,7 @@ class MessageBase(MSGFile):
 
             dirName = '{0:02d}-{1:02d}-{2:02d}_{3:02d}{4:02d}'.format(*d) if d else 'UnknownDate'
             dirName += ' ' + (prepareFilename(self.subject) if self.subject else '[No subject]')
+            dirName = dirName.strip()
 
             self._defaultFolderName = dirName
             return dirName

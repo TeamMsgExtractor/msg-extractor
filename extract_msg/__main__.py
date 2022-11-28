@@ -71,6 +71,7 @@ def main() -> None:
             'saveHeader': args.saveHeader,
             'skipBodyNotFound': args.skipBodyNotFound,
             'skipEmbedded': args.skipEmbedded,
+            'skipHidden': args.skipHidden,
             'skipNotImplemented': args.skipNotImplemented,
             'useMsgFilename': args.useFilename,
             'wkOptions': args.wkOptions,
