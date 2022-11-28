@@ -1,11 +1,3 @@
-**???***
-* Added class to allow the writing of OLE files, which allows for embedded MSG files to be extracted.
-* Added function `MSGFile.export` which copies all streams and storages from an MSG file into a new file. This can "clone" an MSG file or be used for extracting an MSG file that is embedded inside of another.
-* Added hidden function to `MSGFile` for getting the `OleDirectoryEntry` for a storage or stream. This is mainly for use by the `OleWriter` class.
-* Added option `extractEmbedded` to `Attachment.save` (`--extract-embedded` on the command line) which causes embedded MSG files to be extracted instead of running their save methods.
-* Fixed minor issues with `utils.inputToMsgPath` (renamed from `utils.inputToMsgpath`).
-* Renamed `utils.msgpathToString` to `utils.msgPathToString`.
-
 **v0.37.0**
 * [[TeamMsgExtractor #303](https://github.com/TeamMsgExtractor/msg-extractor/issues/303)] Renamed internal variable that wasn't changed when the other instances or it were renamed.
 * [[TeamMsgExtractor #302](https://github.com/TeamMsgExtractor/msg-extractor/issues/302)] Fixed properties missing (a fatal MSG error) raising an unclear exception. It now uses `InvalidFileFormatError`.
