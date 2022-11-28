@@ -91,6 +91,7 @@ refer to the usage information provided from the program's help dialog:
       --zip ZIP             Path to use for saving to a zip file.
       --save-header         Store the header in a separate file.
       --attachments-only    Specify to only save attachments from an msg file.
+      --skip-hidden         Skips any attachment marked as hidden (usually ones embedded in the body).
       --no-folders          When used with --attachments-only, stores everything in the location specified by --out. Incompatible with --out-name.
       --skip-embedded       Skips all embedded MSG files when saving attachments.
       --out-name OUTNAME    Name to be used with saving the file output. Cannot be used if you are saving more than one file.
