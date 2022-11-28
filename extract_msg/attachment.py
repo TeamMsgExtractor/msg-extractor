@@ -33,7 +33,7 @@ class Attachment(AttachmentBase):
         """
         super().__init__(msg, dir_)
 
-        # Get attachment data
+        # Get attachment data.
         if self.exists('__substg1.0_37010102'):
             self.__type = AttachmentType.DATA
             self.__data = self._getStream('__substg1.0_37010102')
@@ -41,13 +41,13 @@ class Attachment(AttachmentBase):
             if (self.props['37050003'].value & 0x7) != 0x5:
                 raise NotImplementedError(
                     'Current version of extract_msg does not support extraction of containers that are not embedded msg files.')
-                # TODO add implementation
+                # TODO add implementation.
             else:
                 self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
                 self.__type = AttachmentType.MSG
                 self.__data = openMsg(self.msg.path, prefix = self.__prefix, parentMsg = self.msg, **self.msg.kwargs)
         elif (self.props['37050003'].value & 0x7) == 0x7:
-            # TODO Handling for special attacment type 0x7
+            # TODO Handling for special attacment type 0x7.
             self.__type = AttachmentType.WEB
             raise NotImplementedError('Attachments of type afByWebReference are not currently supported.')
         else:
@@ -67,7 +67,8 @@ class Attachment(AttachmentBase):
         customFilename = kwargs.get('customFilename')
         if customFilename:
             customFilename = str(customFilename)
-            # First we need to validate it. If there are invalid characters, this will detect it.
+            # First we need to validate it. If there are invalid characters,
+            # this will detect it.
             if constants.RE_INVALID_FILENAME_CHARACTERS.search(customFilename):
                 raise ValueError('Invalid character found in customFilename. Must not contain any of the following characters: \\/:*?"<>|')
             filename = customFilename
