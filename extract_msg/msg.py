@@ -18,7 +18,7 @@ from .exceptions import InvalidFileFormatError, UnrecognizedMSGTypeError
 from .named import Named, NamedProperties
 from .prop import FixedLengthProp
 from .properties import Properties
-from .utils import divide, getEncodingName, hasLen, inputToMsgpath, inputToString, msgpathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
+from .utils import divide, getEncodingName, hasLen, inputToMsgPath, inputToString, msgPathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
 
 
 logger = logging.getLogger(__name__)
@@ -271,6 +271,22 @@ class MSGFile:
             setattr(self, variable, value)
             return value
 
+    def _getOleEntry(self, filename, prefix : bool = True) -> olefile.olefile.OleDirectoryEntry:
+        """
+        Finds the directory entry from the olefile for the stream or storage
+        specified. Use '/' to get the root entry.
+        """
+        sid = -1
+        if filename == '/':
+            if prefix:
+                sid = self.__ole._find(self.__prefix)
+            else:
+                return self.__ole.direntries[0]
+        else:
+            sid = self.__ole._find(self.fixPath(filename, prefix))
+
+        return self.__ole.direntries[sid]
+
     def _getStream(self, filename, prefix : bool = True) -> Optional[bytes]:
         """
         Gets a binary representation of the requested filename.
@@ -297,7 +313,6 @@ class MSGFile:
         This should ALWAYS return a string if it was found, otherwise returns
         None.
         """
-
         filename = self.fixPath(filename, prefix)
         if self.areStringsUnicode:
             return windowsUnicode(self._getStream(filename + '001F', prefix = False))
@@ -394,6 +409,17 @@ class MSGFile:
                 return True, parseType(int(_type, 16), contents, self.stringEncoding, extras)
         return False, None # We didn't find the stream.
 
+    def _oleListDir(self, streams : bool = True, storages : bool = False) -> List:
+        """
+        Calls :method OleFileIO.listdir: from the OleFileIO instance associated
+        with this MSG file. Useful for if you need access to all the top level
+        streams if this is an embedded MSG file.
+
+        Returns a list of the streams and or storages depending on the arguments
+        given.
+        """
+        return self.__ole.listdir(streams, storages)
+
     def close(self) -> None:
         if self.__open:
             try:
@@ -448,7 +474,7 @@ class MSGFile:
         prefixList = self.prefixList if prefix else []
         if location is not None:
             prefixList.append(location)
-        prefixList = inputToMsgpath(prefixList)
+        prefixList = inputToMsgPath(prefixList)
         usableId = _id + _type if _type else _id
         foundNumber = 0
         foundStreams = []
@@ -466,24 +492,45 @@ class MSGFile:
                     foundNumber += 1
         return (foundNumber > 0), foundNumber
 
+    def export(self, path) -> None:
+        """
+        Exports the contents of this MSG file to a new MSG files specified by
+        the path given. If this is an embedded MSG file, the embedded streams
+        and directories will be added to it as if they were at the root,
+        allowing you to save it as it's own MSG file.
+
+        :param path: An IO device with a write method which accepts bytes or a
+            path-like object (including strings and pathlib.Path objects).
+        """
+        from .ole_writer import OleWriter
+
+        # Create an instance of the class used for writing a new OLE file.
+        writer = OleWriter()
+        # Add all file and directory entries to it. If this
+        writer.fromMsg(self)
+        writer.write(path)
+
     def fixPath(self, inp, prefix : bool = True) -> str:
         """
         Changes paths so that they have the proper prefix (should :param prefix:
         be True) and are strings rather than lists or tuples.
         """
-        inp = msgpathToString(inp)
+        inp = msgPathToString(inp)
         if prefix:
             inp = self.__prefix + inp
         return inp
 
-    def listDir(self, streams : bool = True, storages : bool = False) -> List[List]:
+    def listDir(self, streams : bool = True, storages : bool = False, includePrefix : bool = True) -> List[List]:
         """
         Replacement for OleFileIO.listdir that runs at the current prefix
         directory.
+
+        :param includePrefix: If false, removed the part of the path that is the
+            prefix.
         """
         # Get the items from OleFileIO.
         try:
-            return self.__listDirRes[(streams, storages)]
+            return self.__listDirRes[(streams, storages, includePrefix)]
         except KeyError:
             entries = self.__ole.listdir(streams, storages)
             if not self.__prefix:
@@ -493,15 +540,19 @@ class MSGFile:
                 prefix.pop()
 
             prefixLength = self.__prefixLen
-            self.__listDirRes[(streams, storages)] = [x for x in entries if len(x) > prefixLength and x[:prefixLength] == prefix]
-            return self.__listDirRes[(streams, storages)]
+            entries = [x for x in entries if len(x) > prefixLength and x[:prefixLength] == prefix]
+            if not includePrefix:
+                entries = [x[prefixLength:] for x in entries]
+            self.__listDirRes[(streams, storages, includePrefix)] = entries
+
+            return self.__listDirRes[(streams, storages, includePrefix)]
 
     def slistDir(self, streams : bool = True, storages : bool = False) -> List[str]:
         """
         Replacement for OleFileIO.listdir that runs at the current prefix
         directory. Returns a list of strings instead of lists.
         """
-        return [msgpathToString(x) for x in self.listDir(streams, storages)]
+        return [msgPathToString(x) for x in self.listDir(streams, storages)]
 
     def save(self, *args, **kwargs):
         raise NotImplementedError(f'Saving is not yet supported for the {self.__class__.__name__} class.')

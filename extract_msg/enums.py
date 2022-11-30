@@ -311,6 +311,10 @@ class ClientIntentFlag(enum.Enum):
 
 
 
+class Color(enum.IntEnum):
+    RED = 0
+    BLACK = 1
+
 
 class ContactAddressIndex(enum.Enum):
     EMAIL_1 = 0
@@ -345,6 +349,15 @@ class DeencapType(enum.Enum):
     """
     PLAIN = 0
     HTML = 1
+
+
+
+class DirectoryEntryType(enum.IntEnum):
+    UNALLOCATED = 0
+    UNKNOWN = 0
+    STORAGE = 1
+    STREAM = 2
+    ROOT_STORAGE = 5
 
 
 
