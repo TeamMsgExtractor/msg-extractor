@@ -142,8 +142,9 @@ class OleWriter:
                 continue
             # If the current item *only* has the directory's entry and no stream
             # entries, we are actually done.
-            # Create a tree and add all the items to it. We will add it as a
-            # tuple of the name and entry so it will actually sort.
+            # Create a tree and add all the items to it. We add it with a key
+            # that is a tuple of the length (as shorter is *always* less than
+            # longer) and the uppercase name, and the value is the actual entry.
             tree = RedBlackTree()
             for name in currentItem:
                 if not name.startswith('::'):
@@ -157,7 +158,7 @@ class OleWriter:
                         entries.append(val)
 
                     # Add the data to the tree.
-                    tree.add(name.upper(), val)
+                    tree.add((len(name), name.upper()), val)
 
             # Now that everything is added, we need to take our root and add it
             # as the child of the current entry.
