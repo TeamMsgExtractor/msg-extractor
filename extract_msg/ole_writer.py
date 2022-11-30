@@ -389,7 +389,8 @@ class OleWriter:
                 currentSector += size
 
         # Finally, write the remaining slots.
-        f.write(b'\xFF\xFF\xFF\xFF' * (128 - (currentSector & 127)))
+        if currentSector & 127:
+            f.write(b'\xFF\xFF\xFF\xFF' * (128 - (currentSector & 127)))
 
         # Write the mini stream.
         for x in entries:
@@ -478,21 +479,17 @@ class OleWriter:
         # Now check if it is an embedded file. If so, we need to copy the named
         # properties streams (the metadata, not the values).
         if msg.prefixLen > 0:
-            try:
-                # Get the entry for the named properties directory and add it
-                # immediately if it exists. If it doesn't exist, this whole
-                # section will be skipped.
-                self.addOleEntry('__nameid_version1.0', msg._getOleEntry('__nameid_version1.0'), None)
+            # Get the entry for the named properties directory and add it
+            # immediately if it exists. If it doesn't exist, this whole
+            # section will be skipped.
+            self.addOleEntry('__nameid_version1.0', msg._getOleEntry('__nameid_version1.0', False), None)
 
-                # Now that we know it exists, grab all the file inside and copy
-                # them to our root.
-                # Create our generator.
-                gen = (x for x in msg._oleListDir() if len(x) > 1 and x[0] == '__nameid_version1.0')
-                for x in gen:
-                    self.addOleEntry(x, msg._getOleEntry(x, prefix = False), msg._getStream(x, prefix = False))
-            except Exception:
-                # If there is an issue, just ignore the named properties.
-                pass
+            # Now that we know it exists, grab all the file inside and copy
+            # them to our root.
+            # Create our generator.
+            gen = (x for x in msg._oleListDir() if len(x) > 1 and x[0] == '__nameid_version1.0')
+            for x in gen:
+                self.addOleEntry(x, msg._getOleEntry(x, prefix = False), msg._getStream(x, prefix = False))
 
     def fromOleFile(self, ole : OleFileIO) -> None:
         """

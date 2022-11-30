@@ -114,6 +114,20 @@ def ceilDiv(n : int, d : int) -> int:
     return -(n // -d)
 
 
+def cloneOleFile(sourcePath, outputPath) -> None:
+    """
+    Uses the OleWriter class to clone the specified OLE file into a new
+    location. Mainly designed for testing.
+    """
+    from .ole_writer import OleWriter
+
+    with olefile.OleFileIO(sourcePath) as f:
+        writer = OleWriter()
+        writer.fromOleFile(f)
+
+    writer.write(outputPath)
+
+
 def createZipOpen(func):
     """
     Creates a wrapper for the open function of a ZipFile that will automatically
