@@ -278,8 +278,8 @@ class MSGFile:
         """
         sid = -1
         if filename == '/':
-            if prefix:
-                sid = self.__ole._find(self.__prefix)
+            if prefix and self.__prefix:
+                sid = self.__ole._find(self.__prefixList)
             else:
                 return self.__ole.direntries[0]
         else:

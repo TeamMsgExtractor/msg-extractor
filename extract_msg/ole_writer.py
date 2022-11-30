@@ -459,6 +459,9 @@ class OleWriter:
         """
         Copies the streams and stream information necessary from the MSG file.
         """
+        # Get the root OLE entry's CLSID.
+        self.__rootClsid = _unClsid(msg._getOleEntry('/'))
+
         # List both storages and directories, but sort them by shortest length
         # first to prevent errors.
         entries = msg.listDir(True, True, False)
