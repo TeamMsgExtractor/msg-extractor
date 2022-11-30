@@ -445,6 +445,10 @@ NEEDS_ARG = (
 MAINDOC = "extract_msg:\n\tExtracts emails and attachments saved in Microsoft Outlook's .msg files.\n\n" \
           "https://github.com/TeamMsgExtractor/msg-extractor"
 
+# Default class ID for the root entry for OleWriter. This should be
+# referencing Outlook if I understand it correctly.
+DEFAULT_CLSID = b'\x0b\r\x02\x00\x00\x00\x00\x00\xc0\x00\x00\x00\x00\x00\x00F'
+
 # Define pre-compiled structs to make unpacking slightly faster.
 # General structs.
 ST1 = struct.Struct('<8x4I')
@@ -456,6 +460,8 @@ ST_SYSTEMTIME = struct.Struct('<8H')
 ST_GUID = struct.Struct('<IHH8s')
 # Struct for unpacking a TimeZoneStruct from bytes.
 ST_TZ = struct.Struct('<iiiH16sH16s')
+# Struct for packing a compount file directory entry.
+ST_CF_DIR_ENTRY = struct.Struct('<64sHBBIII16sIQQIQ')
 # Structs used by data.py
 ST_DATA_UI32 = struct.Struct('<I')
 ST_DATA_UI16 = struct.Struct('<H')

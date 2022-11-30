@@ -94,6 +94,7 @@ refer to the usage information provided from the program's help dialog:
       --skip-hidden         Skips any attachment marked as hidden (usually ones embedded in the body).
       --no-folders          When used with --attachments-only, stores everything in the location specified by --out. Incompatible with --out-name.
       --skip-embedded       Skips all embedded MSG files when saving attachments.
+      --extract-embedded    Extracts the embedded MSG files as MSG files instead of running their save functions.
       --out-name OUTNAME    Name to be used with saving the file output. Cannot be used if you are saving more than one file.
       --glob, --wildcard    Interpret all paths as having wildcards. Incompatible with --out-name.
       --ignore-rtfde        Ignores all errors thrown from RTFDE when trying to save. Useful for allowing fallback to continue when an exception happens.
@@ -202,9 +203,9 @@ Here is a list of things that are currently on our todo list:
 Credits
 -------
 
-`Matthew Walker`_ - Original developer and owner.
-
 `Destiny Peterson (The Elemental of Destruction)`_ - Co-owner, principle programmer, knows more about msg files than anyone probably should.
+
+`Matthew Walker`_ - Original developer and co-owner.
 
 `JP Bourget`_ - Senior programmer, readability and organization expert, secondary manager.
 
@@ -232,8 +233,8 @@ your access to the newest major version of extract-msg.
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
 
-.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.37.1 -blue.svg
-   :target: https://pypi.org/project/extract-msg/0.37.1/
+.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.38.0-blue.svg
+   :target: https://pypi.org/project/extract-msg/0.38.0/
 
 .. |PyPI2| image:: https://img.shields.io/badge/python-3.6+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-367/

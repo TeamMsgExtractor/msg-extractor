@@ -279,6 +279,13 @@ class AttachmentBase:
         return self.__dir
 
     @property
+    def displayName(self) -> Optional[str]:
+        """
+        Returns the display name of the folder.
+        """
+        return self._ensureSet('_displayName', '__substg1.0_3001')
+
+    @property
     def exceptionReplaceTime(self) -> Optional[datetime.datetime]:
         """
         The original date and time at which the instance in the recurrence
@@ -335,6 +342,9 @@ class AttachmentBase:
         """
         The best name available for the file. Uses long filename before short.
         """
+        if type == AttachmentType.MSG:
+            if self.displayName:
+                return self.displayName + '.msg'
         return self.longFilename or self.shortFilename
 
     @property

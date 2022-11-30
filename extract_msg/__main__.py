@@ -62,6 +62,7 @@ def main() -> None:
             'contentId': args.cid,
             'customFilename': args.outName,
             'customPath': out,
+            'extractEmbedded': args.extractEmbedded,
             'html': args.html,
             'json': args.json,
             'pdf': args.pdf,

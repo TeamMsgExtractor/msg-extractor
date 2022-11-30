@@ -1,3 +1,12 @@
+**v0.38.0**
+* [[TeamMsgExtractor #117](https://github.com/TeamMsgExtractor/msg-extractor/issues/117)] Added class `OleWriter` to allow the writing of OLE files, which allows for embedded MSG files to be extracted.
+* Added function `MSGFile.export` which copies all streams and storages from an MSG file into a new file. This can "clone" an MSG file or be used for extracting an MSG file that is embedded inside of another.
+* Added hidden function to `MSGFile` for getting the `OleDirectoryEntry` for a storage or stream. This is mainly for use by the `OleWriter` class.
+* Added option `extractEmbedded` to `Attachment.save` (`--extract-embedded` on the command line) which causes embedded MSG files to be extracted instead of running their save methods.
+* Fixed minor issues with `utils.inputToMsgPath` (renamed from `utils.inputToMsgpath`).
+* Renamed `utils.msgpathToString` to `utils.msgPathToString`.
+* Made some of the module requirements a little more strict to better version control. I'll be trying to make periodic checks for updates to the dependency packages and make sure that new versions are compatible before changing the allowed versions, while also trying to keep the requirements a bit flexible.
+
 **v0.37.1**
 * Added option to save function (including `MSGFile.saveAttachments`) to skip any attachments marked as hidden. This can also be done from the command line with `--skip-hidden`.
 * Fixed an issue that could cause an `MSGFile` to be included in the attachment names instead of just strings.
