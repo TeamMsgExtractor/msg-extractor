@@ -10,7 +10,6 @@ TEST_FILE = "example-msg-files/unicode.msg"
 class TestCase(unittest.TestCase):
 
     def setUp(self):
-        shutil.rmtree("raw", ignore_errors=True)
         for name in os.listdir('.'):
             if os.path.isdir(name) and name.startswith('2013-11-18_1026'):
                 shutil.rmtree(name, ignore_errors=True)
@@ -42,11 +41,6 @@ class TestCase(unittest.TestCase):
             sorted(['message.text', 'import OleFileIO.tif',
                     'raised value error.tif']))
         msg.saveRaw()
-
-    def test_saveRaw(self):
-        msg = extract_msg.Message(TEST_FILE)
-        msg.saveRaw()
-        assert os.listdir('raw')
 
 
 unittest.main(verbosity=2)

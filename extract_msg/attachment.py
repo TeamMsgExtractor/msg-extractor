@@ -120,6 +120,10 @@ class Attachment(AttachmentBase):
         either pass a path to where you want to create one or pass an instance
         to :param zip:. If :param zip: is an instance, :param customPath: will
         refer to a location inside the zip file.
+
+        :param extractEmbedded: If true, causes the attachment, should it be an
+            embedded MSG file, to save as a .msg file instead of calling it's
+            save function.
         """
         # First check if we are skipping embedded messages and stop
         # *immediately* if we are.

@@ -1,11 +1,11 @@
 
 # First level requirements
-imapclient>=2.1.0
+imapclient>=2.3.0<3
 olefile==0.46
-tzlocal>=4.2
-compressed_rtf>=1.0.6
-ebcdic>=1.1.1
-beautifulsoup4>=4.11.1
-RTFDE>=0.0.2
-chardet>=4.0.0
+tzlocal==4.2
+compressed_rtf==1.0.6
+ebcdic==1.1.1
+beautifulsoup4>=4.11.1<4.12
+RTFDE==0.0.2
+chardet>=4.0.0<6
 red-black-tree-mod==1.20
