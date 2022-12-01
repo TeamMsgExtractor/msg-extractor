@@ -36,7 +36,7 @@ class OutlookSignature(CustomAttachmentHandler):
         # Unpack and verify the OLE stream.
         vals = _ST_OLE.unpack(oleStream[:20])
         # Check the version magic.
-        if vals[0] != 0x20000001:
+        if vals[0] != 0x2000001:
             raise ValueError('OLE stream has wrong version magic.')
         # Check the reserved bytes.
         if vals[3] != 0:
