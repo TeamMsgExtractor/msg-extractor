@@ -49,7 +49,7 @@ class OutlookSignature(CustomAttachmentHandler):
         self.__x = vals[1]
         self.__y = vals[2]
         hwStyle = f'height: {self.__x / 100.0:.2f}mm; width: {self.__y / 100.0:.2f}mm;'
-        imgData = f'data:image;base64,{base64.b64encode(self.__data)}';
+        imgData = f'data:image;base64,{base64.b64encode(self.__data)}'
         self.__htmlTag = f'<img src="{imgData}", style="{hwStyle}">'.encode('ascii')
 
     @classmethod

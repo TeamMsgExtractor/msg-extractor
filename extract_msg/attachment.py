@@ -45,6 +45,7 @@ class Attachment(AttachmentBase):
                 # Check if we have any custom handlers. If not, it will raise
                 # an error automatically.
                 self.__customHandler = getHandler(self)
+                self.__data = self.__customHandler.data
             else:
                 self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
                 self.__type = AttachmentType.MSG
@@ -80,8 +81,10 @@ class Attachment(AttachmentBase):
             # Check if user wants to save the file under the Content-ID.
             if kwargs.get('contentId', False):
                 filename = self.cid
-            # If filename is None at this point, use long filename as first
-            # preference.
+            # If we are using a custom handler, prefer it's name.
+            if self.type == AttachmentType.CUSTOM:
+                filename = self.__customHandler.name
+            # If we are here, try to get the filename however else we can.
             if not filename:
                 filename = self.name
             # Otherwise just make something up!
