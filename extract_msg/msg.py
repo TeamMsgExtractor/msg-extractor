@@ -154,6 +154,9 @@ class MSGFile:
         if not self.__attachmentsDelayed:
             self.attachments
 
+    def __del__(self):
+        self.close()
+
     def __enter__(self):
         self.__ole.__enter__()
         return self
