@@ -40,9 +40,9 @@ class Attachment(AttachmentBase):
             self.__data = self._getStream('__substg1.0_37010102')
         elif self.exists('__substg1.0_3701000D'):
             if (self.props['37050003'].value & 0x7) != 0x5:
-                # Check if we can recognize it as an Outlook signature.
-
-                raise NotImplementedError('Unrecognized custom attachment format. Support may be possible but is not likely.')
+                # Check if we have any custom handlers. If not, it will raise
+                # an error automatically.
+                self.__customHandler = getHandler(self)
             else:
                 self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
                 self.__type = AttachmentType.MSG
@@ -237,8 +237,7 @@ class Attachment(AttachmentBase):
     @property
     def extraData(self) -> Optional[CustomAttachmentHandler]:
         """
-        The extra data for a custom attachment type, if any. If the data
-        returned is a dict, check the "type" key
+
         """
         return self.__extraData
 
