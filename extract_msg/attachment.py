@@ -9,6 +9,7 @@ from typing import Any, Dict, Optional, Union
 
 from . import constants
 from .attachment_base import AttachmentBase
+from .custom_attachments import CustomAttachmentHandler, getHandler
 from .enums import AttachmentType
 from .utils import createZipOpen, inputToString, openMsg, prepareFilename
 
@@ -32,7 +33,7 @@ class Attachment(AttachmentBase):
             located.
         """
         super().__init__(msg, dir_)
-        self.__extraData = None
+        self.__customHandler = None
 
         # Get attachment data.
         if self.exists('__substg1.0_37010102'):
@@ -40,6 +41,7 @@ class Attachment(AttachmentBase):
             self.__data = self._getStream('__substg1.0_37010102')
         elif self.exists('__substg1.0_3701000D'):
             if (self.props['37050003'].value & 0x7) != 0x5:
+                self.__type = AttachmentType.CUSTOM
                 # Check if we have any custom handlers. If not, it will raise
                 # an error automatically.
                 self.__customHandler = getHandler(self)
@@ -235,11 +237,12 @@ class Attachment(AttachmentBase):
         return self.__data
 
     @property
-    def extraData(self) -> Optional[CustomAttachmentHandler]:
+    def customHandler(self) -> Optional[CustomAttachmentHandler]:
         """
-
+        The instance of the custom handler associated with this attachment, if
+        it has one.
         """
-        return self.__extraData
+        return self.__customHandler
 
     @property
     def randomFilename(self) -> str:

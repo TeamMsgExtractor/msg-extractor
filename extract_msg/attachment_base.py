@@ -33,7 +33,7 @@ class AttachmentBase:
         self.__dir = dir_
         self.__props = Properties(self._getStream('__properties_version1.0'), PropertiesType.ATTACHMENT)
         self.__namedProperties = NamedProperties(msg.named, self)
-
+        self.__clsid = msg._getOleEntry(dir_).clsid or ''
 
     def _ensureSet(self, variable, streamID, stringStream = True, **kwargs):
         """
@@ -271,9 +271,16 @@ class AttachmentBase:
     contendId = cid
 
     @property
-    def dir(self):
+    def clsid(self) -> str:
         """
-        Returns the directory inside the msg file where the attachment is
+        Returns the CLSID for the data stream/storage of the attachment.
+        """
+        return self.__clsid
+
+    @property
+    def dir(self) -> str:
+        """
+        Returns the directory inside the MSG file where the attachment is
         located.
         """
         return self.__dir
