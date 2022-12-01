@@ -1,3 +1,7 @@
+**v0.38.1**
+* Added a `__del__` method to `MSGFile` to ensure a bit of proper cleanup should all references to an `MSGFile` instance be removed before the file is closed. `OleFileIO` doesn't appear to have one, so it's up to us to ensure it is properly closed. Note that the `del` keyword does not guarantee the immediate deletion of the object, and you should take care to close the file yourself. If this is not possible, importing the `gc` module and using it's `collect` method will free the files if your code has no references to them.
+* Fixed an import issue with signed messages.
+
 **v0.38.0**
 * [[TeamMsgExtractor #117](https://github.com/TeamMsgExtractor/msg-extractor/issues/117)] Added class `OleWriter` to allow the writing of OLE files, which allows for embedded MSG files to be extracted.
 * Added function `MSGFile.export` which copies all streams and storages from an MSG file into a new file. This can "clone" an MSG file or be used for extracting an MSG file that is embedded inside of another.
