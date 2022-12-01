@@ -33,7 +33,6 @@ class AttachmentBase:
         self.__dir = dir_
         self.__props = Properties(self._getStream('__properties_version1.0'), PropertiesType.ATTACHMENT)
         self.__namedProperties = NamedProperties(msg.named, self)
-        self.__clsid = msg._getOleEntry(dir_).clsid or ''
 
     def _ensureSet(self, variable, streamID, stringStream = True, **kwargs):
         """
@@ -275,7 +274,30 @@ class AttachmentBase:
         """
         Returns the CLSID for the data stream/storage of the attachment.
         """
-        return self.__clsid
+        try:
+            return self.__clsid
+        except AttributeError:
+            # Set some default values.
+            self.__clsid = '00000000-0000-0000-0000-000000000000'
+            dataStream = None
+
+            # See if we can find the data stream/storage.
+            if self.type in (AttachmentType.CUSTOM, AttachmentType.MSG):
+                dataStream = [self.__dir, '__substg1.0_3701000D']
+            elif self.type == AttachmentType.DATA:
+                dataStream = [self.__dir, '__substg1.0_37010102']
+            elif self.type == AttachmentType.UNSUPPORTED:
+                # Special check for custom attachments.
+                if self.exists('__substg1.0_3701000D'):
+                    dataStream = [self.__dir, '__substg1.0_3701000D']
+                elif self.exists('__substg1.0_37010102'):
+                    dataStream = [self.__dir, '__substg1.0_37010102']
+
+            # If we found the right item, get the CLSID.
+            if dataStream:
+                self.__clsid = self.__msg._getOleEntry(dataStream).clsid or '00000000-0000-0000-0000-000000000000'
+                
+            return self.__clsid
 
     @property
     def dir(self) -> str:

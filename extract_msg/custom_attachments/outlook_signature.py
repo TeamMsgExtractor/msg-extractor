@@ -5,7 +5,7 @@ from .custom_handler import CustomAttachmentHandler
 from ..enums import DVAspect
 
 
-_ST_OLE = struct.Struck('<IIIII')
+_ST_OLE = struct.Struct('<IIIII')
 _ST_MAILSTREAM = struct.Struct('<III')
 
 
@@ -52,19 +52,30 @@ class OutlookSignature(CustomAttachmentHandler):
         self.__htmlTag = f'<img src="{imgData}", style="{hwStyle}">'.encode('ascii')
 
     @classmethod
-    def isCorrectHandler(cls, attachment : Attachment) -> bool:
-        if attachment.clsid != '':
+    def isCorrectHandler(cls, attachment : 'Attachment') -> bool:
+        if attachment.clsid != '00000316-0000-0000-C000-000000000046':
             return False
 
         # Check for the required streams.
-        if not attachment._exists('__substg1.0_3701000D/CONTENTS'):
+        if not attachment.exists('__substg1.0_3701000D/CONTENTS'):
             return False
-        if not attachment._exists('__substg1.0_3701000D/\x01Ole'):
+        if not attachment.exists('__substg1.0_3701000D/\x01Ole'):
             return False
-        if not attachment._exists('__substg1.0_3701000D/\x03MailStream'):
+        if not attachment.exists('__substg1.0_3701000D/\x03MailStream'):
             return False
 
         return True
+
+    def injectHTML(self, html : bytes) -> bytes:
+        return html # TODO.
+
+    @property
+    def data(self) -> bytes:
+        return self.__data
+
+    @property
+    def name(self) -> str:
+        return self.attachment.shortFilename + '.bmp'
 
 
 

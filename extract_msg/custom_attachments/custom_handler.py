@@ -17,9 +17,29 @@ class CustomAttachmentHandler(abc.ABC):
         Checks if this is the correct handler for the attachment.
         """
 
+    @abc.abstractmethod
+    def injectHTML(self, html : bytes) -> bytes:
+        """
+        Adds the relevent tag, if any, to the HTML for making prepared HTML.
+        """
+
+    @property
+    def attachment(self):
+        """
+        The attachment this handler is associated with.
+        """
+        return self.__att
+
     @property
     @abc.abstractmethod
-    def data(self):
+    def data(self) -> bytes:
         """
         Gets the data for the attachment.
+        """
+
+    @property
+    @abc.abstractmethod
+    def name(self) -> str:
+        """
+        Returns the name to be used when saving the attachment.
         """
