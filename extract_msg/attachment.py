@@ -5,7 +5,7 @@ import random
 import string
 import zipfile
 
-from typing import Optional, Union
+from typing import Any, Dict, Optional, Union
 
 from . import constants
 from .attachment_base import AttachmentBase
@@ -32,6 +32,7 @@ class Attachment(AttachmentBase):
             located.
         """
         super().__init__(msg, dir_)
+        self.__extraData = None
 
         # Get attachment data.
         if self.exists('__substg1.0_37010102'):
@@ -39,9 +40,9 @@ class Attachment(AttachmentBase):
             self.__data = self._getStream('__substg1.0_37010102')
         elif self.exists('__substg1.0_3701000D'):
             if (self.props['37050003'].value & 0x7) != 0x5:
-                raise NotImplementedError(
-                    'Current version of extract_msg does not support extraction of containers that are not embedded msg files.')
-                # TODO add implementation.
+                # Check if we can recognize it as an Outlook signature.
+
+                raise NotImplementedError('Unrecognized custom attachment format. Support may be possible but is not likely.')
             else:
                 self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
                 self.__type = AttachmentType.MSG
@@ -232,6 +233,14 @@ class Attachment(AttachmentBase):
         Returns the attachment data.
         """
         return self.__data
+
+    @property
+    def extraData(self) -> Optional[CustomAttachmentHandler]:
+        """
+        The extra data for a custom attachment type, if any. If the data
+        returned is a dict, check the "type" key
+        """
+        return self.__extraData
 
     @property
     def randomFilename(self) -> str:

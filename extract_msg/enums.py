@@ -316,6 +316,7 @@ class Color(enum.IntEnum):
     BLACK = 1
 
 
+
 class ContactAddressIndex(enum.Enum):
     EMAIL_1 = 0
     EMAIL_2 = 1
@@ -374,6 +375,16 @@ class DisplayType(enum.Enum):
     ADDRESS_TEMPLATE = 0x0102
     SEARCH = 0x0200
 
+
+
+class DVAspect(enum.IntEnum):
+    """
+    Part of the extra data for Outlook signatures. Different sources seem to
+    disagree on the meanings, so I'm sticking to the meanings in the official
+    Microsoft documentation of the DVASPECT enumeration.
+    """
+    CONTENT = 1
+    ICON = 4
 
 
 class ElectronicAddressProperties(enum.Enum):
