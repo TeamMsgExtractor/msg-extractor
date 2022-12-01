@@ -8,4 +8,4 @@ ebcdic==1.1.1
 beautifulsoup4>=4.11.1,<4.12
 RTFDE==0.0.2
 chardet>=4.0.0,<6
-red-black-tree-mod>=1.21
+red-black-tree-mod==1.20
