@@ -1,5 +1,7 @@
 import abc
 
+from typing import List, Optional, Tuple
+
 
 class CustomAttachmentHandler(abc.ABC):
     """
@@ -18,9 +20,16 @@ class CustomAttachmentHandler(abc.ABC):
         """
 
     @abc.abstractmethod
-    def injectHTML(self, html : bytes) -> bytes:
+    def injectHTML(self, html : bytes, renderedList : Optional[List[str]] = None) -> Tuple[bytes, Optional[List[str]]]:
         """
         Adds the relevent tag, if any, to the HTML for making prepared HTML.
+
+        If this function should do nothing, returns the two arguments without
+        modification.
+
+        :param html: The HTML body to inject into (if at all).
+        :param renderedList: The list to use (if needed) of "rendered
+            characters" which will be returned and matches the HTML returned.
         """
 
     @property

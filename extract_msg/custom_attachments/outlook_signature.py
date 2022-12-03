@@ -1,6 +1,8 @@
 import base64
 import struct
 
+from typing import List, Optional, Tuple
+
 from . import registerHandler
 from .custom_handler import CustomAttachmentHandler
 from ..enums import DVAspect
@@ -67,8 +69,24 @@ class OutlookSignature(CustomAttachmentHandler):
 
         return True
 
-    def injectHTML(self, html : bytes) -> bytes:
+    def injectHTML(self, html : bytes, renderedList : Optional[List[str]] = None) -> Tuple[bytes, Optional[List[str]]]:
         return html # TODO.
+        # Here we want to do the following:
+        #     1. Decode the data: We need to know the encoding to be able to
+        #        figure out what a "rendered character" is.
+        #     2. Break the data up into rendered characters. This will likely
+        #        require going one character at a time or using beautiful soup
+        #        to first get the body, head, etc. separated.
+        #     3. If something isn't going to be rendered, shove that whole
+        #        section as part of the next "rendered character" so we can
+        #        fully recombine the data later.
+        #     4. Find our position and shove our tag onto the front of the next
+        #        rendered character so it's in the correct position.
+        #     5. Recombine and re-encode the data.
+        #     6. Return the new bytes and a list of the rendered characters for
+        #        the next function to call to save time.
+        #     7. The next time one of these functions is called, it will know to
+        #        generate it's own list if the list evaluates as False.
 
     @property
     def data(self) -> bytes:
