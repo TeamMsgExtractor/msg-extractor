@@ -1,3 +1,7 @@
+**v0.38.4**
+* Fix line in `OleWriter` that was causing exporting to fail.
+* Fixed some issues with the `README`.
+
 **v0.38.3**
 * Fixed issues in HTML generation that caused line breaks to be omitted from large sections of the text.
 * Fixed issues with requirements file.
