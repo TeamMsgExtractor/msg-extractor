@@ -1,3 +1,7 @@
+**v0.38.3**
+* Fixed issues in HTML generation that caused line breaks to be omitted from large sections of the text.
+* Fixed issues with requirements file.
+
 **v0.38.2**
 * Fixed new `NameError` accidentally introduced in the previous version.
 
