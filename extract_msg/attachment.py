@@ -82,7 +82,7 @@ class Attachment(AttachmentBase):
             if kwargs.get('contentId', False):
                 filename = self.cid
             # If we are using a custom handler, prefer it's name.
-            if self.type == AttachmentType.CUSTOM:
+            if self.type is AttachmentType.CUSTOM:
                 filename = self.__customHandler.name
             # If we are here, try to get the filename however else we can.
             if not filename:
@@ -176,7 +176,7 @@ class Attachment(AttachmentBase):
 
         fullFilename = customPath / filename
 
-        if self.type is AttachmentType.DATA:
+        if self.type is AttachmentType.DATA or (self.type is AttachmentType.CUSTOM and isinstance(self.__data, bytes)):
             if _zip:
                 name, ext = os.path.splitext(filename)
                 nameList = _zip.namelist()

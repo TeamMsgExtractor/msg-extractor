@@ -415,9 +415,6 @@ class OleWriter:
         _dir = self.__dirEntries
         while len(pathList) > 1:
             if pathList[0] not in _dir:
-                print(pathList[0])
-                print(_dir)
-                print(self.__dirEntries)
                 # If no entry has been provided already for the directory, that
                 # is considered a fatal error.
                 raise ValueError('Path not found.')
@@ -568,5 +565,4 @@ def _unClsid(clsid : str) -> bytes:
             int(clsid[30:32], 16),
         ))
     except Exception:
-        print(clsid)
         raise

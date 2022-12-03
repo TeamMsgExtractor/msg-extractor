@@ -1183,8 +1183,8 @@ class MessageBase(MSGFile):
         # Iterate through all attachments, and inject all of the custom data
         # from them.
         for x in self.attachments:
-            if x.type == AttachmentType.CUSTOM:
-                html = x.customhandler.injectHTML(html)
+            if x.type is AttachmentType.CUSTOM:
+                html = x.customHandler.injectHTML(html)
 
         # Create the BeautifulSoup instance to use.
         soup = bs4.BeautifulSoup(html, 'html.parser')

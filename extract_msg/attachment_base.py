@@ -284,9 +284,9 @@ class AttachmentBase:
             # See if we can find the data stream/storage.
             if self.type in (AttachmentType.CUSTOM, AttachmentType.MSG):
                 dataStream = [self.__dir, '__substg1.0_3701000D']
-            elif self.type == AttachmentType.DATA:
+            elif self.type is AttachmentType.DATA:
                 dataStream = [self.__dir, '__substg1.0_37010102']
-            elif self.type == AttachmentType.UNSUPPORTED:
+            elif self.type is AttachmentType.UNSUPPORTED:
                 # Special check for custom attachments.
                 if self.exists('__substg1.0_3701000D'):
                     dataStream = [self.__dir, '__substg1.0_3701000D']
@@ -296,7 +296,7 @@ class AttachmentBase:
             # If we found the right item, get the CLSID.
             if dataStream:
                 self.__clsid = self.__msg._getOleEntry(dataStream).clsid or '00000000-0000-0000-0000-000000000000'
-                
+
             return self.__clsid
 
     @property
