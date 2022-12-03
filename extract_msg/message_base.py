@@ -1160,7 +1160,7 @@ class MessageBase(MSGFile):
             if not self._htmlBody and self.body:
                 # Convert the plain text body to html.
                 logger.info('HTML body was not found, attempting to generate from plain text body.')
-                correctedBody = html.escape(self.body).replace('\r', '').replace('\n', '</br>')
+                correctedBody = html.escape(self.body).replace('\r', '').replace('\n', '<br />')
                 self._htmlBody = f'<html><body>{correctedBody}</body></head>'.encode('utf-8')
 
             if not self._htmlBody:
@@ -1320,7 +1320,7 @@ class MessageBase(MSGFile):
         """
         prefix = r'\htmlrtf {\htmlrtf0 {\*\htmltag96 <div>}{\*\htmltag96 <div>}{\*\htmltag64 <p class=MsoNormal>}'
         suffix = r'{\*\htmltag244 <o:p>}{\*\htmlrag252 </o:p>}\htmlrtf \par\par\htmlrtf0 {\*\htmltag72 </p>}{\*\htmltag104 </div>}{\*\htmltag104 </div>}\htmlrtf }\htmlrtf0 '
-        joinStr = r'{\*\htmltag116 <br>}\htmlrtf \line\htmlrtf0 '
+        joinStr = r'{\*\htmltag116 <br />}\htmlrtf \line\htmlrtf0 '
         formatter = (lambda name, value : fr'\htmlrtf {{\b\htmlrtf0{{\*\htmltag84 <b>}}{name}: {{\*\htmltag92 </b>}}\htmlrtf \b0\htmlrtf0 {inputToString(rtfSanitizeHtml(value), self.stringEncoding)}\htmlrtf }}\htmlrtf0')
 
         return self.getInjectableHeader(prefix, joinStr, suffix, formatter)
