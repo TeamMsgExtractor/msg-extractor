@@ -70,7 +70,7 @@ class OutlookSignature(CustomAttachmentHandler):
         return True
 
     def injectHTML(self, html : bytes, renderedList : Optional[List[str]] = None) -> Tuple[bytes, Optional[List[str]]]:
-        return html # TODO.
+        return (html, renderedList) # TODO.
         # Here we want to do the following:
         #     1. Decode the data: We need to know the encoding to be able to
         #        figure out what a "rendered character" is.
@@ -87,6 +87,7 @@ class OutlookSignature(CustomAttachmentHandler):
         #        the next function to call to save time.
         #     7. The next time one of these functions is called, it will know to
         #        generate it's own list if the list evaluates as False.
+        
 
     @property
     def data(self) -> bytes:
