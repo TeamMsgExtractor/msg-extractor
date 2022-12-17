@@ -29,7 +29,7 @@ registerHandler = _knownHandlers.append
 
 # Import built-in handler modules. THey will all automatically register their
 # respecive handler(s).
-from .outlook_signature import OutlookSignature
+from .outlook_image import OutlookImage
 
 
 

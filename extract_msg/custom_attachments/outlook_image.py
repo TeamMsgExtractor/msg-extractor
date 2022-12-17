@@ -5,14 +5,16 @@ from typing import List, Optional, Tuple
 
 from . import registerHandler
 from .custom_handler import CustomAttachmentHandler
+from .utils import htmlSplitRendered
 from ..enums import DVAspect
+from ..exceptions import CustomAttachmentError
 
 
 _ST_OLE = struct.Struct('<IIIII')
 _ST_MAILSTREAM = struct.Struct('<III')
 
 
-class OutlookSignature(CustomAttachmentHandler):
+class OutlookImage(CustomAttachmentHandler):
     def __init__(self, attachment : 'Attachment'):
         super().__init__(attachment)
         # First we need to get the mailstream.
@@ -48,11 +50,11 @@ class OutlookSignature(CustomAttachmentHandler):
         # Unpack the mailstream and create the HTML tag.
         vals = _ST_MAILSTREAM.unpack(stream)
         self.__dvaspect = DVAspect(vals[0])
-        self.__x = vals[1]
-        self.__y = vals[2]
+        self.__y = vals[1]
+        self.__x = vals[2]
         hwStyle = f'height: {self.__x / 100.0:.2f}mm; width: {self.__y / 100.0:.2f}mm;'
-        imgData = f'data:image;base64,{base64.b64encode(self.__data)}'
-        self.__htmlTag = f'<img src="{imgData}", style="{hwStyle}">'.encode('ascii')
+        imgData = f'data:image;base64,{base64.b64encode(self.__data).decode("ascii")}'
+        self.__htmlTag = f'<img src="{imgData}", style="{hwStyle}">'
 
     @classmethod
     def isCorrectHandler(cls, attachment : 'Attachment') -> bool:
@@ -70,24 +72,17 @@ class OutlookSignature(CustomAttachmentHandler):
         return True
 
     def injectHTML(self, html : bytes, renderedList : Optional[List[str]] = None) -> Tuple[bytes, Optional[List[str]]]:
-        return (html, renderedList) # TODO.
-        # Here we want to do the following:
-        #     1. Decode the data: We need to know the encoding to be able to
-        #        figure out what a "rendered character" is.
-        #     2. Break the data up into rendered characters. This will likely
-        #        require going one character at a time or using beautiful soup
-        #        to first get the body, head, etc. separated.
-        #     3. If something isn't going to be rendered, shove that whole
-        #        section as part of the next "rendered character" so we can
-        #        fully recombine the data later.
-        #     4. Find our position and shove our tag onto the front of the next
-        #        rendered character so it's in the correct position.
-        #     5. Recombine and re-encode the data.
-        #     6. Return the new bytes and a list of the rendered characters for
-        #        the next function to call to save time.
-        #     7. The next time one of these functions is called, it will know to
-        #        generate it's own list if the list evaluates as False.
-        
+        if not renderedList:
+            renderedList = htmlSplitRendered(html)
+
+        rp = self.attachment.renderingPosition
+
+        if rp >= len(renderedList):
+            raise CustomAttachmentError(f'Rendering position beyond calculated number of rendered characters (expected less than {len(renderedList)}, got {rp}).')
+
+        renderedList[rp] = self.__htmlTag + renderedList[rp]
+
+        return (''.join(renderedList).encode('utf-8'), renderedList)
 
     @property
     def data(self) -> bytes:
@@ -100,4 +95,4 @@ class OutlookSignature(CustomAttachmentHandler):
 
 
 
-registerHandler(OutlookSignature)
+registerHandler(OutlookImage)
