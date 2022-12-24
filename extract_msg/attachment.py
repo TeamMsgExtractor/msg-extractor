@@ -10,6 +10,7 @@ from typing import Optional, Union
 from . import constants
 from .attachment_base import AttachmentBase
 from .enums import AttachmentType
+from .exceptions import StandardViolationError
 from .utils import createZipOpen, inputToString, openMsg, prepareFilename
 
 
@@ -32,6 +33,31 @@ class Attachment(AttachmentBase):
             located.
         """
         super().__init__(msg, dir_)
+
+        if '37050003' not in self.props:
+            from .prop import createProp
+
+            logger.warning('Attahcment method property not found on attachment. Code will attempt to guess the type.')
+
+            # Because this condition is actually kind of a violation of the
+            # standard, we are just going to do this in a dumb way. Basically we
+            # are going to try to set the attach method *manually* just so I
+            # don't have to go and modify the following code.
+            if self.exists('__substg1.0_37010102'):
+                # Set it as data and call it a day.
+                propData = b'\x03\x00\x057\x07\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00'
+            elif self.exists('__substg1.0_3701000D'):
+                # If it is a folder and we have properties, call it an MSG file.
+                if self.exists('__substg1.0_3701000D/__properties_version1.0'):
+                    propData = b'\x03\x00\x057\x07\x00\x00\x00\x05\x00\x00\x00\x00\x00\x00\x00'
+                else:
+                    # Call if custom attachment data.
+                    propData = b'\x03\x00\x057\x07\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00'
+            else:
+                # Can't autodetect it, so throw an error.
+                raise StandardViolationError('Attachment method missing, and it could not be determined automatically.')
+
+            self.props._propDict['37050003'] = createProp(propData)
 
         # Get attachment data.
         if self.exists('__substg1.0_37010102'):
