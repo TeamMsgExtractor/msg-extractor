@@ -1,5 +1,8 @@
 **v0.38.5**
 * Added code to handle a standards violation (from what I can tell, anyways) caused by the attachment not having an `AttachMethod` property. The code will log a warning, attempt to detect the method, and throw a `StandardViolationError` if it fails.
+* Added additional functions to the `OleWriter` class to make it a lot more functional.
+* Fixed up a few docstrings.
+* Fixed a few issues in `MSGFile` regarding the `filename` keyword argument.
 
 **v0.38.4**
 * Fix line in `OleWriter` that was causing exporting to fail.

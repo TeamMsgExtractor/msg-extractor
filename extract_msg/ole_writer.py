@@ -494,7 +494,7 @@ class OleWriter:
             for x in gen:
                 self.addOleEntry(x, msg._getOleEntry(x, prefix = False), msg._getStream(x, prefix = False))
 
-    def fromOleFile(self, ole : OleFileIO) -> None:
+    def fromOleFile(self, ole : OleFileIO, rootPath = []) -> None:
         """
         Copies all the streams from the proided OLE file into this writer.
         """
