@@ -3,6 +3,7 @@
 * Added additional functions to the `OleWriter` class to make it a lot more functional.
 * Fixed up a few docstrings.
 * Fixed a few issues in `MSGFile` regarding the `filename` keyword argument.
+* Removed the bool check on the `_zip` variable in the save functions. The other check of `createdZip` *requires* that `_zip` is set, making the check redundant.
 
 **v0.38.4**
 * Fix line in `OleWriter` that was causing exporting to fail.

@@ -908,7 +908,7 @@ class MessageBase(MSGFile):
             raise
         finally:
             # Close the ZipFile if this function created it.
-            if _zip and createdZip:
+            if createdZip:
                 _zip.close()
 
         # Return the instance so that functions can easily be chained.

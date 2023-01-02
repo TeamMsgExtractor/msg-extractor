@@ -158,7 +158,7 @@ class Attachment(AttachmentBase):
         if self.type is AttachmentType.MSG and kwargs.get('skipEmbedded'):
             return None
 
-        # Check if the user has specified a custom filename
+        # Get the filename to use.
         filename = self.getFilename(**kwargs)
 
         # Someone managed to have a null character here, so let's get rid of that
@@ -229,7 +229,7 @@ class Attachment(AttachmentBase):
                 f.write(self.__data)
 
             # Close the ZipFile if this function created it.
-            if _zip and createdZip:
+            if createdZip:
                 _zip.close()
 
             return str(fullFilename)
