@@ -1,3 +1,4 @@
+import copy
 import io
 import pathlib
 import re
@@ -79,13 +80,53 @@ class OleWriter:
     [MS-CFB].
     """
     def __init__(self, rootClsid : bytes = constants.DEFAULT_CLSID):
-        self.__rootClsid = rootClsid
+        self.__rootEntry = _DirectoryEntry()
+        self.__rootEntry.name = "Root Entry"
+        self.__rootEntry.type = DirectoryEntryType.ROOT_STORAGE
+        self.__rootEntry.clsid = rootClsid
         # The root entry will always exist, so this must be at least 1.
         self.__dirEntryCount = 1
         self.__dirEntries = {}
         self.__largeEntries = []
         self.__largeEntrySectors = 0
         self.__numMinifatSectors = 0
+
+    def __recalculateSectors(self):
+        """
+        Recalculates several of the internal variables used for saving that
+        specify the number of sectors and where things should go.
+        """
+        self.__dirEntryCount = 0
+        self.__numMinifatSectors = 0
+        self.__largeEntries.clear()
+        self.__largeEntrySectors = 0
+
+        count = 0
+        for entry in self.__walkEntries():
+            self.__dirEntryCount += 1
+            if entry.type == DirectoryEntryType.STREAM:
+                if len(entry.data) < 4096:
+                    self.__numMinifatSectors += ceilDiv(len(entry.data), 64)
+                else:
+                    self.__largeEntries.append(entry)
+                    self.__largeEntrySectors += ceilDiv(len(entry.data), 512)
+
+    def __walkEntries(self):
+        """
+        Returns a generator that will walk the entires recursively. Each item
+        returned by it will be a _DirectoryEntry instance.
+        """
+        toProcess = [self.__dirEntries]
+        yield self.__rootEntry
+
+        while len(toProcess) > 0:
+            for name, item in toProcess.pop(0).items():
+                if name != '::DirectoryEntry':
+                    if isinstance(item, dict):
+                        yield item['::DirectoryEntry']
+                        toProcess.append(item)
+                    else:
+                        yield item
 
     @property
     def __numberOfSectors(self) -> int:
@@ -100,6 +141,9 @@ class OleWriter:
 
     @property
     def __numMinifat(self) -> int:
+        """
+        The number of FAT sectors needed to store the mini FAT.
+        """
         return ceilDiv(self.__numMinifatSectors, 8)
 
     def _getFatSectors(self):
@@ -125,13 +169,13 @@ class OleWriter:
         writing the file, returning a list, in order, of the entries to write.
         """
         # First, create the root entry.
-        root = _DirectoryEntry()
-        root.name = "Root Entry"
-        root.type = DirectoryEntryType.ROOT_STORAGE
-        root.clsid = self.__rootClsid
+        root = copy.copy(self.__rootEntry)
+
         # Add the location of the start of the mini stream.
         root.startingSectorLocation = (startingSector + ceilDiv(self.__dirEntryCount, 4) + ceilDiv(self.__numMinifatSectors, 128)) if self.__numMinifat > 0 else 0xFFFFFFFE
         root.streamSize = self.__numMinifatSectors * 64
+        root.childTreeRoot = None
+        root.childID = 0xFFFFFFFF
         entries = [root]
 
         toProcess = [(root, self.__dirEntries)]
@@ -222,6 +266,8 @@ class OleWriter:
 
         :returns: The current sector number after all the data is written.
         """
+        # Recalculate some things needed for saving.
+        self.__recalculateSectors()
         # Since we are going to need these multiple times, get them now.
         numFat, numDifat, totalSectors = self._getFatSectors()
 
@@ -447,11 +493,6 @@ class OleWriter:
 
             # Finally, handle the data.
             newEntry.data = data or b''
-            if len(newEntry.data) < 4096:
-                self.__numMinifatSectors += ceilDiv(len(newEntry.data), 64)
-            else:
-                self.__largeEntries.append(newEntry)
-                self.__largeEntrySectors += ceilDiv(len(newEntry.data), 512)
 
         self.__dirEntryCount += 1
 
@@ -460,7 +501,7 @@ class OleWriter:
         Copies the streams and stream information necessary from the MSG file.
         """
         # Get the root OLE entry's CLSID.
-        self.__rootClsid = _unClsid(msg._getOleEntry('/').clsid)
+        self.__rootEntry.clsid = _unClsid(msg._getOleEntry('/').clsid)
 
         # List both storages and directories, but sort them by shortest length
         # first to prevent errors.
@@ -515,14 +556,14 @@ class OleWriter:
         # Check if the root path is simply the top of the file.
         if rootPath == []:
             # Copy the clsid of the root entry.
-            self.__rootClsid = _unClsid(ole.direntries[0].clsid)
+            self.__rootEntry.clsid = _unClsid(ole.direntries[0].clsid)
             paths = {tuple(x): (x, ole.direntries[ole._find(x)]) for x in ole.listdir(True, True)}
         else:
             # If it is not the top of the file, we need to do some filtering.
             # First get the CLSID from the entry the path points to.
             try:
                 entry = ole.direntries[ole._find(rootPath)]
-                self.__rootClsid = _unClsid(entry.clsid)
+                self.__rootEntry.clsid = _unClsid(entry.clsid)
 
             except OSError as e:
                 if str(e) == 'file not found':
