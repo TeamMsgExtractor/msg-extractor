@@ -497,16 +497,54 @@ class OleWriter:
     def fromOleFile(self, ole : OleFileIO, rootPath = []) -> None:
         """
         Copies all the streams from the proided OLE file into this writer.
-        """
-        # Copy the clsid of the root entry.
-        self.__rootClsid = _unClsid(ole.direntries[0].clsid)
 
-        # Copy all of the other entries.
-        for x in ole.listdir(True, True):
-            entry = ole.direntries[ole._find(x)]
+        NOTE: This method does *not* handle any special rule that may be
+        required by a format that uses the compound binary file format as a base
+        when extracting an embedded directory. For example, MSG files require
+        modification of an embedded properties stream when extracting an
+        embedded MSG file.
+
+        :param rootPath: A path (accepted by olefile.OleFileIO) to the directory
+            to use as the root of the file. If not provided, the file root will
+            be used.
+
+        :raises OSError: If :param rootPath: does not exist in the file.
+        """
+        rootPath = inputToMsgPath(rootPath)
+
+        # Check if the root path is simply the top of the file.
+        if rootPath == []:
+            # Copy the clsid of the root entry.
+            self.__rootClsid = _unClsid(ole.direntries[0].clsid)
+            paths = {tuple(x): (x, ole.direntries[ole._find(x)]) for x in ole.listdir(True, True)}
+        else:
+            # If it is not the top of the file, we need to do some filtering.
+            # First get the CLSID from the entry the path points to.
+            try:
+                entry = ole.direntries[ole._find(rootPath)]
+                self.__rootClsid = _unClsid(entry.clsid)
+
+            except OSError as e:
+                if str(e) == 'file not found':
+                    # Get the cause/context for the original exception and use
+                    # it for the new exception. This hides the exception from
+                    # OleFileIO.
+                    context = e.__cause__ or e.__context__
+                    raise OSError('Root path was not found in the OLE file.') from context
+                else:
+                    raise
+
+            paths = {tuple(x[len(rootPath):]): (x, ole.direntries[ole._find(x)])
+                     for x in ole.listdir(True, True) if len(x) > len(rootPath)}
+
+
+        # Copy all of the other entries. Ensure that directories come before
+        # their streams by sorting the paths.
+        for x in sorted(paths.keys()):
+            fullPath, entry = paths[x]
 
             if entry.entry_type == DirectoryEntryType.STREAM:
-                with ole.openstream(x) as f:
+                with ole.openstream(fullPath) as f:
                     data = f.read()
             else:
                 data = None
