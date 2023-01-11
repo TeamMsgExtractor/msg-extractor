@@ -64,8 +64,11 @@ class Named:
             self.__guids = guids
 
             for entry in entries:
-                streamID = properHex(0x8000 + entry['pid'])
-                self.__properties.append(StringNamedProperty(entry, names[entry['id']]) if entry['pkind'] == NamedPropertyType.STRING_NAMED else NumericalNamedProperty(entry))
+                if entry['id'] in names:
+                    streamID = properHex(0x8000 + entry['pid'])
+                    self.__properties.append(StringNamedProperty(entry, names[entry['id']]) if entry['pkind'] == NamedPropertyType.STRING_NAMED else NumericalNamedProperty(entry))
+                else:
+                    logger.warning(f"Missing name for entry {entry['id']}")
 
             for property in self.__properties:
                 name = property.name if isinstance(property, StringNamedProperty) else property.propertyID
