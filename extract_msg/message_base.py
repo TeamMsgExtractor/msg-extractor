@@ -700,6 +700,7 @@ class MessageBase(MSGFile):
         pdf = kwargs.get('pdf', False)
         allowFallback = kwargs.get('allowFallback', False)
         _zip = kwargs.get('zip')
+        createdZip = False
         maxNameLength = kwargs.get('maxNameLength', 256)
 
         # Variables involved in the save location.
@@ -731,8 +732,6 @@ class MessageBase(MSGFile):
                 _zip = zipfile.ZipFile(_zip, 'a', zipfile.ZIP_DEFLATED)
                 kwargs['zip'] = _zip
                 createdZip = True
-            else:
-                createdZip = False
             # Path needs to be done in a special way if we are in a zip file.
             path = pathlib.Path(kwargs.get('customPath', ''))
             # Set the open command to be that of the zip file.

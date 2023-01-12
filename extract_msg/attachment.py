@@ -174,6 +174,7 @@ class Attachment(AttachmentBase):
 
         # Check if we are doing a zip file.
         _zip = kwargs.get('zip')
+        createdZip = False
 
         # ZipFile handling.
         if _zip:
@@ -183,8 +184,6 @@ class Attachment(AttachmentBase):
                 _zip = zipfile.ZipFile(_zip, 'a', zipfile.ZIP_DEFLATED)
                 kwargs['zip'] = _zip
                 createdZip = True
-            else:
-                createdZip = False
             # Path needs to be done in a special way if we are in a zip file.
             customPath = pathlib.Path(kwargs.get('customPath', ''))
             # Set the open command to be that of the zip file.
