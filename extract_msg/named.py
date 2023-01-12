@@ -21,14 +21,12 @@ class Named:
         # Get the basic streams. If all are emtpy, then nothing to do.
         guidStream = self._getStream('__substg1.0_00020102') or self._getStream('__substg1.0_00020102', False)
         entryStream = self._getStream('__substg1.0_00030102') or self._getStream('__substg1.0_00030102', False)
-        namesStream = self._getStream('__substg1.0_00040102') or self._getStream('__substg1.0_00040102', False)
         self.guidStream = guidStream
         self.entryStream = entryStream
-        self.namesStream = namesStream
+        self.namesStream = namesStream = self._getStream('__substg1.0_00040102') or self._getStream('__substg1.0_00040102', False)
         # The if else stuff is for protection against None.
         guidStreamLength = len(guidStream) if guidStream else 0
         entryStreamLength = len(entryStream) if entryStream else 0
-        namesStreamLength = len(namesStream) if namesStream else 0
 
         self.__propertiesDict = {}
         self.__properties = []
@@ -51,21 +49,11 @@ class Named:
                 entry['guid'] = guids[entry['guid_index']]
                 entries.append(entry)
 
-            # Parse the names stream.
-            names = self.__names
-            pos = 0
-            while pos < namesStreamLength:
-                nameLength = constants.STNP_NAM.unpack(namesStream[pos:pos+4])[0]
-                pos += 4 # Move to the start of the entry.
-                names[pos - 4] = namesStream[pos:pos+nameLength].decode('utf-16-le') # Names are stored in the dictionary as the position they start at.
-                pos += roundUp(nameLength, 4)
-
             self.entries = entries
             self.__guids = guids
 
             for entry in entries:
-                streamID = properHex(0x8000 + entry['pid'])
-                self.__properties.append(StringNamedProperty(entry, names[entry['id']]) if entry['pkind'] == NamedPropertyType.STRING_NAMED else NumericalNamedProperty(entry))
+                self.__properties.append(StringNamedProperty(entry, self.__getName(entry['id'])) if entry['pkind'] == NamedPropertyType.STRING_NAMED else NumericalNamedProperty(entry))
 
             for property in self.__properties:
                 name = property.name if isinstance(property, StringNamedProperty) else property.propertyID
@@ -79,6 +67,32 @@ class Named:
 
     def __len__(self) -> int:
         return self.__propertiesDict.__len__()
+
+    def __getName(self, offset : int) -> str:
+        """
+        Parses the offset into the named stream and returns the name found.
+        """
+        # We used to parse names by handing it as an array, as specified by the
+        # documentation, but this new method allows for a little bit more wiggle
+        # room in terms of what is accepted by the module.
+        if offset & 3 != 0:
+            # If the offset is not a multiple of 4, that is an error, but we are
+            # reducing it to a warning.
+            logger.warning(f'Malformed named properties detected due to bad offset ({offset}). Ignoring.')
+        # Check that offset is in string stream.
+        if offset > len(self.namesStream):
+            raise ValueError('Failed to parse named property: offset was not in string stream.')
+
+        # Get the length, in bytes, of the string.
+        length = constants.STNP_NAM.unpack(self.namesStream[offset:offset + 4])[0]
+        offset += 4
+
+        # Make sure the string can be read entirely. If it can't, something was
+        # corrupt.
+        if offset + length > len(self.namesStream):
+            raise ValueError(f'Failed to parse named property: length ({length}) of string overflows the string stream. This is probably due to a bad offset.')
+
+        return self.namesStream[offset:offset + length].decode('utf-16-le')
 
     def _getStream(self, filename, prefix = True) -> Optional[bytes]:
         return self.__msg._getStream([self.__dir, filename], prefix = prefix)
