@@ -689,11 +689,13 @@ class Contact(MessageBase):
         If you class should not do *any* header injection, return None from this
         property.
         """
-        def strListToStr(inp : Union[str, List[str]]):
+        def strListToStr(inp : Union[str, None, List[str]]):
             """
             Small internal function for things that may return a string or list.
             """
-            if isinstance(inp, str):
+            if inp is None:
+                return None
+            elif isinstance(inp, str):
                 return inp
             else:
                 return ', '.join(inp)
@@ -750,7 +752,7 @@ class Contact(MessageBase):
                 'Anniversary': self.weddingAnniversary.__format__('%B %d, %Y') if self.weddingAnniversaryLocal else None,
                 'Spouse/Partner': self.spouseName,
                 'Profession': self.profession,
-                'Children': ', '.join(self.childrensNames),
+                'Children': strListToStr(self.childrensNames),
                 'Hobbies': self.hobbies,
                 'Assistant': self.assistant,
                 'Web Page': self.webpageUrl,
