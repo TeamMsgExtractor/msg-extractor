@@ -229,7 +229,7 @@ class Attachment(AttachmentBase):
                 f.write(self.__data)
 
             # Close the ZipFile if this function created it.
-            if createdZip:
+            if _zip and createdZip:
                 _zip.close()
 
             return str(fullFilename)

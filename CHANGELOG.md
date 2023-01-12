@@ -3,7 +3,6 @@
 * [[TeamMsgExtractor #318](https://github.com/TeamMsgExtractor/msg-extractor/issues/318)]Added code to handle a standards violation (from what I can tell, anyways) caused by the attachment not having an `AttachMethod` property. The code will log a warning, attempt to detect the method, and throw a `StandardViolationError` if it fails.
 * Fixed up a few docstrings.
 * Fixed a few issues in `MSGFile` regarding the `filename` keyword argument.
-* Removed the bool check on the `_zip` variable in the save functions. The other check of `createdZip` *requires* that `_zip` is set, making the check redundant.
 * Added new argument `rootPath` to `OleWriter.fromOleFile` for saving a specific directory from an OLE file instead of just copying the entire file. That directory will become the root of the new one.
 * Adjusted code for `OleWriter` to generate certain values *only* at save time to make them more dynamic. This allows for existing streams to be properly edited (although has issues with allowing storages to be edited).
 
