@@ -689,13 +689,11 @@ class Contact(MessageBase):
         If you class should not do *any* header injection, return None from this
         property.
         """
-        def strListToStr(inp : Union[str, None, List[str]]):
+        def strListToStr(inp : Optional[Union[str, List[str]]]):
             """
             Small internal function for things that may return a string or list.
             """
-            if inp is None:
-                return None
-            elif isinstance(inp, str):
+            if inp is None or isinstance(inp, str):
                 return inp
             else:
                 return ', '.join(inp)
