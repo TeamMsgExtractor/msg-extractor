@@ -603,7 +603,7 @@ class OleWriter:
         """
         path = inputToMsgPath(path)
         # First, find the current place in our dict to add the item.
-        _dir = self.__getContainingStorage(path, False)
+        _dir = self.__getContainingStorage(path, False, True)
         # Now, check that the item *is not* already in our dict, as that would
         # cause problems.
         if path[-1].lower() in map(str.lower, _dir.keys()):
@@ -614,6 +614,7 @@ class OleWriter:
         entry.type = DirectoryEntryType.STORAGE if storage else DirectoryEntryType.STREAM
         entry.name = path[-1]
         self.__modifyEntry(entry, data = data, **kwargs)
+        _dir[path[-1]] = entry
 
     def addOleEntry(self, path, entry : OleDirectoryEntry, data : Optional[bytes] = None) -> None:
         """
