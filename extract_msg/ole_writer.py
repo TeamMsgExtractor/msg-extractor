@@ -127,7 +127,7 @@ class OleWriter:
                 if create:
                     self.addEntry(path[:index + 1], storage = True)
                 else:
-                    raise OSError('Entry not found.')
+                    raise OSError(f'Entry not found: {name}')
             _dir = _dir[dictGetCasedKey(_dir, name)]
 
             # If the current item is not a storage and we have more to the path,
@@ -614,7 +614,10 @@ class OleWriter:
         entry.type = DirectoryEntryType.STORAGE if storage else DirectoryEntryType.STREAM
         entry.name = path[-1]
         self.__modifyEntry(entry, data = data, **kwargs)
-        _dir[path[-1]] = entry
+        if storage:
+            _dir[path[-1]] = {'::DirectoryEntry': entry}
+        else:
+            _dir[path[-1]] = entry
 
     def addOleEntry(self, path, entry : OleDirectoryEntry, data : Optional[bytes] = None) -> None:
         """
@@ -709,7 +712,7 @@ class OleWriter:
             parameter was invalid.
         """
         # First, find our entry to edit.
-        entry = self.__getEntry(path)
+        entry = self.__getEntry(inputToMsgPath(path))
 
         # Send it to be modified using the arguments given.
         self.__modifyEntry(entry, **kwargs)
