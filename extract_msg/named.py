@@ -23,7 +23,7 @@ class Named:
         entryStream = self._getStream('__substg1.0_00030102') or self._getStream('__substg1.0_00030102', False)
         self.guidStream = guidStream
         self.entryStream = entryStream
-        self.namesStream = namesStream = self._getStream('__substg1.0_00040102') or self._getStream('__substg1.0_00040102', False)
+        self.namesStream = self._getStream('__substg1.0_00040102') or self._getStream('__substg1.0_00040102', False)
         # The if else stuff is for protection against None.
         guidStreamLength = len(guidStream) if guidStream else 0
         entryStreamLength = len(entryStream) if entryStream else 0
