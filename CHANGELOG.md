@@ -13,8 +13,9 @@
 * Changed `_DirectoryEntry` to `DirectoryEntry` to make the more finalized version public. Access to the originals that the `OleWriter` class creates should never happen, instead copies should be returned to ensure the behavior is as expected.
 * Added new function `OleWriter.getEntry` which returns a copy of the `DirectoryEntry` instance for that stream or storage in the writer. Use this function to see the current internal state of an entry.
 * Added new function `OleWriter.renameEntry` which allows the user to rename a stream or storage (in place). This only changes it's direct name and not it's location in the new OLE file.
+* Added new function `OleWriter.walk` which is similar to `os.walk` but for walking the structure of the new OLE file.
 * Added a small amount of path validation to `inputToMsgPath` which is used in a lot of places where user input for a path is accepted. It ensures illegal characters don't exist and that the path segments (each name for a storage or stream) are less than 32 characters. This will be most helpful for `OleWriter`.
-* Added *many* internal helper functions to `OleWriter` to make extensions easier and consolidate common code.
+* Added *many* internal helper functions to `OleWriter` to make extensions easier and consolidate common code. Many of these involve direct access to internal data which is why they are private.
 
 **v0.38.4**
 * Fix line in `OleWriter` that was causing exporting to fail.

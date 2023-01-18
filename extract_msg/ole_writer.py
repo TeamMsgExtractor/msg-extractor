@@ -3,7 +3,7 @@ import io
 import pathlib
 import re
 
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, Iterator, List, Optional, Tuple, Union
 
 from . import constants
 from .enums import Color, DirectoryEntryType
@@ -114,8 +114,10 @@ class OleWriter:
         if create and entryExists:
             raise ValueError(':param create: and :param entryExists: cannot both be True (an entry cannot exist if it is being created).')
 
-        # Check that the path is not an internal entry.
-        if '::directoryentry' in map(str.lower, path):
+        # Check that the path is not an internal entry. Given the validation on
+        # paths that most functions should do because of the call to
+        # inputToMsgPath, this shouldn't actually be necessary.
+        if any(x.startswith('::') for x in path):
             raise ValueError('Found internal name in path.')
 
         _dir = self.__dirEntries
@@ -136,7 +138,7 @@ class OleWriter:
                 raise OSError('Attempted to access children of a stream.')
 
         if entryExists and path[-1].lower() not in map(str.lower, _dir.keys()):
-            raise OSError('Entry not found.')
+            raise OSError(f'Entry not found: {path[-1]}')
 
         return _dir
 
@@ -243,7 +245,7 @@ class OleWriter:
 
         while len(toProcess) > 0:
             for name, item in toProcess.pop(0).items():
-                if name != '::DirectoryEntry':
+                if not name.startswith('::'):
                     if isinstance(item, dict):
                         yield item['::DirectoryEntry']
                         toProcess.append(item)
@@ -675,11 +677,6 @@ class OleWriter:
         # Get the containing storage for the entry.
         _dir = self.__getContainingStorage(path)
 
-        # We need to protect against deliberately trying to break the code, so
-        # make sure someone cannot simply delete the storage entry.
-        if path[-1] == '::DirectoryEntry':
-            raise ValueError('Attempted to delete a storage directory entry directly.')
-
         # The garbage collector will take care of all the loose items, so just
         # remove the entry. Also, once again we deal with the case insensitive
         # nature of the path. Even though comparisons are case insensitive, the
@@ -823,7 +820,7 @@ class OleWriter:
         """
         return copy.copy(self.__getEntry(inputToMsgPath(path)))
 
-    def listDir(self, streams = True, storages = False) -> List[List[str]]:
+    def listStructure(self, streams = True, storages = False) -> List[List[str]]:
         """
         Returns a list of the specified items currently in the writter.
         """
@@ -876,6 +873,31 @@ class OleWriter:
         else:
             _dir[newName] = dirData
 
+    def walk(self) -> Iterator[Tuple[str, List[str], List[str]]]:
+        """
+        Functional equivelent to :function os.walk:, but for going over the file
+        structure of the OLE file to be written. Unlike :function os.walk:, it
+        takes no arguments, and the root will be omitted. The exception is the
+        first return which the directory will be an empty string.
+        """
+        toProcess = [('', self.__dirEntries)]
+
+        # Go through the to process list, removing the last item every time to
+        # mimic the behavior of os.walk, but also to give results more like
+        # olefile.OleFileIO.listdir.
+        while toProcess:
+            currentDir, dirDict = toProcess.pop()
+            storages = []
+            streams = []
+            for name in sorted(dirDict.keys(), key = str.lower):
+                if not name.startswith('::'):
+                    if isinstance(dirDict[name], dict):
+                        storages.append(name)
+                        toProcess.append((name, dirDict[name]))
+                    else:
+                        streams.append(name)
+
+            yield (currentDir, storages, streams)
 
     def write(self, path) -> None:
         """
