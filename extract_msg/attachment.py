@@ -5,12 +5,12 @@ import random
 import string
 import zipfile
 
-from typing import Any, Dict, Optional, Union
+from typing import Optional, Union
 
 from . import constants
 from .attachment_base import AttachmentBase
-from .custom_attachments import CustomAttachmentHandler, getHandler
 from .enums import AttachmentType
+from .exceptions import StandardViolationError
 from .utils import createZipOpen, inputToString, openMsg, prepareFilename
 
 
@@ -33,7 +33,31 @@ class Attachment(AttachmentBase):
             located.
         """
         super().__init__(msg, dir_)
-        self.__customHandler = None
+
+        if '37050003' not in self.props:
+            from .prop import createProp
+
+            logger.warning('Attahcment method property not found on attachment. Code will attempt to guess the type.')
+
+            # Because this condition is actually kind of a violation of the
+            # standard, we are just going to do this in a dumb way. Basically we
+            # are going to try to set the attach method *manually* just so I
+            # don't have to go and modify the following code.
+            if self.exists('__substg1.0_37010102'):
+                # Set it as data and call it a day.
+                propData = b'\x03\x00\x057\x07\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00'
+            elif self.exists('__substg1.0_3701000D'):
+                # If it is a folder and we have properties, call it an MSG file.
+                if self.exists('__substg1.0_3701000D/__properties_version1.0'):
+                    propData = b'\x03\x00\x057\x07\x00\x00\x00\x05\x00\x00\x00\x00\x00\x00\x00'
+                else:
+                    # Call if custom attachment data.
+                    propData = b'\x03\x00\x057\x07\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00'
+            else:
+                # Can't autodetect it, so throw an error.
+                raise StandardViolationError('Attachment method missing, and it could not be determined automatically.')
+
+            self.props._propDict['37050003'] = createProp(propData)
 
         # Get attachment data.
         if self.exists('__substg1.0_37010102'):
@@ -41,11 +65,9 @@ class Attachment(AttachmentBase):
             self.__data = self._getStream('__substg1.0_37010102')
         elif self.exists('__substg1.0_3701000D'):
             if (self.props['37050003'].value & 0x7) != 0x5:
-                self.__type = AttachmentType.CUSTOM
-                # Check if we have any custom handlers. If not, it will raise
-                # an error automatically.
-                self.__customHandler = getHandler(self)
-                self.__data = self.__customHandler.data
+                raise NotImplementedError(
+                    'Current version of extract_msg does not support extraction of containers that are not embedded msg files.')
+                # TODO add implementation.
             else:
                 self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
                 self.__type = AttachmentType.MSG
@@ -81,10 +103,8 @@ class Attachment(AttachmentBase):
             # Check if user wants to save the file under the Content-ID.
             if kwargs.get('contentId', False):
                 filename = self.cid
-            # If we are using a custom handler, prefer it's name.
-            if self.type is AttachmentType.CUSTOM:
-                filename = self.__customHandler.name
-            # If we are here, try to get the filename however else we can.
+            # If filename is None at this point, use long filename as first
+            # preference.
             if not filename:
                 filename = self.name
             # Otherwise just make something up!
@@ -127,16 +147,18 @@ class Attachment(AttachmentBase):
         to :param zip:. If :param zip: is an instance, :param customPath: will
         refer to a location inside the zip file.
 
-        :param extractEmbedded: If true, causes the attachment, should it be an
+        :param extractEmbedded: If True, causes the attachment, should it be an
             embedded MSG file, to save as a .msg file instead of calling it's
             save function.
+        :param skipEmbedded: If True, skips saving this attachment if it is an
+            embedded MSG file.
         """
         # First check if we are skipping embedded messages and stop
         # *immediately* if we are.
         if self.type is AttachmentType.MSG and kwargs.get('skipEmbedded'):
             return None
 
-        # Check if the user has specified a custom filename
+        # Get the filename to use.
         filename = self.getFilename(**kwargs)
 
         # Someone managed to have a null character here, so let's get rid of that
@@ -176,7 +198,7 @@ class Attachment(AttachmentBase):
 
         fullFilename = customPath / filename
 
-        if self.type is AttachmentType.DATA or (self.type is AttachmentType.CUSTOM and isinstance(self.__data, bytes)):
+        if self.type is AttachmentType.DATA:
             if _zip:
                 name, ext = os.path.splitext(filename)
                 nameList = _zip.namelist()
@@ -231,14 +253,6 @@ class Attachment(AttachmentBase):
         subclass.
         """
         self.data.save(**kwargs)
-
-    @property
-    def customHandler(self) -> Optional[CustomAttachmentHandler]:
-        """
-        The instance of the custom handler associated with this attachment, if
-        it has one.
-        """
-        return self.__customHandler
 
     @property
     def data(self) -> Optional[Union[bytes, 'MSGFile']]:

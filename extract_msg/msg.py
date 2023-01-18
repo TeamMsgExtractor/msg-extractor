@@ -37,10 +37,9 @@ class MSGFile:
             one. Do not set manually unless you know what you are doing.
         :param parentMsg: Used for synchronizing named properties instances. Do
             not set this unless you know what you are doing.
-        :param attachmentClass: Optional, the class the MSGFile object
-            will use for attachments. You probably should
-            not change this value unless you know what you
-            are doing.
+        :param attachmentClass: Optional, the class the MSGFile object will use
+            for attachments. You probably should not change this value unless
+            you know what you are doing.
         :param delayAttachments: Optional, delays the initialization of
             attachments until the user attempts to retrieve them. Allows MSG
             files with bad attachments to be initialized so the other data can
@@ -112,6 +111,8 @@ class MSGFile:
             del kwargsCopy['prefix']
         if 'parentMsg' in kwargsCopy:
             del kwargsCopy['parentMsg']
+        if 'filename' in kwargsCopy:
+            del kwargsCopy['filename']
         self.__kwargs = kwargsCopy
 
         prefixl = []
@@ -134,7 +135,7 @@ class MSGFile:
         self.__prefix = prefix
         self.__prefixList = prefixl
         self.__prefixLen = len(prefixl)
-        if prefix:
+        if prefix and not filename:
             filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix = False)
         if filename:
             self.filename = filename
@@ -630,9 +631,10 @@ class MSGFile:
             # Get the attachments.
             attachmentDirs = []
             prefixLen = self.prefixLen
-            for dir_ in self.listDir(False, True, False):
-                if dir_[0].startswith('__attach') and dir_[0] not in attachmentDirs:
-                    attachmentDirs.append(dir_[0])
+            for dir_ in self.listDir(False, True):
+                if dir_[prefixLen].startswith('__attach') and \
+                        dir_[prefixLen] not in attachmentDirs:
+                    attachmentDirs.append(dir_[prefixLen])
 
             self._attachments = []
 
@@ -640,6 +642,7 @@ class MSGFile:
                 try:
                     self._attachments.append(self.attachmentClass(self, attachmentDir))
                 except (NotImplementedError, UnrecognizedMSGTypeError) as e:
+                    print("Hello")
                     if self.attachmentErrorBehavior != AttachErrorBehavior.THROW:
                         logger.error(f'Error processing attachment at {attachmentDir}')
                         logger.exception(e)

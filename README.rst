@@ -19,7 +19,7 @@ This module has a Discord server for general discussion. You can find it here:
 
 Changelog
 ---------
--  `Changelog`_
+-  `Changelog <CHANGELOG.md>`__
 
 Usage
 -----
@@ -234,8 +234,8 @@ your access to the newest major version of extract-msg.
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
 
-.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.38.4-blue.svg
-   :target: https://pypi.org/project/extract-msg/0.38.4/
+.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.38.5-blue.svg
+   :target: https://pypi.org/project/extract-msg/0.38.5/
 
 .. |PyPI2| image:: https://img.shields.io/badge/python-3.6+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-367/
@@ -252,4 +252,3 @@ your access to the newest major version of extract-msg.
 .. _Ko-fi: https://ko-fi.com/destructione
 .. _Patreon: https://www.patreon.com/DestructionE
 .. _msg-explorer: https://pypi.org/project/msg-explorer/
-.. _Changelog: https://github.com/TeamMsgExtractor/msg-extractor/blob/master/CHANGELOG.md

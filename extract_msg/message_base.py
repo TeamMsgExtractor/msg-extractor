@@ -19,7 +19,7 @@ from email.parser import Parser as EmailParser
 from typing import Callable, Dict, Optional, Tuple, Union
 
 from . import constants
-from .enums import AttachmentType, DeencapType, RecipientType
+from .enums import DeencapType, RecipientType
 from .exceptions import (
         DataNotFoundError, DeencapMalformedData, DeencapNotEncapsulated,
         IncompatibleOptionsError, WKError
@@ -79,8 +79,8 @@ class MessageBase(MSGFile):
             body is desired. The function should return a string for plain text
             and bytes for HTML. If any problems occur, the function *must*
             either return None or raise one of the appropriate functions from
-            extract_msg.exceptions. All other functions must be handled
-            internally or they will continue. The original deencapsulation
+            extract_msg.exceptions. All other exceptions must be handled
+            internally or they will not be caught. The original deencapsulation
             method will not run if this is set.
         """
         super().__init__(path, **kwargs)
@@ -1178,18 +1178,8 @@ class MessageBase(MSGFile):
         if not self.htmlBody:
             return self.htmlBody
 
-        html = self.htmlBody
-
-        renderedCharacters = None
-
-        # Iterate through all attachments, and inject all of the custom data
-        # from them.
-        for x in self.attachments:
-            if x.type is AttachmentType.CUSTOM:
-                html, renderedCharacters = x.customHandler.injectHTML(html, renderedCharacters)
-
         # Create the BeautifulSoup instance to use.
-        soup = bs4.BeautifulSoup(html, 'html.parser')
+        soup = bs4.BeautifulSoup(self.htmlBody, 'html.parser')
 
         # Get a list of image tags to see if we can inject into. If the source
         # of an image starts with "cid:" that means it is one of the attachments
