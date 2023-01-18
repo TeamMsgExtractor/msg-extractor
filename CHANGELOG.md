@@ -1,6 +1,7 @@
 **v0.39.0**
 * [[TeamMsgExtractor #318](https://github.com/TeamMsgExtractor/msg-extractor/issues/318)] Added code to handle a standards violation (from what I can tell, anyways) caused by the attachment not having an `AttachMethod` property. The code will log a warning, attempt to detect the method, and throw a `StandardViolationError` if it fails.
 * [[TeamMsgExtractor #320](https://github.com/TeamMsgExtractor/msg-extractor/issues/320)] Changed the way string named properties are handled to allow for the string stream to have some errors and still be parsed. Warnings about these errors will be logged.
+* [[TeamMsgExtractor #324](https://github.com/TeamMsgExtractor/msg-extractor/issues/324)] Fixed an issues with contact saving when a list property returns `None`.
 * [[TeamMsgExtractor #326](https://github.com/TeamMsgExtractor/msg-extractor/issues/326)] Fixed a bug that could cause some files to error when exporting.
 * Fixed an issue where creation and modification times were not being copied to the new OLE file created by `OleWriter`.
 * Fixed up a few docstrings.
