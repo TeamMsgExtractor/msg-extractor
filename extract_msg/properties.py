@@ -192,6 +192,15 @@ class Properties:
         return copy.deepcopy(self.__props)
 
     @property
+    def _propDict(self) -> Dict:
+        """
+        A direct reference to the underlying property dictionary. Used in one
+        place in the code, and not recommended to be used if you are not a
+        developer. Use `Properties.props` instead for a safe reference.
+        """
+        return self.__props
+
+    @property
     def rawData(self) -> bytes:
         """
         The raw bytes used to create this object.

@@ -1,3 +1,23 @@
+**v0.39.0**
+* [[TeamMsgExtractor #318](https://github.com/TeamMsgExtractor/msg-extractor/issues/318)] Added code to handle a standards violation (from what I can tell, anyways) caused by the attachment not having an `AttachMethod` property. The code will log a warning, attempt to detect the method, and throw a `StandardViolationError` if it fails.
+* [[TeamMsgExtractor #320](https://github.com/TeamMsgExtractor/msg-extractor/issues/320)] Changed the way string named properties are handled to allow for the string stream to have some errors and still be parsed. Warnings about these errors will be logged.
+* [[TeamMsgExtractor #326](https://github.com/TeamMsgExtractor/msg-extractor/issues/326)] Fixed a bug that could cause some files to error when exporting.
+* Fixed an issue where creation and modification times were not being copied to the new OLE file created by `OleWriter`.
+* Fixed up a few docstrings.
+* Fixed a few issues in `MSGFile` regarding the `filename` keyword argument.
+* Added new argument `rootPath` to `OleWriter.fromOleFile` for saving a specific directory from an OLE file instead of just copying the entire file. That directory will become the root of the new one.
+* Adjusted code for `OleWriter` to generate certain values *only* at save time to make them more dynamic. This allows for existing streams to be properly edited (although has issues with allowing storages to be edited).
+* Added new function `OleWriter.deleteEntry` to remove an entry that was already added. If the entry is a storage, all children will be removed too.
+* Added new function `OleWriter.editEntry` to edit an entry that was already added.
+* Added new function `OleWriter.addEntry` to add a new entry to the writer without an `OleFileIO` instance. Properties of the entry are instead set using the same keyword arguments as described in `OleWriter.editEntry`.
+* Changed `_DirectoryEntry` to `DirectoryEntry` to make the more finalized version public. Access to the originals that the `OleWriter` class creates should never happen, instead copies should be returned to ensure the behavior is as expected.
+* Added new function `OleWriter.getEntry` which returns a copy of the `DirectoryEntry` instance for that stream or storage in the writer. Use this function to see the current internal state of an entry.
+* Added new function `OleWriter.renameEntry` which allows the user to rename a stream or storage (in place). This only changes it's direct name and not it's location in the new OLE file.
+* Added new function `OleWriter.walk` which is similar to `os.walk` but for walking the structure of the new OLE file.
+* Added new function `OleWriter.listItems` which is functionally equivalent to `olefile.OleFileIO.listdir` which returns a list of paths to every item. Optionally a user can get the paths just for streams, just for storages, or both. Requesting neither will simply return an empty list. Default is to just return streams.
+* Added a small amount of path validation to `inputToMsgPath` which is used in a lot of places where user input for a path is accepted. It ensures illegal characters don't exist and that the path segments (each name for a storage or stream) are less than 32 characters. This will be most helpful for `OleWriter`.
+* Added *many* internal helper functions to `OleWriter` to make extensions easier and consolidate common code. Many of these involve direct access to internal data which is why they are private.
+
 **v0.38.4**
 * Fix line in `OleWriter` that was causing exporting to fail.
 * Fixed some issues with the `README`.
@@ -18,7 +38,7 @@
 * Added function `MSGFile.export` which copies all streams and storages from an MSG file into a new file. This can "clone" an MSG file or be used for extracting an MSG file that is embedded inside of another.
 * Added hidden function to `MSGFile` for getting the `OleDirectoryEntry` for a storage or stream. This is mainly for use by the `OleWriter` class.
 * Added option `extractEmbedded` to `Attachment.save` (`--extract-embedded` on the command line) which causes embedded MSG files to be extracted instead of running their save methods.
-* Fixed minor issues with `utils.inputToMsgPath` (renamed from `utils.inputToMsgpath`).
+* Fixed minor issues with `utils.inputToMsgPath` (renamed from `utils.inputToMsgPath`).
 * Renamed `utils.msgpathToString` to `utils.msgPathToString`.
 * Made some of the module requirements a little more strict to better version control. I'll be trying to make periodic checks for updates to the dependency packages and make sure that new versions are compatible before changing the allowed versions, while also trying to keep the requirements a bit flexible.
 
