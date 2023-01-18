@@ -26,7 +26,7 @@ import olefile
 import tzlocal
 
 from html import escape as htmlEscape
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 from . import constants
 from .enums import AttachmentType
@@ -140,18 +140,6 @@ def createZipOpen(func):
         return func(name, mode, *args, **kwargs)
 
     return _open
-
-
-def dictGetCasedKey(_dict : Dict, key : Any) -> Any:
-    """
-    Retrieves the key from the dictionary with the proper casing using a
-    caseless key.
-    """
-    try:
-        return next((x for x in _dict.keys() if x.lower() == key.lower()))
-    except StopIteration:
-        # If we couldn't find the key, raise a KeyError.
-        raise KeyError(key)
 
 
 def divide(string, length : int) -> List:
@@ -494,26 +482,10 @@ def inputToBytes(stringInputVar, encoding) -> bytes:
 def inputToMsgPath(inp) -> List:
     """
     Converts the input into an msg path.
-
-    :raises ValueError: The path contains an illegal character.
     """
     if isinstance(inp, (list, tuple)):
         inp = '/'.join(inp)
-
-    inp = inputToString(inp, 'utf-8')
-
-    # Validate the path is okay. Normally we would check for '/' and '\', but
-    # we are expecting a string or similar which will use those as path
-    # separators, so we will ignore that for now.
-    if ':' in inp or '!' in inp:
-        raise ValueError('Illegal character ("!" or ":") found in MSG path.')
-
-    ret = [x for x in inp.replace('\\', '/').split('/') if x]
-
-    # One last thing to check: all path segments can be, at most, 31 characters
-    # (32 if you include the null character), so we should verify that.
-    if any(len(x) > 31 for x in ret):
-        raise ValueError('Path segments must not be greater than 31 characters.')
+    ret = [x for x in inputToString(inp, 'utf-8').replace('\\', '/').split('/') if x]
     return ret
 
 
