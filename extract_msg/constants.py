@@ -50,9 +50,6 @@ RE_RTF_FALLBACK_PLAIN = re.compile(br'\\plain[^a-zA-Z0-9]')
 # This is used in the workaround for decoding issues in RTFDE. We find `\bin`
 # sections and try to remove all of them to help with the decoding.
 RE_BIN = re.compile(br'\\bin([0-9]+) ?')
-# Used in the vaildation of OLE paths. Any of these characters in a name make it
-# invalid.
-RE_INVALID_OLE_PATH = re.compile(r'[:/\\!]')
 
 FIXED_LENGTH_PROPS = (
     0x0000,

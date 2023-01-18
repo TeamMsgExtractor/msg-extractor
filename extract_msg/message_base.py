@@ -79,8 +79,8 @@ class MessageBase(MSGFile):
             body is desired. The function should return a string for plain text
             and bytes for HTML. If any problems occur, the function *must*
             either return None or raise one of the appropriate functions from
-            extract_msg.exceptions. All other exceptions must be handled
-            internally or they will not be caught. The original deencapsulation
+            extract_msg.exceptions. All other functions must be handled
+            internally or they will continue. The original deencapsulation
             method will not run if this is set.
         """
         super().__init__(path, **kwargs)
