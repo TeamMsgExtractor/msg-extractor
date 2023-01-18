@@ -27,7 +27,7 @@ _knownHandlers : List[CustomAttachmentHandler] = []
 registerHandler = _knownHandlers.append
 
 
-# Import built-in handler modules. THey will all automatically register their
+# Import built-in handler modules. They will all automatically register their
 # respecive handler(s).
 from .outlook_image import OutlookImage
 
