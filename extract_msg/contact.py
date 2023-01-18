@@ -19,6 +19,8 @@ class Contact(MessageBase):
         :param path: path to the msg file in the system or is the raw msg file.
         :param prefix: used for extracting embeded msg files inside the main
             one. Do not set manually unless you know what you are doing.
+        :param parentMsg: Used for synchronizing named properties instances. Do
+            not set this unless you know what you are doing.
         :param attachmentClass: optional, the class the MSGFile object will use
             for attachments. You probably should not change this value unless
             you know what you are doing.
@@ -28,6 +30,8 @@ class Contact(MessageBase):
             be retrieved.
         :param filename: optional, the filename to be used by default when
             saving.
+        :param attachmentErrorBehavior: Optional, the behavior to use in the
+            event of an error when parsing the attachments.
         :param overrideEncoding: optional, an encoding to use instead of the one
             specified by the msg file. Do not report encoding errors caused by
             this.
@@ -685,11 +689,11 @@ class Contact(MessageBase):
         If you class should not do *any* header injection, return None from this
         property.
         """
-        def strListToStr(inp : Union[str, List[str]]):
+        def strListToStr(inp : Optional[Union[str, List[str]]]):
             """
             Small internal function for things that may return a string or list.
             """
-            if isinstance(inp, str):
+            if inp is None or isinstance(inp, str):
                 return inp
             else:
                 return ', '.join(inp)
@@ -746,7 +750,7 @@ class Contact(MessageBase):
                 'Anniversary': self.weddingAnniversary.__format__('%B %d, %Y') if self.weddingAnniversaryLocal else None,
                 'Spouse/Partner': self.spouseName,
                 'Profession': self.profession,
-                'Children': ', '.join(self.childrensNames),
+                'Children': strListToStr(self.childrensNames),
                 'Hobbies': self.hobbies,
                 'Assistant': self.assistant,
                 'Web Page': self.webpageUrl,

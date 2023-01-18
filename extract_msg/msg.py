@@ -37,10 +37,9 @@ class MSGFile:
             one. Do not set manually unless you know what you are doing.
         :param parentMsg: Used for synchronizing named properties instances. Do
             not set this unless you know what you are doing.
-        :param attachmentClass: Optional, the class the MSGFile object
-            will use for attachments. You probably should
-            not change this value unless you know what you
-            are doing.
+        :param attachmentClass: Optional, the class the MSGFile object will use
+            for attachments. You probably should not change this value unless
+            you know what you are doing.
         :param delayAttachments: Optional, delays the initialization of
             attachments until the user attempts to retrieve them. Allows MSG
             files with bad attachments to be initialized so the other data can
@@ -112,6 +111,8 @@ class MSGFile:
             del kwargsCopy['prefix']
         if 'parentMsg' in kwargsCopy:
             del kwargsCopy['parentMsg']
+        if 'filename' in kwargsCopy:
+            del kwargsCopy['filename']
         self.__kwargs = kwargsCopy
 
         prefixl = []
@@ -134,7 +135,7 @@ class MSGFile:
         self.__prefix = prefix
         self.__prefixList = prefixl
         self.__prefixLen = len(prefixl)
-        if prefix:
+        if prefix and not filename:
             filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix = False)
         if filename:
             self.filename = filename
