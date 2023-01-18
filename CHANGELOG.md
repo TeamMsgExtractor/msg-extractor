@@ -14,6 +14,7 @@
 * Added new function `OleWriter.getEntry` which returns a copy of the `DirectoryEntry` instance for that stream or storage in the writer. Use this function to see the current internal state of an entry.
 * Added new function `OleWriter.renameEntry` which allows the user to rename a stream or storage (in place). This only changes it's direct name and not it's location in the new OLE file.
 * Added new function `OleWriter.walk` which is similar to `os.walk` but for walking the structure of the new OLE file.
+* Added new function `OleWriter.listItems` which is functionally equivalent to `olefile.OleFileIO.listdir` which returns a list of paths to every item. Optionally a user can get the paths just for streams, just for storages, or both. Requesting neither will simply return an empty list. Default is to just return streams.
 * Added a small amount of path validation to `inputToMsgPath` which is used in a lot of places where user input for a path is accepted. It ensures illegal characters don't exist and that the path segments (each name for a storage or stream) are less than 32 characters. This will be most helpful for `OleWriter`.
 * Added *many* internal helper functions to `OleWriter` to make extensions easier and consolidate common code. Many of these involve direct access to internal data which is why they are private.
 

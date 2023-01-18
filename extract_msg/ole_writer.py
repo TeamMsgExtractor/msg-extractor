@@ -215,7 +215,7 @@ class OleWriter:
         if stateBits is not None:
             entry.stateBits = stateBits
 
-    def __recalculateSectors(self):
+    def __recalculateSectors(self) -> None:
         """
         Recalculates several of the internal variables used for saving that
         specify the number of sectors and where things should go.
@@ -235,7 +235,7 @@ class OleWriter:
                     self.__largeEntries.append(entry)
                     self.__largeEntrySectors += ceilDiv(len(entry.data), 512)
 
-    def __walkEntries(self):
+    def __walkEntries(self) -> Iterator[DirectoryEntry]:
         """
         Returns a generator that will walk the entires recursively. Each item
         returned by it will be a DirectoryEntry instance.
@@ -580,7 +580,7 @@ class OleWriter:
         if self.__numMinifatSectors & 7:
             f.write((b'\x00' * 64) * (8 - (self.__numMinifatSectors & 7)))
 
-    def addEntry(self, path, data : bytes = None, storage : bool = False, **kwargs):
+    def addEntry(self, path, data : bytes = None, storage : bool = False, **kwargs) -> None:
         """
         Adds an entry to the OleWriter instance at the path specified, adding
         storages with default settings where necessary. If the entry is not a
@@ -820,13 +820,37 @@ class OleWriter:
         """
         return copy.copy(self.__getEntry(inputToMsgPath(path)))
 
-    def listStructure(self, streams = True, storages = False) -> List[List[str]]:
+    def listItems(self, streams = True, storages = False) -> List[List[str]]:
         """
         Returns a list of the specified items currently in the writter.
-        """
-        # TODO TODO TODO TODO
 
-    def renameEntry(self, path, newName : str):
+        :param streams: If True, includes the path for each stream in the list.
+        :param storages: If True, includes the path for each storage in the
+            list.
+        """
+        # We are actually abusing the walk function a bit here to life much
+        # easier. The way we do this is to look at the current directory that
+        # the walk function is giving information about and then deciding what
+        # parts of it we want to use. Once we have all the paths created, we
+        # will then sort and return it to give an output similar, if not
+        # identical, to OleFileIO.listdir. The mentioned method sorts keeping
+        # case in mind.
+        if not streams and not storages:
+            return []
+
+        paths = []
+        for currentDir, stor, stre in self.walk():
+            if storages:
+                for name in stor:
+                    paths.append(currentDir + [name])
+            if streams:
+                for name in stre:
+                    paths.append(currentDir + [name])
+
+        paths.sort()
+        return paths
+
+    def renameEntry(self, path, newName : str) -> None:
         """
         Changes the name of an entry, leaving it in it's current position.
 
@@ -873,18 +897,22 @@ class OleWriter:
         else:
             _dir[newName] = dirData
 
-    def walk(self) -> Iterator[Tuple[str, List[str], List[str]]]:
+    def walk(self) -> Iterator[Tuple[List[str], List[str], List[str]]]:
         """
         Functional equivelent to :function os.walk:, but for going over the file
         structure of the OLE file to be written. Unlike :function os.walk:, it
-        takes no arguments, and the root will be omitted. The exception is the
-        first return which the directory will be an empty string.
-        """
-        toProcess = [('', self.__dirEntries)]
+        takes no arguments.
 
-        # Go through the to process list, removing the last item every time to
-        # mimic the behavior of os.walk, but also to give results more like
-        # olefile.OleFileIO.listdir.
+        :returns: A tuple of three lists. The first is the path, as a list of
+            strings, for the directory (or an empty list for the root), the
+            second is a list of the storages in the current directory, and the
+            last is a list of the streams. Streams and storages are sorted
+            caselessly.
+        """
+        toProcess = [([], self.__dirEntries)]
+
+        # Go through the toProcess list, removing the last item every time to
+        # mimic the behavior of os.walk.
         while toProcess:
             currentDir, dirDict = toProcess.pop()
             storages = []
@@ -893,7 +921,7 @@ class OleWriter:
                 if not name.startswith('::'):
                     if isinstance(dirDict[name], dict):
                         storages.append(name)
-                        toProcess.append((name, dirDict[name]))
+                        toProcess.append((currentDir + [name], dirDict[name]))
                     else:
                         streams.append(name)
 
