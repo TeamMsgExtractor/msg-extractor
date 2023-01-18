@@ -631,10 +631,9 @@ class MSGFile:
             # Get the attachments.
             attachmentDirs = []
             prefixLen = self.prefixLen
-            for dir_ in self.listDir(False, True):
-                if dir_[prefixLen].startswith('__attach') and \
-                        dir_[prefixLen] not in attachmentDirs:
-                    attachmentDirs.append(dir_[prefixLen])
+            for dir_ in self.listDir(False, True, False):
+                if dir_[0].startswith('__attach') and dir_[0] not in attachmentDirs:
+                    attachmentDirs.append(dir_[0])
 
             self._attachments = []
 
@@ -642,7 +641,6 @@ class MSGFile:
                 try:
                     self._attachments.append(self.attachmentClass(self, attachmentDir))
                 except (NotImplementedError, UnrecognizedMSGTypeError) as e:
-                    print("Hello")
                     if self.attachmentErrorBehavior != AttachErrorBehavior.THROW:
                         logger.error(f'Error processing attachment at {attachmentDir}')
                         logger.exception(e)
