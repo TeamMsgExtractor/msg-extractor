@@ -1,3 +1,6 @@
+**v0.39.1**
+* [[TeamMsgExtractor #333](https://github.com/TeamMsgExtractor/msg-extractor/issues/333)] Fixed typo in a warning.
+
 **v0.39.0**
 * [[TeamMsgExtractor #318](https://github.com/TeamMsgExtractor/msg-extractor/issues/318)] Added code to handle a standards violation (from what I can tell, anyways) caused by the attachment not having an `AttachMethod` property. The code will log a warning, attempt to detect the method, and throw a `StandardViolationError` if it fails.
 * [[TeamMsgExtractor #320](https://github.com/TeamMsgExtractor/msg-extractor/issues/320)] Changed the way string named properties are handled to allow for the string stream to have some errors and still be parsed. Warnings about these errors will be logged.

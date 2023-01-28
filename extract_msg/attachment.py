@@ -37,7 +37,7 @@ class Attachment(AttachmentBase):
         if '37050003' not in self.props:
             from .prop import createProp
 
-            logger.warning('Attahcment method property not found on attachment. Code will attempt to guess the type.')
+            logger.warning('Attachment method property not found on attachment. Code will attempt to guess the type.')
 
             # Because this condition is actually kind of a violation of the
             # standard, we are just going to do this in a dumb way. Basically we
