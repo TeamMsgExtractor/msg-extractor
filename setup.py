@@ -46,5 +46,5 @@ setup(
     },
     include_package_data=True,
     install_requires=dependencies,
-    python_requires='>=3.6',
+    python_requires='>=3.8',
 )

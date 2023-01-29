@@ -38,7 +38,7 @@ attachments.
 The script uses Philippe Lagadec's Python module that reads Microsoft
 OLE2 files (also called Structured Storage, Compound File Binary Format
 or Compound Document File Format). This is the underlying format of
-Outlook's .msg files. This library currently supports Python 3.6 and above.
+Outlook's .msg files. This library currently supports Python 3.7 and above.
 
 The script was originally built using Peter Fiskerstrand's documentation of the
 .msg format. Redemption's discussion of the different property types used within
@@ -237,8 +237,8 @@ your access to the newest major version of extract-msg.
 .. |PyPI3| image:: https://img.shields.io/badge/pypi-0.39.0-blue.svg
    :target: https://pypi.org/project/extract-msg/0.39.0/
 
-.. |PyPI2| image:: https://img.shields.io/badge/python-3.6+-brightgreen.svg
-   :target: https://www.python.org/downloads/release/python-367/
+.. |PyPI2| image:: https://img.shields.io/badge/python-3.8+-brightgreen.svg
+   :target: https://www.python.org/downloads/release/python-3816/
 .. _Matthew Walker: https://github.com/mattgwwalker
 .. _Destiny Peterson (The Elemental of Destruction): https://github.com/TheElementalOfDestruction
 .. _JP Bourget: https://github.com/punkrokk
