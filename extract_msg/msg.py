@@ -48,9 +48,12 @@ class MSGFile:
             saving.
         :param attachmentErrorBehavior: Optional, the behavior to use in the
             event of an error when parsing the attachments.
-        :param overrideEncoding: optional, an encoding to use instead of the one
+        :param overrideEncoding: Optional, an encoding to use instead of the one
             specified by the msg file. Do not report encoding errors caused by
             this.
+        :param treePath: Internal variable used for giving representation of the
+            path, as a tuple of objects, of the MSGFile. When passing, this is
+            the path to the parent object of this instance.
 
         :raises InvalidFileFormatError: If the file is not an OleFile or could
             not be parsed as an MSG file.
@@ -67,6 +70,7 @@ class MSGFile:
         # Retrieve all the kwargs that we need.
         prefix = kwargs.get('prefix', '')
         self.__parentMsg = kwargs.get('parentMsg')
+        self.__treePath = kwargs.get('treePath') or (self,)
         # Verify it is a valid class.
         if self.__parentMsg is not None and not isinstance(self.__parentMsg, MSGFile):
             raise TypeError(':param parentMsg: must be an instance of MSGFile or a subclass.')
@@ -154,9 +158,6 @@ class MSGFile:
         # Now, load the attachments if we are not delaying them.
         if not self.__attachmentsDelayed:
             self.attachments
-
-    def __del__(self):
-        self.close()
 
     def __enter__(self):
         self.__ole.__enter__()
