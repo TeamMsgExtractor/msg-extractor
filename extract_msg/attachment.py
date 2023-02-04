@@ -71,7 +71,7 @@ class Attachment(AttachmentBase):
             else:
                 self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
                 self.__type = AttachmentType.MSG
-                self.__data = openMsg(self.msg.path, prefix = self.__prefix, parentMsg = self.msg, **self.msg.kwargs)
+                self.__data = openMsg(self.msg.path, prefix = self.__prefix, parentMsg = self.msg, treePath = self.treePath, **self.msg.kwargs)
         elif (self.props['37050003'].value & 0x7) == 0x7:
             # TODO Handling for special attacment type 0x7.
             self.__type = AttachmentType.WEB

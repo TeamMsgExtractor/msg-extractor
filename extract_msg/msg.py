@@ -8,7 +8,7 @@ import zipfile
 
 import olefile
 
-from typing import List, Optional, Set, Union
+from typing import List, Optional, Set, Tuple, Union
 from warnings import warn
 
 from . import constants
@@ -70,7 +70,7 @@ class MSGFile:
         # Retrieve all the kwargs that we need.
         prefix = kwargs.get('prefix', '')
         self.__parentMsg = kwargs.get('parentMsg')
-        self.__treePath = kwargs.get('treePath') or (self,)
+        self.__treePath = kwargs.get('treePath', tuple()) + (self,)
         # Verify it is a valid class.
         if self.__parentMsg is not None and not isinstance(self.__parentMsg, MSGFile):
             raise TypeError(':param parentMsg: must be an instance of MSGFile or a subclass.')
@@ -117,6 +117,8 @@ class MSGFile:
             del kwargsCopy['parentMsg']
         if 'filename' in kwargsCopy:
             del kwargsCopy['filename']
+        if 'treePath' in kwargsCopy:
+            del kwargsCopy['treePath']
         self.__kwargs = kwargsCopy
 
         prefixl = []
@@ -768,23 +770,6 @@ class MSGFile:
         return self.__kwargs
 
     @property
-    def props(self) -> Properties:
-        """
-        Returns the Properties instance used by the MSGFile instance.
-        """
-        try:
-            return self._prop
-        except AttributeError:
-            stream = self._getStream('__properties_version1.0')
-            if not stream:
-                # Raise the exception from None so we don't get all the "during
-                # the handling of the above exception" stuff.
-                raise InvalidFileFormatError('File does not contain a properties stream.') from None
-            self._prop = Properties(stream,
-                                    PropertiesType.MESSAGE if self.prefix == '' else PropertiesType.MESSAGE_EMBED)
-            return self._prop
-
-    @property
     def named(self) -> Named:
         """
         The main named properties storage. This is not usable to access the data
@@ -864,6 +849,23 @@ class MSGFile:
         return self._ensureSetProperty('_priority', '00260003', overrideClass = Priority)
 
     @property
+    def props(self) -> Properties:
+        """
+        Returns the Properties instance used by the MSGFile instance.
+        """
+        try:
+            return self._prop
+        except AttributeError:
+            stream = self._getStream('__properties_version1.0')
+            if not stream:
+                # Raise the exception from None so we don't get all the "during
+                # the handling of the above exception" stuff.
+                raise InvalidFileFormatError('File does not contain a properties stream.') from None
+            self._prop = Properties(stream,
+                                    PropertiesType.MESSAGE if self.prefix == '' else PropertiesType.MESSAGE_EMBED)
+            return self._prop
+
+    @property
     def sensitivity(self) -> Optional[Sensitivity]:
         """
         The specified sensitivity of the msg file.
@@ -900,3 +902,11 @@ class MSGFile:
                     # Now we just need to translate that value.
                     self.__stringEncoding = getEncodingName(enc)
                 return self.__stringEncoding
+
+    @property
+    def treePath(self) -> Tuple:
+        """
+        A path, as a tuple of instances, needed to get to this instance through
+        the MSGFile-Attachment tree.
+        """
+        return self.__treePath

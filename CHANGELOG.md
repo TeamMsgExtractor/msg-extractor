@@ -2,6 +2,7 @@
 * [[TeamMsgExtractor #333](https://github.com/TeamMsgExtractor/msg-extractor/issues/333)] Fixed typo in a warning.
 * [[TeamMsgExtractor #334](https://github.com/TeamMsgExtractor/msg-extractor/issues/334)] Removed `__del__` method from `MSGFile`. It was there for cleanup, but wasn't planned well enough to stop it from causing issues. It may be reintroduced in the future if I can manage to remove the issues.
 * [[TeamMsgExtractor #335](https://github.com/TeamMsgExtractor/msg-extractor/issues/335)] Fixed some parts of `extract_msg.utils.getCommandArgs` having invalid logic after a previous (rather old) update that caused exceptions when using certain options.
+* Added new property `treePath` to `AttachmentBase` and `MSGFile` (which adds it to nearly every class). This property is the path to the current instance, represented as a tuple of instances that would be used to get to the current instance.
 
 **v0.39.0**
 * [[TeamMsgExtractor #318](https://github.com/TeamMsgExtractor/msg-extractor/issues/318)] Added code to handle a standards violation (from what I can tell, anyways) caused by the attachment not having an `AttachMethod` property. The code will log a warning, attempt to detect the method, and throw a `StandardViolationError` if it fails.
