@@ -43,9 +43,17 @@ class RTFTokenizer:
         # that is it.
         start = reader.read(6)
         if start != b'{\\rtf1':
-            raise TypeError('Data')
+            raise TypeError('Data does not start with "{\\rtf1".')
 
-        tokens = [Token(b'{'), Token(b'\rtf')]
+        tokens = [
+            Token(b'{', TokenType.GROUP_START),
+            Token(b'\rtf1', TokenType.CONTROL, b'rtf', 1),
+        ]
+        nextChar = reader.read(1)
+
+        # If the next character is a space, ignore it.
+        if nextChar != ' ':
+            reader.seek(reader.tell() - 1)
 
 
 
