@@ -402,6 +402,8 @@ def getCommandArgs(args) -> argparse.Namespace:
         options.cid = False
 
     if options.glob:
+        if options.outName:
+            raise IncompatibleOptionsError('--out-name is not supported when using wildcards.')
         fileLists = []
         for path in options.msgs:
             fileLists += glob.glob(path)
@@ -411,7 +413,7 @@ def getCommandArgs(args) -> argparse.Namespace:
         options.msgs = fileLists
 
     # Make it so outName can only be used on single files.
-    if options.outName and options.fileArgs and len(options.fileArgs) > 0:
+    if options.outName and len(options.msgs) > 1:
         raise IncompatibleOptionsError('--out-name is not supported when saving multiple MSG files.')
 
     # Handle the verbosity level.
