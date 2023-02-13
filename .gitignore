@@ -42,3 +42,6 @@ logging.json
 upload.bat
 upload.sh
 venv
+
+# Sphinx documentation
+docs/_build/

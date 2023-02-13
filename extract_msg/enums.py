@@ -106,6 +106,16 @@ class AttachErrorBehavior(enum.Enum):
 class AttachmentType(enum.Enum):
     """
     The type represented by the attachment.
+
+    DATA: An attachment stored as plain bytes in the MSG file.
+    MSG: A normally embedded MSG file.
+    WEB: An attachment referencing a resource on the web.
+    SIGNED: An attachment of a signed message that is *not* an MSG file.
+    SIGNED_EMBEDDED: An MSG file embedded in a signed message.
+
+    BROKEN: An attachment with a critical issue.
+    UNSUPPORTED: An attachment that does not match any supported types.
+    UNKNOWN: The attachment type could not be determined.
     """
     DATA = 0
     MSG = 1
@@ -113,6 +123,7 @@ class AttachmentType(enum.Enum):
     SIGNED = 3
     BROKEN = 4
     UNSUPPORTED = 5
+    SIGNED_EMBEDDED = 6
 
     UNKNOWN = 0xFFFFFFFF
 
