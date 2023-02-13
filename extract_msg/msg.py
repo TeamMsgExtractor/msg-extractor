@@ -8,7 +8,7 @@ import zipfile
 
 import olefile
 
-from typing import List, Optional, Set, Union
+from typing import List, Optional, Set, Tuple, Union
 from warnings import warn
 
 from . import constants
@@ -48,9 +48,12 @@ class MSGFile:
             saving.
         :param attachmentErrorBehavior: Optional, the behavior to use in the
             event of an error when parsing the attachments.
-        :param overrideEncoding: optional, an encoding to use instead of the one
+        :param overrideEncoding: Optional, an encoding to use instead of the one
             specified by the msg file. Do not report encoding errors caused by
             this.
+        :param treePath: Internal variable used for giving representation of the
+            path, as a tuple of objects, of the MSGFile. When passing, this is
+            the path to the parent object of this instance.
 
         :raises InvalidFileFormatError: If the file is not an OleFile or could
             not be parsed as an MSG file.
@@ -67,6 +70,7 @@ class MSGFile:
         # Retrieve all the kwargs that we need.
         prefix = kwargs.get('prefix', '')
         self.__parentMsg = kwargs.get('parentMsg')
+        self.__treePath = kwargs.get('treePath', tuple()) + (self,)
         # Verify it is a valid class.
         if self.__parentMsg is not None and not isinstance(self.__parentMsg, MSGFile):
             raise TypeError(':param parentMsg: must be an instance of MSGFile or a subclass.')
@@ -113,6 +117,8 @@ class MSGFile:
             del kwargsCopy['parentMsg']
         if 'filename' in kwargsCopy:
             del kwargsCopy['filename']
+        if 'treePath' in kwargsCopy:
+            del kwargsCopy['treePath']
         self.__kwargs = kwargsCopy
 
         prefixl = []
@@ -154,9 +160,6 @@ class MSGFile:
         # Now, load the attachments if we are not delaying them.
         if not self.__attachmentsDelayed:
             self.attachments
-
-    def __del__(self):
-        self.close()
 
     def __enter__(self):
         self.__ole.__enter__()
@@ -765,23 +768,6 @@ class MSGFile:
         return self.__kwargs
 
     @property
-    def props(self) -> Properties:
-        """
-        Returns the Properties instance used by the MSGFile instance.
-        """
-        try:
-            return self._prop
-        except AttributeError:
-            stream = self._getStream('__properties_version1.0')
-            if not stream:
-                # Raise the exception from None so we don't get all the "during
-                # the handling of the above exception" stuff.
-                raise InvalidFileFormatError('File does not contain a properties stream.') from None
-            self._prop = Properties(stream,
-                                    PropertiesType.MESSAGE if self.prefix == '' else PropertiesType.MESSAGE_EMBED)
-            return self._prop
-
-    @property
     def named(self) -> Named:
         """
         The main named properties storage. This is not usable to access the data
@@ -861,6 +847,23 @@ class MSGFile:
         return self._ensureSetProperty('_priority', '00260003', overrideClass = Priority)
 
     @property
+    def props(self) -> Properties:
+        """
+        Returns the Properties instance used by the MSGFile instance.
+        """
+        try:
+            return self._prop
+        except AttributeError:
+            stream = self._getStream('__properties_version1.0')
+            if not stream:
+                # Raise the exception from None so we don't get all the "during
+                # the handling of the above exception" stuff.
+                raise InvalidFileFormatError('File does not contain a properties stream.') from None
+            self._prop = Properties(stream,
+                                    PropertiesType.MESSAGE if self.prefix == '' else PropertiesType.MESSAGE_EMBED)
+            return self._prop
+
+    @property
     def sensitivity(self) -> Optional[Sensitivity]:
         """
         The specified sensitivity of the msg file.
@@ -897,3 +900,11 @@ class MSGFile:
                     # Now we just need to translate that value.
                     self.__stringEncoding = getEncodingName(enc)
                 return self.__stringEncoding
+
+    @property
+    def treePath(self) -> Tuple:
+        """
+        A path, as a tuple of instances, needed to get to this instance through
+        the MSGFile-Attachment tree.
+        """
+        return self.__treePath

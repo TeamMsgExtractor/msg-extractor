@@ -2,7 +2,7 @@ import datetime
 import logging
 
 from functools import partial
-from typing import Optional
+from typing import Optional, Tuple
 
 from . import constants
 from .enums import AttachmentType, PropertiesType
@@ -33,7 +33,7 @@ class AttachmentBase:
         self.__dir = dir_
         self.__props = Properties(self._getStream('__properties_version1.0'), PropertiesType.ATTACHMENT)
         self.__namedProperties = NamedProperties(msg.named, self)
-
+        self.__treePath = msg.treePath + (self,)
 
     def _ensureSet(self, variable, streamID, stringStream = True, **kwargs):
         """
@@ -414,6 +414,14 @@ class AttachmentBase:
         Returns the short file name of the attachment, if it exists.
         """
         return self._ensureSet('_shortFilename', '__substg1.0_3704')
+
+    @property
+    def treePath(self) -> Tuple:
+        """
+        A path, as a tuple of instances, needed to get to this instance through
+        the MSGFile-Attachment tree.
+        """
+        return self.__treePath
 
     @property
     def type(self) -> AttachmentType:

@@ -454,7 +454,8 @@ class OleWriter:
 
         # Finally, fill out the last DIFAT sector with null entries.
         if numFat > 109:
-            f.write(b'\xFF\xFF\xFF\xFF' * ((numFat - 109) % 127))
+            print(numFat)
+            f.write(b'\xFF\xFF\xFF\xFF' * (127 - ((numFat - 109) % 127)))
             # Finally, make sure to write the end of chain marker for the DIFAT.
             f.write(b'\xFE\xFF\xFF\xFF')
         else:
