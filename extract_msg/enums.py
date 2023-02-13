@@ -113,7 +113,6 @@ class AttachmentType(enum.Enum):
     SIGNED = 3
     BROKEN = 4
     UNSUPPORTED = 5
-    CUSTOM = 6
 
     UNKNOWN = 0xFFFFFFFF
 
