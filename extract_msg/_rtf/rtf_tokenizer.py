@@ -279,7 +279,6 @@ class RTFTokenizer:
             else:
                 # Otherwise, it's just text.
                 newTokens, nextChar = self.__readText(nextChar, reader)
-            [print(x) for x in newTokens]
             tokens.extend(newTokens)
 
         self.tokens = tokens
