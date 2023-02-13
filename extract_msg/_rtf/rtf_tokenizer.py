@@ -41,6 +41,46 @@ class RTFTokenizer:
     accessed directly from the `tokens` instance variable.
     """
 
+    __KNOWN_DESTINATIONS = (
+        b'aftncn',
+        b'aftnsep',
+        b'aftnsepc',
+        b'annotation',
+        b'author',
+        b'buptim',
+        b'category',
+        b'colortbl',
+        b'comment',
+        b'company',
+        b'creatim',
+        b'doccomm',
+        b'dptxbxtext',
+        b'factoidname',
+        b'fonttbl',
+        b'footer',
+        b'footerf',
+        b'footerl',
+        b'footerr',
+        b'ftncn',
+        b'ftnsep',
+        b'ftnsepc',
+        b'header',
+        b'headerf',
+        b'headerl',
+        b'headerr',
+        b'hlinkbase',
+        b'keywords',
+        b'manager',
+        b'operator',
+        b'pict',
+        b'printim',
+        b'private',
+        b'revtim',
+        b'stylesheet',
+        b'subject',
+        b'title',
+    )
+
     def __init__(self, data : bytes = None):
         self.tokens : List[Token] = []
         # Feed the data to our parser if provided. Feeding will clear all of the
@@ -51,7 +91,7 @@ class RTFTokenizer:
     def __iter__(self):
         return self.tokens.__iter__()
 
-    def __finishTag(self, startText : bytes, reader : io.BytesIO) -> Tuple[bytes, Optional[bytes], Optional[int], Bytes]:
+    def __finishTag(self, startText : bytes, reader : io.BytesIO) -> Tuple[bytes, Optional[bytes], Optional[int], bytes]:
         """
         Finishes reading a tag, returning the needed parameters to make it a
         token. The return is a 4 tuple of the raw token bytes, the name field,
@@ -73,8 +113,8 @@ class RTFTokenizer:
         # Check what the next character is to decide what to do with it.
         if nextChar == b'-':
             # We do this as a separate check.
-            nextNext = reader.read()
-            if nextNext = b'':
+            nextNext = reader.read(1)
+            if nextNext == b'':
                 raise ValueError('Unexpected end of data.')
             elif nextNext.isdigit():
                 startText += nextChar
@@ -90,6 +130,11 @@ class RTFTokenizer:
             param = int(param)
         else:
             param = None
+
+        # Finally, check if the next char is a space, and if it is, read one
+        # more char to replace it.
+        if nextChar == b' ':
+            nextChar = reader.read(1)
 
         return startText, name, param, nextChar
 
@@ -118,6 +163,7 @@ class RTFTokenizer:
             elif name in self.__KNOWN_DESTINATIONS:
                 return (Token(text, TokenType.DESTINATION, name, param),), nextChar
 
+            return (Token(text, TokenType.CONTROL, name, param),), nextChar
         else:
             # Most control symbols would return immediately, but there are two
             # exceptions.
@@ -140,8 +186,6 @@ class RTFTokenizer:
                 # Call the function to read until a clear end of tag.
                 text, name, param, nextChar = self.__finishTag(startChar, reader)
                 return (Token(text, TokenType.IGNORABLE_DESTSINATION, name, param),), nextChar
-
-
             elif nextChar == b'\'':
                 # This is a hex character, so immediately read 2 more bytes.
                 hexChars = reader.read(2)
@@ -165,7 +209,7 @@ class RTFTokenizer:
         # Text is actually the easiest to read, as we just read until end of
         # stream or until a special character. However, a few characters are
         # simply dropped during reading.
-        while (nextChar := reader.read(1)) not in (b'{', b'}', b'\\'):
+        while (nextChar := reader.read(1)) != b'' and nextChar not in (b'{', b'}', b'\\'):
             # Certain characters are simply dropped.
             if nextChar not in (b'\r', b'\n'):
                 chars.append(nextChar)
@@ -173,7 +217,7 @@ class RTFTokenizer:
         # Now, we actually are reading the text as *individual tokens*, so we
         # need to
 
-        return tuple(Token(startChar, TokenType.Text) for x in chars), nextChar
+        return tuple(Token(x, TokenType.TEXT) for x in chars), nextChar
 
     def feed(self, data : bytes) -> None:
         """
@@ -205,7 +249,7 @@ class RTFTokenizer:
 
         # If the next character is a space, ignore it.
         if nextChar == ' ':
-            nextChar = reader.read()
+            nextChar = reader.read(1)
 
         newToken = None
 
@@ -213,23 +257,29 @@ class RTFTokenizer:
         # set. As such, use it to determine what kind of data to try to read,
         # using the delimeter of that type of data to know what to do next.
         while nextChar != b'':
-            # We should hav exactly one character, the start of the next
+            # We should have exactly one character, the start of the next
             # section. Use it to determine what to do.
+            if nextChar in (b'\r', b'\n'):
+                # Just read the next character and start the loop over.
+                nextChar = reader.read(1)
+                continue
+
             if nextChar == b'\\':
-                newTokens, nextChar = self.__readTag(nextChar, reader)
+                newTokens, nextChar = self.__readControl(nextChar, reader)
             elif nextChar == b'{':
                 # This will always be a group start, which has nothing left to
                 # read.
-                nextChar = reader.read()
+                nextChar = reader.read(1)
                 newTokens = (Token(b'{', TokenType.GROUP_START),)
             elif nextChar == b'}':
                 # This will always be a group end, which has nothing left to
                 # read.
-                nextChar = reader.read()
+                nextChar = reader.read(1)
                 newTokens = (Token(b'}', TokenType.GROUP_END),)
             else:
                 # Otherwise, it's just text.
                 newTokens, nextChar = self.__readText(nextChar, reader)
+            [print(x) for x in newTokens]
             tokens.extend(newTokens)
 
         self.tokens = tokens
