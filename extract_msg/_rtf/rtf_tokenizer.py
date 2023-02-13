@@ -2,7 +2,36 @@ import copy
 import enum
 import io
 
-from typing import List, NamedTuple
+from typing import List, NamedTuple, Tuple
+
+
+class TokenType(enum.Enum):
+    GROUP_START = 0
+    GROUP_END = 1
+    CONTROL = 2
+    SYMBOL = 3
+    TEXT = 4
+    DESTINATION = 5
+    IGNORABLE_DESTSINATION = 6
+    # This one is special, used for handling the binary data.
+    BINARY = 7
+
+
+
+class Token(NamedTuple):
+    # The raw bytes for the token, used to recreate the document.
+    raw : bytes
+    # The type of the token.
+    type : TokenType
+    ## The following are optional as they only apply for certain types of tokens.
+    # The name of the token, if it is a control or destination.
+    name : Optional[bytes] = None
+    # The parameter of the token, if it has one. If the token is a `\'hh` token,
+    # this will be the decimal equivelent of the hex value.
+    parameter : Optional[int] = None
+    # The symbol the token represents, if it is a symbol.
+    symbol : Optional[str] = None
+
 
 
 class RTFTokenizer:
@@ -38,6 +67,72 @@ class RTFTokenizer:
         # TODO
         pass
 
+    def __readControl(self, startChar : bytes, reader : io.BytesIO) -> Tuple[Tuple[Token], bytes]:
+        """
+        Attempts to read the next data as a control, returning as many tokens
+        as necessary.
+        """
+        # First, read the next character, as it decides how to handle
+        # everything.
+        nextChar = reader.read(1)
+        if nextChar == b'':
+            raise ValueError('Unexpected end of data.')
+        elif nextChar.isalpha():
+            # Most control symbols would return immediately, but there are two
+            # exceptions.
+            startChar += nextChar
+            if nextChar == b'*':
+                # This is going to be a custom destination. First, validation.
+                if len(nextChar := reader.read(1)) != 1:
+                    raise ValueError('Unexpected end of data.')
+                elif nextChar != b'\\':
+                    raise ValueError(f'Bad custom destination (expected a backslash, got {nextChar}).')
+
+                startChar += nextChar
+
+                # Check the the next char is alpha.
+                if not (nextChar := reader.read(1)).isalpha():
+                    raise ValueError(f'Expected alpha character for destination, got {nextChar}.')
+
+                pass
+
+
+            elif nextChar == b'\'':
+                # This is a hex character, so immediately read 2 more bytes.
+                hexChars = reader.read(2)
+                if len(hexChars) != 2:
+                    raise ValueError('Unexpected end of data.')
+                try:
+                    param = int(hexChars, 16)
+                except ValueError:
+                    context = e.__cause__ or e.__context__
+                    raise ValueError(f'Hex data was not hexidecimal (got {hexChars}).') from context
+                return (self.__handleTag(startChar + hexChars, param),), reader.read(1)
+            else:
+                # If it is a control symbol, immediately return.
+                return (self.__handleTag(startChar, b''),), reader.read(1)
+
+        else:
+            # If is an alphabetical character, so start the handling of a tag.
+            pass
+
+        # Handling \binN is going to be the hardest to do, so just give it
+        # to it's entire own function.
+
+    def __readText(self, startChar : bytes, reader : io.BytesIO) -> Tuple[Tuple[Token], bytes]:
+        """
+        Attempts to read the next data as text.
+        """
+        # Text is actually the easiest to read, as we just read until end of
+        # stream or until a special character. However, a few characters are
+        # simply dropped during reading.
+        while (nextChar := reader.read(1)) not in (b'{', b'}', b'\\'):
+            # Certain characters are simply dropped.
+            if nextChar not in (b'\r', b'\n'):
+                startChar += nextChar
+
+        return (Token(startChar, TokenType.Text),), nextChar
+
     def feed(self, data : bytes) -> None:
         """
         Reads in the bytes and sets the tokens list to the contents after
@@ -67,122 +162,32 @@ class RTFTokenizer:
         nextChar = reader.read(1)
 
         # If the next character is a space, ignore it.
-        if nextChar != ' ':
-            reader.seek(reader.tell() - 1)
+        if nextChar == ' ':
+            nextChar = reader.read()
 
-        # Setup the loop variables.
-        lastCharacter = b''
-        inTag = False
-        param = b''
-        raw = b''
-        # Tracking for if we are handling a `\'HH` tag.
-        isHex = False
+        newToken = None
 
-        while (currentChar := reader.read()) != b'':
-            if currentChar == b' ' and inTag:
-                # End the tag and drop the space.
-                tokens.append(self.__handleTag(raw, param))
-                raw = b''
-                param = b''
-                inTag = False
-            elif currentChar in (b'{', b'}'):
-                # Brackets are second fastest to parse, so do them next.
-                if inTag:
-                    if raw == b'\\':
-                        # If we only have the backslash, this is a symbol.
-                        tokens.append(self.__handleTag(b'\\' + currentChar, b''))
-                        raw = b''
-                        param = b''
-                        inTag = False
-                    else:
-                        # We already have a currentTag, so we need to push it
-                        # then push a group.
-                        tokens.append(self.__handleTag(raw, param))
-                        raw = b''
-                        param = b''
-                        inTag = False
-                        if currentChar = b'{':
-                            tokens.append(Token(currentChar, TokenType.GROUP_START))
-                        else:
-                            tokens.append(Token(currentChar, TokenType.GROUP_END))
-                else:
-                    if raw:
-                        tokens.append(Token(raw, TokenType.TEXT))
-                        raw = b''
-                    if currentChar = b'{':
-                        tokens.append(Token(currentChar, TokenType.GROUP_START))
-                    else:
-                        tokens.append(Token(currentChar, TokenType.GROUP_END))
-            elif currentChar == b'*' and inTag:
-                if len(raw) == 1:
-                    raw += b'*'
-                else:
-                    # End the current tag and start new text.
-                    tokens.append(self.__handleTag(raw, param))
-                    raw = b'*'
-                    param = b''
-                    inTag = False
-            elif currentChar == b'\\':
-                if inTag:
-                    if lastCharacter == b'\\':
-                        # If the current character is a backslash and we are in
-                        # a tag, then it is a backslash symbol and we need to
-                        # push it to the list.
-                        tokens.append(self.__handleTag(raw + b'\\', param))
-                        raw = b''
-                        param = b''
-                    elif lastCharacter == b'*':
-                        # This is a custom destination, but we aren't handling
-                        # that in this section, so just add to the current tag.
-                        raw += currentChar
-                    else:
-                        # We are starting a new tag.
-                        tokens.append(self.__handleTag(raw, param))
-                        raw = b'\\'
-                        param = b''
-                else:
-                    # If we were not already in a tag, check if we have text to
-                    # push, and if we do we push it. After that, start a tag.
-                    if raw:
-                        tokens.append()
-                    raw += b'\\'
-                    inTag = True
-            elif currentChar == b'\'' and inTag:
-                # If the current character is an apostrophe and we are in a tag,
-                # check if it is the first character after the backslash. If it
-                # is, then we are handling hex character, otherwise we are
+        # At every iteration, so long as there is more data, nextChar should be
+        # set. As such, use it to determine what kind of data to try to read,
+        # using the delimeter of that type of data to know what to do next.
+        while nextChar != b'':
+            # We should hav exactly one character, the start of the next
+            # section. Use it to determine what to do.
+            if nextChar == b'\\':
+                newTokens, nextChar = self.__readTag(nextChar, reader)
+            elif nextChar == b'{':
+                # This will always be a group start, which has nothing left to
+                # read.
+                nextChar = reader.read()
+                newTokens = (Token(b'{', TokenType.GROUP_START),)
+            elif nextChar == b'}':
+                # This will always be a group end, which has nothing left to
+                # read.
+                nextChar = reader.read()
+                newTokens = (Token(b'}', TokenType.GROUP_END),)
+            else:
+                # Otherwise, it's just text.
+                newTokens, nextChar = self.__readText(nextChar, reader)
+            tokens.extend(newTokens)
 
-            elif currentChar.isalpha():
-                pass
-
-
-        lastCharacter = currentChar
-
-    # Since we are done, set the tokens list to the new one.
-    self.tokens = tokens
-
-
-
-class TokenType(enum.Enum):
-    GROUP_START = 0
-    GROUP_END = 1
-    CONTROL = 2
-    SYMBOL = 3
-    DESTINATION = 4
-    TEXT = 5
-
-
-
-class Token(NamedTuple):
-    # The raw bytes for the token, used to recreate the document.
-    raw : bytes
-    # The type of the token.
-    type : TokenType
-    ## The following are optional as they only apply for certain types of tokens.
-    # The name of the token, if it is a control or destination.
-    name : Optional[bytes] = None
-    # The parameter of the token, if it has one. If the token is a `\'hh` token,
-    # this will be the decimal equivelent of the hex value.
-    parameter : Optional[int] = None
-    # The symbol the token represents, if it is a symbol.
-    symbol : Optional[str] = None
+        self.tokens = tokens
