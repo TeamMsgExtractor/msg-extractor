@@ -34,6 +34,7 @@ class AttachmentBase:
         self.__props = Properties(self._getStream('__properties_version1.0'), PropertiesType.ATTACHMENT)
         self.__namedProperties = NamedProperties(msg.named, self)
 
+
     def _ensureSet(self, variable, streamID, stringStream = True, **kwargs):
         """
         Ensures that the variable exists, otherwise will set it using the
