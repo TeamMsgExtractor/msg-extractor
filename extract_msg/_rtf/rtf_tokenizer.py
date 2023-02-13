@@ -2,7 +2,7 @@ import copy
 import enum
 import io
 
-from typing import List, NamedTuple, Tuple
+from typing import List, NamedTuple, Optional, Tuple
 
 
 class TokenType(enum.Enum):
@@ -29,8 +29,6 @@ class Token(NamedTuple):
     # The parameter of the token, if it has one. If the token is a `\'hh` token,
     # this will be the decimal equivelent of the hex value.
     parameter : Optional[int] = None
-    # The symbol the token represents, if it is a symbol.
-    symbol : Optional[str] = None
 
 
 
@@ -53,19 +51,47 @@ class RTFTokenizer:
     def __iter__(self):
         return self.tokens.__iter__()
 
-    def __handleTag(self, tag : bytes, param : bytes) -> Token:
+    def __finishTag(self, startText : bytes, reader : io.BytesIO) -> Tuple[bytes, Optional[bytes], Optional[int], Bytes]:
         """
-        Handles converting an RTF tag into a Token.
+        Finishes reading a tag, returning the needed parameters to make it a
+        token. The return is a 4 tuple of the raw token bytes, the name field,
+        the parameter field (as an int), and the next character after the tag.
         """
-        if tag[1] == '*':
-            # Handle custom destination. We also need to handle bad destination
-            # data. TODO
-            pass
-        elif tag[1] in self.__knownSymbols:
-            pass
+        # Very simple rules here. Anything other than a letter and we change
+        # state. If the next character is a hypen, check if the character after
+        # is a digit, otherwise return. If it is a digit or that previously
+        # mentioned next character was a digit, read digits until anything else
+        # is detected, then return.
+        name = startText[-1:]
+        param = b''
 
-        # TODO
-        pass
+        while (nextChar := reader.read(1)) != b'' and nextChar.isalpha():
+            # Read until not alpha.
+            startText += nextChar
+            name += nextChar
+
+        # Check what the next character is to decide what to do with it.
+        if nextChar == b'-':
+            # We do this as a separate check.
+            nextNext = reader.read()
+            if nextNext = b'':
+                raise ValueError('Unexpected end of data.')
+            elif nextNext.isdigit():
+                startText += nextChar
+                nextChar = nextNext
+
+        if nextChar.isdigit():
+            startText += nextChar
+            param += nextChar
+            while (nextChar := reader.read(1)) != b'' and nextChar.isdigit():
+                startText += nextChar
+                param += nextChar
+
+            param = int(param)
+        else:
+            param = None
+
+        return startText, name, param, nextChar
 
     def __readControl(self, startChar : bytes, reader : io.BytesIO) -> Tuple[Tuple[Token], bytes]:
         """
@@ -78,6 +104,21 @@ class RTFTokenizer:
         if nextChar == b'':
             raise ValueError('Unexpected end of data.')
         elif nextChar.isalpha():
+            # If is an alphabetical character, so start the handling of a tag.
+            text, name, param, nextChar = self.__finishTag(startChar + nextChar, reader)
+            # Important, check if the name is "bin". If it is, handle that
+            # specially before returning.
+            if name == b'bin':
+                if nextChar == b'':
+                    raise ValueError('Unexpected end of data.')
+                binText = nextChar + reader.read(param - 1)
+                if len(binText) != param:
+                    raise ValueError('Unexpected end of data.')
+                return (Token(text, TokenType.CONTROL, name, param), Token(binText, TokenType.BINARY)), nextChar
+            elif name in self.__KNOWN_DESTINATIONS:
+                return (Token(text, TokenType.DESTINATION, name, param),), nextChar
+
+        else:
             # Most control symbols would return immediately, but there are two
             # exceptions.
             startChar += nextChar
@@ -94,7 +135,11 @@ class RTFTokenizer:
                 if not (nextChar := reader.read(1)).isalpha():
                     raise ValueError(f'Expected alpha character for destination, got {nextChar}.')
 
-                pass
+                startChar += nextChar
+
+                # Call the function to read until a clear end of tag.
+                text, name, param, nextChar = self.__finishTag(startChar, reader)
+                return (Token(text, TokenType.IGNORABLE_DESTSINATION, name, param),), nextChar
 
 
             elif nextChar == b'\'':
@@ -107,31 +152,28 @@ class RTFTokenizer:
                 except ValueError:
                     context = e.__cause__ or e.__context__
                     raise ValueError(f'Hex data was not hexidecimal (got {hexChars}).') from context
-                return (self.__handleTag(startChar + hexChars, param),), reader.read(1)
+                return (Token(startChar + hexChars, TokenType.SYMBOL, None, param),), reader.read(1)
             else:
                 # If it is a control symbol, immediately return.
                 return (self.__handleTag(startChar, b''),), reader.read(1)
-
-        else:
-            # If is an alphabetical character, so start the handling of a tag.
-            pass
-
-        # Handling \binN is going to be the hardest to do, so just give it
-        # to it's entire own function.
 
     def __readText(self, startChar : bytes, reader : io.BytesIO) -> Tuple[Tuple[Token], bytes]:
         """
         Attempts to read the next data as text.
         """
+        chars = [startChar]
         # Text is actually the easiest to read, as we just read until end of
         # stream or until a special character. However, a few characters are
         # simply dropped during reading.
         while (nextChar := reader.read(1)) not in (b'{', b'}', b'\\'):
             # Certain characters are simply dropped.
             if nextChar not in (b'\r', b'\n'):
-                startChar += nextChar
+                chars.append(nextChar)
 
-        return (Token(startChar, TokenType.Text),), nextChar
+        # Now, we actually are reading the text as *individual tokens*, so we
+        # need to
+
+        return tuple(Token(startChar, TokenType.Text) for x in chars), nextChar
 
     def feed(self, data : bytes) -> None:
         """
