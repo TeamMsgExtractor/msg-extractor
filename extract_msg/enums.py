@@ -124,6 +124,7 @@ class AttachmentType(enum.Enum):
     BROKEN = 4
     UNSUPPORTED = 5
     SIGNED_EMBEDDED = 6
+    CUSTOM = 7
 
     UNKNOWN = 0xFFFFFFFF
 
