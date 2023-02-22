@@ -38,7 +38,7 @@ attachments.
 The script uses Philippe Lagadec's Python module that reads Microsoft
 OLE2 files (also called Structured Storage, Compound File Binary Format
 or Compound Document File Format). This is the underlying format of
-Outlook's .msg files. This library currently supports Python 3.7 and above.
+Outlook's .msg files. This library currently supports Python 3.8 and above.
 
 The script was originally built using Peter Fiskerstrand's documentation of the
 .msg format. Redemption's discussion of the different property types used within
