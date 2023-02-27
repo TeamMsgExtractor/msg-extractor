@@ -372,7 +372,7 @@ class AttachmentBase:
         """
         The best name available for the file. Uses long filename before short.
         """
-        if type == AttachmentType.MSG:
+        if self.type is AttachmentType.MSG:
             if self.displayName:
                 return self.displayName + '.msg'
         return self.longFilename or self.shortFilename
