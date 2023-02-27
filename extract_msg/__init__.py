@@ -27,8 +27,8 @@ https://github.com/TeamMsgExtractor/msg-extractor
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 __author__ = 'Destiny Peterson & Matthew Walker'
-__date__ = '2023-02-12'
-__version__ = '0.39.1'
+__date__ = '2023-02-26'
+__version__ = '0.39.2'
 
 import logging
 
