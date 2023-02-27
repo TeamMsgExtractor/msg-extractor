@@ -1,3 +1,7 @@
+**v0.39.2**
+* Fixed issues with `AttachmentBase.name` that could cause it to generate wrong.
+* Added convenience function `MSGFile.exportBytes` which returns the exported version from `MSGFile.export` as bytes instead of writing it to a file or file-like object.
+
 **v0.39.1**
 * [[TeamMsgExtractor #333](https://github.com/TeamMsgExtractor/msg-extractor/issues/333)] Fixed typo in a warning.
 * [[TeamMsgExtractor #334](https://github.com/TeamMsgExtractor/msg-extractor/issues/334)] Removed `__del__` method from `MSGFile`. It was there for cleanup, but wasn't planned well enough to stop it from causing issues. It may be reintroduced in the future if I can manage to remove the issues.
