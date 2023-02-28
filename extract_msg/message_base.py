@@ -393,7 +393,6 @@ class MessageBase(MSGFile):
         # Log the arguments.
         logger.info(f'Converting to PDF with the following arguments: {processArgs}')
 
-
         # Get the html body *before* calling Popen.
         htmlBody = self.getSaveHtmlBody(**kwargs)
 
