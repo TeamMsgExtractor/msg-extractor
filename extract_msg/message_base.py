@@ -16,7 +16,7 @@ import compressed_rtf
 import RTFDE
 
 from email.parser import Parser as EmailParser
-from typing import Callable, Dict, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from . import constants
 from .enums import DeencapType, RecipientType
@@ -1265,7 +1265,7 @@ class MessageBase(MSGFile):
         return self.__recipientSeparator
 
     @property
-    def recipients(self) -> list:
+    def recipients(self) -> List[Recipient]:
         """
         Returns a list of all recipients.
         """
