@@ -143,7 +143,7 @@ def _readControl(startChar : bytes, reader : io.BytesIO) -> Tuple[Tuple[Token], 
 
             # Call the function to read until a clear end of tag.
             text, name, param, nextChar = _finishTag(startChar, reader)
-            return (Token(text, TokenType.IGNORABLE_DESTSINATION, name, param),), nextChar
+            return (Token(text, TokenType.IGNORABLE_DESTINATION, name, param),), nextChar
         elif nextChar == b'\'':
             # This is a hex character, so immediately read 2 more bytes.
             hexChars = reader.read(2)
@@ -179,7 +179,7 @@ def _readText(startChar : bytes, reader : io.BytesIO) -> Tuple[Tuple[Token], byt
     return tuple(Token(x, TokenType.TEXT) for x in chars), nextChar
 
 
-def tokenizeRTF(data : bytes) -> None:
+def tokenizeRTF(data : bytes, validateStart : bool = True) -> None:
     """
     Reads in the bytes and sets the tokens list to the contents after
     tokenizing. If tokenizing fails, the current tokens list will not be
@@ -188,28 +188,34 @@ def tokenizeRTF(data : bytes) -> None:
     Direct references to the previous tokens list will only point to the
     previous and not to the current one.
 
+    :param validateStart: If False, does not check the first few tags. Useful
+        when tokenizing a snippet rather than a document.
+
     :raises TypeError: The data is not recognized as RTF.
     :raises ValueError: An issue with basic parsing occured.
     """
     reader = io.BytesIO(data)
-    # This tokenizer *only* breaks things up. It does *not* care about
-    # groups and stuff, as that is for a parser to deal with. All we do is
-    # track the current backslash state and token state. We also simply
-    # check that the first token is "\rtf1" preceeded by a group start, and
-    # that is it.
-    start = reader.read(6)
-    if start != b'{\\rtf1':
-        raise TypeError('Data does not start with "{\\rtf1".')
+    if validateStart:
+        # This tokenizer *only* breaks things up. It does *not* care about
+        # groups and stuff, as that is for a parser to deal with. All we do is
+        # track the current backslash state and token state. We also simply
+        # check that the first token is "\rtf1" preceeded by a group start, and
+        # that is it.
+        start = reader.read(6)
+        if start != b'{\\rtf1':
+            raise TypeError('Data does not start with "{\\rtf1".')
 
-    tokens = [
-        Token(b'{', TokenType.GROUP_START),
-        Token(b'\rtf1', TokenType.CONTROL, b'rtf', 1),
-    ]
-    nextChar = reader.read(1)
-
-    # If the next character is a space, ignore it.
-    if nextChar == ' ':
+        tokens = [
+            Token(b'{', TokenType.GROUP_START),
+            Token(b'\rtf1', TokenType.CONTROL, b'rtf', 1),
+        ]
         nextChar = reader.read(1)
+
+        # If the next character is a space, ignore it.
+        if nextChar == ' ':
+            nextChar = reader.read(1)
+    else:
+        tokens = []
 
     newToken = None
 

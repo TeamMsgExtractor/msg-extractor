@@ -10,7 +10,7 @@ class TokenType(enum.Enum):
     SYMBOL = 3
     TEXT = 4
     DESTINATION = 5
-    IGNORABLE_DESTSINATION = 6
+    IGNORABLE_DESTINATION = 6
     # This one is special, used for handling the binary data.
     BINARY = 7
 
