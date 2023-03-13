@@ -245,6 +245,7 @@ def tokenizeRTF(data : bytes, validateStart : bool = True) -> None:
         else:
             # Otherwise, it's just text.
             newTokens, nextChar = _readText(nextChar, reader)
+        print(newTokens)
         tokens.extend(newTokens)
 
-        return tokens
+    return tokens
