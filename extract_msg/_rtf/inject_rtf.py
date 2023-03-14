@@ -10,7 +10,8 @@ from typing import List, Iterable, Optional, Union
 # anyways, so we don't need to list those here.
 _HEADER_DESTINATIONS = (
     b'fonttbl',
-    b'',
+    b'colortbl',
+    b'stylesheet',
 )
 
 # A tuple of control words that are part of the header and that we simply skip.
@@ -37,7 +38,6 @@ _HEADER_SKIPPABLE = (
     b'deflang',
     b'deflangfe',
     b'adeflang',
-
 )
 
 
@@ -119,3 +119,48 @@ def injectStartRTFTokenized(document : List[Token], injectTokens : Union[bytes, 
 
     # We have verified the minimal amount. Now, iterate through the rest to find
     # the injection point.
+    currentInsertPos = 2
+    # Current number of open groups.
+    groupCount = 1
+    # Set to True when looking for if the group is a destination.
+    checkingDest = False
+
+    for item in document[2:]:
+        if groupCount == 1:
+            if item.tokenType is TokenType.GROUP_END:
+                break
+            elif item.tokenType is TokenType.GROUP_START:
+                groupCount += 1
+                checkingDest = True
+            elif item.tokenType is TokenType.CONTROL and item.name in _HEADER_SKIPPABLE:
+                # If the control is one we know about in the header, skip it.
+                currentInsertPos += 1
+            else:
+                # Anything else means we are out of the header.
+                break
+        elif checkingDest:
+            if item.tokenType is TokenType.DESTINATION:
+                # If it is *not* a header destination, just break, otherwise add
+                # 2 to the insert location and skip the destination.
+                if item.name in _HEADER_DESTINATIONS:
+                    currentInsertPos += 2
+                else:
+                    break
+            elif item.tokenType is TokenType.IGNORABLE_DESTINATION:
+                # Add 2 to insert location and skip.
+                currentInsertPos += 2
+            else:
+                # If it is not an ignorible destination, we are now out of the
+                # header, so break.
+                break
+            checkingDest = False
+        else:
+            # Skip the current token, keeping track of groups.
+            if item.TokenType is TokenType.GROUP_START:
+                groupCount += 1
+            if item.TokenType is TokenType.GROUP_END:
+                groupCount -= 1
+            currentInsertPos += 1
+
+    _listInsertMult(document, injectTokens, currentInsertPos)
+    return document
