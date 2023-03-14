@@ -207,7 +207,7 @@ def tokenizeRTF(data : bytes, validateStart : bool = True) -> None:
 
         tokens = [
             Token(b'{', TokenType.GROUP_START),
-            Token(b'\rtf1', TokenType.CONTROL, b'rtf', 1),
+            Token(b'\\rtf1', TokenType.CONTROL, b'rtf', 1),
         ]
         nextChar = reader.read(1)
 
@@ -216,6 +216,7 @@ def tokenizeRTF(data : bytes, validateStart : bool = True) -> None:
             nextChar = reader.read(1)
     else:
         tokens = []
+        nextChar = reader.read(1)
 
     newToken = None
 

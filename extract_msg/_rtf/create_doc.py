@@ -1,7 +1,10 @@
+from typing import Iterable
+
 from .token import Token, TokenType
 
 
-def createDocument(tokens : List[Tokens]) -> bytes:
+
+def createDocument(tokens : Iterable[Token]) -> bytes:
     """
     Combines the tokenized data into bytes and returns the document.
     """

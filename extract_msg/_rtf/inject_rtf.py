@@ -103,9 +103,9 @@ def injectStartRTFTokenized(document : List[Token], injectTokens : Union[bytes, 
     currentLocation = 0
 
     # First confirm the first two tokens are what we expect.
-    if len(document < 3):
+    if len(document) < 3:
         raise ValueError('RTF documents cannot be less than 3 tokens.')
-    if document[0].type != TokenType.GROUP_START or document[1].raw != b'\\rtf1':
+    if document[0].type is not TokenType.GROUP_START or document[1].raw != b'\\rtf1':
         raise TypeError('RTF document *must* start with "{\\rtf1".')
 
     # Confirm that all start groups have an end group somewhere.
@@ -127,26 +127,26 @@ def injectStartRTFTokenized(document : List[Token], injectTokens : Union[bytes, 
 
     for item in document[2:]:
         if groupCount == 1:
-            if item.tokenType is TokenType.GROUP_END:
+            if item.type is TokenType.GROUP_END:
                 break
-            elif item.tokenType is TokenType.GROUP_START:
+            elif item.type is TokenType.GROUP_START:
                 groupCount += 1
                 checkingDest = True
-            elif item.tokenType is TokenType.CONTROL and item.name in _HEADER_SKIPPABLE:
+            elif item.type is TokenType.CONTROL and item.name in _HEADER_SKIPPABLE:
                 # If the control is one we know about in the header, skip it.
                 currentInsertPos += 1
             else:
                 # Anything else means we are out of the header.
                 break
         elif checkingDest:
-            if item.tokenType is TokenType.DESTINATION:
+            if item.type is TokenType.DESTINATION:
                 # If it is *not* a header destination, just break, otherwise add
                 # 2 to the insert location and skip the destination.
                 if item.name in _HEADER_DESTINATIONS:
                     currentInsertPos += 2
                 else:
                     break
-            elif item.tokenType is TokenType.IGNORABLE_DESTINATION:
+            elif item.type is TokenType.IGNORABLE_DESTINATION:
                 # Add 2 to insert location and skip.
                 currentInsertPos += 2
             else:
