@@ -19,6 +19,8 @@ from email.parser import Parser as EmailParser
 from typing import Callable, Dict, Optional, Tuple, Union
 
 from . import constants
+from ._rtf.create_doc import createDocument
+from ._rtf.inject_rtf import injectStartRTF
 from .enums import DeencapType, RecipientType
 from .exceptions import (
         DataNotFoundError, DeencapMalformedData, DeencapNotEncapsulated,
@@ -570,7 +572,7 @@ class MessageBase(MSGFile):
             """
             Internal function to replace the body tag with itself plus the header.
             """
-            return bodyMarker.group() + injectableHeader.encode('utf-8')
+            return bodyMarker.group() + injectableHeader
 
         # Use the previously defined function to inject the RTF header. We are
         # trying a few different methods to determine where to place the header.
@@ -581,42 +583,17 @@ class MessageBase(MSGFile):
             logger.debug('Successfully injected RTF header using first method.')
             return data
 
-        # This second method only applies to encapsulated HTML, so we need to check
-        # for that first.
+        # This first method only applies to documents with encapsulated HTML
+        # that is formatted in a nice way.
         if isEncapsulatedRtf(self.rtfBody):
             data = constants.RE_RTF_ENC_BODY_START_1.sub(replace, self.rtfBody, 1)
             if data != self.rtfBody:
-                logger.debug('Successfully injected RTF header using second method.')
+                logger.debug('Successfully injected RTF header using encapsulation method.')
                 return data
 
-            # This third method is a lot less reliable, and actually would just
-            # simply violate the encapuslated html, so for this one we don't even
-            # try to worry about what the html will think about it. If it injects,
-            # we swap to basic and then inject again, more worried about it working
-            # than looking nice inside.
-            if constants.RE_RTF_ENC_BODY_UGLY.sub(replace, self.rtfBody, 1) != self.rtfBody:
-                injectableHeader = constants.RTF_PLAIN_INJECTABLE_HEADER
-                data = constants.RE_RTF_ENC_BODY_UGLY.sub(replace, self.rtfBody, 1)
-                logger.debug('Successfully injected RTF header using third method.')
-                return data
-
-        # Severe fallback attempts.
-        data = constants.RE_RTF_BODY_FALLBACK_FS.sub(replace, self.rtfBody, 1)
-        if data != self.rtfBody:
-            logger.debug('Successfully injected RTF header using forth method.')
-            return data
-
-        data = constants.RE_RTF_BODY_FALLBACK_F.sub(replace, self.rtfBody, 1)
-        if data != self.rtfBody:
-            logger.debug('Successfully injected RTF header using fifth method.')
-            return data
-
-        data = constants.RE_RTF_BODY_FALLBACK_PLAIN.sub(replace, self.rtfBody, 1)
-        if data != self.rtfBody:
-            logger.debug('Successfully injected RTF header using sixth method.')
-            return data
-
-        raise RuntimeError('All injection attempts failed. Please report this to the developer.')
+        # If the normal encapsulated HTML injection fails or it isn't
+        # encapsulated, use the internal _rtf module.
+        return createDocument(injectStartRTF(self.rtfBody, injectableHeader))
 
     def save(self, **kwargs):
         """
@@ -1306,7 +1283,7 @@ class MessageBase(MSGFile):
             return self._rtfBody
 
     @property
-    def rtfEncapInjectableHeader(self) -> str:
+    def rtfEncapInjectableHeader(self) -> bytes:
         """
         The header that can be formatted and injected into the plain RTF body.
         """
@@ -1315,10 +1292,10 @@ class MessageBase(MSGFile):
         joinStr = r'{\*\htmltag116 <br />}\htmlrtf \line\htmlrtf0 '
         formatter = (lambda name, value : fr'\htmlrtf {{\b\htmlrtf0{{\*\htmltag84 <b>}}{name}: {{\*\htmltag92 </b>}}\htmlrtf \b0\htmlrtf0 {inputToString(rtfSanitizeHtml(value), self.stringEncoding)}\htmlrtf }}\htmlrtf0')
 
-        return self.getInjectableHeader(prefix, joinStr, suffix, formatter)
+        return self.getInjectableHeader(prefix, joinStr, suffix, formatter).encode('utf-8')
 
     @property
-    def rtfPlainInjectableHeader(self) -> str:
+    def rtfPlainInjectableHeader(self) -> bytes:
         """
         The header that can be formatted and injected into the encapsulated RTF
         body.
@@ -1328,7 +1305,7 @@ class MessageBase(MSGFile):
         joinStr = r'\line'
         formatter = (lambda name, value : fr'{{\b {name}: \b0 {inputToString(rtfSanitizePlain(value), self.stringEncoding)}}}')
 
-        return self.getInjectableHeader(prefix, joinStr, suffix, formatter)
+        return self.getInjectableHeader(prefix, joinStr, suffix, formatter).encode('utf-8')
 
     @property
     def sender(self) -> Optional[str]:
