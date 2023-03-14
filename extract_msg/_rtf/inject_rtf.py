@@ -3,12 +3,14 @@ import copy
 from .token import Token, TokenType
 from .tokenize_rtf import tokenizeRTF
 
-from typing import List, Optional, Union
+from typing import List, Iterable, Optional, Union
 
 
-# A tuple of destinations (including custom ones) used in the header.
+# A tuple of destinations used in the header. All ignorable ones are skipped
+# anyways, so we don't need to list those here.
 _HEADER_DESTINATIONS = (
-    'fonttbl'
+    b'fonttbl',
+    b'',
 )
 
 # A tuple of control words that are part of the header and that we simply skip.
@@ -39,6 +41,23 @@ _HEADER_SKIPPABLE = (
 )
 
 
+def _listInsertMult(dest : List, source : Iterable, index : int = -1):
+    """
+    Inserts into :param dest: all the items in :param source: at the index
+    specified. :param dest: can be any mutable sequence with :method insert:,
+    :method __len__:, and :method extend:.
+
+    If :param index: is not specified, the default position is the end of the
+    list. This is also where things will be inserted if index is greater than or
+    equal to the size of the list.
+    """
+    if index == -1 or index >= len(dest):
+        dest.extend(source)
+    else:
+        for offset, item in enumerate(source):
+            dest.insert(index + offset, item)
+
+
 def injectStartRTF(document : bytes, injectTokens : Union[bytes, List[Token]]) -> List[Token]:
     """
     Injects the specified tokens into the document, returning a new copy of the
@@ -55,7 +74,7 @@ def injectStartRTF(document : bytes, injectTokens : Union[bytes, List[Token]]) -
     return injectStartRTFTokenized(tokenizeRTF(document), injectTokens)
 
 
-def injectStartRTFTokenized(document : List[Token], injectTokens : Union[bytes, List[Token]]) -> List[Token]:
+def injectStartRTFTokenized(document : List[Token], injectTokens : Union[bytes, Iterable[Token]]) -> List[Token]:
     """
     Like :function injectStartRTF:, injects the specified tokens into the
     document, returning a reference to the document, except that it accepts a
@@ -86,7 +105,17 @@ def injectStartRTFTokenized(document : List[Token], injectTokens : Union[bytes, 
     # First confirm the first two tokens are what we expect.
     if len(document < 3):
         raise ValueError('RTF documents cannot be less than 3 tokens.')
-    if document[0].type != TokenType.GROUP_START or :
+    if document[0].type != TokenType.GROUP_START or document[1].raw != b'\\rtf1':
+        raise TypeError('RTF document *must* start with "{\\rtf1".')
 
+    # Confirm that all start groups have an end group somewhere.
+    if sum(x.type == TokenType.GROUP_START for x in document) != sum(x.type == TokenType.GROUP_END for x in document):
+        raise ValueError('Number of group opens did not match number of group closes.')
 
-    # We have verified the minimal amount. Now,
+    # If the length is exactly 3, insert right before the end and return.
+    if len(document) == 3:
+        _listInsertMult(document, injectTokens, 2)
+        return document
+
+    # We have verified the minimal amount. Now, iterate through the rest to find
+    # the injection point.
