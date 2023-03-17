@@ -31,7 +31,7 @@ RE_HTML_SAN_SPACE = re.compile('  +')
 RE_HTML_BODY_START = re.compile(b'<body[^>]*>')
 # Regular expression to find the start of the html body in encapsulated RTF.
 # This is used for one of the pattern types that makes life easy.
-RE_RTF_ENC_BODY_START_1 = re.compile(br'\{\\\*\\htmltag[0-9]* ?<body[^>]*>\}')
+RE_RTF_ENC_BODY_START = re.compile(br'\{\\\*\\htmltag[0-9]* ?<body[^>]*>\}')
 # This is used in the workaround for decoding issues in RTFDE. We find `\bin`
 # sections and try to remove all of them to help with the decoding.
 RE_BIN = re.compile(br'\\bin([0-9]+) ?')

@@ -574,25 +574,18 @@ class MessageBase(MSGFile):
             """
             return bodyMarker.group() + injectableHeader
 
-        # Use the previously defined function to inject the RTF header. We are
-        # trying a few different methods to determine where to place the header.
-        data = constants.RE_RTF_BODY_START.sub(replace, self.rtfBody, 1)
-        # If after any method the data does not match the RTF body, then we have
-        # succeeded.
-        if data != self.rtfBody:
-            logger.debug('Successfully injected RTF header using first method.')
-            return data
-
         # This first method only applies to documents with encapsulated HTML
         # that is formatted in a nice way.
         if isEncapsulatedRtf(self.rtfBody):
-            data = constants.RE_RTF_ENC_BODY_START_1.sub(replace, self.rtfBody, 1)
+            data = constants.RE_RTF_ENC_BODY_START.sub(replace, self.rtfBody, 1)
             if data != self.rtfBody:
                 logger.debug('Successfully injected RTF header using encapsulation method.')
                 return data
+            logger.debug('RTF has encapsulated HTML, but injection method failed. It is likely dirty. Will use normal RTF injection method.')
 
         # If the normal encapsulated HTML injection fails or it isn't
         # encapsulated, use the internal _rtf module.
+        logger.debug('Using _rtf module to inject RTF text header.')
         return createDocument(injectStartRTF(self.rtfBody, injectableHeader))
 
     def save(self, **kwargs):

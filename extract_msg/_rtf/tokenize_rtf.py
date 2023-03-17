@@ -157,7 +157,7 @@ def _readControl(startChar : bytes, reader : io.BytesIO) -> Tuple[Tuple[Token], 
             return (Token(startChar + hexChars, TokenType.SYMBOL, None, param),), reader.read(1)
         else:
             # If it is a control symbol, immediately return.
-            return (_handleTag(startChar, b''),), reader.read(1)
+            return (Token(startChar, TokenType.SYMBOL),), reader.read(1)
 
 
 def _readText(startChar : bytes, reader : io.BytesIO) -> Tuple[Tuple[Token], bytes]:

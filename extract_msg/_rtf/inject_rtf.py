@@ -156,9 +156,9 @@ def injectStartRTFTokenized(document : List[Token], injectTokens : Union[bytes, 
             checkingDest = False
         else:
             # Skip the current token, keeping track of groups.
-            if item.TokenType is TokenType.GROUP_START:
+            if item.type is TokenType.GROUP_START:
                 groupCount += 1
-            if item.TokenType is TokenType.GROUP_END:
+            if item.type is TokenType.GROUP_END:
                 groupCount -= 1
             currentInsertPos += 1
 
