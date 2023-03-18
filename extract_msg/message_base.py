@@ -21,7 +21,7 @@ from typing import Callable, Dict, List, Optional, Tuple, Union
 from . import constants
 from ._rtf.create_doc import createDocument
 from ._rtf.inject_rtf import injectStartRTF
-from .enums import DeencapType, RecipientType
+from .enums import AttachmentType, DeencapType, RecipientType
 from .exceptions import (
         DataNotFoundError, DeencapMalformedData, DeencapNotEncapsulated,
         IncompatibleOptionsError, WKError
