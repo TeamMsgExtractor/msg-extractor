@@ -1,6 +1,7 @@
 import codecs
 import copy
 import datetime
+import io
 import logging
 import os
 import pathlib
@@ -516,6 +517,14 @@ class MSGFile:
         # Add all file and directory entries to it. If this
         writer.fromMsg(self)
         writer.write(path)
+
+    def exportBytes(self) -> bytes:
+        """
+        Saves a new copy of the MSG file, returning the bytes.
+        """
+        out = io.BytesIO()
+        self.export(out)
+        return out.getvalue()
 
     def fixPath(self, inp, prefix : bool = True) -> str:
         """
