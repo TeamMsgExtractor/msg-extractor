@@ -26,7 +26,7 @@ This module has a Discord server for general discussion. You can find it here:
 
 Changelog
 ---------
--  `Changelog <CHANGELOG.md>`__
+-  `Changelog`_
 
 Usage
 -----
@@ -261,3 +261,4 @@ your access to the newest major version of extract-msg.
 .. _msg-explorer: https://pypi.org/project/msg-explorer/
 .. _wiki: https://github.com/TeamMsgExtractor/msg-extractor/wiki
 .. _read the docs: https://msg-extractor.rtfd.io/
+.. _Changelog: https://github.com/TeamMsgExtractor/msg-extractor/blob/master/CHANGELOG.md
