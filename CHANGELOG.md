@@ -1,3 +1,9 @@
+**v0.40.0**
+* [[TeamMsgExtractor #338](https://github.com/TeamMsgExtractor/msg-extractor/issues/338)] Added new code to handle injection of text into the RTF body. For many cases, this will be much more effective as it relies on ensuring that it is in the main group and past the header before injection. It is *not* currently the first choice as it doesn't have proper respect for encapsulated HTML, however it will replace some of the old methods entirely. Solving this issue was done through the use of a few functions and the internal `_rtf` module. This module in it's entirety is considered to be implementation details, and I give no guarantee that it will remain in it's current state even across patch versions. As such, it is not recommended to use it outside of the module.
+* Changed `MessageBase.rtfEncapInjectableHeader` and `MessageBase.rtfPlainInjectableHeader` from `str` to `bytes`. They always get encoded anyways, so I don't know why I had them returning as `str`.
+* Updated minimum Python version to 3.8 as 3.6 has reached end of support and 3.7 will reach end of support within the year.
+* Updated information in `README`.
+
 **v0.39.2**
 * Fixed issues with `AttachmentBase.name` that could cause it to generate wrong.
 * Added convenience function `MSGFile.exportBytes` which returns the exported version from `MSGFile.export` as bytes instead of writing it to a file or file-like object.
