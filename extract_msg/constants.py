@@ -31,22 +31,7 @@ RE_HTML_SAN_SPACE = re.compile('  +')
 RE_HTML_BODY_START = re.compile(b'<body[^>]*>')
 # Regular expression to find the start of the html body in encapsulated RTF.
 # This is used for one of the pattern types that makes life easy.
-RE_RTF_ENC_BODY_START_1 = re.compile(br'\{\\\*\\htmltag[0-9]* ?<body[^>]*>\}')
-# Unfortunately, while it would make it easy to find the start of the body in
-# terms of the encapsulated HTML, trying to inject directly into this location
-# has proven to cause some rendering issues that I'll figure out later. For now
-# this is basically the universal start we will try to use.
-RE_RTF_BODY_START = re.compile(br'\\lang[0-9]*')
-# This is an unrelible one to use as it doesn't have a proper way to verify that
-# it will inject in exactly the right place. This is kind of just a "well, let's
-# hope this one works" method.
-RE_RTF_ENC_BODY_UGLY = re.compile(br'<body[^>]*>[^}]*?\}')
-# The following tags are fallbacks that we will try to use, with the higher ones
-# having priority. If we can't find any other way, we try these which should
-# hopefully always work.
-RE_RTF_BODY_FALLBACK_FS = re.compile(br'\\fs[0-9]*[^a-zA-Z]')
-RE_RTF_BODY_FALLBACK_F = re.compile(br'\\f[0-9]*[^a-zA-Z]')
-RE_RTF_FALLBACK_PLAIN = re.compile(br'\\plain[^a-zA-Z0-9]')
+RE_RTF_ENC_BODY_START = re.compile(br'\{\\\*\\htmltag[0-9]* ?<body[^>]*>\}')
 # This is used in the workaround for decoding issues in RTFDE. We find `\bin`
 # sections and try to remove all of them to help with the decoding.
 RE_BIN = re.compile(br'\\bin([0-9]+) ?')
