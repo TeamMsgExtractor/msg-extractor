@@ -19,7 +19,7 @@ from email.parser import Parser as EmailParser
 from typing import Callable, Dict, Optional, Tuple, Union
 
 from . import constants
-from .enums import AttachmentType, DeencapType, RecipientType
+from .enums import DeencapType, RecipientType
 from .exceptions import (
         DataNotFoundError, DeencapMalformedData, DeencapNotEncapsulated,
         IncompatibleOptionsError, WKError

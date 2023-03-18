@@ -19,7 +19,7 @@ This module has a Discord server for general discussion. You can find it here:
 
 Changelog
 ---------
--  `Changelog`_
+-  `Changelog <CHANGELOG.md>`__
 
 Usage
 -----
@@ -252,4 +252,3 @@ your access to the newest major version of extract-msg.
 .. _Ko-fi: https://ko-fi.com/destructione
 .. _Patreon: https://www.patreon.com/DestructionE
 .. _msg-explorer: https://pypi.org/project/msg-explorer/
-.. _Changelog: https://github.com/TeamMsgExtractor/msg-extractor/blob/master/CHANGELOG.md
