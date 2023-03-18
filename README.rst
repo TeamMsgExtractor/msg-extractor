@@ -1,6 +1,6 @@
 |License: GPL v3| |PyPI3| |PyPI2|
 
-msg-extractor
+extract-msg
 =============
 
 Extracts emails and attachments saved in Microsoft Outlook's .msg files
@@ -8,10 +8,17 @@ Extracts emails and attachments saved in Microsoft Outlook's .msg files
 The python package extract_msg automates the extraction of key email
 data (from, to, cc, date, subject, body) and the email's attachments.
 
+Documentation can be found in the code, on the `wiki`_, and on the
+`read the docs`_ page.
+
 NOTICE
 ======
 0.29.* is the branch that supports both Python 2 and Python 3. It is now only
 receiving bug fixes and will not be receiving feature updates.
+
+0.39.* is the last versions that supported Python 3.6 and 3.7. Support for those
+was dropped to allow the use of new features from 3.8 and because the life spans
+of those versions had ended.
 
 This module has a Discord server for general discussion. You can find it here:
 `Discord`_
@@ -234,8 +241,8 @@ your access to the newest major version of extract-msg.
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
 
-.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.39.2-blue.svg
-   :target: https://pypi.org/project/extract-msg/0.39.2/
+.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.40.0-blue.svg
+   :target: https://pypi.org/project/extract-msg/0.40.0/
 
 .. |PyPI2| image:: https://img.shields.io/badge/python-3.8+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-3816/
@@ -252,3 +259,5 @@ your access to the newest major version of extract-msg.
 .. _Ko-fi: https://ko-fi.com/destructione
 .. _Patreon: https://www.patreon.com/DestructionE
 .. _msg-explorer: https://pypi.org/project/msg-explorer/
+.. _wiki: https://github.com/TeamMsgExtractor/msg-extractor/wiki
+.. _read the docs: https://msg-extractor.rtfd.io/
