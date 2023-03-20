@@ -5,7 +5,7 @@ import pathlib
 import zipfile
 
 from .enums import AttachmentType
-from .utils import createZipOpen, inputToString, prepareFilename
+from .utils import createZipOpen, inputToString, openMsg, prepareFilename
 
 
 logger = logging.getLogger(__name__)
@@ -21,11 +21,29 @@ class SignedAttachment:
         :param mimetype: The reported mimetype of the attachment.
         :param node: The email Message instance for this node.
         """
-        self.__data = data
+        self.__asBytes = data
         self.__name = name
         self.__mimetype = mimetype
         self.__msg = msg
         self.__node = node
+        self.__treePath = msg.treePath + (self,)
+
+        self.__data = None
+        # To add support for embedded MSG files, we are going to completely
+        # ignore the mimetype and just do a few simple checks to see if we can
+        # use the bytes as am embedded file.
+        if data[:8] == b'\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1':
+            try:
+                # While we have to pass a lot of data down to the file, we don't
+                # pass the prefix and parent MSG data, as it is not an *actual*
+                # embedded MSG file. We are just pretending that it is for the
+                # external API.
+                self.__data = openMsg(data, treePath = self.__treePath, **msg.kwargs)
+            except Exception:
+                logger.exception('Signed message was an OLE file, but could not be read as an MSG file due to an exception.')
+
+        if self.__data is None:
+            self.__data = data
 
     def save(self, **kwargs):
         """
@@ -92,7 +110,6 @@ class SignedAttachment:
 
         fullFilename = customPath / filename
 
-
         if _zip:
             name, ext = os.path.splitext(filename)
             nameList = _zip.namelist()
@@ -129,7 +146,11 @@ class SignedAttachment:
         return fullFilename
 
     @property
-    def data(self) -> bytes:
+    def asBytes(self) -> bytes:
+        return self.__asBytes
+
+    @property
+    def data(self) -> Union[bytes, 'MSGFile']:
         """
         The bytes that compose this attachment.
         """
@@ -150,7 +171,7 @@ class SignedAttachment:
         return self.__mimetype
 
     @property
-    def msg(self) -> "MSGFile":
+    def msg(self) -> 'MSGFile':
         """
         The MSGFile instance this attachment belongs to.
         """
@@ -167,8 +188,16 @@ class SignedAttachment:
     shortFilename = name
 
     @property
+    def treePath(self) -> Tuple:
+        """
+        A path, as a tuple of instances, needed to get to this instance through
+        the MSGFile-Attachment tree.
+        """
+        return self.__treePath
+
+    @property
     def type(self) -> AttachmentType:
         """
         The AttachmentType.
         """
-        return AttachmentType.SIGNED
+        return AttachmentType.SIGNED if isinstance(self.__data, bytes) else AttachmentType.SIGNED_EMBEDDED

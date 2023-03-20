@@ -135,9 +135,9 @@ class FixedLengthProp(PropBase):
                 value = ErrorCodeType(value)
             except ValueError:
                 logger.warning(f'Error type found that was not from Additional Error Codes. Value was {value}. You should report this to the developers.')
-                # So here, the value should be from Additional Error Codes, but it
-                # wasn't. So we are just returning the int. However, we want to see
-                # if it is a normal error type.
+                # So here, the value should be from Additional Error Codes, but
+                # it wasn't. So we are just returning the int. However, we want
+                # to see if it is a normal error code.
                 try:
                     logger.warning(f'REPORT TO DEVELOPERS: Error type of {ErrorType(value)} was found.')
                 except ValueError:
