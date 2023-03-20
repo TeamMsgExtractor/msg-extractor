@@ -794,7 +794,7 @@ def parseType(_type : int, stream, encoding, extras):
             # wasn't. So we are just returning the int. However, we want to see
             # if it is a normal error type.
             try:
-                logger.warning(f'REPORT TO DEVELOPERS: Error type of {ErrorType(value)} was found.')
+                logger.warning(f'REPORT TO DEVELOPERS: Error type of {ErrorCode(value)} was found.')
             except ValueError:
                 pass
         return value
