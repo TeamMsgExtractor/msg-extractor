@@ -78,7 +78,7 @@ class PropBase:
         """
         The raw bytes used to create this object.
         """
-        return self.__raw
+        return self.__rawData
 
     @property
     def type(self) -> int:
@@ -152,7 +152,7 @@ class FixedLengthProp(PropBase):
                 value = filetimeToDatetime(rawTime)
             except ValueError as e:
                 logger.exception(e)
-                logger.error(self.raw)
+                logger.error(self.rawData)
         elif _type == 0x0048:  # PtypGuid
             # TODO parsing for this
             pass
