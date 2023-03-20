@@ -1,8 +1,6 @@
 import datetime
 import logging
 
-import olefile
-
 from typing import Any
 
 from . import constants
@@ -139,7 +137,7 @@ class FixedLengthProp(PropBase):
                 # wasn't. So we are just returning the int. However, we want to see
                 # if it is a normal error type.
                 try:
-                    logger.warning(f'REPORT TO DEVELOPERS: Error type of {ErrorType(value)} was found.')
+                    logger.warning(f'REPORT TO DEVELOPERS: Error type of {ErrorCode(value)} was found.')
                 except ValueError:
                     pass
         elif _type == 0x000B:  # PtypBoolean
