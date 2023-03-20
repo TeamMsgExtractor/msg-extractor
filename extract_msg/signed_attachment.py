@@ -4,6 +4,8 @@ import os
 import pathlib
 import zipfile
 
+from typing import Tuple, Union
+
 from .enums import AttachmentType
 from .utils import createZipOpen, inputToString, openMsg, prepareFilename
 
