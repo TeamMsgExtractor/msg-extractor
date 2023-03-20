@@ -235,7 +235,6 @@ class Attachment(AttachmentBase):
             return str(fullFilename)
         else:
             if kwargs.get('extractEmbedded', False):
-                # TODO
                 with _open(str(fullFilename), mode) as f:
                     self.data.export(f)
             else:
