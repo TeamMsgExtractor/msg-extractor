@@ -400,7 +400,7 @@ class ElectronicAddressProperties(enum.Enum):
             raise ValueError('Value must not be negative.')
         # This is a quick compressed way to convert the bits in the int into
         # a tuple of instances of this class should any bit be a 1.
-        return {cls(int(x)) for index, val in enumerate(bin(value)[:1:-1]) if val == '1'}
+        return {cls(int(index)) for index, val in enumerate(bin(value)[:1:-1]) if val == '1'}
 
     EMAIL_1 = 0x00000000
     EMAIL_2 = 0x00000001
