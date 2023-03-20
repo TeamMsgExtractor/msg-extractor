@@ -155,7 +155,8 @@ class SignedAttachment:
         else:
             if kwargs.get('extractEmbedded', False):
                 with _open(str(fullFilename), mode) as f:
-                    self.data.export(f)
+                    # We just use the data we were given for this one.
+                    f.write(self.__asBytes)
             else:
                 self.saveEmbededMessage(**kwargs)
 
