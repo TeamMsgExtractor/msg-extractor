@@ -151,6 +151,7 @@ class SignedAttachment:
             if _zip and createdZip:
                 _zip.close()
 
+            return str(fullFilename)
         else:
             if kwargs.get('extractEmbedded', False):
                 with _open(str(fullFilename), mode) as f:
@@ -163,8 +164,6 @@ class SignedAttachment:
                 _zip.close()
 
             return self.msg
-
-        return str(fullFilename)
 
     def saveEmbededMessage(self, **kwargs) -> None:
         """
