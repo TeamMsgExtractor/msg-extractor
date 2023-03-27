@@ -4,43 +4,33 @@ import unittest
 
 import extract_msg
 
-TEST_FILE = "example-msg-files/unicode.msg"
+from pathlib import Path
 
 
-class TestCase(unittest.TestCase):
+TEST_FILE_DIR = Path(__file__).parent / 'example-msg-files'
+TEST_EXPORT_DIR = TEST_FILE_DIR / 'export-results'
 
-    def setUp(self):
-        for name in os.listdir('.'):
-            if os.path.isdir(name) and name.startswith('2013-11-18_1026'):
-                shutil.rmtree(name, ignore_errors=True)
 
-    tearDown = setUp
+class OleWriterTests(unittest.TestCase):
+    def testExportExamples(self):
+        """
+        Tests exporting the example files.
+        """
+        for exportResultFile in TEST_EXPORT_DIR.glob('*.msg'):
+            # If we have an export result, find the original file, open it,
+            # and export it as bytes to check against the known result.
+            with extract_msg.openMsg(TEST_FILE_DIR / exportResultFile.name) as msg:
+                exportedBytes = msg.exportBytes()
 
-    def test_message(self):
-        msg = extract_msg.Message(TEST_FILE)
-        self.assertEqual(msg.subject, u'Test for TIF files')
-        self.assertEqual(
-            msg.body,
-            u'This is a test email to experiment with the MS Outlook MSG '
-            u'Extractor\r\n\r\n\r\n-- \r\n\r\n\r\nKind regards'
-            u'\r\n\r\n\r\n\r\n\r\nBrian Zhou\r\n\r\n')
-        self.assertEqual(msg.date, 'Mon, 18 Nov 2013 10:26:24 +0200')
-        self.assertEqual(msg.parsedDate, (2013, 11, 18, 10, 26, 24, 0, 1, -1))
-        self.assertEqual(msg.sender, 'Brian Zhou <brizhou@gmail.com>')
-        self.assertEqual(msg.to, 'brianzhou@me.com')
-        self.assertEqual(msg.cc, 'Brian Zhou <brizhou@gmail.com>')
-        self.assertEqual(len(msg.attachments), 2)
-        msg.dump()
-        msg.debug()
+            with open(exportResultFile, 'rb') as f:
+                exportResult = f.read()
 
-    def test_save(self):
-        msg = extract_msg.Message(TEST_FILE)
-        msg.save()
-        self.assertEqual(
-            sorted(os.listdir('2013-11-18_1026 Test for TIF files')),
-            sorted(['message.text', 'import OleFileIO.tif',
-                    'raised value error.tif']))
-        msg.saveRaw()
+            l1 = len(exportedBytes)
+            l2 = len(exportResult)
+            # We use three assertions to give better error messages.
+            self.assertFalse(l1 > l2, 'Exported data is too large (expected {12}, got {l1}).')
+            self.assertFalse(l1 < l2, 'Exported data is too small (expected {12}, got {l1}).')
+            self.assertEqual(exportedBytes, exportResult, 'Exported data is incorrect.')
 
 
 unittest.main(verbosity=2)
