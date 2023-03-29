@@ -25,10 +25,7 @@ def main() -> None:
     else:
         out = args.outPath if args.outPath else ''
 
-    if args.dev:
-        import extract_msg.dev
-        extract_msg.dev.main(args, sys.argv[1:])
-    elif args.validate:
+    if args.validate:
         import json
         import pprint
         import time
