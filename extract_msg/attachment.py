@@ -37,7 +37,8 @@ class Attachment(AttachmentBase):
         if '37050003' not in self.props:
             from .prop import createProp
 
-            logger.warning('Attachment method property not found on attachment. Code will attempt to guess the type.')
+            logger.warning(f'Attachment method property not found on attachment {dir_}. Code will attempt to guess the type.')
+            logger.log(5, self.props)
 
             # Because this condition is actually kind of a violation of the
             # standard, we are just going to do this in a dumb way. Basically we
@@ -55,7 +56,7 @@ class Attachment(AttachmentBase):
                     propData = b'\x03\x00\x057\x07\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00'
             else:
                 # Can't autodetect it, so throw an error.
-                raise StandardViolationError('Attachment method missing, and it could not be determined automatically.')
+                raise StandardViolationError(f'Attachment method missing on attachment {dir_}, and it could not be determined automatically.')
 
             self.props._propDict['37050003'] = createProp(propData)
 

@@ -69,7 +69,7 @@ class Properties:
         self.__pl = len(self.__props)
 
     def __contains__(self, key) -> bool:
-        self.__props.__contains__(key)
+        return self.__props.__contains__(key)
 
     def __getitem__(self, key):
         return self.__props.__getitem__(key)

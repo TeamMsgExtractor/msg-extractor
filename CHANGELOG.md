@@ -4,6 +4,10 @@
 * Fixed bug in rare logging message caused by incorrect type name.
 * Removed the `dev` and `dev_classes` submodules, as most of their features are possible using the base code. Additionally, the classes involved because significantly outdated over time.
 * Removed the `--dev` argument from the command line.
+* Changed the message for the standards violation error when an attachment has no specified attachment type and it could not be determined automatically. The error now specifies the path of the attachment that had an issue for easier debugging. Additionally, the log message for it simply not being present has also been changed to show this information.
+* Added a dev level log that will output the entire properties mapping if the attachment type is not set. Dev level is 5.
+* Fixed a critical error in `Properties` that caused the `__contains__` method to *always* be `False`. This occurred because it was missing a `return` statement.
+* Removed some debug prints that slipped through.
 
 **v0.40.0**
 * [[TeamMsgExtractor #338](https://github.com/TeamMsgExtractor/msg-extractor/issues/338)] Added new code to handle injection of text into the RTF body. For many cases, this will be much more effective as it relies on ensuring that it is in the main group and past the header before injection. It is *not* currently the first choice as it doesn't have proper respect for encapsulated HTML, however it will replace some of the old methods entirely. Solving this issue was done through the use of a few functions and the internal `_rtf` module. This module in it's entirety is considered to be implementation details, and I give no guarantee that it will remain in it's current state even across patch versions. As such, it is not recommended to use it outside of the module.
