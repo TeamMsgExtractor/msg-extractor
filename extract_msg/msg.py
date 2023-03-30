@@ -625,7 +625,7 @@ class MSGFile:
         try:
             return self.__bStringsUnicode
         except AttributeError:
-            if self.props.has_key('340D0003'):
+            if '340D0003' in self.props:
                 if (self.props['340D0003'].value & 0x40000) != 0:
                     self.__bStringsUnicode = True
                     return self.__bStringsUnicode
@@ -654,7 +654,6 @@ class MSGFile:
                 try:
                     self._attachments.append(self.attachmentClass(self, attachmentDir))
                 except (NotImplementedError, UnrecognizedMSGTypeError) as e:
-                    print("Hello")
                     if self.attachmentErrorBehavior != AttachErrorBehavior.THROW:
                         logger.error(f'Error processing attachment at {attachmentDir}')
                         logger.exception(e)
@@ -901,7 +900,7 @@ class MSGFile:
                 return self.__stringEncoding
             else:
                 # Well, it's not unicode. Now we have to figure out what it IS.
-                if not self.props.has_key('3FFD0003'):
+                if '3FFD0003' not in self.props:
                     # If this property is not set by the client, we SHOULD set
                     # it to ISO-8859-15, but MAY set it to ISO-8859-1.
                     logger.warning('Encoding property not found. Defaulting to ISO-8859-15.')
