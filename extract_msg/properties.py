@@ -4,6 +4,7 @@ import logging
 import pprint
 
 from typing import Any, Dict, Optional, Union
+from warnings import warn
 
 from . import constants
 from .enums import Intelligence, PropertiesType
@@ -104,6 +105,7 @@ class Properties:
         """
         Checks if :param key: is a key in the properties dictionary.
         """
+        warn('`Properties.has_key` is deprecated. Use the `in` keyword instead.' DeprecationWarning)
         return key in self.__props
 
     def items(self):
@@ -145,7 +147,7 @@ class Properties:
             return self.__date
         except AttributeError:
             self.__date = None
-            if self.has_key('00390040'):
+            if '00390040' in self:
                 dateValue = self.get('00390040').value
                 # A date can by bytes if it fails to initialize, so we check it
                 # first.

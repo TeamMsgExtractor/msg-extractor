@@ -10,7 +10,6 @@ import zipfile
 import olefile
 
 from typing import List, Optional, Set, Tuple, Union
-from warnings import warn
 
 from . import constants
 from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment

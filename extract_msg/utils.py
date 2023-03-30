@@ -261,9 +261,6 @@ def getCommandArgs(args) -> argparse.Namespace:
     # --use-content-id, --cid
     parser.add_argument('--use-content-id', '--cid', dest='cid', action='store_true',
                         help='Save attachments by their Content ID, if they have one. Useful when working with the HTML body.')
-    # --validate
-    parser.add_argument('--validate', dest='validate', action='store_true',
-                        help='Turns on file validation mode. Turns off regular file output.')
     # --json
     outFormat.add_argument('--json', dest='json', action='store_true',
                         help='Changes to write output files as json.')
