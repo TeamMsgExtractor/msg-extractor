@@ -59,6 +59,9 @@ class Named:
                 name = property.name if isinstance(property, StringNamedProperty) else property.propertyID
                 self.__propertiesDict[(name, property.guid)] = property
 
+    def __contains__(self, key) -> bool:
+        return key in self.__propertiesDict
+
     def __getitem__(self, key):
         return self.__propertiesDict[key]
 

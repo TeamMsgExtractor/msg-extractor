@@ -870,11 +870,6 @@ class MessageBase(MSGFile):
                         f.write(self.getSaveRtfBody(**kwargs))
                     else:
                         f.write(self.getSaveBody(**kwargs))
-
-        except Exception:
-            if not _zip:
-                self.saveRaw(path)
-            raise
         finally:
             # Close the ZipFile if this function created it.
             if _zip and createdZip:
