@@ -105,7 +105,7 @@ class Properties:
         """
         Checks if :param key: is a key in the properties dictionary.
         """
-        warn('`Properties.has_key` is deprecated. Use the `in` keyword instead.' DeprecationWarning)
+        warn('`Properties.has_key` is deprecated. Use the `in` keyword instead.', DeprecationWarning)
         return key in self.__props
 
     def items(self):
