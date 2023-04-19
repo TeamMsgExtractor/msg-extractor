@@ -3,9 +3,15 @@ import unittest
 import extract_msg
 
 from .constants import TEST_FILE_DIR, USER_TEST_DIR
+from .custom_test_base import ExceptionExpectedTestCase
 
 
-class OleWriterTests(unittest.TestCase):
+class OleWriterEditingTests(ExceptionExpectedTestCase):
+    pass
+
+
+
+class OleWriterExportTests(unittest.TestCase):
     def testExportExamples(self, testFileDir = TEST_FILE_DIR):
         """
         Tests exporting the example files.
@@ -21,11 +27,8 @@ class OleWriterTests(unittest.TestCase):
             with open(exportResultFile, 'rb') as f:
                 exportResult = f.read()
 
-            l1 = len(exportedBytes)
-            l2 = len(exportResult)
-            # We use three assertions to give better error messages.
-            self.assertFalse(l1 > l2, 'Exported data is too large (expected {12}, got {l1}).')
-            self.assertFalse(l1 < l2, 'Exported data is too small (expected {12}, got {l1}).')
+            # We use two assertions to give better error messages.
+            self.assertCountEqual(exportResult, exportedBytes, 'Exported data is wrong size.')
             self.assertEqual(exportedBytes, exportResult, 'Exported data is incorrect.')
 
     @unittest.skipIf(USER_TEST_DIR is None, 'User test files not defined.')
