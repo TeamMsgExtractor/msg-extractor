@@ -600,7 +600,7 @@ class OleWriter:
         :param stateBits: A 4 byte int. Sets the state bits, user-defined flags,
             of the entry. For a stream, this *SHOULD* be unset.
 
-        :raises OSError: A stream was found on the path before the end.
+        :raises OSError: A stream was found on the path before the end or an entry with the same name already exists.
         :raises ValueError: Attempts to access an internal item.
         """
         path = inputToMsgPath(path)

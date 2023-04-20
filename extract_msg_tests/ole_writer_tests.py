@@ -3,11 +3,17 @@ import unittest
 import extract_msg
 
 from .constants import TEST_FILE_DIR, USER_TEST_DIR
-from .custom_test_base import ExceptionExpectedTestCase
+from extract_msg.ole_writer import OleWriter
 
 
-class OleWriterEditingTests(ExceptionExpectedTestCase):
-    pass
+class OleWriterEditingTests(unittest.TestCase):
+    def testAddEntryManual(self):
+        writer = OleWriter()
+        writer.addEntry('storage_1', storage = True)
+        writer.addEntry('stream_1', b'Hello World')
+        with self.assertRaises(OSError, msg = 'Cannot add an entry that already exists.'):
+            # Try to add an entry that already exists.
+            writer.addEntry('storage_1', b'')
 
 
 
