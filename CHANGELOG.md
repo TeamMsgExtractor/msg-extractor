@@ -13,6 +13,7 @@
 * Removed the `validation` submodule and all related references. It was pretty outdated and has minimal usage at this point in time. It may come back at some later point.
 * Changed behavior of `MessageBase.save` so it doesn't save raw when an exception occurs. This behavior may have ended up creating unexpected output which is why it was removed. It was mainly there for debugging in the first place, but is no longer necessary.
 * Added `__contains__` function to `Named` class.
+* Fixed a bad error message appearing when trying to add or use an entry in `OleWriter` using an empty path.
 
 **v0.40.0**
 * [[TeamMsgExtractor #338](https://github.com/TeamMsgExtractor/msg-extractor/issues/338)] Added new code to handle injection of text into the RTF body. For many cases, this will be much more effective as it relies on ensuring that it is in the main group and past the header before injection. It is *not* currently the first choice as it doesn't have proper respect for encapsulated HTML, however it will replace some of the old methods entirely. Solving this issue was done through the use of a few functions and the internal `_rtf` module. This module in it's entirety is considered to be implementation details, and I give no guarantee that it will remain in it's current state even across patch versions. As such, it is not recommended to use it outside of the module.

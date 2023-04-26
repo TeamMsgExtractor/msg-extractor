@@ -110,6 +110,9 @@ class OleWriter:
 
         :returns: The storage dict that the entry is in.
         """
+        if not path:
+            raise OSError('Path cannot be empty.')
+
         # Quick check for incompatability between create and entryExists.
         if create and entryExists:
             raise ValueError(':param create: and :param entryExists: cannot both be True (an entry cannot exist if it is being created).')

@@ -14,6 +14,19 @@ class OleWriterEditingTests(unittest.TestCase):
         with self.assertRaises(OSError, msg = 'Cannot add an entry that already exists.'):
             # Try to add an entry that already exists.
             writer.addEntry('storage_1', b'')
+        with self.assertRaises(OSError, msg = 'Attempted to access children of a stream.'):
+            # Try to add an entry as a child of a stream.
+            writer.addEntry('stream_1/child', b'')
+        with self.assertRaises(ValueError, msg = 'Path segments must not be greater than 31 characters.'):
+            # Try to use a path with a name that is too long.
+            writer.addEntry('storage_1/12345678901234567890123456789012', b'')
+        with self.assertRaises(ValueError, msg = 'Illegal character ("!" or ":") found in MSG path.'):
+            # Attempt to use : in path.
+            writer.addEntry('::InternalName', b'')
+
+        with self.assertRaises(ValueError, msg = 'Illegal character ("!" or ":") found in MSG path.'):
+            # Attempt to use ! in path.
+            writer.addEntry('!bang', b'')
 
 
 
