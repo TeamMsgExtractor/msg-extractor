@@ -6,6 +6,7 @@ from typing import Optional, Tuple
 
 from . import constants
 from .enums import AttachmentType, PropertiesType
+from .exceptions import StandardViolationError
 from .named import NamedProperties
 from .prop import FixedLengthProp
 from .properties import Properties
@@ -31,6 +32,8 @@ class AttachmentBase:
         """
         self.__msg = msg
         self.__dir = dir_
+        if not self.exists('__properties_version1.0'):
+            raise StandardViolationError('Attachments MUST have a properties stream.')
         self.__props = Properties(self._getStream('__properties_version1.0'), PropertiesType.ATTACHMENT)
         self.__namedProperties = NamedProperties(msg.named, self)
         self.__treePath = msg.treePath + (self,)
