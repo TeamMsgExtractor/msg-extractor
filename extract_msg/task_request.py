@@ -3,7 +3,7 @@ import logging
 from typing import Optional
 
 from . import constants
-from .enums import TaskMode, TaskRequestType
+from .enums import ErrorBehavior, TaskMode, TaskRequestType
 from .exceptions import StandardViolationError
 from .message_base import MessageBase
 from .task import Task
@@ -84,6 +84,9 @@ class TaskRequest(MessageBase):
             # however, will not be tolerated.
             task = next(((index, att) for index, att in self.attachments if isinstance(att.data, Task)), None)
             if task is None:
+                if self.errorBehavior & ErrorBehavior.STANDARDS_VIOLATION:
+                    logger.error('Task object not found on TaskRequest object.')
+                    return
                 raise StandardViolationError('Task object not found on TaskRequest object.')
 
             # We know we have the task, let's make sure it's at index 0. If not,

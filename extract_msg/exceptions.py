@@ -17,19 +17,16 @@ class BadHtmlError(ValueError):
     """
     HTML failed to pass validation.
     """
-    pass
 
 class ConversionError(Exception):
     """
     An error occured during type conversion.
     """
-    pass
 
 class DataNotFoundError(Exception):
     """
     Requested stream type was unavailable.
     """
-    pass
 
 class DeencapMalformedData(Exception):
     """
@@ -45,7 +42,6 @@ class ExecutableNotFound(Exception):
     """
     Could not find the specified executable.
     """
-    pass
 
 class IncompatibleOptionsError(Exception):
     """
@@ -56,26 +52,25 @@ class InvalidFileFormatError(OSError):
     """
     An Invalid File Format Error occurred.
     """
-    pass
 
 class InvaildPropertyIdError(Exception):
     """
     The provided property ID was invalid.
     """
-    pass
 
 class InvalidVersionError(Exception):
     """
     The version specified is invalid.
     """
-    pass
 
-class StandardViolationError(Exception):
+class StandardViolationError(InvalidFileFormatError):
     """
     A critical violation of the MSG standards was detected and could not be
     recovered from. Recoverable violations will result in log messages instead.
+
+    Any that could reasonably be skipped, although are likely to still cause 
+    errors down the line, can be suppressed.
     """
-    pass
 
 class TZError(Exception):
     """
@@ -91,13 +86,11 @@ class UnknownCodepageError(Exception):
     """
     The codepage provided was not one we know of.
     """
-    pass
 
 class UnknownTypeError(Exception):
     """
     The type specified is not one that is recognized.
     """
-    pass
 
 class UnsupportedMSGTypeError(NotImplementedError):
     """
@@ -110,10 +103,8 @@ class UnrecognizedMSGTypeError(TypeError):
     An exception that is raised when the module cannot determine how to properly
     open a specific class of msg file.
     """
-    pass
 
 class WKError(RuntimeError):
     """
     An error occured while running wkhtmltopdf.
     """
-    pass
