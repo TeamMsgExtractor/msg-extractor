@@ -32,8 +32,11 @@ class AttachmentBase:
         """
         self.__msg = msg
         self.__dir = dir_
-        if not self.exists('__properties_version1.0') and not (msg.errorBehavior & ErrorBehavior.STANDARDS_VIOLATION):
-            raise StandardViolationError('Attachments MUST have a properties stream.')
+        if not self.exists('__properties_version1.0'):
+            if (msg.errorBehavior & ErrorBehavior.STANDARDS_VIOLATION):
+                logger.error('Attachments MUST have a property stream.')
+            else:
+                raise StandardViolationError('Attachments MUST have a property stream.') from None
         self.__props = Properties(self._getStream('__properties_version1.0'), PropertiesType.ATTACHMENT)
         self.__namedProperties = NamedProperties(msg.named, self)
         self.__treePath = msg.treePath + (self,)

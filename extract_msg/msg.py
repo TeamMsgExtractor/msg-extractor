@@ -875,11 +875,13 @@ class MSGFile:
         try:
             return self._prop
         except AttributeError:
-            stream = self._getStream('__properties_version1.0')
-            if not stream and not (self.__errorBehavior & ErrorBehavior.STANDARDS_VIOLATION):
-                # Raise the exception from None so we don't get all the "during
-                # the handling of the above exception" stuff.
-                raise StandardViolationError('File does not contain a properties stream.') from None
+            if not (stream := self._getStream('__properties_version1.0')):
+                if self.__errorBehavior & ErrorBehavior.STANDARDS_VIOLATION:
+                    logger.error('File does not contain a property stream.')
+                else:
+                    # Raise the exception from None so we don't get all the "during
+                    # the handling of the above exception" stuff.
+                    raise StandardViolationError('File does not contain a property stream.') from None
             self._prop = Properties(stream,
                                     PropertiesType.MESSAGE if self.prefix == '' else PropertiesType.MESSAGE_EMBED)
             return self._prop

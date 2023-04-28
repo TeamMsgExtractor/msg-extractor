@@ -23,8 +23,8 @@ from ._rtf.create_doc import createDocument
 from ._rtf.inject_rtf import injectStartRTF
 from .enums import DeencapType, RecipientType
 from .exceptions import (
-        DataNotFoundError, DeencapMalformedData, DeencapNotEncapsulated,
-        IncompatibleOptionsError, WKError
+        BadHtmlError, DataNotFoundError, DeencapMalformedData,
+        DeencapNotEncapsulated, IncompatibleOptionsError, WKError
     )
 from .msg import MSGFile
 from .structures.report_tag import ReportTag
