@@ -87,6 +87,11 @@ class UnknownCodepageError(Exception):
     The codepage provided was not one we know of.
     """
 
+class UnsupportedEncodingError(NotImplementedError):
+    """
+    The codepage provided is known but is not supported.
+    """
+
 class UnknownTypeError(Exception):
     """
     The type specified is not one that is recognized.

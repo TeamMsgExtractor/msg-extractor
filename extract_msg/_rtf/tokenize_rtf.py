@@ -151,7 +151,7 @@ def _readControl(startChar : bytes, reader : io.BytesIO) -> Tuple[Tuple[Token], 
                 raise ValueError('Unexpected end of data.')
             try:
                 param = int(hexChars, 16)
-            except ValueError:
+            except ValueError as e:
                 context = e.__cause__ or e.__context__
                 raise ValueError(f'Hex data was not hexidecimal (got {hexChars}).') from context
             return (Token(startChar + hexChars, TokenType.SYMBOL, None, param),), reader.read(1)

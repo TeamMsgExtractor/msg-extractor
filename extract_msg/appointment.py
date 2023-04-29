@@ -3,7 +3,7 @@ import datetime
 from typing import Optional
 
 from . import constants
-from .enums import AppointmentStateFlag, BusyStatus, RecurPatternType, ResponseStatus
+from .enums import AppointmentStateFlag, RecurPatternType, ResponseStatus
 from .calendar import Calendar
 from .structures.entry_id import EntryID
 

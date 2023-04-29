@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Utility functions of extract_msg.
 """
@@ -26,12 +28,21 @@ import olefile
 import tzlocal
 
 from html import escape as htmlEscape
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING, Union
 
 from . import constants
 from .enums import AttachmentType
-from .exceptions import BadHtmlError, ConversionError, IncompatibleOptionsError, InvalidFileFormatError, InvaildPropertyIdError, TZError, UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError, UnsupportedMSGTypeError
+from .exceptions import (
+    ConversionError, ExecutableNotFound, IncompatibleOptionsError,
+    InvalidFileFormatError, InvaildPropertyIdError, TZError,
+    UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError,
+    UnsupportedEncodingError, UnsupportedMSGTypeError
+)
 
+
+# Allow for nice type checking.
+if TYPE_CHECKING:
+    from .msg import MSGFile
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -581,7 +592,7 @@ def msgPathToString(inp) -> str:
     return inp
 
 
-def openMsg(path, **kwargs) -> 'MSGFile':
+def openMsg(path, **kwargs) -> MSGFile:
     """
     Function to automatically open an MSG file and detect what type it is.
 
@@ -716,7 +727,7 @@ def openMsg(path, **kwargs) -> 'MSGFile':
         return msg
 
 
-def openMsgBulk(path, **kwargs) -> Union[List['MSGFile'], Tuple[Exception, Union[str, bytes]]]:
+def openMsgBulk(path, **kwargs) -> Union[List[MSGFile], Tuple[Exception, Union[str, bytes]]]:
     """
     Takes the same arguments as openMsg, but opens a collection of msg files
     based on a wild card. Returns a list if successful, otherwise returns a
@@ -1087,7 +1098,7 @@ def unsignedToSignedInt(uInt : int) -> int:
     return constants.STI32.unpack(constants.STUI32.pack(uInt))[0]
 
 
-def unwrapMsg(msg : 'MSGFile') -> Dict:
+def unwrapMsg(msg : MSGFile) -> Dict:
     """
     Takes a recursive message-attachment structure and unwraps it into a linear
     dictionary for easy iteration. Dictionary contains 4 keys: "attachments" for

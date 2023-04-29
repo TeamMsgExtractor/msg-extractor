@@ -95,7 +95,7 @@ class EntryID:
         """
         Whether the EntryID is long term or not.
         """
-        return self__flags == b'\x00\x00\x00\x00'
+        return self.__flags == b'\x00\x00\x00\x00'
 
     @property
     def providerUID(self) -> bytes:

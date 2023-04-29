@@ -2,9 +2,8 @@ import datetime
 import logging
 
 from functools import partial
-from typing import Optional, Tuple
+from typing import Optional, Tuple, TYPE_CHECKING
 
-from . import constants
 from .enums import AttachmentType, ErrorBehavior, PropertiesType
 from .exceptions import StandardViolationError
 from .named import NamedProperties
@@ -12,6 +11,10 @@ from .prop import FixedLengthProp
 from .properties import Properties
 from .utils import tryGetMimetype, verifyPropertyId, verifyType
 
+
+# Allow for nice type checking.
+if TYPE_CHECKING:
+    from .msg import MSGFile
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -337,7 +340,7 @@ class AttachmentBase:
         return self._ensureSet('_mimetype', '__substg1.0_370E', overrideClass = partial(tryGetMimetype, self), preserveNone = False)
 
     @property
-    def msg(self) -> 'MSGFile':
+    def msg(self) -> MSGFile:
         """
         Returns the Message instance the attachment belongs to.
         """

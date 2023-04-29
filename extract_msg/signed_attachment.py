@@ -1,14 +1,20 @@
+from __future__ import annotations
+
 import email
 import logging
 import os
 import pathlib
 import zipfile
 
-from typing import Tuple, Union
+from typing import Tuple, TYPE_CHECKING, Union
 
 from .enums import AttachmentType
 from .utils import createZipOpen, inputToString, openMsg, prepareFilename
 
+
+# Allow for nice type checking.
+if TYPE_CHECKING:
+    from .msg import MSGFile
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -178,7 +184,7 @@ class SignedAttachment:
         return self.__asBytes
 
     @property
-    def data(self) -> Union[bytes, 'MSGFile']:
+    def data(self) -> Union[bytes, MSGFile]:
         """
         The bytes that compose this attachment.
         """
@@ -199,7 +205,7 @@ class SignedAttachment:
         return self.__mimetype
 
     @property
-    def msg(self) -> 'MSGFile':
+    def msg(self) -> MSGFile:
         """
         The MSGFile instance this attachment belongs to.
         """

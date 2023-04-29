@@ -55,7 +55,7 @@ class RecurrencePattern:
         return self.__calendarType
 
     @property
-    def deletedInstanceDates() -> Tuple[int]:
+    def deletedInstanceDates(self) -> Tuple[int]:
         """
         A tuple of the dates (stored as number of minutes between midnight,
         January 1, 1601, and midnight on the specified day in the timezone
@@ -99,7 +99,7 @@ class RecurrencePattern:
         return self.__firstDOW
 
     @property
-    def modifiedInstanceDates() -> Tuple[int]:
+    def modifiedInstanceDates(self) -> Tuple[int]:
         """
         A tuple of the dates (stored as number of minutes between midnight,
         January 1, 1601, and midnight on the specified day in the timezone

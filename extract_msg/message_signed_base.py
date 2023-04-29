@@ -1,4 +1,3 @@
-import email.utils
 import html
 import logging
 import re

@@ -16,7 +16,7 @@ import compressed_rtf
 import RTFDE
 
 from email.parser import Parser as EmailParser
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, List, Optional, Union
 
 from . import constants
 from ._rtf.create_doc import createDocument
@@ -34,6 +34,7 @@ from .utils import (
         inputToBytes, inputToString, isEncapsulatedRtf, prepareFilename,
         rtfSanitizeHtml, rtfSanitizePlain, validateHtml
     )
+
 from imapclient.imapclient import decode_utf7
 
 

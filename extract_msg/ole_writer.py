@@ -1,15 +1,21 @@
+from __future__ import annotations
+
 import copy
-import io
-import pathlib
 import re
 
-from typing import Dict, Iterator, List, Optional, Tuple, Union
+from typing import Dict, Iterator, List, Optional, Tuple, TYPE_CHECKING
 
 from . import constants
 from .enums import Color, DirectoryEntryType
 from .utils import ceilDiv, dictGetCasedKey, inputToMsgPath
 from olefile.olefile import OleDirectoryEntry, OleFileIO
 from red_black_dict_mod import RedBlackTree
+
+
+# Allow for nice type checking.
+if TYPE_CHECKING:
+    from .msg import MSGFile
+
 
 
 class DirectoryEntry:
@@ -717,7 +723,7 @@ class OleWriter:
         # Send it to be modified using the arguments given.
         self.__modifyEntry(entry, **kwargs)
 
-    def fromMsg(self, msg : 'MSGFile') -> None:
+    def fromMsg(self, msg : MSGFile) -> None:
         """
         Copies the streams and stream information necessary from the MSG file.
         """

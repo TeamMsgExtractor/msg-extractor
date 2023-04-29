@@ -30,13 +30,39 @@ __author__ = 'Destiny Peterson & Matthew Walker'
 __date__ = '2023-04-28'
 __version__ = '0.41.0'
 
-import logging
+__all__ = [
+    # Modules:
+    'constants',
+    'enums',
+    'exceptions',
 
-from . import constants, enums
+    # Classes:
+    'AppointmentMeeting',
+    'Attachment',
+    'Contact',
+    'MeetingForwardNotification',
+    'MeetingRequest',
+    'MeetingResponse',
+    'Message',
+    'MessageBase',
+    'MessageSigned',
+    'MessageSignedBase',
+    'MSGFile',
+    'Post',
+    'Properties',
+    'Recipient',
+    'Task',
+
+    #Functions:
+    'createProp',
+    'openMsg',
+    'openMsgBulk',
+]
+
+from . import constants, enums, exceptions
 from .appointment import AppointmentMeeting
 from .attachment import Attachment
 from .contact import Contact
-from .exceptions import UnrecognizedMSGTypeError
 from .meeting_forward import MeetingForwardNotification
 from .meeting_request import MeetingRequest
 from .meeting_response import MeetingResponse
@@ -50,4 +76,4 @@ from .prop import createProp
 from .properties import Properties
 from .recipient import Recipient
 from .task import Task
-from .utils import openMsg, openMsgBulk, properHex
+from .utils import openMsg, openMsgBulk

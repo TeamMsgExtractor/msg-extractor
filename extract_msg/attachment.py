@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 import pathlib
@@ -5,7 +7,7 @@ import random
 import string
 import zipfile
 
-from typing import Optional, Union
+from typing import Optional, TYPE_CHECKING, Union
 
 from . import constants
 from .attachment_base import AttachmentBase
@@ -13,6 +15,10 @@ from .enums import AttachmentType
 from .exceptions import StandardViolationError
 from .utils import createZipOpen, inputToString, openMsg, prepareFilename
 
+
+# Allow for nice type checking.
+if TYPE_CHECKING:
+    from .msg import MSGFile
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -123,7 +129,7 @@ class Attachment(AttachmentBase):
                    ''.join(random.choice(string.ascii_uppercase + string.digits)
                            for _ in range(5)) + '.bin', 'ascii')
 
-    def save(self, **kwargs) -> Optional[Union[str, 'MSGFile']]:
+    def save(self, **kwargs) -> Optional[Union[str, MSGFile]]:
         """
         Saves the attachment data.
 
@@ -255,7 +261,7 @@ class Attachment(AttachmentBase):
         self.data.save(**kwargs)
 
     @property
-    def data(self) -> Optional[Union[bytes, 'MSGFile']]:
+    def data(self) -> Optional[Union[bytes, MSGFile]]:
         """
         Returns the attachment data.
         """

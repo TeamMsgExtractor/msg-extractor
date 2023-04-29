@@ -1,13 +1,20 @@
+from __future__ import annotations
+
 import copy
 import logging
 import pprint
 
-from typing import Dict, Optional
+from typing import Dict, Optional, TYPE_CHECKING
 
 from . import constants
 from .enums import NamedPropertyType
-from .utils import bytesToGuid, divide, properHex, roundUp
+from .utils import bytesToGuid, divide, properHex
 from compressed_rtf.crc32 import crc32
+
+
+# Allow for nice type checking.
+if TYPE_CHECKING:
+    from .msg import MSGFile
 
 
 logger = logging.getLogger(__name__)
@@ -156,7 +163,7 @@ class Named:
         return self.__dir
 
     @property
-    def msg(self) -> 'MSGFile':
+    def msg(self) -> MSGFile:
         """
         Returns the Message instance the attachment belongs to.
         """
@@ -246,7 +253,7 @@ class NamedPropertyBase:
 
     @property
     def rawEntry(self) -> dict:
-        return copy.deepcopy(entry)
+        return copy.deepcopy(self.__entry)
 
     @property
     def rawEntryStream(self) -> bytes:

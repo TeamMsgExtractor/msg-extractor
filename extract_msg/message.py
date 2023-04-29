@@ -1,10 +1,4 @@
-import logging
-
 from .message_base import MessageBase
-
-
-logger = logging.getLogger(__name__)
-logger.addHandler(logging.NullHandler())
 
 
 # Due to changes to how saving works, Message is now identical to MessageBase,

@@ -9,4 +9,4 @@ import unittest
 from extract_msg_tests import *
 
 
-unittest.main(verbosity=2)
+unittest.main(verbosity = 2)
