@@ -28,6 +28,12 @@ class OleWriterEditingTests(unittest.TestCase):
             # Attempt to use ! in path.
             writer.addEntry('!bang', b'')
 
+    def testEditEntryManual(self):
+        pass
+
+    def testRemoveEntryManual(self):
+        pass
+
 
 
 class OleWriterExportTests(unittest.TestCase):
