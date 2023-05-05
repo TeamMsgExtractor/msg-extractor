@@ -7,10 +7,19 @@ from extract_msg.ole_writer import OleWriter
 
 
 class OleWriterEditingTests(unittest.TestCase):
-    def testAddEntryManual(self):
+    def _setupWriter(self) -> OleWriter():
+        """
+        Sets up the olewriter in a way that shouldn't throw any errors. Used for
+        every test.
+        """
         writer = OleWriter()
         writer.addEntry('storage_1', storage = True)
         writer.addEntry('stream_1', b'Hello World')
+
+    def testAddEntryManual(self):
+        writer = self._setupWriter()
+
+        self.assertEqual(writer.getEntry('stream_1').data, b'Hello World')
         with self.assertRaises(OSError, msg = 'Cannot add an entry that already exists.'):
             # Try to add an entry that already exists.
             writer.addEntry('storage_1', b'')
@@ -29,10 +38,11 @@ class OleWriterEditingTests(unittest.TestCase):
             writer.addEntry('!bang', b'')
 
     def testEditEntryManual(self):
-        pass
+        writer = self._setupWriter()
+
 
     def testRemoveEntryManual(self):
-        pass
+        writer = self._setupWriter()
 
 
 
