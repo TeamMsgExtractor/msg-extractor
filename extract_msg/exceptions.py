@@ -8,6 +8,27 @@ extract_msg.exceptions
 This module contains the set of extract_msg exceptions.
 """
 
+__all__ = [
+    'BadHtmlError',
+    'ConversionError',
+    'DataNotFoundError',
+    'DeencapMalformedData',
+    'DeencapNotEncapsulated',
+    'ExecutableNotFound',
+    'IncompatibleOptionsError',
+    'InvalidFileFormatError',
+    'InvaildPropertyIdError',
+    'InvalidVersionError',
+    'StandardViolationError',
+    'TZError',
+    'UnknownCodepageError',
+    'UnsupportedEncodingError',
+    'UnknownTypeError',
+    'UnsupportedMSGTypeError',
+    'UnrecognizedMSGTypeError',
+    'WKError',
+]
+
 # Add logger bus.
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
