@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+
+__all__ = [
+    'SignedAttachment',
+]
+
+
 import email
 import logging
 import os
@@ -11,10 +17,6 @@ from typing import Tuple, TYPE_CHECKING, Union
 from .enums import AttachmentType
 from .utils import createZipOpen, inputToString, openMsg, prepareFilename
 
-
-__all__ = [
-    'SignedAttachment',
-]
 
 # Allow for nice type checking.
 if TYPE_CHECKING:

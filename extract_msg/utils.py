@@ -4,49 +4,9 @@ from __future__ import annotations
 Utility functions of extract_msg.
 """
 
-import argparse
-import codecs
-import collections
-import copy
-import datetime
-import email.message
-import email.policy
-import glob
-import json
-import logging
-import logging.config
-import os
-import pathlib
-import shutil
-import struct
-# Not actually sure if this needs to be here for the logging, so just in case.
-import sys
-import zipfile
-
-import bs4
-import olefile
-import tzlocal
-
-from html import escape as htmlEscape
-from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING, Union
-
-from . import constants
-from .enums import AttachmentType
-from .exceptions import (
-        ConversionError, ExecutableNotFound, IncompatibleOptionsError,
-        InvalidFileFormatError, InvaildPropertyIdError, TZError,
-        UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError,
-        UnsupportedEncodingError, UnsupportedMSGTypeError
-    )
-
 
 __all__ = [
-    'addNumToDir',
-    'addNumToZipDir',
-    'bitwiseAdjust',
-    'bitwiseAdjustedAnd',
-    'bytesToGuid',
-    'ceilDiv',
+    'addNumToDir', 'addNumToZipDir', 'bitwiseAdjust', 'bitwiseAdjustedAnd', 'bytesToGuid', 'ceilDiv',
     'cloneOleFile',
     'createZipOpen',
     'dictGetCasedKey',
@@ -85,6 +45,43 @@ __all__ = [
     'verifyType',
     'windowsUnicode',
 ]
+
+
+import argparse
+import codecs
+import collections
+import copy
+import datetime
+import email.message
+import email.policy
+import glob
+import json
+import logging
+import logging.config
+import os
+import pathlib
+import shutil
+import struct
+# Not actually sure if this needs to be here for the logging, so just in case.
+import sys
+import zipfile
+
+import bs4
+import olefile
+import tzlocal
+
+from html import escape as htmlEscape
+from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING, Union
+
+from . import constants
+from .enums import AttachmentType
+from .exceptions import (
+        ConversionError, ExecutableNotFound, IncompatibleOptionsError,
+        InvalidFileFormatError, InvaildPropertyIdError, TZError,
+        UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError,
+        UnsupportedEncodingError, UnsupportedMSGTypeError
+    )
+
 
 # Allow for nice type checking.
 if TYPE_CHECKING:

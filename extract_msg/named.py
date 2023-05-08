@@ -1,5 +1,15 @@
 from __future__ import annotations
 
+
+__all__ = [
+    'Named',
+    'NamedProperties',
+    'NamedPropertyBase',
+    'NumericalNamedProperty',
+    'StringNamedProperty',
+]
+
+
 import copy
 import logging
 import pprint
@@ -11,14 +21,6 @@ from .enums import NamedPropertyType
 from .utils import bytesToGuid, divide, properHex
 from compressed_rtf.crc32 import crc32
 
-
-__all__ = [
-    'Named',
-    'NamedProperties',
-    'NamedPropertyBase',
-    'NumericalNamedProperty',
-    'StringNamedProperty',
-]
 
 # Allow for nice type checking.
 if TYPE_CHECKING:

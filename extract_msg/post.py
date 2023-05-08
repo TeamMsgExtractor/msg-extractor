@@ -1,3 +1,8 @@
+__all__ = [
+    'Post',
+]
+
+
 import json
 
 from typing import Optional
@@ -7,11 +12,6 @@ from .message_base import MessageBase
 from .utils import inputToString
 
 from imapclient.imapclient import decode_utf7
-
-
-__all__ = [
-    'Post',
-]
 
 
 class Post(MessageBase):

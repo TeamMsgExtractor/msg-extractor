@@ -1,3 +1,8 @@
+__all__ = [
+    'Calendar',
+]
+
+
 import datetime
 
 from typing import Optional, Set
@@ -5,11 +10,6 @@ from typing import Optional, Set
 from . import constants
 from .calendar_base import CalendarBase
 from .enums import ClientIntentFlag
-
-
-__all__ = [
-    'Calendar',
-]
 
 
 class Calendar(CalendarBase):

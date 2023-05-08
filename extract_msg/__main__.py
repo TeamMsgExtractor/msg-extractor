@@ -1,3 +1,7 @@
+__all__ = [
+    'main',
+]
+
 import os
 import sys
 import traceback

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import logging
-
 """
 extract_msg.exceptions
 ~~~~~~~~~~~~~~~~~~~
@@ -28,6 +26,10 @@ __all__ = [
     'UnrecognizedMSGTypeError',
     'WKError',
 ]
+
+
+import logging
+
 
 # Add logger bus.
 logger = logging.getLogger(__name__)

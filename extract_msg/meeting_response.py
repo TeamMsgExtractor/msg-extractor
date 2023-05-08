@@ -1,3 +1,8 @@
+__all__ = [
+    'MeetingResponse',
+]
+
+
 import datetime
 
 from typing import Optional
@@ -5,11 +10,6 @@ from typing import Optional
 from . import constants
 from .enums import ResponseType
 from .meeting_related import MeetingRelated
-
-
-__all__ = [
-    'MeetingResponse',
-]
 
 
 class MeetingResponse(MeetingRelated):

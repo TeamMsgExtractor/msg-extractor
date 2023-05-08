@@ -1,3 +1,8 @@
+__all__ = [
+    'AppointmentMeeting',
+]
+
+
 import datetime
 
 from typing import Optional
@@ -6,11 +11,6 @@ from . import constants
 from .enums import AppointmentStateFlag, RecurPatternType, ResponseStatus
 from .calendar import Calendar
 from .structures.entry_id import EntryID
-
-
-__all__ = [
-    'AppointmentMeeting',
-]
 
 
 class AppointmentMeeting(Calendar):

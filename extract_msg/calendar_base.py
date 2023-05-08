@@ -1,3 +1,8 @@
+__all__ = [
+    'CalendarBase',
+]
+
+
 import datetime
 import logging
 
@@ -12,10 +17,6 @@ from .structures.recurrence_pattern import RecurrencePattern
 from .structures.time_zone_definition import TimeZoneDefinition
 from .structures.time_zone_struct import TimeZoneStruct
 
-
-__all__ = [
-    'CalendarBase',
-]
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())

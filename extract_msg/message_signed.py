@@ -1,11 +1,9 @@
-import logging
-
-from .message_signed_base import MessageSignedBase
-
-
 __all__ = [
     'MessageSigned',
 ]
+
+
+from .message_signed_base import MessageSignedBase
 
 
 class MessageSigned(MessageSignedBase):

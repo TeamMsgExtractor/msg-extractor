@@ -1,3 +1,8 @@
+__all__ = [
+    'Task',
+]
+
+
 import datetime
 import logging
 
@@ -12,10 +17,6 @@ from .message_base import MessageBase
 from .structures.recurrence_pattern import RecurrencePattern
 from .utils import unsignedToSignedInt
 
-
-__all__ = [
-    'Task',
-]
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())

@@ -1,13 +1,13 @@
+__all__ = [
+    'MeetingForwardNotification',
+]
+
+
 from typing import Optional
 
 from . import constants
 from .meeting_related import MeetingRelated
 from .enums import RecurPatternType
-
-
-__all__ = [
-    'MeetingForwardNotification',
-]
 
 
 class MeetingForwardNotification(MeetingRelated):

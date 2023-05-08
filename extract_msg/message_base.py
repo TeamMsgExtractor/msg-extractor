@@ -1,3 +1,8 @@
+__all__ = [
+    'MessageBase',
+]
+
+
 import base64
 import datetime
 import email.utils
@@ -37,10 +42,6 @@ from .utils import (
 
 from imapclient.imapclient import decode_utf7
 
-
-__all__ = [
-    'MessageBase',
-]
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())

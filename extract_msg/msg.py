@@ -1,3 +1,8 @@
+__all__ = [
+    'MSGFile',
+]
+
+
 import codecs
 import copy
 import datetime
@@ -29,10 +34,6 @@ from .utils import  (
         windowsUnicode
     )
 
-
-__all__ = [
-    'MSGFile',
-]
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())

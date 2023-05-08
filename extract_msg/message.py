@@ -1,9 +1,9 @@
-from .message_base import MessageBase
-
-
 __all__ = [
     'Message',
 ]
+
+
+from .message_base import MessageBase
 
 
 # Due to changes to how saving works, Message is now identical to MessageBase,

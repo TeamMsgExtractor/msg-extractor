@@ -1,13 +1,3 @@
-import datetime
-import logging
-
-from typing import Any
-
-from . import constants
-from .enums import ErrorCode, ErrorCodeType
-from .utils import filetimeToDatetime, properHex
-
-
 __all__ = [
     # Classes.
     'FixedLengthProp'
@@ -17,6 +7,17 @@ __all__ = [
     # Functions.
     'createProp',
 ]
+
+
+import datetime
+import logging
+
+from typing import Any
+
+from . import constants
+from .enums import ErrorCode, ErrorCodeType
+from .utils import filetimeToDatetime, properHex
+
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())

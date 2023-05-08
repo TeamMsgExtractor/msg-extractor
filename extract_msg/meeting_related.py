@@ -1,3 +1,8 @@
+__all__ = [
+    'MeetingRelated',
+]
+
+
 import datetime
 
 from typing import Optional, Set
@@ -5,11 +10,6 @@ from typing import Optional, Set
 from . import constants
 from .calendar_base import CalendarBase
 from .enums import ServerProcessingAction
-
-
-__all__ = [
-    'MeetingRelated',
-]
 
 
 class MeetingRelated(CalendarBase):

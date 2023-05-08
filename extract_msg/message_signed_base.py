@@ -1,3 +1,8 @@
+__all__ = [
+    'MessageSignedBase',
+]
+
+
 import html
 import logging
 import re
@@ -10,10 +15,6 @@ from .message_base import MessageBase
 from .signed_attachment import SignedAttachment
 from .utils import inputToBytes, inputToString, unwrapMultipart
 
-
-__all__ = [
-    'MessageSignedBase',
-]
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())

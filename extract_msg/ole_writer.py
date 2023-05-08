@@ -1,5 +1,12 @@
 from __future__ import annotations
 
+
+__all__ = [
+    'DirectoryEntry',
+    'OleWriter',
+]
+
+
 import copy
 import re
 
@@ -11,11 +18,6 @@ from .utils import ceilDiv, dictGetCasedKey, inputToMsgPath
 from olefile.olefile import OleDirectoryEntry, OleFileIO
 from red_black_dict_mod import RedBlackTree
 
-
-__all__ = [
-    'DirectoryEntry',
-    'OleWriter',
-]
 
 # Allow for nice type checking.
 if TYPE_CHECKING:

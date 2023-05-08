@@ -1,3 +1,8 @@
+__all__ = [
+    'MeetingRequest',
+]
+
+
 import datetime
 
 from typing import List, Optional, Set
@@ -5,11 +10,6 @@ from typing import List, Optional, Set
 from . import constants
 from .meeting_related import MeetingRelated
 from .enums import BusyStatus, MeetingObjectChange, MeetingType, RecurCalendarType, RecurPatternType, ResponseStatus
-
-
-__all__ = [
-    'MeetingRequest',
-]
 
 
 class MeetingRequest(MeetingRelated):

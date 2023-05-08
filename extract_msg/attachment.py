@@ -1,5 +1,13 @@
 from __future__ import annotations
 
+
+__all__ = [
+    'Attachment',
+    'BrokenAttachment',
+    'UnsupportedAttachment',
+]
+
+
 import logging
 import os
 import pathlib
@@ -15,12 +23,6 @@ from .enums import AttachmentType
 from .exceptions import StandardViolationError
 from .utils import createZipOpen, inputToString, openMsg, prepareFilename
 
-
-__all__ = [
-    'Attachment',
-    'BrokenAttachment',
-    'UnsupportedAttachment',
-]
 
 # Allow for nice type checking.
 if TYPE_CHECKING:

@@ -1,8 +1,3 @@
-import enum
-
-from typing import Set, Union
-
-
 __all__ = [
     'AddressBookType', 'AppointmentAuxilaryFlag', 'AppointmentColor',
     'AppointmentStateFlag', 'AttachErrorBehavior', 'AttachmentType',
@@ -22,6 +17,11 @@ __all__ = [
     'TaskHistory', 'TaskMode', 'TaskMultipleRecipients', 'TaskOwnership',
     'TaskRequestType', 'TaskState', 'TaskStatus', 'TZFlag',
 ]
+
+
+import enum
+
+from typing import Set, Union
 
 
 class AddressBookType(enum.Enum):

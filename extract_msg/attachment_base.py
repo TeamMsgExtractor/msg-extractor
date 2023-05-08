@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+
+__all__ = [
+    'AttachmentBase',
+]
+
+
 import datetime
 import logging
 
@@ -13,10 +19,6 @@ from .prop import FixedLengthProp
 from .properties import Properties
 from .utils import tryGetMimetype, verifyPropertyId, verifyType
 
-
-__all__ = [
-    'AttachmentBase',
-]
 
 # Allow for nice type checking.
 if TYPE_CHECKING:

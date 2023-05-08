@@ -1,3 +1,8 @@
+__all__ = [
+    'Contact',
+]
+
+
 import datetime
 
 from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING,Union
@@ -8,10 +13,6 @@ from .message_base import MessageBase
 from .structures.entry_id import EntryID
 from .structures.business_card import BusinessCardDisplayDefinition
 
-
-__all__ = [
-    'Contact',
-]
 
 # Allow for type checking an optional dependency.
 if TYPE_CHECKING:
