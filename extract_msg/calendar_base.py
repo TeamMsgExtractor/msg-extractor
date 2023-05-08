@@ -13,6 +13,10 @@ from .structures.time_zone_definition import TimeZoneDefinition
 from .structures.time_zone_struct import TimeZoneStruct
 
 
+__all__ = [
+    'CalendarBase',
+]
+
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 

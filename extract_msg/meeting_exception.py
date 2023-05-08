@@ -6,6 +6,11 @@ from . import constants
 from .meeting_related import MeetingRelated
 
 
+__all__ = [
+    'MeetingException',
+]
+
+
 class MeetingException(MeetingRelated):
     """
     Class for handling Meeting Exceptions.

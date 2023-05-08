@@ -7,6 +7,11 @@ from .enums import ResponseType
 from .meeting_related import MeetingRelated
 
 
+__all__ = [
+    'MeetingResponse',
+]
+
+
 class MeetingResponse(MeetingRelated):
     """
     Class for handling meeting response objects.

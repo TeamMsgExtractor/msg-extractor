@@ -11,6 +11,10 @@ from .signed_attachment import SignedAttachment
 from .utils import inputToBytes, inputToString, unwrapMultipart
 
 
+__all__ = [
+    'MessageSignedBase',
+]
+
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 

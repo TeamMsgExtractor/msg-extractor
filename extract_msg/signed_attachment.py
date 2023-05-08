@@ -12,6 +12,10 @@ from .enums import AttachmentType
 from .utils import createZipOpen, inputToString, openMsg, prepareFilename
 
 
+__all__ = [
+    'SignedAttachment',
+]
+
 # Allow for nice type checking.
 if TYPE_CHECKING:
     from .msg import MSGFile

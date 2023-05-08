@@ -9,6 +9,11 @@ from .utils import inputToString
 from imapclient.imapclient import decode_utf7
 
 
+__all__ = [
+    'Post',
+]
+
+
 class Post(MessageBase):
     """
     Class for parsing Post messages.

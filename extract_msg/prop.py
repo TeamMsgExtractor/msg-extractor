@@ -8,6 +8,16 @@ from .enums import ErrorCode, ErrorCodeType
 from .utils import filetimeToDatetime, properHex
 
 
+__all__ = [
+    # Classes.
+    'FixedLengthProp'
+    'PropBase',
+    'VariableLengthProp',
+
+    # Functions.
+    'createProp',
+]
+
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 

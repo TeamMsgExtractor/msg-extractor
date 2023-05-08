@@ -16,6 +16,12 @@ from .exceptions import StandardViolationError
 from .utils import createZipOpen, inputToString, openMsg, prepareFilename
 
 
+__all__ = [
+    'Attachment',
+    'BrokenAttachment',
+    'UnsupportedAttachment',
+]
+
 # Allow for nice type checking.
 if TYPE_CHECKING:
     from .msg import MSGFile

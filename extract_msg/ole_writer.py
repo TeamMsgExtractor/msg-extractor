@@ -12,6 +12,11 @@ from olefile.olefile import OleDirectoryEntry, OleFileIO
 from red_black_dict_mod import RedBlackTree
 
 
+__all__ = [
+    'DirectoryEntry',
+    'OleWriter',
+]
+
 # Allow for nice type checking.
 if TYPE_CHECKING:
     from .msg import MSGFile
@@ -170,6 +175,7 @@ class OleWriter:
         Edits the DirectoryEntry with the data provided. Common code used for
         :method addEntry: and :method editEntry:.
 
+        :raises TypeError: Attempted to modify the data of a storage.
         :raises ValueError: Some part of the data given to modify the various
             properties was invalid. See the the listed methods for details.
         """
@@ -185,7 +191,7 @@ class OleWriter:
         # invalid.
         if data is not None:
             if entry.type is not DirectoryEntryType.STREAM:
-                raise ValueError('Cannot set the data of a storage object.')
+                raise TypeError('Cannot set the data of a storage object.')
             if not isinstance(data, bytes):
                 raise ValueError('Data must be a bytes instance if set.')
 

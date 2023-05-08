@@ -10,6 +10,10 @@ from .structures.entry_id import PermanentEntryID
 from .utils import verifyPropertyId, verifyType
 
 
+__all__ = [
+    'Recipient',
+]
+
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 

@@ -110,12 +110,6 @@ class AppointmentStateFlag(enum.Enum):
 
 
 
-
-
-
-
-
-
 class AttachmentType(enum.Enum):
     """
     The type represented by the attachment.

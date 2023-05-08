@@ -4,11 +4,18 @@ import logging
 from typing import Optional, Set
 
 from . import constants
-from .enums import TaskAcceptance, TaskHistory, TaskMode, TaskMultipleRecipients, TaskOwnership, TaskState, TaskStatus
+from .enums import (
+        TaskAcceptance, TaskHistory, TaskMode, TaskMultipleRecipients,
+        TaskOwnership, TaskState, TaskStatus
+    )
 from .message_base import MessageBase
 from .structures.recurrence_pattern import RecurrencePattern
 from .utils import unsignedToSignedInt
 
+
+__all__ = [
+    'Task',
+]
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())

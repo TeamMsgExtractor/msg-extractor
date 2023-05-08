@@ -12,10 +12,17 @@ from .utils import bytesToGuid, divide, properHex
 from compressed_rtf.crc32 import crc32
 
 
+__all__ = [
+    'Named',
+    'NamedProperties',
+    'NamedPropertyBase',
+    'NumericalNamedProperty',
+    'StringNamedProperty',
+]
+
 # Allow for nice type checking.
 if TYPE_CHECKING:
     from .msg import MSGFile
-
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())

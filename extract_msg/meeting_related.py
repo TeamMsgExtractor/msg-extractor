@@ -7,6 +7,11 @@ from .calendar_base import CalendarBase
 from .enums import ServerProcessingAction
 
 
+__all__ = [
+    'MeetingRelated',
+]
+
+
 class MeetingRelated(CalendarBase):
     """
     Base class for meeting-related objects.

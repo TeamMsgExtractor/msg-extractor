@@ -14,6 +14,10 @@ from .properties import Properties
 from .utils import tryGetMimetype, verifyPropertyId, verifyType
 
 
+__all__ = [
+    'AttachmentBase',
+]
+
 # Allow for nice type checking.
 if TYPE_CHECKING:
     from .msg import MSGFile

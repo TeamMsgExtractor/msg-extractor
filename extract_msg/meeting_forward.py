@@ -5,6 +5,11 @@ from .meeting_related import MeetingRelated
 from .enums import RecurPatternType
 
 
+__all__ = [
+    'MeetingForwardNotification',
+]
+
+
 class MeetingForwardNotification(MeetingRelated):
     """
     Class for handling Meeting Forward Notification objects.

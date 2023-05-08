@@ -12,6 +12,10 @@ from .prop import createProp, PropBase
 from .utils import divide, properHex
 
 
+__all__ = [
+    'Properties',
+]
+
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 

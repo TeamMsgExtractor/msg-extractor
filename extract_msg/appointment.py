@@ -8,6 +8,11 @@ from .calendar import Calendar
 from .structures.entry_id import EntryID
 
 
+__all__ = [
+    'AppointmentMeeting',
+]
+
+
 class AppointmentMeeting(Calendar):
     """
     Parser for Microsoft Outlook Appointment or Meeting files.

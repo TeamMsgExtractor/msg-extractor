@@ -9,6 +9,10 @@ from .structures.entry_id import EntryID
 from .structures.business_card import BusinessCardDisplayDefinition
 
 
+__all__ = [
+    'Contact',
+]
+
 # Allow for type checking an optional dependency.
 if TYPE_CHECKING:
     try:

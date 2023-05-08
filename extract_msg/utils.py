@@ -33,12 +33,58 @@ from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING, Union
 from . import constants
 from .enums import AttachmentType
 from .exceptions import (
-    ConversionError, ExecutableNotFound, IncompatibleOptionsError,
-    InvalidFileFormatError, InvaildPropertyIdError, TZError,
-    UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError,
-    UnsupportedEncodingError, UnsupportedMSGTypeError
-)
+        ConversionError, ExecutableNotFound, IncompatibleOptionsError,
+        InvalidFileFormatError, InvaildPropertyIdError, TZError,
+        UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError,
+        UnsupportedEncodingError, UnsupportedMSGTypeError
+    )
 
+
+__all__ = [
+    'addNumToDir',
+    'addNumToZipDir',
+    'bitwiseAdjust',
+    'bitwiseAdjustedAnd',
+    'bytesToGuid',
+    'ceilDiv',
+    'cloneOleFile',
+    'createZipOpen',
+    'dictGetCasedKey',
+    'divide',
+    'filetimeToDatetime',
+    'findWk',
+    'fromTimeStamp',
+    'getCommandArgs',
+    'getEncodingName',
+    'getFullClassName',
+    'hasLen',
+    'htmlSanitize',
+    'inputToBytes',
+    'inputToMsgPath',
+    'inputToString',
+    'isEncapsulatedRtf',
+    'isEmptyString',
+    'knownMsgClass',
+    'filetimeToUtc',
+    'msgPathToString',
+    'openMsg',
+    'openMsgBulk',
+    'parseType',
+    'prepareFilename',
+    'properHex',
+    'roundUp',
+    'rtfSanitizeHtml',
+    'rtfSanitizePlain',
+    'setupLogging',
+    'tryGetMimetype',
+    'unsignedToSignedInt',
+    'unwrapMsg',
+    'unwrapMultipart',
+    'validateHtml',
+    'verifyPropertyId',
+    'verifyType',
+    'windowsUnicode',
+]
 
 # Allow for nice type checking.
 if TYPE_CHECKING:

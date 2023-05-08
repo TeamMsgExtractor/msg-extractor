@@ -13,13 +13,26 @@ from typing import List, Optional, Set, Tuple, Union
 
 from . import constants
 from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment
-from .enums import AttachErrorBehavior, ErrorBehavior, Importance, Priority, PropertiesType, Sensitivity, SideEffect
-from .exceptions import InvalidFileFormatError, StandardViolationError, UnrecognizedMSGTypeError
+from .enums import (
+        AttachErrorBehavior, ErrorBehavior, Importance, Priority,
+        PropertiesType, Sensitivity, SideEffect
+    )
+from .exceptions import (
+        InvalidFileFormatError, StandardViolationError, UnrecognizedMSGTypeError
+    )
 from .named import Named, NamedProperties
 from .prop import FixedLengthProp
 from .properties import Properties
-from .utils import divide, getEncodingName, hasLen, inputToMsgPath, inputToString, msgPathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
+from .utils import  (
+        divide, getEncodingName, hasLen, inputToMsgPath, inputToString,
+        msgPathToString, parseType, properHex, verifyPropertyId, verifyType,
+        windowsUnicode
+    )
 
+
+__all__ = [
+    'MSGFile',
+]
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())

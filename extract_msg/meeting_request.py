@@ -7,6 +7,11 @@ from .meeting_related import MeetingRelated
 from .enums import BusyStatus, MeetingObjectChange, MeetingType, RecurCalendarType, RecurPatternType, ResponseStatus
 
 
+__all__ = [
+    'MeetingRequest',
+]
+
+
 class MeetingRequest(MeetingRelated):
     """
     Class for handling Meeting Request and Meeting Update objects.

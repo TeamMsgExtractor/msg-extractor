@@ -3,6 +3,11 @@ from .enums import RecurPatternType, ResponseStatus
 from .meeting_related import MeetingRelated
 
 
+__all__ = [
+    'MeetingCancellation',
+]
+
+
 # The documentation for this only specifies restrictions on existing properties,
 # so we just mostly leave this alone.
 class MeetingCancellation(MeetingRelated):

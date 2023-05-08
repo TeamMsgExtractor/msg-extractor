@@ -7,6 +7,11 @@ from .calendar_base import CalendarBase
 from .enums import ClientIntentFlag
 
 
+__all__ = [
+    'Calendar',
+]
+
+
 class Calendar(CalendarBase):
     """
     A calendar object.
