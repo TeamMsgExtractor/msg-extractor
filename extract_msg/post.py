@@ -1,8 +1,17 @@
+__all__ = [
+    'Post',
+]
+
+
+import json
+
 from typing import Optional
 
 from . import constants
 from .message_base import MessageBase
-from .utils import inputToBytes, inputToString
+from .utils import inputToString
+
+from imapclient.imapclient import decode_utf7
 
 
 class Post(MessageBase):
@@ -18,7 +27,7 @@ class Post(MessageBase):
             'from': inputToString(self.sender, self.stringEncoding),
             'subject': inputToString(self.subject, self.stringEncoding),
             'date': inputToString(self.date, self.stringEncoding),
-            'conversation': inputTostring(self.conversation, self.stringEncoding),
+            'conversation': inputToString(self.conversation, self.stringEncoding),
             'body': decode_utf7(self.body),
         })
 

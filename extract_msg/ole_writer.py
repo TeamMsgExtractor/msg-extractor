@@ -1,15 +1,28 @@
+from __future__ import annotations
+
+
+__all__ = [
+    'DirectoryEntry',
+    'OleWriter',
+]
+
+
 import copy
-import io
-import pathlib
 import re
 
-from typing import Dict, Iterator, List, Optional, Tuple, Union
+from typing import Dict, Iterator, List, Optional, Tuple, TYPE_CHECKING
 
 from . import constants
 from .enums import Color, DirectoryEntryType
 from .utils import ceilDiv, dictGetCasedKey, inputToMsgPath
 from olefile.olefile import OleDirectoryEntry, OleFileIO
 from red_black_dict_mod import RedBlackTree
+
+
+# Allow for nice type checking.
+if TYPE_CHECKING:
+    from .msg import MSGFile
+
 
 
 class DirectoryEntry:
@@ -110,6 +123,9 @@ class OleWriter:
 
         :returns: The storage dict that the entry is in.
         """
+        if not path:
+            raise OSError('Path cannot be empty.')
+
         # Quick check for incompatability between create and entryExists.
         if create and entryExists:
             raise ValueError(':param create: and :param entryExists: cannot both be True (an entry cannot exist if it is being created).')
@@ -161,6 +177,7 @@ class OleWriter:
         Edits the DirectoryEntry with the data provided. Common code used for
         :method addEntry: and :method editEntry:.
 
+        :raises TypeError: Attempted to modify the data of a storage.
         :raises ValueError: Some part of the data given to modify the various
             properties was invalid. See the the listed methods for details.
         """
@@ -176,7 +193,7 @@ class OleWriter:
         # invalid.
         if data is not None:
             if entry.type is not DirectoryEntryType.STREAM:
-                raise ValueError('Cannot set the data of a storage object.')
+                raise TypeError('Cannot set the data of a storage object.')
             if not isinstance(data, bytes):
                 raise ValueError('Data must be a bytes instance if set.')
 
@@ -454,7 +471,6 @@ class OleWriter:
 
         # Finally, fill out the last DIFAT sector with null entries.
         if numFat > 109:
-            print(numFat)
             f.write(b'\xFF\xFF\xFF\xFF' * (127 - ((numFat - 109) % 127)))
             # Finally, make sure to write the end of chain marker for the DIFAT.
             f.write(b'\xFE\xFF\xFF\xFF')
@@ -601,7 +617,7 @@ class OleWriter:
         :param stateBits: A 4 byte int. Sets the state bits, user-defined flags,
             of the entry. For a stream, this *SHOULD* be unset.
 
-        :raises OSError: A stream was found on the path before the end.
+        :raises OSError: A stream was found on the path before the end or an entry with the same name already exists.
         :raises ValueError: Attempts to access an internal item.
         """
         path = inputToMsgPath(path)
@@ -715,7 +731,7 @@ class OleWriter:
         # Send it to be modified using the arguments given.
         self.__modifyEntry(entry, **kwargs)
 
-    def fromMsg(self, msg : 'MSGFile') -> None:
+    def fromMsg(self, msg : MSGFile) -> None:
         """
         Copies the streams and stream information necessary from the MSG file.
         """

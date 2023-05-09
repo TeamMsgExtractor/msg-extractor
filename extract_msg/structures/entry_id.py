@@ -1,3 +1,18 @@
+__all__ = [
+    'AddressBookEntryID',
+    'ContactAddressEntryID',
+    'EntryID',
+    'FolderEntryID',
+    'MessageEntryID',
+    'NNTPNewsgroupFolderEntryID',
+    'OneOffRecipient',
+    'PermanentEntryID',
+    'PersonalDistributionListEntryID',
+    'StoreObjectEntryID',
+    'WrappedEntryID',
+]
+
+
 import logging
 from typing import Union
 
@@ -95,7 +110,7 @@ class EntryID:
         """
         Whether the EntryID is long term or not.
         """
-        return self__flags == b'\x00\x00\x00\x00'
+        return self.__flags == b'\x00\x00\x00\x00'
 
     @property
     def providerUID(self) -> bytes:

@@ -1,6 +1,10 @@
+__all__ = [
+    'TimeZoneDefinition',
+]
+
+
 from typing import Tuple
 
-from .. import constants
 from ._helpers import BytesReader
 from .tz_rule import TZRule
 

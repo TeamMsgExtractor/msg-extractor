@@ -1,3 +1,8 @@
+__all__ = [
+    'MeetingResponse',
+]
+
+
 import datetime
 
 from typing import Optional

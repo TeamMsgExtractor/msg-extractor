@@ -1,10 +1,9 @@
-import logging
+__all__ = [
+    'MessageSigned',
+]
+
 
 from .message_signed_base import MessageSignedBase
-
-
-logger = logging.getLogger(__name__)
-logger.addHandler(logging.NullHandler())
 
 
 class MessageSigned(MessageSignedBase):

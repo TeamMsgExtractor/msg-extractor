@@ -1,3 +1,8 @@
+__all__ = [
+    'MeetingCancellation',
+]
+
+
 from . import constants
 from .enums import RecurPatternType, ResponseStatus
 from .meeting_related import MeetingRelated

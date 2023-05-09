@@ -3,6 +3,15 @@ Miscellaneous ID structures used in MSG files that don't fit into any of the
 other ID structure classifications.
 """
 
+
+__all__ = [
+    'FolderID',
+    'GlobalObjectID',
+    'MessageID',
+    'ServerID',
+]
+
+
 import datetime
 
 from .. import constants
@@ -29,49 +38,6 @@ class FolderID:
         An unsigned integer identifying the folder within its Store object.
         """
         return self.__globalCounter
-
-    @property
-    def rawData(self) -> bytes:
-        """
-        The raw bytes used to create this object.
-        """
-        return self.__rawData
-
-    @property
-    def replicaID(self) -> int:
-        """
-        An unsigned integer identifying a Store object.
-        """
-        return self.__replicaID
-
-
-
-class MessageID:
-    """
-    A Message ID structure, as defined in [MS-OXCDATA].
-    """
-
-    __SIZE__ : int = 8
-
-    def __init__(self, data : bytes):
-        self.__rawData = data
-        self.__replicaID = constants.STUI16.unpack(data[:2])
-        # This entry is 6 bytes, so we pull some shenanigans to unpack it.
-        self.__globalCounter = constants.STUI64.unpack(data[2:8] + b'\x00\x00')
-
-    @property
-    def globalCounter(self) -> int:
-        """
-        An unsigned integer identifying the folder within its Store object.
-        """
-        return self.__globalCounter
-
-    @property
-    def isFolder(self) -> bool:
-        """
-        Tells if the object pointed to is actually a folder.
-        """
-        return self.__globalCounter == 0 and self.__replicaID == 0
 
     @property
     def rawData(self) -> bytes:
@@ -163,6 +129,50 @@ class GlobalObjectID:
         represents an exception. Otherwise, this is 0.
         """
         return self.__year
+
+
+
+class MessageID:
+    """
+    A Message ID structure, as defined in [MS-OXCDATA].
+    """
+
+    __SIZE__ : int = 8
+
+    def __init__(self, data : bytes):
+        self.__rawData = data
+        self.__replicaID = constants.STUI16.unpack(data[:2])
+        # This entry is 6 bytes, so we pull some shenanigans to unpack it.
+        self.__globalCounter = constants.STUI64.unpack(data[2:8] + b'\x00\x00')
+
+    @property
+    def globalCounter(self) -> int:
+        """
+        An unsigned integer identifying the folder within its Store object.
+        """
+        return self.__globalCounter
+
+    @property
+    def isFolder(self) -> bool:
+        """
+        Tells if the object pointed to is actually a folder.
+        """
+        return self.__globalCounter == 0 and self.__replicaID == 0
+
+    @property
+    def rawData(self) -> bytes:
+        """
+        The raw bytes used to create this object.
+        """
+        return self.__rawData
+
+    @property
+    def replicaID(self) -> int:
+        """
+        An unsigned integer identifying a Store object.
+        """
+        return self.__replicaID
+
 
 
 class ServerID:

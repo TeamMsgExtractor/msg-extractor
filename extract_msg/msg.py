@@ -1,3 +1,8 @@
+__all__ = [
+    'MSGFile',
+]
+
+
 import codecs
 import copy
 import datetime
@@ -10,16 +15,24 @@ import zipfile
 import olefile
 
 from typing import List, Optional, Set, Tuple, Union
-from warnings import warn
 
 from . import constants
 from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment
-from .enums import AttachErrorBehavior, Importance, Priority, PropertiesType, Sensitivity, SideEffect
-from .exceptions import InvalidFileFormatError, UnrecognizedMSGTypeError
+from .enums import (
+        AttachErrorBehavior, ErrorBehavior, Importance, Priority,
+        PropertiesType, Sensitivity, SideEffect
+    )
+from .exceptions import (
+        InvalidFileFormatError, StandardViolationError, UnrecognizedMSGTypeError
+    )
 from .named import Named, NamedProperties
 from .prop import FixedLengthProp
 from .properties import Properties
-from .utils import divide, getEncodingName, hasLen, inputToMsgPath, inputToString, msgPathToString, parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
+from .utils import  (
+        divide, getEncodingName, hasLen, inputToMsgPath, inputToString,
+        msgPathToString, parseType, properHex, verifyPropertyId, verifyType,
+        windowsUnicode
+    )
 
 
 logger = logging.getLogger(__name__)
@@ -47,8 +60,8 @@ class MSGFile:
             be retrieved.
         :param filename: Optional, the filename to be used by default when
             saving.
-        :param attachmentErrorBehavior: Optional, the behavior to use in the
-            event of an error when parsing the attachments.
+        :param errorBehavior: Optional, the behavior to use in the event of an
+            certain types of errors.
         :param overrideEncoding: Optional, an encoding to use instead of the one
             specified by the msg file. Do not report encoding errors caused by
             this.
@@ -58,6 +71,8 @@ class MSGFile:
 
         :raises InvalidFileFormatError: If the file is not an OleFile or could
             not be parsed as an MSG file.
+        :raises StandardViolationError: If some part of the file badly violates 
+            the standard.
         :raises IOError: If there is an issue opening the MSG file.
         :raises NameError: If the encoding provided is not supported.
         :raises TypeError: If the prefix is not a supported type.
@@ -83,7 +98,16 @@ class MSGFile:
         self.__attachmentClass = kwargs.get('attachmentClass', Attachment)
         self.__attachmentsDelayed = kwargs.get('delayAttachments', False)
         self.__attachmentsReady = False
-        self.__attachmentErrorBehavior = AttachErrorBehavior(kwargs.get('attachmentErrorBehavior', AttachErrorBehavior.THROW))
+        self.__errorBehavior = ErrorBehavior(kwargs.get('errorBehavior', ErrorBehavior.THROW))
+        if self.__errorBehavior is None:
+            if 'attachmentErrorBehavior' in kwargs:
+                import warnings
+                warnings.warn(':param attachmentErrorsBehavior: is deprecated. Use :param ErrorBehavior: instead.', DeprecationWarning)
+
+                # Get the error behavior and call the old class to convert it if
+                # necessary.
+                self.__errorBehavior = AttachErrorBehavior(kwargs['attachmentErrorBehavior'])
+
         self.__waitingProperties = []
         if overrideEncoding is not None:
             codecs.lookup(overrideEncoding)
@@ -625,7 +649,7 @@ class MSGFile:
         try:
             return self.__bStringsUnicode
         except AttributeError:
-            if self.props.has_key('340D0003'):
+            if '340D0003' in self.props:
                 if (self.props['340D0003'].value & 0x40000) != 0:
                     self.__bStringsUnicode = True
                     return self.__bStringsUnicode
@@ -654,17 +678,20 @@ class MSGFile:
                 try:
                     self._attachments.append(self.attachmentClass(self, attachmentDir))
                 except (NotImplementedError, UnrecognizedMSGTypeError) as e:
-                    print("Hello")
-                    if self.attachmentErrorBehavior != AttachErrorBehavior.THROW:
-                        logger.error(f'Error processing attachment at {attachmentDir}')
-                        logger.exception(e)
+                    if self.errorBehavior & ErrorBehavior.ATTACH_NOT_IMPLEMENTED:
+                        logger.exception(f'Error processing attachment at {attachmentDir}')
                         self._attachments.append(UnsupportedAttachment(self, attachmentDir))
                     else:
                         raise
+                except StandardViolationError as e:
+                    if self.errorBehavior & ErrorBehavior.STANDARDS_VIOLATION:
+                        logger.exception(f'Unresolvable standards violation in  {attachmentDir}')
+                        self._attachments.append(BrokenAttachment(self, attachmentDir))
+                    else:
+                        raise
                 except Exception as e:
-                    if self.attachmentErrorBehavior == AttachErrorBehavior.BROKEN:
-                        logger.error(f'Error processing attachment at {attachmentDir}')
-                        logger.exception(e)
+                    if self.errorBehavior & ErrorBehavior.ATTACH_BROKEN:
+                        logger.exception(f'Error processing attachment at {attachmentDir}')
                         self._attachments.append(BrokenAttachment(self, attachmentDir))
                     else:
                         raise
@@ -687,17 +714,6 @@ class MSGFile:
         Returns True if the attachment initialization was delayed.
         """
         return self.__attachmentsDelayed
-
-    @property
-    def attachmentErrorBehavior(self) -> AttachErrorBehavior:
-        """
-        The behavior to follow when an attachment raises an exception. Will be
-        one of the following values:
-        ATTACHMENT_ERROR_THROW: Don't catch exceptions.
-        ATTACHMENT_ERROR_NOT_IMPLEMENTED: Catch NotImplementedError exceptions.
-        ATTACHMENT_ERROR_BROKEN: Catch all exceptions.
-        """
-        return self.__attachmentErrorBehavior
 
     @property
     def attachmentsReady(self) -> bool:
@@ -749,6 +765,14 @@ class MSGFile:
         Specifies the name of the client application that sent the message.
         """
         return self._ensureSetNamed('_currentVersionName', '8554', constants.PSETID_COMMON)
+    
+    @property
+    def errorBehavior(self) -> ErrorBehavior:
+        """
+        The behavior to follow when an attachment raises an exception. Will be
+        a member of the ErrorBehavior enum.
+        """
+        return self.__errorBehavior
 
     @property
     def importance(self) -> Optional[Importance]:
@@ -865,11 +889,13 @@ class MSGFile:
         try:
             return self._prop
         except AttributeError:
-            stream = self._getStream('__properties_version1.0')
-            if not stream:
-                # Raise the exception from None so we don't get all the "during
-                # the handling of the above exception" stuff.
-                raise InvalidFileFormatError('File does not contain a properties stream.') from None
+            if not (stream := self._getStream('__properties_version1.0')):
+                if self.__errorBehavior & ErrorBehavior.STANDARDS_VIOLATION:
+                    logger.error('File does not contain a property stream.')
+                else:
+                    # Raise the exception from None so we don't get all the "during
+                    # the handling of the above exception" stuff.
+                    raise StandardViolationError('File does not contain a property stream.') from None
             self._prop = Properties(stream,
                                     PropertiesType.MESSAGE if self.prefix == '' else PropertiesType.MESSAGE_EMBED)
             return self._prop
@@ -901,7 +927,7 @@ class MSGFile:
                 return self.__stringEncoding
             else:
                 # Well, it's not unicode. Now we have to figure out what it IS.
-                if not self.props.has_key('3FFD0003'):
+                if '3FFD0003' not in self.props:
                     # If this property is not set by the client, we SHOULD set
                     # it to ISO-8859-15, but MAY set it to ISO-8859-1.
                     logger.warning('Encoding property not found. Defaulting to ISO-8859-15.')

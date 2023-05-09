@@ -1,16 +1,28 @@
+from __future__ import annotations
+
+
+__all__ = [
+    'AttachmentBase',
+]
+
+
 import datetime
 import logging
 
 from functools import partial
-from typing import Optional, Tuple
+from typing import Optional, Tuple, TYPE_CHECKING
 
-from . import constants
-from .enums import AttachmentType, PropertiesType
+from .enums import AttachmentType, ErrorBehavior, PropertiesType
+from .exceptions import StandardViolationError
 from .named import NamedProperties
 from .prop import FixedLengthProp
 from .properties import Properties
 from .utils import tryGetMimetype, verifyPropertyId, verifyType
 
+
+# Allow for nice type checking.
+if TYPE_CHECKING:
+    from .msg import MSGFile
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -31,6 +43,11 @@ class AttachmentBase:
         """
         self.__msg = msg
         self.__dir = dir_
+        if not self.exists('__properties_version1.0'):
+            if (msg.errorBehavior & ErrorBehavior.STANDARDS_VIOLATION):
+                logger.error('Attachments MUST have a property stream.')
+            else:
+                raise StandardViolationError('Attachments MUST have a property stream.') from None
         self.__props = Properties(self._getStream('__properties_version1.0'), PropertiesType.ATTACHMENT)
         self.__namedProperties = NamedProperties(msg.named, self)
         self.__treePath = msg.treePath + (self,)
@@ -331,7 +348,7 @@ class AttachmentBase:
         return self._ensureSet('_mimetype', '__substg1.0_370E', overrideClass = partial(tryGetMimetype, self), preserveNone = False)
 
     @property
-    def msg(self) -> 'MSGFile':
+    def msg(self) -> MSGFile:
         """
         Returns the Message instance the attachment belongs to.
         """

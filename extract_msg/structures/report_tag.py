@@ -1,3 +1,8 @@
+__all__ = [
+    'ReportTag',
+]
+
+
 from typing import Optional
 
 from ._helpers import BytesReader

@@ -1,3 +1,8 @@
+__all__ = [
+    'MeetingException',
+]
+
+
 import datetime
 
 from typing import Optional

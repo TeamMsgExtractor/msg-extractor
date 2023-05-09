@@ -1,12 +1,25 @@
+__all__ = [
+    'Contact',
+]
+
+
 import datetime
 
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING,Union
 
 from . import constants
 from .enums import ContactLinkState, ElectronicAddressProperties, Gender, PostalAddressID
 from .message_base import MessageBase
 from .structures.entry_id import EntryID
 from .structures.business_card import BusinessCardDisplayDefinition
+
+
+# Allow for type checking an optional dependency.
+if TYPE_CHECKING:
+    try:
+        import PIL.Image
+    except ImportError:
+        pass
 
 
 class Contact(MessageBase):

@@ -10,13 +10,13 @@ def main(args):
     overlapping if they share the same variable name or come from the same
     property. This may be intentional for some properties.
     """
-    if len(sys.argv) < 2:
+    if len(args) < 2:
         print('Please specify a file to read.')
         sys.exit(1)
 
     pattern = re.compile(r"(?<=self._ensureSet)((Named)|(Property)|(Typed))?\('(.*?)', '(.*?)'")
 
-    for patt in sys.argv[1:]:
+    for patt in args[1:]:
         for name in glob.glob(patt):
             with open(name, 'r', encoding = 'utf-8') as f:
                 data = f.read()

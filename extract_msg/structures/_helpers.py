@@ -2,6 +2,11 @@
 Module for helper classes to different data structures.
 """
 
+__all__ = [
+    'BytesReader',
+]
+
+
 import io
 import struct
 

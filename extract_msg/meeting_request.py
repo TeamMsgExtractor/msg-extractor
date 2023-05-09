@@ -1,3 +1,8 @@
+__all__ = [
+    'MeetingRequest',
+]
+
+
 import datetime
 
 from typing import List, Optional, Set

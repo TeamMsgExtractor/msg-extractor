@@ -1,3 +1,24 @@
+__all__ = [
+    'AddressBookType', 'AppointmentAuxilaryFlag', 'AppointmentColor',
+    'AppointmentStateFlag', 'AttachErrorBehavior', 'AttachmentType',
+    'BCImageAlignment', 'BCImageSource', 'BCLabelFormat', 'BCTemplateID',
+    'BCTextFormat', 'BusyStatus', 'ClientIntentFlag', 'Color',
+    'ContactAddressIndex', 'ContactLinkState', 'DeencapType',
+    'DirectoryEntryType', 'DisplayType', 'ElectronicAddressProperties',
+    'EntryIDType', 'EntryIDTypeHex', 'ErrorCode', 'ErrorCodeType', 'Gender',
+    'IconIndex', 'Importance', 'Intelligence', 'MacintoshEncoding',
+    'MeetingObjectChange', 'MeetingRecipientType', 'MeetingType',
+    'MessageFormat', 'MessageType', 'NamedPropertyType', 'OORBodyFormat',
+    'PostalAddressID', 'Priority', 'PropertiesType', 'RecipientRowFlagType',
+    'RecipientType', 'RecurCalendarType', 'RecurDOW', 'RecurEndType',
+    'RecurFrequency', 'RecurMonthNthWeek', 'RecurPatternTypeSpecificWeekday',
+    'RecurPatternType', 'ResponseStatus', 'ResponseType', 'RuleActionType',
+    'Sensitivity', 'ServerProcessingAction', 'SideEffect', 'TaskAcceptance',
+    'TaskHistory', 'TaskMode', 'TaskMultipleRecipients', 'TaskOwnership',
+    'TaskRequestType', 'TaskState', 'TaskStatus', 'TZFlag',
+]
+
+
 import enum
 
 from typing import Set, Union
@@ -86,20 +107,6 @@ class AppointmentStateFlag(enum.Enum):
     MEETING = 0b1
     RECEIVED = 0b10
     CANCELED = 0b100
-
-
-
-class AttachErrorBehavior(enum.Enum):
-    """
-    The behavior to follow when handling an error in an attachment.
-    THROW: Throw the exception regardless of type.
-    NOT_IMPLEMENTED: Silence the exception for NotImplementedError.
-    BROKEN: Silence the exception for NotImplementedError and for broken
-        attachments.
-    """
-    THROW = 0
-    NOT_IMPLEMENTED = 1
-    BROKEN = 2
 
 
 
@@ -400,7 +407,7 @@ class ElectronicAddressProperties(enum.Enum):
             raise ValueError('Value must not be negative.')
         # This is a quick compressed way to convert the bits in the int into
         # a tuple of instances of this class should any bit be a 1.
-        return {cls(int(x)) for index, val in enumerate(bin(value)[:1:-1]) if val == '1'}
+        return {cls(int(index)) for index, val in enumerate(bin(value)[:1:-1]) if val == '1'}
 
     EMAIL_1 = 0x00000000
     EMAIL_2 = 0x00000001
@@ -455,6 +462,28 @@ class EntryIDTypeHex(enum.Enum):
     PUBLIC_MESSAGE_STORE = '1A447390AA6611CD9BC800AA002FC45A'
     # [MS-OXOCNTC] WrappedEntryId Structure.
     WRAPPED = 'C091ADD3519DCF11A4A900AA0047FAA4'
+
+
+
+class ErrorBehavior(enum.IntFlag):
+    """
+    The behavior to follow when handling an error in an MSG file and it's 
+    attachments. This is an int flag enum, so the options you want will be ORed
+    with each other.
+
+    THROW: Throw the exception regardless of type.
+    ATTACH_NOT_IMPLEMENTED: Silence the exception for NotImplementedError.
+    ATTACH_BROKEN: Silence the exception for broken attachments.
+    ATTACH_SUPPRESS_ALL: Silence the exception for NotImplementedError and for broken
+        attachments.
+    STANDARDS_VIOLATION
+    """
+    THROW = 0b000
+    ATTACH_NOT_IMPLEMENTED = 0b001
+    ATTACH_BROKEN = 0b010
+    ATTACH_SUPPRESS_ALL = 0b011
+    STANDARDS_VIOLATION = 0b100
+    SUPPRESS_ALL = 0b111
 
 
 
@@ -1668,3 +1697,60 @@ class TZFlag(enum.Enum):
 
     RECUR_CURRENT_TZREG = 0b1
     EFFECTIVE_TZREG = 0b10
+
+
+
+class _EnumDeprecator:
+    """
+    Special class for handling deprecated enums in a way that shouldn't break 
+    existing code, including code for checking `is` on a member of the enum.
+    """
+    def __init__(self, oldClassName : str, newClass : enum.Enum, nameConversion : dict = {}, valueConversion : dict = {}):
+        """
+        :param oldClassName: The name to use in the deprecation message.
+        :param newClass: The new enum class to look for the value in.
+        :param nameConversion: A dictionary of old names to new names to
+            convert if needed. If a name is the same, it can be omitted.
+        :param valueConversion: A dictionary of old values to new values used
+            when getting a value from the enum.
+        """
+        self.__warnMessage = f'Enum `{oldClassName}` is deprecated and has been replaced with {newClass.__name__}. Please update your code.'
+        self.__new = newClass
+        self.__nameConv = nameConversion
+        self.__valConv = valueConversion
+
+    def __call__(self, val):
+        # Warn about the deprecation
+        import warnings
+        warnings.warn(self.__warnMessage, DeprecationWarning)
+
+        return self.__new(self.__valConv.get(val, val))
+
+    def __getattr__(self, key):
+        # Warn about the deprecation
+        import warnings
+        warnings.warn(self.__warnMessage, DeprecationWarning)
+
+        return getattr(self.__new, self.__nameConv.get(key, key))
+    
+    def __getitem__(self, name):
+        # Warn about the deprecation
+        import warnings
+        warnings.warn(self.__warnMessage, DeprecationWarning)
+
+        return self.__new.__getitem__(self.__nameConv.get(name, name))
+
+
+
+
+# Deprecated Enums
+AttachErrorBehavior = _EnumDeprecator(
+    'AttachErrorBehavior', 
+    ErrorBehavior,
+    {
+        'BROKEN': 'ATTACH_SUPPRESS_ALL',
+        'NOT_IMPLEMENTED': 'ATTACH_NOT_IMPLEMENTED',
+    },
+    {
+        2: 3
+    })
