@@ -1,12 +1,35 @@
 # -*- coding: utf-8 -*-
 
-import logging
-
 """
 extract_msg.exceptions
 ~~~~~~~~~~~~~~~~~~~
 This module contains the set of extract_msg exceptions.
 """
+
+__all__ = [
+    'BadHtmlError',
+    'ConversionError',
+    'DataNotFoundError',
+    'DeencapMalformedData',
+    'DeencapNotEncapsulated',
+    'ExecutableNotFound',
+    'IncompatibleOptionsError',
+    'InvalidFileFormatError',
+    'InvaildPropertyIdError',
+    'InvalidVersionError',
+    'StandardViolationError',
+    'TZError',
+    'UnknownCodepageError',
+    'UnsupportedEncodingError',
+    'UnknownTypeError',
+    'UnsupportedMSGTypeError',
+    'UnrecognizedMSGTypeError',
+    'WKError',
+]
+
+
+import logging
+
 
 # Add logger bus.
 logger = logging.getLogger(__name__)
@@ -63,10 +86,13 @@ class InvalidVersionError(Exception):
     The version specified is invalid.
     """
 
-class StandardViolationError(Exception):
+class StandardViolationError(InvalidFileFormatError):
     """
     A critical violation of the MSG standards was detected and could not be
     recovered from. Recoverable violations will result in log messages instead.
+
+    Any that could reasonably be skipped, although are likely to still cause 
+    errors down the line, can be suppressed.
     """
 
 class TZError(Exception):
@@ -83,7 +109,11 @@ class UnknownCodepageError(Exception):
     """
     The codepage provided was not one we know of.
     """
-    pass
+
+class UnsupportedEncodingError(NotImplementedError):
+    """
+    The codepage provided is known but is not supported.
+    """
 
 class UnknownTypeError(Exception):
     """

@@ -1,12 +1,26 @@
+from __future__ import annotations
+
+
+__all__ = [
+    'SignedAttachment',
+]
+
+
 import email
 import logging
 import os
 import pathlib
 import zipfile
 
-from .enums import AttachmentType
-from .utils import createZipOpen, inputToString, prepareFilename
+from typing import Tuple, TYPE_CHECKING, Union
 
+from .enums import AttachmentType
+from .utils import createZipOpen, inputToString, openMsg, prepareFilename
+
+
+# Allow for nice type checking.
+if TYPE_CHECKING:
+    from .msg import MSGFile
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -21,11 +35,29 @@ class SignedAttachment:
         :param mimetype: The reported mimetype of the attachment.
         :param node: The email Message instance for this node.
         """
-        self.__data = data
+        self.__asBytes = data
         self.__name = name
         self.__mimetype = mimetype
         self.__msg = msg
         self.__node = node
+        self.__treePath = msg.treePath + (self,)
+
+        self.__data = None
+        # To add support for embedded MSG files, we are going to completely
+        # ignore the mimetype and just do a few simple checks to see if we can
+        # use the bytes as am embedded file.
+        if data[:8] == b'\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1':
+            try:
+                # While we have to pass a lot of data down to the file, we don't
+                # pass the prefix and parent MSG data, as it is not an *actual*
+                # embedded MSG file. We are just pretending that it is for the
+                # external API.
+                self.__data = openMsg(data, treePath = self.__treePath, **msg.kwargs)
+            except Exception:
+                logger.exception('Signed message was an OLE file, but could not be read as an MSG file due to an exception.')
+
+        if self.__data is None:
+            self.__data = data
 
     def save(self, **kwargs):
         """
@@ -52,6 +84,11 @@ class SignedAttachment:
         to :param zip:. If :param zip: is an instance, :param customPath: will
         refer to a location inside the zip file.
         """
+        # First check if we are skipping embedded messages and stop
+        # *immediately* if we are.
+        if self.type is AttachmentType.SIGNED_EMBEDDED and kwargs.get('skipEmbedded'):
+            return None
+
         # Check if the user has specified a custom filename
         filename = self.name
 
@@ -92,44 +129,68 @@ class SignedAttachment:
 
         fullFilename = customPath / filename
 
-
-        if _zip:
-            name, ext = os.path.splitext(filename)
-            nameList = _zip.namelist()
-            if fullFilename in nameList:
-                for i in range(2, 100):
-                    testName = customPath / f'{name} ({i}){ext}'
-                    if testName not in nameList:
-                        fullFilename = testName
-                        break
-                else:
-                    # If we couldn't find one that didn't exist.
-                    raise FileExistsError(f'Could not create the specified file because it already exists ("{fullFilename}").')
-        else:
-            if fullFilename.exists():
-                # Try to split the filename into a name and extention.
+        if self.type is AttachmentType.DATA:
+            if _zip:
                 name, ext = os.path.splitext(filename)
-                # Try to add a number to it so that we can save without overwriting.
-                for i in range(2, 100):
-                    testName = customPath / f'{name} ({i}){ext}'
-                    if not testName.exists():
-                        fullFilename = testName
-                        break
-                else:
-                    # If we couldn't find one that didn't exist.
-                    raise FileExistsError(f'Could not create the specified file because it already exists ("{fullFilename}").')
+                nameList = _zip.namelist()
+                if fullFilename in nameList:
+                    for i in range(2, 100):
+                        testName = customPath / f'{name} ({i}){ext}'
+                        if testName not in nameList:
+                            fullFilename = testName
+                            break
+                    else:
+                        # If we couldn't find one that didn't exist.
+                        raise FileExistsError(f'Could not create the specified file because it already exists ("{fullFilename}").')
+            else:
+                if fullFilename.exists():
+                    # Try to split the filename into a name and extention.
+                    name, ext = os.path.splitext(filename)
+                    # Try to add a number to it so that we can save without overwriting.
+                    for i in range(2, 100):
+                        testName = customPath / f'{name} ({i}){ext}'
+                        if not testName.exists():
+                            fullFilename = testName
+                            break
+                    else:
+                        # If we couldn't find one that didn't exist.
+                        raise FileExistsError(f'Could not create the specified file because it already exists ("{fullFilename}").')
 
-        with _open(str(fullFilename), mode) as f:
-            f.write(self.__data)
+            with _open(str(fullFilename), mode) as f:
+                f.write(self.__data)
 
-        # Close the ZipFile if this function created it.
-        if _zip and createdZip:
-            _zip.close()
+            # Close the ZipFile if this function created it.
+            if _zip and createdZip:
+                _zip.close()
 
-        return fullFilename
+            return str(fullFilename)
+        else:
+            if kwargs.get('extractEmbedded', False):
+                with _open(str(fullFilename), mode) as f:
+                    # We just use the data we were given for this one.
+                    f.write(self.__asBytes)
+            else:
+                self.saveEmbededMessage(**kwargs)
+
+            # Close the ZipFile if this function created it.
+            if _zip and createdZip:
+                _zip.close()
+
+            return self.msg
+
+    def saveEmbededMessage(self, **kwargs) -> None:
+        """
+        Seperate function from save to allow it to easily be overridden by a
+        subclass.
+        """
+        self.data.save(**kwargs)
 
     @property
-    def data(self) -> bytes:
+    def asBytes(self) -> bytes:
+        return self.__asBytes
+
+    @property
+    def data(self) -> Union[bytes, MSGFile]:
         """
         The bytes that compose this attachment.
         """
@@ -150,7 +211,7 @@ class SignedAttachment:
         return self.__mimetype
 
     @property
-    def msg(self) -> "MSGFile":
+    def msg(self) -> MSGFile:
         """
         The MSGFile instance this attachment belongs to.
         """
@@ -167,8 +228,16 @@ class SignedAttachment:
     shortFilename = name
 
     @property
+    def treePath(self) -> Tuple:
+        """
+        A path, as a tuple of instances, needed to get to this instance through
+        the MSGFile-Attachment tree.
+        """
+        return self.__treePath
+
+    @property
     def type(self) -> AttachmentType:
         """
         The AttachmentType.
         """
-        return AttachmentType.SIGNED
+        return AttachmentType.SIGNED if isinstance(self.__data, bytes) else AttachmentType.SIGNED_EMBEDDED

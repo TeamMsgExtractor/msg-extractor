@@ -1,9 +1,13 @@
-import copy
+__all__ = [
+    'injectStartRTF',
+    'injectStartRTFTokenized',
+]
+
 
 from .token import Token, TokenType
 from .tokenize_rtf import tokenizeRTF
 
-from typing import List, Iterable, Optional, Union
+from typing import List, Iterable, Union
 
 
 # A tuple of destinations used in the header. All ignorable ones are skipped
@@ -93,14 +97,12 @@ def injectStartRTFTokenized(document : List[Token], injectTokens : Union[bytes, 
     if isinstance(injectTokens, bytes):
         injectTokens = tokenizeRTF(injectTokens, False)
 
-    # Find the location to insert into. THis is annoyingly complicated, and we
+    # Find the location to insert into. This is annoyingly complicated, and we
     # do this by looking for the parts of the header (if they exist) as we go
     # token by token. The moment we confirm we are no longer in the header (and
     # we are not in a custom destination that we can simply ignore), we use the
     # last recorded spot as the insert point. We don't move that recorded spot
     # until we know that what we checked was part of the header.
-
-    currentLocation = 0
 
     # First confirm the first two tokens are what we expect.
     if len(document) < 3:

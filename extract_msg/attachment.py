@@ -1,3 +1,13 @@
+from __future__ import annotations
+
+
+__all__ = [
+    'Attachment',
+    'BrokenAttachment',
+    'UnsupportedAttachment',
+]
+
+
 import logging
 import os
 import pathlib
@@ -5,7 +15,7 @@ import random
 import string
 import zipfile
 
-from typing import Optional, Union
+from typing import Optional, TYPE_CHECKING, Union
 
 from . import constants
 from .attachment_base import AttachmentBase
@@ -14,6 +24,10 @@ from .enums import AttachmentType
 from .exceptions import StandardViolationError
 from .utils import createZipOpen, inputToString, openMsg, prepareFilename
 
+
+# Allow for nice type checking.
+if TYPE_CHECKING:
+    from .msg import MSGFile
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -39,7 +53,8 @@ class Attachment(AttachmentBase):
         if '37050003' not in self.props:
             from .prop import createProp
 
-            logger.warning('Attachment method property not found on attachment. Code will attempt to guess the type.')
+            logger.warning(f'Attachment method property not found on attachment {dir_}. Code will attempt to guess the type.')
+            logger.log(5, self.props)
 
             # Because this condition is actually kind of a violation of the
             # standard, we are just going to do this in a dumb way. Basically we
@@ -57,7 +72,7 @@ class Attachment(AttachmentBase):
                     propData = b'\x03\x00\x057\x07\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00'
             else:
                 # Can't autodetect it, so throw an error.
-                raise StandardViolationError('Attachment method missing, and it could not be determined automatically.')
+                raise StandardViolationError(f'Attachment method missing on attachment {dir_}, and it could not be determined automatically.')
 
             self.props._propDict['37050003'] = createProp(propData)
 
@@ -128,7 +143,7 @@ class Attachment(AttachmentBase):
                    ''.join(random.choice(string.ascii_uppercase + string.digits)
                            for _ in range(5)) + '.bin', 'ascii')
 
-    def save(self, **kwargs) -> Optional[Union[str, 'MSGFile']]:
+    def save(self, **kwargs) -> Optional[Union[str, MSGFile]]:
         """
         Saves the attachment data.
 
@@ -241,7 +256,6 @@ class Attachment(AttachmentBase):
             return str(fullFilename)
         else:
             if kwargs.get('extractEmbedded', False):
-                # TODO
                 with _open(str(fullFilename), mode) as f:
                     self.data.export(f)
             else:
@@ -261,7 +275,7 @@ class Attachment(AttachmentBase):
         self.data.save(**kwargs)
 
     @property
-    def data(self) -> Optional[Union[bytes, 'MSGFile']]:
+    def data(self) -> Optional[Union[bytes, MSGFile]]:
         """
         Returns the attachment data.
         """

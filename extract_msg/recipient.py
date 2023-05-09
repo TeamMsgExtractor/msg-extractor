@@ -1,8 +1,14 @@
+__all__ = [
+    'Recipient',
+]
+
+
 import logging
 
 from typing import Optional, Union
 
-from .enums import MeetingRecipientType, PropertiesType, RecipientType
+from .enums import ErrorBehavior, MeetingRecipientType, PropertiesType, RecipientType
+from .exceptions import StandardViolationError
 from .prop import FixedLengthProp
 from .properties import Properties
 from .structures.entry_id import PermanentEntryID
@@ -21,6 +27,11 @@ class Recipient:
     def __init__(self, _dir, msg):
         self.__msg = msg # Allows calls to original msg file.
         self.__dir = _dir
+        if not self.exists('__properties_version1.0'):
+            if msg.errorBehavior & ErrorBehavior.STANDARDS_VIOLATION:
+                logger.error('Recipients MUST have a property stream.')
+            else:
+                raise StandardViolationError('Recipients MUST have a property stream.') from None
         self.__props = Properties(self._getStream('__properties_version1.0'), PropertiesType.RECIPIENT)
         self.__email = self._getStringStream('__substg1.0_39FE')
         if not self.__email:

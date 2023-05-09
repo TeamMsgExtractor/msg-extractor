@@ -1,3 +1,35 @@
+**v0.41.0**
+* [[TeamMsgExtractor #357](https://github.com/TeamMsgExtractor/msg-extractor/issues/357)] Fixed an issue where the properties stream being absent would raise an error message that was not clear.
+* [[TeamMsgExtractor #357](https://github.com/TeamMsgExtractor/msg-extractor/issues/357)] Added a way to suppress `StandardViolationError` for poorly created files. This may cause issues you might not expect since this exception is meant to stop the processing for a reason.
+* [[TeamMsgExtractor #223](https://github.com/TeamMsgExtractor/msg-extractor/issues/223)] Finally got around to dealing with signed attachments that are embedded MSG files. `SignedAttachment.data` now returns either `bytes` or `MSGFile`. `SignedAttachment` also now has a `asBytes` property that will return the bytes that created the signed attachment, regardless of if it is an MSG or not, making it unnecessary to call `MSGFile.exportBytes` to get the bytes of the embedded MSG file, which can add a small delay to your code. As `Attachment` is a much more complex class, it does *not* (at least yet) have this property. Also unlike `Attachment`, `SignedAttachment` *will not* throw an exception if the data is an MSG file but is not supported. Instead, it will simply be logged as a exception, but the code will continue. If the data is successfully read as an embedded MSG file, the `AttachmentType` will be `AttachmentType.SIGNED_EMBEDDED`.
+* Deprecated `AttachErrorBehavior` in favor of the new `ErrorBehavior` enum which controls the error behavior for the various parts of the MSG file. Uses of the former will work until the next major version.
+* Deprecated the `attachmentErrorBehavior` parameter of `MSGFile` in favor of `errorBehavior`. Uses of the previous will work until the next major version.
+* Added `treePath` property to `SignedAttachment` to bring it more in line with `AttachmentBase`.
+* Fixed bug in rare logging message caused by incorrect type name.
+* Removed the `dev` and `dev_classes` submodules, as most of their features are possible using the base code. Additionally, the classes involved because significantly outdated over time.
+* Removed the `--dev` argument from the command line.
+* Changed the message for the standards violation error when an attachment has no specified attachment type and it could not be determined automatically. The error now specifies the path of the attachment that had an issue for easier debugging. Additionally, the log message for it simply not being present has also been changed to show this information.
+* Added a dev level log that will output the entire properties mapping if the attachment type is not set. Dev level is 5.
+* Fixed a critical error in `Properties` that caused the `__contains__` method to *always* be `False`. This occurred because it was missing a `return` statement. Fortunately, it looks like only one part of the module was affected due to other parts using a properly written function.
+* Removed some debug prints that slipped through.
+* Changed some parts to use `in` for checking that a property exists as opposed to `has_key`. The function was there to act more like Python 2.
+* Deprecated `Properties.has_key`.
+* Removed the `validation` submodule and all related references. It was pretty outdated and has minimal usage at this point in time. It may come back at some later point.
+* Changed behavior of `MessageBase.save` so it doesn't save raw when an exception occurs. This behavior may have ended up creating unexpected output which is why it was removed. It was mainly there for debugging in the first place, but is no longer necessary.
+* Added `__contains__` function to `Named` class.
+* Fixed missing import in `message_base.py` that would only cause problems if something was wrong with the HTML.
+* Fixed a bad error message appearing when trying to add or use an entry in `OleWriter` using an empty path.
+* Changed the `InvalidFileFormatError` for a missing property stream to a `StandardViolationError`.
+* Changed the exception messages for a few exceptions to fix typos and clarify.
+* Fixed issues in `_rtf.tokenize_rtf` which would cause an exception to handle incorrectly and throw an unclear error.
+* Fixed various small bugs caused by typos.
+* Clean up unneeded imports.
+* Improved existing `__all__` entries and added some where they should be.
+* Removed default export of the `UnrecognizedMSGTypeError` exception in favor of exporting the exceptions module.
+* Removed default export of `properHex`.
+* Improved type checking in many places.
+* Fixed issues in `RecurrencePattern`.
+
 **v0.40.0**
 * [[TeamMsgExtractor #338](https://github.com/TeamMsgExtractor/msg-extractor/issues/338)] Added new code to handle injection of text into the RTF body. For many cases, this will be much more effective as it relies on ensuring that it is in the main group and past the header before injection. It is *not* currently the first choice as it doesn't have proper respect for encapsulated HTML, however it will replace some of the old methods entirely. Solving this issue was done through the use of a few functions and the internal `_rtf` module. This module in it's entirety is considered to be implementation details, and I give no guarantee that it will remain in it's current state even across patch versions. As such, it is not recommended to use it outside of the module.
 * Changed `MessageBase.rtfEncapInjectableHeader` and `MessageBase.rtfPlainInjectableHeader` from `str` to `bytes`. They always get encoded anyways, so I don't know why I had them returning as `str`.

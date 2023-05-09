@@ -1,10 +1,15 @@
-import email.utils
+__all__ = [
+    'MessageSignedBase',
+]
+
+
 import html
 import logging
 import re
 
 from typing import List, Optional
 
+from .enums import ErrorBehavior
 from .exceptions import StandardViolationError
 from .message_base import MessageBase
 from .signed_attachment import SignedAttachment
@@ -69,7 +74,17 @@ class MessageSignedBase(MessageBase):
             atts = super().attachments
 
             if len(atts) != 1:
-                raise StandardViolationError('Signed messages without exactly 1 (regular) attachment constitue a violation of the standard.')
+                if self.errorBehavior & ErrorBehavior.STANDARDS_VIOLATION:
+                    if len(atts) == 0:
+                        logger.error('Signed message has no attachments, a violation of the standard.')
+                        self._sAttachments = None
+                        self._signedBody = None
+                        self._signedHtmlBody = None
+                        return
+                    # If there is at least one attachment, just try to use the
+                    # first.
+                else:
+                    raise StandardViolationError('Signed messages without exactly 1 (regular) attachment constitue a violation of the standard.')
 
             # We need to unwrap the multipart stream.
             unwrapped = unwrapMultipart(atts[0].data)

@@ -1,7 +1,16 @@
+__all__ = [
+    # Classes.
+    'FixedLengthProp'
+    'PropBase',
+    'VariableLengthProp',
+
+    # Functions.
+    'createProp',
+]
+
+
 import datetime
 import logging
-
-import olefile
 
 from typing import Any
 
@@ -78,7 +87,7 @@ class PropBase:
         """
         The raw bytes used to create this object.
         """
-        return self.__raw
+        return self.__rawData
 
     @property
     def type(self) -> int:
@@ -135,11 +144,11 @@ class FixedLengthProp(PropBase):
                 value = ErrorCodeType(value)
             except ValueError:
                 logger.warning(f'Error type found that was not from Additional Error Codes. Value was {value}. You should report this to the developers.')
-                # So here, the value should be from Additional Error Codes, but it
-                # wasn't. So we are just returning the int. However, we want to see
-                # if it is a normal error type.
+                # So here, the value should be from Additional Error Codes, but
+                # it wasn't. So we are just returning the int. However, we want
+                # to see if it is a normal error code.
                 try:
-                    logger.warning(f'REPORT TO DEVELOPERS: Error type of {ErrorType(value)} was found.')
+                    logger.warning(f'REPORT TO DEVELOPERS: Error type of {ErrorCode(value)} was found.')
                 except ValueError:
                     pass
         elif _type == 0x000B:  # PtypBoolean
@@ -152,7 +161,7 @@ class FixedLengthProp(PropBase):
                 value = filetimeToDatetime(rawTime)
             except ValueError as e:
                 logger.exception(e)
-                logger.error(self.raw)
+                logger.error(self.rawData)
         elif _type == 0x0048:  # PtypGuid
             # TODO parsing for this
             pass

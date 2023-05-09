@@ -1,3 +1,8 @@
+__all__ = [
+    'MessageBase',
+]
+
+
 import base64
 import datetime
 import email.utils
@@ -16,15 +21,15 @@ import compressed_rtf
 import RTFDE
 
 from email.parser import Parser as EmailParser
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, List, Optional, Union
 
 from . import constants
 from ._rtf.create_doc import createDocument
 from ._rtf.inject_rtf import injectStartRTF
 from .enums import AttachmentType, DeencapType, RecipientType
 from .exceptions import (
-        DataNotFoundError, DeencapMalformedData, DeencapNotEncapsulated,
-        IncompatibleOptionsError, WKError
+        BadHtmlError, DataNotFoundError, DeencapMalformedData,
+        DeencapNotEncapsulated, IncompatibleOptionsError, WKError
     )
 from .msg import MSGFile
 from .structures.report_tag import ReportTag
@@ -34,6 +39,7 @@ from .utils import (
         inputToBytes, inputToString, isEncapsulatedRtf, prepareFilename,
         rtfSanitizeHtml, rtfSanitizePlain, validateHtml
     )
+
 from imapclient.imapclient import decode_utf7
 
 
@@ -870,11 +876,6 @@ class MessageBase(MSGFile):
                         f.write(self.getSaveRtfBody(**kwargs))
                     else:
                         f.write(self.getSaveBody(**kwargs))
-
-        except Exception:
-            if not _zip:
-                self.saveRaw(path)
-            raise
         finally:
             # Close the ZipFile if this function created it.
             if _zip and createdZip:

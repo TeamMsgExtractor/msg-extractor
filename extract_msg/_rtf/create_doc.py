@@ -1,3 +1,8 @@
+__all__ = [
+    'createDocument',
+]
+
+
 from typing import Iterable
 
 from .token import Token, TokenType

@@ -1,9 +1,15 @@
+__all__ = [
+    'Properties',
+]
+
+
 import copy
 import datetime
 import logging
 import pprint
 
 from typing import Any, Dict, Optional, Union
+from warnings import warn
 
 from . import constants
 from .enums import Intelligence, PropertiesType
@@ -20,7 +26,10 @@ class Properties:
     Parser for msg properties files.
     """
 
-    def __init__(self, data : bytes, _type : Optional[PropertiesType] = None, skip : Optional[int] = None):
+    def __init__(self, data : Optional[bytes], _type : Optional[PropertiesType] = None, skip : Optional[int] = None):
+        if not data:
+            # If data comes back false, make sure is is empty bytes.
+            data = b''
         if not isinstance(data, bytes):
             raise TypeError(':param data: MUST be bytes.')
         self.__rawData = data
@@ -69,7 +78,7 @@ class Properties:
         self.__pl = len(self.__props)
 
     def __contains__(self, key) -> bool:
-        self.__props.__contains__(key)
+        return self.__props.__contains__(key)
 
     def __getitem__(self, key):
         return self.__props.__getitem__(key)
@@ -104,6 +113,7 @@ class Properties:
         """
         Checks if :param key: is a key in the properties dictionary.
         """
+        warn('`Properties.has_key` is deprecated. Use the `in` keyword instead.', DeprecationWarning)
         return key in self.__props
 
     def items(self):
@@ -145,7 +155,7 @@ class Properties:
             return self.__date
         except AttributeError:
             self.__date = None
-            if self.has_key('00390040'):
+            if '00390040' in self:
                 dateValue = self.get('00390040').value
                 # A date can by bytes if it fails to initialize, so we check it
                 # first.
