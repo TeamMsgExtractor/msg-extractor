@@ -261,14 +261,6 @@ class Attachment(AttachmentBase):
         self.data.save(**kwargs)
 
     @property
-    def customHandler(self) -> Optional[CustomAttachmentHandler]:
-        """
-        The instance of the custom handler associated with this attachment, if
-        it has one.
-        """
-        return self.__customHandler
-
-    @property
     def data(self) -> Optional[Union[bytes, 'MSGFile']]:
         """
         Returns the attachment data.
