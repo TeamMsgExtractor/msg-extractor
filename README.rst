@@ -232,7 +232,7 @@ Credits
 
 `Dean Malmgren`_ - First implementation of the setup.py script.
 
-`Seamus Tuohy`_ - Developer of the Python RTFDE module. Gave first examples of how to use the module.
+`Seamus Tuohy`_ - Developer of the Python RTFDE module. Gave first examples of how to use the module and has worked with Destiny to ensure functionality.
 
 `Liam`_ - Significant reorganization and transfer of data.
 
