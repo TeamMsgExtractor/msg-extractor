@@ -23,11 +23,6 @@ class ConversionError(Exception):
     An error occured during type conversion.
     """
 
-class CustomAttachmentError(Exception):
-    """
-    A generic error used for issues handling custom attachments.
-    """
-
 class DataNotFoundError(Exception):
     """
     Requested stream type was unavailable.
