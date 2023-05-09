@@ -5,7 +5,7 @@ import random
 import string
 import zipfile
 
-from typing import Any, Dict, Optional, Union
+from typing import Optional, Union
 
 from . import constants
 from .attachment_base import AttachmentBase
