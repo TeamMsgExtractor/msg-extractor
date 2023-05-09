@@ -83,6 +83,7 @@ class UnknownCodepageError(Exception):
     """
     The codepage provided was not one we know of.
     """
+    pass
 
 class UnknownTypeError(Exception):
     """
