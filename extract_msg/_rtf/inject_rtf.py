@@ -1,4 +1,8 @@
-import copy
+__all__ = [
+    'injectStartRTF',
+    'injectStartRTFTokenized',
+]
+
 
 from .token import Token, TokenType
 from .tokenize_rtf import tokenizeRTF

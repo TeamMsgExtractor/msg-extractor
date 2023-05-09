@@ -1,3 +1,18 @@
+__all__ = [
+    'AddressBookEntryID',
+    'ContactAddressEntryID',
+    'EntryID',
+    'FolderEntryID',
+    'MessageEntryID',
+    'NNTPNewsgroupFolderEntryID',
+    'OneOffRecipient',
+    'PermanentEntryID',
+    'PersonalDistributionListEntryID',
+    'StoreObjectEntryID',
+    'WrappedEntryID',
+]
+
+
 import logging
 from typing import Union
 

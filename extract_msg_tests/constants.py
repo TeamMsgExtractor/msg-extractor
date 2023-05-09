@@ -1,3 +1,9 @@
+__all__ = [
+    'TEST_FILE_DIR',
+    'USER_TEST_DIR',
+]
+
+
 import os
 
 from pathlib import Path

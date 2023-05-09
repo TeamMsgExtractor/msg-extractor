@@ -1,8 +1,11 @@
-import copy
-import enum
+__all__ = [
+    'tokenizeRTF',
+]
+
+
 import io
 
-from typing import List, NamedTuple, Optional, Tuple
+from typing import Optional, Tuple
 
 from .token import Token, TokenType
 

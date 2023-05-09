@@ -1,3 +1,8 @@
+__all__ = [
+    'RecurrencePattern',
+]
+
+
 from typing import Any, Tuple
 
 from .. import constants
@@ -30,7 +35,7 @@ class RecurrencePattern:
         if self.__patternType == RecurPatternType.DAY:
             self.__patternTypeSpecific = None
         elif self.__patternType == RecurPatternType.WEEK:
-            self.__paternTypeSpecific = RPTSW.fromBits(reader.readUnsignedInt())
+            self.__patternTypeSpecific = RPTSW.fromBits(reader.readUnsignedInt())
         elif self.__patternType in (RecurPatternType.MONTH_NTH, RecurPatternType.HJ_MONTH_NTH):
             self.__patternTypeSpecific = reader.readUnsignedInt()
         else:
@@ -43,7 +48,7 @@ class RecurrencePattern:
         deletedInstanceCount = reader.readUnsignedInt()
         self.__deletedInstanceDates = tuple(reader.readUnsignedInt() for x in range(deletedInstanceCount))
         modifiedInstanceCount = reader.readUnsignedInt()
-        self.__modifiedInstanceDates = tuple(reader.readUnsignedInt() for x in range(deletedInstanceCount))
+        self.__modifiedInstanceDates = tuple(reader.readUnsignedInt() for x in range(modifiedInstanceCount))
         self.__startDate = reader.readUnsignedInt()
         self.__endDate = reader.readUnsignedInt()
 
@@ -106,7 +111,7 @@ class RecurrencePattern:
         specified in the calendar object), ordered from earliest to latest, of
         a modified instance.
         """
-        return self.__deletedInstanceDates
+        return self.__modifiedInstanceDates
 
     @property
     def occurrenceCount(self) -> int:
@@ -143,6 +148,7 @@ class RecurrencePattern:
         RecurPatternType.HJ_MONTH_END: The day of the month on which the
             recurrence falls.
         """
+        return self.__patternTypeSpecific
 
     @property
     def period(self) -> int:

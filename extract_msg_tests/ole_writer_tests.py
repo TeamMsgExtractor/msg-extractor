@@ -1,3 +1,9 @@
+__all__ = [
+    'OleWriterEditingTests',
+    'OleWriterExportTests',
+]
+
+
 import unittest
 
 import extract_msg
@@ -15,14 +21,14 @@ class OleWriterEditingTests(unittest.TestCase):
         writer = OleWriter()
         writer.addEntry('storage_1', storage = True)
         writer.addEntry('stream_1', b'Hello World')
-        writer.editEntry('storage_1', 
-                         clsid = b'0123456789012345', 
+        writer.editEntry('storage_1',
+                         clsid = b'0123456789012345',
                          creationTime = 1,
                          modifiedTime = 2,
                          stateBits = 3)
-        
+
         return writer
-        
+
     def testSetup(self):
         """
         Initial test to check that the setup does not throw exceptions.
@@ -38,7 +44,7 @@ class OleWriterEditingTests(unittest.TestCase):
         # Check that addEntry function in setup actually worked.
         self.assertEqual(writer.getEntry('stream_1').data, b'Hello World')
         writer.getEntry('storage_1')
-        
+
         # Try to add an entry that already exists.
         with self.assertRaises(OSError, msg = 'Cannot add an entry that already exists.'):
             writer.addEntry('storage_1', b'')

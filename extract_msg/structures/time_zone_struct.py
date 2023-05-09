@@ -1,3 +1,8 @@
+__all__ = [
+    'TimeZoneStruct',
+]
+
+
 from .. import constants
 from .system_time import SystemTime
 
