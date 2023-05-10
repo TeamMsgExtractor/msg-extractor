@@ -1,3 +1,6 @@
+**v0.41.1**
+* [[TeamMsgExtractor #357](https://github.com/TeamMsgExtractor/msg-extractor/issues/362)] Fixed an issue with the removal of the `--dev` option missing one of the checks (I swear I actually tested it).
+
 **v0.41.0**
 * [[TeamMsgExtractor #357](https://github.com/TeamMsgExtractor/msg-extractor/issues/357)] Fixed an issue where the properties stream being absent would raise an error message that was not clear.
 * [[TeamMsgExtractor #357](https://github.com/TeamMsgExtractor/msg-extractor/issues/357)] Added a way to suppress `StandardViolationError` for poorly created files. This may cause issues you might not expect since this exception is meant to stop the processing for a reason.

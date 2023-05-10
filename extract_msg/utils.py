@@ -387,7 +387,7 @@ def getCommandArgs(args) -> argparse.Namespace:
     if options.outName and options.noFolders:
         raise IncompatibleOptionsError('--out-name is not compatible with --no-folders.')
 
-    if options.dev or options.fileLogging:
+    if options.fileLogging:
         options.verbose = options.verbose or 1
 
     # Handle the wkOptions if they exist.
