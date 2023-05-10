@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 """
 Submodule designed to help with saving and using custom attachments. Custom
 attachments are those follow standards not defined in the MSG documentation. Use
@@ -15,7 +18,18 @@ If you would like to add your own handler, simply subclass
 CustomAttachmentHandler and add it using the `registerHandler` function.
 """
 
-from typing import List
+__all__ = [
+    # Classes.
+    'CustomAttachmentHandler',
+    'OutlookImage',
+
+    # Functions.
+    'getHandler',
+    'registerHandler',
+]
+
+
+from typing import List, TYPE_CHECKING
 
 from .custom_handler import CustomAttachmentHandler
 
@@ -32,10 +46,12 @@ registerHandler = _knownHandlers.append
 from .outlook_image import OutlookImage
 
 
+if TYPE_CHECKING:
+    from ..attachment import Attachment
 
 
 # Function designed to route to the correct handler.
-def getHandler(attachment : 'Attachment') -> CustomAttachmentHandler:
+def getHandler(attachment : Attachment) -> CustomAttachmentHandler:
     """
     Takes an attachment and uses it to find the correct handler. Returns an
     instance created using the specified attachment.

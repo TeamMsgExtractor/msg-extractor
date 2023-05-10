@@ -1,6 +1,18 @@
+from __future__ import annotations
+
+
+__all__ = [
+    'CustomAttachmentHandler',
+]
+
+
 import abc
 
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, TYPE_CHECKING
+
+
+if TYPE_CHECKING:
+    from ..attachment import Attachment
 
 
 class CustomAttachmentHandler(abc.ABC):
@@ -8,13 +20,13 @@ class CustomAttachmentHandler(abc.ABC):
     A class designed to help with custom attachments that may require parsing in
     special ways that are completely different from one another.
     """
-    def __init__(self, attachment : 'Attachment'):
+    def __init__(self, attachment : Attachment):
         super().__init__()
         self.__att = attachment
 
     @classmethod
     @abc.abstractmethod
-    def isCorrectHandler(cls, attachment : 'Attachment') -> bool:
+    def isCorrectHandler(cls, attachment : Attachment) -> bool:
         """
         Checks if this is the correct handler for the attachment.
         """

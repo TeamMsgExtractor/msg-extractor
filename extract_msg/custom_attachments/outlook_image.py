@@ -1,7 +1,15 @@
+from __future__ import annotations
+
+
+__all__ = [
+    'OutlookImage',
+]
+
+
 import base64
 import struct
 
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, TYPE_CHECKING
 
 from . import registerHandler
 from .custom_handler import CustomAttachmentHandler
@@ -10,12 +18,15 @@ from ..enums import DVAspect
 from ..exceptions import CustomAttachmentError
 
 
+if TYPE_CHECKING:
+    from ..attachment import Attachment
+
 _ST_OLE = struct.Struct('<IIIII')
 _ST_MAILSTREAM = struct.Struct('<III')
 
 
 class OutlookImage(CustomAttachmentHandler):
-    def __init__(self, attachment : 'Attachment'):
+    def __init__(self, attachment : Attachment):
         super().__init__(attachment)
         # First we need to get the mailstream.
         stream = attachment._getStream('__substg1.0_3701000D/\x03MailStream')
@@ -57,7 +68,7 @@ class OutlookImage(CustomAttachmentHandler):
         self.__htmlTag = f'<img src="{imgData}", style="{hwStyle}">'
 
     @classmethod
-    def isCorrectHandler(cls, attachment : 'Attachment') -> bool:
+    def isCorrectHandler(cls, attachment : Attachment) -> bool:
         if attachment.clsid != '00000316-0000-0000-C000-000000000046':
             return False
 

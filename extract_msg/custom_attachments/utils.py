@@ -3,6 +3,12 @@ Utilities for extract-msg that are more specialized for the custom_attachments
 submodule than for the main module.
 """
 
+__all__ = [
+    'htmlSplitRendered',
+    'tokenizeHtml',
+]
+
+
 import bs4
 
 from typing import List
