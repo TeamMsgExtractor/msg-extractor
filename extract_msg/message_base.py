@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 __all__ = [
     'MessageBase',
 ]
@@ -6,6 +9,7 @@ __all__ = [
 import base64
 import datetime
 import email.utils
+import functools
 import html
 import json
 import logging
@@ -26,7 +30,7 @@ from typing import Callable, List, Optional, Union
 from . import constants
 from ._rtf.create_doc import createDocument
 from ._rtf.inject_rtf import injectStartRTF
-from .enums import DeencapType, RecipientType
+from .enums import BodyTypes, DeencapType, RecipientType
 from .exceptions import (
         BadHtmlError, DataNotFoundError, DeencapMalformedData,
         DeencapNotEncapsulated, IncompatibleOptionsError, WKError
@@ -593,7 +597,7 @@ class MessageBase(MSGFile):
         logger.debug('Using _rtf module to inject RTF text header.')
         return createDocument(injectStartRTF(self.rtfBody, injectableHeader))
 
-    def save(self, **kwargs):
+    def save(self, **kwargs) -> MessageBase:
         """
         Saves the message body and attachments found in the message.
 
@@ -1026,6 +1030,21 @@ class MessageBase(MSGFile):
 
             self._defaultFolderName = dirName
             return dirName
+
+    @functools.cached_property
+    def detectedBodies(self) -> BodyTypes:
+        """
+        The types of bodies stored in the .msg file.
+        """
+        bodies = BodyTypes.NONE
+        if self.sExists('__substg1.0_1000'):
+            bodies |= BodyTypes.PLAIN
+        if self.exists('__substg1.0_10090102'):
+            bodies |= BodyTypes.RTF
+        if self.exists('__substg1.0_10130102'):
+            bodies |= BodyTypes.HTML
+
+        return bodies
 
     @property
     def header(self):
