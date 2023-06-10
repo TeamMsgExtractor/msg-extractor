@@ -648,7 +648,6 @@ class OleWriter:
         """
         path = inputToMsgPath(path)
         # First, find the current place in our dict to add the item.
-        
         _dir = self.__getContainingStorage(path, False)
         # Now, check that the item *is not* already in our dict, as that would
         # cause problems.
