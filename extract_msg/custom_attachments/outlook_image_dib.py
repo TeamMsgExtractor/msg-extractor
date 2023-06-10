@@ -25,7 +25,12 @@ _ST_OLE = struct.Struct('<IIIII')
 _ST_MAILSTREAM = struct.Struct('<III')
 
 
-class OutlookImage(CustomAttachmentHandler):
+class OutlookImageDIB(CustomAttachmentHandler):
+    """
+    Custom handler for a special attachment type, a Device Independent Bitmap
+    stored in a way special to Outlook.
+    """
+
     def __init__(self, attachment : Attachment):
         super().__init__(attachment)
         # First we need to get the mailstream.
@@ -82,18 +87,8 @@ class OutlookImage(CustomAttachmentHandler):
 
         return True
 
-    def injectHTML(self, html : bytes, renderedList : Optional[List[str]] = None) -> Tuple[bytes, Optional[List[str]]]:
-        if not renderedList:
-            renderedList = htmlSplitRendered(html)
-
-        rp = self.attachment.renderingPosition
-
-        if rp >= len(renderedList):
-            raise CustomAttachmentError(f'Rendering position beyond calculated number of rendered characters (expected less than {len(renderedList)}, got {rp}).')
-
-        renderedList[rp] = self.__htmlTag + renderedList[rp]
-
-        return (''.join(renderedList).encode('utf-8'), renderedList)
+    def generateRtf(self) -> Optional[bytes]:
+        pass
 
     @property
     def data(self) -> bytes:
@@ -106,4 +101,4 @@ class OutlookImage(CustomAttachmentHandler):
 
 
 
-registerHandler(OutlookImage)
+registerHandler(OutlookImageDIB)

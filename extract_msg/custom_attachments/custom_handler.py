@@ -20,6 +20,7 @@ class CustomAttachmentHandler(abc.ABC):
     A class designed to help with custom attachments that may require parsing in
     special ways that are completely different from one another.
     """
+
     def __init__(self, attachment : Attachment):
         super().__init__()
         self.__att = attachment
@@ -32,16 +33,11 @@ class CustomAttachmentHandler(abc.ABC):
         """
 
     @abc.abstractmethod
-    def injectHTML(self, html : bytes, renderedList : Optional[List[str]] = None) -> Tuple[bytes, Optional[List[str]]]:
+    def generateRtf(self) -> Optional[bytes]:
         """
-        Adds the relevent tag, if any, to the HTML for making prepared HTML.
+        Generates the RTF to inject in place of the \objattph tag.
 
-        If this function should do nothing, returns the two arguments without
-        modification.
-
-        :param html: The HTML body to inject into (if at all).
-        :param renderedList: The list to use (if needed) of "rendered
-            characters" which will be returned and matches the HTML returned.
+        If this function should do nothing, returns None
         """
 
     @property

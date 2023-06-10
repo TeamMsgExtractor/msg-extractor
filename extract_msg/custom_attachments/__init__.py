@@ -21,7 +21,7 @@ CustomAttachmentHandler and add it using the `registerHandler` function.
 __all__ = [
     # Classes.
     'CustomAttachmentHandler',
-    'OutlookImage',
+    'OutlookImageDIB',
 
     # Functions.
     'getHandler',
@@ -29,21 +29,33 @@ __all__ = [
 ]
 
 
-from typing import List, TYPE_CHECKING
+from typing import List, Type, TYPE_CHECKING
 
 from .custom_handler import CustomAttachmentHandler
 
 
 # Create a way to register handlers.
 _knownHandlers : List[CustomAttachmentHandler] = []
-# This line is cheating a little bit, but is more efficient than wrapping it in
-# a function.
-registerHandler = _knownHandlers.append
+
+def registerHandler(handler : Type[CustomAttachmentHandler]) -> None:
+    """
+    Registers the CustomAttachmentHandler subclass as a handler.
+
+    :raises TypeError: The handler was not a subclass of
+        CustomAttachmentHandler.
+    """
+    # Make sure it is a subclass of CustomAttachmentHandler.
+    if not isinstance(handler, type):
+        raise ValueError(':param handler: must be a class, not an instance of a class.')
+    if not issubclass(handler, CustomAttachmentHandler):
+        raise ValueError(':param handler: must be a subclass of CustomAttachmentHandler.')
+    _knownHandlers.append(handler)
+
 
 
 # Import built-in handler modules. They will all automatically register their
 # respecive handler(s).
-from .outlook_image import OutlookImage
+from .outlook_image_dib import OutlookImageDIB
 
 
 if TYPE_CHECKING:

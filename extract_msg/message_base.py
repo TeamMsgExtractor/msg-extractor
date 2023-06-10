@@ -26,7 +26,7 @@ from typing import Callable, List, Optional, Union
 from . import constants
 from ._rtf.create_doc import createDocument
 from ._rtf.inject_rtf import injectStartRTF
-from .enums import AttachmentType, DeencapType, RecipientType
+from .enums import DeencapType, RecipientType
 from .exceptions import (
         BadHtmlError, DataNotFoundError, DeencapMalformedData,
         DeencapNotEncapsulated, IncompatibleOptionsError, WKError
@@ -1148,18 +1148,8 @@ class MessageBase(MSGFile):
         if not self.htmlBody:
             return self.htmlBody
 
-        html = self.htmlBody
-
-        renderedCharacters = None
-
-        # Iterate through all attachments, and inject all of the custom data
-        # from them.
-        for x in self.attachments:
-            if x.type is AttachmentType.CUSTOM:
-                html, renderedCharacters = x.customHandler.injectHTML(html, renderedCharacters)
-
         # Create the BeautifulSoup instance to use.
-        soup = bs4.BeautifulSoup(html, 'html.parser')
+        soup = bs4.BeautifulSoup(self.htmlBody, 'html.parser')
 
         # Get a list of image tags to see if we can inject into. If the source
         # of an image starts with "cid:" that means it is one of the attachments
