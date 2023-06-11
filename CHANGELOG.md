@@ -1,3 +1,7 @@
+**v0.41.4**
+* Fixed [[TeamMsgExtractor #366](https://github.com/TeamMsgExtractor/msg-extractor/pull/366)]
+* Updated `tzlocal` and allow future updates for `compressed_rtf` and `ebcdic`.
+
 **v0.41.3**
 * [[TeamMsgExtractor #365](https://github.com/TeamMsgExtractor/msg-extractor/issues/365)] Fixed an issue that would cause certain values retrieved from the header to not be decoded properly. It does this when retrieving the values, so nothing about the header has been changed.
 * Added new property `MessageBase.headerText` which is the text content of the header stream. Adjusted other things to use this instead of trying to retrieve the stream directly in multiple places.
