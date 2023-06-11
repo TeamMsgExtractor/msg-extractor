@@ -1,5 +1,5 @@
 **v0.41.4**
-* Fixed [[TeamMsgExtractor #366](https://github.com/TeamMsgExtractor/msg-extractor/pull/366)]
+* Fixed an issue in the last version that would break the decoding function if the contents were not encoded.
 * Updated `tzlocal` and allow future updates for `compressed_rtf` and `ebcdic`.
 
 **v0.41.3**
