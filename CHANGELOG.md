@@ -1,3 +1,6 @@
+**v0.41.5**
+* Fixed an issue from version `0.41.3` where the header being present but missing the `From` field would cause an exception.
+
 **v0.41.4**
 * Fixed an issue in the last version that would break the decoding function if the contents were not encoded.
 * Updated `tzlocal` and allow future updates for `compressed_rtf` and `ebcdic`.

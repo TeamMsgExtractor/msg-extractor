@@ -1338,9 +1338,9 @@ class MessageBase(MSGFile):
         except AttributeError:
             # Check header first
             if self.headerInit():
-                headerResult = decodeRfc2047(self.header['from'])
+                headerResult = self.header['from']
                 if headerResult is not None:
-                    self._sender = headerResult
+                    self._sender = decodeRfc2047(headerResult)
                     return headerResult
                 logger.info('Header found, but "sender" is not included. Will be generated from other streams.')
             # Extract from other fields
