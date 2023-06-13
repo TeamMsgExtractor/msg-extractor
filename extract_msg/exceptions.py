@@ -46,6 +46,11 @@ class ConversionError(Exception):
     An error occured during type conversion.
     """
 
+class CustomAttachmentError(Exception):
+    """
+    A generic error used for issues handling custom attachments.
+    """
+
 class DataNotFoundError(Exception):
     """
     Requested stream type was unavailable.
@@ -91,7 +96,7 @@ class StandardViolationError(InvalidFileFormatError):
     A critical violation of the MSG standards was detected and could not be
     recovered from. Recoverable violations will result in log messages instead.
 
-    Any that could reasonably be skipped, although are likely to still cause 
+    Any that could reasonably be skipped, although are likely to still cause
     errors down the line, can be suppressed.
     """
 

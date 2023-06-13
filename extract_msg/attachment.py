@@ -19,6 +19,7 @@ from typing import Optional, TYPE_CHECKING, Union
 
 from . import constants
 from .attachment_base import AttachmentBase
+from .custom_attachments import CustomAttachmentHandler, getHandler
 from .enums import AttachmentType
 from .exceptions import StandardViolationError
 from .utils import createZipOpen, inputToString, openMsg, prepareFilename
@@ -47,6 +48,7 @@ class Attachment(AttachmentBase):
             located.
         """
         super().__init__(msg, dir_)
+        self.__customHandler = None
 
         if '37050003' not in self.props:
             from .prop import createProp
@@ -80,9 +82,11 @@ class Attachment(AttachmentBase):
             self.__data = self._getStream('__substg1.0_37010102')
         elif self.exists('__substg1.0_3701000D'):
             if (self.props['37050003'].value & 0x7) != 0x5:
-                raise NotImplementedError(
-                    'Current version of extract_msg does not support extraction of containers that are not embedded msg files.')
-                # TODO add implementation.
+                self.__type = AttachmentType.CUSTOM
+                # Check if we have any custom handlers. If not, it will raise
+                # an error automatically.
+                self.__customHandler = getHandler(self)
+                self.__data = self.__customHandler.data
             else:
                 self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
                 self.__type = AttachmentType.MSG
@@ -118,8 +122,10 @@ class Attachment(AttachmentBase):
             # Check if user wants to save the file under the Content-ID.
             if kwargs.get('contentId', False):
                 filename = self.cid
-            # If filename is None at this point, use long filename as first
-            # preference.
+            # If we are using a custom handler, prefer it's name.
+            if self.type is AttachmentType.CUSTOM:
+                filename = self.__customHandler.name
+            # If we are here, try to get the filename however else we can.
             if not filename:
                 filename = self.name
             # Otherwise just make something up!
@@ -213,7 +219,7 @@ class Attachment(AttachmentBase):
 
         fullFilename = customPath / filename
 
-        if self.type is AttachmentType.DATA:
+        if isinstance(self.__data, bytes):
             if _zip:
                 name, ext = os.path.splitext(filename)
                 nameList = _zip.namelist()
@@ -248,7 +254,7 @@ class Attachment(AttachmentBase):
                 _zip.close()
 
             return str(fullFilename)
-        else:
+        elif self.__data:
             if kwargs.get('extractEmbedded', False):
                 with _open(str(fullFilename), mode) as f:
                     self.data.export(f)
@@ -267,6 +273,14 @@ class Attachment(AttachmentBase):
         subclass.
         """
         self.data.save(**kwargs)
+
+    @property
+    def customHandler(self) -> Optional[CustomAttachmentHandler]:
+        """
+        The instance of the custom handler associated with this attachment, if
+        it has one.
+        """
+        return self.__customHandler
 
     @property
     def data(self) -> Optional[Union[bytes, MSGFile]]:

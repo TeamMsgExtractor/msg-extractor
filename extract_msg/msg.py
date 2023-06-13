@@ -667,10 +667,9 @@ class MSGFile:
             # Get the attachments.
             attachmentDirs = []
             prefixLen = self.prefixLen
-            for dir_ in self.listDir(False, True):
-                if dir_[prefixLen].startswith('__attach') and \
-                        dir_[prefixLen] not in attachmentDirs:
-                    attachmentDirs.append(dir_[prefixLen])
+            for dir_ in self.listDir(False, True, False):
+                if dir_[0].startswith('__attach') and dir_[0] not in attachmentDirs:
+                    attachmentDirs.append(dir_[0])
 
             self._attachments = []
 
