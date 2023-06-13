@@ -52,6 +52,9 @@ class CustomAttachmentHandler(abc.ABC):
     def data(self) -> bytes:
         """
         Gets the data for the attachment.
+
+        If an attachment should do nothing when saving, return None from this
+        property.
         """
 
     @property

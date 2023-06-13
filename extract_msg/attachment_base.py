@@ -9,7 +9,7 @@ __all__ = [
 import datetime
 import logging
 
-from functools import partial
+from functools import cached_property, partial
 from typing import Optional, Tuple, TYPE_CHECKING
 
 from .enums import AttachmentType, ErrorBehavior, PropertiesType
@@ -262,7 +262,7 @@ class AttachmentBase:
     def attachmentEncoding(self) -> Optional[bytes]:
         """
         The encoding information about the attachment object. Will return
-        b'*\x86H\x86\xf7\x14\x03\x0b\x01' if encoded in MacBinary format,
+        b'*\\x86H\\x86\\xf7\\x14\\x03\\x0b\\x01' if encoded in MacBinary format,
         otherwise it is unset.
         """
         return self._ensureSet('_attachmentEncoding', '__substg1.0_37020102', False)
@@ -287,35 +287,32 @@ class AttachmentBase:
 
     contendId = cid
 
-    @property
+    @cached_property
     def clsid(self) -> str:
         """
         Returns the CLSID for the data stream/storage of the attachment.
         """
-        try:
-            return self.__clsid
-        except AttributeError:
-            # Set some default values.
-            self.__clsid = '00000000-0000-0000-0000-000000000000'
-            dataStream = None
+        # Set some default values.
+        clsid = '00000000-0000-0000-0000-000000000000'
+        dataStream = None
 
-            # See if we can find the data stream/storage.
-            if self.type in (AttachmentType.CUSTOM, AttachmentType.MSG):
+        # See if we can find the data stream/storage.
+        if self.type in (AttachmentType.CUSTOM, AttachmentType.MSG):
+            dataStream = [self.__dir, '__substg1.0_3701000D']
+        elif self.type is AttachmentType.DATA:
+            dataStream = [self.__dir, '__substg1.0_37010102']
+        elif self.type is AttachmentType.UNSUPPORTED:
+            # Special check for custom attachments.
+            if self.exists('__substg1.0_3701000D'):
                 dataStream = [self.__dir, '__substg1.0_3701000D']
-            elif self.type is AttachmentType.DATA:
+            elif self.exists('__substg1.0_37010102'):
                 dataStream = [self.__dir, '__substg1.0_37010102']
-            elif self.type is AttachmentType.UNSUPPORTED:
-                # Special check for custom attachments.
-                if self.exists('__substg1.0_3701000D'):
-                    dataStream = [self.__dir, '__substg1.0_3701000D']
-                elif self.exists('__substg1.0_37010102'):
-                    dataStream = [self.__dir, '__substg1.0_37010102']
 
-            # If we found the right item, get the CLSID.
-            if dataStream:
-                self.__clsid = self.__msg._getOleEntry(dataStream).clsid or '00000000-0000-0000-0000-000000000000'
+        # If we found the right item, get the CLSID.
+        if dataStream:
+            clsid = self.__msg._getOleEntry(dataStream).clsid or clsid
 
-            return self.__clsid
+        return self.__clsid
 
     @property
     def dir(self) -> str:

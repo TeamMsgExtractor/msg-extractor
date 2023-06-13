@@ -219,7 +219,7 @@ class Attachment(AttachmentBase):
 
         fullFilename = customPath / filename
 
-        if self.type is AttachmentType.DATA or (self.type is AttachmentType.CUSTOM and isinstance(self.__data, bytes)):
+        if isinstance(self.__data, bytes):
             if _zip:
                 name, ext = os.path.splitext(filename)
                 nameList = _zip.namelist()
@@ -254,7 +254,7 @@ class Attachment(AttachmentBase):
                 _zip.close()
 
             return str(fullFilename)
-        else:
+        elif self.__data:
             if kwargs.get('extractEmbedded', False):
                 with _open(str(fullFilename), mode) as f:
                     self.data.export(f)
