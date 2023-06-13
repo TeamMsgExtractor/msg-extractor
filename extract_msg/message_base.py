@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 __all__ = [
     'MessageBase',
 ]
@@ -6,6 +9,7 @@ __all__ = [
 import base64
 import datetime
 import email.utils
+import functools
 import html
 import json
 import logging
@@ -26,7 +30,7 @@ from typing import Callable, List, Optional, Union
 from . import constants
 from ._rtf.create_doc import createDocument
 from ._rtf.inject_rtf import injectStartRTF
-from .enums import DeencapType, RecipientType
+from .enums import BodyTypes, DeencapType, RecipientType
 from .exceptions import (
         BadHtmlError, DataNotFoundError, DeencapMalformedData,
         DeencapNotEncapsulated, IncompatibleOptionsError, WKError
@@ -35,9 +39,9 @@ from .msg import MSGFile
 from .structures.report_tag import ReportTag
 from .recipient import Recipient
 from .utils import (
-        addNumToDir, addNumToZipDir, createZipOpen, findWk, htmlSanitize,
-        inputToBytes, inputToString, isEncapsulatedRtf, prepareFilename,
-        rtfSanitizeHtml, rtfSanitizePlain, validateHtml
+        addNumToDir, addNumToZipDir, createZipOpen, decodeRfc2047, findWk,
+        htmlSanitize, inputToBytes, inputToString, isEncapsulatedRtf,
+        prepareFilename, rtfSanitizeHtml, rtfSanitizePlain, validateHtml
     )
 
 from imapclient.imapclient import decode_utf7
@@ -131,6 +135,7 @@ class MessageBase(MSGFile):
             if self.headerInit():
                 value = self.header[recipientType]
                 if value:
+                    value = decodeRfc2047(value)
                     value = value.replace(',', self.__recipientSeparator)
 
             # If the header had a blank field or didn't have the field, generate
@@ -593,7 +598,7 @@ class MessageBase(MSGFile):
         logger.debug('Using _rtf module to inject RTF text header.')
         return createDocument(injectStartRTF(self.rtfBody, injectableHeader))
 
-    def save(self, **kwargs):
+    def save(self, **kwargs) -> MessageBase:
         """
         Saves the message body and attachments found in the message.
 
@@ -788,7 +793,7 @@ class MessageBase(MSGFile):
 
         # If the user has requested the headers for this file, save it now.
         if kwargs.get('saveHeader', False):
-            headerText = self._getStringStream('__substg1.0_007D')
+            headerText = self.headerText
             if not headerText:
                 headerText = constants.HEADER_FORMAT.format(subject = self.subject, **self.header)
 
@@ -1027,8 +1032,23 @@ class MessageBase(MSGFile):
             self._defaultFolderName = dirName
             return dirName
 
+    @functools.cached_property
+    def detectedBodies(self) -> BodyTypes:
+        """
+        The types of bodies stored in the .msg file.
+        """
+        bodies = BodyTypes.NONE
+        if self.sExists('__substg1.0_1000'):
+            bodies |= BodyTypes.PLAIN
+        if self.exists('__substg1.0_10090102'):
+            bodies |= BodyTypes.RTF
+        if self.exists('__substg1.0_10130102'):
+            bodies |= BodyTypes.HTML
+
+        return bodies
+
     @property
-    def header(self):
+    def header(self) -> email.message.Message:
         """
         Returns the message header, if it exists. Otherwise it will generate
         one.
@@ -1036,7 +1056,7 @@ class MessageBase(MSGFile):
         try:
             return self._header
         except AttributeError:
-            headerText = self._getStringStream('__substg1.0_007D')
+            headerText = self.headerText
             if headerText:
                 self._header = EmailParser().parsestr(headerText)
                 self._header['date'] = self.date
@@ -1052,6 +1072,7 @@ class MessageBase(MSGFile):
                 # TODO find authentication results outside of header
                 header.add_header('Authentication-Results', None)
                 self._header = header
+
             return self._header
 
     @property
@@ -1110,6 +1131,13 @@ class MessageBase(MSGFile):
                 'Importance': self.importanceString,
             },
         }
+
+    @functools.cached_property
+    def headerText(self) -> Optional[str]:
+        """
+        The raw text of the header stream, if it exists.
+        """
+        return self._getStringStream('__substg1.0_007D')
 
     @property
     def htmlBody(self) -> Optional[bytes]:
@@ -1210,7 +1238,7 @@ class MessageBase(MSGFile):
         except AttributeError:
             headerResult = None
             if self.headerInit():
-                headerResult = self._header['message-id']
+                headerResult = self.header['message-id']
             if headerResult is not None:
                 self._messageId = headerResult
             else:
@@ -1312,7 +1340,7 @@ class MessageBase(MSGFile):
             if self.headerInit():
                 headerResult = self.header['from']
                 if headerResult is not None:
-                    self._sender = headerResult
+                    self._sender = decodeRfc2047(headerResult)
                     return headerResult
                 logger.info('Header found, but "sender" is not included. Will be generated from other streams.')
             # Extract from other fields

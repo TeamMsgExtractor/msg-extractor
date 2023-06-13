@@ -25,6 +25,7 @@ import codecs
 import collections
 import copy
 import datetime
+import email.header
 import email.message
 import email.policy
 import glob
@@ -167,6 +168,21 @@ def createZipOpen(func):
         return func(name, mode, *args, **kwargs)
 
     return _open
+
+
+def decodeRfc2047(encoded : str) -> str:
+    """
+    Decodes text encoded using the method specified in RFC 2047.
+    """
+    # This returns a list of tuples containing the bytes and the encoding they
+    # are using, so we decode each one and join them together.
+    #
+    # decode_header header will return a string instead of bytes for the first
+    # object if the input is not encoded, something that is frustrating.
+    return ''.join(
+        x[0].decode(x[1] or 'ascii') if isinstance(x[0], bytes) else x[0]
+        for x in email.header.decode_header(encoded)
+    )
 
 
 def dictGetCasedKey(_dict : Dict, key : Any) -> Any:
@@ -387,7 +403,7 @@ def getCommandArgs(args) -> argparse.Namespace:
     if options.outName and options.noFolders:
         raise IncompatibleOptionsError('--out-name is not compatible with --no-folders.')
 
-    if options.dev or options.fileLogging:
+    if options.fileLogging:
         options.verbose = options.verbose or 1
 
     # Handle the wkOptions if they exist.

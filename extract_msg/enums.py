@@ -2,7 +2,7 @@ __all__ = [
     'AddressBookType', 'AppointmentAuxilaryFlag', 'AppointmentColor',
     'AppointmentStateFlag', 'AttachErrorBehavior', 'AttachmentType',
     'BCImageAlignment', 'BCImageSource', 'BCLabelFormat', 'BCTemplateID',
-    'BCTextFormat', 'BusyStatus', 'ClientIntentFlag', 'Color',
+    'BCTextFormat', 'BodyTypes', 'BusyStatus', 'ClientIntentFlag', 'Color',
     'ContactAddressIndex', 'ContactLinkState', 'DeencapType',
     'DirectoryEntryType', 'DisplayType', 'ElectronicAddressProperties',
     'EntryIDType', 'EntryIDTypeHex', 'ErrorCode', 'ErrorCodeType', 'Gender',
@@ -265,6 +265,27 @@ class BCTextFormat(enum.Enum):
 
 
 
+class BodyTypes(enum.IntFlag):
+    """
+    Enum representing the types of bodies found in a message. This does not
+    include bodies generated from other sources, and so is a good detection
+    method for generated bodies (if you check a body and it is not null, but it
+    is not listed in the enum, then it was generated from another body).
+
+    This is an IntFlag enum, so to check if a body was found use the & operator
+    with the body you are checking and ensuring the result isn't BodyTypes.None.
+    You can also convert the result to a bool. For example:
+
+    >>> rtfFound = bool(msg.detectedBodies & BodyTypes.RTF)
+    """
+    NONE = 0b000
+    PLAIN = 0b001
+    RTF = 0b010
+    HTML = 0b100
+    ALL = 0b111
+
+
+
 class BusyStatus(enum.Enum):
     """
     The availability of a use for the event described by the object.
@@ -479,7 +500,7 @@ class EntryIDTypeHex(enum.Enum):
 
 class ErrorBehavior(enum.IntFlag):
     """
-    The behavior to follow when handling an error in an MSG file and it's 
+    The behavior to follow when handling an error in an MSG file and it's
     attachments. This is an int flag enum, so the options you want will be ORed
     with each other.
 
@@ -1714,7 +1735,7 @@ class TZFlag(enum.Enum):
 
 class _EnumDeprecator:
     """
-    Special class for handling deprecated enums in a way that shouldn't break 
+    Special class for handling deprecated enums in a way that shouldn't break
     existing code, including code for checking `is` on a member of the enum.
     """
     def __init__(self, oldClassName : str, newClass : enum.Enum, nameConversion : dict = {}, valueConversion : dict = {}):
@@ -1744,7 +1765,7 @@ class _EnumDeprecator:
         warnings.warn(self.__warnMessage, DeprecationWarning)
 
         return getattr(self.__new, self.__nameConv.get(key, key))
-    
+
     def __getitem__(self, name):
         # Warn about the deprecation
         import warnings
@@ -1757,7 +1778,7 @@ class _EnumDeprecator:
 
 # Deprecated Enums
 AttachErrorBehavior = _EnumDeprecator(
-    'AttachErrorBehavior', 
+    'AttachErrorBehavior',
     ErrorBehavior,
     {
         'BROKEN': 'ATTACH_SUPPRESS_ALL',
