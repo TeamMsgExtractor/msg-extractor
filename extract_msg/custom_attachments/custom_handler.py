@@ -37,7 +37,7 @@ class CustomAttachmentHandler(abc.ABC):
         """
         Generates the RTF to inject in place of the \objattph tag.
 
-        If this function should do nothing, returns None
+        If this function should do nothing, returns None.
         """
 
     @property

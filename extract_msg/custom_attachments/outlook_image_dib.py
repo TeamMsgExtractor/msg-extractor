@@ -66,11 +66,11 @@ class OutlookImageDIB(CustomAttachmentHandler):
         # Unpack the mailstream and create the HTML tag.
         vals = _ST_MAILSTREAM.unpack(stream)
         self.__dvaspect = DVAspect(vals[0])
-        self.__y = vals[1]
-        self.__x = vals[2]
-        hwStyle = f'height: {self.__x / 100.0:.2f}mm; width: {self.__y / 100.0:.2f}mm;'
-        imgData = f'data:image;base64,{base64.b64encode(self.__data).decode("ascii")}'
-        self.__htmlTag = f'<img src="{imgData}", style="{hwStyle}">'
+        self.__x = vals[1]
+        self.__y = vals[2]
+        # Convert to twips for RTF.
+        self.__xtwips = int(round(self.__x / 1.7639))
+        self.__ytwips = int(round(self.__y / 1.7639))
 
     @classmethod
     def isCorrectHandler(cls, attachment : Attachment) -> bool:
@@ -88,7 +88,37 @@ class OutlookImageDIB(CustomAttachmentHandler):
         return True
 
     def generateRtf(self) -> Optional[bytes]:
-        pass
+        """
+        Generates the RTF to inject in place of the \objattph tag.
+
+        If this function should do nothing, returns None.
+
+        This function requires PIL or Pillow. If neither are found, raises an
+        import error.
+        """
+        try:
+            import PIL.Image
+        except ImportError:
+            raise ImportError('PIL or Pillow is required for inserting an Outlook Image into the body.')
+
+        # First, convert the bitmap into a PNG so we can insert it into the
+        # body.
+        import io
+
+        # Note, use self.data instead of self.__data to allow support for
+        # extensions.
+        with PIL.Image.open(io.BytesIO(self.data)) as img:
+            out = io.BytesIO()
+            img.save(out, 'PNG')
+
+        hexData = out.getvalue().hex()
+
+        inject = '{\\*\\shppict\n{\\pict\\picscalex100\\picscaley100'
+        inject += f'\\picw{img.width}\\pich{img.height}'
+        inject += f'\\picwgoal{self.__xtwips}\\pichgoal{self.__ytwips}\n'
+        inject += '\\pngblip ' + hexData + '}}'
+
+        return inject.encode()
 
     @property
     def data(self) -> bytes:
