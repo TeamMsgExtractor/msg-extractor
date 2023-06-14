@@ -4,6 +4,7 @@
 * Changed internal behavior of `MSGFile.attachments`. This should not cause any noticeable changes to the output.
 * Refactored code significantly to make it more organized.
 * Changed the exports from the main module to only include an important subset of the module. For other items, you'll have to import the submodule that it falls under to access it. Submodules export all important pieces, so it will be easier to find.
+* Fixed `__main__` using the wrong enum for error behavior.
 
 **v0.41.5**
 * Fixed an issue from version `0.41.3` where the header being present but missing the `From` field would cause an exception.

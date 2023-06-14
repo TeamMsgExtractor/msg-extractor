@@ -7,8 +7,8 @@ import sys
 import traceback
 import zipfile
 
-from extract_msg import __doc__, utils
-from extract_msg.enums import AttachErrorBehavior
+from extract_msg import __doc__, openMsg, utils
+from extract_msg.enums import ErrorBehavior
 
 
 def main() -> None:
@@ -70,7 +70,7 @@ def main() -> None:
     # If we are skipping the NotImplementedError attachments, we need to
     # suppress the error.
     if args.skipNotImplemented:
-        openKwargs['attachmentErrorBehavior'] = AttachErrorBehavior.NOT_IMPLEMENTED
+        openKwargs['errorBehavior'] = ErrorBehavior.ATTACH_NOT_IMPLEMENTED
 
     def strSanitize(inp):
         """
@@ -91,7 +91,7 @@ def main() -> None:
             except UnicodeEncodeError:
                 print(f'Saving file "{strSanitize(x)}" (failed to print without repr)...')
         try:
-            with utils.openMsg(x, **openKwargs) as msg:
+            with openMsg(x, **openKwargs) as msg:
                 if args.dumpStdout:
                     print(msg.body)
                 elif args.noFolders:
