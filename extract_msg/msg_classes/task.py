@@ -8,14 +8,14 @@ import logging
 
 from typing import Optional, Set
 
-from . import constants
-from .enums import (
+from .. import constants
+from ..enums import (
         TaskAcceptance, TaskHistory, TaskMode, TaskMultipleRecipients,
         TaskOwnership, TaskState, TaskStatus
     )
 from .message_base import MessageBase
-from .structures.recurrence_pattern import RecurrencePattern
-from .utils import unsignedToSignedInt
+from ..structures.recurrence_pattern import RecurrencePattern
+from ..utils import unsignedToSignedInt
 
 
 logger = logging.getLogger(__name__)

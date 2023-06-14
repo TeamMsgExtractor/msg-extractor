@@ -7,7 +7,7 @@ import datetime
 
 from typing import Optional
 
-from . import constants
+from .. import constants
 from .meeting_related import MeetingRelated
 
 

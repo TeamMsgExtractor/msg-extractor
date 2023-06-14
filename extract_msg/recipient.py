@@ -9,8 +9,8 @@ from typing import Optional, Union
 
 from .enums import ErrorBehavior, MeetingRecipientType, PropertiesType, RecipientType
 from .exceptions import StandardViolationError
-from .prop import FixedLengthProp
-from .properties import Properties
+from .properties.prop import FixedLengthProp
+from .properties.properties_store import PropertiesStore
 from .structures.entry_id import PermanentEntryID
 from .utils import verifyPropertyId, verifyType
 
@@ -32,13 +32,13 @@ class Recipient:
                 logger.error('Recipients MUST have a property stream.')
             else:
                 raise StandardViolationError('Recipients MUST have a property stream.') from None
-        self.__props = Properties(self._getStream('__properties_version1.0'), PropertiesType.RECIPIENT)
+        self.__props = PropertiesStore(self._getStream('__properties_version1.0'), PropertiesType.RECIPIENT)
         self.__email = self._getStringStream('__substg1.0_39FE')
         if not self.__email:
             self.__email = self._getStringStream('__substg1.0_3003')
         self.__name = self._getStringStream('__substg1.0_3001')
         self.__typeFlags = self.__props.get('0C150003').value or 0
-        from .calendar_base import CalendarBase
+        from .msg_classes.calendar_base import CalendarBase
         if isinstance(msg, CalendarBase):
             self.__type = MeetingRecipientType(0xF & self.__typeFlags)
         else:
@@ -267,7 +267,7 @@ class Recipient:
         return self.__name
 
     @property
-    def props(self) -> Properties:
+    def props(self) -> PropertiesStore:
         """
         Returns the Properties instance of the recipient.
         """

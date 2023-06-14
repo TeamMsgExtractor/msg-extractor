@@ -16,19 +16,19 @@ import olefile
 
 from typing import List, Optional, Set, Tuple, Union
 
-from . import constants
-from .attachment import Attachment, BrokenAttachment, UnsupportedAttachment
-from .enums import (
+from .. import constants
+from ..attachments.attachment import Attachment, BrokenAttachment, UnsupportedAttachment
+from ..enums import (
         AttachErrorBehavior, ErrorBehavior, Importance, Priority,
         PropertiesType, Sensitivity, SideEffect
     )
-from .exceptions import (
+from ..exceptions import (
         InvalidFileFormatError, StandardViolationError, UnrecognizedMSGTypeError
     )
-from .named import Named, NamedProperties
-from .prop import FixedLengthProp
-from .properties import Properties
-from .utils import  (
+from ..properties.named import Named, NamedProperties
+from ..properties.prop import FixedLengthProp
+from ..properties.properties_store import PropertiesStore
+from ..utils import  (
         divide, getEncodingName, hasLen, inputToMsgPath, inputToString,
         msgPathToString, parseType, properHex, verifyPropertyId, verifyType,
         windowsUnicode
@@ -71,7 +71,7 @@ class MSGFile:
 
         :raises InvalidFileFormatError: If the file is not an OleFile or could
             not be parsed as an MSG file.
-        :raises StandardViolationError: If some part of the file badly violates 
+        :raises StandardViolationError: If some part of the file badly violates
             the standard.
         :raises IOError: If there is an issue opening the MSG file.
         :raises NameError: If the encoding provided is not supported.
@@ -534,7 +534,7 @@ class MSGFile:
         :param path: An IO device with a write method which accepts bytes or a
             path-like object (including strings and pathlib.Path objects).
         """
-        from .ole_writer import OleWriter
+        from ..ole_writer import OleWriter
 
         # Create an instance of the class used for writing a new OLE file.
         writer = OleWriter()
@@ -764,7 +764,7 @@ class MSGFile:
         Specifies the name of the client application that sent the message.
         """
         return self._ensureSetNamed('_currentVersionName', '8554', constants.PSETID_COMMON)
-    
+
     @property
     def errorBehavior(self) -> ErrorBehavior:
         """
@@ -881,7 +881,7 @@ class MSGFile:
         return self._ensureSetProperty('_priority', '00260003', overrideClass = Priority)
 
     @property
-    def props(self) -> Properties:
+    def props(self) -> PropertiesStore:
         """
         Returns the Properties instance used by the MSGFile instance.
         """
@@ -895,7 +895,7 @@ class MSGFile:
                     # Raise the exception from None so we don't get all the "during
                     # the handling of the above exception" stuff.
                     raise StandardViolationError('File does not contain a property stream.') from None
-            self._prop = Properties(stream,
+            self._prop = PropertiesStore(stream,
                                     PropertiesType.MESSAGE if self.prefix == '' else PropertiesType.MESSAGE_EMBED)
             return self._prop
 

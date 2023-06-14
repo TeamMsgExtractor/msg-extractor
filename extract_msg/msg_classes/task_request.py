@@ -7,9 +7,9 @@ import logging
 
 from typing import Optional
 
-from . import constants
-from .enums import ErrorBehavior, TaskMode, TaskRequestType
-from .exceptions import StandardViolationError
+from .. import constants
+from ..enums import ErrorBehavior, TaskMode, TaskRequestType
+from ..exceptions import StandardViolationError
 from .message_base import MessageBase
 from .task import Task
 

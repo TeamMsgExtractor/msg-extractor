@@ -11,12 +11,11 @@ __all__ = [
     'dictGetCasedKey', 'divide', 'filetimeToDatetime', 'findWk',
     'fromTimeStamp', 'getCommandArgs', 'getEncodingName', 'getFullClassName',
     'hasLen', 'htmlSanitize', 'inputToBytes', 'inputToMsgPath', 'inputToString',
-    'isEncapsulatedRtf', 'isEmptyString', 'knownMsgClass', 'filetimeToUtc',
-    'msgPathToString', 'openMsg', 'openMsgBulk', 'parseType', 'prepareFilename',
-    'properHex', 'roundUp', 'rtfSanitizeHtml', 'rtfSanitizePlain',
-    'setupLogging', 'tryGetMimetype', 'unsignedToSignedInt', 'unwrapMsg',
-    'unwrapMultipart', 'validateHtml', 'verifyPropertyId', 'verifyType',
-    'windowsUnicode',
+    'isEncapsulatedRtf', 'isEmptyString', 'filetimeToUtc', 'msgPathToString',
+    'parseType', 'prepareFilename', 'properHex', 'roundUp', 'rtfSanitizeHtml'
+    'rtfSanitizePlain', 'setupLogging', 'tryGetMimetype',
+    'unsignedToSignedInt', 'unwrapMsg', 'unwrapMultipart', 'validateHtml',
+    'verifyPropertyId', 'verifyType', 'windowsUnicode',
 ]
 
 
@@ -45,21 +44,20 @@ import olefile
 import tzlocal
 
 from html import escape as htmlEscape
-from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING, Union
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union
 
 from . import constants
 from .enums import AttachmentType
 from .exceptions import (
         ConversionError, ExecutableNotFound, IncompatibleOptionsError,
-        InvalidFileFormatError, InvaildPropertyIdError, TZError,
-        UnknownCodepageError, UnknownTypeError, UnrecognizedMSGTypeError,
-        UnsupportedEncodingError, UnsupportedMSGTypeError
+        InvaildPropertyIdError, TZError,
+        UnknownCodepageError, UnknownTypeError, UnsupportedEncodingError
     )
 
 
 # Allow for nice type checking.
 if TYPE_CHECKING:
-    from .msg import MSGFile
+    from .msg_classes.msg import MSGFile
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -588,22 +586,6 @@ def isEmptyString(inp : str) -> bool:
     return (inp == '' or inp is None)
 
 
-def knownMsgClass(classType : str) -> bool:
-    """
-    Checks if the specified class type is recognized by the module. Usually used
-    for checking if a type is simply unsupported rather than unknown.
-    """
-    classType = classType.lower()
-    if classType == 'ipm':
-        return True
-
-    for item in constants.KNOWN_CLASS_TYPES:
-        if classType.startswith(item):
-            return True
-
-    return False
-
-
 def filetimeToUtc(inp : int) -> float:
     """
     Converts a FILETIME into a unix timestamp.
@@ -622,165 +604,6 @@ def msgPathToString(inp) -> str:
         inp = '/'.join(inp)
     inp.replace('\\', '/')
     return inp
-
-
-def openMsg(path, **kwargs) -> MSGFile:
-    """
-    Function to automatically open an MSG file and detect what type it is.
-
-    :param path: Path to the msg file in the system or is the raw msg file.
-    :param prefix: Used for extracting embeded msg files inside the main one.
-        Do not set manually unless you know what you are doing.
-    :param parentMsg: Used for syncronizing named properties instances. Do not
-        set this unless you know what you are doing.
-    :param attachmentClass: Optional, the class the Message object will use for
-        attachments. You probably should not change this value unless you know
-        what you are doing.
-    :param signedAttachmentClass: Optional, the class the object will use for
-        signed attachments.
-    :param filename: Optional, the filename to be used by default when saving.
-    :param delayAttachments: Optional, delays the initialization of attachments
-        until the user attempts to retrieve them. Allows MSG files with bad
-        attachments to be initialized so the other data can be retrieved.
-    :param overrideEncoding: Optional, overrides the specified encoding of the
-        MSG file.
-    :param attachmentErrorBehavior: Optional, the behaviour to use in the event
-        of an error when parsing the attachments.
-    :param recipientSeparator: Optional, Separator string to use between
-        recipients.
-    :param ignoreRtfDeErrors: Optional, specifies that any errors that occur
-        from the usage of RTFDE should be ignored (default: False).
-
-    If :param strict: is set to `True`, this function will raise an exception
-    when it cannot identify what MSGFile derivitive to use. Otherwise, it will
-    log the error and return a basic MSGFile instance.
-
-    :raises UnsupportedMSGTypeError: if the type is recognized but not suppoted.
-    :raises UnrecognizedMSGTypeError: if the type is not recognized.
-    """
-    from .appointment import AppointmentMeeting
-    from .contact import Contact
-    from .meeting_cancellation import MeetingCancellation
-    from .meeting_exception import MeetingException
-    from .meeting_forward import MeetingForwardNotification
-    from .meeting_request import MeetingRequest
-    from .meeting_response import MeetingResponse
-    from .message import Message
-    from .msg import MSGFile
-    from .message_signed import MessageSigned
-    from .post import Post
-    from .task import Task
-    from .task_request import TaskRequest
-
-    # When the initial MSG file is opened, it should *always* delay attachments
-    # so it can get the main class type. We only need to load them after that
-    # if we are directly returning the MSGFile instance *and* delayAttachments
-    # is False.
-    #
-    # So first let's store the original value.
-    delayAttachments = kwargs.get('delayAttachments', False)
-    kwargs['delayAttachments'] = True
-
-    msg = MSGFile(path, **kwargs)
-
-    # Restore the option in the kwargs so we don't have to worry about it.
-    kwargs['delayAttachments'] = delayAttachments
-
-    # After rechecking the docs, all comparisons should be case-insensitive, not
-    # case-sensitive. My reading ability is great.
-    #
-    # Also after consideration, I realized we need to be very careful here, as
-    # other file types (like doc, ppt, etc.) might open but not return a class
-    # type. If the stream is not found, classType returns None, which has no
-    # lower function. So let's make sure we got a good return first.
-    if not msg.classType:
-        if kwargs.get('strict', True):
-            raise InvalidFileFormatError('File was confirmed to be an olefile, but was not an MSG file.')
-        else:
-            # If strict mode is off, we'll just return an MSGFile anyways.
-            logging.critical('Received file that was an olefile but was not an MSG file. Returning MSGFile anyways because strict mode is off.')
-            return msg
-    classType = msg.classType.lower()
-    # Put the message class first as it is most common.
-    if classType.startswith('ipm.note') or classType.startswith('report'):
-        msg.close()
-        if classType.endswith('smime.multipartsigned') or classType.endswith('smime'):
-            return MessageSigned(path, **kwargs)
-        else:
-            return Message(path, **kwargs)
-    elif classType.startswith('ipm.appointment'):
-        msg.close()
-        return AppointmentMeeting(path, **kwargs)
-    elif classType.startswith('ipm.contact') or classType.startswith('ipm.distlist'):
-        msg.close()
-        return Contact(path, **kwargs)
-    elif classType.startswith('ipm.post'):
-        msg.close()
-        return Post(path, **kwargs)
-    elif classType.startswith('ipm.schedule.meeting.request'):
-        msg.close()
-        return MeetingRequest(path, **kwargs)
-    elif classType.startswith('ipm.schedule.meeting.canceled'):
-        msg.close()
-        return MeetingCancellation(path, **kwargs)
-    elif classType.startswith('ipm.schedule.meeting.notification.forward'):
-        msg.close()
-        return MeetingForwardNotification(path, **kwargs)
-    elif classType.startswith('ipm.schedule.meeting.resp'):
-        msg.close()
-        return MeetingResponse(path, **kwargs)
-    elif classType.startswith('ipm.taskrequest'):
-        msg.close()
-        return TaskRequest(path, **kwargs)
-    elif classType.startswith('ipm.task'):
-        msg.close()
-        return Task(path, **kwargs)
-    elif classType.startswith('ipm.ole.class.{00061055-0000-0000-c000-000000000046}'):
-        # Exception objects have a weird class type.
-        msg.close()
-        return MeetingException(path, **kwargs)
-    elif classType == 'ipm':
-        # Unspecified format. It should be equal to this and not just start with
-        # it.
-        if not delayAttachments:
-            msg.attachments
-        return msg
-    elif kwargs.get('strict', True):
-        # Because we are closing it, we need to store it in a variable first.
-        ct = msg.classType
-        msg.close()
-        if knownMsgClass(classType):
-            raise UnsupportedMSGTypeError(f'MSG type "{ct}" currently is not supported by the module. If you would like support, please make a feature request.')
-        raise UnrecognizedMSGTypeError(f'Could not recognize msg class type "{ct}".')
-    else:
-        logger.error(f'Could not recognize msg class type "{msg.classType}". This most likely means it hasn\'t been implemented yet, and you should ask the developers to add support for it.')
-        if not delayAttachments:
-            msg.attachments
-        return msg
-
-
-def openMsgBulk(path, **kwargs) -> Union[List[MSGFile], Tuple[Exception, Union[str, bytes]]]:
-    """
-    Takes the same arguments as openMsg, but opens a collection of msg files
-    based on a wild card. Returns a list if successful, otherwise returns a
-    tuple.
-
-    :param ignoreFailures: If this is True, will return a list of all successful
-        files, ignoring any failures. Otherwise, will close all that
-        successfully opened, and return a tuple of the exception and the path of
-        the file that failed.
-    """
-    files = []
-    for x in glob.glob(str(path)):
-        try:
-            files.append(openMsg(x, **kwargs))
-        except Exception as e:
-            if not kwargs.get('ignoreFailures', False):
-                for msg in files:
-                    msg.close()
-                return (e, x)
-
-    return files
 
 
 def parseType(_type : int, stream, encoding, extras):
@@ -1022,7 +845,7 @@ def setupLogging(defaultPath = None, defaultLevel = logging.WARN, logfile = None
     Returns:
         bool: True if the configuration file was found and applied, False otherwise
     """
-    shippedConfig = pathlib.Path(__file__).parent / 'logging-config'
+    shippedConfig = pathlib.Path(__file__).parent / 'data' / 'logging-config'
     if os.name == 'nt':
         null = 'NUL'
         shippedConfig /= 'logging-nt.json'
@@ -1139,7 +962,7 @@ def unwrapMsg(msg : MSGFile) -> Dict:
     (including the original in the first index), and "raw_attachments" for raw
     attachments from signed messages.
     """
-    from .message_signed_base import MessageSignedBase
+    from .msg_classes import MessageSignedBase
 
     # Here is where we store main attachments.
     attachments = []
@@ -1359,3 +1182,4 @@ def verifyType(_type) -> str:
 
 def windowsUnicode(string) -> Optional[str]:
     return str(string, 'utf-16-le') if string is not None else None
+

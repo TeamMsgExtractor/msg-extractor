@@ -9,13 +9,11 @@ __all__ = [
 import base64
 import struct
 
-from typing import List, Optional, Tuple, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 from . import registerHandler
 from .custom_handler import CustomAttachmentHandler
-from .utils import htmlSplitRendered
-from ..enums import DVAspect
-from ..exceptions import CustomAttachmentError
+from ...enums import DVAspect
 
 
 if TYPE_CHECKING:
@@ -127,7 +125,6 @@ class OutlookImageDIB(CustomAttachmentHandler):
     @property
     def name(self) -> str:
         return self.attachment.shortFilename + '.bmp'
-
 
 
 

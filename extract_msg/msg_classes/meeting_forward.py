@@ -5,9 +5,9 @@ __all__ = [
 
 from typing import Optional
 
-from . import constants
+from .. import constants
 from .meeting_related import MeetingRelated
-from .enums import RecurPatternType
+from ..enums import RecurPatternType
 
 
 class MeetingForwardNotification(MeetingRelated):

@@ -27,18 +27,18 @@ import RTFDE
 from email.parser import Parser as EmailParser
 from typing import Callable, List, Optional, Union
 
-from . import constants
-from ._rtf.create_doc import createDocument
-from ._rtf.inject_rtf import injectStartRTF
-from .enums import BodyTypes, DeencapType, RecipientType
-from .exceptions import (
+from .. import constants
+from .._rtf.create_doc import createDocument
+from .._rtf.inject_rtf import injectStartRTF
+from ..enums import BodyTypes, DeencapType, RecipientType
+from ..exceptions import (
         BadHtmlError, DataNotFoundError, DeencapMalformedData,
         DeencapNotEncapsulated, IncompatibleOptionsError, WKError
     )
 from .msg import MSGFile
-from .structures.report_tag import ReportTag
-from .recipient import Recipient
-from .utils import (
+from ..structures.report_tag import ReportTag
+from ..recipient import Recipient
+from ..utils import (
         addNumToDir, addNumToZipDir, createZipOpen, decodeRfc2047, findWk,
         htmlSanitize, inputToBytes, inputToString, isEncapsulatedRtf,
         prepareFilename, rtfSanitizeHtml, rtfSanitizePlain, validateHtml

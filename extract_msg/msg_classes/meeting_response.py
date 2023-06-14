@@ -7,8 +7,8 @@ import datetime
 
 from typing import Optional
 
-from . import constants
-from .enums import ResponseType
+from .. import constants
+from ..enums import ResponseType
 from .meeting_related import MeetingRelated
 
 

@@ -8,14 +8,14 @@ import logging
 
 from typing import List, Optional, Set, Tuple, Union
 
-from . import constants
-from .enums import AppointmentAuxilaryFlag, AppointmentColor, AppointmentStateFlag, BusyStatus, IconIndex, MeetingRecipientType, ResponseStatus
+from .. import constants
+from ..enums import AppointmentAuxilaryFlag, AppointmentColor, AppointmentStateFlag, BusyStatus, IconIndex, MeetingRecipientType, ResponseStatus
 from .message_base import MessageBase
-from .structures.entry_id import EntryID
-from .structures.misc_id import GlobalObjectID
-from .structures.recurrence_pattern import RecurrencePattern
-from .structures.time_zone_definition import TimeZoneDefinition
-from .structures.time_zone_struct import TimeZoneStruct
+from ..structures.entry_id import EntryID
+from ..structures.misc_id import GlobalObjectID
+from ..structures.recurrence_pattern import RecurrencePattern
+from ..structures.time_zone_definition import TimeZoneDefinition
+from ..structures.time_zone_struct import TimeZoneStruct
 
 
 logger = logging.getLogger(__name__)

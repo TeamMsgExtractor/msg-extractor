@@ -16,15 +16,15 @@ import pprint
 
 from typing import Dict, Optional, TYPE_CHECKING
 
-from . import constants
-from .enums import NamedPropertyType
-from .utils import bytesToGuid, divide, properHex
+from .. import constants
+from ..enums import NamedPropertyType
+from ..utils import bytesToGuid, divide, properHex
 from compressed_rtf.crc32 import crc32
 
 
 # Allow for nice type checking.
 if TYPE_CHECKING:
-    from .msg import MSGFile
+    from ..msg_classes.msg import MSGFile
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())

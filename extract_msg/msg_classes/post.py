@@ -7,9 +7,9 @@ import json
 
 from typing import Optional
 
-from . import constants
+from .. import constants
 from .message_base import MessageBase
-from .utils import inputToString
+from ..utils import inputToString
 
 from imapclient.imapclient import decode_utf7
 

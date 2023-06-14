@@ -21,8 +21,7 @@ from red_black_dict_mod import RedBlackTree
 
 # Allow for nice type checking.
 if TYPE_CHECKING:
-    from .msg import MSGFile
-
+    from .msg_classes import MSGFile
 
 
 class DirectoryEntry:

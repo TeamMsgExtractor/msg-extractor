@@ -12,17 +12,17 @@ import logging
 from functools import cached_property, partial
 from typing import Optional, Tuple, TYPE_CHECKING
 
-from .enums import AttachmentType, ErrorBehavior, PropertiesType
-from .exceptions import StandardViolationError
-from .named import NamedProperties
-from .prop import FixedLengthProp
-from .properties import Properties
-from .utils import tryGetMimetype, verifyPropertyId, verifyType
+from ..enums import AttachmentType, ErrorBehavior, PropertiesType
+from ..exceptions import StandardViolationError
+from ..properties.named import NamedProperties
+from ..properties.prop import FixedLengthProp
+from ..properties.properties_store import PropertiesStore
+from ..utils import tryGetMimetype, verifyPropertyId, verifyType
 
 
 # Allow for nice type checking.
 if TYPE_CHECKING:
-    from .msg import MSGFile
+    from ..msg_classes.msg import MSGFile
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -48,7 +48,7 @@ class AttachmentBase:
                 logger.error('Attachments MUST have a property stream.')
             else:
                 raise StandardViolationError('Attachments MUST have a property stream.') from None
-        self.__props = Properties(self._getStream('__properties_version1.0'), PropertiesType.ATTACHMENT)
+        self.__props = PropertiesStore(self._getStream('__properties_version1.0'), PropertiesType.ATTACHMENT)
         self.__namedProperties = NamedProperties(msg.named, self)
         self.__treePath = msg.treePath + (self,)
 
@@ -407,7 +407,7 @@ class AttachmentBase:
         return self._ensureSet('_payloadClass', '__substg1.0_371A')
 
     @property
-    def props(self) -> Properties:
+    def props(self) -> PropertiesStore:
         """
         Returns the Properties instance of the attachment.
         """

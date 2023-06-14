@@ -1,5 +1,5 @@
 __all__ = [
-    'Properties',
+    'PropertiesStore',
 ]
 
 
@@ -11,17 +11,17 @@ import pprint
 from typing import Any, Dict, Optional, Union
 from warnings import warn
 
-from . import constants
-from .enums import Intelligence, PropertiesType
+from .. import constants
+from ..enums import Intelligence, PropertiesType
 from .prop import createProp, PropBase
-from .utils import divide, properHex
+from ..utils import divide, properHex
 
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-class Properties:
+class PropertiesStore:
     """
     Parser for msg properties files.
     """

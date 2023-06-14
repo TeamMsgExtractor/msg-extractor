@@ -14,13 +14,14 @@ import zipfile
 
 from typing import Tuple, TYPE_CHECKING, Union
 
-from .enums import AttachmentType
-from .utils import createZipOpen, inputToString, openMsg, prepareFilename
+from ..enums import AttachmentType
+from ..open_msg import openMsg
+from ..utils import createZipOpen, inputToString, prepareFilename
 
 
 # Allow for nice type checking.
 if TYPE_CHECKING:
-    from .msg import MSGFile
+    from ..msg_classes.msg import MSGFile
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())

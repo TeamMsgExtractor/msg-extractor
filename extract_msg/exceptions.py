@@ -28,14 +28,6 @@ __all__ = [
 ]
 
 
-import logging
-
-
-# Add logger bus.
-logger = logging.getLogger(__name__)
-logger.addHandler(logging.NullHandler())
-
-
 class BadHtmlError(ValueError):
     """
     HTML failed to pass validation.
@@ -44,11 +36,6 @@ class BadHtmlError(ValueError):
 class ConversionError(Exception):
     """
     An error occured during type conversion.
-    """
-
-class CustomAttachmentError(Exception):
-    """
-    A generic error used for issues handling custom attachments.
     """
 
 class DataNotFoundError(Exception):

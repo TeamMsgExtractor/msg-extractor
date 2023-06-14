@@ -9,11 +9,11 @@ import re
 
 from typing import List, Optional
 
-from .enums import ErrorBehavior
-from .exceptions import StandardViolationError
+from ..enums import ErrorBehavior
+from ..exceptions import StandardViolationError
 from .message_base import MessageBase
-from .signed_attachment import SignedAttachment
-from .utils import inputToBytes, inputToString, unwrapMultipart
+from ..attachments import SignedAttachment
+from ..utils import inputToBytes, inputToString, unwrapMultipart
 
 
 logger = logging.getLogger(__name__)

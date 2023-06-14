@@ -17,17 +17,18 @@ import zipfile
 
 from typing import Optional, TYPE_CHECKING, Union
 
-from . import constants
+from .. import constants
 from .attachment_base import AttachmentBase
 from .custom_attachments import CustomAttachmentHandler, getHandler
-from .enums import AttachmentType
-from .exceptions import StandardViolationError
-from .utils import createZipOpen, inputToString, openMsg, prepareFilename
+from ..enums import AttachmentType
+from ..exceptions import StandardViolationError
+from ..open_msg import openMsg
+from ..utils import createZipOpen, inputToString, prepareFilename
 
 
 # Allow for nice type checking.
 if TYPE_CHECKING:
-    from .msg import MSGFile
+    from ..msg_classes.msg import MSGFile
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -51,7 +52,7 @@ class Attachment(AttachmentBase):
         self.__customHandler = None
 
         if '37050003' not in self.props:
-            from .prop import createProp
+            from ..properties.prop import createProp
 
             logger.warning(f'Attachment method property not found on attachment {dir_}. Code will attempt to guess the type.')
             logger.log(5, self.props)
