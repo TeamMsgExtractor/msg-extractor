@@ -312,7 +312,7 @@ class AttachmentBase:
         if dataStream:
             clsid = self.__msg._getOleEntry(dataStream).clsid or clsid
 
-        return self.__clsid
+        return clsid
 
     @property
     def dir(self) -> str:
