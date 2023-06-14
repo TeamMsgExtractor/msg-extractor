@@ -8,16 +8,17 @@ __all__ = [
 
 import datetime
 import logging
+import weakref
 
 from functools import cached_property, partial
-from typing import Optional, Tuple, TYPE_CHECKING
+from typing import List, Optional, Tuple, TYPE_CHECKING
 
 from ..enums import AttachmentType, ErrorBehavior, PropertiesType
 from ..exceptions import StandardViolationError
 from ..properties.named import NamedProperties
 from ..properties.prop import FixedLengthProp
 from ..properties.properties_store import PropertiesStore
-from ..utils import tryGetMimetype, verifyPropertyId, verifyType
+from ..utils import makeWeakRef, tryGetMimetype, verifyPropertyId, verifyType
 
 
 # Allow for nice type checking.
@@ -41,7 +42,7 @@ class AttachmentBase:
         :param msg: the Message instance that the attachment belongs to.
         :param dir_: the directory inside the msg file where the attachment is located.
         """
-        self.__msg = msg
+        self.__msg = makeWeakRef(msg)
         self.__dir = dir_
         if not self.exists('__properties_version1.0'):
             if (msg.errorBehavior & ErrorBehavior.STANDARDS_VIOLATION):
@@ -50,7 +51,7 @@ class AttachmentBase:
                 raise StandardViolationError('Attachments MUST have a property stream.') from None
         self.__props = PropertiesStore(self._getStream('__properties_version1.0'), PropertiesType.ATTACHMENT)
         self.__namedProperties = NamedProperties(msg.named, self)
-        self.__treePath = msg.treePath + (self,)
+        self.__treePath = msg.treePath + [makeWeakRef(self)]
 
     def _ensureSet(self, variable, streamID, stringStream = True, **kwargs):
         """
@@ -95,6 +96,9 @@ class AttachmentBase:
         :param preserveNone: If true (default), causes the function to ignore
             :param overrideClass: when the value could not be found (is None).
             If this is changed to False, then the value will be used regardless.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
         """
         try:
             return getattr(self, variable)
@@ -149,6 +153,9 @@ class AttachmentBase:
         :param preserveNone: If true (default), causes the function to ignore
             :param overrideClass: when the value could not be found (is None).
             If this is changed to False, then the value will be used regardless.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
         """
         try:
             return getattr(self, variable)
@@ -163,7 +170,18 @@ class AttachmentBase:
             return value
 
     def _getStream(self, filename) -> Optional[bytes]:
-        return self.__msg._getStream([self.__dir, filename])
+        """
+        Gets a binary representation of the requested filename.
+
+        This should ALWAYS return a bytes object if it was found, otherwise
+        returns None.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
+        """
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+        return msg._getStream([self.__dir, filename])
 
     def _getStringStream(self, filename) -> Optional[str]:
         """
@@ -172,8 +190,13 @@ class AttachmentBase:
         a value if possible.  If there are both ASCII and Unicode
         versions, then :param prefer: specifies which will be
         returned.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
         """
-        return self.__msg._getStringStream([self.__dir, filename])
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+        return msg._getStringStream([self.__dir, filename])
 
     def _getTypedData(self, id, _type = None):
         """
@@ -185,6 +208,9 @@ class AttachmentBase:
         you can specify it as being one of the strings in the
         constant FIXED_LENGTH_PROPS_STRING or
         VARIABLE_LENGTH_PROPS_STRING.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
         """
         verifyPropertyId(id)
         id = id.upper()
@@ -195,7 +221,7 @@ class AttachmentBase:
             found, result = self._getTypedProperty(id, _type)
             return result if found else None
 
-    def _getTypedProperty(self, propertyID, _type = None):
+    def _getTypedProperty(self, propertyID, _type = None) -> Tuple[bool, Optional[object]]:
         """
         Gets the property with the specified id as the type that it
         is supposed to be. :param id: MUST be a 4 digit hexadecimal
@@ -235,28 +261,48 @@ class AttachmentBase:
         using this function it is best for you to check the type
         that it returns. If the function returns None, that means
         it could not find the stream specified.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
         """
-        return self.__msg._getTypedStream([self.__dir, filename], True, _type)
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+        return msg._getTypedStream([self.__dir, filename], True, _type)
 
     def exists(self, filename) -> bool:
         """
         Checks if stream exists inside the attachment folder.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
         """
-        return self.__msg.exists([self.__dir, filename])
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+        return msg.exists([self.__dir, filename])
 
     def sExists(self, filename) -> bool:
         """
         Checks if the string stream exists inside the attachment folder.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
         """
-        return self.__msg.sExists([self.__dir, filename])
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+        return msg.sExists([self.__dir, filename])
 
     def existsTypedProperty(self, id, _type = None) -> bool:
         """
         Determines if the stream with the provided id exists. The return of this
         function is 2 values, the first being a boolean for if anything was
         found, and the second being how many were found.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
         """
-        return self.__msg.existsTypedProperty(id, self.__dir, _type, True, self.__props)
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+        return msg.existsTypedProperty(id, self.__dir, _type, True, self.__props)
 
     @property
     def attachmentEncoding(self) -> Optional[bytes]:
@@ -378,8 +424,13 @@ class AttachmentBase:
     def msg(self) -> MSGFile:
         """
         Returns the Message instance the attachment belongs to.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
         """
-        return self.__msg
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+        return msg
 
     @property
     def name(self) -> Optional[str]:
@@ -430,7 +481,7 @@ class AttachmentBase:
         return self._ensureSet('_shortFilename', '__substg1.0_3704')
 
     @property
-    def treePath(self) -> Tuple:
+    def treePath(self) -> List[weakref.ReferenceType]:
         """
         A path, as a tuple of instances, needed to get to this instance through
         the MSGFile-Attachment tree.

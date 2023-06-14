@@ -10,13 +10,14 @@ import email
 import logging
 import os
 import pathlib
+import weakref
 import zipfile
 
-from typing import Tuple, TYPE_CHECKING, Union
+from typing import List, TYPE_CHECKING, Union
 
 from ..enums import AttachmentType
 from ..open_msg import openMsg
-from ..utils import createZipOpen, inputToString, prepareFilename
+from ..utils import createZipOpen, inputToString, makeWeakRef, prepareFilename
 
 
 # Allow for nice type checking.
@@ -39,9 +40,9 @@ class SignedAttachment:
         self.__asBytes = data
         self.__name = name
         self.__mimetype = mimetype
-        self.__msg = msg
+        self.__msg = makeWeakRef(msg)
         self.__node = node
-        self.__treePath = msg.treePath + (self,)
+        self.__treePath = msg.treePath + [makeWeakRef(self)]
 
         self.__data = None
         # To add support for embedded MSG files, we are going to completely
@@ -84,6 +85,9 @@ class SignedAttachment:
         either pass a path to where you want to create one or pass an instance
         to :param zip:. If :param zip: is an instance, :param customPath: will
         refer to a location inside the zip file.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
         """
         # First check if we are skipping embedded messages and stop
         # *immediately* if we are.
@@ -215,8 +219,13 @@ class SignedAttachment:
     def msg(self) -> MSGFile:
         """
         The MSGFile instance this attachment belongs to.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
         """
-        return self.__msg
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+        return msg
 
     @property
     def name(self) -> str:
@@ -229,7 +238,7 @@ class SignedAttachment:
     shortFilename = name
 
     @property
-    def treePath(self) -> Tuple:
+    def treePath(self) -> List[weakref.ReferenceType]:
         """
         A path, as a tuple of instances, needed to get to this instance through
         the MSGFile-Attachment tree.

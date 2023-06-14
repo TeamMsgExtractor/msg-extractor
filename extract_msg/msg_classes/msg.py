@@ -10,6 +10,7 @@ import io
 import logging
 import os
 import pathlib
+import weakref
 import zipfile
 
 import olefile
@@ -30,8 +31,8 @@ from ..properties.prop import FixedLengthProp
 from ..properties.properties_store import PropertiesStore
 from ..utils import  (
         divide, getEncodingName, hasLen, inputToMsgPath, inputToString,
-        msgPathToString, parseType, properHex, verifyPropertyId, verifyType,
-        windowsUnicode
+        makeWeakRef, msgPathToString, parseType, properHex, verifyPropertyId,
+        verifyType, windowsUnicode
     )
 
 
@@ -85,10 +86,10 @@ class MSGFile:
         """
         # Retrieve all the kwargs that we need.
         prefix = kwargs.get('prefix', '')
-        self.__parentMsg = kwargs.get('parentMsg')
-        self.__treePath = kwargs.get('treePath', tuple()) + (self,)
+        self.__parentMsg = makeWeakRef(kwargs.get('parentMsg'))
+        self.__treePath = kwargs.get('treePath', []) + [makeWeakRef(self)]
         # Verify it is a valid class.
-        if self.__parentMsg is not None and not isinstance(self.__parentMsg, MSGFile):
+        if self.__parentMsg and not isinstance(self.__parentMsg(), MSGFile):
             raise TypeError(':param parentMsg: must be an instance of MSGFile or a subclass.')
         filename = kwargs.get('filename', None)
         overrideEncoding = kwargs.get('overrideEncoding', None)
@@ -108,7 +109,6 @@ class MSGFile:
                 # necessary.
                 self.__errorBehavior = AttachErrorBehavior(kwargs['attachmentErrorBehavior'])
 
-        self.__waitingProperties = []
         if overrideEncoding is not None:
             codecs.lookup(overrideEncoding)
             logger.warning('You have chosen to override the string encoding. Do not report encoding errors caused by this.')
@@ -123,7 +123,7 @@ class MSGFile:
         if self.__parentMsg:
             # We should be able to directly access the private variables of
             # another instance with no issue.
-            self.__ole = self.__parentMsg.__ole
+            self.__ole = self.__parentMsg().__ole
             self.__oleOwner = False
         else:
             try:
@@ -370,7 +370,7 @@ class MSGFile:
             found, result = self._getTypedProperty(_id, _type)
             return result if found else None
 
-    def _getTypedProperty(self, propertyID : str, _type = None):
+    def _getTypedProperty(self, propertyID : str, _type = None) -> Tuple[bool, Optional[object]]:
         """
         Gets the property with the specified id as the type that it is supposed
         to be. :param id: MUST be a 4 digit hexadecimal string.
@@ -806,6 +806,9 @@ class MSGFile:
         """
         The main named properties storage. This is not usable to access the data
         of the properties directly.
+
+        :raises ReferenceError: The parent MSGFile instance has been garbage
+            collected.
         """
         try:
             return self.__named
@@ -815,12 +818,12 @@ class MSGFile:
             if self.__parentMsg:
                 # Try to get the named properties and use that for our main
                 # instance.
-                try:
-                    self.__named = self.__parentMsg.named
-                except Exception:
-                    pass
-            if not self.__named:
+                if (msg := self.__parentMsg()) is None:
+                    raise ReferenceError('Parent MSGFile instance has been garbage collected.')
+                self.__named = msg.named
+            else:
                 self.__named = Named(self)
+
             return self.__named
 
     @property
@@ -938,9 +941,11 @@ class MSGFile:
                 return self.__stringEncoding
 
     @property
-    def treePath(self) -> Tuple:
+    def treePath(self) -> List[weakref.ReferenceType]:
         """
-        A path, as a tuple of instances, needed to get to this instance through
-        the MSGFile-Attachment tree.
+        A path, as a list of weak reference to the instances needed to get to
+        this instance through the MSGFile-Attachment tree. These are weak
+        references to ensure the garbage collector doesn't see the references
+        back to higher objects.
         """
         return self.__treePath

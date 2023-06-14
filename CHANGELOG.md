@@ -5,6 +5,12 @@
 * Refactored code significantly to make it more organized.
 * Changed the exports from the main module to only include an important subset of the module. For other items, you'll have to import the submodule that it falls under to access it. Submodules export all important pieces, so it will be easier to find.
 * Fixed `__main__` using the wrong enum for error behavior.
+* Fixed `Named.get` being severely out of date (it's not used anywhere by the module which is why it wasn't noticed).
+* Fixed `Named.__getitem__` being entirely case-sensitive.
+* Switched much of the internal code (and the `treePath` property of all classes that have it) to using `weakref.ReferenceType` to avoid hard cyclic references.
+* Fixed `Recipient._getTypedStream` never returning a value.
+* Added additional type hints in various places.
+* Corrected `Attachment.save` so that saving an embedded msg file returns that embedded msg file instead of the parent msg file.
 
 **v0.41.5**
 * Fixed an issue from version `0.41.3` where the header being present but missing the `From` field would cause an exception.

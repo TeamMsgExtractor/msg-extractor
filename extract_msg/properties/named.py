@@ -14,11 +14,11 @@ import copy
 import logging
 import pprint
 
-from typing import Dict, Optional, TYPE_CHECKING
+from typing import Dict, Optional, Tuple, TYPE_CHECKING
 
 from .. import constants
 from ..enums import NamedPropertyType
-from ..utils import bytesToGuid, divide, properHex
+from ..utils import bytesToGuid, divide, makeWeakRef, properHex
 from compressed_rtf.crc32 import crc32
 
 
@@ -31,9 +31,14 @@ logger.addHandler(logging.NullHandler())
 
 
 class Named:
+    """
+    Class for handling access to the named properties themselves.
+    """
+
     __dir = '__nameid_version1.0'
+
     def __init__(self, msg):
-        self.__msg = msg
+        self.__msg = makeWeakRef(msg)
         # Get the basic streams. If all are emtpy, then nothing to do.
         guidStream = self._getStream('__substg1.0_00020102') or self._getStream('__substg1.0_00020102', False)
         entryStream = self._getStream('__substg1.0_00030102') or self._getStream('__substg1.0_00030102', False)
@@ -78,8 +83,18 @@ class Named:
     def __contains__(self, key) -> bool:
         return key in self.__propertiesDict
 
-    def __getitem__(self, key):
-        return self.__propertiesDict[key]
+    def __getitem__(self, propertyName : Tuple[str, str]):
+        # Validate the key.
+        if not hasattr(propertyName, '__len__') or len(propertyName) != 2:
+            raise TypeError('Named property key must be a tuple of two strings.')
+
+        # Case insensitive search of the dictionary.
+        propertyName = (propertyName[0].upper(), propertyName[1].upper())
+        for key in self.__propertiesDict.keys():
+             if propertyName == (key[0].upper(), key[1].upper()):
+                    return self.__propertiesDict[key]
+
+        raise KeyError(propertyName)
 
     def __iter__(self):
         return self.__propertiesDict.__iter__()
@@ -114,29 +129,58 @@ class Named:
         return self.namesStream[offset:offset + length].decode('utf-16-le')
 
     def _getStream(self, filename, prefix = True) -> Optional[bytes]:
-        return self.__msg._getStream([self.__dir, filename], prefix = prefix)
+        """
+        Gets a binary representation of the requested filename.
+
+        This should ALWAYS return a bytes object if it was found, otherwise
+        returns None.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
+        """
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Named instance has been garbage collected.')
+        return msg._getStream([self.__dir, filename], prefix = prefix)
 
     def _getStringStream(self, filename, prefix = True) -> Optional[str]:
         """
         Gets a string representation of the requested filename.
-        Checks for both ASCII and Unicode representations and returns
-        a value if possible.  If there are both ASCII and Unicode
-        versions, then :param prefer: specifies which will be
-        returned.
+
+        Rather than the full filename, you should only feed this function the
+        filename sans the type. So if the full name is "__substg1.0_001A001F",
+        the filename this function should receive should be "__substg1.0_001A".
+
+        This should ALWAYS return a string if it was found, otherwise returns
+        None.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
         """
-        return self.__msg._getStringStream([self.__dir, filename], prefix = prefix)
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Named instance has been garbage collected.')
+        return msg._getStringStream([self.__dir, filename], prefix = prefix)
 
     def exists(self, filename) -> bool:
         """
         Checks if stream exists inside the named properties folder.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
         """
-        return self.__msg.exists([self.__dir, filename])
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Named instance has been garbage collected.')
+        return msg.exists([self.__dir, filename])
 
     def sExists(self, filename) -> bool:
         """
         Checks if the string stream exists inside the named properties folder.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
         """
-        return self.__msg.sExists([self.__dir, filename])
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Named instance has been garbage collected.')
+        return msg.sExists([self.__dir, filename])
 
     def get(self, propertyName, default = None):
         """
@@ -144,12 +188,8 @@ class Named:
         if not found. Key is a tuple of the name and the property set GUID.
         """
         try:
-            return self.__propertiesDict[propertyName]
+            return self[propertyName]
         except KeyError:
-            propertyName = propertyName.upper()
-            for key in self.__propertiesDict.keys():
-                if propertyName == key.upper():
-                    return self.__propertiesDict[key]
             return default
 
     def keys(self):
@@ -175,8 +215,13 @@ class Named:
     def msg(self) -> MSGFile:
         """
         Returns the Message instance the attachment belongs to.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
         """
-        return self.__msg
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Named instance has been garbage collected.')
+        return msg
 
     @property
     def namedProperties(self) -> Dict:
@@ -200,22 +245,30 @@ class NamedProperties:
             property.
         """
         self.__named = named
-        self.__streamSource = streamSource
+        self.__streamSource = makeWeakRef(streamSource)
 
     def __getitem__(self, item):
         """
         Get a named property using the [] operator. Item must be a named
         property instance or a tuple with 2 items: the name and the GUID string.
+
+        :raises ReferenceError: The associated instance for getting actual
+            property data has been garbage collected.
         """
+        if (source := self.__streamSource()) is None:
+            raise ReferenceError('The stream source for the NamedProperties instance has been garbage collected.')
         if isinstance(item, NamedPropertyBase):
-            return self.__streamSource._getTypedData(item.propertyStreamID)
+            return source._getTypedData(item.propertyStreamID)
         else:
-            return self.__streamSource._getTypedData(self.__named[item].propertyStreamID)
+            return source._getTypedData(self.__named[item].propertyStreamID)
 
     def get(self, item, default = None):
         """
         Get a named property, returning the value of :param default: if not
         found. Item must be a tuple with 2 items: the name and the GUID string.
+
+        :raises ReferenceError: The associated instance for getting actual
+            property data has been garbage collected.
         """
         try:
             return self[item]

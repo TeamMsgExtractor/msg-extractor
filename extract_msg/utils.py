@@ -37,6 +37,7 @@ import shutil
 import struct
 # Not actually sure if this needs to be here for the logging, so just in case.
 import sys
+import weakref
 import zipfile
 
 import bs4
@@ -593,6 +594,17 @@ def filetimeToUtc(inp : int) -> float:
     return (inp - 116444736000000000) / 10000000.0
 
 
+def makeWeakRef(obj : Optional[object]) -> Optional[weakref.ReferenceType]:
+    """
+    Attempts to return a weak reference to the object, returning None if not
+    possible.
+    """
+    try:
+        return weakref.ref(obj)
+    except TypeError:
+        return None
+
+
 def msgPathToString(inp) -> str:
     """
     Converts an MSG path (one of the internal paths inside an MSG file) into a
@@ -1137,6 +1149,7 @@ def unwrapMultipart(mp : Union[bytes, str, email.message.Message]) -> Dict:
         'plain_body': plainBody,
         'html_body': htmlBody,
     }
+
 
 def validateHtml(html : bytes) -> bool:
     """

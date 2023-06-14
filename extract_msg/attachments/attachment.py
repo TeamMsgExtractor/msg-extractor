@@ -255,7 +255,7 @@ class Attachment(AttachmentBase):
                 _zip.close()
 
             return str(fullFilename)
-        elif self.__data:
+        elif self.type is AttachmentType.MSG:
             if kwargs.get('extractEmbedded', False):
                 with _open(str(fullFilename), mode) as f:
                     self.data.export(f)
@@ -266,7 +266,7 @@ class Attachment(AttachmentBase):
             if _zip and createdZip:
                 _zip.close()
 
-            return self.msg
+            return self.__data
 
     def saveEmbededMessage(self, **kwargs) -> None:
         """

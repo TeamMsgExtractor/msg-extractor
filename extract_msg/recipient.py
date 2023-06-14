@@ -5,14 +5,14 @@ __all__ = [
 
 import logging
 
-from typing import Optional, Union
+from typing import Optional, Tuple, Union
 
 from .enums import ErrorBehavior, MeetingRecipientType, PropertiesType, RecipientType
 from .exceptions import StandardViolationError
 from .properties.prop import FixedLengthProp
 from .properties.properties_store import PropertiesStore
 from .structures.entry_id import PermanentEntryID
-from .utils import verifyPropertyId, verifyType
+from .utils import makeWeakRef, verifyPropertyId, verifyType
 
 
 logger = logging.getLogger(__name__)
@@ -21,11 +21,11 @@ logger.addHandler(logging.NullHandler())
 
 class Recipient:
     """
-    Contains the data of one of the recipients in an msg file.
+    Contains the data of one of the recipients in an MSG file.
     """
 
     def __init__(self, _dir, msg):
-        self.__msg = msg # Allows calls to original msg file.
+        self.__msg = makeWeakRef(msg) # Allows calls to original msg file.
         self.__dir = _dir
         if not self.exists('__properties_version1.0'):
             if msg.errorBehavior & ErrorBehavior.STANDARDS_VIOLATION:
@@ -60,6 +60,9 @@ class Recipient:
         :param preserveNone: If true (default), causes the function to ignore
             :param overrideClass: when the value could not be found (is None).
             If this is changed to False, then the value will be used regardless.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
         """
         try:
             return getattr(self, variable)
@@ -88,6 +91,9 @@ class Recipient:
         :param preserveNone: If true (default), causes the function to ignore
             :param overrideClass: when the value could not be found (is None).
             If this is changed to False, then the value will be used regardless.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
         """
         try:
             return getattr(self, variable)
@@ -117,6 +123,9 @@ class Recipient:
         :param preserveNone: If true (default), causes the function to ignore
             :param overrideClass: when the value could not be found (is None).
             If this is changed to False, then the value will be used regardless.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
         """
         try:
             return getattr(self, variable)
@@ -136,17 +145,31 @@ class Recipient:
 
         This should ALWAYS return a bytes object if it was found, otherwise
         returns None.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
         """
-        return self.__msg._getStream([self.__dir, filename])
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
+        return msg._getStream([self.__dir, filename])
 
     def _getStringStream(self, filename) -> Optional[str]:
         """
-        Gets a string representation of the requested filename. Checks for both
-        Unicode and Non-Unicode representations and returns a value if possible.
-        If there are both Unicode and Non-Unicode versions, then :param prefer:
-        specifies which will be returned.
+        Gets a string representation of the requested filename.
+
+        Rather than the full filename, you should only feed this function the
+        filename sans the type. So if the full name is "__substg1.0_001A001F",
+        the filename this function should receive should be "__substg1.0_001A".
+
+        This should ALWAYS return a string if it was found, otherwise returns
+        None.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
         """
-        return self.__msg._getStringStream([self.__dir, filename])
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
+        return msg._getStringStream([self.__dir, filename])
 
     def _getTypedData(self, _id, _type = None):
         """
@@ -156,6 +179,9 @@ class Recipient:
         If you know for sure what type the data is before hand, you can specify
         it as being one of the strings in the constant FIXED_LENGTH_PROPS_STRING
         or VARIABLE_LENGTH_PROPS_STRING.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
         """
         verifyPropertyId(id)
         _id = _id.upper()
@@ -166,7 +192,7 @@ class Recipient:
             found, result = self._getTypedProperty(_id, _type)
             return result if found else None
 
-    def _getTypedProperty(self, propertyID : str, _type = None):
+    def _getTypedProperty(self, propertyID : str, _type = None) -> Tuple[bool, Optional[object]]:
         """
         Gets the property with the specified id as the type that it is supposed
         to be. :param id: MUST be a 4 digit hexadecimal string.
@@ -201,28 +227,48 @@ class Recipient:
         many cases cannot be predicted. As such, when using this function it is
         best for you to check the type that it returns. If the function returns
         None, that means it could not find the stream specified.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
         """
-        self.__msg._getTypedStream(self, [self.__dir, filename], True, _type)
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
+        return msg._getTypedStream(self, [self.__dir, filename], True, _type)
 
     def exists(self, filename) -> bool:
         """
         Checks if stream exists inside the recipient folder.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
         """
-        return self.__msg.exists([self.__dir, filename])
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
+        return msg.exists([self.__dir, filename])
 
     def sExists(self, filename) -> bool:
         """
         Checks if the string stream exists inside the recipient folder.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
         """
-        return self.__msg.sExists([self.__dir, filename])
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
+        return msg.sExists([self.__dir, filename])
 
     def existsTypedProperty(self, id, _type = None) -> bool:
         """
         Determines if the stream with the provided id exists. The return of this
         function is 2 values, the first being a boolean for if anything was
         found, and the second being how many were found.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
         """
-        return self.__msg.existsTypedProperty(id, self.__dir, _type, True, self.__props)
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
+        return msg.existsTypedProperty(id, self.__dir, _type, True, self.__props)
 
     @property
     def account(self) -> Optional[str]:
