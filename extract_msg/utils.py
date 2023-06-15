@@ -6,16 +6,45 @@ Utility functions of extract_msg.
 
 
 __all__ = [
-    'addNumToDir', 'addNumToZipDir', 'bitwiseAdjust', 'bitwiseAdjustedAnd',
-    'bytesToGuid', 'ceilDiv', 'cloneOleFile', 'createZipOpen',
-    'dictGetCasedKey', 'divide', 'filetimeToDatetime', 'filetimeToUtc',
-    'findWk', 'fromTimeStamp', 'getCommandArgs', 'getEncodingName',
-    'getFullClassName', 'hasLen', 'htmlSanitize', 'inputToBytes',
-    'inputToMsgPath', 'inputToString', 'isEncapsulatedRtf', 'isEmptyString',
-    'msgPathToString', 'parseType', 'prepareFilename', 'properHex', 'roundUp',
-    'rtfSanitizeHtml', 'rtfSanitizePlain', 'setupLogging', 'tryGetMimetype',
-    'unsignedToSignedInt', 'unwrapMsg', 'unwrapMultipart', 'validateHtml',
-    'verifyPropertyId', 'verifyType', 'windowsUnicode',
+    'addNumToDir',
+    'addNumToZipDir',
+    'bitwiseAdjust',
+    'bitwiseAdjustedAnd',
+    'bytesToGuid',
+    'ceilDiv',
+    'cloneOleFile',
+    'createZipOpen',
+    'dictGetCasedKey',
+    'divide',
+    'filetimeToDatetime',
+    'filetimeToUtc',
+    'findWk',
+    'fromTimeStamp',
+    'getCommandArgs',
+    'getEncodingName',
+    'hasLen',
+    'htmlSanitize',
+    'inputToBytes',
+    'inputToMsgPath',
+    'inputToString',
+    'isEncapsulatedRtf',
+    'isEmptyString',
+    'msgPathToString',
+    'parseType',
+    'prepareFilename',
+    'properHex',
+    'roundUp',
+    'rtfSanitizeHtml',
+    'rtfSanitizePlain',
+    'setupLogging',
+    'tryGetMimetype',
+    'unsignedToSignedInt',
+    'unwrapMsg',
+    'unwrapMultipart',
+    'validateHtml',
+    'verifyPropertyId',
+    'verifyType',
+    'windowsUnicode',
 ]
 
 
@@ -481,10 +510,6 @@ def getEncodingName(codepage : int) -> str:
         return constants.CODE_PAGES[codepage]
     except LookupError:
         raise UnsupportedEncodingError(f'The codepage {codepage} ({constants.CODE_PAGES[codepage]}) is not currently supported by your version of Python.')
-
-
-def getFullClassName(inp) -> str:
-    return inp.__class__.__module__ + '.' + inp.__class__.__name__
 
 
 def hasLen(obj) -> bool:

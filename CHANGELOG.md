@@ -13,6 +13,7 @@
 * Corrected `Attachment.save` so that saving an embedded msg file returns that embedded msg file instead of the parent msg file.
 * Modified tests.py to only run if it is run as a file instead of imported.
 * Changed `knownMsgClass` to a private function since it is explicitly not being exported by any part of the module.
+* Removed unusued function `getFullClassName`.
 
 **v0.41.5**
 * Fixed an issue from version `0.41.3` where the header being present but missing the `From` field would cause an exception.
