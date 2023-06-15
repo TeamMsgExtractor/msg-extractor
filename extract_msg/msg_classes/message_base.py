@@ -472,18 +472,15 @@ class MessageBase(MSGFile):
 
         # Validate the HTML.
         if not validateHtml(body):
-            # If we are not preparing the HTML body, then raise an
-            # exception.
-            if not prepared:
-                raise BadHtmlError('HTML body failed to pass validation.')
+            logger.warning('HTML body failed to validate. Code will attempt to correct it.')
 
-            # If we are here, then we need to do what we can to fix the HTML body.
-            # Unfortunately this gets complicated because of the various ways the
-            # body could be wrong. If only the <body> tag is missing, then we just
-            # need to insert it at the end and be done. If both the <html> and
-            # <body> tag are missing, we determine where to put the body tag (around
-            # everything if there is no <head> tag, otherwise at the end) and then
-            # wrap it all in the <html> tag.
+            # If we are here, then we need to do what we can to fix the HTML
+            # body. Unfortunately this gets complicated because of the various
+            # ways the body could be wrong. If only the <body> tag is missing,
+            # then we just need to insert it at the end and be done. If both
+            # the <html> and <body> tag are missing, we determine where to put
+            # the body tag (around everything if there is no <head> tag,
+            # otherwise at the end) and then wrap it all in the <html> tag.
             parser = bs4.BeautifulSoup(body, features = 'html.parser')
             if not parser.find('html') and not parser.find('body'):
                 if parser.find('head') or parser.find('footer'):
