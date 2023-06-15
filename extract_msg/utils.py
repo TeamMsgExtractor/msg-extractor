@@ -35,8 +35,6 @@ import os
 import pathlib
 import shutil
 import struct
-# Not actually sure if this needs to be here for the logging, so just in case.
-import sys
 import weakref
 import zipfile
 
