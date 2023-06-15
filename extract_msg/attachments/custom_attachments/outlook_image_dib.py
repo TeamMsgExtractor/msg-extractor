@@ -124,7 +124,11 @@ class OutlookImageDIB(CustomAttachmentHandler):
 
     @property
     def name(self) -> str:
-        return self.attachment.shortFilename + '.bmp'
+        # Try to get the name from the attachment. If that fails, name it based
+        # on the number.
+        if not (name := self.attachment.name):
+            name = f'attachment {int(self.attachment.dir[-8:], 16)}'
+        return name + '.bmp'
 
 
 
