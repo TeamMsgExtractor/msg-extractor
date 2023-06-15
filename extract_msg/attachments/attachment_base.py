@@ -356,7 +356,9 @@ class AttachmentBase:
 
         # If we found the right item, get the CLSID.
         if dataStream:
-            clsid = self.__msg._getOleEntry(dataStream).clsid or clsid
+            if (msg := self.__msg()) is None:
+                raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            clsid = msg._getOleEntry(dataStream).clsid or clsid
 
         return clsid
 
