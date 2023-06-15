@@ -43,7 +43,7 @@ class Contact(MessageBase):
             be retrieved.
         :param filename: optional, the filename to be used by default when
             saving.
-        :param attachmentErrorBehavior: Optional, the behavior to use in the
+        :param errorBehavior: Optional, the behavior to use in the
             event of an error when parsing the attachments.
         :param overrideEncoding: optional, an encoding to use instead of the one
             specified by the msg file. Do not report encoding errors caused by

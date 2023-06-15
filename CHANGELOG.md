@@ -15,6 +15,7 @@
 * Changed `knownMsgClass` to a private function since it is explicitly not being exported by any part of the module.
 * Removed unusued function `getFullClassName`.
 * Fixes to the HTML body when saving as HTML will no longer require the `preparedHtml`/`--prepared-html` option.
+* Removed the exception `BadHtmlError` since it is no longer used.
 
 **v0.41.5**
 * Fixed an issue from version `0.41.3` where the header being present but missing the `From` field would cause an exception.

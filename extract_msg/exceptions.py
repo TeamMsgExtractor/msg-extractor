@@ -7,7 +7,6 @@ This module contains the set of extract_msg exceptions.
 """
 
 __all__ = [
-    'BadHtmlError',
     'ConversionError',
     'DataNotFoundError',
     'DeencapMalformedData',
@@ -27,11 +26,6 @@ __all__ = [
     'WKError',
 ]
 
-
-class BadHtmlError(ValueError):
-    """
-    HTML failed to pass validation.
-    """
 
 class ConversionError(Exception):
     """

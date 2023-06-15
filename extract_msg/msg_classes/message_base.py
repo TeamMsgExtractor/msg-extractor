@@ -32,8 +32,8 @@ from .._rtf.create_doc import createDocument
 from .._rtf.inject_rtf import injectStartRTF
 from ..enums import BodyTypes, DeencapType, RecipientType
 from ..exceptions import (
-        BadHtmlError, DataNotFoundError, DeencapMalformedData,
-        DeencapNotEncapsulated, IncompatibleOptionsError, WKError
+        DataNotFoundError, DeencapMalformedData, DeencapNotEncapsulated,
+        IncompatibleOptionsError, WKError
     )
 from .msg import MSGFile
 from ..structures.report_tag import ReportTag
@@ -77,7 +77,7 @@ class MessageBase(MSGFile):
         :param overrideEncoding: Optional, an encoding to use instead of the one
             specified by the msg file. Do not report encoding errors caused by
             this.
-        :param attachmentErrorBehavior: Optional, the behavior to use in the
+        :param errorBehavior: Optional, the behavior to use in the
             event of an error when parsing the attachments.
         :param recipientSeparator: Optional, separator string to use between
             recipients.
@@ -327,9 +327,6 @@ class MessageBase(MSGFile):
             `None` or an empty string to not insert the tag (Default: 'utf-8').
         :param kwargs: Used to allow kwargs expansion in the save function.
             Arguments absorbed by this are simply ignored.
-
-        :raises BadHtmlError: if :param preparedHtml: is False and the HTML
-            fails to validate.
         """
         if self.htmlBody:
             # Inject the header into the data.
@@ -452,8 +449,6 @@ class MessageBase(MSGFile):
             the prepared HTML (True) body (Default: False).
 
         :raises AttributeError: if the correct HTML body cannot be acquired.
-        :raises BadHtmlError: if :param preparedHtml: is False and the HTML fails to
-            validate.
         """
         if not self.htmlBody:
             raise AttributeError('Cannot inject the HTML header without an HTML body attribute.')

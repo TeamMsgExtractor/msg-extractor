@@ -61,7 +61,7 @@ def openMsg(path, **kwargs) -> MSGFile:
         attachments to be initialized so the other data can be retrieved.
     :param overrideEncoding: Optional, overrides the specified encoding of the
         MSG file.
-    :param attachmentErrorBehavior: Optional, the behaviour to use in the event
+    :param errorBehavior: Optional, the behaviour to use in the event
         of an error when parsing the attachments.
     :param recipientSeparator: Optional, Separator string to use between
         recipients.
