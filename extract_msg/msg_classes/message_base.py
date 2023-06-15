@@ -96,7 +96,6 @@ class MessageBase(MSGFile):
             method will not run if this is set.
         """
         super().__init__(path, **kwargs)
-        recipientSeparator = ';'
         self.__recipientSeparator = kwargs.get('recipientSeparator', ';')
         self.__ignoreRtfDeErrors = kwargs.get('ignoreRtfDeErrors', False)
         self.__deencap = kwargs.get('deencapsulationFunc')
