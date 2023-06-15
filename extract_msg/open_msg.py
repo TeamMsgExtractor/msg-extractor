@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from .msg_classes import MSGFile
 
 
-def knownMsgClass(classType : str) -> bool:
+def _knownMsgClass(classType : str) -> bool:
     """
     Checks if the specified class type is recognized by the module. Usually used
     for checking if a type is simply unsupported rather than unknown.
@@ -156,7 +156,7 @@ def openMsg(path, **kwargs) -> MSGFile:
         # Because we are closing it, we need to store it in a variable first.
         ct = msg.classType
         msg.close()
-        if knownMsgClass(classType):
+        if _knownMsgClass(classType):
             raise UnsupportedMSGTypeError(f'MSG type "{ct}" currently is not supported by the module. If you would like support, please make a feature request.')
         raise UnrecognizedMSGTypeError(f'Could not recognize msg class type "{ct}".')
     else:

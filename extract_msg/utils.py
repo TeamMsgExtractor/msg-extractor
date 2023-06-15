@@ -8,12 +8,12 @@ Utility functions of extract_msg.
 __all__ = [
     'addNumToDir', 'addNumToZipDir', 'bitwiseAdjust', 'bitwiseAdjustedAnd',
     'bytesToGuid', 'ceilDiv', 'cloneOleFile', 'createZipOpen',
-    'dictGetCasedKey', 'divide', 'filetimeToDatetime', 'findWk',
-    'fromTimeStamp', 'getCommandArgs', 'getEncodingName', 'getFullClassName',
-    'hasLen', 'htmlSanitize', 'inputToBytes', 'inputToMsgPath', 'inputToString',
-    'isEncapsulatedRtf', 'isEmptyString', 'filetimeToUtc', 'msgPathToString',
-    'parseType', 'prepareFilename', 'properHex', 'roundUp', 'rtfSanitizeHtml'
-    'rtfSanitizePlain', 'setupLogging', 'tryGetMimetype',
+    'dictGetCasedKey', 'divide', 'filetimeToDatetime', 'filetimeToUtc',
+    'findWk', 'fromTimeStamp', 'getCommandArgs', 'getEncodingName',
+    'getFullClassName', 'hasLen', 'htmlSanitize', 'inputToBytes',
+    'inputToMsgPath', 'inputToString', 'isEncapsulatedRtf', 'isEmptyString',
+    'msgPathToString', 'parseType', 'prepareFilename', 'properHex', 'roundUp',
+    'rtfSanitizeHtml', 'rtfSanitizePlain', 'setupLogging', 'tryGetMimetype',
     'unsignedToSignedInt', 'unwrapMsg', 'unwrapMultipart', 'validateHtml',
     'verifyPropertyId', 'verifyType', 'windowsUnicode',
 ]
