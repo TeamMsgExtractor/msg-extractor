@@ -21,7 +21,9 @@ import olefile
 from typing import Any, Callable, List, Optional, Set, Tuple, Union
 
 from .. import constants
-from ..attachments import AttachmentBase, initStandardAttachment
+from ..attachments import (
+        AttachmentBase, initStandardAttachment, SignedAttachment
+    )
 from ..enums import (
         AttachErrorBehavior, ErrorBehavior, Importance, Priority,
         PropertiesType, Sensitivity, SideEffect
@@ -661,7 +663,7 @@ class MSGFile:
             return self.__bStringsUnicode
 
     @property
-    def attachments(self) -> List[AttachmentBase]:
+    def attachments(self) -> Union[List[AttachmentBase], List[SignedAttachment]]:
         """
         Returns a list of all attachments.
         """
@@ -670,7 +672,6 @@ class MSGFile:
         except AttributeError:
             # Get the attachments.
             attachmentDirs = []
-            prefixLen = self.prefixLen
             for dir_ in self.listDir(False, True, False):
                 if dir_[0].startswith('__attach') and dir_[0] not in attachmentDirs:
                     attachmentDirs.append(dir_[0])
