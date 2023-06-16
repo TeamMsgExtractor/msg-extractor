@@ -1,3 +1,8 @@
+__all__ = [
+    'BrokenAttachment',
+]
+
+
 from .attachment_base import AttachmentBase
 from ..enums import AttachmentType
 
