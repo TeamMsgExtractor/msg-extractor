@@ -78,7 +78,7 @@ class AttachmentBase(abc.ABC):
             setattr(self, variable, value)
             return value
 
-    def _ensureSetNamed(self, variable, propertyName : str, guid : str, **kwargs):
+    def _ensureSetNamed(self, variable : str, propertyName : str, guid : str, **kwargs):
         """
         Ensures that the variable exists, otherwise will set it using the named
         property. After that, return said variable.
@@ -460,6 +460,13 @@ class AttachmentBase(abc.ABC):
         Returns the long file name of the attachment, if it exists.
         """
         return self._ensureSet('_longFilename', '__substg1.0_3707')
+
+    @property
+    def longPathname(self) -> Optional[str]:
+        """
+        The fully qualified path and file name with extension.
+        """
+        return self._ensureSet('_longPathname', '__substg1.0_370D')
 
     @property
     def mimetype(self) -> Optional[str]:

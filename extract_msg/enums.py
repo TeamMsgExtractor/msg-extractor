@@ -110,6 +110,16 @@ class AppointmentStateFlag(enum.Enum):
 
 
 
+class AttachmentPermissionType(enum.Enum):
+    """
+    The permission type data associated with a web reference attachment.
+    """
+    NONE = 0
+    VIEW = 1
+    EDIT = 2
+
+
+
 class AttachmentType(enum.Enum):
     """
     The type represented by the attachment.

@@ -16,7 +16,8 @@ __all__ = [
     'CustomAttachmentHandler',
     'EmbeddedMsgAttachment',
     'SignedAttachment',
-    'UnsupportedAttachment'
+    'UnsupportedAttachment',
+    'WebAttachment',
 
     # Functions.
     'initStandardAttachment',
@@ -33,6 +34,7 @@ from .custom_att_handler import CustomAttachmentHandler, registerHandler
 from .emb_msg_att import EmbeddedMsgAttachment
 from .signed_att import SignedAttachment
 from .unsupported_att import UnsupportedAttachment
+from .web_att import WebAttachment
 
 
 import logging as _logging
@@ -104,8 +106,7 @@ def initStandardAttachment(msg : MSGFile, dir_) -> AttachmentBase:
                 return EmbeddedMsgAttachment(msg, dir_, propStore)
 
         if (propStore['37050003'].value & 0x7) == 0x7:
-            # TODO Handling for special attacment type 0x7.
-            raise NotImplementedError('Attachments of type afByWebReference are not currently supported.')
+            return WebAttachment(msg, dir_, propStore)
 
     except (NotImplementedError, UnrecognizedMSGTypeError) as e:
         if msg.errorBehavior & ErrorBehavior.ATTACH_NOT_IMPLEMENTED:
