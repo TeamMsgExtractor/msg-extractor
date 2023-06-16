@@ -6,7 +6,6 @@ __all__ = [
 ]
 
 
-import base64
 import struct
 
 from typing import Optional, TYPE_CHECKING
@@ -17,7 +16,7 @@ from ...enums import DVAspect
 
 
 if TYPE_CHECKING:
-    from ..attachment import Attachment
+    from ..attachment_base import AttachmentBase
 
 _ST_OLE = struct.Struct('<IIIII')
 _ST_MAILSTREAM = struct.Struct('<III')
@@ -29,7 +28,7 @@ class OutlookImageDIB(CustomAttachmentHandler):
     stored in a way special to Outlook.
     """
 
-    def __init__(self, attachment : Attachment):
+    def __init__(self, attachment : AttachmentBase):
         super().__init__(attachment)
         # First we need to get the mailstream.
         stream = attachment._getStream('__substg1.0_3701000D/\x03MailStream')
@@ -71,7 +70,7 @@ class OutlookImageDIB(CustomAttachmentHandler):
         self.__ytwips = int(round(self.__y / 1.7639))
 
     @classmethod
-    def isCorrectHandler(cls, attachment : Attachment) -> bool:
+    def isCorrectHandler(cls, attachment : AttachmentBase) -> bool:
         if attachment.clsid != '00000316-0000-0000-C000-000000000046':
             return False
 

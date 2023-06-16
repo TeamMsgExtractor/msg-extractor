@@ -12,7 +12,7 @@ from typing import Optional, TYPE_CHECKING
 
 
 if TYPE_CHECKING:
-    from ..attachment import Attachment
+    from ..attachment_base import AttachmentBase
 
 
 class CustomAttachmentHandler(abc.ABC):
@@ -21,13 +21,13 @@ class CustomAttachmentHandler(abc.ABC):
     special ways that are completely different from one another.
     """
 
-    def __init__(self, attachment : Attachment):
+    def __init__(self, attachment : AttachmentBase):
         super().__init__()
         self.__att = attachment
 
     @classmethod
     @abc.abstractmethod
-    def isCorrectHandler(cls, attachment : Attachment) -> bool:
+    def isCorrectHandler(cls, attachment : AttachmentBase) -> bool:
         """
         Checks if this is the correct handler for the attachment.
         """
@@ -59,7 +59,7 @@ class CustomAttachmentHandler(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def name(self) -> str:
+    def name(self) -> Optional[str]:
         """
         Returns the name to be used when saving the attachment.
         """

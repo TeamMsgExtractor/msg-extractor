@@ -16,6 +16,8 @@
 * Removed unusued function `getFullClassName`.
 * Fixes to the HTML body when saving as HTML will no longer require the `preparedHtml`/`--prepared-html` option.
 * Removed the exception `BadHtmlError` since it is no longer used.
+* Entirely reoganized the way attachments are initialized, including the class that will be used in various circumstances. Embedded MSG files, custom attachments, and web attachments will all use dedicated classes that are subclasses of AttachmentBase.
+    * With this change, the way to specify a new Attachment class is to override the function used when creating attachments. This can be done by passing `attachmentInit = myFunction` as an option to `openMsg`. This function MUST return an instance of AttachmentBase.
 
 **v0.41.5**
 * Fixed an issue from version `0.41.3` where the header being present but missing the `From` field would cause an exception.

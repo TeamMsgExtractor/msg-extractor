@@ -31,10 +31,10 @@ class MessageSignedBase(MessageBase):
         :param prefix: used for extracting embeded msg files
             inside the main one. Do not set manually unless
             you know what you are doing.
-        :param attachmentClass: optional, the class the Message object
-            will use for attachments. You probably should
-            not change this value unless you know what you
-            are doing.
+        :param initAttachment: Optional, the method used when creating an
+            attachment for an MSG file. MUST be a function that takes 2
+            arguments (the MSGFile instance and the directory in the MSG file
+            where the attachment is) and returns an instance of AttachmentBase.
         :param signedAttachmentClass: optional, the class the object will use
             for signed attachments.
         :param filename: optional, the filename to be used by default when
@@ -51,7 +51,6 @@ class MessageSignedBase(MessageBase):
         :param recipientSeparator: Optional, Separator string to use between
             recipients.
         """
-        self.__recipientSeparator = kwargs.get('recipientSeparator', ';')
         self.__signedAttachmentClass = kwargs.get('signedAttachmentClass', SignedAttachment)
         super().__init__(path, **kwargs)
         # Initialize properties in the order that is least likely to cause bugs.

@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 __all__ = [
     'MSGFile',
 ]
@@ -15,16 +18,16 @@ import zipfile
 
 import olefile
 
-from typing import List, Optional, Set, Tuple, Union
+from typing import Any, Callable, List, Optional, Set, Tuple, Union
 
 from .. import constants
-from ..attachments.attachment import Attachment, BrokenAttachment, UnsupportedAttachment
+from ..attachments import AttachmentBase, initStandardAttachment
 from ..enums import (
         AttachErrorBehavior, ErrorBehavior, Importance, Priority,
         PropertiesType, Sensitivity, SideEffect
     )
 from ..exceptions import (
-        InvalidFileFormatError, StandardViolationError, UnrecognizedMSGTypeError
+        InvalidFileFormatError, StandardViolationError
     )
 from ..properties.named import Named, NamedProperties
 from ..properties.prop import FixedLengthProp
@@ -52,9 +55,10 @@ class MSGFile:
             one. Do not set manually unless you know what you are doing.
         :param parentMsg: Used for synchronizing named properties instances. Do
             not set this unless you know what you are doing.
-        :param attachmentClass: Optional, the class the MSGFile object will use
-            for attachments. You probably should not change this value unless
-            you know what you are doing.
+        :param initAttachment: Optional, the method used when creating an
+            attachment for an MSG file. MUST be a function that takes 2
+            arguments (the MSGFile instance and the directory in the MSG file
+            where the attachment is) and returns an instance of AttachmentBase.
         :param delayAttachments: Optional, delays the initialization of
             attachments until the user attempts to retrieve them. Allows MSG
             files with bad attachments to be initialized so the other data can
@@ -96,7 +100,7 @@ class MSGFile:
 
         # WARNING DO NOT MANUALLY MODIFY PREFIX. Let the program set it.
         self.__path = path
-        self.__attachmentClass = kwargs.get('attachmentClass', Attachment)
+        self.__initAttachmentFunc = kwargs.get('initAttachment', initStandardAttachment)
         self.__attachmentsDelayed = kwargs.get('delayAttachments', False)
         self.__attachmentsReady = False
         self.__errorBehavior = ErrorBehavior(kwargs.get('errorBehavior', ErrorBehavior.THROW))
@@ -186,11 +190,11 @@ class MSGFile:
         if not self.__attachmentsDelayed:
             self.attachments
 
-    def __enter__(self):
+    def __enter__(self) -> MSGFile:
         self.__ole.__enter__()
         return self
 
-    def __exit__(self, *args, **kwargs):
+    def __exit__(self, *_) -> None:
         self.close()
 
     def _ensureSet(self, variable : str, streamID, stringStream : bool = True, **kwargs):
@@ -657,7 +661,7 @@ class MSGFile:
             return self.__bStringsUnicode
 
     @property
-    def attachments(self) -> List:
+    def attachments(self) -> List[AttachmentBase]:
         """
         Returns a list of all attachments.
         """
@@ -674,38 +678,11 @@ class MSGFile:
             self._attachments = []
 
             for attachmentDir in attachmentDirs:
-                try:
-                    self._attachments.append(self.attachmentClass(self, attachmentDir))
-                except (NotImplementedError, UnrecognizedMSGTypeError) as e:
-                    if self.errorBehavior & ErrorBehavior.ATTACH_NOT_IMPLEMENTED:
-                        logger.exception(f'Error processing attachment at {attachmentDir}')
-                        self._attachments.append(UnsupportedAttachment(self, attachmentDir))
-                    else:
-                        raise
-                except StandardViolationError as e:
-                    if self.errorBehavior & ErrorBehavior.STANDARDS_VIOLATION:
-                        logger.exception(f'Unresolvable standards violation in  {attachmentDir}')
-                        self._attachments.append(BrokenAttachment(self, attachmentDir))
-                    else:
-                        raise
-                except Exception as e:
-                    if self.errorBehavior & ErrorBehavior.ATTACH_BROKEN:
-                        logger.exception(f'Error processing attachment at {attachmentDir}')
-                        self._attachments.append(BrokenAttachment(self, attachmentDir))
-                    else:
-                        raise
+                self._attachments.append(self.initAttachmentFunc(self, attachmentDir))
 
             self.__attachmentsReady = True
 
             return self._attachments
-
-    @property
-    def attachmentClass(self):
-        """
-        Returns the Attachment class being used, should you need to use it
-        externally for whatever reason.
-        """
-        return self.__attachmentClass
 
     @property
     def attachmentsDelayed(self) -> bool:
@@ -789,9 +766,17 @@ class MSGFile:
         return {
             Importance.HIGH: 'High',
             Importance.MEDIUM: None,
-            Importance.LOW: 'low',
+            Importance.LOW: 'Low',
             None: None,
         }[self.importance]
+
+    @property
+    def initAttachmentFunc(self) -> Callable[[MSGFile, Any], AttachmentBase]:
+        """
+        Returns the method for initializing attachments being used, should you
+        need to use it externally for whatever reason.
+        """
+        return self.__initAttachmentFunc
 
     @property
     def kwargs(self) -> dict:

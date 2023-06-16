@@ -59,11 +59,11 @@ from .outlook_image_dib import OutlookImageDIB
 
 
 if TYPE_CHECKING:
-    from ..attachment import Attachment
+    from ..attachment_base import AttachmentBase
 
 
 # Function designed to route to the correct handler.
-def getHandler(attachment : Attachment) -> CustomAttachmentHandler:
+def getHandler(attachment : AttachmentBase) -> CustomAttachmentHandler:
     """
     Takes an attachment and uses it to find the correct handler. Returns an
     instance created using the specified attachment.

@@ -19,11 +19,9 @@ from typing import Optional, TYPE_CHECKING, Union
 
 from .. import constants
 from .attachment_base import AttachmentBase
-from .custom_attachments import CustomAttachmentHandler, getHandler
 from ..enums import AttachmentType
-from ..exceptions import StandardViolationError
-from ..open_msg import openMsg
 from ..utils import createZipOpen, inputToString, prepareFilename
+from ..properties import PropertiesStore
 
 
 # Allow for nice type checking.
@@ -36,68 +34,19 @@ logger.addHandler(logging.NullHandler())
 
 class Attachment(AttachmentBase):
     """
-    Stores the attachment data of a Message instance.
-    Should the attachment be an embeded message, the
-    class used to create it will be the same as the
-    Message class used to create the attachment.
+    A standard data attachment of an MSG file.
     """
 
-    def __init__(self, msg, dir_):
+    def __init__(self, msg : MSGFile, dir_, propStore : PropertiesStore):
         """
-        :param msg: the Message instance that the attachment belongs to.
-        :param dir_: the directory inside the msg file where the attachment is
+        :param msg: The MSGFile instance that the attachment belongs to.
+        :param dir_: The directory inside the MSG file where the attachment is
             located.
+        :param propStore: The PropertiesStore instance for the attachment to
+            use.
         """
-        super().__init__(msg, dir_)
-        self.__customHandler = None
-
-        if '37050003' not in self.props:
-            from ..properties.prop import createProp
-
-            logger.warning(f'Attachment method property not found on attachment {dir_}. Code will attempt to guess the type.')
-            logger.log(5, self.props)
-
-            # Because this condition is actually kind of a violation of the
-            # standard, we are just going to do this in a dumb way. Basically we
-            # are going to try to set the attach method *manually* just so I
-            # don't have to go and modify the following code.
-            if self.exists('__substg1.0_37010102'):
-                # Set it as data and call it a day.
-                propData = b'\x03\x00\x057\x07\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00'
-            elif self.exists('__substg1.0_3701000D'):
-                # If it is a folder and we have properties, call it an MSG file.
-                if self.exists('__substg1.0_3701000D/__properties_version1.0'):
-                    propData = b'\x03\x00\x057\x07\x00\x00\x00\x05\x00\x00\x00\x00\x00\x00\x00'
-                else:
-                    # Call if custom attachment data.
-                    propData = b'\x03\x00\x057\x07\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00'
-            else:
-                # Can't autodetect it, so throw an error.
-                raise StandardViolationError(f'Attachment method missing on attachment {dir_}, and it could not be determined automatically.')
-
-            self.props._propDict['37050003'] = createProp(propData)
-
-        # Get attachment data.
-        if self.exists('__substg1.0_37010102'):
-            self.__type = AttachmentType.DATA
-            self.__data = self._getStream('__substg1.0_37010102')
-        elif self.exists('__substg1.0_3701000D'):
-            if (self.props['37050003'].value & 0x7) != 0x5:
-                self.__type = AttachmentType.CUSTOM
-                # Check if we have any custom handlers. If not, it will raise
-                # an error automatically.
-                self.__customHandler = getHandler(self)
-                self.__data = self.__customHandler.data
-            else:
-                self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
-                self.__type = AttachmentType.MSG
-                self.__data = openMsg(self.msg.path, prefix = self.__prefix, parentMsg = self.msg, treePath = self.treePath, **self.msg.kwargs)
-        elif (self.props['37050003'].value & 0x7) == 0x7:
-            # TODO Handling for special attacment type 0x7.
-            self.__type = AttachmentType.WEB
-            raise NotImplementedError('Attachments of type afByWebReference are not currently supported.')
-        else:
-            raise TypeError('Unknown attachment type.')
+        super().__init__(msg, dir_, propStore)
+        self.__data = self._getStream('__substg1.0_37010102')
 
     def getFilename(self, **kwargs) -> str:
         """
@@ -123,9 +72,6 @@ class Attachment(AttachmentBase):
             # Check if user wants to save the file under the Content-ID.
             if kwargs.get('contentId', False):
                 filename = self.cid
-            # If we are using a custom handler, prefer it's name.
-            if self.type is AttachmentType.CUSTOM:
-                filename = self.__customHandler.name
             # If we are here, try to get the filename however else we can.
             if not filename:
                 filename = self.name
@@ -175,15 +121,11 @@ class Attachment(AttachmentBase):
         :param skipEmbedded: If True, skips saving this attachment if it is an
             embedded MSG file.
         """
-        # First check if we are skipping embedded messages and stop
-        # *immediately* if we are.
-        if self.type is AttachmentType.MSG and kwargs.get('skipEmbedded'):
-            return None
-
         # Get the filename to use.
         filename = self.getFilename(**kwargs)
 
-        # Someone managed to have a null character here, so let's get rid of that
+        # Someone managed to have a null character here, so let's get rid of
+        # that
         filename = prepareFilename(inputToString(filename, self.msg.stringEncoding))
 
         # Get the maximum name length.
@@ -220,73 +162,45 @@ class Attachment(AttachmentBase):
 
         fullFilename = customPath / filename
 
-        if isinstance(self.__data, bytes):
-            if _zip:
+        if _zip:
+            name, ext = os.path.splitext(filename)
+            nameList = _zip.namelist()
+            if str(fullFilename).replace('\\', '/') in nameList:
+                for i in range(2, 100):
+                    testName = customPath / f'{name} ({i}){ext}'
+                    if str(testName).replace('\\', '/') not in nameList:
+                        fullFilename = testName
+                        break
+                else:
+                    # If we couldn't find one that didn't exist.
+                    raise FileExistsError(f'Could not create the specified file because it already exists ("{fullFilename}").')
+        else:
+            if fullFilename.exists():
+                # Try to split the filename into a name and extention.
                 name, ext = os.path.splitext(filename)
-                nameList = _zip.namelist()
-                if str(fullFilename).replace('\\', '/') in nameList:
-                    for i in range(2, 100):
-                        testName = customPath / f'{name} ({i}){ext}'
-                        if str(testName).replace('\\', '/') not in nameList:
-                            fullFilename = testName
-                            break
-                    else:
-                        # If we couldn't find one that didn't exist.
-                        raise FileExistsError(f'Could not create the specified file because it already exists ("{fullFilename}").')
-            else:
-                if fullFilename.exists():
-                    # Try to split the filename into a name and extention.
-                    name, ext = os.path.splitext(filename)
-                    # Try to add a number to it so that we can save without overwriting.
-                    for i in range(2, 100):
-                        testName = customPath / f'{name} ({i}){ext}'
-                        if not testName.exists():
-                            fullFilename = testName
-                            break
-                    else:
-                        # If we couldn't find one that didn't exist.
-                        raise FileExistsError(f'Could not create the specified file because it already exists ("{fullFilename}").')
+                # Try to add a number to it so that we can save without overwriting.
+                for i in range(2, 100):
+                    testName = customPath / f'{name} ({i}){ext}'
+                    if not testName.exists():
+                        fullFilename = testName
+                        break
+                else:
+                    # If we couldn't find one that didn't exist.
+                    raise FileExistsError(f'Could not create the specified file because it already exists ("{fullFilename}").')
 
-            with _open(str(fullFilename), mode) as f:
-                f.write(self.__data)
+        with _open(str(fullFilename), mode) as f:
+            f.write(self.__data)
 
-            # Close the ZipFile if this function created it.
-            if _zip and createdZip:
-                _zip.close()
+        # Close the ZipFile if this function created it.
+        if _zip and createdZip:
+            _zip.close()
 
-            return str(fullFilename)
-        elif self.type is AttachmentType.MSG:
-            if kwargs.get('extractEmbedded', False):
-                with _open(str(fullFilename), mode) as f:
-                    self.data.export(f)
-            else:
-                self.saveEmbededMessage(**kwargs)
-
-            # Close the ZipFile if this function created it.
-            if _zip and createdZip:
-                _zip.close()
-
-            return self.__data
-
-    def saveEmbededMessage(self, **kwargs) -> None:
-        """
-        Seperate function from save to allow it to easily be overridden by a
-        subclass.
-        """
-        self.data.save(**kwargs)
+        return str(fullFilename)
 
     @property
-    def customHandler(self) -> Optional[CustomAttachmentHandler]:
+    def data(self) -> bytes:
         """
-        The instance of the custom handler associated with this attachment, if
-        it has one.
-        """
-        return self.__customHandler
-
-    @property
-    def data(self) -> Optional[Union[bytes, MSGFile]]:
-        """
-        Returns the attachment data.
+        The bytes making up the attachment data.
         """
         return self.__data
 
@@ -306,41 +220,4 @@ class Attachment(AttachmentBase):
         """
         Returns the (internally used) type of the data.
         """
-        return self.__type
-
-
-
-class BrokenAttachment(AttachmentBase):
-    """
-    An attachment that has suffered a fatal error. Will not generate from a
-    NotImplementedError exception.
-    """
-
-    @property
-    def type(self) -> AttachmentType:
-        """
-        Returns the (internally used) type of the data.
-        """
-        return AttachmentType.BROKEN
-
-class UnsupportedAttachment(AttachmentBase):
-    """
-    An attachment whose type is not currently supported.
-    """
-
-    def save(self, **kwargs) -> None:
-        """
-        Raises a NotImplementedError unless :param skipNotImplemented: is set to
-        True. If it is, returns None to signify the attachment was skipped. This
-        allows for the easy implementation of the option to skip this type of
-        attachment.
-        """
-        if not kwargs.get('skipNotImplemented', False):
-            raise NotImplementedError('Unsupported attachments cannot be saved.')
-
-    @property
-    def type(self) -> AttachmentType:
-        """
-        Returns the (internally used) type of the data.
-        """
-        return AttachmentType.UNSUPPORTED
+        return AttachmentType.DATA

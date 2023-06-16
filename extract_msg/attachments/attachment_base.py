@@ -6,6 +6,7 @@ __all__ = [
 ]
 
 
+import abc
 import datetime
 import logging
 import weakref
@@ -13,8 +14,7 @@ import weakref
 from functools import cached_property, partial
 from typing import List, Optional, Tuple, TYPE_CHECKING
 
-from ..enums import AttachmentType, ErrorBehavior, PropertiesType
-from ..exceptions import StandardViolationError
+from ..enums import AttachmentType
 from ..properties.named import NamedProperties
 from ..properties.prop import FixedLengthProp
 from ..properties.properties_store import PropertiesStore
@@ -29,27 +29,21 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-class AttachmentBase:
+class AttachmentBase(abc.ABC):
     """
-    Stores the attachment data of a Message instance.
-    Should the attachment be an embeded message, the
-    class used to create it will be the same as the
-    Message class used to create the attachment.
+    The base class for all Attachments used by the module, if not overriden.
     """
 
-    def __init__(self, msg, dir_):
+    def __init__(self, msg : MSGFile, dir_, propStore : PropertiesStore):
         """
         :param msg: the Message instance that the attachment belongs to.
         :param dir_: the directory inside the msg file where the attachment is located.
+        :param propStore: The PropertiesStore instance for the attachment. If
+            not provided, it will be found automatically.
         """
         self.__msg = makeWeakRef(msg)
         self.__dir = dir_
-        if not self.exists('__properties_version1.0'):
-            if (msg.errorBehavior & ErrorBehavior.STANDARDS_VIOLATION):
-                logger.error('Attachments MUST have a property stream.')
-            else:
-                raise StandardViolationError('Attachments MUST have a property stream.') from None
-        self.__props = PropertiesStore(self._getStream('__properties_version1.0'), PropertiesType.ATTACHMENT)
+        self.__props = propStore
         self.__namedProperties = NamedProperties(msg.named, self)
         self.__treePath = msg.treePath + [makeWeakRef(self)]
 
@@ -304,6 +298,51 @@ class AttachmentBase:
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
         return msg.existsTypedProperty(id, self.__dir, _type, True, self.__props)
 
+    @abc.abstractmethod
+    def getFilename(self, **kwargs) -> str:
+        """
+        Returns the filename to use for the attachment.
+
+        :param contentId:      Use the contentId, if available.
+        :param customFilename: A custom name to use for the file.
+
+        If the filename starts with "UnknownFilename" then there is no guarentee
+        that the files will have exactly the same filename.
+        """
+
+    @abc.abstractmethod
+    def save(self, **kwargs):
+        """
+        Saves the attachment data.
+
+        The name of the file is determined by several factors. The first
+        thing that is checked is if you have provided :param customFilename:
+        to this function. If you have, that is the name that will be used.
+        If no custom name has been provided and :param contentId: is True,
+        the file will be saved using the content ID of the attachment. If
+        it is not found or :param contentId: is False, the long filename
+        will be used. If the long filename is not found, the short one will
+        be used. If after all of this a usable filename has not been found, a
+        random one will be used (accessible from `Attachment.randomFilename`).
+        After the name to use has been determined, it will then be shortened to
+        make sure that it is not more than the value of :param maxNameLength:.
+
+        To change the directory that the attachment is saved to, set the value
+        of :param customPath: when calling this function. The default save
+        directory is the working directory.
+
+        If you want to save the contents into a ZipFile or similar object,
+        either pass a path to where you want to create one or pass an instance
+        to :param zip:. If :param zip: is an instance, :param customPath: will
+        refer to a location inside the zip file.
+
+        :param extractEmbedded: If True, causes the attachment, should it be an
+            embedded MSG file, to save as a .msg file instead of calling it's
+            save function.
+        :param skipEmbedded: If True, skips saving this attachment if it is an
+            embedded MSG file.
+        """
+
     @property
     def attachmentEncoding(self) -> Optional[bytes]:
         """
@@ -361,6 +400,13 @@ class AttachmentBase:
             clsid = msg._getOleEntry(dataStream).clsid or clsid
 
         return clsid
+
+    @property
+    @abc.abstractmethod
+    def data(self) -> Optional[object]:
+        """
+        The attachment data, if any. Returns None if there is no data to save.
+        """
 
     @property
     def dir(self) -> str:
@@ -491,8 +537,8 @@ class AttachmentBase:
         return self.__treePath
 
     @property
+    @abc.abstractmethod
     def type(self) -> AttachmentType:
         """
         Returns the (internally used) type of the data.
         """
-        return AttachmentType.UNKNOWN

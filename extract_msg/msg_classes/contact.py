@@ -34,9 +34,10 @@ class Contact(MessageBase):
             one. Do not set manually unless you know what you are doing.
         :param parentMsg: Used for synchronizing named properties instances. Do
             not set this unless you know what you are doing.
-        :param attachmentClass: optional, the class the MSGFile object will use
-            for attachments. You probably should not change this value unless
-            you know what you are doing.
+        :param initAttachment: Optional, the method used when creating an
+            attachment for an MSG file. MUST be a function that takes 2
+            arguments (the MSGFile instance and the directory in the MSG file
+            where the attachment is) and returns an instance of AttachmentBase.
         :param delayAttachments: optional, delays the initialization of
             attachments until the user attempts to retrieve them. Allows MSG
             files with bad attachments to be initialized so the other data can
