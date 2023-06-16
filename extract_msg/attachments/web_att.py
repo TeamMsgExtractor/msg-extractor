@@ -20,8 +20,16 @@ class WebAttachment(AttachmentBase):
     def getFilename(self) -> str:
         raise NotImplementedError('Cannot get the filename of a web attachment.')
 
-    def save(self, **_) -> None:
-        raise NotImplementedError('Cannot save a web attachment.')
+    def save(self, **kwargs) -> None:
+        """
+        Raises a NotImplementedError unless :param skipNotImplemented: is set to
+        True. If it is, returns None to signify the attachment was skipped. This
+        allows for the easy implementation of the option to skip this type of
+        attachment.
+        """
+        if not kwargs.get('skipNotImplemented', False):
+            raise NotImplementedError('Web attachments cannot be saved.')
+
 
     @property
     def data(self) -> None:
