@@ -129,6 +129,10 @@ class OutlookImageDIB(CustomAttachmentHandler):
             name = f'attachment {int(self.attachment.dir[-8:], 16)}'
         return name + '.bmp'
 
+    @property
+    def obj(self) -> bytes:
+        return self.data
+
 
 
 registerHandler(OutlookImageDIB)

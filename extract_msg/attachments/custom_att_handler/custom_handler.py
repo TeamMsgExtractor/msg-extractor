@@ -53,8 +53,7 @@ class CustomAttachmentHandler(abc.ABC):
         """
         Gets the data for the attachment.
 
-        If an attachment should do nothing when saving, return None from this
-        property.
+        If an attachment should do nothing when saving, returns None.
         """
 
     @property
@@ -62,4 +61,15 @@ class CustomAttachmentHandler(abc.ABC):
     def name(self) -> Optional[str]:
         """
         Returns the name to be used when saving the attachment.
+        """
+
+    @property
+    @abc.abstractmethod
+    def obj(self) -> Optional[object]:
+        """
+        Returns an object representing the data. May return the same as
+        :property data:.
+
+        If there is no object to represent the custom attachment, including
+        bytes, returns None.
         """
