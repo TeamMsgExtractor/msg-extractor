@@ -1025,9 +1025,9 @@ def unwrapMsg(msg : MSGFile) -> Dict:
         for att in currentItem.attachments:
             # If it is a regular attachment, add it to the list. Otherwise, add
             # it to be processed
-            if att.type in (AttachmentType.DATA, AttachmentType.SIGNED):
+            if att.type not in (AttachmentType.MSG, AttachmentType.SIGNED_EMBEDDED):
                 attachments.append(att)
-            elif att.type is AttachmentType.MSG:
+            elif:
                 # Here we do two things. The first is we store it to the output
                 # so we can return it. The second is we add it to the processing
                 # list. The reason this is two steps is because we need to be
