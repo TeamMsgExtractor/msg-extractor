@@ -65,13 +65,13 @@ def main() -> None:
     }
 
     openKwargs = {
-        'ignoreRtfDeErrors': args.ignoreRtfDeErrors,
+        'errorBehavior': ErrorBehavior.RTFDE if args.ignoreRtfDeErrors else ErrorBehavior.THROW,
     }
 
     # If we are skipping the NotImplementedError attachments, we need to
     # suppress the error.
     if args.skipNotImplemented:
-        openKwargs['errorBehavior'] = ErrorBehavior.ATTACH_NOT_IMPLEMENTED
+        openKwargs['errorBehavior'] |= ErrorBehavior.ATTACH_NOT_IMPLEMENTED
 
     def strSanitize(inp):
         """

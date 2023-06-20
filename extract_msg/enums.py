@@ -519,14 +519,17 @@ class ErrorBehavior(enum.IntFlag):
     ATTACH_BROKEN: Silence the exception for broken attachments.
     ATTACH_SUPPRESS_ALL: Silence the exception for NotImplementedError and for broken
         attachments.
-    STANDARDS_VIOLATION
+    STANDARDS_VIOLATION: Silences StandardViolationError where acceptable.
+    RTFDE: Silences errors from RTFDE.
+    SUPPRESS_ALL: Silences all of the above.
     """
     THROW = 0b000
     ATTACH_NOT_IMPLEMENTED = 0b001
     ATTACH_BROKEN = 0b010
     ATTACH_SUPPRESS_ALL = 0b011
     STANDARDS_VIOLATION = 0b100
-    SUPPRESS_ALL = 0b111
+    RTFDE = 0b1000
+    SUPPRESS_ALL = 0b1111
 
 
 

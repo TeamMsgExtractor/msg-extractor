@@ -30,7 +30,7 @@ from typing import Callable, List, Optional, Union
 from .. import constants
 from .._rtf.create_doc import createDocument
 from .._rtf.inject_rtf import injectStartRTF
-from ..enums import BodyTypes, DeencapType, RecipientType
+from ..enums import BodyTypes, DeencapType, ErrorBehavior, RecipientType
 from ..exceptions import (
         DataNotFoundError, DeencapMalformedData, DeencapNotEncapsulated,
         IncompatibleOptionsError, WKError
@@ -81,8 +81,6 @@ class MessageBase(MSGFile):
             event of an error when parsing the attachments.
         :param recipientSeparator: Optional, separator string to use between
             recipients.
-        :param ignoreRtfDeErrors: Optional, specifies that any errors that occur
-            from the usage of RTFDE should be ignored (default: False).
         :param deencapsulationFunc: Optional, if specified must be a callable
             that will override the way that HTML/text is deencapsulated from the
             RTF body. This function must take exactly 2 arguments, the first
@@ -95,9 +93,17 @@ class MessageBase(MSGFile):
             internally or they will not be caught. The original deencapsulation
             method will not run if this is set.
         """
+        if 'ignoreRtfDeErrors' in kwargs is not None:
+            import warnings
+            warnings.warn(':param ignoreRtfDeErrors: is deprecated. Use :param ErrorBehavior: instead.', DeprecationWarning)
+
+            if kwargs.get('ignoreRtfDeErrors', False):
+                errorBehavior = kwargs.get('errorBehavior', ErrorBehavior.THROW)
+                errorBehavior |= ErrorBehavior.RTFDE
+                kwargs['errorBehavior'] = errorBehavior
+
         super().__init__(path, **kwargs)
         self.__recipientSeparator = kwargs.get('recipientSeparator', ';')
-        self.__ignoreRtfDeErrors = kwargs.get('ignoreRtfDeErrors', False)
         self.__deencap = kwargs.get('deencapsulationFunc')
         # Initialize properties in the order that is least likely to cause bugs.
         # TODO have each function check for initialization of needed data so
@@ -998,7 +1004,7 @@ class MessageBase(MSGFile):
                 except Exception:
                     # If we are just ignoring the errors, log it then set to
                     # None. Otherwise, continue the exception.
-                    if not self.__ignoreRtfDeErrors:
+                    if not (self.errorBehavior & ErrorBehavior.RTFDE):
                         raise
                     logger.exception('Unhandled error happened while using RTFDE. You have choosen to ignore these errors.')
                     self._deencapsultor = None
