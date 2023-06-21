@@ -4,6 +4,7 @@
 * Changed internal behavior of `MSGFile.attachments`. This should not cause any noticeable changes to the output.
 * Refactored code significantly to make it more organized.
 * Changed the exports from the main module to only include an important subset of the module. For other items, you'll have to import the submodule that it falls under to access it. Submodules export all important pieces, so it will be easier to find.
+    * This includes having many modules be under entirely new paths. Some of these changes have been done with no deprecation, something I generally try to avoid. This is happening at the same time as the public api is significantly changing, which makes it more acceptable.
 * Fixed `__main__` using the wrong enum for error behavior.
 * Fixed `Named.get` being severely out of date (it's not used anywhere by the module which is why it wasn't noticed).
 * Fixed `Named.__getitem__` being entirely case-sensitive.
@@ -20,6 +21,8 @@
     * With this change, the way to specify a new Attachment class is to override the function used when creating attachments. This can be done by passing `attachmentInit = myFunction` as an option to `openMsg`. This function MUST return an instance of AttachmentBase.
 * Added first implementation of web attachments. Saving is not currently possible, but basic relevent property access is now possible. Saving will not be stopped by this attachment if `skipNotImplemented = True` is passed to the save function.
 * Changed the option to suppress RTFDE errors to fall under the `ErrorBehavior` enum. Usage of the original option will be allowable, but is being marked as deprecated. However, it is still a dedicated option from the command line.
+* Removed some constants that are not used by the module.
+* Added the `encoding` submodule for encoding tasks, including proper support for Microsoft's implementation of cp950. This gets added to the codecs list as windows-950.
 
 **v0.41.5**
 * Fixed an issue from version `0.41.3` where the header being present but missing the `From` field would cause an exception.

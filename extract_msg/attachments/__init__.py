@@ -94,21 +94,30 @@ def initStandardAttachment(msg : MSGFile, dir_) -> AttachmentBase:
 
                 propStore._propDict['37050003'] = createProp(propData)
 
-        # If it is a plain data attachment, create a standard attachment and
-        # return it.
-        if msg.exists([dir_, '__substg1.0_37010102']):
-            return Attachment(msg, dir_, propStore)
+        attMethod = propStore['3705003'] & 7
 
+        if msg.exists([dir_, '__substg1.0_37010102']):
+                return Attachment(msg, dir_, propStore)
         if msg.exists([dir_, '__substg1.0_3701000D']):
-            if (propStore['37050003'].value & 0x7) != 0x5:
+            if attMethod != 5:
                 return CustomAttachment(msg, dir_, propStore)
             else:
                 return EmbeddedMsgAttachment(msg, dir_, propStore)
 
-        if (propStore['37050003'].value & 0x7) == 0x7:
+        if attMethod == 7:
             return WebAttachment(msg, dir_, propStore)
 
-        raise NotImplementedError('Could not determine attachment type!')
+        # Error handling.
+        if attMethod == 1:
+            raise StandardViolationError('Attachments of type data MUST have a data stream.')
+        if attMethod == 0:
+            raise NotImplementedError('extract-msg does not support attachments of type afNone.')
+        if attMethod == 2:
+            raise NotImplementedError('extract-msg does not support attachments of type afByReference. Contact the developer for support.')
+        if attMethod == 4:
+            raise NotImplementedError('extract-msg does not support attachments of type afByReferenceOnly. Contact the developer for support.')
+
+        raise NotImplementedError(f'Could not determine attachment type ({attMethod})!')
 
     except (NotImplementedError, UnrecognizedMSGTypeError) as e:
         if msg.errorBehavior & ErrorBehavior.ATTACH_NOT_IMPLEMENTED:
@@ -125,6 +134,6 @@ def initStandardAttachment(msg : MSGFile, dir_) -> AttachmentBase:
     except Exception as e:
         if msg.errorBehavior & ErrorBehavior.ATTACH_BROKEN:
             _logger.exception(f'Error processing attachment at {dir_}')
-            return BrokenAttachment(msg, dir_, propStore)
+            return BrokenAttachment(msg, dir_)
         else:
             raise

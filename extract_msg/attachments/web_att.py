@@ -43,21 +43,21 @@ class WebAttachment(AttachmentBase):
         """
         The permission type data associated with a web reference attachment.
         """
-        return self._ensureSetNamed('_oPermissionType', 'AttachmentOriginalPermissionType', constants.PSETID_ATTACHMENT, overrideClass = AttachmentPermissionType, preserveNone = True)
+        return self._ensureSetNamed('_oPermissionType', 'AttachmentOriginalPermissionType', constants.ps.PSETID_ATTACHMENT, overrideClass = AttachmentPermissionType, preserveNone = True)
 
     @property
     def permissionType(self) -> Optional[AttachmentPermissionType]:
         """
         The permission type data associated with a web reference attachment.
         """
-        return self._ensureSetNamed('_permissionType', 'AttachmentPermissionType', constants.PSETID_ATTACHMENT, overrideClass = AttachmentPermissionType, preserveNone = True)
+        return self._ensureSetNamed('_permissionType', 'AttachmentPermissionType', constants.ps.PSETID_ATTACHMENT, overrideClass = AttachmentPermissionType, preserveNone = True)
 
     @property
     def providerName(self) -> Optional[str]:
         """
         The type of web service manipulating the attachment.
         """
-        return self._ensureSetNamed('_permissionType', 'AttachmentProviderType', constants.PSETID_ATTACHMENT)
+        return self._ensureSetNamed('_permissionType', 'AttachmentProviderType', constants.ps.PSETID_ATTACHMENT)
 
     @property
     def type(self) -> AttachmentType:

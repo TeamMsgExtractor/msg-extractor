@@ -555,7 +555,7 @@ class MessageBase(MSGFile):
             return bodyMarker.group() + self.htmlInjectableHeader.encode('utf-8')
 
         # Use the previously defined function to inject the HTML header.
-        return constants.RE_HTML_BODY_START.sub(replace, body, 1)
+        return constants.re.HTML_BODY_START.sub(replace, body, 1)
 
     def injectRtfHeader(self) -> bytes:
         """
@@ -584,7 +584,7 @@ class MessageBase(MSGFile):
         # This first method only applies to documents with encapsulated HTML
         # that is formatted in a nice way.
         if isEncapsulatedRtf(self.rtfBody):
-            data = constants.RE_RTF_ENC_BODY_START.sub(replace, self.rtfBody, 1)
+            data = constants.re.RTF_ENC_BODY_START.sub(replace, self.rtfBody, 1)
             if data != self.rtfBody:
                 logger.debug('Successfully injected RTF header using encapsulation method.')
                 return data
@@ -734,7 +734,7 @@ class MessageBase(MSGFile):
         if customFilename:
             # First we need to validate it. If there are invalid characters,
             # this will detect it.
-            if constants.RE_INVALID_FILENAME_CHARACTERS.search(customFilename):
+            if constants.re.INVALID_FILENAME_CHARACTERS.search(customFilename):
                 raise ValueError('Invalid character found in customFilename. Must not contain any of the following characters: \\/:*?"<>|')
             # Quick fix to remove spaces from the end of the filename, if any
             # are there.
@@ -983,7 +983,7 @@ class MessageBase(MSGFile):
                         # then log if we removed any of them before trying this.
                         logger.warning(f'RTFDE failed to decode rtfBody for message with subject "{self.subject}". Attempting to cut out unnecessary data and override decoding.')
 
-                        match = constants.RE_BIN.search(body)
+                        match = constants.re.BIN.search(body)
                         # Because we are going to be actively removing things,
                         # we want to search the entire thing over again.
                         while match:
@@ -991,7 +991,7 @@ class MessageBase(MSGFile):
                             length = int(match.group(1))
                             # Extract the entire binary section and replace it.
                             body = body.replace(body[match.start():match.end() + length], b'', 1)
-                            match = constants.RE_BIN.search(body)
+                            match = constants.re.BIN.search(body)
 
                         self._deencapsultor = RTFDE.DeEncapsulator(body.decode(chardet.detect(body)['encoding']))
                     self._deencapsultor.deencapsulate()

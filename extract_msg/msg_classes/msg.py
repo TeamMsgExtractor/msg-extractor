@@ -24,6 +24,7 @@ from .. import constants
 from ..attachments import (
         AttachmentBase, initStandardAttachment, SignedAttachment
     )
+from ..encoding import lookupCodePage
 from ..enums import (
         AttachErrorBehavior, ErrorBehavior, Importance, Priority,
         PropertiesType, Sensitivity, SideEffect
@@ -35,9 +36,9 @@ from ..properties.named import Named, NamedProperties
 from ..properties.prop import FixedLengthProp
 from ..properties.properties_store import PropertiesStore
 from ..utils import  (
-        divide, getEncodingName, hasLen, inputToMsgPath, inputToString,
-        makeWeakRef, msgPathToString, parseType, properHex, verifyPropertyId,
-        verifyType, windowsUnicode
+        divide, hasLen, inputToMsgPath, inputToString, makeWeakRef,
+        msgPathToString, parseType, properHex, verifyPropertyId, verifyType,
+        windowsUnicode
     )
 
 
@@ -705,7 +706,7 @@ class MSGFile:
         Indicates whether the contents of this message are regarded as
         classified information.
         """
-        return self._ensureSetNamed('_classified', '85B5', constants.PSETID_COMMON, overrideClass = bool, preserveNone = False)
+        return self._ensureSetNamed('_classified', '85B5', constants.ps.PSETID_COMMON, overrideClass = bool, preserveNone = False)
 
     @property
     def classType(self) -> Optional[str]:
@@ -719,14 +720,14 @@ class MSGFile:
         """
         The end time for the object.
         """
-        return self._ensureSetNamed('_commonEnd', '8517', constants.PSETID_COMMON)
+        return self._ensureSetNamed('_commonEnd', '8517', constants.ps.PSETID_COMMON)
 
     @property
     def commonStart(self) -> Optional[datetime.datetime]:
         """
         The start time for the object.
         """
-        return self._ensureSetNamed('_commonStart', '8516', constants.PSETID_COMMON)
+        return self._ensureSetNamed('_commonStart', '8516', constants.ps.PSETID_COMMON)
 
     @property
     def currentVersion(self) -> Optional[int]:
@@ -734,14 +735,14 @@ class MSGFile:
         Specifies the build number of the client application that sent the
         message.
         """
-        return self._ensureSetNamed('_currentVersion', '8552', constants.PSETID_COMMON)
+        return self._ensureSetNamed('_currentVersion', '8552', constants.ps.PSETID_COMMON)
 
     @property
     def currentVersionName(self) -> Optional[str]:
         """
         Specifies the name of the client application that sent the message.
         """
-        return self._ensureSetNamed('_currentVersionName', '8554', constants.PSETID_COMMON)
+        return self._ensureSetNamed('_currentVersionName', '8554', constants.ps.PSETID_COMMON)
 
     @property
     def errorBehavior(self) -> ErrorBehavior:
@@ -901,7 +902,7 @@ class MSGFile:
         Controls how a Message object is handled by the client in relation to
         certain user interface actions by the user, such as deleting a message.
         """
-        return self._ensureSetNamed('_sideEffects', '8510', constants.PSETID_COMMON, overrideClass = SideEffect.fromBits)
+        return self._ensureSetNamed('_sideEffects', '8510', constants.ps.PSETID_COMMON, overrideClass = SideEffect.fromBits)
 
     @property
     def stringEncoding(self):
@@ -923,7 +924,7 @@ class MSGFile:
                 else:
                     enc = self.props['3FFD0003'].value
                     # Now we just need to translate that value.
-                    self.__stringEncoding = getEncodingName(enc)
+                    self.__stringEncoding = lookupCodePage(enc)
                 return self.__stringEncoding
 
     @property

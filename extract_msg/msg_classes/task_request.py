@@ -66,7 +66,7 @@ class TaskRequest(MessageBase):
         """
         The assignment status of the embedded Task object.
         """
-        return self._ensureSetNamed('_taskMode', '8518', constants.PSETID_COMMON, overrideClass = TaskMode)
+        return self._ensureSetNamed('_taskMode', '8518', constants.ps.PSETID_COMMON, overrideClass = TaskMode)
 
     @property
     def taskObject(self) -> Task:

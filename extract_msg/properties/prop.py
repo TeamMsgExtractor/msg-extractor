@@ -24,7 +24,7 @@ logger.addHandler(logging.NullHandler())
 
 
 def createProp(data : bytes) -> 'PropBase':
-    temp = constants.ST2.unpack(data)[0]
+    temp = constants.st.ST2.unpack(data)[0]
     if temp in constants.FIXED_LENGTH_PROPS:
         return FixedLengthProp(data)
     else:
@@ -42,7 +42,7 @@ class PropBase:
     def __init__(self, data : bytes):
         self.__rawData = data
         self.__name = properHex(data[3::-1]).upper()
-        self.__type, self.__flags = constants.ST2.unpack(data)
+        self.__type, self.__flags = constants.st.ST2.unpack(data)
         self.__fm = self.__flags & 1 == 1
         self.__fr = self.__flags & 2 == 2
         self.__fw = self.__flags & 4 == 4
@@ -106,7 +106,7 @@ class FixedLengthProp(PropBase):
 
     def __init__(self, data : bytes):
         super().__init__(data)
-        self.__value = self.parseType(self.type, constants.STFIX.unpack(data)[0])
+        self.__value = self.parseType(self.type, constants.st.STFIX.unpack(data)[0])
 
     def parseType(self, _type : int, stream : bytes) -> Any:
         """
@@ -126,20 +126,20 @@ class FixedLengthProp(PropBase):
                 logger.warning('Property type is PtypNull, but is not equal to 0.')
             value = None
         elif _type == 0x0002: # PtypInteger16
-            value = constants.STI16.unpack(value)[0]
+            value = constants.st.STI16.unpack(value)[0]
         elif _type == 0x0003: # PtypInteger32
-            value = constants.STI32.unpack(value)[0]
+            value = constants.st.STI32.unpack(value)[0]
         elif _type == 0x0004: # PtypFloating32
-            value = constants.STF32.unpack(value)[0]
+            value = constants.st.STF32.unpack(value)[0]
         elif _type == 0x0005: # PtypFloating64
-            value = constants.STF64.unpack(value)[0]
+            value = constants.st.STF64.unpack(value)[0]
         elif _type == 0x0006: # PtypCurrency
-            value = (constants.STI64.unpack(value))[0] / 10000.0
+            value = (constants.st.STI64.unpack(value))[0] / 10000.0
         elif _type == 0x0007: # PtypFloatingTime
-            value = constants.STF64.unpack(value)[0]
+            value = constants.st.STF64.unpack(value)[0]
             return constants.PYTPFLOATINGTIME_START + datetime.timedelta(days = value)
         elif _type == 0x000A: # PtypErrorCode
-            value = constants.STI32.unpack(value)[0]
+            value = constants.st.STI32.unpack(value)[0]
             try:
                 value = ErrorCodeType(value)
             except ValueError:
@@ -152,11 +152,11 @@ class FixedLengthProp(PropBase):
                 except ValueError:
                     pass
         elif _type == 0x000B:  # PtypBoolean
-            value = constants.ST3.unpack(value)[0] == 1
+            value = constants.st.ST3.unpack(value)[0] == 1
         elif _type == 0x0014:  # PtypInteger64
-            value = constants.STI64.unpack(value)[0]
+            value = constants.st.STI64.unpack(value)[0]
         elif _type == 0x0040:  # PtypTime
-            rawTime = constants.ST3.unpack(value)[0]
+            rawTime = constants.st.ST3.unpack(value)[0]
             try:
                 value = filetimeToDatetime(rawTime)
             except ValueError as e:
@@ -182,7 +182,7 @@ class VariableLengthProp(PropBase):
 
     def __init__(self, data : bytes):
         super().__init__(data)
-        self.__length, self.__reserved = constants.STVAR.unpack(data)
+        self.__length, self.__reserved = constants.st.STVAR.unpack(data)
         if self.type == 0x001E:
             self.__realLength = self.__length - 1
         elif self.type == 0x001F:

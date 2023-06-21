@@ -57,7 +57,7 @@ class CustomAttachment(AttachmentBase):
             customFilename = str(customFilename)
             # First we need to validate it. If there are invalid characters,
             # this will detect it.
-            if constants.RE_INVALID_FILENAME_CHARACTERS.search(customFilename):
+            if constants.re.INVALID_FILENAME_CHARACTERS.search(customFilename):
                 raise ValueError('Invalid character found in customFilename. Must not contain any of the following characters: \\/:*?"<>|')
             filename = customFilename
         else:

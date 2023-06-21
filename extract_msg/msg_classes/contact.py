@@ -69,14 +69,14 @@ class Contact(MessageBase):
         Property is stored in the MSG file as a sinlge int. The result should be
         identical to addressBookProviderEmailList.
         """
-        return self._ensureSetNamed('_addressBookProviderArrayType', '8029', constants.PSETID_ADDRESS, ElectronicAddressProperties.fromBits)
+        return self._ensureSetNamed('_addressBookProviderArrayType', '8029', constants.ps.PSETID_ADDRESS, ElectronicAddressProperties.fromBits)
 
     @property
     def addressBookProviderEmailList(self) -> Optional[Set[ElectronicAddressProperties]]:
         """
         A set of which Electronic Address properties are set on the contact.
         """
-        return self._ensureSetNamed('_addressBookProviderEmailList', '8028', constants.PSETID_ADDRESS, overrideClass = lambda x : {ElectronicAddressProperties(y) for y in x})
+        return self._ensureSetNamed('_addressBookProviderEmailList', '8028', constants.ps.PSETID_ADDRESS, overrideClass = lambda x : {ElectronicAddressProperties(y) for y in x})
 
     @property
     def assistant(self) -> Optional[str]:
@@ -98,14 +98,14 @@ class Contact(MessageBase):
         Whether the client should create a Journal object for each action
         associated with the Contact object.
         """
-        return self._ensureSetNamed('_autoLog', '8025', constants.PSETID_ADDRESS, overrideClass = bool, preserveNone = False)
+        return self._ensureSetNamed('_autoLog', '8025', constants.ps.PSETID_ADDRESS, overrideClass = bool, preserveNone = False)
 
     @property
     def billing(self) -> Optional[str]:
         """
         Billing information for the contact.
         """
-        return self._ensureSetNamed('_billing', '8535', constants.PSETID_COMMON)
+        return self._ensureSetNamed('_billing', '8535', constants.ps.PSETID_COMMON)
 
     @property
     def birthday(self) -> Optional[datetime.datetime]:
@@ -120,14 +120,14 @@ class Contact(MessageBase):
         The EntryID of an optional Appointement object that represents the
         contact's birtday.
         """
-        return self._ensureSetNamed('_birthdayEventEntryID', '804D', constants.PSETID_ADDRESS, overrideClass = EntryID.autoCreate)
+        return self._ensureSetNamed('_birthdayEventEntryID', '804D', constants.ps.PSETID_ADDRESS, overrideClass = EntryID.autoCreate)
 
     @property
     def birthdayLocal(self) -> Optional[datetime.datetime]:
         """
         The birthday of the contact at 0:00 in the client's local time zone.
         """
-        return self._ensureSetNamed('_birthdayLocal', '80DE', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_birthdayLocal', '80DE', constants.ps.PSETID_ADDRESS)
 
     @property
     def businessCard(self) -> 'PIL.Image.Image':
@@ -161,7 +161,7 @@ class Contact(MessageBase):
         The image to be used on a business card. Must be either a PNG file or a
         JPEG file.
         """
-        return self._ensureSetNamed('_businessCardCardPicture', '8041', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_businessCardCardPicture', '8041', constants.ps.PSETID_ADDRESS)
 
     @property
     def businessCardDisplayDefinition(self) -> Optional[BusinessCardDisplayDefinition]:
@@ -169,7 +169,7 @@ class Contact(MessageBase):
         Specifies the customization details for displaying a contact as a
         business card.
         """
-        return self._ensureSetNamed('_businessCardDisplayDefinition', '8040', constants.PSETID_ADDRESS, overrideClass = BusinessCardDisplayDefinition)
+        return self._ensureSetNamed('_businessCardDisplayDefinition', '8040', constants.ps.PSETID_ADDRESS, overrideClass = BusinessCardDisplayDefinition)
 
     @property
     def businessFax(self) -> Optional[dict]:
@@ -198,7 +198,7 @@ class Contact(MessageBase):
         """
         The type of address for the fax. MUST be set to "FAX" if present.
         """
-        return self._ensureSetNamed('_businessFaxAddressType', '80C2', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_businessFaxAddressType', '80C2', constants.ps.PSETID_ADDRESS)
 
     @property
     def businessFaxEmailAddress(self) -> Optional[str]:
@@ -206,7 +206,7 @@ class Contact(MessageBase):
         Contains a user-readable display name, followed by the "@" character,
         followed by a fax number.
         """
-        return self._ensureSetNamed('_businessFaxEmailAddress', '80C3', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_businessFaxEmailAddress', '80C3', constants.ps.PSETID_ADDRESS)
 
     @property
     def businessFaxNumber(self) -> Optional[str]:
@@ -220,14 +220,14 @@ class Contact(MessageBase):
         """
         The normalized subject for the contact.
         """
-        return self._ensureSetNamed('_businessFaxOriginalDisplayName', '80C4', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_businessFaxOriginalDisplayName', '80C4', constants.ps.PSETID_ADDRESS)
 
     @property
     def businessFaxOriginalEntryId(self) -> Optional[EntryID]:
         """
         The one-off EntryID corresponding to this fax address.
         """
-        return self._ensureSetNamed('_businessFaxOriginalEntryId', '80C5', constants.PSETID_ADDRESS, overrideClass = EntryID.autoCreate)
+        return self._ensureSetNamed('_businessFaxOriginalEntryId', '80C5', constants.ps.PSETID_ADDRESS, overrideClass = EntryID.autoCreate)
 
     @property
     def businessTelephoneNumber(self) -> Optional[str]:
@@ -297,35 +297,35 @@ class Contact(MessageBase):
         """
         The character set that is used for this Contact object.
         """
-        return self._ensureSetNamed('_contactCharacterSet', '8023', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_contactCharacterSet', '8023', constants.ps.PSETID_ADDRESS)
 
     @property
     def contactItemData(self) -> Optional[List[int]]:
         """
         Used to help display the contact information.
         """
-        return self._ensureSetNamed('_contactItemData', '8007', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_contactItemData', '8007', constants.ps.PSETID_ADDRESS)
 
     @property
     def contactLinkedGlobalAddressListEntryID(self) -> Optional[EntryID]:
         """
         The EntryID of the GAL object to which the duplicate contact is linked.
         """
-        return self._ensureSetNamed('_contactLinkedGlobalAddressListEntryID', '80E2', constants.PSETID_ADDRESS, overrideClass = EntryID.autoCreate)
+        return self._ensureSetNamed('_contactLinkedGlobalAddressListEntryID', '80E2', constants.ps.PSETID_ADDRESS, overrideClass = EntryID.autoCreate)
 
     @property
     def contactLinkGlobalAddressListLinkID(self) -> Optional[str]:
         """
         The GUID of the GAL contact to which the duplicate contact is linked.
         """
-        return self._ensureSetNamed('_contactLinkGlobalAddressListLinkId', '80E8', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_contactLinkGlobalAddressListLinkId', '80E8', constants.ps.PSETID_ADDRESS)
 
     @property
     def contactLinkGlobalAddressListLinkState(self) -> Optional[ContactLinkState]:
         """
         The state of linking between the GAL contact and the duplicate contact.
         """
-        return self._ensureSetNamed('_contactLinkGlobalAddressListLinkState', '80E6', constants.PSETID_ADDRESS, overrideClass = ContactLinkState)
+        return self._ensureSetNamed('_contactLinkGlobalAddressListLinkState', '80E6', constants.ps.PSETID_ADDRESS, overrideClass = ContactLinkState)
 
     @property
     def contactLinkLinkRejectHistory(self) -> Optional[List[bytes]]:
@@ -333,7 +333,7 @@ class Contact(MessageBase):
         A list of any contacts that were previously rejected for linking with
         the duplicate contact.
         """
-        return self._ensureSetNamed('_contactLinkLinkRejectHistory', '80E5', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_contactLinkLinkRejectHistory', '80E5', constants.ps.PSETID_ADDRESS)
 
     @property
     def contactLinkSMTPAddressCache(self) -> Optional[List[str]]:
@@ -341,7 +341,7 @@ class Contact(MessageBase):
         A list of the SMTP addresses that are used by the GAL contact that are
         linked to the duplicate contact.
         """
-        return self._ensureSetNamed('_contactLinkSMTPAddressCache', '80E3', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_contactLinkSMTPAddressCache', '80E3', constants.ps.PSETID_ADDRESS)
 
     @property
     def contactPhoto(self) -> Optional[bytes]:
@@ -364,28 +364,28 @@ class Contact(MessageBase):
         """
         Used to store custom text for a business card.
         """
-        return self._ensureSetNamed('_contactUserField1', '804F', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_contactUserField1', '804F', constants.ps.PSETID_ADDRESS)
 
     @property
     def contactUserField2(self) -> Optional[str]:
         """
         Used to store custom text for a business card.
         """
-        return self._ensureSetNamed('_contactUserField2', '8050', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_contactUserField2', '8050', constants.ps.PSETID_ADDRESS)
 
     @property
     def contactUserField3(self) -> Optional[str]:
         """
         Used to store custom text for a business card.
         """
-        return self._ensureSetNamed('_contactUserField3', '8051', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_contactUserField3', '8051', constants.ps.PSETID_ADDRESS)
 
     @property
     def contactUserField4(self) -> Optional[str]:
         """
         Used to store custom text for a business card.
         """
-        return self._ensureSetNamed('_contactUserField4', '8052', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_contactUserField4', '8052', constants.ps.PSETID_ADDRESS)
 
     @property
     def customerID(self) -> Optional[str]:
@@ -442,21 +442,21 @@ class Contact(MessageBase):
         """
         The address type of the first email address.
         """
-        return self._ensureSetNamed('_email1AddressType', '8082', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_email1AddressType', '8082', constants.ps.PSETID_ADDRESS)
 
     @property
     def email1DisplayName(self) -> Optional[str]:
         """
         The user-readable display name of the first email address.
         """
-        return self._ensureSetNamed('_email1DisplayName', '8080', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_email1DisplayName', '8080', constants.ps.PSETID_ADDRESS)
 
     @property
     def email1EmailAddress(self) -> Optional[str]:
         """
         The first email address.
         """
-        return self._ensureSetNamed('_email1EmailAddress', '8083', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_email1EmailAddress', '8083', constants.ps.PSETID_ADDRESS)
 
     @property
     def email1OriginalDisplayName(self) -> Optional[str]:
@@ -464,14 +464,14 @@ class Contact(MessageBase):
         The first SMTP email address that corresponds to the first email address
         for the contact.
         """
-        return self._ensureSetNamed('_email1OriginalDisplayName', '8084', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_email1OriginalDisplayName', '8084', constants.ps.PSETID_ADDRESS)
 
     @property
     def email1OriginalEntryId(self) -> Optional[EntryID]:
         """
         The EntryID of the object correspinding to this electronic address.
         """
-        return self._ensureSetNamed('_email1OriginalEntryId', '8085', constants.PSETID_ADDRESS, overrideClass = EntryID.autoCreate)
+        return self._ensureSetNamed('_email1OriginalEntryId', '8085', constants.ps.PSETID_ADDRESS, overrideClass = EntryID.autoCreate)
 
     @property
     def email2(self) -> Optional[dict]:
@@ -497,21 +497,21 @@ class Contact(MessageBase):
         """
         The address type of the second email address.
         """
-        return self._ensureSetNamed('_email2AddressType', '8092', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_email2AddressType', '8092', constants.ps.PSETID_ADDRESS)
 
     @property
     def email2DisplayName(self) -> Optional[str]:
         """
         The user-readable display name of the second email address.
         """
-        return self._ensureSetNamed('_email2DisplayName', '8090', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_email2DisplayName', '8090', constants.ps.PSETID_ADDRESS)
 
     @property
     def email2EmailAddress(self) -> Optional[str]:
         """
         The second email address.
         """
-        return self._ensureSetNamed('_email2EmailAddress', '8093', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_email2EmailAddress', '8093', constants.ps.PSETID_ADDRESS)
 
     @property
     def email2OriginalDisplayName(self) -> Optional[str]:
@@ -519,14 +519,14 @@ class Contact(MessageBase):
         The second SMTP email address that corresponds to the second email address
         for the contact.
         """
-        return self._ensureSetNamed('_email2OriginalDisplayName', '8094', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_email2OriginalDisplayName', '8094', constants.ps.PSETID_ADDRESS)
 
     @property
     def email2OriginalEntryId(self) -> Optional[EntryID]:
         """
         The EntryID of the object correspinding to this electronic address.
         """
-        return self._ensureSetNamed('_email2OriginalEntryId', '8095', constants.PSETID_ADDRESS, overrideClass = EntryID.autoCreate)
+        return self._ensureSetNamed('_email2OriginalEntryId', '8095', constants.ps.PSETID_ADDRESS, overrideClass = EntryID.autoCreate)
 
     @property
     def email3(self) -> Optional[dict]:
@@ -552,21 +552,21 @@ class Contact(MessageBase):
         """
         The address type of the third email address.
         """
-        return self._ensureSetNamed('_email3AddressType', '80A2', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_email3AddressType', '80A2', constants.ps.PSETID_ADDRESS)
 
     @property
     def email3DisplayName(self) -> Optional[str]:
         """
         The user-readable display name of the third email address.
         """
-        return self._ensureSetNamed('_email3DisplayName', '80A0', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_email3DisplayName', '80A0', constants.ps.PSETID_ADDRESS)
 
     @property
     def email3EmailAddress(self) -> Optional[str]:
         """
         The third email address.
         """
-        return self._ensureSetNamed('_email3EmailAddress', '80A3', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_email3EmailAddress', '80A3', constants.ps.PSETID_ADDRESS)
 
     @property
     def email3OriginalDisplayName(self) -> Optional[str]:
@@ -574,14 +574,14 @@ class Contact(MessageBase):
         The third SMTP email address that corresponds to the third email address
         for the contact.
         """
-        return self._ensureSetNamed('_email3OriginalDisplayName', '80A4', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_email3OriginalDisplayName', '80A4', constants.ps.PSETID_ADDRESS)
 
     @property
     def email3OriginalEntryId(self) -> Optional[EntryID]:
         """
         The EntryID of the object correspinding to this electronic address.
         """
-        return self._ensureSetNamed('_email3OriginalEntryId', '80A5', constants.PSETID_ADDRESS, overrideClass = EntryID.autoCreate)
+        return self._ensureSetNamed('_email3OriginalEntryId', '80A5', constants.ps.PSETID_ADDRESS, overrideClass = EntryID.autoCreate)
 
     @property
     def emails(self) -> Tuple[Union[Dict, None], Union[Dict, None], Union[Dict, None]]:
@@ -618,7 +618,7 @@ class Contact(MessageBase):
         The name under which to file a contact when displaying a list of
         contacts.
         """
-        return self._ensureSetNamed('_fileUnder', '8005', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_fileUnder', '8005', constants.ps.PSETID_ADDRESS)
 
     @property
     def fileUnderID(self) -> Optional[int]:
@@ -626,7 +626,7 @@ class Contact(MessageBase):
         The format to use for fileUnder. See PidLidFileUnderId in [MS-OXOCNTC]
         for details.
         """
-        return self._ensureSetNamed('_fileUnderID', '8006', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_fileUnderID', '8006', constants.ps.PSETID_ADDRESS)
 
     @property
     def freeBusyLocation(self) -> Optional[str]:
@@ -634,7 +634,7 @@ class Contact(MessageBase):
         A URL path from which a client can retrieve free/busy status information
         for the contact as an iCalendat file.
         """
-        return self._ensureSetNamed('_freeBusyLocation', '80D8', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_freeBusyLocation', '80D8', constants.ps.PSETID_ADDRESS)
 
     @property
     def ftpSite(self) -> Optional[str]:
@@ -677,7 +677,7 @@ class Contact(MessageBase):
         """
         Whether the contact has a contact photo.
         """
-        return self._ensureSetNamed('_hasPicture', '8015', constants.PSETID_ADDRESS, overrideClass = bool, preserveNone = False)
+        return self._ensureSetNamed('_hasPicture', '8015', constants.ps.PSETID_ADDRESS, overrideClass = bool, preserveNone = False)
 
     @property
     def headerFormatProperties(self) -> constants.HEADER_FORMAT_TYPE:
@@ -783,7 +783,7 @@ class Contact(MessageBase):
         """
         The complete home address of the contact.
         """
-        return self._ensureSetNamed('_homeAddress', '801A', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_homeAddress', '801A', constants.ps.PSETID_ADDRESS)
 
     @property
     def homeAddressCountry(self) -> Optional[str]:
@@ -797,7 +797,7 @@ class Contact(MessageBase):
         """
         The country code portion of the contact's home address.
         """
-        return self._ensureSetNamed('_homeAddressCountryCode', '80DA', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_homeAddressCountryCode', '80DA', constants.ps.PSETID_ADDRESS)
 
     @property
     def homeAddressLocality(self) -> Optional[str]:
@@ -861,7 +861,7 @@ class Contact(MessageBase):
         """
         The type of address for the fax. MUST be set to "FAX" if present.
         """
-        return self._ensureSetNamed('_homeFaxAddressType', '80D2', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_homeFaxAddressType', '80D2', constants.ps.PSETID_ADDRESS)
 
     @property
     def homeFaxEmailAddress(self) -> Optional[str]:
@@ -869,7 +869,7 @@ class Contact(MessageBase):
         Contains a user-readable display name, followed by the "@" character,
         followed by a fax number.
         """
-        return self._ensureSetNamed('_homeFaxEmailAddress', '80D3', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_homeFaxEmailAddress', '80D3', constants.ps.PSETID_ADDRESS)
 
     @property
     def homeFaxNumber(self) -> Optional[str]:
@@ -883,14 +883,14 @@ class Contact(MessageBase):
         """
         The normalized subject for the contact.
         """
-        return self._ensureSetNamed('_homeFaxOriginalDisplayName', '80D4', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_homeFaxOriginalDisplayName', '80D4', constants.ps.PSETID_ADDRESS)
 
     @property
     def homeFaxOriginalEntryId(self) -> Optional[EntryID]:
         """
         The one-off EntryID corresponding to this fax address.
         """
-        return self._ensureSetNamed('_homeFaxOriginalEntryId', '80D5', constants.PSETID_ADDRESS, overrideClass = EntryID.autoCreate)
+        return self._ensureSetNamed('_homeFaxOriginalEntryId', '80D5', constants.ps.PSETID_ADDRESS, overrideClass = EntryID.autoCreate)
 
     @property
     def homeTelephoneNumber(self) -> Optional[str]:
@@ -918,14 +918,14 @@ class Contact(MessageBase):
         """
         The instant messaging address of the contact.
         """
-        return self._ensureSetNamed('_instantMessagingAddress', '8062', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_instantMessagingAddress', '8062', constants.ps.PSETID_ADDRESS)
 
     @property
     def isContactLinked(self) -> bool:
         """
         Whether the contact is linked to other contacts.
         """
-        return self._ensureSetNamed('_isContactLinked', '80E0', constants.PSETID_ADDRESS, overrideClass = bool, preserveNone = False)
+        return self._ensureSetNamed('_isContactLinked', '80E0', constants.ps.PSETID_ADDRESS, overrideClass = bool, preserveNone = False)
 
     @property
     def isdnNumber(self) -> Optional[str]:
@@ -983,7 +983,7 @@ class Contact(MessageBase):
         """
         The country code portion of the contact's mail address.
         """
-        return self._ensureSetNamed('_mailAddressCountryCode', '80DD', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_mailAddressCountryCode', '80DD', constants.ps.PSETID_ADDRESS)
 
     @property
     def mailAddressLocality(self) -> Optional[str]:
@@ -1076,7 +1076,7 @@ class Contact(MessageBase):
         """
         The complete other address of the contact.
         """
-        return self._ensureSetNamed('_otherAddress', '801C', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_otherAddress', '801C', constants.ps.PSETID_ADDRESS)
 
     @property
     def otherAddressCountry(self) -> Optional[str]:
@@ -1090,7 +1090,7 @@ class Contact(MessageBase):
         """
         The country code portion of the contact's other address.
         """
-        return self._ensureSetNamed('_otherAddressCountryCode', '80DC', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_otherAddressCountryCode', '80DC', constants.ps.PSETID_ADDRESS)
 
     @property
     def otherAddressLocality(self) -> Optional[str]:
@@ -1153,21 +1153,21 @@ class Contact(MessageBase):
         """
         The phonetic pronunciation of the contact's company name.
         """
-        return self._ensureSetNamed('_phoneticCompanyName', '802E', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_phoneticCompanyName', '802E', constants.ps.PSETID_ADDRESS)
 
     @property
     def phoneticGivenName(self) -> Optional[str]:
         """
         The phonetic pronunciation of the contact's given name.
         """
-        return self._ensureSetNamed('_phoneticGivenName', '802C', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_phoneticGivenName', '802C', constants.ps.PSETID_ADDRESS)
 
     @property
     def phoneticSurname(self) -> Optional[str]:
         """
         The phonetic pronunciation of the given name of the contact.
         """
-        return self._ensureSetNamed('_phoneticSurname', '802D', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_phoneticSurname', '802D', constants.ps.PSETID_ADDRESS)
 
     @property
     def postalAddressID(self) -> PostalAddressID:
@@ -1175,7 +1175,7 @@ class Contact(MessageBase):
         Indicates which physical address is the Mailing Address for this
         contact.
         """
-        return self._ensureSetNamed('_postalAddressID', '8022', constants.PSETID_ADDRESS, overrideClass = lambda x : PostalAddressID(x or 0), preserveNone = False)
+        return self._ensureSetNamed('_postalAddressID', '8022', constants.ps.PSETID_ADDRESS, overrideClass = lambda x : PostalAddressID(x or 0), preserveNone = False)
 
     @property
     def primaryFax(self) -> Optional[dict]:
@@ -1204,7 +1204,7 @@ class Contact(MessageBase):
         """
         The type of address for the fax. MUST be set to "FAX" if present.
         """
-        return self._ensureSetNamed('_primaryFaxAddressType', '80B2', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_primaryFaxAddressType', '80B2', constants.ps.PSETID_ADDRESS)
 
     @property
     def primaryFaxEmailAddress(self) -> Optional[str]:
@@ -1212,7 +1212,7 @@ class Contact(MessageBase):
         Contains a user-readable display name, followed by the "@" character,
         followed by a fax number.
         """
-        return self._ensureSetNamed('_primaryFaxEmailAddress', '80B3', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_primaryFaxEmailAddress', '80B3', constants.ps.PSETID_ADDRESS)
 
     @property
     def primaryFaxNumber(self) -> Optional[str]:
@@ -1226,14 +1226,14 @@ class Contact(MessageBase):
         """
         The normalized subject for the contact.
         """
-        return self._ensureSetNamed('_primaryFaxOriginalDisplayName', '80B4', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_primaryFaxOriginalDisplayName', '80B4', constants.ps.PSETID_ADDRESS)
 
     @property
     def primaryFaxOriginalEntryId(self) -> Optional[EntryID]:
         """
         The one-off EntryID corresponding to this fax address.
         """
-        return self._ensureSetNamed('_primaryFaxOriginalEntryId', '80B5', constants.PSETID_ADDRESS, overrideClass = EntryID.autoCreate)
+        return self._ensureSetNamed('_primaryFaxOriginalEntryId', '80B5', constants.ps.PSETID_ADDRESS, overrideClass = EntryID.autoCreate)
 
     @property
     def primaryTelephoneNumber(self) -> Optional[str]:
@@ -1263,7 +1263,7 @@ class Contact(MessageBase):
         Contact object unless the Contact object is a copy of an earlier
         original.
         """
-        return self._ensureSetNamed('_referenceEntryID', '85BD', constants.PSETID_COMMON, overrideClass = EntryID.autoCreate)
+        return self._ensureSetNamed('_referenceEntryID', '85BD', constants.ps.PSETID_COMMON, overrideClass = EntryID.autoCreate)
 
     @property
     def referredByName(self) -> Optional[str]:
@@ -1321,7 +1321,7 @@ class Contact(MessageBase):
         The EntryID of an optional Appointement object that represents the
         contact's wedding anniversary.
         """
-        return self._ensureSetNamed('_weddingAnniversaryEventEntryID', '804E', constants.PSETID_ADDRESS, overrideClass = EntryID.autoCreate)
+        return self._ensureSetNamed('_weddingAnniversaryEventEntryID', '804E', constants.ps.PSETID_ADDRESS, overrideClass = EntryID.autoCreate)
 
     @property
     def weddingAnniversaryLocal(self) -> Optional[datetime.datetime]:
@@ -1329,67 +1329,67 @@ class Contact(MessageBase):
         The wedding anniversary of the contact at 0:00 in the client's local
         time zone.
         """
-        return self._ensureSetNamed('_weddingAnniversaryLocal', '80DF', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_weddingAnniversaryLocal', '80DF', constants.ps.PSETID_ADDRESS)
 
     @property
     def webpageUrl(self) -> Optional[str]:
         """
         The contact's business web page url. SHOULD be the same as businessUrl.
         """
-        return self._ensureSetNamed('_webpageUrl', '802B', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_webpageUrl', '802B', constants.ps.PSETID_ADDRESS)
 
     @property
     def workAddress(self) -> Optional[str]:
         """
         The complete work address of the contact.
         """
-        return self._ensureSetNamed('_workAddress', '801B', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_workAddress', '801B', constants.ps.PSETID_ADDRESS)
 
     @property
     def workAddressCountry(self) -> Optional[str]:
         """
         The country portion of the contact's work address.
         """
-        return self._ensureSetNamed('_workAddressCountry', '8049', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_workAddressCountry', '8049', constants.ps.PSETID_ADDRESS)
 
     @property
     def workAddressCountryCode(self) -> Optional[str]:
         """
         The country code portion of the contact's work address.
         """
-        return self._ensureSetNamed('_workAddressCountryCode', '80DB', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_workAddressCountryCode', '80DB', constants.ps.PSETID_ADDRESS)
 
     @property
     def workAddressLocality(self) -> Optional[str]:
         """
         The locality or city portion of the contact's work address.
         """
-        return self._ensureSetNamed('_workAddressLocality', '8046', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_workAddressLocality', '8046', constants.ps.PSETID_ADDRESS)
 
     @property
     def workAddressPostalCode(self) -> Optional[str]:
         """
         The postal code portion of the contact's work address.
         """
-        return self._ensureSetNamed('_workAddressPostalCode', '8048', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_workAddressPostalCode', '8048', constants.ps.PSETID_ADDRESS)
 
     @property
     def workAddressPostOfficeBox(self) -> Optional[str]:
         """
         The number or identifier of the contact's work post office box.
         """
-        return self._ensureSetNamed('_workAddressPostOfficeBox', '804A', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_workAddressPostOfficeBox', '804A', constants.ps.PSETID_ADDRESS)
 
     @property
     def workAddressStateOrProvince(self) -> Optional[str]:
         """
         The state or province portion of the contact's work address.
         """
-        return self._ensureSetNamed('_workAddressStateOrProvince', '8047', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_workAddressStateOrProvince', '8047', constants.ps.PSETID_ADDRESS)
 
     @property
     def workAddressStreet(self) -> Optional[str]:
         """
         The street portion of the contact's work address.
         """
-        return self._ensureSetNamed('_workAddressStreet', '8045', constants.PSETID_ADDRESS)
+        return self._ensureSetNamed('_workAddressStreet', '8045', constants.ps.PSETID_ADDRESS)

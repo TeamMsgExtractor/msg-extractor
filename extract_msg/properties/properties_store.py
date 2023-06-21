@@ -49,10 +49,10 @@ class PropertiesStore:
                 self.__intel = Intelligence.SMART
                 if _type == PropertiesType.MESSAGE:
                     skip = 32
-                    self.__nrid, self.__naid, self.__rc, self.__ac = constants.ST1.unpack(self.__rawData[:24])
+                    self.__nrid, self.__naid, self.__rc, self.__ac = constants.st.ST1.unpack(self.__rawData[:24])
                 elif _type == PropertiesType.MESSAGE_EMBED:
                     skip = 24
-                    self.__nrid, self.__naid, self.__rc, self.__ac = constants.ST1.unpack(self.__rawData[:24])
+                    self.__nrid, self.__naid, self.__rc, self.__ac = constants.st.ST1.unpack(self.__rawData[:24])
                 else:
                     skip = 8
         else:

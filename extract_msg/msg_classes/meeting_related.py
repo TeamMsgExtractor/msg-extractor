@@ -22,7 +22,7 @@ class MeetingRelated(CalendarBase):
         """
         The date and time at which the meeting-related object was sent.
         """
-        return self._ensureSetNamed('_attendeeCriticalChange', '0001', constants.PSETID_MEETING)
+        return self._ensureSetNamed('_attendeeCriticalChange', '0001', constants.ps.PSETID_MEETING)
 
     @property
     def processed(self) -> bool:
@@ -37,7 +37,7 @@ class MeetingRelated(CalendarBase):
         Indicates that the Meeting Request object or Meeting Update object has
         been processed.
         """
-        return self._ensureSetNamed('_serverProcessed', '85CC', constants.PSETID_CALENDAR_ASSISTANT, overrideClass = bool, preserveNone = False)
+        return self._ensureSetNamed('_serverProcessed', '85CC', constants.ps.PSETID_CALENDAR_ASSISTANT, overrideClass = bool, preserveNone = False)
 
     @property
     def serverProcessingActions(self) -> Optional[Set[ServerProcessingAction]]:
@@ -45,7 +45,7 @@ class MeetingRelated(CalendarBase):
         A set of which actions have been taken on the Meeting Request object or
         Meeting Update object.
         """
-        return self._ensureSetNamed('_serverProcessingActions', '85CD', constants.PSETID_CALENDAR_ASSISTANT, overrideClass = ServerProcessingAction.fromBits)
+        return self._ensureSetNamed('_serverProcessingActions', '85CD', constants.ps.PSETID_CALENDAR_ASSISTANT, overrideClass = ServerProcessingAction.fromBits)
 
     @property
     def timeZone(self) -> Optional[int]:
@@ -54,11 +54,11 @@ class MeetingRelated(CalendarBase):
 
         See PidLidTimeZone in [MS-OXOCAL] for details.
         """
-        return self._ensureSetNamed('_timeZone', '000C', constants.PSETID_MEETING)
+        return self._ensureSetNamed('_timeZone', '000C', constants.ps.PSETID_MEETING)
 
     @property
     def where(self) -> Optional[str]:
         """
         PidLidWhere. Should be the same as location.
         """
-        return self._ensureSetNamed('_where', '0002', constants.PSETID_MEETING)
+        return self._ensureSetNamed('_where', '0002', constants.ps.PSETID_MEETING)
