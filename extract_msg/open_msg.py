@@ -77,7 +77,7 @@ def openMsg(path, **kwargs) -> MSGFile:
     from .msg_classes import (
             AppointmentMeeting, Contact, MeetingCancellation, MeetingException,
             MeetingForwardNotification, MeetingRequest, MeetingResponse,
-            Message, MSGFile, MessageSigned, Post, Task, TaskRequest
+            Message, MSGFile, MessageSigned, Post, StickyNote, Task, TaskRequest
         )
 
     # When the initial MSG file is opened, it should *always* delay attachments
@@ -137,6 +137,9 @@ def openMsg(path, **kwargs) -> MSGFile:
     elif classType.startswith('ipm.schedule.meeting.resp'):
         msg.close()
         return MeetingResponse(path, **kwargs)
+    elif classType.startswith('ipm.stickynote'):
+        msg.close()
+        return StickyNote(path, **kwargs)
     elif classType.startswith('ipm.taskrequest'):
         msg.close()
         return TaskRequest(path, **kwargs)

@@ -1299,6 +1299,15 @@ class NamedPropertyType(enum.Enum):
 
 
 
+class NoteColor(enum.Enum):
+    BLUE = 0
+    GREEN = 1
+    PINK = 2
+    YELLOW = 3
+    WHITE = 4
+
+
+
 class OORBodyFormat(enum.Enum):
     """
     The body format for One Off Recipients.

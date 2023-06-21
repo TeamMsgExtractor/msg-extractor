@@ -20,6 +20,7 @@ __all__ = [
     'MessageSignedBase',
     'MSGFile',
     'Post',
+    'StickyNote',
     'Task',
     'TaskRequest',
 ]
@@ -41,5 +42,6 @@ from .message_signed import MessageSigned
 from .message_signed_base import MessageSignedBase
 from .msg import MSGFile
 from .post import Post
+from .sticky_note import StickyNote
 from .task import Task
 from .task_request import TaskRequest
