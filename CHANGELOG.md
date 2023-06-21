@@ -20,9 +20,11 @@
 * Entirely reoganized the way attachments are initialized, including the class that will be used in various circumstances. Embedded MSG files, custom attachments, and web attachments will all use dedicated classes that are subclasses of AttachmentBase.
     * With this change, the way to specify a new Attachment class is to override the function used when creating attachments. This can be done by passing `attachmentInit = myFunction` as an option to `openMsg`. This function MUST return an instance of AttachmentBase.
 * Added first implementation of web attachments. Saving is not currently possible, but basic relevent property access is now possible. Saving will not be stopped by this attachment if `skipNotImplemented = True` is passed to the save function.
-* Changed the option to suppress RTFDE errors to fall under the `ErrorBehavior` enum. Usage of the original option will be allowable, but is being marked as deprecated. However, it is still a dedicated option from the command line.
+* Changed the option to suppress `RTFDE` errors to fall under the `ErrorBehavior` enum. Usage of the original option will be allowable, but is being marked as deprecated. However, it is still a dedicated option from the command line.
+    * Also fixed the option not properly ignoring some RTFDE errors, specifically the ones that it is normal for the module to throw.
 * Removed some constants that are not used by the module.
 * Added the `encoding` submodule for encoding tasks, including proper support for Microsoft's implementation of cp950. This gets added to the codecs list as windows-950.
+* Updated to support `RTFDE` version `0.1.0`. Users encountering random erros from that module should find that those errors have disappeared. If you get errors from it still, bring up the issue on their GitHub.
 
 **v0.41.5**
 * Fixed an issue from version `0.41.3` where the header being present but missing the `From` field would cause an exception.

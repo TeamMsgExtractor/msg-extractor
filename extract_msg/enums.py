@@ -520,15 +520,19 @@ class ErrorBehavior(enum.IntFlag):
     ATTACH_SUPPRESS_ALL: Silence the exception for NotImplementedError and for broken
         attachments.
     STANDARDS_VIOLATION: Silences StandardViolationError where acceptable.
-    RTFDE: Silences errors from RTFDE.
+    RTFDE_UNKNOWN_ERROR: Silences errors from RTFDE that are not normal.
+    RTFDE_MALFORMED: Silences errors about malformed RTF data.
+    RTFDE: Silences all errors from RTFDE.
     SUPPRESS_ALL: Silences all of the above.
     """
-    THROW = 0b000
-    ATTACH_NOT_IMPLEMENTED = 0b001
-    ATTACH_BROKEN = 0b010
-    ATTACH_SUPPRESS_ALL = 0b011
-    STANDARDS_VIOLATION = 0b100
-    RTFDE = 0b1000
+    THROW = 0b00000
+    ATTACH_NOT_IMPLEMENTED = 0b00001
+    ATTACH_BROKEN = 0b00010
+    ATTACH_SUPPRESS_ALL = 0b00011
+    STANDARDS_VIOLATION = 0b00100
+    RTFDE_UNKNOWN_ERROR = 0b01000
+    RTFDE_MALFORMED = 0b10000
+    RTFDE = 0b11000
     SUPPRESS_ALL = 0b1111
 
 

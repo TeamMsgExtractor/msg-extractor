@@ -206,7 +206,7 @@ class MessageBase(MSGFile):
                         logger.exception('Custom deencapsulation function reported data is not encapsulated.')
                 else:
                     if self.deencapsulatedRtf and self.deencapsulatedRtf.content_type == 'html':
-                        return self.deencapsulatedRtf.html.encode('utf-8')
+                        return self.deencapsulatedRtf.html
 
             if bodyType == DeencapType.PLAIN:
                 logger.info('Could not deencapsulate plain text from RTF body.')
@@ -970,41 +970,20 @@ class MessageBase(MSGFile):
                     body = body[:-1]
 
                 try:
-                    try:
-                        self._deencapsultor = RTFDE.DeEncapsulator(body)
-                    except UnicodeDecodeError:
-                        # There is a known issue that bytes are not well decoded
-                        # by RTFDE right now, so let's see if we can't manually
-                        # decode it and see if that will work.
-                        #
-                        # There is also the fact that it is decoded *at all*
-                        # before binary data is stripped out. This data should
-                        # almost certainly be stripped out, so let's log it and
-                        # then log if we removed any of them before trying this.
-                        logger.warning(f'RTFDE failed to decode rtfBody for message with subject "{self.subject}". Attempting to cut out unnecessary data and override decoding.')
-
-                        match = constants.re.BIN.search(body)
-                        # Because we are going to be actively removing things,
-                        # we want to search the entire thing over again.
-                        while match:
-                            logger.info(f'Found match to bin data starting at location {match.start()}. Replacing with nothing.')
-                            length = int(match.group(1))
-                            # Extract the entire binary section and replace it.
-                            body = body.replace(body[match.start():match.end() + length], b'', 1)
-                            match = constants.re.BIN.search(body)
-
-                        self._deencapsultor = RTFDE.DeEncapsulator(body.decode(chardet.detect(body)['encoding']))
+                    self._deencapsultor = RTFDE.DeEncapsulator(body)
                     self._deencapsultor.deencapsulate()
                 except RTFDE.exceptions.NotEncapsulatedRtf as e:
                     logger.debug('RTF body is not encapsulated.')
                     self._deencapsultor = None
                 except RTFDE.exceptions.MalformedEncapsulatedRtf as _e:
+                    if not (self.errorBehavior & ErrorBehavior.RTFDE_MALFORMED):
+                        raise
                     logger.info('RTF body contains malformed encapsulated content.')
                     self._deencapsultor = None
                 except Exception:
                     # If we are just ignoring the errors, log it then set to
                     # None. Otherwise, continue the exception.
-                    if not (self.errorBehavior & ErrorBehavior.RTFDE):
+                    if not (self.errorBehavior & ErrorBehavior.RTFDE_UNKNOWN_ERROR):
                         raise
                     logger.exception('Unhandled error happened while using RTFDE. You have choosen to ignore these errors.')
                     self._deencapsultor = None
