@@ -28,7 +28,7 @@
 * Fixed bug that would cause weird behavior if you gave an empty string as the path for an MSG file.
 * Added support for `IPM.StickyNote`.
 * Fixed an issue that would cause MSG file to never close if an error happened during any of the `__init__` functions for MSG classes.
-* removed unneeded `chardet` dependency.
+* Removed unneeded `chardet` dependency.
 * Removed `Contact.__init__` as it didn't provide any unique behavior.
 
 **v0.41.5**
