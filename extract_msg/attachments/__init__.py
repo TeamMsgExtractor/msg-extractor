@@ -108,21 +108,23 @@ def initStandardAttachment(msg : MSGFile, dir_) -> AttachmentBase:
         if (propStore['37050003'].value & 0x7) == 0x7:
             return WebAttachment(msg, dir_, propStore)
 
+        raise NotImplementedError('Could not determine attachment type!')
+
     except (NotImplementedError, UnrecognizedMSGTypeError) as e:
         if msg.errorBehavior & ErrorBehavior.ATTACH_NOT_IMPLEMENTED:
             _logger.exception(f'Error processing attachment at {dir_}')
-            return UnsupportedAttachment(msg, dir_)
+            return UnsupportedAttachment(msg, dir_, propStore)
         else:
             raise
     except StandardViolationError as e:
         if msg.errorBehavior & ErrorBehavior.STANDARDS_VIOLATION:
             _logger.exception(f'Unresolvable standards violation in  {dir_}')
-            return BrokenAttachment(msg, dir_)
+            return BrokenAttachment(msg, dir_, propStore)
         else:
             raise
     except Exception as e:
         if msg.errorBehavior & ErrorBehavior.ATTACH_BROKEN:
             _logger.exception(f'Error processing attachment at {dir_}')
-            return BrokenAttachment(msg, dir_)
+            return BrokenAttachment(msg, dir_, propStore)
         else:
             raise
