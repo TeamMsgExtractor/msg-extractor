@@ -25,6 +25,11 @@
 * Removed some constants that are not used by the module.
 * Added the `encoding` submodule for encoding tasks, including proper support for Microsoft's implementation of cp950. This gets added to the codecs list as windows-950.
 * Updated to support `RTFDE` version `0.1.0`. Users encountering random erros from that module should find that those errors have disappeared. If you get errors from it still, bring up the issue on their GitHub.
+* Fixed bug that would cause weird behavior if you gave an empty string as the path for an MSG file.
+* Added support for `IPM.StickyNote`.
+* Fixed an issue that would cause MSG file to never close if an error happened during any of the `__init__` functions for MSG classes.
+* removed unneeded `chardet` dependency.
+* Removed `Contact.__init__` as it didn't provide any unique behavior.
 
 **v0.41.5**
 * Fixed an issue from version `0.41.3` where the header being present but missing the `From` field would cause an exception.

@@ -53,11 +53,6 @@ class MessageSignedBase(MessageBase):
         """
         self.__signedAttachmentClass = kwargs.get('signedAttachmentClass', SignedAttachment)
         super().__init__(path, **kwargs)
-        # Initialize properties in the order that is least likely to cause bugs.
-        # TODO have each function check for initialization of needed data so these
-        # lines will be unnecessary.
-        if not kwargs.get('delayAttachments', False):
-            self.attachments
 
     @property
     def attachments(self) -> List:

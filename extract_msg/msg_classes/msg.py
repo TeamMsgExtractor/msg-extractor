@@ -124,15 +124,16 @@ class MSGFile:
 
         self.__listDirRes = {}
 
-        # This is a variable that tells whether we own the olefile. Used for
-        # closing.
-        self.__oleOwner = True
         if self.__parentMsg:
             # We should be able to directly access the private variables of
             # another instance with no issue.
             self.__ole = self.__parentMsg().__ole
             self.__oleOwner = False
         else:
+            # Verify the path at least evaluates to True, as not doing so can
+            # allow an OleFile to be created without a path.
+            if not path:
+                raise ValueError(':param path: must be set and must not be empty.')
             try:
                 self.__ole = olefile.OleFileIO(path)
             except OSError as e:
@@ -141,57 +142,70 @@ class MSGFile:
                     raise InvalidFileFormatError(e)
                 else:
                     raise
+            # This is a variable that tells whether we own the olefile. Used for
+            # closing. We set it here for error handling.
+            self.__oleOwner = True
 
-        kwargsCopy = copy.copy(kwargs)
-        if 'prefix' in kwargsCopy:
-            del kwargsCopy['prefix']
-        if 'parentMsg' in kwargsCopy:
-            del kwargsCopy['parentMsg']
-        if 'filename' in kwargsCopy:
-            del kwargsCopy['filename']
-        if 'treePath' in kwargsCopy:
-            del kwargsCopy['treePath']
-        self.__kwargs = kwargsCopy
+        # The rest *must* be in a try-except block to ensure we close the file.
+        try:
+            kwargsCopy = copy.copy(kwargs)
+            if 'prefix' in kwargsCopy:
+                del kwargsCopy['prefix']
+            if 'parentMsg' in kwargsCopy:
+                del kwargsCopy['parentMsg']
+            if 'filename' in kwargsCopy:
+                del kwargsCopy['filename']
+            if 'treePath' in kwargsCopy:
+                del kwargsCopy['treePath']
+            self.__kwargs = kwargsCopy
 
-        prefixl = []
-        if prefix:
-            try:
-                prefix = inputToString(prefix, 'utf-8')
-            except Exception:
+            prefixl = []
+            if prefix:
                 try:
-                    prefix = '/'.join(prefix)
+                    prefix = inputToString(prefix, 'utf-8')
                 except Exception:
-                    raise TypeError(f'Invalid prefix type: {type(prefix)}\n' +
-                                    '(This was probably caused by you setting it manually).')
-            prefix = prefix.replace('\\', '/')
-            g = prefix.split('/')
-            if g[-1] == '':
-                g.pop()
-            prefixl = g
-            if prefix[-1] != '/':
-                prefix += '/'
-        self.__prefix = prefix
-        self.__prefixList = prefixl
-        self.__prefixLen = len(prefixl)
-        if prefix and not filename:
-            filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix = False)
-        if filename:
-            self.filename = filename
-        elif hasLen(path):
-            if len(path) < 1536:
+                    try:
+                        prefix = '/'.join(prefix)
+                    except Exception:
+                        raise TypeError(f'Invalid prefix type: {type(prefix)}\n' +
+                                        '(This was probably caused by you setting it manually).')
+                prefix = prefix.replace('\\', '/')
+                g = prefix.split('/')
+                if g[-1] == '':
+                    g.pop()
+                prefixl = g
+                if prefix[-1] != '/':
+                    prefix += '/'
+            self.__prefix = prefix
+            self.__prefixList = prefixl
+            self.__prefixLen = len(prefixl)
+            if prefix and not filename:
+                filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix = False)
+            if filename:
+                self.filename = filename
+            elif hasLen(path):
+                if len(path) < 1536:
+                    self.filename = str(path)
+                else:
+                    self.filename = None
+            elif isinstance(path, pathlib.Path):
                 self.filename = str(path)
             else:
                 self.filename = None
-        elif isinstance(path, pathlib.Path):
-            self.filename = str(path)
-        else:
-            self.filename = None
 
-        self.__open = True
+            self.__open = True
 
-        # Now, load the attachments if we are not delaying them.
-        if not self.__attachmentsDelayed:
-            self.attachments
+            # Now, load the attachments if we are not delaying them.
+            if not self.__attachmentsDelayed:
+                self.attachments
+        except:
+            # *Any* exception here requires that we close the file.
+            try:
+                self.close()
+            except:
+                pass
+            # Raise the exception after trying to close the file.
+            raise
 
     def __enter__(self) -> MSGFile:
         self.__ole.__enter__()
