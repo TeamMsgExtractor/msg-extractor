@@ -27,29 +27,11 @@ class MessageSignedBase(MessageBase):
 
     def __init__(self, path, **kwargs):
         """
-        :param path: path to the msg file in the system or is the raw msg file.
-        :param prefix: used for extracting embeded msg files
-            inside the main one. Do not set manually unless
-            you know what you are doing.
-        :param initAttachment: Optional, the method used when creating an
-            attachment for an MSG file. MUST be a function that takes 2
-            arguments (the MSGFile instance and the directory in the MSG file
-            where the attachment is) and returns an instance of AttachmentBase.
+        Supports all of the options from :method MessageBase.__init__: with some
+        additional ones.
+
         :param signedAttachmentClass: optional, the class the object will use
             for signed attachments.
-        :param filename: optional, the filename to be used by default when
-            saving.
-        :param delayAttachments: optional, delays the initialization of
-            attachments until the user attempts to retrieve them. Allows MSG
-            files with bad attachments to be initialized so the other data can
-            be retrieved.
-        :param overrideEncoding: optional, an encoding to use instead of the one
-            specified by the msg file. Do not report encoding errors caused by
-            this.
-        :param errorBehavior: Optional, the behavior to use in the
-            event of an error when parsing the attachments.
-        :param recipientSeparator: Optional, Separator string to use between
-            recipients.
         """
         self.__signedAttachmentClass = kwargs.get('signedAttachmentClass', SignedAttachment)
         super().__init__(path, **kwargs)

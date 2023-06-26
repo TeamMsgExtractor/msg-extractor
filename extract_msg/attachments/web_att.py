@@ -62,7 +62,7 @@ class WebAttachment(AttachmentBase):
     @property
     def type(self) -> AttachmentType:
         """
-        Returns the (internally used) type of the data.
+        Returns an enum value that identifies the type of attachment.
         """
         return AttachmentType.WEB
 

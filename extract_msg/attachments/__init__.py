@@ -36,17 +36,17 @@ from .signed_att import SignedAttachment
 from .unsupported_att import UnsupportedAttachment
 from .web_att import WebAttachment
 
-
 import logging as _logging
 
-from typing import TYPE_CHECKING as _TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 
-if _TYPE_CHECKING:
+if TYPE_CHECKING:
     from ..msg_classes import MSGFile
 
 _logger = _logging.getLogger(__name__)
 _logger.addHandler(_logging.NullHandler())
+
 
 def initStandardAttachment(msg : MSGFile, dir_) -> AttachmentBase:
     """
@@ -94,7 +94,7 @@ def initStandardAttachment(msg : MSGFile, dir_) -> AttachmentBase:
 
                 propStore._propDict['37050003'] = createProp(propData)
 
-        attMethod = propStore['37050003'] & 7
+        attMethod = propStore['37050003'].value & 7
 
         if msg.exists([dir_, '__substg1.0_37010102']):
                 return Attachment(msg, dir_, propStore)

@@ -30,6 +30,9 @@
 * Fixed an issue that would cause MSG file to never close if an error happened during any of the `__init__` functions for MSG classes.
 * Removed unneeded `chardet` dependency.
 * Removed `Contact.__init__` as it didn't provide any unique behavior.
+* Changed the documentation of `openMsg` to specify that it accepts all options recognized by MSGFile subclasses, allowing the doc string to not be modified every time one of them is changed.
+    * Changed the documentaion of various `__init__` methods to do the same thing.
+* Added `dataType` property to `AttachmentBase` and `SignedAttachment` for checking the class that the data will be, if accessible. Returns `None` if the data is inaccessible, including because accessing it would throw an exception.
 
 **v0.41.5**
 * Fixed an issue from version `0.41.3` where the header being present but missing the `From` field would cause an exception.

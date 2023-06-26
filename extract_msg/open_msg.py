@@ -45,32 +45,17 @@ def _knownMsgClass(classType : str) -> bool:
 def openMsg(path, **kwargs) -> MSGFile:
     """
     Function to automatically open an MSG file and detect what type it is.
-    :param path: Path to the msg file in the system or is the raw msg file.
-    :param prefix: Used for extracting embeded msg files inside the main one.
-        Do not set manually unless you know what you are doing.
-    :param parentMsg: Used for syncronizing named properties instances. Do not
-        set this unless you know what you are doing.
-    :param initAttachment: Optional, the method used when creating an attachment
-        for an MSG file. MUST be a function that takes 2 arguments (the MSGFile
-        instance and the directory in the MSG file where the attachment is) and
-        returns an instance of AttachmentBase.
-    :param signedAttachmentClass: Optional, the class the object will use for
-        signed attachments.
-    :param filename: Optional, the filename to be used by default when saving.
-    :param delayAttachments: Optional, delays the initialization of attachments
-        until the user attempts to retrieve them. Allows MSG files with bad
-        attachments to be initialized so the other data can be retrieved.
-    :param overrideEncoding: Optional, overrides the specified encoding of the
-        MSG file.
-    :param errorBehavior: Optional, the behaviour to use in the event
-        of an error when parsing the attachments.
-    :param recipientSeparator: Optional, Separator string to use between
-        recipients.
-    :param ignoreRtfDeErrors: Optional, specifies that any errors that occur
-        from the usage of RTFDE should be ignored (default: False).
-    If :param strict: is set to `True`, this function will raise an exception
-    when it cannot identify what MSGFile derivitive to use. Otherwise, it will
-    log the error and return a basic MSGFile instance.
+
+    Accepts all of the same arguments as the __init__ method for the class it
+    creates. Extra options will be ignored if the class doesn't know what to do
+    with them, but child instances may end up using them if they understand
+    them. See :method MSGFile.__init__: for a list of all globally recognized
+    options.
+
+    If :param strict: is set to True, this function will raise an exception when
+    it cannot identify what MSGFile derivitive to use. Otherwise, it will log
+    the error and return a basic MSGFile instance. Default is True.
+
     :raises UnsupportedMSGTypeError: if the type is recognized but not suppoted.
     :raises UnrecognizedMSGTypeError: if the type is not recognized.
     """

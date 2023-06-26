@@ -13,7 +13,7 @@ import pathlib
 import weakref
 import zipfile
 
-from typing import List, TYPE_CHECKING, Union
+from typing import List, Optional, Type, TYPE_CHECKING, Union
 
 from ..enums import AttachmentType
 from ..open_msg import openMsg
@@ -202,6 +202,21 @@ class SignedAttachment:
         return self.__data
 
     @property
+    def dataType(self) -> Optional[Type[type]]:
+        """
+        The class that the data type will use, if it can be retrieved.
+
+        This is a safe way to do type checking on data before knowing if it will
+        raise an exception. Returns None if no data will be returns or if an
+        exception will be raised.
+        """
+        try:
+            return None if self.data is None else self.data.__class__
+        except Exception:
+            # All exceptions that accessing data would cause should be silenced.
+            return None
+
+    @property
     def emailMessage(self) -> email.message.Message:
         """
         The email Message instance that is the source for this attachment.
@@ -248,6 +263,6 @@ class SignedAttachment:
     @property
     def type(self) -> AttachmentType:
         """
-        The AttachmentType.
+        Returns an enum value that identifies the type of attachment.
         """
         return AttachmentType.SIGNED if isinstance(self.__data, bytes) else AttachmentType.SIGNED_EMBEDDED

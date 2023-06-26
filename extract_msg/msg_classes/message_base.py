@@ -57,27 +57,9 @@ class MessageBase(MSGFile):
 
     def __init__(self, path, **kwargs):
         """
-        :param path: path to the msg file in the system or is the raw msg file.
-        :param prefix: used for extracting embeded msg files
-            inside the main one. Do not set manually unless
-            you know what you are doing.
-        :param parentMsg: Used for syncronizing named properties instances. Do
-            not set this unless you know what you are doing.
-        :param initAttachment: Optional, the method used when creating an
-            attachment for an MSG file. MUST be a function that takes 2
-            arguments (the MSGFile instance and the directory in the MSG file
-            where the attachment is) and returns an instance of AttachmentBase.
-        :param filename: Optional, the filename to be used by default when
-            saving.
-        :param delayAttachments: Optional, delays the initialization of
-            attachments until the user attempts to retrieve them. Allows MSG
-            files with bad attachments to be initialized so the other data can
-            be retrieved.
-        :param overrideEncoding: Optional, an encoding to use instead of the one
-            specified by the msg file. Do not report encoding errors caused by
-            this.
-        :param errorBehavior: Optional, the behavior to use in the
-            event of an error when parsing the attachments.
+        Supports all of the options from :method MSGFile.__init__: with some
+        additional ones.
+
         :param recipientSeparator: Optional, separator string to use between
             recipients.
         :param deencapsulationFunc: Optional, if specified must be a callable
@@ -92,7 +74,7 @@ class MessageBase(MSGFile):
             internally or they will not be caught. The original deencapsulation
             method will not run if this is set.
         """
-        if 'ignoreRtfDeErrors' in kwargs is not None:
+        if 'ignoreRtfDeErrors' in kwargs:
             import warnings
             warnings.warn(':param ignoreRtfDeErrors: is deprecated. Use :param ErrorBehavior: instead.', DeprecationWarning)
 

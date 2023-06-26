@@ -33,9 +33,8 @@ class PropertiesStore:
         if not isinstance(data, bytes):
             raise TypeError(':param data: MUST be bytes.')
         self.__rawData = data
-        self.__pos = 0
         self.__len = len(data)
-        self.__props = {}
+        self.__props : Dict[PropBase] = {}
         self.__naid = None
         self.__nrid = None
         self.__ac = None
@@ -80,7 +79,7 @@ class PropertiesStore:
     def __contains__(self, key) -> bool:
         return self.__props.__contains__(key)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> PropBase:
         return self.__props.__getitem__(key)
 
     def __iter__(self):

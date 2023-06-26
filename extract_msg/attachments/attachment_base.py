@@ -12,7 +12,7 @@ import logging
 import weakref
 
 from functools import cached_property, partial
-from typing import List, Optional, Tuple, TYPE_CHECKING
+from typing import List, Optional, Tuple, Type, TYPE_CHECKING
 
 from ..enums import AttachmentType
 from ..properties.named import NamedProperties
@@ -409,6 +409,21 @@ class AttachmentBase(abc.ABC):
         """
 
     @property
+    def dataType(self) -> Optional[Type[type]]:
+        """
+        The class that the data type will use, if it can be retrieved.
+
+        This is a safe way to do type checking on data before knowing if it will
+        raise an exception. Returns None if no data will be returns or if an
+        exception will be raised.
+        """
+        try:
+            return None if self.data is None else self.data.__class__
+        except Exception:
+            # All exceptions that accessing data would cause should be silenced.
+            return None
+
+    @property
     def dir(self) -> str:
         """
         Returns the directory inside the MSG file where the attachment is
@@ -547,5 +562,5 @@ class AttachmentBase(abc.ABC):
     @abc.abstractmethod
     def type(self) -> AttachmentType:
         """
-        Returns the (internally used) type of the data.
+        Returns an enum value that identifies the type of attachment.
         """

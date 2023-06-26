@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 __all__ = [
     # Classes.
     'FixedLengthProp'
@@ -9,6 +12,7 @@ __all__ = [
 ]
 
 
+import abc
 import datetime
 import logging
 
@@ -23,13 +27,13 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-def createProp(data : bytes) -> 'PropBase':
+def createProp(data : bytes) -> PropBase:
     temp = constants.st.ST2.unpack(data)[0]
     if temp in constants.FIXED_LENGTH_PROPS:
         return FixedLengthProp(data)
     else:
         if temp not in constants.VARIABLE_LENGTH_PROPS:
-            # DEBUG
+            # DEBUG.
             logger.warning(f'Unknown property type: {properHex(temp)}')
         return VariableLengthProp(data)
 
@@ -95,6 +99,7 @@ class PropBase:
         The type of property.
         """
         return self.__type
+
 
 
 class FixedLengthProp(PropBase):
@@ -173,6 +178,7 @@ class FixedLengthProp(PropBase):
         Property value.
         """
         return self.__value
+
 
 
 class VariableLengthProp(PropBase):

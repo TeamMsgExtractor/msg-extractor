@@ -68,14 +68,17 @@ class MSGFile:
             be retrieved.
         :param filename: Optional, the filename to be used by default when
             saving.
-        :param errorBehavior: Optional, the behavior to use in the event of an
-            certain types of errors.
+        :param errorBehavior: Optional, the behavior to use in the event of
+            certain types of errors. Uses the ErrorBehavior enum.
         :param overrideEncoding: Optional, an encoding to use instead of the one
             specified by the msg file. Do not report encoding errors caused by
             this.
         :param treePath: Internal variable used for giving representation of the
             path, as a tuple of objects, of the MSGFile. When passing, this is
             the path to the parent object of this instance.
+        :param insecureFeatures: Optional, an enum value that specifies if
+            certain insecure features should be enabled. These features should
+            only be used on data that you trust. Uses the InsecureFeatures enum.
 
         :raises InvalidFileFormatError: If the file is not an OleFile or could
             not be parsed as an MSG file.
