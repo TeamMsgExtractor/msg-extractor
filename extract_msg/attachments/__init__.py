@@ -119,19 +119,19 @@ def initStandardAttachment(msg : MSGFile, dir_) -> AttachmentBase:
 
         raise NotImplementedError(f'Could not determine attachment type ({attMethod})!')
 
-    except (NotImplementedError, UnrecognizedMSGTypeError) as e:
+    except (NotImplementedError, UnrecognizedMSGTypeError):
         if msg.errorBehavior & ErrorBehavior.ATTACH_NOT_IMPLEMENTED:
             _logger.exception(f'Error processing attachment at {dir_}')
             return UnsupportedAttachment(msg, dir_, propStore)
         else:
             raise
-    except StandardViolationError as e:
+    except StandardViolationError:
         if msg.errorBehavior & ErrorBehavior.STANDARDS_VIOLATION:
             _logger.exception(f'Unresolvable standards violation in  {dir_}')
             return BrokenAttachment(msg, dir_, propStore)
         else:
             raise
-    except Exception as e:
+    except Exception:
         if msg.errorBehavior & ErrorBehavior.ATTACH_BROKEN:
             _logger.exception(f'Error processing attachment at {dir_}')
             return BrokenAttachment(msg, dir_)

@@ -12,7 +12,8 @@ from typing import Optional, TYPE_CHECKING
 
 from . import registerHandler
 from .custom_handler import CustomAttachmentHandler
-from ...enums import DVAspect
+from ...enums import DVAspect, InsecureFeatures
+from ...exceptions import SecurityError
 
 
 if TYPE_CHECKING:
@@ -93,6 +94,9 @@ class OutlookImageDIB(CustomAttachmentHandler):
         This function requires PIL or Pillow. If neither are found, raises an
         import error.
         """
+        if not self.attachment.msg.insecureFeatures & InsecureFeatures.PIL_IMAGE_PARSING:
+            raise SecurityError('Generating the RTF for a custom attachment requires the insecure feature PIL_IMAGE_PARSING.')
+
         try:
             import PIL.Image
         except ImportError:

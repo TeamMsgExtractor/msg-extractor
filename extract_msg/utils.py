@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import extract_msg.encoding
 
 """
 Utility functions of extract_msg.
@@ -50,7 +49,6 @@ __all__ = [
 
 
 import argparse
-import codecs
 import collections
 import copy
 import datetime
@@ -79,8 +77,7 @@ from . import constants
 from .enums import AttachmentType
 from .exceptions import (
         ConversionError, ExecutableNotFound, IncompatibleOptionsError,
-        InvaildPropertyIdError, TZError,
-        UnknownCodepageError, UnknownTypeError, UnsupportedEncodingError
+        InvaildPropertyIdError, TZError, UnknownTypeError
     )
 
 

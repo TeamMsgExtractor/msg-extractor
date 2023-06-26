@@ -16,14 +16,14 @@
 * Changed `knownMsgClass` to a private function since it is explicitly not being exported by any part of the module.
 * Removed unusued function `getFullClassName`.
 * Fixes to the HTML body when saving as HTML will no longer require the `preparedHtml`/`--prepared-html` option.
-* Removed the exception `BadHtmlError` since it is no longer used.
+* Removed unused exceptions.
 * Entirely reoganized the way attachments are initialized, including the class that will be used in various circumstances. Embedded MSG files, custom attachments, and web attachments will all use dedicated classes that are subclasses of AttachmentBase.
     * With this change, the way to specify a new Attachment class is to override the function used when creating attachments. This can be done by passing `attachmentInit = myFunction` as an option to `openMsg`. This function MUST return an instance of AttachmentBase.
 * Added first implementation of web attachments. Saving is not currently possible, but basic relevent property access is now possible. Saving will not be stopped by this attachment if `skipNotImplemented = True` is passed to the save function.
 * Changed the option to suppress `RTFDE` errors to fall under the `ErrorBehavior` enum. Usage of the original option will be allowable, but is being marked as deprecated. However, it is still a dedicated option from the command line.
     * Also fixed the option not properly ignoring some RTFDE errors, specifically the ones that it is normal for the module to throw.
 * Removed some constants that are not used by the module.
-* Added the `encoding` submodule for encoding tasks, including proper support for Microsoft's implementation of cp950. This gets added to the codecs list as windows-950.
+* Added the `encoding` submodule for encoding tasks, including proper support for Microsoft's implementation of cp950. This gets added to the codecs list as "windows-950".
 * Updated to support `RTFDE` version `0.1.0`. Users encountering random erros from that module should find that those errors have disappeared. If you get errors from it still, bring up the issue on their GitHub.
 * Fixed bug that would cause weird behavior if you gave an empty string as the path for an MSG file.
 * Added support for `IPM.StickyNote`.
@@ -33,6 +33,10 @@
 * Changed the documentation of `openMsg` to specify that it accepts all options recognized by MSGFile subclasses, allowing the doc string to not be modified every time one of them is changed.
     * Changed the documentaion of various `__init__` methods to do the same thing.
 * Added `dataType` property to `AttachmentBase` and `SignedAttachment` for checking the class that the data will be, if accessible. Returns `None` if the data is inaccessible, including because accessing it would throw an exception.
+* Added new enum `InsecureFeatures` and option `insecureFeatures`. This option will allow certain features with security implcations to be used for files that you trust. Currently the only feature it supports is the usage of `PIL`/`Pillow` to open and modify images. All features like this will be opt-in to reduce possible vulnerabilities.
+* Modified all custom exceptions the module uses to derive from a single base class for better organization.
+    * Added new exceptions to handle some of the situations previously handled by base Python exceptions.
+* Changed internal handling of the `prefix` option for `MSGFile.__init__` (and therefore `openMsg`). If you are not setting this manually, you should notice little difference.
 
 **v0.41.5**
 * Fixed an issue from version `0.41.3` where the header being present but missing the `From` field would cause an exception.

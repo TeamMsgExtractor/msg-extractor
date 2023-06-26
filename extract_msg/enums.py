@@ -1179,6 +1179,29 @@ class Importance(enum.Enum):
 
 
 
+class InsecureFeatures(enum.IntFlag):
+    """
+    Insecure options that can be enabled for an MSG file.
+
+    Using ALL is not recommended unless you check this list before updating to
+    a new version of the module, as new features may have been added. It is
+    also not recommended to use these on files you do not trust.
+
+    The following features are avilable:
+    NONE: No insecure features are allowed (default).
+    PIL_IMAGE_PARSING: Various operations requiring PIL or Pillow that will read
+        image data from parts of the MSG file. These operations are usually
+        constructing new images or are converting from one format to another.
+        This may expose you to security issues from those libraries.
+
+    ALL: All of the previously listed features will be enabled for the MSG file.
+    """
+    NONE = 0b0000
+    PIL_IMAGE_PARSING = 0b0001
+    ALL = 0b1111
+
+
+
 class Intelligence(enum.Enum):
     ERROR = -1
     DUMB = 0

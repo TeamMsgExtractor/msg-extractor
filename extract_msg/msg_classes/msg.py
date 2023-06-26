@@ -26,19 +26,19 @@ from ..attachments import (
     )
 from ..encoding import lookupCodePage
 from ..enums import (
-        AttachErrorBehavior, ErrorBehavior, Importance, Priority,
-        PropertiesType, Sensitivity, SideEffect
+        AttachErrorBehavior, ErrorBehavior, InsecureFeatures, Importance,
+        Priority, PropertiesType, Sensitivity, SideEffect
     )
 from ..exceptions import (
-        InvalidFileFormatError, StandardViolationError
+        ConversionError, InvalidFileFormatError, PrefixError,
+        StandardViolationError
     )
 from ..properties.named import Named, NamedProperties
 from ..properties.prop import FixedLengthProp
 from ..properties.properties_store import PropertiesStore
 from ..utils import  (
-        divide, hasLen, inputToMsgPath, inputToString, makeWeakRef,
-        msgPathToString, parseType, properHex, verifyPropertyId, verifyType,
-        windowsUnicode
+        divide, hasLen, inputToMsgPath, makeWeakRef, msgPathToString,
+        parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
     )
 
 
@@ -86,7 +86,7 @@ class MSGFile:
             the standard.
         :raises IOError: If there is an issue opening the MSG file.
         :raises NameError: If the encoding provided is not supported.
-        :raises TypeError: If the prefix is not a supported type.
+        :raises PrefixError: If the prefix is not a supported type.
         :raises TypeError: If the parent is not an instance of MSGFile or a
             subclass.
         :raises ValueError: If the attachment error behavior is not valid.
@@ -95,6 +95,7 @@ class MSGFile:
         specific exceptions was raised.
         """
         # Retrieve all the kwargs that we need.
+        self.__inscFeat = kwargs.get('insecureFeatures', InsecureFeatures.NONE)
         prefix = kwargs.get('prefix', '')
         self.__parentMsg = makeWeakRef(kwargs.get('parentMsg'))
         self.__treePath = kwargs.get('treePath', []) + [makeWeakRef(self)]
@@ -165,20 +166,10 @@ class MSGFile:
             prefixl = []
             if prefix:
                 try:
-                    prefix = inputToString(prefix, 'utf-8')
-                except Exception:
-                    try:
-                        prefix = '/'.join(prefix)
-                    except Exception:
-                        raise TypeError(f'Invalid prefix type: {type(prefix)}\n' +
-                                        '(This was probably caused by you setting it manually).')
-                prefix = prefix.replace('\\', '/')
-                g = prefix.split('/')
-                if g[-1] == '':
-                    g.pop()
-                prefixl = g
-                if prefix[-1] != '/':
-                    prefix += '/'
+                    prefixl = inputToMsgPath(prefix)
+                    prefix = '/'.join(prefixl) + '/'
+                except ConversionError:
+                    raise PrefixError(f'The provided prefix could not be used: {prefix}')
             self.__prefix = prefix
             self.__prefixList = prefixl
             self.__prefixLen = len(prefixl)
@@ -764,8 +755,8 @@ class MSGFile:
     @property
     def errorBehavior(self) -> ErrorBehavior:
         """
-        The behavior to follow when an attachment raises an exception. Will be
-        a member of the ErrorBehavior enum.
+        The behavior to follow when certain errors occur. Will be an instance of
+        the ErrorBehavior enum.
         """
         return self.__errorBehavior
 
@@ -796,6 +787,14 @@ class MSGFile:
         need to use it externally for whatever reason.
         """
         return self.__initAttachmentFunc
+
+    @property
+    def insecureFeatures(self) -> InsecureFeatures:
+        """
+        An enum specifying what insecure features have been enabled for this
+        file.
+        """
+        return self.__inscFeat
 
     @property
     def kwargs(self) -> dict:
@@ -873,7 +872,7 @@ class MSGFile:
         return self.__prefixLen
 
     @property
-    def prefixList(self):
+    def prefixList(self) -> List[str]:
         """
         Returns the prefix list of the Message instance. Intended for developer
         use.
