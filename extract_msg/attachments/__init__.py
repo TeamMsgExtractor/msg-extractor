@@ -94,7 +94,7 @@ def initStandardAttachment(msg : MSGFile, dir_) -> AttachmentBase:
 
                 propStore._propDict['37050003'] = createProp(propData)
 
-        attMethod = propStore['3705003'] & 7
+        attMethod = propStore['37050003'] & 7
 
         if msg.exists([dir_, '__substg1.0_37010102']):
                 return Attachment(msg, dir_, propStore)
