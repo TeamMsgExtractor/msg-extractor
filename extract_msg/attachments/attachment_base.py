@@ -12,7 +12,7 @@ import logging
 import weakref
 
 from functools import cached_property, partial
-from typing import List, Optional, Tuple, Type, TYPE_CHECKING
+from typing import List, Optional, Tuple, Type, TYPE_CHECKING, Union
 
 from ..enums import AttachmentType
 from ..properties.named import NamedProperties
@@ -311,7 +311,7 @@ class AttachmentBase(abc.ABC):
         """
 
     @abc.abstractmethod
-    def save(self, **kwargs):
+    def save(self, **kwargs) -> Optional[Union[str, object]]:
         """
         Saves the attachment data.
 
@@ -341,6 +341,13 @@ class AttachmentBase(abc.ABC):
             save function.
         :param skipEmbedded: If True, skips saving this attachment if it is an
             embedded MSG file.
+
+        The return type from this function can be anything, but it SHOULD follow
+        the following rules:
+            * Returns None if nothing is saved.
+            * Returns a non-string object if the attachment is saved but not as
+              pure bytes.
+            * Returns a string with the path to the file that was saved.
         """
 
     @property

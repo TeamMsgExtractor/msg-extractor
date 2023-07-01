@@ -61,7 +61,7 @@ class SignedAttachment:
         if self.__data is None:
             self.__data = data
 
-    def save(self, **kwargs):
+    def save(self, **kwargs) -> Optional[Union[str, MSGFile]]:
         """
         Saves the attachment data.
 
@@ -171,17 +171,19 @@ class SignedAttachment:
             return str(fullFilename)
         else:
             if kwargs.get('extractEmbedded', False):
+                ret = str(fullFilename)
                 with _open(str(fullFilename), mode) as f:
                     # We just use the data we were given for this one.
                     f.write(self.__asBytes)
             else:
+                ret = self.data
                 self.saveEmbededMessage(**kwargs)
 
             # Close the ZipFile if this function created it.
             if _zip and createdZip:
                 _zip.close()
 
-            return self.msg
+            return ret
 
     def saveEmbededMessage(self, **kwargs) -> None:
         """

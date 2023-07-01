@@ -1,4 +1,5 @@
 **v0.42.0**
+* [[TeamMsgExtractor #372](https://github.com/TeamMsgExtractor/msg-extractor/issues/372)] Addressed an issue where the save functions would sometimes return unexpected types. This has been addressed by fixing some of the underlying bugs (wrong type returned, wrong object returned, etc.) and adding typing information so the return types would be properly documented.
 * Added new submodule `custom_attachments`. This submodule provides an extendable way to handle custom attachment types, attachment types whose structure and formatting are not defined in the Microsoft documentation for MSG files.
 * Added new property `AttachmentBase.clsid` which returns the listed CLSID value of the data stream/storage of the attachment.
 * Changed internal behavior of `MSGFile.attachments`. This should not cause any noticeable changes to the output.
@@ -11,7 +12,6 @@
 * Switched much of the internal code (and the `treePath` property of all classes that have it) to using `weakref.ReferenceType` to avoid hard cyclic references.
 * Fixed `Recipient._getTypedStream` never returning a value.
 * Added additional type hints in various places.
-* Corrected `Attachment.save` so that saving an embedded msg file returns that embedded msg file instead of the parent msg file.
 * Modified tests.py to only run if it is run as a file instead of imported.
 * Changed `knownMsgClass` to a private function since it is explicitly not being exported by any part of the module.
 * Removed unusued function `getFullClassName`.

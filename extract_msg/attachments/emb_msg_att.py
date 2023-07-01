@@ -16,7 +16,7 @@ from ..enums import AttachmentType
 from ..open_msg import openMsg
 from ..utils import createZipOpen, prepareFilename
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, Union
 
 
 if TYPE_CHECKING:
@@ -58,7 +58,7 @@ class EmbeddedMsgAttachment(AttachmentBase):
         else:
             return self.name
 
-    def save(self, **kwargs) -> Optional[MSGFile]:
+    def save(self, **kwargs) -> Optional[Union[str, MSGFile]]:
         # First check if we are skipping embedded messages and stop
         # *immediately* if we are.
         if kwargs.get('skipEmbedded'):
@@ -106,16 +106,18 @@ class EmbeddedMsgAttachment(AttachmentBase):
         fullFilename = customPath / filename
 
         if kwargs.get('extractEmbedded', False):
+            ret = str(fullFilename)
             with _open(str(fullFilename), mode) as f:
                 self.data.export(f)
         else:
+            ret = self.data
             self.data.save(**kwargs)
 
         # Close the ZipFile if this function created it.
         if _zip and createdZip:
             _zip.close()
 
-        return self.__data
+        return ret
 
     save.__doc__ = _saveDoc
 
