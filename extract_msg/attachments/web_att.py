@@ -36,7 +36,7 @@ class WebAttachment(AttachmentBase):
         """
         The bytes making up the attachment data.
         """
-        raise NotImplementedError('Cannot get the data of a web attachment')
+        raise NotImplementedError('Cannot get the data of a web attachment.')
 
     @property
     def originalPermissionType(self) -> Optional[AttachmentPermissionType]:
