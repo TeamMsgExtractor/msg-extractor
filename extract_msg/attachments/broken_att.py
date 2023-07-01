@@ -16,8 +16,9 @@ class BrokenAttachment(AttachmentBase):
     def getFilename(self, **kwargs) -> str:
         raise NotImplementedError('Broken attachments cannot be saved.')
 
-    def save(self, **kwargs):
-        raise NotImplementedError('Broken attachments cannot be saved.')
+    def save(self, **kwargs) -> None:
+        if not kwargs.get('skipNotImplemented', False):
+            raise NotImplementedError('Broken attachments cannot be saved.')
 
     @property
     def data(self) -> None:
