@@ -1004,33 +1004,29 @@ class MessageBase(MSGFile):
 
         return bodies
 
-    @property
+    @functools.cached_property
     def header(self) -> email.message.Message:
         """
         Returns the message header, if it exists. Otherwise it will generate
         one.
         """
-        try:
-            return self._header
-        except AttributeError:
-            headerText = self.headerText
-            if headerText:
-                self._header = EmailParser().parsestr(headerText)
-                self._header['date'] = self.date
-            else:
-                logger.info('Header is empty or was not found. Header will be generated from other streams.')
-                header = EmailParser().parsestr('')
-                header.add_header('Date', self.date)
-                header.add_header('From', self.sender)
-                header.add_header('To', self.to)
-                header.add_header('Cc', self.cc)
-                header.add_header('Bcc', self.bcc)
-                header.add_header('Message-Id', self.messageId)
-                # TODO find authentication results outside of header
-                header.add_header('Authentication-Results', None)
-                self._header = header
+        headerText = self.headerText
+        if headerText:
+            header = EmailParser().parsestr(headerText)
+            header['date'] = self.date
+        else:
+            logger.info('Header is empty or was not found. Header will be generated from other streams.')
+            header = EmailParser().parsestr('')
+            header.add_header('Date', self.date)
+            header.add_header('From', self.sender)
+            header.add_header('To', self.to)
+            header.add_header('Cc', self.cc)
+            header.add_header('Bcc', self.bcc)
+            header.add_header('Message-Id', self.messageId)
+            # TODO find authentication results outside of header
+            header.add_header('Authentication-Results', None)
 
-            return self._header
+        return header
 
     @property
     def headerDict(self) -> dict:
