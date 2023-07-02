@@ -3,6 +3,7 @@ __all__ = [
 ]
 
 
+import functools
 import logging
 
 from typing import Optional, Tuple, Union
@@ -45,99 +46,28 @@ class Recipient:
             self.__type = RecipientType(0xF & self.__typeFlags)
         self.__formatted = f'{self.__name} <{self.__email}>'
 
-    def _ensureSet(self, variable, streamID, stringStream : bool = True, **kwargs):
+    def _getPropertyAs(self, propertyName, overrideClass = None, preserveNone : bool = True):
         """
-        Ensures that the variable exists, otherwise will set it using the
-        specified stream. After that, return said variable.
-
-        If the specified stream is not a string stream, make sure to set
-        :param string stream: to False.
+        Returns the property, setting the class if specified.
 
         :param overrideClass: Class/function to use to morph the data that was
             read. The data will be the first argument to the class's __init__
             function or the function itself, if that is what is provided. By
             default, this will be completely ignored if the value was not found.
-        :param preserveNone: If true (default), causes the function to ignore
+        :param preserveNone: If True (default), causes the function to ignore
             :param overrideClass: when the value could not be found (is None).
             If this is changed to False, then the value will be used regardless.
-
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
         """
         try:
-            return getattr(self, variable)
-        except AttributeError:
-            if stringStream:
-                value = self._getStringStream(streamID)
-            else:
-                value = self._getStream(streamID)
-            # Check if we should be overriding the data type for this instance.
-            if kwargs:
-                overrideClass = kwargs.get('overrideClass')
-                if overrideClass is not None and (value is not None or not kwargs.get('preserveNone', True)):
-                    value = overrideClass(value)
-            setattr(self, variable, value)
-            return value
+            value = self.props[propertyName].value
+        except (KeyError, AttributeError):
+            value = None
+        # Check if we should be overriding the data type for this instance.
+        if overrideClass is not None:
+            if (value is not None or not preserveNone):
+                value = overrideClass(value)
 
-    def _ensureSetProperty(self, variable : str, propertyName : str, **kwargs):
-        """
-        Ensures that the variable exists, otherwise will set it using the
-        property. After that, return said variable.
-
-        :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. By
-            default, this will be completely ignored if the value was not found.
-        :param preserveNone: If true (default), causes the function to ignore
-            :param overrideClass: when the value could not be found (is None).
-            If this is changed to False, then the value will be used regardless.
-
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
-        """
-        try:
-            return getattr(self, variable)
-        except AttributeError:
-            try:
-                value = self.props[propertyName].value
-            except (KeyError, AttributeError):
-                value = None
-            # Check if we should be overriding the data type for this instance.
-            if kwargs:
-                overrideClass = kwargs.get('overrideClass')
-                if overrideClass is not None and (value is not None or not kwargs.get('preserveNone', True)):
-                    value = overrideClass(value)
-            setattr(self, variable, value)
-            return value
-
-    def _ensureSetTyped(self, variable : str, _id, **kwargs):
-        """
-        Like the other ensure set functions, but designed for when something
-        could be multiple types (where only one will be present). This way you
-        have no need to set the type, it will be handled for you.
-
-        :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. By
-            default, this will be completely ignored if the value was not found.
-        :param preserveNone: If true (default), causes the function to ignore
-            :param overrideClass: when the value could not be found (is None).
-            If this is changed to False, then the value will be used regardless.
-
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
-        """
-        try:
-            return getattr(self, variable)
-        except AttributeError:
-            value = self._getTypedData(_id)
-            # Check if we should be overriding the data type for this instance.
-            if kwargs:
-                overrideClass = kwargs.get('overrideClass')
-                if overrideClass is not None and (value is not None or not kwargs.get('preserveNone', True)):
-                    value = overrideClass(value)
-            setattr(self, variable, value)
-            return value
+        return value
 
     def _getStream(self, filename) -> Optional[bytes]:
         """
@@ -152,6 +82,33 @@ class Recipient:
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg._getStream([self.__dir, filename])
+
+    def _getStreamAs(self, streamID, stringStream : bool = True, overrideClass = None, preserveNone : bool = True):
+        """
+        Returns the specified stream, modifying it to the class if specified.
+
+        If the specified stream is not a string stream, make sure to set
+        :param stringStream: to False.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. By
+            default, this will be completely ignored if the value was not found.
+        :param preserveNone: If true (default), causes the function to ignore
+            :param overrideClass: when the value could not be found (is None).
+            If this is changed to False, then the value will be used regardless.
+        """
+        if stringStream:
+            value = self._getStringStream(streamID)
+        else:
+            value = self._getStream(streamID)
+
+        # Check if we should be overriding the data type for this instance.
+        if overrideClass is not None:
+            if value is not None or not preserveNone:
+                value = overrideClass(value)
+
+        return value
 
     def _getStringStream(self, filename) -> Optional[str]:
         """
@@ -170,6 +127,28 @@ class Recipient:
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg._getStringStream([self.__dir, filename])
+
+    def _getTypedAs(self, _id : str, overrideClass = None, preserveNone : bool = True):
+        """
+        Like the other get as functions, but designed for when something
+        could be multiple types (where only one will be present). This way you
+        have no need to set the type, it will be handled for you.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. By
+            default, this will be completely ignored if the value was not found.
+        :param preserveNone: If true (default), causes the function to ignore
+            :param overrideClass: when the value could not be found (is None).
+            If this is changed to False, then the value will be used regardless.
+        """
+        value = self._getTypedData(_id)
+        # Check if we should be overriding the data type for this instance.
+        if overrideClass is not None:
+            if value is not None or not preserveNone:
+                value = overrideClass(value)
+
+        return value
 
     def _getTypedData(self, _id, _type = None):
         """
@@ -270,12 +249,12 @@ class Recipient:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.existsTypedProperty(id, self.__dir, _type, True, self.__props)
 
-    @property
+    @functools.cached_property
     def account(self) -> Optional[str]:
         """
         Returns the account of this recipient.
         """
-        return self._ensureSet('_account', '__substg1.0_3A00')
+        return self._getStringStream('__substg1.0_3A00')
 
     @property
     def email(self) -> Optional[str]:
@@ -284,12 +263,12 @@ class Recipient:
         """
         return self.__email
 
-    @property
+    @functools.cached_property
     def entryID(self) -> Optional[PermanentEntryID]:
         """
         Returns the recipient's Entry ID.
         """
-        return self._ensureSet('_entryID', '__substg1.0_0FFF0102', False, overrideClass = PermanentEntryID)
+        return self._getStreamAs('__substg1.0_0FFF0102', False, PermanentEntryID)
 
     @property
     def formatted(self) -> str:
@@ -298,12 +277,12 @@ class Recipient:
         """
         return self.__formatted
 
-    @property
+    @functools.cached_property
     def instanceKey(self) -> Optional[bytes]:
         """
         Returns the instance key of this recipient.
         """
-        return self._ensureSet('_instanceKey', '__substg1.0_0FF60102', False)
+        return self._getStream('__substg1.0_0FF60102')
 
     @property
     def name(self) -> Optional[str]:
@@ -319,33 +298,33 @@ class Recipient:
         """
         return self.__props
 
-    @property
+    @functools.cached_property
     def recordKey(self) -> Optional[bytes]:
         """
         Returns the instance key of this recipient.
         """
-        return self._ensureSet('_recordKey', '__substg1.0_0FF90102', False)
+        return self._getStream('__substg1.0_0FF90102')
 
-    @property
+    @functools.cached_property
     def searchKey(self) -> Optional[bytes]:
         """
         Returns the search key of this recipient.
         """
-        return self._ensureSet('_searchKey', '__substg1.0_300B0102', False)
+        return self._getStream('__substg1.0_300B0102')
 
-    @property
+    @functools.cached_property
     def smtpAddress(self) -> Optional[str]:
         """
         Returns the SMTP address of this recipient.
         """
-        return self._ensureSet('_smtpAddress', '__substg1.0_39FE')
+        return self._getStringStream('__substg1.0_39FE')
 
-    @property
+    @functools.cached_property
     def transmittableDisplayName(self) -> Optional[str]:
         """
         Returns the transmittable display name of this recipient.
         """
-        return self._ensureSet('_transmittableDisplayName', '__substg1.0_3A20')
+        return self._getStringStream('__substg1.0_3A20')
 
     @property
     def type(self) -> Union[RecipientType, MeetingRecipientType]:
