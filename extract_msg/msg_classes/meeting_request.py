@@ -4,8 +4,9 @@ __all__ = [
 
 
 import datetime
+import functools
 
-from typing import List, Optional, Set
+from typing import List, Optional
 
 from .. import constants
 from .meeting_related import MeetingRelated
@@ -17,42 +18,42 @@ class MeetingRequest(MeetingRelated):
     Class for handling Meeting Request and Meeting Update objects.
     """
 
-    @property
+    @functools.cached_property
     def appointmentMessageClass(self) -> Optional[str]:
         """
         Indicates the value of the PidTagMessageClass property of the Meeting
         object that is to be generated from the Meeting Request object. MUST
         start with "IPM.Appointment".
         """
-        return self._getNamedAs('_appointmentMessageClass', '0024', constants.ps.PSETID_MEETING)
+        return self._getNamedAs('0024', constants.ps.PSETID_MEETING)
 
-    @property
+    @functools.cached_property
     def calendarType(self) -> Optional[RecurCalendarType]:
         """
         The value of the CalendarType field from the PidLidAppointmentRecur
         property if the Meeting Request object represents a recurring series or
         an exception.
         """
-        return self._getNamedAs('_calendarType', '001C', constants.ps.PSETID_MEETING, overrideClass = RecurCalendarType)
+        return self._getNamedAs('001C', constants.ps.PSETID_MEETING, RecurCalendarType)
 
-    @property
-    def changeHighlight(self) -> Optional[Set[MeetingObjectChange]]:
+    @functools.cached_property
+    def changeHighlight(self) -> Optional[MeetingObjectChange]:
         """
         Soecifies a bit field that indicates how the Meeting object has been
         changed.
 
-        Returns a set of flags.
+        Returns a union of the set flags.
         """
-        return self._getNamedAs('_changeHighlight', '8204', constants.ps.PSETID_APPOINTMENT, overrideClass = MeetingObjectChange.fromBits)
+        return self._getNamedAs('8204', constants.ps.PSETID_APPOINTMENT, MeetingObjectChange)
 
-    @property
+    @functools.cached_property
     def forwardInstance(self) -> bool:
         """
         Indicates that the Meeting Request object represents an exception to a
         recurring series, and it was forwarded (even when forwarded by the
         organizer) rather than being an invitation sent by the organizer.
         """
-        return self._getNamedAs('_forwardInstance', '820A', constants.ps.PSETID_APPOINTMENT, overrideClass = bool, preserveNone = False)
+        return self._getNamedAs('820A', constants.ps.PSETID_APPOINTMENT, bool, False)
 
     @property
     def headerFormatProperties(self) -> constants.HEADER_FORMAT_TYPE:
@@ -132,41 +133,41 @@ class MeetingRequest(MeetingRelated):
         }
 
 
-    @property
+    @functools.cached_property
     def intendedBusyStatus(self) -> Optional[BusyStatus]:
         """
         The value of the busyStatus on the Meeting object in the organizer's
         calendar at the time the Meeting Request object or Meeting Update object
         was sent.
         """
-        return self._getNamedAs('_intendedBusyStatus', '8224', constants.ps.PSETID_APPOINTMENT, overrideClass = BusyStatus)
+        return self._getNamedAs('8224', constants.ps.PSETID_APPOINTMENT, BusyStatus)
 
-    @property
+    @functools.cached_property
     def meetingType(self) -> Optional[MeetingType]:
         """
         The type of Meeting Request object or Meeting Update object.
         """
-        return self._getNamedAs('_meetingType', '0026', constants.ps.PSETID_MEETING, overrideClass = MeetingType)
+        return self._getNamedAs('0026', constants.ps.PSETID_MEETING, MeetingType)
 
-    @property
+    @functools.cached_property
     def oldLocation(self) -> Optional[str]:
         """
         The original value of the location property before a meeting update.
         """
-        return self._getNamedAs('_oldLocation', '0028', constants.ps.PSETID_MEETING)
+        return self._getNamedAs('0028', constants.ps.PSETID_MEETING)
 
-    @property
+    @functools.cached_property
     def oldWhenEndWhole(self) -> Optional[datetime.datetime]:
         """
         The original value of the appointmentEndWhole property before a meeting
         update.
         """
-        return self._getNamedAs('_oldWhenEndWhole', '002A', constants.ps.PSETID_MEETING)
+        return self._getNamedAs('002A', constants.ps.PSETID_MEETING)
 
-    @property
+    @functools.cached_property
     def oldWhenStartWhole(self) -> Optional[datetime.datetime]:
         """
         The original value of the appointmentStartWhole property before a
         meeting update.
         """
-        return self._getNamedAs('_oldWhenStartWhole', '0029', constants.ps.PSETID_MEETING)
+        return self._getNamedAs('0029', constants.ps.PSETID_MEETING)

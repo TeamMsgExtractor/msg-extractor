@@ -246,7 +246,7 @@ class Task(MessageBase):
     @functools.cached_property
     def taskMultipleRecipients(self) -> Optional[TaskMultipleRecipients]:
         """
-        Returns a set of flags that specify optimization hints about the
+        Returns a union of flags that specify optimization hints about the
         recipients of a Task object.
         """
         return self._getNamedAs('8120', constants.ps.PSETID_TASK, TaskMultipleRecipients)

@@ -3,6 +3,8 @@ __all__ = [
 ]
 
 
+import functools
+
 from typing import Optional
 
 from .. import constants
@@ -15,7 +17,7 @@ class MeetingForwardNotification(MeetingRelated):
     Class for handling Meeting Forward Notification objects.
     """
 
-    @property
+    @functools.cached_property
     def forwardNotificationRecipients(self) -> Optional[bytes]:
         """
         Bytes containing a list of RecipientRow structures that indicate the
@@ -24,7 +26,7 @@ class MeetingForwardNotification(MeetingRelated):
         Incomplete, looks to be the same structure as
         appointmentUnsendableRecipients, so we need more examples of this.
         """
-        return self._getNamedAs('_forwardNotificationRecipients', '8261', constants.ps.PSETID_APPOINTMENT)
+        return self._getNamedAs('8261', constants.ps.PSETID_APPOINTMENT)
 
     @property
     def headerFormatProperties(self) -> constants.HEADER_FORMAT_TYPE:
@@ -88,10 +90,10 @@ class MeetingForwardNotification(MeetingRelated):
             },
         }
 
-    @property
+    @functools.cached_property
     def promptSendUpdate(self) -> bool:
         """
         Indicates that the Meeting Forward Notification object was out-of-date
         when it was received.
         """
-        return self._getNamedAs('_promptSendUpdate', '8045', constants.ps.PSETID_COMMON, overrideClass = bool, preserveNone = False)
+        return self._getNamedAs('8045', constants.ps.PSETID_COMMON, bool, False)

@@ -40,6 +40,7 @@
 * Changed internal handling of the `prefix` option for `MSGFile.__init__` (and therefore `openMsg`). If you are not setting this manually, you should notice little difference.
 * Made enums less strict and converted all using `fromBits` to be `IntFlag` enums.
 * Fixed `CalendarBase.keywords` being blatantly incorrect (it was so bad I don't know how it slipped through).
+* Fixed `Contact.gender` being blatantly incorrect.
 
 **v0.41.5**
 * Fixed an issue from version `0.41.3` where the header being present but missing the `From` field would cause an exception.
