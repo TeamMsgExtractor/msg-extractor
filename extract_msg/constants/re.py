@@ -16,7 +16,7 @@ import re
 
 
 # Characters that are invalid in a filename.
-INVALID_FILENAME_CHARACTERS = re.compile(r'[\\/:*?"<>|]')
+INVALID_FILENAME_CHARS = re.compile(r'[\\/:*?"<>|]')
 # Regular expression to find sections of spaces for htmlSanitize.
 HTML_SAN_SPACE = re.compile('  +')
 # Regular expression to find the start of the html body.

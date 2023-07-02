@@ -3,12 +3,11 @@ __all__ = [
 ]
 
 
+from typing import Optional
+
 from .. import constants
 from .attachment_base import AttachmentBase
-from ..enums import AttachmentPermissionType, AttachmentType
-
-
-from typing import Optional
+from ..enums import AttachmentPermissionType, AttachmentType, SaveType
 
 
 class WebAttachment(AttachmentBase):
@@ -20,7 +19,7 @@ class WebAttachment(AttachmentBase):
     def getFilename(self) -> str:
         raise NotImplementedError('Cannot get the filename of a web attachment.')
 
-    def save(self, **kwargs) -> None:
+    def save(self, **kwargs) -> constants.SAVE_TYPE:
         """
         Raises a NotImplementedError unless :param skipNotImplemented: is set to
         True. If it is, returns None to signify the attachment was skipped. This
@@ -29,6 +28,8 @@ class WebAttachment(AttachmentBase):
         """
         if not kwargs.get('skipNotImplemented', False):
             raise NotImplementedError('Web attachments cannot be saved.')
+
+        return (SaveType.NONE, None)
 
 
     @property

@@ -3,8 +3,9 @@ __all__ = [
 ]
 
 
+from .. import constants
 from .attachment_base import AttachmentBase
-from ..enums import AttachmentType
+from ..enums import AttachmentType, SaveType
 
 
 class UnsupportedAttachment(AttachmentBase):
@@ -12,10 +13,10 @@ class UnsupportedAttachment(AttachmentBase):
     An attachment whose type is not currently supported.
     """
 
-    def getFilename(self, **kwargs) -> str:
+    def getFilename(self, **_) -> str:
         raise NotImplementedError('Unsupported attachments cannot be saved.')
 
-    def save(self, **kwargs) -> None:
+    def save(self, **kwargs) -> constants.SAVE_TYPE:
         """
         Raises a NotImplementedError unless :param skipNotImplemented: is set to
         True. If it is, returns None to signify the attachment was skipped. This

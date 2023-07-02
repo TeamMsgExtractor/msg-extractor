@@ -1544,6 +1544,31 @@ class RuleActionType(enum.Enum):
 
 
 
+class SaveType(enum.Enum):
+    """
+    Specifies the way that a function saved the data. Used to determine how the
+    return value from a save function should be read.
+
+    CUSTOM: An unlisted save method was used, and the second value is
+        unspecified.
+    NONE: No data was saved, and the second tuple value should be None.
+    FILE: A single file was save, and the location is the second value.
+    FILES: Multiple files were created, and the second value is a list of the
+        locations.
+    FOLDER: A folder was created to store data, and the location is the second
+        value.
+    FOLDERS: Multiple folders were created to store data, and the second value
+        is a list of the locations.
+    """
+    CUSTOM = -1
+    NONE = 0
+    FILE = 1
+    FILES = 2
+    FOLDER = 3
+    FOLDERS = 4
+
+
+
 class Sensitivity(enum.Enum):
     NORMAL = 0
     PERSONAL = 1

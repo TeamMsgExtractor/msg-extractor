@@ -1,6 +1,3 @@
-from __future__ import annotations
-
-
 __all__ = [
     'MessageBase',
 ]
@@ -29,7 +26,9 @@ from typing import Callable, List, Optional, Union
 from .. import constants
 from .._rtf.create_doc import createDocument
 from .._rtf.inject_rtf import injectStartRTF
-from ..enums import BodyTypes, DeencapType, ErrorBehavior, RecipientType
+from ..enums import (
+        BodyTypes, DeencapType, ErrorBehavior, RecipientType, SaveType
+    )
 from ..exceptions import (
         DataNotFoundError, DeencapMalformedData, DeencapNotEncapsulated,
         IncompatibleOptionsError, WKError
@@ -120,48 +119,41 @@ class MessageBase(MSGFile):
         """
         Returns the specified recipient field.
         """
-        private = '_' + recipientType
         recipientInt = RecipientType(recipientInt)
-        try:
-            return getattr(self, private)
-        except AttributeError:
-            value = None
-            # Check header first.
-            if self.headerInit():
-                value = self.header[recipientType]
-                if value:
-                    value = decodeRfc2047(value)
-                    value = value.replace(',', self.__recipientSeparator)
-
-            # If the header had a blank field or didn't have the field, generate
-            # it manually.
-            if not value:
-                # Check if the header has initialized.
-                if self.headerInit():
-                    logger.info(f'Header found, but "{recipientType}" is not included. Will be generated from other streams.')
-
-                # Get a list of the recipients of the specified type.
-                foundRecipients = tuple(recipient.formatted for recipient in self.recipients if recipient.type == recipientInt)
-
-                # If we found recipients, join them with the recipient separator
-                # and a space.
-                if len(foundRecipients) > 0:
-                    value = (self.__recipientSeparator + ' ').join(foundRecipients)
-
-            # Code to fix the formatting so it's all a single line. This allows
-            # the user to format it themself if they want. This should probably
-            # be redone to use re or something, but I can do that later. This
-            # shouldn't be a huge problem for now.
+        value = None
+        # Check header first.
+        if self.headerInit():
+            value = self.header[recipientType]
             if value:
-                value = value.replace(' \r\n\t', ' ').replace('\r\n\t ', ' ').replace('\r\n\t', ' ')
-                value = value.replace('\r\n', ' ').replace('\r', ' ').replace('\n', ' ')
-                while value.find('  ') != -1:
-                    value = value.replace('  ', ' ')
+                value = decodeRfc2047(value)
+                value = value.replace(',', self.__recipientSeparator)
 
-            # Set the field in the class.
-            setattr(self, private, value)
+        # If the header had a blank field or didn't have the field, generate
+        # it manually.
+        if not value:
+            # Check if the header has initialized.
+            if self.headerInit():
+                logger.info(f'Header found, but "{recipientType}" is not included. Will be generated from other streams.')
 
-            return value
+            # Get a list of the recipients of the specified type.
+            foundRecipients = tuple(recipient.formatted for recipient in self.recipients if recipient.type == recipientInt)
+
+            # If we found recipients, join them with the recipient separator
+            # and a space.
+            if len(foundRecipients) > 0:
+                value = (self.__recipientSeparator + ' ').join(foundRecipients)
+
+        # Code to fix the formatting so it's all a single line. This allows
+        # the user to format it themself if they want. This should probably
+        # be redone to use re or something, but I can do that later. This
+        # shouldn't be a huge problem for now.
+        if value:
+            value = value.replace(' \r\n\t', ' ').replace('\r\n\t ', ' ').replace('\r\n\t', ' ')
+            value = value.replace('\r\n', ' ').replace('\r', ' ').replace('\n', ' ')
+            while value.find('  ') != -1:
+                value = value.replace('  ', ' ')
+
+        return value
 
     def deencapsulateBody(self, rtfBody : bytes, bodyType : DeencapType) -> Optional[Union[bytes, str]]:
         """
@@ -289,7 +281,7 @@ class MessageBase(MSGFile):
             'body': decode_utf7(self.body),
         })
 
-    def getSaveBody(self, **kwargs) -> bytes:
+    def getSaveBody(self, **_) -> bytes:
         """
         Returns the plain text body that will be used in saving based on the
         arguments.
@@ -585,7 +577,7 @@ class MessageBase(MSGFile):
         logger.debug('Using _rtf module to inject RTF text header.')
         return createDocument(injectStartRTF(self.rtfBody, injectableHeader))
 
-    def save(self, **kwargs) -> MessageBase:
+    def save(self, **kwargs) -> constants.SAVE_TYPE:
         """
         Saves the message body and attachments found in the message.
 
@@ -686,164 +678,165 @@ class MessageBase(MSGFile):
         if pdf:
             kwargs['preparedHtml'] = True
 
-        # ZipFile handling.
-        if _zip:
-            # `raw` and `zip` are incompatible.
-            if raw:
-                raise IncompatibleOptionsError('The options `raw` and `zip` are incompatible.')
-            # If we are doing a zip file, first check that we have been given a
-            # path.
-            if isinstance(_zip, (str, pathlib.Path)):
-                # If we have a path then we use the zip file.
-                _zip = zipfile.ZipFile(_zip, 'a', zipfile.ZIP_DEFLATED)
-                kwargs['zip'] = _zip
-                createdZip = True
-            else:
-                createdZip = False
-            # Path needs to be done in a special way if we are in a zip file.
-            path = pathlib.Path(kwargs.get('customPath', ''))
-            # Set the open command to be that of the zip file.
-            _open = createZipOpen(_zip.open)
-            # Zip files use w for writing in binary.
-            mode = 'w'
-        else:
-            path = pathlib.Path(kwargs.get('customPath', '.')).absolute()
-            mode = 'wb'
-            _open = open
+        # Try to get the body, if needed, before messing with the path.
+        if not attachOnly:
+            # Check what to save the body with.
+            fext = 'json' if _json else 'txt'
 
-        # Reset this for sub save calls.
-        kwargs['customFilename'] = None
+            fallbackToPlain = False
+            useHtml = False
+            usePdf = False
+            useRtf = False
+            if html:
+                if self.htmlBody:
+                    useHtml = True
+                    fext = 'html'
+                elif not allowFallback:
+                    if skipBodyNotFound:
+                        fext = None
+                    else:
+                        raise DataNotFoundError('Could not find the htmlBody.')
 
-        # Check if incompatible options have been provided in any way.
-        if _json + html + rtf + raw + attachOnly + pdf > 1:
-            raise IncompatibleOptionsError('Only one of the following options may be used at a time: json, raw, html, rtf, attachmentsOnly, pdf.')
+            if pdf:
+                if self.htmlBody:
+                    usePdf = True
+                    fext = 'pdf'
+                elif not allowFallback:
+                    if skipBodyNotFound:
+                        fext = None
+                    else:
+                        raise DataNotFoundError('Count not find the htmlBody to convert to pdf.')
 
-        # TODO: insert code here that will handle checking all of the msg files
-        # to see if the path with overflow.
-
-        if customFilename:
-            # First we need to validate it. If there are invalid characters,
-            # this will detect it.
-            if constants.re.INVALID_FILENAME_CHARACTERS.search(customFilename):
-                raise ValueError('Invalid character found in customFilename. Must not contain any of the following characters: \\/:*?"<>|')
-            # Quick fix to remove spaces from the end of the filename, if any
-            # are there.
-            customFilename = customFilename.strip()
-            path /= customFilename[:maxNameLength]
-        elif useMsgFilename:
-            if not self.filename:
-                raise ValueError(':param useMsgFilename: is only available if you are using an msg file on the disk or have provided a filename.')
-            # Get the actual name of the file.
-            filename = os.path.split(self.filename)[1]
-            # Remove the extensions.
-            filename = os.path.splitext(filename)[0]
-            # Prepare the filename by removing any special characters.
-            filename = prepareFilename(filename)
-            # Shorted the filename.
-            filename = filename[:maxNameLength]
-            # Check to make sure we actually have a filename to use.
-            if not filename:
-                raise ValueError(f'Invalid filename found in self.filename: "{self.filename}"')
-
-            # Add the file name to the path.
-            path /= filename[:maxNameLength]
-        else:
-            path /= self.defaultFolderName[:maxNameLength]
-
-        # Create the folders.
-        if not _zip:
-            try:
-                os.makedirs(path)
-            except Exception:
-                newDirName = addNumToDir(path)
-                if newDirName:
-                    path = newDirName
+            if rtf or (html and not useHtml) or (pdf and not usePdf):
+                if self.rtfBody:
+                    useRtf = True
+                    fext = 'rtf'
+                elif not allowFallback:
+                    if skipBodyNotFound:
+                        fext = None
+                    else:
+                        raise DataNotFoundError('Could not find the rtfBody.')
                 else:
-                    raise Exception(f'Failed to create directory "{path}". Does it already exist?')
-        else:
-            # In my testing I ended up with multiple files in a zip at the same
-            # location so let's try to handle that.
-            pathCompare = str(path).replace('\\', '/').rstrip('/') + '/'
-            if any(x.startswith(pathCompare) for x in _zip.namelist()):
-                newDirName = addNumToZipDir(path, _zip)
-                if newDirName:
-                    path = newDirName
-                else:
-                    raise Exception(f'Failed to create directory "{path}". Does it already exist?')
+                    # This was the last resort before plain text, so fall
+                    # back to that.
+                    fallbackToPlain = True
 
-        # Update the kwargs.
-        kwargs['customPath'] = path
-
-        if raw:
-            self.saveRaw(path)
-            return self
-
-        # If the user has requested the headers for this file, save it now.
-        if kwargs.get('saveHeader', False):
-            headerText = self.headerText
-            if not headerText:
-                headerText = constants.HEADER_FORMAT.format(subject = self.subject, **self.header)
-
-            with _open(str(path / 'header.txt'), mode) as f:
-                f.write(headerText.encode('utf-8'))
+            # After all other options, try to go with plain text if
+            # possible.
+            if not (rtf or html or pdf) or fallbackToPlain:
+                # We need to check if the plain text body was found. If it
+                # was found but was empty that is considered valid, so we
+                # specifically check against None.
+                if self.body is None:
+                    if skipBodyNotFound:
+                        fext = None
+                    else:
+                        if allowFallback:
+                            raise DataNotFoundError('Could not find a valid body using current options.')
+                        else:
+                            raise DataNotFoundError('Plain text body could not be found.')
 
         try:
-            if not attachOnly:
-                # Check what to save the body with.
-                fext = 'json' if _json else 'txt'
+            # ZipFile handling.
+            if _zip:
+                # `raw` and `zip` are incompatible.
+                if raw:
+                    raise IncompatibleOptionsError('The options `raw` and `zip` are incompatible.')
+                # If we are doing a zip file, first check that we have been given a
+                # path.
+                if isinstance(_zip, (str, pathlib.Path)):
+                    # If we have a path then we use the zip file.
+                    _zip = zipfile.ZipFile(_zip, 'a', zipfile.ZIP_DEFLATED)
+                    kwargs['zip'] = _zip
+                    createdZip = True
+                else:
+                    createdZip = False
+                # Path needs to be done in a special way if we are in a zip file.
+                path = pathlib.Path(kwargs.get('customPath', ''))
+                # Set the open command to be that of the zip file.
+                _open = createZipOpen(_zip.open)
+                # Zip files use w for writing in binary.
+                mode = 'w'
+            else:
+                path = pathlib.Path(kwargs.get('customPath', '.')).absolute()
+                mode = 'wb'
+                _open = open
 
-                fallbackToPlain = False
-                useHtml = False
-                usePdf = False
-                useRtf = False
-                if html:
-                    if self.htmlBody:
-                        useHtml = True
-                        fext = 'html'
-                    elif not allowFallback:
-                        if skipBodyNotFound:
-                            fext = None
-                        else:
-                            raise DataNotFoundError('Could not find the htmlBody.')
+            # Reset this for sub save calls.
+            kwargs['customFilename'] = None
 
-                if pdf:
-                    if self.htmlBody:
-                        usePdf = True
-                        fext = 'pdf'
-                    elif not allowFallback:
-                        if skipBodyNotFound:
-                            fext = None
-                        else:
-                            raise DataNotFoundError('Count not find the htmlBody to convert to pdf.')
+            # Check if incompatible options have been provided in any way.
+            if _json + html + rtf + raw + attachOnly + pdf > 1:
+                raise IncompatibleOptionsError('Only one of the following options may be used at a time: json, raw, html, rtf, attachmentsOnly, pdf.')
 
-                if rtf or (html and not useHtml) or (pdf and not usePdf):
-                    if self.rtfBody:
-                        useRtf = True
-                        fext = 'rtf'
-                    elif not allowFallback:
-                        if skipBodyNotFound:
-                            fext = None
-                        else:
-                            raise DataNotFoundError('Could not find the rtfBody.')
+            # TODO: insert code here that will handle checking all of the msg
+            # files to see if the path with overflow.
+
+            if customFilename:
+                # First we need to validate it. If there are invalid characters,
+                # this will detect it.
+                if constants.re.INVALID_FILENAME_CHARS.search(customFilename):
+                    raise ValueError('Invalid character found in customFilename. Must not contain any of the following characters: \\/:*?"<>|')
+                # Quick fix to remove spaces from the end of the filename, if
+                # any are there.
+                customFilename = customFilename.strip()
+                path /= customFilename[:maxNameLength]
+            elif useMsgFilename:
+                if not self.filename:
+                    raise ValueError(':param useMsgFilename: is only available if you are using an msg file on the disk or have provided a filename.')
+                # Get the actual name of the file.
+                filename = os.path.split(self.filename)[1]
+                # Remove the extensions.
+                filename = os.path.splitext(filename)[0]
+                # Prepare the filename by removing any special characters.
+                filename = prepareFilename(filename)
+                # Shorted the filename.
+                filename = filename[:maxNameLength]
+                # Check to make sure we actually have a filename to use.
+                if not filename:
+                    raise ValueError(f'Invalid filename found in self.filename: "{self.filename}"')
+
+                # Add the file name to the path.
+                path /= filename[:maxNameLength]
+            else:
+                path /= self.defaultFolderName[:maxNameLength]
+
+            # Create the folders.
+            if not _zip:
+                try:
+                    os.makedirs(path)
+                except Exception:
+                    newDirName = addNumToDir(path)
+                    if newDirName:
+                        path = newDirName
                     else:
-                        # This was the last resort before plain text, so fall
-                        # back to that.
-                        fallbackToPlain = True
+                        raise OSError(f'Failed to create directory "{path}". Does it already exist?')
+            else:
+                # In my testing I ended up with multiple files in a zip at the same
+                # location so let's try to handle that.
+                pathCompare = str(path).replace('\\', '/').rstrip('/') + '/'
+                if any(x.startswith(pathCompare) for x in _zip.namelist()):
+                    newDirName = addNumToZipDir(path, _zip)
+                    if newDirName:
+                        path = newDirName
+                    else:
+                        raise Exception(f'Failed to create directory "{path}". Does it already exist?')
 
-                # After all other options, try to go with plain text if
-                # possible.
-                if not (rtf or html or pdf) or fallbackToPlain:
-                    # We need to check if the plain text body was found. If it
-                    # was found but was empty that is considered valid, so we
-                    # specifically check against None.
-                    if self.body is None:
-                        if skipBodyNotFound:
-                            fext = None
-                        else:
-                            if allowFallback:
-                                raise DataNotFoundError('Could not find a valid body using current options.')
-                            else:
-                                raise DataNotFoundError('Plain text body could not be found.')
+            # Update the kwargs.
+            kwargs['customPath'] = path
+
+            if raw:
+                self.saveRaw(path)
+                return (SaveType.FOLDER, str(path))
+
+            # If the user has requested the headers for this file, save it now.
+            if kwargs.get('saveHeader', False):
+                headerText = self.headerText
+                if not headerText:
+                    headerText = constants.HEADER_FORMAT.format(subject = self.subject, **self.header)
+
+                with _open(str(path / 'header.txt'), mode) as f:
+                    f.write(headerText.encode('utf-8'))
 
 
             if not skipAttachments:
@@ -868,15 +861,14 @@ class MessageBase(MSGFile):
                         f.write(self.getSaveRtfBody(**kwargs))
                     else:
                         f.write(self.getSaveBody(**kwargs))
+
+            return (SaveType.FOLDER, str(path))
         finally:
             # Close the ZipFile if this function created it.
             if _zip and createdZip:
                 _zip.close()
 
-        # Return the instance so that functions can easily be chained.
-        return self
-
-    @property
+    @functools.cached_property
     def bcc(self) -> Optional[str]:
         """
         Returns the bcc field, if it exists.
@@ -891,7 +883,8 @@ class MessageBase(MSGFile):
         try:
             return self._body
         except AttributeError:
-            if self._ensureSet('_body', '__substg1.0_1000'):
+            # If the body exists but is empty, that means it should be returned.
+            if self._ensureSet('_body', '__substg1.0_1000') is not None:
                 pass
             else:
                 # If the body doesn't exist, see if we can get it from the RTF
@@ -901,13 +894,12 @@ class MessageBase(MSGFile):
 
             if self._body:
                 self._body = inputToString(self._body, 'utf-8')
-                a = re.search('\n', self._body)
-                if a is not None:
+                if re.search('\n', self._body) is not None:
                     if re.search('\r\n', self._body) is not None:
                         self.__crlf = '\r\n'
             return self._body
 
-    @property
+    @functools.cached_property
     def cc(self) -> Optional[str]:
         """
         Returns the cc field, if it exists.
@@ -927,19 +919,14 @@ class MessageBase(MSGFile):
         Returns the value of self.__crlf, should you need it for whatever
         reason.
         """
-        self.body
         return self.__crlf
 
-    @property
-    def date(self) -> Optional[str]:
+    @functools.cached_property
+    def date(self) -> Optional[datetime.datetime]:
         """
-        Returns the send date, if it exists.
+        Returns the string for the send date, if it exists.
         """
-        try:
-            return self._date
-        except AttributeError:
-            self._date = self._prop.date if self.isSent else None
-            return self._date
+        return self._prop.date if self.isSent else None
 
     @property
     def deencapsulatedRtf(self) -> Optional[RTFDE.DeEncapsulator]:
@@ -1228,28 +1215,19 @@ class MessageBase(MSGFile):
     def recipientSeparator(self) -> str:
         return self.__recipientSeparator
 
-    @property
+    @functools.cached_property
     def recipients(self) -> List[Recipient]:
         """
         Returns a list of all recipients.
         """
-        try:
-            return self._recipients
-        except AttributeError:
-            # Get the recipients
-            recipientDirs = []
-            prefixLen = self.prefixLen
-            for dir_ in self.listDir():
-                if dir_[prefixLen].startswith('__recip') and\
-                        dir_[prefixLen] not in recipientDirs:
-                    recipientDirs.append(dir_[prefixLen])
+        recipientDirs = []
+        prefixLen = self.prefixLen
+        for dir_ in self.listDir():
+            if dir_[prefixLen].startswith('__recip') and\
+                    dir_[prefixLen] not in recipientDirs:
+                recipientDirs.append(dir_[prefixLen])
 
-            self._recipients = []
-
-            for recipientDir in recipientDirs:
-                self._recipients.append(Recipient(recipientDir, self))
-
-            return self._recipients
+        return [Recipient(recipientDir, self) for recipientDir in recipientDirs]
 
     @property
     def reportTag(self) -> Optional[ReportTag]:
@@ -1288,8 +1266,8 @@ class MessageBase(MSGFile):
         body.
         """
         prefix = '{'
-        suffix = r'\par\par}'
-        joinStr = r'\line'
+        suffix = '\\par\\par}'
+        joinStr = '\\line'
         formatter = (lambda name, value : fr'{{\b {name}: \b0 {inputToString(rtfSanitizePlain(value), self.stringEncoding)}}}')
 
         return self.getInjectableHeader(prefix, joinStr, suffix, formatter).encode('utf-8')
@@ -1331,7 +1309,7 @@ class MessageBase(MSGFile):
         """
         return self._ensureSet('_subject', '__substg1.0_0037')
 
-    @property
+    @functools.cached_property
     def to(self) -> Optional[str]:
         """
         Returns the to field, if it exists.

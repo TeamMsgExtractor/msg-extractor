@@ -3,8 +3,9 @@ __all__ = [
 ]
 
 
+from .. import constants
 from .attachment_base import AttachmentBase
-from ..enums import AttachmentType
+from ..enums import AttachmentType, SaveType
 
 
 class BrokenAttachment(AttachmentBase):
@@ -13,12 +14,14 @@ class BrokenAttachment(AttachmentBase):
     NotImplementedError exception.
     """
 
-    def getFilename(self, **kwargs) -> str:
+    def getFilename(self, **_) -> str:
         raise NotImplementedError('Broken attachments cannot be saved.')
 
-    def save(self, **kwargs) -> None:
+    def save(self, **kwargs) -> constants.SAVE_TYPE:
         if not kwargs.get('skipNotImplemented', False):
             raise NotImplementedError('Broken attachments cannot be saved.')
+
+        return (SaveType.NONE, None)
 
     @property
     def data(self) -> None:

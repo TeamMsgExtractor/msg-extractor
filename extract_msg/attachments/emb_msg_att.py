@@ -10,13 +10,13 @@ import os
 import pathlib
 import zipfile
 
+from typing import TYPE_CHECKING
+
 from .. import constants
 from .attachment_base import AttachmentBase
-from ..enums import AttachmentType
+from ..enums import AttachmentType, SaveType
 from ..open_msg import openMsg
 from ..utils import createZipOpen, prepareFilename
-
-from typing import Optional, TYPE_CHECKING, Union
 
 
 if TYPE_CHECKING:
@@ -58,11 +58,11 @@ class EmbeddedMsgAttachment(AttachmentBase):
         else:
             return self.name
 
-    def save(self, **kwargs) -> Optional[Union[str, MSGFile]]:
+    def save(self, **kwargs) -> constants.SAVE_TYPE:
         # First check if we are skipping embedded messages and stop
         # *immediately* if we are.
         if kwargs.get('skipEmbedded'):
-            return None
+            return (SaveType.NONE, None)
 
         # Get the filename to use.
         filename = self.getFilename(**kwargs)

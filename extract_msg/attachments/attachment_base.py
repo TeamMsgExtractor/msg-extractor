@@ -12,8 +12,9 @@ import logging
 import weakref
 
 from functools import cached_property, partial
-from typing import List, Optional, Tuple, Type, TYPE_CHECKING, Union
+from typing import List, Optional, Tuple, Type, TYPE_CHECKING
 
+from .. import constants
 from ..enums import AttachmentType
 from ..properties.named import NamedProperties
 from ..properties.prop import FixedLengthProp
@@ -311,21 +312,12 @@ class AttachmentBase(abc.ABC):
         """
 
     @abc.abstractmethod
-    def save(self, **kwargs) -> Optional[Union[str, object]]:
+    def save(self, **kwargs) -> constants.SAVE_TYPE:
         """
         Saves the attachment data.
 
-        The name of the file is determined by several factors. The first
-        thing that is checked is if you have provided :param customFilename:
-        to this function. If you have, that is the name that will be used.
-        If no custom name has been provided and :param contentId: is True,
-        the file will be saved using the content ID of the attachment. If
-        it is not found or :param contentId: is False, the long filename
-        will be used. If the long filename is not found, the short one will
-        be used. If after all of this a usable filename has not been found, a
-        random one will be used (accessible from `Attachment.randomFilename`).
-        After the name to use has been determined, it will then be shortened to
-        make sure that it is not more than the value of :param maxNameLength:.
+        The name of the file is determined by the logic of the getFilename
+        function. If you are a developer, ensure that you use this behavior.
 
         To change the directory that the attachment is saved to, set the value
         of :param customPath: when calling this function. The default save
@@ -342,12 +334,8 @@ class AttachmentBase(abc.ABC):
         :param skipEmbedded: If True, skips saving this attachment if it is an
             embedded MSG file.
 
-        The return type from this function can be anything, but it SHOULD follow
-        the following rules:
-            * Returns None if nothing is saved.
-            * Returns a non-string object if the attachment is saved but not as
-              pure bytes.
-            * Returns a string with the path to the file that was saved.
+        :returns: A tuple that specifies how the data was saved. The value of
+            the first item specifies what the second value will be.
         """
 
     @property

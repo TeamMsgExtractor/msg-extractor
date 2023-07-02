@@ -37,15 +37,17 @@ __all__ = [
 
 import datetime
 
-from typing import Dict, Tuple, Union
+from typing import Dict, List, Tuple, Union
 
 from . import ps, re, st
+from ..enums import SaveType
 
 
 # Typing Constants.
 HEADER_FORMAT_VALUE_TYPE = Union[str, Tuple[Union[str, None], bool], None]
 # Basically a dict of HEADER_FORMAT_TYPE and dicts containing them.
 HEADER_FORMAT_TYPE = Dict[str, Union[HEADER_FORMAT_VALUE_TYPE, Dict[str, HEADER_FORMAT_VALUE_TYPE]]]
+SAVE_TYPE = Tuple[SaveType, Union[List[str], str, None]]
 
 
 
