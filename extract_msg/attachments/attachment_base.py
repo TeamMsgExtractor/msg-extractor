@@ -342,8 +342,6 @@ class AttachmentBase(abc.ABC):
         """
         return self._getStringStream('__substg1.0_3712')
 
-    contendId = cid
-
     @cached_property
     def clsid(self) -> str:
         """
@@ -372,6 +370,10 @@ class AttachmentBase(abc.ABC):
             clsid = msg._getOleEntry(dataStream).clsid or clsid
 
         return clsid
+
+    @property
+    def contentId(self) -> Optional[str]:
+        return self.cid
 
     @property
     @abc.abstractmethod

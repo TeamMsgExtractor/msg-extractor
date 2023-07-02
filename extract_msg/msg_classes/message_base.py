@@ -925,9 +925,9 @@ class MessageBase(MSGFile):
     @functools.cached_property
     def date(self) -> Optional[datetime.datetime]:
         """
-        Returns the string for the send date, if it exists.
+        Returns the send date, if it exists.
         """
-        return self._prop.date if self.isSent else None
+        return self.props.date if self.isSent else None
 
     @property
     def deencapsulatedRtf(self) -> Optional[RTFDE.DeEncapsulator]:

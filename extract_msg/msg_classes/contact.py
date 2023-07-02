@@ -240,7 +240,7 @@ class Contact(MessageBase):
         """
         A list of the named of the contact's children.
         """
-        return self._getStringStream('3A58')
+        return self._getTypedAs('3A58')
 
     @functools.cached_property
     def companyMainTelephoneNumber(self) -> Optional[str]:

@@ -697,7 +697,7 @@ class MSGFile:
         """
         The class type of the MSG file.
         """
-        return self._getStringStream('_classType', '__substg1.0_001A')
+        return self._getStringStream('__substg1.0_001A')
 
     @functools.cached_property
     def commonEnd(self) -> Optional[datetime.datetime]:
