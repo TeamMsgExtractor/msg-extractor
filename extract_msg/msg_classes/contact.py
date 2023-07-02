@@ -212,7 +212,7 @@ class Contact(MessageBase):
         """
         Contains the second number or numbers of the contact's business.
         """
-        return self._ensureSetTyped('3A1B')
+        return self._getTypedAs('3A1B')
 
     @functools.cached_property
     def businessHomePage(self) -> Optional[str]:
@@ -485,7 +485,7 @@ class Contact(MessageBase):
         """
         The EntryID of the object correspinding to this electronic address.
         """
-        return self._getNamedAs('_email2OriginalEntryId', '8095', constants.ps.PSETID_ADDRESS, overrideClass = EntryID.autoCreate)
+        return self._getNamedAs('8095', constants.ps.PSETID_ADDRESS, EntryID.autoCreate)
 
     @functools.cached_property
     def email3(self) -> Optional[dict]:
@@ -849,7 +849,7 @@ class Contact(MessageBase):
         """
         The number(s) of the contact's second home telephone.
         """
-        return self._ensureSetTyped('3A2F')
+        return self._getTypedAs('3A2F')
 
     @functools.cached_property
     def initials(self) -> Optional[str]:
@@ -1240,14 +1240,14 @@ class Contact(MessageBase):
         """
         The contact's telex number(s).
         """
-        return self._ensureSetTyped('3A2C')
+        return self._getTypedAs('3A2C')
 
     @functools.cached_property
     def userX509Certificate(self) -> Optional[List[bytes]]:
         """
         A list of certificates for the contact.
         """
-        return self._ensureSetTyped('3A70')
+        return self._getTypedAs('3A70')
 
     @functools.cached_property
     def weddingAnniversary(self) -> Optional[datetime.datetime]:

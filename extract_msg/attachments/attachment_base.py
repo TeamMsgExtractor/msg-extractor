@@ -49,13 +49,9 @@ class AttachmentBase(abc.ABC):
         self.__namedProperties = NamedProperties(msg.named, self)
         self.__treePath = msg.treePath + [makeWeakRef(self)]
 
-    def _ensureSet(self, variable, streamID, stringStream = True, **kwargs):
+    def _getNamedAs(self, propertyName : str, guid : str, overrideClass = None, preserveNone : bool = True):
         """
-        Ensures that the variable exists, otherwise will set it using the
-        specified stream. After that, return said variable.
-
-        If the specified stream is not a string stream, make sure to set
-        :param stringStream: to False.
+        Returns the named property, setting the class if specified.
 
         :param overrideClass: Class/function to use to morph the data that was
             read. The data will be the first argument to the class's __init__
@@ -65,53 +61,17 @@ class AttachmentBase(abc.ABC):
             :param overrideClass: when the value could not be found (is None).
             If this is changed to False, then the value will be used regardless.
         """
-        try:
-            return getattr(self, variable)
-        except AttributeError:
-            if stringStream:
-                value = self._getStringStream(streamID)
-            else:
-                value = self._getStream(streamID)
-            # Check if we should be overriding the data type for this instance.
-            if kwargs:
-                overrideClass = kwargs.get('overrideClass')
-                if overrideClass is not None and (value is not None or not kwargs.get('preserveNone', True)):
-                    value = overrideClass(value)
-            setattr(self, variable, value)
-            return value
+        value = self.namedProperties.get((propertyName, guid))
+        # Check if we should be overriding the data type for this instance.
+        if overrideClass is not None:
+            if value is not None or not preserveNone:
+                value = overrideClass(value)
 
-    def _ensureSetNamed(self, variable : str, propertyName : str, guid : str, **kwargs):
-        """
-        Ensures that the variable exists, otherwise will set it using the named
-        property. After that, return said variable.
-
-        :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. By
-            default, this will be completely ignored if the value was not found.
-        :param preserveNone: If true (default), causes the function to ignore
-            :param overrideClass: when the value could not be found (is None).
-            If this is changed to False, then the value will be used regardless.
-
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
-        """
-        try:
-            return getattr(self, variable)
-        except AttributeError:
-            value = self.namedProperties.get((propertyName, guid))
-            # Check if we should be overriding the data type for this instance.
-            if kwargs:
-                overrideClass = kwargs.get('overrideClass')
-                if overrideClass is not None and (value is not None or not kwargs.get('preserveNone', True)):
-                    value = overrideClass(value)
-            setattr(self, variable, value)
-            return value
+        return value
 
     def _getPropertyAs(self, propertyName, overrideClass = None, preserveNone : bool = True):
         """
-        Ensures that the variable exists, otherwise will set it using the
-        property. After that, return said variable.
+        Returns the property, setting the class if specified.
 
         :param overrideClass: Class/function to use to morph the data that was
             read. The data will be the first argument to the class's __init__
@@ -132,35 +92,6 @@ class AttachmentBase(abc.ABC):
 
         return value
 
-    def _ensureSetTyped(self, variable, _id, **kwargs):
-        """
-        Like the other ensure set functions, but designed for when something
-        could be multiple types (where only one will be present). This way you
-        have no need to set the type, it will be handled for you.
-
-        :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. By
-            default, this will be completely ignored if the value was not found.
-        :param preserveNone: If true (default), causes the function to ignore
-            :param overrideClass: when the value could not be found (is None).
-            If this is changed to False, then the value will be used regardless.
-
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
-        """
-        try:
-            return getattr(self, variable)
-        except AttributeError:
-            value = self._getTypedData(_id)
-            # Check if we should be overriding the data type for this instance.
-            if kwargs:
-                overrideClass = kwargs.get('overrideClass')
-                if overrideClass is not None and (value is not None or not kwargs.get('preserveNone', True)):
-                    value = overrideClass(value)
-            setattr(self, variable, value)
-            return value
-
     def _getStream(self, filename) -> Optional[bytes]:
         """
         Gets a binary representation of the requested filename.
@@ -174,6 +105,33 @@ class AttachmentBase(abc.ABC):
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
         return msg._getStream([self.__dir, filename])
+
+    def _getStreamAs(self, streamID, stringStream : bool = True, overrideClass = None, preserveNone : bool = True):
+        """
+        Returns the specified stream, modifying it to the class if specified.
+
+        If the specified stream is not a string stream, make sure to set
+        :param stringStream: to False.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. By
+            default, this will be completely ignored if the value was not found.
+        :param preserveNone: If true (default), causes the function to ignore
+            :param overrideClass: when the value could not be found (is None).
+            If this is changed to False, then the value will be used regardless.
+        """
+        if stringStream:
+            value = self._getStringStream(streamID)
+        else:
+            value = self._getStream(streamID)
+
+        # Check if we should be overriding the data type for this instance.
+        if overrideClass is not None:
+            if value is not None or not preserveNone:
+                value = overrideClass(value)
+
+        return value
 
     def _getStringStream(self, filename) -> Optional[str]:
         """
@@ -189,6 +147,28 @@ class AttachmentBase(abc.ABC):
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
         return msg._getStringStream([self.__dir, filename])
+
+    def _getTypedAs(self, _id : str, overrideClass = None, preserveNone : bool = True):
+        """
+        Like the other get as functions, but designed for when something
+        could be multiple types (where only one will be present). This way you
+        have no need to set the type, it will be handled for you.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. By
+            default, this will be completely ignored if the value was not found.
+        :param preserveNone: If true (default), causes the function to ignore
+            :param overrideClass: when the value could not be found (is None).
+            If this is changed to False, then the value will be used regardless.
+        """
+        value = self._getTypedData(_id)
+        # Check if we should be overriding the data type for this instance.
+        if overrideClass is not None:
+            if value is not None or not preserveNone:
+                value = overrideClass(value)
+
+        return value
 
     def _getTypedData(self, id, _type = None):
         """
@@ -335,16 +315,16 @@ class AttachmentBase(abc.ABC):
             the first item specifies what the second value will be.
         """
 
-    @property
+    @functools.cached_property
     def attachmentEncoding(self) -> Optional[bytes]:
         """
         The encoding information about the attachment object. Will return
         b'*\\x86H\\x86\\xf7\\x14\\x03\\x0b\\x01' if encoded in MacBinary format,
         otherwise it is unset.
         """
-        return self._ensureSet('_attachmentEncoding', '__substg1.0_37020102', False)
+        return self._getStream('__substg1.0_37020102')
 
-    @property
+    @functools.cached_property
     def additionalInformation(self) -> Optional[str]:
         """
         The additional information about the attachment. This property MUST be
@@ -353,14 +333,14 @@ class AttachmentBase(abc.ABC):
         four-letter Macintosh file creator code and ":TYPE" is a four-letter
         Macintosh type code.
         """
-        return self._ensureSet('_additionalInformation', '__substg1.0_370F')
+        return self._getStringStream('__substg1.0_370F')
 
-    @property
+    @functools.cached_property
     def cid(self) -> Optional[str]:
         """
         Returns the Content ID of the attachment, if it exists.
         """
-        return self._ensureSet('_cid', '__substg1.0_3712')
+        return self._getStringStream('__substg1.0_3712')
 
     contendId = cid
 
@@ -400,7 +380,7 @@ class AttachmentBase(abc.ABC):
         The attachment data, if any. Returns None if there is no data to save.
         """
 
-    @property
+    @functools.cached_property
     def dataType(self) -> Optional[Type[type]]:
         """
         The class that the data type will use, if it can be retrieved.
@@ -423,12 +403,12 @@ class AttachmentBase(abc.ABC):
         """
         return self.__dir
 
-    @property
+    @functools.cached_property
     def displayName(self) -> Optional[str]:
         """
         Returns the display name of the folder.
         """
-        return self._ensureSet('_displayName', '__substg1.0_3001')
+        return self._getStringStream('__substg1.0_3001')
 
     @functools.cached_property
     def exceptionReplaceTime(self) -> Optional[datetime.datetime]:
@@ -440,47 +420,47 @@ class AttachmentBase(abc.ABC):
         """
         return self._getPropertyAs('7FF90040')
 
-    @property
+    @functools.cached_property
     def extension(self) -> Optional[str]:
         """
         The reported extension for the file.
         """
-        return self._ensureSet('_extension', '__substg1.0_3703')
+        return self._getStringStream('__substg1.0_3703')
 
     @functools.cached_property
     def hidden(self) -> bool:
         """
         Indicates whether an Attachment object is hidden from the end user.
         """
-        return self._getPropertyAs('7FFE000B', overrideClass = bool, preserveNone = False)
+        return self._getPropertyAs('7FFE000B', bool, False)
 
     @functools.cached_property
     def isAttachmentContactPhoto(self) -> bool:
         """
         Whether the attachment is a contact photo for a Contact object.
         """
-        return self._getPropertyAs('7FFF000B', overrideClass = bool, preserveNone = False)
+        return self._getPropertyAs('7FFF000B', bool, False)
 
-    @property
+    @functools.cached_property
     def longFilename(self) -> Optional[str]:
         """
         Returns the long file name of the attachment, if it exists.
         """
-        return self._ensureSet('_longFilename', '__substg1.0_3707')
+        return self._getStringStream('__substg1.0_3707')
 
-    @property
+    @functools.cached_property
     def longPathname(self) -> Optional[str]:
         """
         The fully qualified path and file name with extension.
         """
-        return self._ensureSet('_longPathname', '__substg1.0_370D')
+        return self._getStringStream('__substg1.0_370D')
 
-    @property
+    @functools.cached_property
     def mimetype(self) -> Optional[str]:
         """
         The content-type mime header of the attachment, if specified.
         """
-        return self._ensureSet('_mimetype', '__substg1.0_370E', overrideClass = partial(tryGetMimetype, self), preserveNone = False)
+        return self._getStreamAs('__substg1.0_370E', partial(tryGetMimetype, self), False)
 
     @property
     def msg(self) -> MSGFile:
@@ -494,7 +474,7 @@ class AttachmentBase(abc.ABC):
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
         return msg
 
-    @property
+    @functools.cached_property
     def name(self) -> Optional[str]:
         """
         The best name available for the file. Uses long filename before short.
@@ -511,13 +491,13 @@ class AttachmentBase(abc.ABC):
         """
         return self.__namedProperties
 
-    @property
+    @functools.cached_property
     def payloadClass(self) -> Optional[str]:
         """
         The class name of an object that can display the contents of the
         message.
         """
-        return self._ensureSet('_payloadClass', '__substg1.0_371A')
+        return self._getStringStream('__substg1.0_371A')
 
     @property
     def props(self) -> PropertiesStore:
@@ -540,7 +520,7 @@ class AttachmentBase(abc.ABC):
         """
         Returns the short file name of the attachment, if it exists.
         """
-        return self._ensureSet('_shortFilename', '__substg1.0_3704')
+        return self._getStringStream('__substg1.0_3704')
 
     @property
     def treePath(self) -> List[weakref.ReferenceType]:

@@ -456,7 +456,7 @@ class CalendarBase(MessageBase):
         """
         Whether the organizer requests a reply from attendees.
         """
-        return self._getPropertyAs('0C17000B', overrideClass = bool, preserveNone = False)
+        return self._getPropertyAs('0C17000B', bool, False)
 
     @functools.cached_property
     def requiredAttendees(self) -> Optional[str]:

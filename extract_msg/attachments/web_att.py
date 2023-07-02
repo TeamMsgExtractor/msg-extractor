@@ -3,6 +3,8 @@ __all__ = [
 ]
 
 
+import functools
+
 from typing import Optional
 
 from .. import constants
@@ -36,26 +38,26 @@ class WebAttachment(AttachmentBase):
         """
         raise NotImplementedError('Cannot get the data of a web attachment.')
 
-    @property
+    @functools.cached_property
     def originalPermissionType(self) -> Optional[AttachmentPermissionType]:
         """
         The permission type data associated with a web reference attachment.
         """
-        return self._ensureSetNamed('_oPermissionType', 'AttachmentOriginalPermissionType', constants.ps.PSETID_ATTACHMENT, overrideClass = AttachmentPermissionType, preserveNone = True)
+        return self._getNamedAs('AttachmentOriginalPermissionType', constants.ps.PSETID_ATTACHMENT, AttachmentPermissionType)
 
-    @property
+    @functools.cached_property
     def permissionType(self) -> Optional[AttachmentPermissionType]:
         """
         The permission type data associated with a web reference attachment.
         """
-        return self._ensureSetNamed('_permissionType', 'AttachmentPermissionType', constants.ps.PSETID_ATTACHMENT, overrideClass = AttachmentPermissionType, preserveNone = True)
+        return self._getNamedAs('AttachmentPermissionType', constants.ps.PSETID_ATTACHMENT, AttachmentPermissionType)
 
-    @property
+    @functools.cached_property
     def providerName(self) -> Optional[str]:
         """
         The type of web service manipulating the attachment.
         """
-        return self._ensureSetNamed('_permissionType', 'AttachmentProviderType', constants.ps.PSETID_ATTACHMENT)
+        return self._getNamedAs('AttachmentProviderType', constants.ps.PSETID_ATTACHMENT)
 
     @property
     def type(self) -> AttachmentType:

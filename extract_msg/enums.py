@@ -43,7 +43,7 @@ class AddressBookType(enum.Enum):
 
 
 
-class AppointmentAuxilaryFlag(enum.IntEnum):
+class AppointmentAuxilaryFlag(enum.IntFlag):
     """
     Describes the auxilary state of the object.
 
@@ -76,19 +76,12 @@ class AppointmentColor(enum.Enum):
 
 
 
-class AppointmentStateFlag(enum.Enum):
+class AppointmentStateFlag(enum.IntFlag):
     """
     MEETING: The object is a Meeting object or meeting-related object.
     RECEIVED: The represented object was received from someone else.
     CANCELED: The Meeting object that is represented has been canceled.
     """
-    @classmethod
-    def fromBits(cls, value : int) -> Set['AppointmentStateFlag']:
-        """
-        Takes an int and returns a set of the flags.
-        """
-        return {cls(1 << x) for x in range(3) if (value & (1 << x)) != 0}
-
     MEETING = 0b1
     RECEIVED = 0b10
     CANCELED = 0b100
@@ -415,20 +408,6 @@ class DVAspect(enum.IntEnum):
 
 
 class ElectronicAddressProperties(enum.Enum):
-    @classmethod
-    def fromBits(cls, value : int) -> Set['ElectronicAddressProperties']:
-        """
-        Converts an int, with the left most bit referring to 0x00000000, to a
-        set of this enum.
-
-        :raises ValueError: The value was less than 0.
-        """
-        if value < 0:
-            raise ValueError('Value must not be negative.')
-        # This is a quick compressed way to convert the bits in the int into
-        # a tuple of instances of this class should any bit be a 1.
-        return {cls(int(index)) for index, val in enumerate(bin(value)[:1:-1]) if val == '1'}
-
     EMAIL_1 = 0x00000000
     EMAIL_2 = 0x00000001
     EMAIL_3 = 0x00000002
@@ -1197,7 +1176,7 @@ class MacintoshEncoding(enum.Enum):
 
 
 
-class MeetingObjectChange(enum.Enum):
+class MeetingObjectChange(enum.IntFlag):
     """
     Indicates a property that has changed on a meeting object.
 
@@ -1212,23 +1191,6 @@ class MeetingObjectChange(enum.Enum):
     RESPONSE: The responseRequested or replyRequested property has changed.
     ALLOW_PROPOSE: The appointmentNotAllowPropose property has changed.
     """
-    @classmethod
-    def fromBits(cls, value : int) -> Set['MeetingObjectChange']:
-        """
-        Takes an int and returns a set of the changes.
-        """
-        changes = set()
-        for x in range(32):
-            if x in (8, 11) or (12 < x < 31):
-                continue
-            bit = value & (1 << x)
-            if bit:
-                if x in (12, 31):
-                    raise ValueError('Reserved bit was set.')
-                changes.add(cls(bit))
-
-        return changes
-
     START = 0b1
     END = 0b10
     RECUR = 0b100
@@ -1440,17 +1402,10 @@ class RecurMonthNthWeek(enum.Enum):
 
 
 
-class RecurPatternTypeSpecificWeekday(enum.Enum):
+class RecurPatternTypeSpecificWeekday(enum.IntFlag):
     """
     See [MS-OXOCAL] for details.
     """
-    @classmethod
-    def fromBits(cls, value : int) -> Set['RecurPatternTypeSpecificWeekday']:
-        """
-        Takes an int and returns a set of the weekdays.
-        """
-        return {cls(1 << x) for x in range(1, 8) if (value & (1 << x))}
-
     SATURDAY = 0b10
     FRIDAY = 0b100
     THURSDAY = 0b1000
@@ -1554,17 +1509,10 @@ class Sensitivity(enum.Enum):
 
 
 
-class ServerProcessingAction(enum.Enum):
+class ServerProcessingAction(enum.IntFlag):
     """
     Actions taken on a meeting-related object.
     """
-    @classmethod
-    def fromBits(cls, value : int) -> Set['ServerProcessingAction']:
-        """
-        Takes an int and returns a set of the weekdays.
-        """
-        return {cls(1 << x) for x in range(16) if (value & (1 << x))}
-
     DELEGATOR_WANTS_COPY = 0x00000002
     CREATED_ON_PRINCIPLE = 0x00000010
     UPDATED_CAL_ITEM = 0x00000080
@@ -1575,7 +1523,7 @@ class ServerProcessingAction(enum.Enum):
 
 
 
-class SideEffect(enum.Enum):
+class SideEffect(enum.IntFlag):
     """
     A flag for how a Message object is handled by the client in relation to
     certain user interface actions.
@@ -1601,13 +1549,6 @@ class SideEffect(enum.Enum):
     OPEN_TO_PERM_DELETE: The client opens the Message object to permanently
         delete it.
     """
-    @classmethod
-    def fromBits(cls, value : int) -> Set['SideEffect']:
-        """
-        Takes an int and returns a set of the side effects.
-        """
-        return {cls(1 << x) for x in range(15) if (value & (1 << x))}
-
     OPEN_TO_DELETE = 0b1
     NO_FRAME = 0b1000
     COERCE_TO_INDEX = 0b10000
@@ -1758,20 +1699,13 @@ class TaskStatus(enum.Enum):
 
 
 
-class TZFlag(enum.Enum):
+class TZFlag(enum.IntFlag):
     """
     Flags for a TZRule object as defined in [MS-OXOCAL].
 
     RECUR_CURRENT_TZREG: The rule is associated with a recurring series.
     EFFECTIVE_TZREG: The rule is the effective rule.
     """
-    @classmethod
-    def fromBits(cls, value : int) -> Set['TZFlag']:
-        """
-        Takes an int and returns a set of the flags.
-        """
-        return {cls(1 << x) for x in range(2) if (value & (1 << x))}
-
     RECUR_CURRENT_TZREG = 0b1
     EFFECTIVE_TZREG = 0b10
 

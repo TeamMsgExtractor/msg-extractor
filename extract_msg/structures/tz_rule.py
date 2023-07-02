@@ -24,7 +24,7 @@ class TZRule:
         self.__majorVersion = reader.readByte()
         self.__minorVersion = reader.readByte()
         reader.assertRead(b'\x3E\x00')
-        self.__flags = TZFlag.fromBits(reader.readUnsignedShort())
+        self.__flags = TZFlag(reader.readUnsignedShort())
         self.__year = reader.readShort()
         # We *should* be doing this, but Outlook is violating the standard so...
         #reader.assertNull(14)

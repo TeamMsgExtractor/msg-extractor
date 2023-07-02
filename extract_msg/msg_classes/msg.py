@@ -209,34 +209,6 @@ class MSGFile:
     def __exit__(self, *_) -> None:
         self.close()
 
-    def _getStreamAs(self, streamID, stringStream : bool = True, overrideClass = None, preserveNone : bool = True):
-        """
-        Ensures that the variable exists, otherwise will set it using the
-        specified stream. After that, return said variable.
-
-        If the specified stream is not a string stream, make sure to set
-        :param stringStream: to False.
-
-        :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. By
-            default, this will be completely ignored if the value was not found.
-        :param preserveNone: If true (default), causes the function to ignore
-            :param overrideClass: when the value could not be found (is None).
-            If this is changed to False, then the value will be used regardless.
-        """
-        if stringStream:
-            value = self._getStringStream(streamID)
-        else:
-            value = self._getStream(streamID)
-
-        # Check if we should be overriding the data type for this instance.
-        if overrideClass is not None:
-            if value is not None or not preserveNone:
-                value = overrideClass(value)
-
-        return value
-
     def _getNamedAs(self, propertyName : str, guid : str, overrideClass = None, preserveNone : bool = True):
         """
         Returns the named property, setting the class if specified.
@@ -256,6 +228,22 @@ class MSGFile:
                 value = overrideClass(value)
 
         return value
+
+    def _getOleEntry(self, filename, prefix : bool = True) -> olefile.olefile.OleDirectoryEntry:
+        """
+        Finds the directory entry from the olefile for the stream or storage
+        specified. Use '/' to get the root entry.
+        """
+        sid = -1
+        if filename == '/':
+            if prefix and self.__prefix:
+                sid = self.__ole._find(self.__prefixList)
+            else:
+                return self.__ole.direntries[0]
+        else:
+            sid = self.__ole._find(self.fixPath(filename, prefix))
+
+        return self.__ole.direntries[sid]
 
     def _getPropertyAs(self, propertyName, overrideClass = None, preserveNone : bool = True):
         """
@@ -280,48 +268,6 @@ class MSGFile:
 
         return value
 
-    def _ensureSetTyped(self, variable : str, _id, **kwargs):
-        """
-        Like the other ensure set functions, but designed for when something
-        could be multiple types (where only one will be present). This way you
-        have no need to set the type, it will be handled for you.
-
-        :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. By
-            default, this will be completely ignored if the value was not found.
-        :param preserveNone: If true (default), causes the function to ignore
-            :param overrideClass: when the value could not be found (is None).
-            If this is changed to False, then the value will be used regardless.
-        """
-        try:
-            return getattr(self, variable)
-        except AttributeError:
-            value = self._getTypedData(_id)
-            # Check if we should be overriding the data type for this instance.
-            if kwargs:
-                overrideClass = kwargs.get('overrideClass')
-                if overrideClass is not None and (value is not None or not kwargs.get('preserveNone', True)):
-                    value = overrideClass(value)
-            setattr(self, variable, value)
-            return value
-
-    def _getOleEntry(self, filename, prefix : bool = True) -> olefile.olefile.OleDirectoryEntry:
-        """
-        Finds the directory entry from the olefile for the stream or storage
-        specified. Use '/' to get the root entry.
-        """
-        sid = -1
-        if filename == '/':
-            if prefix and self.__prefix:
-                sid = self.__ole._find(self.__prefixList)
-            else:
-                return self.__ole.direntries[0]
-        else:
-            sid = self.__ole._find(self.fixPath(filename, prefix))
-
-        return self.__ole.direntries[sid]
-
     def _getStream(self, filename, prefix : bool = True) -> Optional[bytes]:
         """
         Gets a binary representation of the requested filename.
@@ -336,6 +282,33 @@ class MSGFile:
         else:
             logger.info(f'Stream "{filename}" was requested but could not be found. Returning `None`.')
             return None
+
+    def _getStreamAs(self, streamID, stringStream : bool = True, overrideClass = None, preserveNone : bool = True):
+        """
+        Returns the specified stream, modifying it to the class if specified.
+
+        If the specified stream is not a string stream, make sure to set
+        :param stringStream: to False.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. By
+            default, this will be completely ignored if the value was not found.
+        :param preserveNone: If true (default), causes the function to ignore
+            :param overrideClass: when the value could not be found (is None).
+            If this is changed to False, then the value will be used regardless.
+        """
+        if stringStream:
+            value = self._getStringStream(streamID)
+        else:
+            value = self._getStream(streamID)
+
+        # Check if we should be overriding the data type for this instance.
+        if overrideClass is not None:
+            if value is not None or not preserveNone:
+                value = overrideClass(value)
+
+        return value
 
     def _getStringStream(self, filename, prefix : bool = True) -> Optional[str]:
         """
@@ -354,6 +327,28 @@ class MSGFile:
         else:
             tmp = self._getStream(filename + '001E', prefix = False)
             return None if tmp is None else tmp.decode(self.stringEncoding)
+
+    def _getTypedAs(self, _id : str, overrideClass = None, preserveNone : bool = True):
+        """
+        Like the other get as functions, but designed for when something
+        could be multiple types (where only one will be present). This way you
+        have no need to set the type, it will be handled for you.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. By
+            default, this will be completely ignored if the value was not found.
+        :param preserveNone: If true (default), causes the function to ignore
+            :param overrideClass: when the value could not be found (is None).
+            If this is changed to False, then the value will be used regardless.
+        """
+        value = self._getTypedData(_id)
+        # Check if we should be overriding the data type for this instance.
+        if overrideClass is not None:
+            if value is not None or not preserveNone:
+                value = overrideClass(value)
+
+        return value
 
     def _getTypedData(self, _id : str, _type = None, prefix : bool = True):
         """
@@ -746,7 +741,7 @@ class MSGFile:
         """
         The specified importance of the msg file.
         """
-        return self._getPropertyAs('00170003', overrideClass = Importance)
+        return self._getPropertyAs('00170003', Importance)
 
     @property
     def importanceString(self) -> Union[str, None]:
