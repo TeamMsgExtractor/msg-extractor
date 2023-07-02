@@ -28,7 +28,7 @@ class Recipient:
         self.__msg = makeWeakRef(msg) # Allows calls to original msg file.
         self.__dir = _dir
         if not self.exists('__properties_version1.0'):
-            if msg.errorBehavior & ErrorBehavior.STANDARDS_VIOLATION:
+            if ErrorBehavior.STANDARDS_VIOLATION in msg.errorBehavior:
                 logger.error('Recipients MUST have a property stream.')
             else:
                 raise StandardViolationError('Recipients MUST have a property stream.') from None

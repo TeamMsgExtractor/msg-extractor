@@ -38,6 +38,8 @@
 * Modified all custom exceptions the module uses to derive from a single base class for better organization.
     * Added new exceptions to handle some of the situations previously handled by base Python exceptions.
 * Changed internal handling of the `prefix` option for `MSGFile.__init__` (and therefore `openMsg`). If you are not setting this manually, you should notice little difference.
+* Made enums less strict and converted all using `fromBits` to be `IntFlag` enums.
+* Fixed `CalendarBase.keywords` being blatantly incorrect (it was so bad I don't know how it slipped through).
 
 **v0.41.5**
 * Fixed an issue from version `0.41.3` where the header being present but missing the `From` field would cause an exception.

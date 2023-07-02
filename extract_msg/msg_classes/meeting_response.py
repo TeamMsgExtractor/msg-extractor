@@ -4,6 +4,7 @@ __all__ = [
 
 
 import datetime
+import functools
 
 from typing import Optional
 
@@ -17,55 +18,55 @@ class MeetingResponse(MeetingRelated):
     Class for handling meeting response objects.
     """
 
-    @property
+    @functools.cached_property
     def appointmentCounterProposal(self) -> bool:
         """
         Indicates if the response is a counter proposal.
         """
-        return self._ensureSetNamed('_appointmentCounterProposal', '8257', constants.ps.PSETID_APPOINTMENT, overrideClass = bool, preserveNone = False)
+        return self._getNamedAs('8257', constants.ps.PSETID_APPOINTMENT, bool, False)
 
-    @property
+    @functools.cached_property
     def appointmentProposedDuration(self) -> Optional[int]:
         """
         The proposed value for the appointmentDuration property for a counter
         proposal.
         """
-        return self._ensureSetNamed('_appointmentProposedDuration', '8256', constants.ps.PSETID_APPOINTMENT)
+        return self._getNamedAs('8256', constants.ps.PSETID_APPOINTMENT)
 
-    @property
+    @functools.cached_property
     def appointmentProposedEndWhole(self) -> Optional[datetime.datetime]:
         """
         The proposal value for the appointmentEndWhole property for a counter
         proposal.
         """
-        return self._ensureSetNamed('_appointmentProposedEndWhole', '8251', constants.ps.PSETID_APPOINTMENT)
+        return self._getNamedAs('8251', constants.ps.PSETID_APPOINTMENT)
 
-    @property
+    @functools.cached_property
     def appointmentProposedStartWhole(self) -> Optional[datetime.datetime]:
         """
         The proposal value for the appointmentStartWhole property for a counter
         proposal.
         """
-        return self._ensureSetNamed('_appointmentProposedStartWhole', '8250', constants.ps.PSETID_APPOINTMENT)
+        return self._getNamedAs('8250', constants.ps.PSETID_APPOINTMENT)
 
-    @property
+    @functools.cached_property
     def isSilent(self) -> bool:
         """
         Indicates if the user did not include any text in the body of the
         Meeting Response object.
         """
-        return self._ensureSetNamed('_isSilent', '0004', constants.ps.PSETID_MEETING, overrideClass = bool, preserveNone = False)
+        return self._getNamedAs('0004', constants.ps.PSETID_MEETING, bool, False)
 
-    @property
+    @functools.cached_property
     def promptSendUpdate(self) -> bool:
         """
         Indicates that the Meeting Response object was out-of-date when it was
         received.
         """
-        return self._ensureSetNamed('_promptSendUpdate', '8045', constants.ps.PSETID_COMMON, overrideClass = bool, preserveNone = False)
+        return self._getNamedAs('8045', constants.ps.PSETID_COMMON, bool, False)
 
-    @property
-    def responseType(self) -> Optional[ResponseType]:
+    @functools.cached_property
+    def responseType(self) -> ResponseType:
         """
         The type of Meeting Response object.
         """

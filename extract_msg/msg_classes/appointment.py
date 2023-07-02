@@ -4,6 +4,7 @@ __all__ = [
 
 
 import datetime
+import functools
 
 from typing import Optional
 
@@ -22,53 +23,53 @@ class AppointmentMeeting(Calendar):
     object.
     """
 
-    @property
+    @functools.cached_property
     def appointmentCounterProposal(self) -> bool:
         """
         Indicates to the organizer that there are counter proposals that have
         not been accepted or rejected by the organizer.
         """
-        return self._ensureSetNamed('_appointmentCounterProposal', '8257', constants.ps.PSETID_APPOINTMENT, overrideClass = bool, preserveNone = False)
+        return self._getNamedAs('8257', constants.ps.PSETID_APPOINTMENT, bool, False)
 
-    @property
+    @functools.cached_property
     def appointmentLastSequence(self) -> Optional[int]:
         """
         The last sequence number that was sent to any attendee.
         """
-        return self._ensureSetNamed('_appointmentLastSequence', '8203', constants.ps.PSETID_APPOINTMENT)
+        return self._getNamedAs('8203', constants.ps.PSETID_APPOINTMENT)
 
-    @property
+    @functools.cached_property
     def appointmentProposalNumber(self) -> Optional[int]:
         """
         The number of attendees who have sent counter propostals that have not
         been accepted or rejected by the organizer.
         """
-        return self._ensureSetNamed('_appointmentProposalNumber', '8259', constants.ps.PSETID_APPOINTMENT)
+        return self._getNamedAs('8259', constants.ps.PSETID_APPOINTMENT)
 
-    @property
+    @functools.cached_property
     def appointmentReplyName(self) -> Optional[datetime.datetime]:
         """
         The user who last replied to the meeting request or meeting update.
         """
-        return self._ensureSetNamed('_appointmentReplyName', '8230', constants.ps.PSETID_APPOINTMENT)
+        return self._getNamedAs('8230', constants.ps.PSETID_APPOINTMENT)
 
-    @property
+    @functools.cached_property
     def appointmentReplyTime(self) -> Optional[datetime.datetime]:
         """
         The date and time at which the attendee responded to a received Meeting
         Request object of Meeting Update object in UTC.
         """
-        return self._ensureSetNamed('_appointmentReplyTime', '8220', constants.ps.PSETID_APPOINTMENT)
+        return self._getNamedAs('8220', constants.ps.PSETID_APPOINTMENT)
 
-    @property
+    @functools.cached_property
     def appointmentSequenceTime(self) -> Optional[datetime.datetime]:
         """
         The date and time at which the appointmentSequence property was last
         modified.
         """
-        return self._ensureSetNamed('_appointmentSequenceTime', '8202', constants.ps.PSETID_APPOINTMENT)
+        return self._getNamedAs('8202', constants.ps.PSETID_APPOINTMENT)
 
-    @property
+    @functools.cached_property
     def autoFillLocation(self) -> bool:
         """
         A value of True indicates that the value of the location property is set
@@ -78,14 +79,14 @@ class AppointmentMeeting(Calendar):
         A value of False indicates that the value of the location property is
         not automatically set.
         """
-        return self._ensureSetNamed('_autoFillLocation', '823A', constants.ps.PSETID_APPOINTMENT, overrideClass = bool, preserveNone = False)
+        return self._getNamedAs('823A', constants.ps.PSETID_APPOINTMENT, bool, False)
 
-    @property
+    @functools.cached_property
     def fInvited(self) -> bool:
         """
         Whether a Meeting Request object has been sent out.
         """
-        return self._ensureSetNamed('_fInvited', '8229', constants.ps.PSETID_APPOINTMENT, overrideClass = bool, preserveNone = False)
+        return self._getNamedAs('8229', constants.ps.PSETID_APPOINTMENT, bool, False)
 
     @property
     def headerFormatProperties(self) -> constants.HEADER_FORMAT_TYPE:
@@ -161,7 +162,7 @@ class AppointmentMeeting(Calendar):
             },
         }
 
-    @property
+    @functools.cached_property
     def isMeeting(self) -> bool:
         """
         Attempts to determine if the object is a Meeting. True if meeting, False
@@ -169,9 +170,9 @@ class AppointmentMeeting(Calendar):
         """
         return self.appointmentStateFlags and AppointmentStateFlag.MEETING in self.appointmentStateFlags
 
-    @property
+    @functools.cached_property
     def originalStoreEntryID(self) -> Optional[EntryID]:
         """
         The EntryID of the delegator's message store.
         """
-        return self._ensureSetNamed('_originalStoreEntryID', '8237', constants.ps.PSETID_APPOINTMENT, overrideClass = EntryID.autoCreate)
+        return self._getNamedAs('8237', constants.ps.PSETID_APPOINTMENT, EntryID.autoCreate)

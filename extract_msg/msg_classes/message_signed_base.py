@@ -3,6 +3,7 @@ __all__ = [
 ]
 
 
+import functools
 import html
 import logging
 import re
@@ -50,10 +51,10 @@ class MessageSignedBase(MessageBase):
             atts = super().attachments
 
             if len(atts) != 1:
-                if self.errorBehavior & ErrorBehavior.STANDARDS_VIOLATION:
+                if ErrorBehavior.STANDARDS_VIOLATION in self.errorBehavior:
                     if len(atts) == 0:
                         logger.error('Signed message has no attachments, a violation of the standard.')
-                        self._sAttachments = None
+                        self._sAttachments = []
                         self._signedBody = None
                         self._signedHtmlBody = None
                         return
@@ -128,7 +129,7 @@ class MessageSignedBase(MessageBase):
 
             return self._htmlBody
 
-    @property
+    @functools.cached_property
     def _rawAttachments(self) -> List:
         """
         A property to allow access to the non-signed attachments.
@@ -142,24 +143,18 @@ class MessageSignedBase(MessageBase):
         """
         return self.__signedAttachmentClass
 
-    @property
+    @functools.cached_property
     def signedBody(self) -> Optional[str]:
         """
         Returns the body from the signed message if it exists.
         """
-        try:
-            return self._signedBody
-        except AttributeError:
-            self.attachments
-            return self._signedBody
+        self.attachments
+        return self._signedBody
 
-    @property
+    @functools.cached_property
     def signedHtmlBody(self) -> Optional[bytes]:
         """
         Returns the HTML body from the signed message if it exists.
         """
-        try:
-            return self._signedHtmlBody
-        except AttributeError:
-            self.attachments
-            return self._signedHtmlBody
+        self.attachments
+        return self._signedHtmlBody

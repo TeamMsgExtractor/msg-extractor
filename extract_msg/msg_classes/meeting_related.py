@@ -4,6 +4,7 @@ __all__ = [
 
 
 import datetime
+import functools
 
 from typing import Optional, Set
 
@@ -22,14 +23,14 @@ class MeetingRelated(CalendarBase):
         """
         The date and time at which the meeting-related object was sent.
         """
-        return self._ensureSetNamed('_attendeeCriticalChange', '0001', constants.ps.PSETID_MEETING)
+        return self._getNamedAs('_attendeeCriticalChange', '0001', constants.ps.PSETID_MEETING)
 
-    @property
+    @functools.cached_property
     def processed(self) -> bool:
         """
         Indicates whether a client has processed a meeting-related object.
         """
-        return self._ensureSetProperty('_processed', '7D01000B', overrideClass = bool, preserveNone = False)
+        return self._getPropertyAs('7D01000B', overrideClass = bool, preserveNone = False)
 
     @property
     def serverProcessed(self) -> bool:
@@ -37,7 +38,7 @@ class MeetingRelated(CalendarBase):
         Indicates that the Meeting Request object or Meeting Update object has
         been processed.
         """
-        return self._ensureSetNamed('_serverProcessed', '85CC', constants.ps.PSETID_CALENDAR_ASSISTANT, overrideClass = bool, preserveNone = False)
+        return self._getNamedAs('_serverProcessed', '85CC', constants.ps.PSETID_CALENDAR_ASSISTANT, overrideClass = bool, preserveNone = False)
 
     @property
     def serverProcessingActions(self) -> Optional[Set[ServerProcessingAction]]:
@@ -45,7 +46,7 @@ class MeetingRelated(CalendarBase):
         A set of which actions have been taken on the Meeting Request object or
         Meeting Update object.
         """
-        return self._ensureSetNamed('_serverProcessingActions', '85CD', constants.ps.PSETID_CALENDAR_ASSISTANT, overrideClass = ServerProcessingAction.fromBits)
+        return self._getNamedAs('_serverProcessingActions', '85CD', constants.ps.PSETID_CALENDAR_ASSISTANT, overrideClass = ServerProcessingAction.fromBits)
 
     @property
     def timeZone(self) -> Optional[int]:
@@ -54,11 +55,11 @@ class MeetingRelated(CalendarBase):
 
         See PidLidTimeZone in [MS-OXOCAL] for details.
         """
-        return self._ensureSetNamed('_timeZone', '000C', constants.ps.PSETID_MEETING)
+        return self._getNamedAs('_timeZone', '000C', constants.ps.PSETID_MEETING)
 
     @property
     def where(self) -> Optional[str]:
         """
         PidLidWhere. Should be the same as location.
         """
-        return self._ensureSetNamed('_where', '0002', constants.ps.PSETID_MEETING)
+        return self._getNamedAs('_where', '0002', constants.ps.PSETID_MEETING)

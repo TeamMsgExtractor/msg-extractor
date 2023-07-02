@@ -4,9 +4,10 @@ __all__ = [
 
 
 import datetime
+import functools
 import logging
 
-from typing import List, Optional, Set, Tuple, Union
+from typing import List, Optional, Union
 
 from .. import constants
 from ..enums import AppointmentAuxilaryFlag, AppointmentColor, AppointmentStateFlag, BusyStatus, IconIndex, MeetingRecipientType, ResponseStatus
@@ -31,154 +32,147 @@ class CalendarBase(MessageBase):
         """
         Returns the specified recipient field.
         """
-        private = '_' + recipientType
         recipientInt = MeetingRecipientType(recipientInt)
-        try:
-            return getattr(self, private)
-        except AttributeError:
-            value = None
-            # Check header first.
-            if self.headerInit():
-                value = self.header[recipientType]
-                if value:
-                    value = value.replace(',', self.recipientSeparator)
-
-            # If the header had a blank field or didn't have the field, generate
-            # it manually.
-            if not value:
-                # Check if the header has initialized.
-                if self.headerInit():
-                    logger.info(f'Header found, but "{recipientType}" is not included. Will be generated from other streams.')
-
-                # Get a list of the recipients of the specified type.
-                foundRecipients = tuple(recipient.formatted for recipient in self.recipients if recipient.type == recipientInt)
-
-                # If we found recipients, join them with the recipient separator
-                # and a space.
-                if len(foundRecipients) > 0:
-                    value = (self.recipientSeparator + ' ').join(foundRecipients)
-
-            # Code to fix the formatting so it's all a single line. This allows
-            # the user to format it themself if they want. This should probably
-            # be redone to use re or something, but I can do that later. This
-            # shouldn't be a huge problem for now.
+        value = None
+        # Check header first.
+        if self.headerInit():
+            value = self.header[recipientType]
             if value:
-                value = value.replace(' \r\n\t', ' ').replace('\r\n\t ', ' ').replace('\r\n\t', ' ')
-                value = value.replace('\r\n', ' ').replace('\r', ' ').replace('\n', ' ')
-                while value.find('  ') != -1:
-                    value = value.replace('  ', ' ')
+                value = value.replace(',', self.recipientSeparator)
 
-            # Set the field in the class.
-            setattr(self, private, value)
+        # If the header had a blank field or didn't have the field, generate
+        # it manually.
+        if not value:
+            # Check if the header has initialized.
+            if self.headerInit():
+                logger.info(f'Header found, but "{recipientType}" is not included. Will be generated from other streams.')
 
-            return value
+            # Get a list of the recipients of the specified type.
+            foundRecipients = tuple(recipient.formatted for recipient in self.recipients if recipient.type == recipientInt)
 
-    @property
+            # If we found recipients, join them with the recipient separator
+            # and a space.
+            if len(foundRecipients) > 0:
+                value = (self.recipientSeparator + ' ').join(foundRecipients)
+
+        # Code to fix the formatting so it's all a single line. This allows
+        # the user to format it themself if they want. This should probably
+        # be redone to use re or something, but I can do that later. This
+        # shouldn't be a huge problem for now.
+        if value:
+            value = value.replace(' \r\n\t', ' ').replace('\r\n\t ', ' ').replace('\r\n\t', ' ')
+            value = value.replace('\r\n', ' ').replace('\r', ' ').replace('\n', ' ')
+            while value.find('  ') != -1:
+                value = value.replace('  ', ' ')
+
+        return value
+
+    @functools.cached_property
     def allAttendeesString(self) -> Optional[str]:
         """
         A list of all attendees, excluding the organizer.
         """
-        return self._ensureSetNamed('_allAttendeesString', '8238', constants.ps.PSETID_APPOINTMENT)
+        return self._getNamedAs('8238', constants.ps.PSETID_APPOINTMENT)
 
-    @property
-    def appointmentAuxilaryFlags(self) -> Optional[Set[AppointmentAuxilaryFlag]]:
+    @functools.cached_property
+    def appointmentAuxilaryFlags(self) -> Optional[AppointmentAuxilaryFlag]:
         """
         The auxiliary state of the object.
         """
-        return self._ensureSetNamed('_appointmentAuxilaryFlags', '8207', constants.ps.PSETID_APPOINTMENT, overrideClass = AppointmentAuxilaryFlag.fromBits)
+        return self._getNamedAs('8207', constants.ps.PSETID_APPOINTMENT, AppointmentAuxilaryFlag)
 
-    @property
+    @functools.cached_property
     def appointmentColor(self) -> Optional[AppointmentColor]:
         """
         The color to be used when displaying a Calendar object.
         """
-        return self._ensureSetNamed('_appointmentColor', '8214', constants.ps.PSETID_APPOINTMENT, overrideClass = AppointmentColor)
+        return self._getNamedAs('8214', constants.ps.PSETID_APPOINTMENT, AppointmentColor)
 
-    @property
+    @functools.cached_property
     def appointmentDuration(self) -> Optional[int]:
         """
         The length of the event, in minutes.
         """
-        return self._ensureSetNamed('_appointmentDuration', '8213', constants.ps.PSETID_APPOINTMENT)
+        return self._getNamedAs('8213', constants.ps.PSETID_APPOINTMENT)
 
-    @property
+    @functools.cached_property
     def appointmentEndWhole(self) -> Optional[datetime.datetime]:
         """
         The end date and time of the event in UTC.
         """
-        return self._ensureSetNamed('_appointmentEndWhole', '820E', constants.ps.PSETID_APPOINTMENT)
+        return self._getNamedAs('820E', constants.ps.PSETID_APPOINTMENT)
 
-    @property
+    @functools.cached_property
     def appointmentNotAllowPropose(self) -> bool:
         """
         Indicates that attendees are not allowed to propose a new date and/or
         time for the meeting if True.
         """
-        return self._ensureSetNamed('_appointmentNotAllowPropose', '8259', constants.ps.PSETID_APPOINTMENT, overrideClass = bool, preserveNone = False)
+        return self._getNamedAs('8259', constants.ps.PSETID_APPOINTMENT, bool, False)
 
-    @property
+    @functools.cached_property
     def appointmentRecur(self) -> Optional[RecurrencePattern]:
         """
         Specifies the dates and times when a recurring series occurs by using
         one of the recurrence patterns and ranges specified in this section.
         """
-        return self._ensureSetNamed('_appointmentRecur', '8216', constants.ps.PSETID_APPOINTMENT, overrideClass = RecurrencePattern)
+        return self._getNamedAs('8216', constants.ps.PSETID_APPOINTMENT, RecurrencePattern)
 
-    @property
+    @functools.cached_property
     def appointmentSequence(self) -> Optional[int]:
         """
         Specified the sequence number of a Meeting object. A meeting object
         begins with the sequence number set to 0 and is incremented each time
         the organizer sends out a Meeting Update object.
         """
-        return self._ensureSetNamed('_appointmentSequence', '8201', constants.ps.PSETID_APPOINTMENT)
+        return self._getNamedAs('8201', constants.ps.PSETID_APPOINTMENT)
 
-    @property
+    @functools.cached_property
     def appointmentStartWhole(self) -> Optional[datetime.datetime]:
         """
         The start date and time of the event in UTC.
         """
-        return self._ensureSetNamed('_appointmentStartWhole', '820D', constants.ps.PSETID_APPOINTMENT)
+        return self._getNamedAs('820D', constants.ps.PSETID_APPOINTMENT)
 
-    @property
-    def appointmentStateFlags(self) -> Optional[Set[AppointmentStateFlag]]:
+    @functools.cached_property
+    def appointmentStateFlags(self) -> Optional[AppointmentStateFlag]:
         """
         The appointment state of the object.
         """
-        return self._ensureSetNamed('_appointmentStateFlags', '8217', constants.ps.PSETID_APPOINTMENT, overrideClass = AppointmentStateFlag.fromBits)
+        return self._getNamedAs('8217', constants.ps.PSETID_APPOINTMENT, AppointmentStateFlag)
 
-    @property
+    @functools.cached_property
     def appointmentSubType(self) -> bool:
         """
         Whether the event is an all-day event or not.
         """
-        return self._ensureSetNamed('_appointmentSubType', '8215', constants.ps.PSETID_APPOINTMENT, overrideClass = bool, preserveNone = False)
+        return self._getNamedAs('8215', constants.ps.PSETID_APPOINTMENT, bool, False)
 
-    @property
+    @functools.cached_property
     def appointmentTimeZoneDefinitionEndDisplay(self) -> Optional[TimeZoneDefinition]:
         """
         Specifies the time zone information for the appointmentEndWhole property
         Used to convert the end date and time to and from UTC.
         """
-        return self._ensureSetNamed('_appointmentTimeZoneDefinitionEndDisplay', '825F', constants.ps.PSETID_APPOINTMENT, overrideClass = TimeZoneDefinition)
+        return self._getNamedAs('825F', constants.ps.PSETID_APPOINTMENT, TimeZoneDefinition)
 
-    @property
+    @functools.cached_property
     def appointmentTimeZoneDefinitionRecur(self) -> Optional[TimeZoneDefinition]:
         """
         Specified the time zone information that specifies how to convert the
         meeting date and time on a recurring series to and from UTC.
         """
-        return self._ensureSetNamed('_appointmentTimeZoneDefinitionRecur', '8260', constants.ps.PSETID_APPOINTMENT, overrideClass = TimeZoneDefinition)
+        return self._getNamedAs('8260', constants.ps.PSETID_APPOINTMENT, TimeZoneDefinition)
 
-    @property
+    @functools.cached_property
     def appointmentTimeZoneDefinitionStartDisplay(self) -> Optional[TimeZoneDefinition]:
         """
         Specifies the time zone information for the appointmentStartWhole
         property. Used to convert the start date and time to and from UTC.
         """
-        return self._ensureSetNamed('_appointmentTimeZoneDefinitionStartDisplay', '825E', constants.ps.PSETID_APPOINTMENT, overrideClass = TimeZoneDefinition)
+        return self._getNamedAs('825E', constants.ps.PSETID_APPOINTMENT, TimeZoneDefinition)
 
-    @property
+    @functools.cached_property
     def appointmentUnsendableRecipients(self) -> Optional[bytes]:
         """
         A list of unsendable attendees.
@@ -187,69 +181,69 @@ class CalendarBase(MessageBase):
         the specifications. If you have examples, let me know and I can ask you
         to run a verification on it.
         """
-        return self._ensureSetNamed('_appointmentUnsendableRecipients', '825D', constants.ps.PSETID_APPOINTMENT)
+        return self._getNamedAs('825D', constants.ps.PSETID_APPOINTMENT)
 
-    @property
+    @functools.cached_property
     def bcc(self) -> Optional[str]:
         """
         Returns the bcc field, if it exists.
         """
         return self._genRecipient('bcc', MeetingRecipientType.SENDABLE_RESOURCE_OBJECT)
 
-    @property
+    @functools.cached_property
     def birthdayContactAttributionDisplayName(self) -> Optional[str]:
         """
         Indicated the name of the contact associated with the birthday event.
         """
-        return self._ensureSetNamed('_birthdayContactAttributionDisplayName', 'BirthdayContactAttributionDisplayName', constants.ps.PSETID_ADDRESS)
+        return self._getNamedAs('BirthdayContactAttributionDisplayName', constants.ps.PSETID_ADDRESS)
 
-    @property
+    @functools.cached_property
     def birthdayContactEntryID(self) -> Optional[EntryID]:
         """
         Indicates the EntryID of the contact associated with the birthday event.
         """
-        return self._ensureSetNamed('_birthdayContactEntryID', 'BirthdayContactEntryId', constants.ps.PSETID_ADDRESS, overrideClass = EntryID.autoCreate)
+        return self._getNamedAs('BirthdayContactEntryId', constants.ps.PSETID_ADDRESS, EntryID.autoCreate)
 
-    @property
+    @functools.cached_property
     def birthdayContactPersonGuid(self) -> Optional[bytes]:
         """
         Indicates the person ID's GUID of the contact associated with the
         birthday event.
         """
-        return self._ensureSetNamed('_birthdayContactPersonGuid', 'BirthdayContactPersonGuid', constants.ps.PSETID_ADDRESS)
+        return self._getNamedAs('BirthdayContactPersonGuid', constants.ps.PSETID_ADDRESS)
 
-    @property
+    @functools.cached_property
     def busyStatus(self) -> Optional[BusyStatus]:
         """
         Specified the availability of a user for the event described by the
         object.
         """
-        return self._ensureSetNamed('_busyStatus', '8205', constants.ps.PSETID_APPOINTMENT, overrideClass = BusyStatus)
+        return self._getNamedAs('8205', constants.ps.PSETID_APPOINTMENT, BusyStatus)
 
-    @property
+    @functools.cached_property
     def cc(self) -> Optional[str]:
         """
         Returns the cc field, if it exists.
         """
         return self._genRecipient('cc', MeetingRecipientType.SENDABLE_OPTIONAL_ATTENDEE)
 
-    @property
+    @functools.cached_property
     def ccAttendeesString(self) -> Optional[str]:
         """
         A list of all the sendable attendees, who are also optional attendees.
         """
-        return self._ensureSetNamed('_ccAttendeesString', '823C', constants.ps.PSETID_APPOINTMENT)
+        return self._getNamedAs('823C', constants.ps.PSETID_APPOINTMENT)
 
-    @property
+    @functools.cached_property
     def cleanGlobalObjectID(self) -> Optional[GlobalObjectID]:
         """
         The value of the globalObjectID property for an object that represents
         an Exception object to a recurring series, where the year, month, and
         day fields are all 0.
         """
-        return self._ensureSetNamed('_cleanGlobalObjectID', '0023', constants.ps.PSETID_MEETING, overrideClass = GlobalObjectID)
+        return self._getNamedAs('0023', constants.ps.PSETID_MEETING, GlobalObjectID)
 
-    @property
+    @functools.cached_property
     def clipEnd(self) -> Optional[datetime.datetime]:
         """
         For single-instance Calendar objects, the end date and time of the
@@ -260,9 +254,9 @@ class CalendarBase(MessageBase):
 
         Honestly, not sure what this is. [MS-OXOCAL]: PidLidClipEnd.
         """
-        return self._ensureSetNamed('_clipEnd', '8236', constants.ps.PSETID_APPOINTMENT)
+        return self._getNamedAs('8236', constants.ps.PSETID_APPOINTMENT)
 
-    @property
+    @functools.cached_property
     def clipStart(self) -> Optional[datetime.datetime]:
         """
         For single-instance Calendar objects, the start date and time of the
@@ -271,152 +265,152 @@ class CalendarBase(MessageBase):
 
         Honestly, not sure what this is. [MS-OXOCAL]: PidLidClipStart.
         """
-        return self._ensureSetNamed('_clipStart', '8235', constants.ps.PSETID_APPOINTMENT)
+        return self._getNamedAs('8235', constants.ps.PSETID_APPOINTMENT)
 
-    @property
+    @functools.cached_property
     def commonEnd(self) -> Optional[datetime.datetime]:
         """
         The end date and time of an event. MUST be equal to appointmentEndWhole.
         """
-        return self._ensureSetNamed('_commonEnd', '8517', constants.ps.PSETID_COMMON)
+        return self._getNamedAs('8517', constants.ps.PSETID_COMMON)
 
-    @property
+    @functools.cached_property
     def commonStart(self) -> Optional[datetime.datetime]:
         """
         The start date and time of an event. MUST be equal to
         appointmentStartWhole.
         """
-        return self._ensureSetNamed('_commonStart', '8516', constants.ps.PSETID_COMMON)
+        return self._getNamedAs('8516', constants.ps.PSETID_COMMON)
 
-    @property
+    @functools.cached_property
     def endDate(self) -> Optional[datetime.datetime]:
         """
         The end date of the appointment.
         """
-        return self._ensureSetProperty('_endDate', '00610040')
+        return self._getPropertyAs('00610040')
 
-    @property
+    @functools.cached_property
     def globalObjectID(self) -> Optional[GlobalObjectID]:
         """
         The unique identifier or the Calendar object.
         """
-        return self._ensureSetNamed('_globalObjectID', '0003', constants.ps.PSETID_MEETING, overrideClass = GlobalObjectID)
+        return self._getNamedAs('0003', constants.ps.PSETID_MEETING, GlobalObjectID)
 
-    @property
+    @functools.cached_property
     def iconIndex(self) -> Optional[Union[IconIndex, int]]:
         """
         The icon to use for the object.
         """
-        return self._ensureSetProperty('_iconIndex', '10800003', overrideClass = IconIndex.tryMake)
+        return self._getPropertyAs('10800003', IconIndex.tryMake)
 
-    @property
+    @functools.cached_property
     def isBirthdayContactWritable(self) -> bool:
         """
         Indicates whether the contact associated with the birthday event is
         writable.
         """
-        return self._ensureSetNamed('_isBirthdayContactWritable', 'IsBirthdayContactWritable', constants.ps.PSETID_ADDRESS, overrideClass = bool, preserveNone = False)
+        return self._getNamedAs('IsBirthdayContactWritable', constants.ps.PSETID_ADDRESS, bool, False)
 
-    @property
+    @functools.cached_property
     def isException(self) -> bool:
         """
         Whether the object represents an exception. False indicates that the
         object represents a recurring series or a single-instance object.
         """
-        return self._ensureSetNamed('_isException', '000A', constants.ps.PSETID_MEETING, overrideClass = bool, preserveNone = False)
+        return self._getNamedAs('000A', constants.ps.PSETID_MEETING, bool, False)
 
-    @property
+    @functools.cached_property
     def isRecurring(self) -> bool:
         """
         Whether the object is associated with a recurring series.
         """
-        return self._ensureSetNamed('_isRecurring', '0005', constants.ps.PSETID_MEETING, overrideClass = bool, preserveNone = False)
+        return self._getNamedAs('0005', constants.ps.PSETID_MEETING, bool, False)
 
-    @property
+    @functools.cached_property
     def keywords(self) -> Optional[List[str]]:
         """
         The color to be used when displaying a Calendar object.
         """
-        return self._ensureSet('_keywords', 'Keywords')
+        return self._getNamedAs('Keywords', constants.ps.PS_PUBLIC_STRINGS)
 
-    @property
-    def linkedTaskItems(self) -> Optional[Tuple[EntryID]]:
+    @functools.cached_property
+    def linkedTaskItems(self) -> Optional[List[EntryID]]:
         """
         A list of PidTagEntryId properties of Task objects related to the
         Calendar object that are set by a client.
         """
-        return self._ensureSetNamed('_linkedTaskItems', '820C', constants.ps.PSETID_APPOINTMENT, overrideClass = lambda x : tuple(EntryID.autoCreate(y) for y in x))
+        return self._getNamedAs('820C', constants.ps.PSETID_APPOINTMENT, lambda x : list(EntryID.autoCreate(y) for y in x))
 
-    @property
+    @functools.cached_property
     def location(self) -> Optional[str]:
         """
         Returns the location of the meeting.
         """
-        return self._ensureSetNamed('_location', '8208', constants.ps.PSETID_APPOINTMENT)
+        return self._getNamedAs('8208', constants.ps.PSETID_APPOINTMENT)
 
-    @property
+    @functools.cached_property
     def meetingDoNotForward(self) -> bool:
         """
         Whether to allow the meeting to be forwarded. True disallows forwarding.
         """
-        return self._ensureSetNamed('_meetingDoNotForward', 'DoNotForward', constants.ps.PS_PUBLIC_STRINGS, overrideClass = bool, preserveNone = False)
+        return self._getNamedAs('DoNotForward', constants.ps.PS_PUBLIC_STRINGS, bool, False)
 
-    @property
+    @functools.cached_property
     def meetingWorkspaceUrl(self) -> Optional[str]:
         """
         The URL of the Meeting Workspace, as specified in [MS-MEETS], that is
         associated with a Calendar object.
         """
-        return self._ensureSetNamed('_meetingWorkspaceUrl', '8209', constants.ps.PSETID_APPOINTMENT)
+        return self._getNamedAs('8209', constants.ps.PSETID_APPOINTMENT)
 
-    @property
+    @functools.cached_property
     def nonSendableBcc(self) -> Optional[str]:
         """
         A list of all unsendable attendees who are also resource objects.
         """
-        return self._ensureSetNamed('_nonSendableBcc', '8538', constants.ps.PSETID_COMMON)
+        return self._getNamedAs('8538', constants.ps.PSETID_COMMON)
 
-    @property
+    @functools.cached_property
     def nonSendableCc(self) -> Optional[str]:
         """
         A list of all unsendable attendees who are also optional attendees.
         """
-        return self._ensureSetNamed('_nonSendableCc', '8537', constants.ps.PSETID_COMMON)
+        return self._getNamedAs('8537', constants.ps.PSETID_COMMON)
 
-    @property
+    @functools.cached_property
     def nonSendableTo(self) -> Optional[str]:
         """
         A list of all unsendable attendees who are also required attendees.
         """
-        return self._ensureSetNamed('_nonSendableTo', '8536', constants.ps.PSETID_COMMON)
+        return self._getNamedAs('8536', constants.ps.PSETID_COMMON)
 
-    @property
+    @functools.cached_property
     def nonSendBccTrackStatus(self) -> Optional[List[ResponseStatus]]:
         """
         A ResponseStatus for each of the attendees in nonSendableBcc.
         """
-        return self._ensureSetNamed('_nonSendBccTrackStatus', '8545', constants.ps.PSETID_COMMON, overrideClass = (lambda x : (ResponseStatus(y) for y in x)))
+        return self._getNamedAs('8545', constants.ps.PSETID_COMMON, lambda x : list(ResponseStatus(y) for y in x))
 
-    @property
+    @functools.cached_property
     def nonSendCcTrackStatus(self) -> Optional[List[ResponseStatus]]:
         """
         A ResponseStatus for each of the attendees in nonSendableCc.
         """
-        return self._ensureSetNamed('_nonSendCcTrackStatus', '8544', constants.ps.PSETID_COMMON, overrideClass = (lambda x : (ResponseStatus(y) for y in x)))
+        return self._getNamedAs('8544', constants.ps.PSETID_COMMON, lambda x : list(ResponseStatus(y) for y in x))
 
-    @property
+    @functools.cached_property
     def nonSendToTrackStatus(self) -> Optional[List[ResponseStatus]]:
         """
         A ResponseStatus for each of the attendees in nonSendableTo.
         """
-        return self._ensureSetNamed('_nonSendToTrackStatus', '8543', constants.ps.PSETID_COMMON, overrideClass = (lambda x : (ResponseStatus(y) for y in x)))
+        return self._getNamedAs('8543', constants.ps.PSETID_COMMON, lambda x : list(ResponseStatus(y) for y in x))
 
-    @property
+    @functools.cached_property
     def optionalAttendees(self) -> Optional[str]:
         """
         Returns the optional attendees of the meeting.
         """
-        return self._ensureSetNamed('_optionalAttendees', '0007', constants.ps.PSETID_MEETING)
+        return self._getNamedAs('0007', constants.ps.PSETID_MEETING)
 
     @property
     def organizer(self) -> Optional[str]:
@@ -425,106 +419,106 @@ class CalendarBase(MessageBase):
         """
         return self._ensureSet('_organizer', '__substg1.0_0042')
 
-    @property
+    @functools.cached_property
     def ownerAppointmentID(self) -> Optional[int]:
         """
         A quasi-unique value amond all Calendar objects in a user's mailbox.
         Assists a client or server in finding a Calendar object but is not
         guarenteed to be unique amoung all objects.
         """
-        return self._ensureSetProperty('_ownerAppointmentID', '00620003')
+        return self._getPropertyAs('00620003')
 
-    @property
+    @functools.cached_property
     def ownerCriticalChange(self) -> Optional[datetime.datetime]:
         """
         The date and time at which a Meeting Request object was sent by the
         organizer, in UTC.
         """
-        return self._ensureSetNamed('_ownerCriticalChange', '001A', constants.ps.PSETID_MEETING)
+        return self._getNamedAs('001A', constants.ps.PSETID_MEETING)
 
-    @property
+    @functools.cached_property
     def recurrencePattern(self) -> Optional[str]:
         """
         A description of the recurrence specified by the appointmentRecur
         property.
         """
-        return self._ensureSetNamed('_recurrencePattern', '8232', constants.ps.PSETID_APPOINTMENT)
+        return self._getNamedAs('8232', constants.ps.PSETID_APPOINTMENT)
 
-    @property
+    @functools.cached_property
     def recurring(self) -> bool:
         """
         Specifies whether the object represents a recurring series.
         """
-        return self._ensureSetNamed('_recurring', '8223', constants.ps.PSETID_APPOINTMENT, overrideClass = bool, preserveNone = True)
+        return self._getNamedAs('8223', constants.ps.PSETID_APPOINTMENT, bool, True)
 
-    @property
+    @functools.cached_property
     def replyRequested(self) -> bool:
         """
         Whether the organizer requests a reply from attendees.
         """
-        return self._ensureSetProperty('_replyRequested', '0C17000B', overrideClass = bool, preserveNone = False)
+        return self._getPropertyAs('0C17000B', overrideClass = bool, preserveNone = False)
 
-    @property
+    @functools.cached_property
     def requiredAttendees(self) -> Optional[str]:
         """
         Returns the required attendees of the meeting.
         """
-        return self._ensureSetNamed('_requiredAttendees', '0006', constants.ps.PSETID_MEETING)
+        return self._getNamedAs('0006', constants.ps.PSETID_MEETING)
 
-    @property
+    @functools.cached_property
     def resourceAttendees(self) -> Optional[str]:
         """
         Returns the resource attendees of the meeting.
         """
-        return self._ensureSetNamed('_resourceAttendees', '0008', constants.ps.PSETID_MEETING)
+        return self._getNamedAs('0008', constants.ps.PSETID_MEETING)
 
-    @property
+    @functools.cached_property
     def responseRequested(self) -> bool:
         """
         Whether to send Meeting Response objects to the organizer.
         """
-        return self._ensureSetProperty('_responseRequested', '0063000B', overrideClass = bool, preserveNone = False)
+        return self._getPropertyAs('0063000B', bool, False)
 
-    @property
+    @functools.cached_property
     def responseStatus(self) -> ResponseStatus:
         """
         The response status of an attendee.
         """
-        return self._ensureSetNamed('_responseStatus', '8218', constants.ps.PSETID_APPOINTMENT, overrideClass = lambda x: ResponseStatus(x or 0), preserveNone = False)
+        return self._getNamedAs('8218', constants.ps.PSETID_APPOINTMENT, lambda x: ResponseStatus(x or 0), False)
 
-    @property
+    @functools.cached_property
     def startDate(self) -> Optional[datetime.datetime]:
         """
         The start date of the appointment.
         """
-        return self._ensureSetProperty('_startDate', '00600040')
+        return self._getPropertyAs('00600040')
 
-    @property
+    @functools.cached_property
     def timeZoneDescription(self) -> Optional[str]:
         """
         A human-readable description of the time zone that is represented by the
         data in the timeZoneStruct property.
         """
-        return self._ensureSetNamed('_timeZoneDescription', '8234', constants.ps.PSETID_APPOINTMENT)
+        return self._getNamedAs('8234', constants.ps.PSETID_APPOINTMENT)
 
-    @property
+    @functools.cached_property
     def timeZoneStruct(self) -> Optional[TimeZoneStruct]:
         """
         Set on a recurring series to specify time zone information. Specifies
         how to convert time fields between local time and UTC.
         """
-        return self._ensureSetNamed('_timeZoneStruct', '8233', constants.ps.PSETID_APPOINTMENT, overrideClass = TimeZoneStruct)
+        return self._getNamedAs('8233', constants.ps.PSETID_APPOINTMENT, TimeZoneStruct)
 
-    @property
+    @functools.cached_property
     def to(self) -> Optional[str]:
         """
         Returns the to field, if it exists.
         """
         return self._genRecipient('to', MeetingRecipientType.SENDABLE_REQUIRED_ATTENDEE)
 
-    @property
+    @functools.cached_property
     def toAttendeesString(self) -> Optional[str]:
         """
         A list of all the sendable attendees, who are also required attendees.
         """
-        return self._ensureSetNamed('_toAttendeesString', '823B', constants.ps.PSETID_APPOINTMENT)
+        return self._getNamedAs('823B', constants.ps.PSETID_APPOINTMENT)

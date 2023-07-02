@@ -43,7 +43,7 @@ class AddressBookType(enum.Enum):
 
 
 
-class AppointmentAuxilaryFlag(enum.Enum):
+class AppointmentAuxilaryFlag(enum.IntEnum):
     """
     Describes the auxilary state of the object.
 
@@ -54,21 +54,6 @@ class AppointmentAuxilaryFlag(enum.Enum):
     REPAIR_UPDATE_MESSAGE: The meeting request is a Repair Update Message sent
         from a server-side calendar repair system.
     """
-    @classmethod
-    def fromBits(cls, value : int) -> Set['AppointmentAuxilaryFlag']:
-        """
-        Takes an int and returns a set of the flags.
-        """
-        flags = set()
-        for x in range(7):
-            bit = value & (1 << x)
-            if bit:
-                if x in (3, 4, 6):
-                    raise ValueError('Reserved bit was set.')
-                flags.add(cls(bit))
-
-        return flags
-
     COPIED = 0b1
     FORCE_MEETING_RESPONSE = 0b10
     FORWARDED = 0b100
@@ -282,11 +267,10 @@ class BodyTypes(enum.IntFlag):
     method for generated bodies (if you check a body and it is not null, but it
     is not listed in the enum, then it was generated from another body).
 
-    This is an IntFlag enum, so to check if a body was found use the & operator
-    with the body you are checking and ensuring the result isn't BodyTypes.None.
-    You can also convert the result to a bool. For example:
+    This is an IntFlag enum, so to check if a body was found use the in operator
+    with the body you are checking. For example:
 
-    >>> rtfFound = bool(msg.detectedBodies & BodyTypes.RTF)
+    >>> rtfFound = BodyTypes.RTF msg.detectedBodies
     """
     NONE = 0b000
     PLAIN = 0b001
@@ -315,7 +299,7 @@ class BusyStatus(enum.Enum):
 
 
 
-class ClientIntentFlag(enum.Enum):
+class ClientIntentFlag(enum.IntFlag):
     """
     An action a user has taken on a Meeting object.
 
@@ -338,13 +322,6 @@ class ClientIntentFlag(enum.Enum):
     CANCELED: The user canceled a meeting request.
     EXCEPTION_CANCELED: The user canceled an exception to a recurring series.
     """
-    @classmethod
-    def fromBits(cls, value : int) -> Set['ClientIntentFlag']:
-        """
-        Takes an int and returns a set of the flags.
-        """
-        return {cls(1 << x) for x in range(13) if (value & (1 << x))}
-
     MANAGER = 0b1
     DELEGATE = 0b10
     DELETED_WITH_NO_RESPONSE = 0b100
@@ -1690,14 +1667,7 @@ class TaskMode(enum.Enum):
 
 
 
-class TaskMultipleRecipients(enum.Enum):
-    @classmethod
-    def fromBits(cls, value : int) -> Set['TaskMultipleRecipients']:
-        """
-        Takes an int and returns a set of the flags.
-        """
-        return {cls(1 << x) for x in range(2) if (value & (1 << x))}
-
+class TaskMultipleRecipients(enum.IntFlag):
     SENT = 0x00000001
     RECEIVED = 0x00000002
 

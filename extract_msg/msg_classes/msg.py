@@ -240,10 +240,9 @@ class MSGFile:
             setattr(self, variable, value)
             return value
 
-    def _ensureSetNamed(self, variable : str, propertyName : str, guid : str, **kwargs):
+    def _getNamedAs(self, propertyName : str, guid : str, overrideClass = None, preserveNone : bool = True):
         """
-        Ensures that the variable exists, otherwise will set it using the named
-        property. After that, return said variable.
+        Returns the named property, setting the class if specified.
 
         :param overrideClass: Class/function to use to morph the data that was
             read. The data will be the first argument to the class's __init__
@@ -253,45 +252,36 @@ class MSGFile:
             :param overrideClass: when the value could not be found (is None).
             If this is changed to False, then the value will be used regardless.
         """
-        try:
-            return getattr(self, variable)
-        except AttributeError:
-            value = self.namedProperties.get((propertyName, guid))
-            # Check if we should be overriding the data type for this instance.
-            if kwargs:
-                overrideClass = kwargs.get('overrideClass')
-                if overrideClass is not None and (value is not None or not kwargs.get('preserveNone', True)):
-                    value = overrideClass(value)
-            setattr(self, variable, value)
-            return value
+        value = self.namedProperties.get((propertyName, guid))
+        # Check if we should be overriding the data type for this instance.
+        if overrideClass is not None:
+            if value is not None or not preserveNone:
+                value = overrideClass(value)
 
-    def _ensureSetProperty(self, variable : str, propertyName, **kwargs):
+        return value
+
+    def _getPropertyAs(self, propertyName, overrideClass = None, preserveNone : bool = True):
         """
-        Ensures that the variable exists, otherwise will set it using the
-        property. After that, return said variable.
+        Returns the property, setting the class if specified.
 
         :param overrideClass: Class/function to use to morph the data that was
             read. The data will be the first argument to the class's __init__
             function or the function itself, if that is what is provided. By
             default, this will be completely ignored if the value was not found.
-        :param preserveNone: If true (default), causes the function to ignore
+        :param preserveNone: If True (default), causes the function to ignore
             :param overrideClass: when the value could not be found (is None).
             If this is changed to False, then the value will be used regardless.
         """
         try:
-            return getattr(self, variable)
-        except AttributeError:
-            try:
-                value = self.props[propertyName].value
-            except (KeyError, AttributeError):
-                value = None
-            # Check if we should be overriding the data type for this instance.
-            if kwargs:
-                overrideClass = kwargs.get('overrideClass')
-                if overrideClass is not None and (value is not None or not kwargs.get('preserveNone', True)):
-                    value = overrideClass(value)
-            setattr(self, variable, value)
-            return value
+            value = self.props[propertyName].value
+        except (KeyError, AttributeError):
+            value = None
+        # Check if we should be overriding the data type for this instance.
+        if overrideClass is not None:
+            if (value is not None or not preserveNone):
+                value = overrideClass(value)
+
+        return value
 
     def _ensureSetTyped(self, variable : str, _id, **kwargs):
         """
@@ -702,13 +692,13 @@ class MSGFile:
         """
         return self.__attachmentsReady
 
-    @property
+    @functools.cached_property
     def classified(self) -> bool:
         """
         Indicates whether the contents of this message are regarded as
         classified information.
         """
-        return self._ensureSetNamed('_classified', '85B5', constants.ps.PSETID_COMMON, overrideClass = bool, preserveNone = False)
+        return self._getNamedAs('85B5', constants.ps.PSETID_COMMON, overrideClass = bool, preserveNone = False)
 
     @property
     def classType(self) -> Optional[str]:
@@ -717,34 +707,34 @@ class MSGFile:
         """
         return self._ensureSet('_classType', '__substg1.0_001A')
 
-    @property
+    @functools.cached_property
     def commonEnd(self) -> Optional[datetime.datetime]:
         """
         The end time for the object.
         """
-        return self._ensureSetNamed('_commonEnd', '8517', constants.ps.PSETID_COMMON)
+        return self._getNamedAs('8517', constants.ps.PSETID_COMMON)
 
-    @property
+    @functools.cached_property
     def commonStart(self) -> Optional[datetime.datetime]:
         """
         The start time for the object.
         """
-        return self._ensureSetNamed('_commonStart', '8516', constants.ps.PSETID_COMMON)
+        return self._getNamedAs('8516', constants.ps.PSETID_COMMON)
 
-    @property
+    @functools.cached_property
     def currentVersion(self) -> Optional[int]:
         """
         Specifies the build number of the client application that sent the
         message.
         """
-        return self._ensureSetNamed('_currentVersion', '8552', constants.ps.PSETID_COMMON)
+        return self._getNamedAs('8552', constants.ps.PSETID_COMMON)
 
-    @property
+    @functools.cached_property
     def currentVersionName(self) -> Optional[str]:
         """
         Specifies the name of the client application that sent the message.
         """
-        return self._ensureSetNamed('_currentVersionName', '8554', constants.ps.PSETID_COMMON)
+        return self._getNamedAs('8554', constants.ps.PSETID_COMMON)
 
     @property
     def errorBehavior(self) -> ErrorBehavior:
@@ -754,12 +744,12 @@ class MSGFile:
         """
         return self.__errorBehavior
 
-    @property
+    @functools.cached_property
     def importance(self) -> Optional[Importance]:
         """
         The specified importance of the msg file.
         """
-        return self._ensureSetProperty('_importance', '00170003', overrideClass = Importance)
+        return self._getPropertyAs('00170003', overrideClass = Importance)
 
     @property
     def importanceString(self) -> Union[str, None]:
@@ -863,46 +853,42 @@ class MSGFile:
         """
         return copy.deepcopy(self.__prefixList)
 
-    @property
+    @functools.cached_property
     def priority(self) -> Optional[Priority]:
         """
         The specified priority of the msg file.
         """
-        return self._ensureSetProperty('_priority', '00260003', overrideClass = Priority)
+        return self._getPropertyAs('00260003', Priority)
 
-    @property
+    @functools.cached_property
     def props(self) -> PropertiesStore:
         """
         Returns the Properties instance used by the MSGFile instance.
         """
-        try:
-            return self._prop
-        except AttributeError:
-            if not (stream := self._getStream('__properties_version1.0')):
-                if self.__errorBehavior & ErrorBehavior.STANDARDS_VIOLATION:
-                    logger.error('File does not contain a property stream.')
-                else:
-                    # Raise the exception from None so we don't get all the "during
-                    # the handling of the above exception" stuff.
-                    raise StandardViolationError('File does not contain a property stream.') from None
-            self._prop = PropertiesStore(stream,
-                                    PropertiesType.MESSAGE if self.prefix == '' else PropertiesType.MESSAGE_EMBED)
-            return self._prop
+        if not (stream := self._getStream('__properties_version1.0')):
+            if ErrorBehavior.STANDARDS_VIOLATION in self.__errorBehavior:
+                logger.error('File does not contain a property stream.')
+            else:
+                # Raise the exception from None so we don't get all the "during
+                # the handling of the above exception" stuff.
+                raise StandardViolationError('File does not contain a property stream.') from None
+        return PropertiesStore(stream,
+                               PropertiesType.MESSAGE if self.prefix == '' else PropertiesType.MESSAGE_EMBED)
 
-    @property
+    @functools.cached_property
     def sensitivity(self) -> Optional[Sensitivity]:
         """
         The specified sensitivity of the msg file.
         """
-        return self._ensureSetProperty('_sensitivity', '00360003', overrideClass = Sensitivity)
+        return self._getPropertyAs('00360003', Sensitivity)
 
-    @property
-    def sideEffects(self) -> Optional[Set[SideEffect]]:
+    @functools.cached_property
+    def sideEffects(self) -> Optional[SideEffect]:
         """
         Controls how a Message object is handled by the client in relation to
         certain user interface actions by the user, such as deleting a message.
         """
-        return self._ensureSetNamed('_sideEffects', '8510', constants.ps.PSETID_COMMON, overrideClass = SideEffect.fromBits)
+        return self._getNamedAs('8510', constants.ps.PSETID_COMMON, SideEffect)
 
     @property
     def stringEncoding(self):

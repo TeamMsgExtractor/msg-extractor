@@ -8,6 +8,7 @@ __all__ = [
 
 import abc
 import datetime
+import functools
 import logging
 import weakref
 
@@ -107,7 +108,7 @@ class AttachmentBase(abc.ABC):
             setattr(self, variable, value)
             return value
 
-    def _ensureSetProperty(self, variable, propertyName, **kwargs):
+    def _getPropertyAs(self, propertyName, overrideClass = None, preserveNone : bool = True):
         """
         Ensures that the variable exists, otherwise will set it using the
         property. After that, return said variable.
@@ -116,24 +117,20 @@ class AttachmentBase(abc.ABC):
             read. The data will be the first argument to the class's __init__
             function or the function itself, if that is what is provided. By
             default, this will be completely ignored if the value was not found.
-        :param preserveNone: If true (default), causes the function to ignore
+        :param preserveNone: If True (default), causes the function to ignore
             :param overrideClass: when the value could not be found (is None).
             If this is changed to False, then the value will be used regardless.
         """
         try:
-            return getattr(self, variable)
-        except AttributeError:
-            try:
-                value = self.props[propertyName].value
-            except (KeyError, AttributeError):
-                value = None
-            # Check if we should be overriding the data type for this instance.
-            if kwargs:
-                overrideClass = kwargs.get('overrideClass')
-                if overrideClass is not None and (value is not None or not kwargs.get('preserveNone', True)):
-                    value = overrideClass(value)
-            setattr(self, variable, value)
-            return value
+            value = self.props[propertyName].value
+        except (KeyError, AttributeError):
+            value = None
+        # Check if we should be overriding the data type for this instance.
+        if overrideClass is not None:
+            if (value is not None or not preserveNone):
+                value = overrideClass(value)
+
+        return value
 
     def _ensureSetTyped(self, variable, _id, **kwargs):
         """
@@ -433,7 +430,7 @@ class AttachmentBase(abc.ABC):
         """
         return self._ensureSet('_displayName', '__substg1.0_3001')
 
-    @property
+    @functools.cached_property
     def exceptionReplaceTime(self) -> Optional[datetime.datetime]:
         """
         The original date and time at which the instance in the recurrence
@@ -441,7 +438,7 @@ class AttachmentBase(abc.ABC):
 
         Only applicable if the attachment is an Exception object.
         """
-        return self._ensureSetProperty('_exceptionReplaceTime', '7FF90040')
+        return self._getPropertyAs('7FF90040')
 
     @property
     def extension(self) -> Optional[str]:
@@ -450,19 +447,19 @@ class AttachmentBase(abc.ABC):
         """
         return self._ensureSet('_extension', '__substg1.0_3703')
 
-    @property
+    @functools.cached_property
     def hidden(self) -> bool:
         """
         Indicates whether an Attachment object is hidden from the end user.
         """
-        return self._ensureSetProperty('_hidden', '7FFE000B', overrideClass = bool, preserveNone = False)
+        return self._getPropertyAs('7FFE000B', overrideClass = bool, preserveNone = False)
 
-    @property
+    @functools.cached_property
     def isAttachmentContactPhoto(self) -> bool:
         """
         Whether the attachment is a contact photo for a Contact object.
         """
-        return self._ensureSetProperty('_isAttachmentContactPhoto', '7FFF000B', overrideClass = bool, preserveNone = False)
+        return self._getPropertyAs('7FFF000B', overrideClass = bool, preserveNone = False)
 
     @property
     def longFilename(self) -> Optional[str]:
@@ -529,14 +526,14 @@ class AttachmentBase(abc.ABC):
         """
         return self.__props
 
-    @property
+    @functools.cached_property
     def renderingPosition(self) -> Optional[int]:
         """
         The offset, in redered characters, to use when rendering the attachment
         within the main message text. A value of 0xFFFFFFFF indicates a hidden
         attachment that is not to be rendered.
         """
-        return self._ensureSetProperty('_renderingPosition', '370B0003')
+        return self._getPropertyAs('370B0003')
 
     @property
     def shortFilename(self) -> Optional[str]:

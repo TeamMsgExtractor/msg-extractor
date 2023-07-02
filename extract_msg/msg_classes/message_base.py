@@ -957,14 +957,14 @@ class MessageBase(MSGFile):
                     logger.debug('RTF body is not encapsulated.')
                     self._deencapsultor = None
                 except RTFDE.exceptions.MalformedEncapsulatedRtf as _e:
-                    if not (self.errorBehavior & ErrorBehavior.RTFDE_MALFORMED):
+                    if ErrorBehavior.RTFDE_MALFORMED not in self.errorBehavior:
                         raise
                     logger.info('RTF body contains malformed encapsulated content.')
                     self._deencapsultor = None
                 except Exception:
                     # If we are just ignoring the errors, log it then set to
                     # None. Otherwise, continue the exception.
-                    if not (self.errorBehavior & ErrorBehavior.RTFDE_UNKNOWN_ERROR):
+                    if ErrorBehavior.RTFDE_UNKNOWN_ERROR not in self.errorBehavior:
                         raise
                     logger.exception('Unhandled error happened while using RTFDE. You have choosen to ignore these errors.')
                     self._deencapsultor = None
@@ -1119,7 +1119,7 @@ class MessageBase(MSGFile):
 
             return self._htmlBody
 
-    @property
+    @functools.cached_property
     def htmlBodyPrepared(self) -> Optional[bytes]:
         """
         Returns the HTML body that has (where possible) the embedded attachments
@@ -1147,7 +1147,7 @@ class MessageBase(MSGFile):
 
         return soup.prettify('utf-8')
 
-    @property
+    @functools.cached_property
     def htmlInjectableHeader(self) -> str:
         """
         The header that can be formatted and injected into the html body.
@@ -1166,14 +1166,17 @@ class MessageBase(MSGFile):
         """
         return self._ensureSet('_in_reply_to', '__substg1.0_1042')
 
-    @property
+    @functools.cached_property
     def isRead(self) -> bool:
         """
         Returns if this email has been marked as read.
         """
-        return bool(self.props['0E070003'].value & 1)
+        try:
+            return bool(self.props['0E070003'].value & 1)
+        except (AttributeError, KeyError):
+            return False
 
-    @property
+    @functools.cached_property
     def isSent(self) -> bool:
         """
         Returns if this email has been marked as sent. Assumes True if no flags
@@ -1184,32 +1187,28 @@ class MessageBase(MSGFile):
         else:
             return not bool(self.props['0E070003'].value & 8)
 
-    @property
+    @functools.cached_property
     def messageId(self) -> Optional[str]:
-        try:
-            return self._messageId
-        except AttributeError:
-            headerResult = None
-            if self.headerInit():
-                headerResult = self.header['message-id']
-            if headerResult is not None:
-                self._messageId = headerResult
-            else:
-                if self.headerInit():
-                    logger.info('Header found, but "Message-Id" is not included. Will be generated from other streams.')
-                self._messageId = self._getStringStream('__substg1.0_1035')
-            return self._messageId
+        headerResult = None
+        if self.headerInit():
+            headerResult = self.header['message-id']
+        if headerResult is not None:
+            return headerResult
 
-    @property
+        if self.headerInit():
+            logger.info('Header found, but "Message-Id" is not included. Will be generated from other streams.')
+        return self._getStringStream('__substg1.0_1035')
+
+    @functools.cached_property
     def parsedDate(self):
         return email.utils.parsedate(self.date)
 
-    @property
+    @functools.cached_property
     def receivedTime(self) -> Optional[datetime.datetime]:
         """
         The date and time the message was received by the server.
         """
-        return self._ensureSetProperty('_receivedTime', '0E060040')
+        return self._getPropertyAs('0E060040')
 
     @property
     def recipientSeparator(self) -> str:

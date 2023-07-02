@@ -3,6 +3,7 @@ __all__ = [
 ]
 
 
+import functools
 import logging
 
 from typing import Optional
@@ -53,23 +54,23 @@ class TaskRequest(MessageBase):
         # print. So I guess we just return None and handle that.
         return None
 
-    @property
+    @functools.cached_property
     def processed(self) -> bool:
         """
         Indicates whether a client has already processed a received task
         communication.
         """
-        return self._ensureSetProperty('_processed', '7D01000B', overrideClass = bool, preserveNone = False)
+        return self._getPropertyAs('7D01000B', bool, False)
 
-    @property
+    @functools.cached_property
     def taskMode(self) -> Optional[TaskMode]:
         """
         The assignment status of the embedded Task object.
         """
-        return self._ensureSetNamed('_taskMode', '8518', constants.ps.PSETID_COMMON, overrideClass = TaskMode)
+        return self._getNamedAs('8518', constants.ps.PSETID_COMMON, TaskMode)
 
-    @property
-    def taskObject(self) -> Task:
+    @functools.cached_property
+    def taskObject(self) -> Optional[Task]:
         """
         The task object embedded in this Task Request object.
 
@@ -79,33 +80,31 @@ class TaskRequest(MessageBase):
         :raises StandardViolationError: A standard was blatently violated in a
             way that program does not tolerate.
         """
-        try:
-            return self._taskObject
-        except AttributeError:
-            # Get the task object.
-            #
-            # The task object MUST be the first attachment, but we will be
-            # lenient and allow it to be in any position. It not existing,
-            # however, will not be tolerated.
-            task = next(((index, att) for index, att in self.attachments if isinstance(att.data, Task)), None)
-            if task is None:
-                if self.errorBehavior & ErrorBehavior.STANDARDS_VIOLATION:
-                    logger.error('Task object not found on TaskRequest object.')
-                    return
-                raise StandardViolationError('Task object not found on TaskRequest object.')
+        # Get the task object.
+        #
+        # The task object MUST be the first attachment, but we will be
+        # lenient and allow it to be in any position. It not existing,
+        # however, will not be tolerated.
+        task = next(((index, att) for index, att in self.attachments if isinstance(att.data, Task)), None)
 
-            # We know we have the task, let's make sure it's at index 0. If not,
-            # log it.
-            if task[0] != 0:
-                logger.warning('Embedded task object was not located at index 0.')
+        if task is None:
+            if ErrorBehavior.STANDARDS_VIOLATION in self.errorBehavior:
+                logger.error('Task object not found on TaskRequest object.')
+                return
+            raise StandardViolationError('Task object not found on TaskRequest object.')
 
-            self._taskObject = task[1]
+        # We know we have the task, let's make sure it's at index 0. If not,
+        # log it.
+        if task[0] != 0:
+            logger.warning('Embedded task object was not located at index 0.')
 
-            return self._taskObject
+        self._taskObject = task[1]
 
-    @property
+        return self._taskObject
+
+    @functools.cached_property
     def taskRequestType(self) -> TaskRequestType:
         """
         The type of task request.
         """
-        return self._ensureSet('_taskRequestType', '__substg1.0_001A', TaskRequestType.fromClassType)
+        return self._ensureSet('__substg1.0_001A', TaskRequestType.fromClassType)

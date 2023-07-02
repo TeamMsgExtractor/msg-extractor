@@ -94,7 +94,7 @@ class OutlookImageDIB(CustomAttachmentHandler):
         This function requires PIL or Pillow. If neither are found, raises an
         import error.
         """
-        if not self.attachment.msg.insecureFeatures & InsecureFeatures.PIL_IMAGE_PARSING:
+        if InsecureFeatures.PIL_IMAGE_PARSING not in self.attachment.msg.insecureFeatures:
             raise SecurityError('Generating the RTF for a custom attachment requires the insecure feature PIL_IMAGE_PARSING.')
 
         try:
