@@ -22,15 +22,12 @@ class WebAttachment(AttachmentBase):
     def save(self, **kwargs) -> constants.SAVE_TYPE:
         """
         Raises a NotImplementedError unless :param skipNotImplemented: is set to
-        True. If it is, returns None to signify the attachment was skipped. This
-        allows for the easy implementation of the option to skip this type of
-        attachment.
+        True. If it is, returns a value that indicates no data was saved.
         """
-        if not kwargs.get('skipNotImplemented', False):
-            raise NotImplementedError('Web attachments cannot be saved.')
+        if kwargs.get('skipNotImplemented', False):
+            return (SaveType.NONE, None)
 
-        return (SaveType.NONE, None)
-
+        raise NotImplementedError('Web attachments cannot be saved.')
 
     @property
     def data(self) -> None:

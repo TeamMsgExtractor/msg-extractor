@@ -95,6 +95,12 @@ class SignedAttachment:
         if self.type is AttachmentType.SIGNED_EMBEDDED and kwargs.get('skipEmbedded'):
             return (SaveType.NONE, None)
 
+        # If we are running the save function for the MSG file, just let it
+        # handle everything.
+        if (self.type is AttachmentType.SIGNED_EMBEDDED and
+            not kwargs.get('extractEmbedded', False)):
+            return self.saveEmbededMessage(**kwargs)
+
         # Check if the user has specified a custom filename
         filename = self.name
 
@@ -112,6 +118,7 @@ class SignedAttachment:
         # Check if we are doing a zip file.
         _zip = kwargs.get('zip')
 
+        createdZip = True
         try:
             # ZipFile handling.
             if _zip:
@@ -171,13 +178,10 @@ class SignedAttachment:
 
                 return (SaveType.FILE, str(fullFilename))
             else:
-                if kwargs.get('extractEmbedded', False):
-                    with _open(str(fullFilename), mode) as f:
-                        # We just use the data we were given for this one.
-                        f.write(self.__asBytes)
-                    return (SaveType.FILE, str(fullFilename))
-                else:
-                    return self.saveEmbededMessage(**kwargs)
+                with _open(str(fullFilename), mode) as f:
+                    # We just use the data we were given for this one.
+                    f.write(self.__asBytes)
+                return (SaveType.FILE, str(fullFilename))
         finally:
             # Close the ZipFile if this function created it.
             if _zip and createdZip:

@@ -18,10 +18,14 @@ class BrokenAttachment(AttachmentBase):
         raise NotImplementedError('Broken attachments cannot be saved.')
 
     def save(self, **kwargs) -> constants.SAVE_TYPE:
-        if not kwargs.get('skipNotImplemented', False):
-            raise NotImplementedError('Broken attachments cannot be saved.')
+        """
+        Raises a NotImplementedError unless :param skipNotImplemented: is set to
+        True. If it is, returns a value that indicates no data was saved.
+        """
+        if kwargs.get('skipNotImplemented', False):
+            return (SaveType.NONE, None)
 
-        return (SaveType.NONE, None)
+        raise NotImplementedError('Broken attachments cannot be saved.')
 
     @property
     def data(self) -> None:

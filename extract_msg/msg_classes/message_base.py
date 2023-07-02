@@ -736,22 +736,22 @@ class MessageBase(MSGFile):
                         else:
                             raise DataNotFoundError('Plain text body could not be found.')
 
+        createdZip = False
         try:
             # ZipFile handling.
             if _zip:
                 # `raw` and `zip` are incompatible.
                 if raw:
                     raise IncompatibleOptionsError('The options `raw` and `zip` are incompatible.')
-                # If we are doing a zip file, first check that we have been given a
-                # path.
+                # If we are doing a zip file, first check that we have been
+                # given a path.
                 if isinstance(_zip, (str, pathlib.Path)):
                     # If we have a path then we use the zip file.
                     _zip = zipfile.ZipFile(_zip, 'a', zipfile.ZIP_DEFLATED)
                     kwargs['zip'] = _zip
                     createdZip = True
-                else:
-                    createdZip = False
-                # Path needs to be done in a special way if we are in a zip file.
+                # Path needs to be done in a special way if we are in a zip
+                # file.
                 path = pathlib.Path(kwargs.get('customPath', ''))
                 # Set the open command to be that of the zip file.
                 _open = createZipOpen(_zip.open)
@@ -812,8 +812,8 @@ class MessageBase(MSGFile):
                     else:
                         raise OSError(f'Failed to create directory "{path}". Does it already exist?')
             else:
-                # In my testing I ended up with multiple files in a zip at the same
-                # location so let's try to handle that.
+                # In my testing I ended up with multiple files in a zip at the
+                # same location so let's try to handle that.
                 pathCompare = str(path).replace('\\', '/').rstrip('/') + '/'
                 if any(x.startswith(pathCompare) for x in _zip.namelist()):
                     newDirName = addNumToZipDir(path, _zip)

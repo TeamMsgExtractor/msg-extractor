@@ -64,60 +64,61 @@ class EmbeddedMsgAttachment(AttachmentBase):
         if kwargs.get('skipEmbedded'):
             return (SaveType.NONE, None)
 
-        # Get the filename to use.
-        filename = self.getFilename(**kwargs)
-
-        # Someone managed to have a null character here, so let's get rid of
-        # that
-        filename = prepareFilename(filename)
-
-        # Get the maximum name length.
-        maxNameLength = kwargs.get('maxNameLength', 256)
-
-        # Make sure the filename is not longer than it should be.
-        if len(filename) > maxNameLength:
-            name, ext = os.path.splitext(filename)
-            filename = name[:maxNameLength - len(ext)] + ext
-
-        # Check if we are doing a zip file.
-        _zip = kwargs.get('zip')
-
-        # ZipFile handling.
-        if _zip:
-            # If we are doing a zip file, first check that we have been given a path.
-            if isinstance(_zip, (str, pathlib.Path)):
-                # If we have a path then we use the zip file.
-                _zip = zipfile.ZipFile(_zip, 'a', zipfile.ZIP_DEFLATED)
-                kwargs['zip'] = _zip
-                createdZip = True
-            else:
-                createdZip = False
-            # Path needs to be done in a special way if we are in a zip file.
-            customPath = pathlib.Path(kwargs.get('customPath', ''))
-            # Set the open command to be that of the zip file.
-            _open = createZipOpen(_zip.open)
-            # Zip files use w for writing in binary.
-            mode = 'w'
-        else:
-            customPath = pathlib.Path(kwargs.get('customPath', '.')).absolute()
-            mode = 'wb'
-            _open = open
-
-        fullFilename = customPath / filename
-
+        # We only need to handle things if we are saving as bytes.
         if kwargs.get('extractEmbedded', False):
-            ret = str(fullFilename)
-            with _open(str(fullFilename), mode) as f:
-                self.data.export(f)
+            # Get the filename to use.
+            filename = self.getFilename(**kwargs)
+
+            # Someone managed to have a null character here, so let's get rid of
+            # that
+            filename = prepareFilename(filename)
+
+            # Get the maximum name length.
+            maxNameLength = kwargs.get('maxNameLength', 256)
+
+            # Make sure the filename is not longer than it should be.
+            if len(filename) > maxNameLength:
+                name, ext = os.path.splitext(filename)
+                filename = name[:maxNameLength - len(ext)] + ext
+
+            # Check if we are doing a zip file.
+            _zip = kwargs.get('zip')
+
+            createdZip = False
+            try:
+                # ZipFile handling.
+                if _zip:
+                    # If we are doing a zip file, first check that we have been given a path.
+                    if isinstance(_zip, (str, pathlib.Path)):
+                        # If we have a path then we use the zip file.
+                        _zip = zipfile.ZipFile(_zip, 'a', zipfile.ZIP_DEFLATED)
+                        kwargs['zip'] = _zip
+                        createdZip = True
+                    # Path needs to be done in a special way if we are in a zip file.
+                    customPath = pathlib.Path(kwargs.get('customPath', ''))
+                    # Set the open command to be that of the zip file.
+                    _open = createZipOpen(_zip.open)
+                    # Zip files use w for writing in binary.
+                    mode = 'w'
+                else:
+                    customPath = pathlib.Path(kwargs.get('customPath', '.')).absolute()
+                    mode = 'wb'
+                    _open = open
+
+                fullFilename = customPath / filename
+
+                with _open(str(fullFilename), mode) as f:
+                    self.data.export(f)
+
+                return (SaveType.FILE, str(fullFilename))
+            finally:
+                # Close the ZipFile if this function created it.
+                if _zip and createdZip:
+                    _zip.close()
         else:
-            ret = self.data
-            self.data.save(**kwargs)
-
-        # Close the ZipFile if this function created it.
-        if _zip and createdZip:
-            _zip.close()
-
-        return ret
+            # If we are letting the MSG file create stuff, just let it handle
+            # everything.
+            return self.data.save(**kwargs)
 
     save.__doc__ = _saveDoc
 
