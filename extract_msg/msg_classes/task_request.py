@@ -107,4 +107,4 @@ class TaskRequest(MessageBase):
         """
         The type of task request.
         """
-        return self._ensureSet('__substg1.0_001A', TaskRequestType.fromClassType)
+        return self._getStreamAs('__substg1.0_001A', TaskRequestType.fromClassType)

@@ -100,7 +100,7 @@ class MessageBase(MSGFile):
             self.sender
             self.date
             # This variable keeps track of what the new line character should be.
-            self.__crlf = '\n'
+            self._crlf = '\n'
             try:
                 self.body
             except Exception as e:
@@ -879,29 +879,26 @@ class MessageBase(MSGFile):
         """
         return self._genRecipient('bcc', RecipientType.BCC)
 
-    @property
+    @functools.cached_property
     def body(self) -> Optional[str]:
         """
         Returns the message body, if it exists.
         """
-        try:
-            return self._body
-        except AttributeError:
-            # If the body exists but is empty, that means it should be returned.
-            if self._ensureSet('_body', '__substg1.0_1000') is not None:
-                pass
-            else:
-                # If the body doesn't exist, see if we can get it from the RTF
-                # body.
-                if self.rtfBody:
-                    self._body = self.deencapsulateBody(self.rtfBody, DeencapType.PLAIN)
+        # If the body exists but is empty, that means it should be returned.
+        if (body := self._getStringStream('__substg1.0_1000')) is not None:
+            pass
+        elif self.rtfBody:
+            # If the body doesn't exist, see if we can get it from the RTF
+            # body.
+            body = self.deencapsulateBody(self.rtfBody, DeencapType.PLAIN)
 
-            if self._body:
-                self._body = inputToString(self._body, 'utf-8')
-                if re.search('\n', self._body) is not None:
-                    if re.search('\r\n', self._body) is not None:
-                        self.__crlf = '\r\n'
-            return self._body
+        if body:
+            body = inputToString(body, 'utf-8')
+            if re.search('\n', body) is not None:
+                if re.search('\r\n', body) is not None:
+                    self._crlf = '\r\n'
+
+        return body
 
     @functools.cached_property
     def cc(self) -> Optional[str]:
@@ -910,12 +907,12 @@ class MessageBase(MSGFile):
         """
         return self._genRecipient('cc', RecipientType.CC)
 
-    @property
+    @functools.cached_property
     def compressedRtf(self) -> Optional[bytes]:
         """
         Returns the compressed RTF stream, if it exists.
         """
-        return self._ensureSet('_compressedRtf', '__substg1.0_10090102', False)
+        return self._getStream('__substg1.0_10090102')
 
     @property
     def crlf(self) -> str:
@@ -923,7 +920,7 @@ class MessageBase(MSGFile):
         Returns the value of self.__crlf, should you need it for whatever
         reason.
         """
-        return self.__crlf
+        return self._crlf
 
     @functools.cached_property
     def date(self) -> Optional[datetime.datetime]:
@@ -1092,32 +1089,28 @@ class MessageBase(MSGFile):
         """
         return self._getStringStream('__substg1.0_007D')
 
-    @property
+    @functools.cached_property
     def htmlBody(self) -> Optional[bytes]:
         """
         Returns the html body, if it exists.
         """
-        try:
-            return self._htmlBody
-        except AttributeError:
-            if self._ensureSet('_htmlBody', '__substg1.0_10130102', False):
-                # Reducing line repetition.
-                pass
-            elif self.rtfBody:
-                logger.info('HTML body was not found, attempting to generate from RTF.')
-                self._htmlBody = self.deencapsulateBody(self.rtfBody, DeencapType.HTML)
-            # This is it's own if statement so we can ensure it will generate
-            # even if there is an rtfBody, in the event it doesn't have HTML.
-            if not self._htmlBody and self.body:
-                # Convert the plain text body to html.
-                logger.info('HTML body was not found, attempting to generate from plain text body.')
-                correctedBody = html.escape(self.body).replace('\r', '').replace('\n', '<br />')
-                self._htmlBody = f'<html><body>{correctedBody}</body></head>'.encode('utf-8')
+        if (htmlBody := self._getStream('__substg1.0_10130102')) is not None:
+            pass
+        elif self.rtfBody:
+            logger.info('HTML body was not found, attempting to generate from RTF.')
+            htmlBody = self.deencapsulateBody(self.rtfBody, DeencapType.HTML)
+        # This is it's own if statement so we can ensure it will generate
+        # even if there is an rtfBody, in the event it doesn't have HTML.
+        if not htmlBody and self.body:
+            # Convert the plain text body to html.
+            logger.info('HTML body was not found, attempting to generate from plain text body.')
+            correctedBody = html.escape(self.body).replace('\r', '').replace('\n', '<br />')
+            htmlBody = f'<html><body>{correctedBody}</body></head>'.encode('utf-8')
 
-            if not self._htmlBody:
-                logger.info('HTML body could not be found nor generated.')
+        if not htmlBody:
+            logger.info('HTML body could not be found nor generated.')
 
-            return self._htmlBody
+        return htmlBody
 
     @functools.cached_property
     def htmlBodyPrepared(self) -> Optional[bytes]:
@@ -1159,12 +1152,12 @@ class MessageBase(MSGFile):
 
         return self.getInjectableHeader(prefix, joinStr, suffix, formatter)
 
-    @property
+    @functools.cached_property
     def inReplyTo(self) -> Optional[str]:
         """
         Returns the message id that this message is in reply to.
         """
-        return self._ensureSet('_in_reply_to', '__substg1.0_1042')
+        return self._getStringStream('__substg1.0_1042')
 
     @functools.cached_property
     def isRead(self) -> bool:
@@ -1228,25 +1221,21 @@ class MessageBase(MSGFile):
 
         return [Recipient(recipientDir, self) for recipientDir in recipientDirs]
 
-    @property
+    @functools.cached_property
     def reportTag(self) -> Optional[ReportTag]:
         """
         Data that is used to correlate the report and the original message.
         """
-        return self._ensureSet('_reportTag', '__substg1.0_00310102', False, overrideClass = ReportTag)
+        return self._getStreamAs('__substg1.0_00310102', False, ReportTag)
 
-    @property
+    @functools.cached_property
     def rtfBody(self) -> Optional[bytes]:
         """
         Returns the decompressed Rtf body from the message.
         """
-        try:
-            return self._rtfBody
-        except AttributeError:
-            self._rtfBody = compressed_rtf.decompress(self.compressedRtf) if self.compressedRtf else None
-            return self._rtfBody
+        return compressed_rtf.decompress(self.compressedRtf) if self.compressedRtf else None
 
-    @property
+    @functools.cached_property
     def rtfEncapInjectableHeader(self) -> bytes:
         """
         The header that can be formatted and injected into the plain RTF body.
@@ -1258,7 +1247,7 @@ class MessageBase(MSGFile):
 
         return self.getInjectableHeader(prefix, joinStr, suffix, formatter).encode('utf-8')
 
-    @property
+    @functools.cached_property
     def rtfPlainInjectableHeader(self) -> bytes:
         """
         The header that can be formatted and injected into the encapsulated RTF
@@ -1271,42 +1260,38 @@ class MessageBase(MSGFile):
 
         return self.getInjectableHeader(prefix, joinStr, suffix, formatter).encode('utf-8')
 
-    @property
+    @functools.cached_property
     def sender(self) -> Optional[str]:
         """
         Returns the message sender, if it exists.
         """
-        try:
-            return self._sender
-        except AttributeError:
-            # Check header first
-            if self.headerInit():
-                headerResult = self.header['from']
-                if headerResult is not None:
-                    self._sender = decodeRfc2047(headerResult)
-                    return headerResult
-                logger.info('Header found, but "sender" is not included. Will be generated from other streams.')
-            # Extract from other fields
-            text = self._getStringStream('__substg1.0_0C1A')
-            email = self._getStringStream('__substg1.0_5D01')
-            # Will not give an email address sometimes. Seems to exclude the email address if YOU are the sender.
-            result = None
-            if text is None:
-                result = email
-            else:
-                result = text
-                if email is not None:
-                    result += ' <' + email + '>'
+        # Check header first
+        if self.headerInit():
+            headerResult = self.header['from']
+            if headerResult is not None:
+                return decodeRfc2047(headerResult)
+            logger.info('Header found, but "sender" is not included. Will be generated from other streams.')
+        # Extract from other fields
+        text = self._getStringStream('__substg1.0_0C1A')
+        email = self._getStringStream('__substg1.0_5D01')
+        # Will not give an email address sometimes. Seems to exclude the email
+        # address if YOU are the sender.
+        result = None
+        if text is None:
+            result = email
+        else:
+            result = text
+            if email is not None:
+                result += ' <' + email + '>'
 
-            self._sender = result
-            return result
+        return result
 
-    @property
+    @functools.cached_property
     def subject(self) -> Optional[str]:
         """
         Returns the message subject, if it exists.
         """
-        return self._ensureSet('_subject', '__substg1.0_0037')
+        return self._getStringStream('__substg1.0_0037')
 
     @functools.cached_property
     def to(self) -> Optional[str]:

@@ -10,7 +10,7 @@ import re
 
 from typing import List, Optional
 
-from ..enums import ErrorBehavior
+from ..enums import DeencapType, ErrorBehavior
 from ..exceptions import StandardViolationError
 from .message_base import MessageBase
 from ..attachments import SignedAttachment
@@ -74,60 +74,49 @@ class MessageSignedBase(MessageBase):
 
             return self._sAttachments
 
-    @property
+    @functools.cached_property
     def body(self) -> Optional[str]:
         """
         Returns the message body, if it exists.
         """
-        try:
-            return self._body
-        except AttributeError:
-            if self._ensureSet('_body', '__substg1.0_1000'):
-                pass
-            elif self.signedBody:
-                self._body = self.signedBody
-            else:
-                # If the body doesn't exist, see if we can get it from the RTF
-                # body.
-                if self.deencapsulatedRtf and self.deencapsulatedRtf.content_type == 'text':
-                    self._body = self.deencapsulatedRtf.text
+        if (body := self._getStringStream('__substg1.0_1000')) is not None:
+            pass
+        elif self.signedBody:
+            body = self.signedBody
+        elif self.rtfBody:
+            # If the body doesn't exist, see if we can get it from the RTF
+            # body.
+            body = self.deencapsulateBody(self.rtfBody, DeencapType.PLAIN)
 
-            if self._body:
-                self._body = inputToString(self._body, 'utf-8')
-                a = re.search('\n', self._body)
-                if a is not None:
-                    if re.search('\r\n', self._body) is not None:
-                        self.__crlf = '\r\n'
-            return self._body
+        if body:
+            body = inputToString(body, 'utf-8')
+            if re.search('\n', body):
+                if re.search('\r\n', body):
+                    self._crlf = '\r\n'
 
-    @property
+        return body
+
+    @functools.cached_property
     def htmlBody(self) -> Optional[bytes]:
         """
         Returns the html body, if it exists.
         """
-        try:
-            return self._htmlBody
-        except AttributeError:
-            if self._ensureSet('_htmlBody', '__substg1.0_10130102', False):
-                # Reducing line repetition.
-                pass
-            elif self.signedHtmlBody:
-                self._htmlBody = self.signedHtmlBody
-            elif self.rtfBody:
-                logger.info('HTML body was not found, attempting to generate from RTF.')
-                if self.deencapsulatedRtf and self.deencapsulatedRtf.content_type == 'html':
-                    self._htmlBody = self.deencapsulatedRtf.html.encode('utf-8')
-                else:
-                    logger.info('Could not deencapsulate HTML from RTF body.')
-            elif self.body:
-                # Convert the plain text body to html.
-                logger.info('HTML body was not found, attempting to generate from plain text body.')
-                correctedBody = html.escpae(self.body).replace('\r', '').replace('\n', '<br />')
-                self._htmlBody = f'<html><body>{correctedBody}</body></head>'.encode('utf-8')
-            else:
-                logger.info('HTML body could not be found nor generated.')
+        if (htmlBody := self._getStream('__substg1.0_10130102')) is not None:
+            pass
+        elif self.signedHtmlBody:
+            htmlBody = self.signedHtmlBody
+        elif self.rtfBody:
+            logger.info('HTML body was not found, attempting to generate from RTF.')
+            htmlBody = self.deencapsulateBody(self.rtfBody, DeencapType.HTML)
+        elif self.body:
+            # Convert the plain text body to html.
+            logger.info('HTML body was not found, attempting to generate from plain text body.')
+            correctedBody = html.escpae(self.body).replace('\r', '').replace('\n', '<br />')
+            htmlBody = f'<html><body>{correctedBody}</body></head>'.encode('utf-8')
+        else:
+            logger.info('HTML body could not be found nor generated.')
 
-            return self._htmlBody
+        return htmlBody
 
     @functools.cached_property
     def _rawAttachments(self) -> List:

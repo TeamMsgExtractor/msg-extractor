@@ -3,6 +3,7 @@ __all__ = [
 ]
 
 
+import functools
 import json
 
 from typing import Optional
@@ -31,12 +32,12 @@ class Post(MessageBase):
             'body': decode_utf7(self.body),
         })
 
-    @property
+    @functools.cached_property
     def conversation(self) -> Optional[str]:
         """
         The name of the conversation being posted to.
         """
-        return self._ensureSet('_convo', '__substg1.0_0070')
+        return self._getStringStream('__substg1.0_0070')
 
     @property
     def headerFormatProperties(self) -> constants.HEADER_FORMAT_TYPE:

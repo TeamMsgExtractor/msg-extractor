@@ -41,6 +41,7 @@
 * Made enums less strict and converted all using `fromBits` to be `IntFlag` enums.
 * Fixed `CalendarBase.keywords` being blatantly incorrect (it was so bad I don't know how it slipped through).
 * Fixed `Contact.gender` being blatantly incorrect.
+* Fixed sender not being properly decoded in some circumstances.
 
 **v0.41.5**
 * Fixed an issue from version `0.41.3` where the header being present but missing the `From` field would cause an exception.

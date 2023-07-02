@@ -209,7 +209,7 @@ class MSGFile:
     def __exit__(self, *_) -> None:
         self.close()
 
-    def _ensureSet(self, variable : str, streamID, stringStream : bool = True, **kwargs):
+    def _getStreamAs(self, streamID, stringStream : bool = True, overrideClass = None, preserveNone : bool = True):
         """
         Ensures that the variable exists, otherwise will set it using the
         specified stream. After that, return said variable.
@@ -225,20 +225,17 @@ class MSGFile:
             :param overrideClass: when the value could not be found (is None).
             If this is changed to False, then the value will be used regardless.
         """
-        try:
-            return getattr(self, variable)
-        except AttributeError:
-            if stringStream:
-                value = self._getStringStream(streamID)
-            else:
-                value = self._getStream(streamID)
-            # Check if we should be overriding the data type for this instance.
-            if kwargs:
-                overrideClass = kwargs.get('overrideClass')
-                if overrideClass is not None and (value is not None or not kwargs.get('preserveNone', True)):
-                    value = overrideClass(value)
-            setattr(self, variable, value)
-            return value
+        if stringStream:
+            value = self._getStringStream(streamID)
+        else:
+            value = self._getStream(streamID)
+
+        # Check if we should be overriding the data type for this instance.
+        if overrideClass is not None:
+            if value is not None or not preserveNone:
+                value = overrideClass(value)
+
+        return value
 
     def _getNamedAs(self, propertyName : str, guid : str, overrideClass = None, preserveNone : bool = True):
         """
@@ -700,12 +697,12 @@ class MSGFile:
         """
         return self._getNamedAs('85B5', constants.ps.PSETID_COMMON, overrideClass = bool, preserveNone = False)
 
-    @property
+    @functools.cached_property
     def classType(self) -> Optional[str]:
         """
         The class type of the MSG file.
         """
-        return self._ensureSet('_classType', '__substg1.0_001A')
+        return self._getStringStream('_classType', '__substg1.0_001A')
 
     @functools.cached_property
     def commonEnd(self) -> Optional[datetime.datetime]:
