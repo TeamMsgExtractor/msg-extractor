@@ -9,6 +9,7 @@ __all__ = [
 import codecs
 import copy
 import datetime
+import functools
 import io
 import logging
 import os
@@ -18,7 +19,7 @@ import zipfile
 
 import olefile
 
-from typing import Any, Callable, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, cast, List, Optional, Set, Tuple, Union
 
 from .. import constants
 from ..attachments import (
@@ -27,7 +28,7 @@ from ..attachments import (
 from ..encoding import lookupCodePage
 from ..enums import (
         AttachErrorBehavior, ErrorBehavior, InsecureFeatures, Importance,
-        Priority, PropertiesType, Sensitivity, SideEffect
+        Priority, PropertiesType, SaveType, Sensitivity, SideEffect
     )
 from ..exceptions import (
         ConversionError, InvalidFileFormatError, PrefixError,
@@ -97,7 +98,7 @@ class MSGFile:
         # Retrieve all the kwargs that we need.
         self.__inscFeat = kwargs.get('insecureFeatures', InsecureFeatures.NONE)
         prefix = kwargs.get('prefix', '')
-        self.__parentMsg = makeWeakRef(kwargs.get('parentMsg'))
+        self.__parentMsg = makeWeakRef(cast(MSGFile, kwargs.get('parentMsg')))
         self.__treePath = kwargs.get('treePath', []) + [makeWeakRef(self)]
         # Verify it is a valid class.
         if self.__parentMsg and not isinstance(self.__parentMsg(), MSGFile):
@@ -469,14 +470,11 @@ class MSGFile:
 
     def close(self) -> None:
         if self.__open:
-            try:
-                # If this throws an AttributeError then we have not loaded the attachments.
-                self._attachments
+            if self.attachmentsReady:
                 for attachment in self.attachments:
                     if attachment.type == 'msg':
                         attachment.data.close()
-            except AttributeError:
-                pass
+
             if self.__oleOwner:
                 self.__ole.close()
 
@@ -609,7 +607,10 @@ class MSGFile:
         """
         return [msgPathToString(x) for x in self.listDir(streams, storages)]
 
-    def save(self, *args, **kwargs):
+    def save(self, **kwargs) -> constants.SAVE_TYPE:
+        if kwargs.get('skipNotImplemented', False):
+            return (SaveType.NONE, None)
+
         raise NotImplementedError(f'Saving is not yet supported for the {self.__class__.__name__} class.')
 
     def saveAttachments(self, **kwargs) -> None:
@@ -656,43 +657,36 @@ class MSGFile:
                     if data is not None:
                         f.write(data)
 
-    @property
+    @functools.cached_property
     def areStringsUnicode(self) -> bool:
         """
         Returns a boolean telling if the strings are unicode encoded.
         """
-        try:
-            return self.__bStringsUnicode
-        except AttributeError:
-            if '340D0003' in self.props:
-                if (self.props['340D0003'].value & 0x40000) != 0:
-                    self.__bStringsUnicode = True
-                    return self.__bStringsUnicode
-            self.__bStringsUnicode = False
-            return self.__bStringsUnicode
+        if '340D0003' in self.props:
+            if (self.props['340D0003'].value & 0x40000) != 0:
+                return True
 
-    @property
+        return False
+
+    @functools.cached_property
     def attachments(self) -> Union[List[AttachmentBase], List[SignedAttachment]]:
         """
         Returns a list of all attachments.
         """
-        try:
-            return self._attachments
-        except AttributeError:
-            # Get the attachments.
-            attachmentDirs = []
-            for dir_ in self.listDir(False, True, False):
-                if dir_[0].startswith('__attach') and dir_[0] not in attachmentDirs:
-                    attachmentDirs.append(dir_[0])
+        # Get the attachments.
+        attachmentDirs = []
+        for dir_ in self.listDir(False, True, False):
+            if dir_[0].startswith('__attach') and dir_[0] not in attachmentDirs:
+                attachmentDirs.append(dir_[0])
 
-            self._attachments = []
+        attachments = []
 
-            for attachmentDir in attachmentDirs:
-                self._attachments.append(self.initAttachmentFunc(self, attachmentDir))
+        for attachmentDir in attachmentDirs:
+            attachments.append(self.initAttachmentFunc(self, attachmentDir))
 
-            self.__attachmentsReady = True
+        self.__attachmentsReady = True
 
-            return self._attachments
+        return attachments
 
     @property
     def attachmentsDelayed(self) -> bool:
@@ -804,7 +798,7 @@ class MSGFile:
         """
         return self.__kwargs
 
-    @property
+    @functools.cached_property
     def named(self) -> Named:
         """
         The main named properties storage. This is not usable to access the data
@@ -813,33 +807,23 @@ class MSGFile:
         :raises ReferenceError: The parent MSGFile instance has been garbage
             collected.
         """
-        try:
-            return self.__named
-        except AttributeError:
-            self.__named = None
-            # Handle the parent msg file existing.
-            if self.__parentMsg:
-                # Try to get the named properties and use that for our main
-                # instance.
-                if (msg := self.__parentMsg()) is None:
-                    raise ReferenceError('Parent MSGFile instance has been garbage collected.')
-                self.__named = msg.named
-            else:
-                self.__named = Named(self)
+        # Handle the parent msg file existing.
+        if self.__parentMsg:
+            # Try to get the named properties and use that for our main
+            # instance.
+            if (msg := self.__parentMsg()) is None:
+                raise ReferenceError('Parent MSGFile instance has been garbage collected.')
+            return msg.named
+        else:
+            return Named(self)
 
-            return self.__named
-
-    @property
+    @functools.cached_property
     def namedProperties(self) -> NamedProperties:
         """
         The NamedProperties instances usable to access the data for named
         properties.
         """
-        try:
-            return self.__namedProperties
-        except AttributeError:
-            self.__namedProperties = NamedProperties(self.named, self)
-            return self.__namedProperties
+        return NamedProperties(self.named, self)
 
     @property
     def overrideEncoding(self):

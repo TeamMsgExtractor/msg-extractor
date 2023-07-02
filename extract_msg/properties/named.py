@@ -14,7 +14,7 @@ import copy
 import logging
 import pprint
 
-from typing import Dict, Optional, Tuple, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING, Union
 
 from .. import constants
 from ..enums import NamedPropertyType
@@ -25,6 +25,7 @@ from compressed_rtf.crc32 import crc32
 # Allow for nice type checking.
 if TYPE_CHECKING:
     from ..msg_classes.msg import MSGFile
+    from ..attachments.attachment_base import AttachmentBase
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -37,7 +38,7 @@ class Named:
 
     __dir = '__nameid_version1.0'
 
-    def __init__(self, msg):
+    def __init__(self, msg : MSGFile):
         self.__msg = makeWeakRef(msg)
         # Get the basic streams. If all are emtpy, then nothing to do.
         guidStream = self._getStream('__substg1.0_00020102') or self._getStream('__substg1.0_00020102', False)
@@ -57,7 +58,7 @@ class Named:
         # Check that we even have any entries. If there are none, nothing to do.
         if entryStream:
             guids = tuple([None, constants.ps.PS_MAPI, constants.ps.PS_PUBLIC_STRINGS] + [bytesToGuid(x) for x in divide(guidStream, 16)])
-            entries = []
+            entries : List[Dict[str, Any]]= []
             for rawStream in divide(entryStream, 8):
                 tmp = constants.st.STNP_ENT.unpack(rawStream)
                 entry = {
@@ -237,7 +238,7 @@ class NamedProperties:
     An instance that uses a Named instance and an extract-msg class to read the
     data of named properties.
     """
-    def __init__(self, named, streamSource):
+    def __init__(self, named, streamSource : Union[MSGFile, AttachmentBase]):
         """
         :param named: The named instance to refer to for named properties
             entries.

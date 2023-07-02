@@ -29,6 +29,7 @@ __all__ = [
     'inputToString',
     'isEncapsulatedRtf',
     'isEmptyString',
+    'makeWeakRef',
     'msgPathToString',
     'parseType',
     'prepareFilename',
@@ -71,7 +72,7 @@ import olefile
 import tzlocal
 
 from html import escape as htmlEscape
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union
+from typing import Any, Dict, List, Optional, TypeVar, TYPE_CHECKING, Union
 
 from . import constants
 from .enums import AttachmentType
@@ -88,6 +89,8 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 logging.addLevelName(5, 'DEVELOPER')
+
+_T = TypeVar("_T")
 
 
 def addNumToDir(dirName : pathlib.Path) -> Optional[pathlib.Path]:
@@ -598,7 +601,7 @@ def filetimeToUtc(inp : int) -> float:
     return (inp - 116444736000000000) / 10000000.0
 
 
-def makeWeakRef(obj : Optional[object]) -> Optional[weakref.ReferenceType]:
+def makeWeakRef(obj : Optional[_T]) -> Optional[weakref.ReferenceType[_T]]:
     """
     Attempts to return a weak reference to the object, returning None if not
     possible.
