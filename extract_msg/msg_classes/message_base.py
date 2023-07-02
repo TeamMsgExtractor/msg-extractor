@@ -300,7 +300,7 @@ class MessageBase(MSGFile):
         header = self.getInjectableHeader(prefix, joinStr, suffix, formatter).encode('utf-8')
         return header + inputToBytes(self.body, 'utf-8')
 
-    def getSaveHtmlBody(self, preparedHtml : bool = False, charset : str = 'utf-8', **kwargs) -> bytes:
+    def getSaveHtmlBody(self, preparedHtml : bool = False, charset : str = 'utf-8', **_) -> bytes:
         """
         Returns the HTML body that will be used in saving based on the
         arguments.
@@ -348,7 +348,7 @@ class MessageBase(MSGFile):
         else:
             return self.htmlBody
 
-    def getSavePdfBody(self, **kwargs) -> bytes:
+    def getSavePdfBody(self, wkPath = None, wkOptions = None, **kwargs) -> bytes:
         """
         Returns the PDF body that will be used in saving based on the arguments.
 
@@ -367,10 +367,9 @@ class MessageBase(MSGFile):
         :raises WKError: Something went wrong in creating the PDF body.
         """
         # Immediately try to find the executable.
-        wkPath = findWk(kwargs.get('wkPath'))
+        wkPath = findWk(wkPath)
 
         # First thing is first, we need to parse our wkOptions if they exist.
-        wkOptions = kwargs.get('wkOptions')
         if wkOptions:
             try:
                 # Try to convert to a list, whatever it is, and fail if it is
@@ -407,7 +406,7 @@ class MessageBase(MSGFile):
 
         return process.stdout
 
-    def getSaveRtfBody(self, **kwargs) -> bytes:
+    def getSaveRtfBody(self, **_) -> bytes:
         """
         Returns the RTF body that will be used in saving based on the arguments.
 
@@ -841,9 +840,14 @@ class MessageBase(MSGFile):
 
             if not skipAttachments:
                 # Save the attachments.
-                attachmentNames = [attachment.save(**kwargs) for attachment in self.attachments if not (skipHidden and attachment.hidden)]
-                # Remove skipped attachments.
-                attachmentNames = [x for x in attachmentNames if x and isinstance(x, str)]
+                attachmentReturns = [attachment.save(**kwargs) for attachment in self.attachments if not (skipHidden and attachment.hidden)]
+                # Get the names from each.
+                attachmentNames = []
+                for x in attachmentReturns:
+                    if isinstance(x[1], str):
+                        attachmentNames.append(x[1])
+                    elif isinstance(x[1], list):
+                        attachmentNames.extend(x[1])
 
             if not attachOnly and fext:
                 with _open(str(path / ('message.' + fext)), mode) as f:
@@ -852,7 +856,7 @@ class MessageBase(MSGFile):
                         if not skipAttachments:
                             emailObj['attachments'] = attachmentNames
 
-                        f.write(inputToBytes(json.dumps(emailObj), 'utf-8'))
+                        f.write(json.dumps(emailObj).encode('utf-8'))
                     elif useHtml:
                         f.write(self.getSaveHtmlBody(**kwargs))
                     elif usePdf:
