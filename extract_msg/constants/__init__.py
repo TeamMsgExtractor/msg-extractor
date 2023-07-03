@@ -31,7 +31,12 @@ __all__ = [
     'NEEDS_ARG',
     'NULL_DATE',
     'PTYPES',
-    'PYTPFLOATINGTIME_START', 'VARIABLE_LENGTH_PROPS', 'VARIABLE_LENGTH_PROPS_STRING',
+    'PYTPFLOATINGTIME_START',
+    'REFUSED_CLASS_TYPES',
+    'REPOSITORY_URL',
+    'SAVE_TYPE',
+    'VARIABLE_LENGTH_PROPS',
+    'VARIABLE_LENGTH_PROPS_STRING',
 ]
 
 
@@ -205,6 +210,12 @@ KNOWN_CLASS_TYPES = (
     'report',
 )
 
+# Each item is a tuple of the lowercase class type and the issue number
+# associated with it.
+REFUSED_CLASS_TYPES = (
+    ('ipm.outlook.recall', '235'),
+)
+
 PYTPFLOATINGTIME_START = datetime.datetime(1899, 12, 30)
 NULL_DATE = datetime.datetime(4500, 8, 31, 23, 59)
 
@@ -215,8 +226,11 @@ KNOWN_FILE_FLAGS = (
 NEEDS_ARG = (
     '--out-name',
 )
-MAINDOC = "extract_msg:\n\tExtracts emails and attachments saved in Microsoft Outlook's .msg files.\n\n" \
-          "https://github.com/TeamMsgExtractor/msg-extractor"
+REPOSITORY_URL = 'https://github.com/TeamMsgExtractor/msg-extractor'
+MAINDOC = f"""extract_msg:
+\tExtracts emails and attachments saved in Microsoft Outlook's .msg files.
+
+{REPOSITORY_URL}"""
 
 # Default class ID for the root entry for OleWriter. This should be
 # referencing Outlook if I understand it correctly.

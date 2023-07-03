@@ -3,7 +3,7 @@ Classes for opening an MSG file with.
 """
 
 __all__ = [
-    # Classes.
+    # Classes:
     'AppointmentMeeting',
     'Calendar',
     'CalendarBase',

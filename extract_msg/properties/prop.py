@@ -2,17 +2,16 @@ from __future__ import annotations
 
 
 __all__ = [
-    # Classes.
+    # Classes:
     'FixedLengthProp'
     'PropBase',
     'VariableLengthProp',
 
-    # Functions.
+    # Functions:
     'createProp',
 ]
 
 
-import abc
 import datetime
 import logging
 

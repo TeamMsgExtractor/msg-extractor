@@ -50,12 +50,16 @@ __all__ = [
     'Recipient',
     'SignedAttachment',
 
-    #Functions:
+    # Functions:
     'openMsg',
     'openMsgBulk',
 ]
 
-from . import attachments, enums, exceptions, msg_classes, properties
+
+# Ensure these are imported before anything else.
+from . import constants, enums, exceptions
+
+from . import attachments, msg_classes, properties
 from .attachments import Attachment, AttachmentBase, SignedAttachment
 from .msg_classes import Message, MSGFile
 from .ole_writer import OleWriter

@@ -10,7 +10,7 @@ __all__ = [
 import glob
 import logging
 
-from typing import List, Tuple, TYPE_CHECKING, Union
+from typing import List, Optional, Tuple, TYPE_CHECKING, Union
 
 from . import constants
 from .exceptions import (
@@ -26,20 +26,29 @@ if TYPE_CHECKING:
     from .msg_classes import MSGFile
 
 
-def _knownMsgClass(classType : str) -> bool:
+def _getMsgClassInfo(classType : str) -> Tuple[bool, Optional[str]]:
     """
     Checks if the specified class type is recognized by the module. Usually used
     for checking if a type is simply unsupported rather than unknown.
+
+    Returns a tuple of two items. The first is whether it is known. If it is
+    known and support is refused, the second item will be a string of the
+    relevent issue number. Otherwise, it will be None.
     """
     classType = classType.lower()
     if classType == 'ipm':
-        return True
+        return (True, None)
 
     for item in constants.KNOWN_CLASS_TYPES:
         if classType.startswith(item):
-            return True
+            # Check if the found class type has had support refused.
+            for tup in constants.REFUSED_CLASS_TYPES:
+                if tup[0] == item:
+                    return (True, tup[1])
+            else:
+                return (True, None)
 
-    return False
+    return (False, None)
 
 
 def openMsg(path, **kwargs) -> MSGFile:
@@ -145,11 +154,20 @@ def openMsg(path, **kwargs) -> MSGFile:
         # Because we are closing it, we need to store it in a variable first.
         ct = msg.classType
         msg.close()
-        if _knownMsgClass(classType):
+        # Now we need to figure out exactly what we are going to be reporting to
+        # the user.
+        if (info := _getMsgClassInfo(classType))[0]:
+            if info[1]:
+                raise UnsupportedMSGTypeError(f'Support for MSG type "{ct}" has been refused. See {constants.REPOSITORY_URL}/issues/{info[1]} for more information.')
             raise UnsupportedMSGTypeError(f'MSG type "{ct}" currently is not supported by the module. If you would like support, please make a feature request.')
-        raise UnrecognizedMSGTypeError(f'Could not recognize msg class type "{ct}".')
+        raise UnrecognizedMSGTypeError(f'Could not recognize MSG class type "{ct}". As such, there is a high chance that support may be impossible, but you should contact the developers to find out more.')
     else:
-        logger.error(f'Could not recognize msg class type "{msg.classType}". This most likely means it hasn\'t been implemented yet, and you should ask the developers to add support for it.')
+        if (info := _getMsgClassInfo(classType))[0]:
+            if info[1]:
+                logger.error(f'Support for MSG type "{msg.classType}" has been refused. See {constants.REPOSITORY_URL}/issues/{info[1]} for more information.')
+            else:
+                logger.error(f'MSG type "{msg.classType}" currently is not supported by the module. If you would like support, please make a feature request.')
+        logger.error(f'Could not recognize MSG class type "{msg.classType}". As such, there is a high chance that support may be impossible, but you should contact the developers to find out more.')
         if not delayAttachments:
             msg.attachments
         return msg
