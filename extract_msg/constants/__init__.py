@@ -132,7 +132,7 @@ VARIABLE_LENGTH_PROPS_STRING = (
     '1102',
 )
 
-# Multiple type properties that take up 2 bytes
+# Multiple type properties that take up 2 bytes.
 MULTIPLE_2_BYTES = (
     '1002',
 )
@@ -141,7 +141,7 @@ MULTIPLE_2_BYTES_HEX = (
     0x1002,
 )
 
-# Multiple type properties that take up 4 bytes
+# Multiple type properties that take up 4 bytes.
 MULTIPLE_4_BYTES = (
     '1003',
     '1004',
@@ -152,7 +152,7 @@ MULTIPLE_4_BYTES_HEX = (
     0x1004,
 )
 
-# Multiple type properties that take up 4 bytes
+# Multiple type properties that take up 8 bytes.
 MULTIPLE_8_BYTES = (
     '1005',
     '1007',
@@ -167,7 +167,7 @@ MULTIPLE_8_BYTES_HEX = (
     0x1040,
 )
 
-# Multiple type properties that take up 4 bytes
+# Multiple type properties that take up 16 bytes.
 MULTIPLE_16_BYTES = (
     '1048',
 )
@@ -219,7 +219,7 @@ REFUSED_CLASS_TYPES = (
 PYTPFLOATINGTIME_START = datetime.datetime(1899, 12, 30)
 NULL_DATE = datetime.datetime(4500, 8, 31, 23, 59)
 
-# Constants used for argparse stuff
+# Constants used for argparse stuff.
 KNOWN_FILE_FLAGS = (
     '--out-name',
 )
@@ -239,19 +239,19 @@ DEFAULT_CLSID = b'\x0b\r\x02\x00\x00\x00\x00\x00\xc0\x00\x00\x00\x00\x00\x00F'
 PTYPES = {
     0x0000: 'PtypUnspecified',
     0x0001: 'PtypNull',
-    0x0002: 'PtypInteger16',  # Signed short
-    0x0003: 'PtypInteger32',  # Signed int
-    0x0004: 'PtypFloating32',  # Float
-    0x0005: 'PtypFloating64',  # Double
+    0x0002: 'PtypInteger16',  # Signed short.
+    0x0003: 'PtypInteger32',  # Signed int.
+    0x0004: 'PtypFloating32',  # Float.
+    0x0005: 'PtypFloating64',  # Double.
     0x0006: 'PtypCurrency',
     0x0007: 'PtypFloatingTime',
     0x000A: 'PtypErrorCode',
     0x000B: 'PtypBoolean',
     0x000D: 'PtypObject/PtypEmbeddedTable/Storage',
-    0x0014: 'PtypInteger64',  # Signed longlong
+    0x0014: 'PtypInteger64',  # Signed longlong.
     0x001E: 'PtypString8',
     0x001F: 'PtypString',
-    0x0040: 'PtypTime',  # Use filetimeToUtc to convert to unix time stamp
+    0x0040: 'PtypTime', # Use filetimeToUtc to convert to unix time stamp.
     0x0048: 'PtypGuid',
     0x00FB: 'PtypServerId',
     0x00FD: 'PtypRestriction',
@@ -271,4 +271,4 @@ PTYPES = {
     0x1102: 'PtypMultipleBinary',
 }
 
-# END CONSTANTS
+# END CONSTANTS.
