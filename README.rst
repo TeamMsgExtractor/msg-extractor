@@ -59,62 +59,54 @@ Currently, the README is in the process of being redone. For now, please
 refer to the usage information provided from the program's help dialog:
 ::
 
-    usage: extract_msg [-h] [--use-content-id] [--validate] [--json] [--file-logging] [-v] [--log LOG] [--config CONFIGPATH]
-                       [--out OUTPATH] [--use-filename] [--dump-stdout] [--html] [--pdf] [--wk-path WKPATH]
-                       [--wk-options [WKOPTIONS ...]] [--prepared-html] [--charset CHARSET] [--raw] [--rtf] [--allow-fallback]
-                       [--skip-body-not-found] [--zip ZIP] [--save-header] [--attachments-only] [--skip-hidden] [--no-folders]
-                       [--skip-embedded] [--extract-embedded] [--skip-not-implemented] [--out-name OUTNAME | --glob] [--ignore-rtfde]
-                       [--progress]
-                       msg [msg ...]
+     usage: extract_msg [-h] [--use-content-id] [--json] [--file-logging] [-v] [--log LOG] [--config CONFIGPATH] [--out OUTPATH] [--use-filename] [--dump-stdout] [--html] [--pdf] [--wk-path WKPATH] [--wk-options [WKOPTIONS ...]]
+                        [--prepared-html] [--charset CHARSET] [--raw] [--rtf] [--allow-fallback] [--skip-body-not-found] [--zip ZIP] [--save-header] [--attachments-only] [--skip-hidden] [--no-folders] [--skip-embedded] [--extract-embedded]
+                        [--overwrite-existing] [--skip-not-implemented] [--out-name OUTNAME | --glob] [--ignore-rtfde] [--progress]
+                        msg [msg ...]
 
-    extract_msg: Extracts emails and attachments saved in Microsoft Outlook's .msg files. https://github.com/TeamMsgExtractor/msg-
-    extractor
+     extract_msg: Extracts emails and attachments saved in Microsoft Outlook's .msg files. https://github.com/TeamMsgExtractor/msg-extractor
 
-    positional arguments:
-      msg                   An MSG file to be parsed.
+     positional arguments:
+       msg                   An MSG file to be parsed.
 
-    optional arguments:
-      -h, --help            show this help message and exit
-      --use-content-id, --cid
-                            Save attachments by their Content ID, if they have one. Useful when working with the HTML body.
-      --validate            Turns on file validation mode. Turns off regular file output.
-      --json                Changes to write output files as json.
-      --file-logging        Enables file logging. Implies --verbose level 1.
-      -v, --verbose         Turns on console logging. Specify more than once for higher verbosity.
-      --log LOG             Set the path to write the file log to.
-      --config CONFIGPATH   Set the path to load the logging config from.
-      --out OUTPATH         Set the folder to use for the program output. (Default: Current directory)
-      --use-filename        Sets whether the name of each output is based on the msg filename.
-      --dump-stdout         Tells the program to dump the message body (plain text) to stdout. Overrides saving arguments.
-      --html                Sets whether the output should be HTML. If this is not possible, will error.
-      --pdf                 Saves the body as a PDF. If this is not possible, will error.
-      --wk-path WKPATH      Overrides the path for finding wkhtmltopdf.
-      --wk-options [WKOPTIONS ...]
-                            Sets additional options to be used in wkhtmltopdf. Should be a series of options and values, replacing the -
-                            or -- in the beginning with + or ++, respectively. For example: --wk-options "+O Landscape"
-      --prepared-html       When used in conjunction with --html, sets whether the HTML output should be prepared for embedded
-                            attachments.
-      --charset CHARSET     Character set to use for the prepared HTML in the added tag. (Default: utf-8)
-      --raw                 Sets whether the output should be raw. If this is not possible, will error.
-      --rtf                 Sets whether the output should be RTF. If this is not possible, will error.
-      --allow-fallback      Tells the program to fallback to a different save type if the selected one is not possible.
-      --skip-body-not-found
-                            Skips saving the body if the body cannot be found, rather than throwing an error.
-      --zip ZIP             Path to use for saving to a zip file.
-      --save-header         Store the header in a separate file.
-      --attachments-only    Specify to only save attachments from an msg file.
-      --skip-hidden         Skips any attachment marked as hidden (usually ones embedded in the body).
-      --no-folders          Stores everything in the location specified by --out. Requires --attachments-only and is incompatible with
-                            --out-name.
-      --skip-embedded       Skips all embedded MSG files when saving attachments.
-      --extract-embedded    Extracts the embedded MSG files as MSG files instead of running their save functions.
-      --skip-not-implemented, --skip-ni
-                            Skips any attachments that are not implemented, allowing saving of the rest of the message.
-      --out-name OUTNAME    Name to be used with saving the file output. Cannot be used if you are saving more than one file.
-      --glob, --wildcard    Interpret all paths as having wildcards. Incompatible with --out-name.
-      --ignore-rtfde        Ignores all errors thrown from RTFDE when trying to save. Useful for allowing fallback to continue when an
-                            exception happens.
-      --progress            Shows what file the program is currently working on during it's progress.
+     options:
+       -h, --help            show this help message and exit
+       --use-content-id, --cid
+                             Save attachments by their Content ID, if they have one. Useful when working with the HTML body.
+       --json                Changes to write output files as json.
+       --file-logging        Enables file logging. Implies --verbose level 1.
+       -v, --verbose         Turns on console logging. Specify more than once for higher verbosity.
+       --log LOG             Set the path to write the file log to.
+       --config CONFIGPATH   Set the path to load the logging config from.
+       --out OUTPATH         Set the folder to use for the program output. (Default: Current directory)
+       --use-filename        Sets whether the name of each output is based on the msg filename.
+       --dump-stdout         Tells the program to dump the message body (plain text) to stdout. Overrides saving arguments.
+       --html                Sets whether the output should be HTML. If this is not possible, will error.
+       --pdf                 Saves the body as a PDF. If this is not possible, will error.
+       --wk-path WKPATH      Overrides the path for finding wkhtmltopdf.
+       --wk-options [WKOPTIONS ...]
+                             Sets additional options to be used in wkhtmltopdf. Should be a series of options and values, replacing the - or -- in the beginning with + or ++, respectively. For example: --wk-options "+O Landscape"
+       --prepared-html       When used in conjunction with --html, sets whether the HTML output should be prepared for embedded attachments.
+       --charset CHARSET     Character set to use for the prepared HTML in the added tag. (Default: utf-8)
+       --raw                 Sets whether the output should be raw. If this is not possible, will error.
+       --rtf                 Sets whether the output should be RTF. If this is not possible, will error.
+       --allow-fallback      Tells the program to fallback to a different save type if the selected one is not possible.
+       --skip-body-not-found
+                         Skips saving the body if the body cannot be found, rather than throwing an error.
+       --zip ZIP             Path to use for saving to a zip file.
+       --save-header         Store the header in a separate file.
+       --attachments-only    Specify to only save attachments from an msg file.
+       --skip-hidden         Skips any attachment marked as hidden (usually ones embedded in the body).
+       --no-folders          Stores everything in the location specified by --out. Requires --attachments-only and is incompatible with --out-name.
+       --skip-embedded       Skips all embedded MSG files when saving attachments.
+       --extract-embedded    Extracts the embedded MSG files as MSG files instead of running their save functions.
+       --overwrite-existing  Disables filename conflict resolution code for attachments when saving a file, causing files to be overwriten if two attachments with the same filename are on an MSG file.
+       --skip-not-implemented, --skip-ni
+                         Skips any attachments that are not implemented, allowing saving of the rest of the message.
+       --out-name OUTNAME    Name to be used with saving the file output. Cannot be used if you are saving more than one file.
+       --glob, --wildcard    Interpret all paths as having wildcards. Incompatible with --out-name.
+       --ignore-rtfde        Ignores all errors thrown from RTFDE when trying to save. Useful for allowing fallback to continue when an exception happens.
+       --progress            Shows what file the program is currently working on during it's progress.
 
 **To use this in your own script**, start by using:
 
