@@ -10,6 +10,8 @@ import abc
 import datetime
 import functools
 import logging
+import os
+import pathlib
 import weakref
 
 from functools import cached_property, partial
@@ -240,6 +242,48 @@ class AttachmentBase(abc.ABC):
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
         return msg._getTypedStream([self.__dir, filename], True, _type)
+
+    def _handleFnc(self, _zip, filename, customPath, kwargs) -> pathlib.Path:
+        """
+        "Handle Filename Conflict"
+
+        Internal function for use in determining how to modify the saving path
+        when a file with the same name already exists. This is mainly because
+        any save function that uses files will need to do this functionality.
+
+        :returns: A pathlib.Path object to where the file should be saved.
+        """
+        fullFilename = customPath / filename
+
+        overwriteExisting = kwargs.get('overwriteExisting', False)
+
+        if _zip:
+            # If we are writing to a zip file and are not overwriting.
+            if not overwriteExisting:
+                name, ext = os.path.splitext(filename)
+                nameList = _zip.namelist()
+                if str(fullFilename).replace('\\', '/') in nameList:
+                    for i in range(2, 100):
+                        testName = customPath / f'{name} ({i}){ext}'
+                        if str(testName).replace('\\', '/') not in nameList:
+                            return testName
+                    else:
+                        # If we couldn't find one that didn't exist.
+                        raise FileExistsError(f'Could not create the specified file because it already exists ("{fullFilename}").')
+        else:
+            if not overwriteExisting and fullFilename.exists():
+                # Try to split the filename into a name and extention.
+                name, ext = os.path.splitext(filename)
+                # Try to add a number to it so that we can save without overwriting.
+                for i in range(2, 100):
+                    testName = customPath / f'{name} ({i}){ext}'
+                    if not testName.exists():
+                        return testName
+                else:
+                    # If we couldn't find one that didn't exist.
+                    raise FileExistsError(f'Could not create the specified file because it already exists ("{fullFilename}").')
+
+        return fullFilename
 
     def exists(self, filename) -> bool:
         """

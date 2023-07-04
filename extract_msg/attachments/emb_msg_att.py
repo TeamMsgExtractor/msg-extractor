@@ -105,7 +105,7 @@ class EmbeddedMsgAttachment(AttachmentBase):
                     mode = 'wb'
                     _open = open
 
-                fullFilename = customPath / filename
+                fullFilename = self._handleFnc(_zip, filename, customPath, kwargs)
 
                 with _open(str(fullFilename), mode) as f:
                     self.data.export(f)

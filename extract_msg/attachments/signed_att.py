@@ -143,36 +143,9 @@ class SignedAttachment:
                 mode = 'wb'
                 _open = open
 
-            fullFilename = customPath / filename
+            fullFilename = self._handleFnc(_zip, filename, customPath, kwargs)
 
             if self.type is AttachmentType.DATA:
-                if _zip:
-                    name, ext = os.path.splitext(filename)
-                    nameList = _zip.namelist()
-                    if fullFilename in nameList:
-                        for i in range(2, 100):
-                            testName = customPath / f'{name} ({i}){ext}'
-                            if testName not in nameList:
-                                fullFilename = testName
-                                break
-                        else:
-                            # If we couldn't find one that didn't exist.
-                            raise FileExistsError(f'Could not create the specified file because it already exists ("{fullFilename}").')
-                else:
-                    if fullFilename.exists():
-                        # Try to split the filename into a name and extention.
-                        name, ext = os.path.splitext(filename)
-                        # Try to add a number to it so that we can save without
-                        # overwriting.
-                        for i in range(2, 100):
-                            testName = customPath / f'{name} ({i}){ext}'
-                            if not testName.exists():
-                                fullFilename = testName
-                                break
-                        else:
-                            # If we couldn't find one that didn't exist.
-                            raise FileExistsError(f'Could not create the specified file because it already exists ("{fullFilename}").')
-
                 with _open(str(fullFilename), mode) as f:
                     f.write(self.__data)
 

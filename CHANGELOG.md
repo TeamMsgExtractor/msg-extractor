@@ -1,5 +1,6 @@
 **v0.42.0**
 * [[TeamMsgExtractor #372](https://github.com/TeamMsgExtractor/msg-extractor/issues/372)] Changed the way that the save functions return a value. This makes the return value from all save functions much more informative, allowing a user to separate if a fole or folder (or if more than one) was saved from the function. It also guarentees that all classes from this module will return the relevent path(s) if data is actually saved.
+* [[TeamMsgExtractor #288](https://github.com/TeamMsgExtractor/msg-extractor/issues/288)] Added feature to allow attachment save functions to simply overwrite existing files of the same name.
 * Fixed an issue in the save functions that left the possibility for the zip files to not end up closing if the save function created it and then had an exception.
 * Added new submodule `custom_attachments`. This submodule provides an extendable way to handle custom attachment types, attachment types whose structure and formatting are not defined in the Microsoft documentation for MSG files.
 * Added new property `AttachmentBase.clsid` which returns the listed CLSID value of the data stream/storage of the attachment.
@@ -43,6 +44,7 @@
 * Fixed `Contact.gender` being blatantly incorrect.
 * Fixed sender not being properly decoded in some circumstances.
 * Changed behavior of `MSGFile` to have olefile raise defects of type `DEFECT_INCORRECT` and above instead of just `DEFECT_FATAL`. Uncaught issues of `DEFECT_INCORRECT` can often cause the module to have parsing issues that may be misleading, this just ensures the issue is clarified. This behavior can be reverted back to the previous with `ErrorBehavior.OLE_DEFECT_INCORRECT`.
+* Fixed potential issues that may have made is possible for certain attachments to ignore filename conflict resolution code.
 
 **v0.41.5**
 * Fixed an issue from version `0.41.3` where the header being present but missing the `From` field would cause an exception.
