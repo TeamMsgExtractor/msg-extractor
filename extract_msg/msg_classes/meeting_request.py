@@ -6,9 +6,9 @@ __all__ = [
 import datetime
 import functools
 
-from typing import List, Optional
+from typing import Optional
 
-from .. import constants
+from ..constants import HEADER_FORMAT_TYPE, ps
 from .meeting_related import MeetingRelated
 from ..enums import BusyStatus, MeetingObjectChange, MeetingType, RecurCalendarType, RecurPatternType, ResponseStatus
 
@@ -25,7 +25,7 @@ class MeetingRequest(MeetingRelated):
         object that is to be generated from the Meeting Request object. MUST
         start with "IPM.Appointment".
         """
-        return self._getNamedAs('0024', constants.ps.PSETID_MEETING)
+        return self._getNamedAs('0024', ps.PSETID_MEETING)
 
     @functools.cached_property
     def calendarType(self) -> Optional[RecurCalendarType]:
@@ -34,7 +34,7 @@ class MeetingRequest(MeetingRelated):
         property if the Meeting Request object represents a recurring series or
         an exception.
         """
-        return self._getNamedAs('001C', constants.ps.PSETID_MEETING, RecurCalendarType)
+        return self._getNamedAs('001C', ps.PSETID_MEETING, RecurCalendarType)
 
     @functools.cached_property
     def changeHighlight(self) -> Optional[MeetingObjectChange]:
@@ -44,7 +44,7 @@ class MeetingRequest(MeetingRelated):
 
         Returns a union of the set flags.
         """
-        return self._getNamedAs('8204', constants.ps.PSETID_APPOINTMENT, MeetingObjectChange)
+        return self._getNamedAs('8204', ps.PSETID_APPOINTMENT, MeetingObjectChange)
 
     @functools.cached_property
     def forwardInstance(self) -> bool:
@@ -53,10 +53,10 @@ class MeetingRequest(MeetingRelated):
         recurring series, and it was forwarded (even when forwarded by the
         organizer) rather than being an invitation sent by the organizer.
         """
-        return self._getNamedAs('820A', constants.ps.PSETID_APPOINTMENT, bool, False)
+        return self._getNamedAs('820A', ps.PSETID_APPOINTMENT, bool, False)
 
     @property
-    def headerFormatProperties(self) -> constants.HEADER_FORMAT_TYPE:
+    def headerFormatProperties(self) -> HEADER_FORMAT_TYPE:
         """
         Returns a dictionary of properties, in order, to be formatted into the
         header. Keys are the names to use in the header while the values are one
@@ -140,21 +140,21 @@ class MeetingRequest(MeetingRelated):
         calendar at the time the Meeting Request object or Meeting Update object
         was sent.
         """
-        return self._getNamedAs('8224', constants.ps.PSETID_APPOINTMENT, BusyStatus)
+        return self._getNamedAs('8224', ps.PSETID_APPOINTMENT, BusyStatus)
 
     @functools.cached_property
     def meetingType(self) -> Optional[MeetingType]:
         """
         The type of Meeting Request object or Meeting Update object.
         """
-        return self._getNamedAs('0026', constants.ps.PSETID_MEETING, MeetingType)
+        return self._getNamedAs('0026', ps.PSETID_MEETING, MeetingType)
 
     @functools.cached_property
     def oldLocation(self) -> Optional[str]:
         """
         The original value of the location property before a meeting update.
         """
-        return self._getNamedAs('0028', constants.ps.PSETID_MEETING)
+        return self._getNamedAs('0028', ps.PSETID_MEETING)
 
     @functools.cached_property
     def oldWhenEndWhole(self) -> Optional[datetime.datetime]:
@@ -162,7 +162,7 @@ class MeetingRequest(MeetingRelated):
         The original value of the appointmentEndWhole property before a meeting
         update.
         """
-        return self._getNamedAs('002A', constants.ps.PSETID_MEETING)
+        return self._getNamedAs('002A', ps.PSETID_MEETING)
 
     @functools.cached_property
     def oldWhenStartWhole(self) -> Optional[datetime.datetime]:
@@ -170,4 +170,4 @@ class MeetingRequest(MeetingRelated):
         The original value of the appointmentStartWhole property before a
         meeting update.
         """
-        return self._getNamedAs('0029', constants.ps.PSETID_MEETING)
+        return self._getNamedAs('0029', ps.PSETID_MEETING)
