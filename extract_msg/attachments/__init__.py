@@ -57,7 +57,10 @@ def initStandardAttachment(msg : MSGFile, dir_) -> AttachmentBase:
     """
     from ..properties import PropertiesStore
     from ..enums import ErrorBehavior, PropertiesType
-    from ..exceptions import UnrecognizedMSGTypeError, StandardViolationError
+    from ..exceptions import (
+            FeatureNotImplemented, StandardViolationError,
+            UnrecognizedMSGTypeError
+        )
 
     # First, create the properties store to check things like attachment type.
     propertiesStream = msg._getStream([dir_, '__properties_version1.0'])
@@ -119,7 +122,9 @@ def initStandardAttachment(msg : MSGFile, dir_) -> AttachmentBase:
 
         raise NotImplementedError(f'Could not determine attachment type ({attMethod})!')
 
-    except (NotImplementedError, UnrecognizedMSGTypeError):
+    except (FeatureNotImplemented,
+            NotImplementedError,
+            UnrecognizedMSGTypeError):
         if ErrorBehavior.ATTACH_NOT_IMPLEMENTED in msg.errorBehavior:
             _logger.exception(f'Error processing attachment at {dir_}')
             return UnsupportedAttachment(msg, dir_, propStore)

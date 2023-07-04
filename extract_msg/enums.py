@@ -519,29 +519,37 @@ class EntryIDTypeHex(enum.Enum):
 class ErrorBehavior(enum.IntFlag):
     """
     The behavior to follow when handling an error in an MSG file and it's
-    attachments. This is an int flag enum, so the options you want will be ORed
-    with each other.
+    attachments. Specifying an option indicates the behavior for the situation
+    is to log a message, if anything, instead of raising an exception. This is
+    an int flag enum, so the options you want will be ORed with each other.
 
     THROW: Throw the exception regardless of type.
     ATTACH_NOT_IMPLEMENTED: Silence the exception for NotImplementedError.
     ATTACH_BROKEN: Silence the exception for broken attachments.
-    ATTACH_SUPPRESS_ALL: Silence the exception for NotImplementedError and for broken
-        attachments.
-    STANDARDS_VIOLATION: Silences StandardViolationError where acceptable.
-    RTFDE_UNKNOWN_ERROR: Silences errors from RTFDE that are not normal.
+    ATTACH_SUPPRESS_ALL: Silence the exception for NotImplementedError and for
+        broken attachments.
     RTFDE_MALFORMED: Silences errors about malformed RTF data.
+    RTFDE_UNKNOWN_ERROR: Silences errors from RTFDE that are not normal.
     RTFDE: Silences all errors from RTFDE.
+    STANDARDS_VIOLATION: Silences StandardViolationError where acceptable.
+    OLE_DEFECT_INCORRECT: Silences defects of type DEFECT_INCORRECT that are
+        enabled by default. This can lead to strange bugs.
     SUPPRESS_ALL: Silences all of the above.
     """
-    THROW = 0b00000
-    ATTACH_NOT_IMPLEMENTED = 0b00001
-    ATTACH_BROKEN = 0b00010
-    ATTACH_SUPPRESS_ALL = 0b00011
-    STANDARDS_VIOLATION = 0b00100
-    RTFDE_UNKNOWN_ERROR = 0b01000
-    RTFDE_MALFORMED = 0b10000
-    RTFDE = 0b11000
-    SUPPRESS_ALL = 0b1111
+    THROW = 0b000000
+    # Attachments.
+    ATTACH_NOT_IMPLEMENTED = 0b000001
+    ATTACH_BROKEN = 0b000010
+    ATTACH_SUPPRESS_ALL = 0b000011
+    # RTFDE.
+    RTFDE_MALFORMED = 0b000100
+    RTFDE_UNKNOWN_ERROR = 0b001000
+    RTFDE = 0b001100
+    # General.
+    STANDARDS_VIOLATION = 0b010000
+    OLE_DEFECT_INCORRECT = 0b100000
+
+    SUPPRESS_ALL = 0b111111
 
 
 

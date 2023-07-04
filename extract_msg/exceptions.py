@@ -35,7 +35,10 @@ class ExMsgBaseException(Exception):
     The base class for all custom exceptions the module uses.
     """
 
-class FeatureNotImplemented(ExMsgBaseException, NotImplementedError):
+# I would want this to also be a subclass of NotImplementedError, but Python
+# docs say that CPython can make that a bit problematic due to things from the C
+# side of the code.
+class FeatureNotImplemented(ExMsgBaseException):
     """
     The base class for a feature not yet being implemented in the module.
     """

@@ -42,6 +42,7 @@
 * Fixed `CalendarBase.keywords` being blatantly incorrect (it was so bad I don't know how it slipped through).
 * Fixed `Contact.gender` being blatantly incorrect.
 * Fixed sender not being properly decoded in some circumstances.
+* Changed behavior of `MSGFile` to have olefile raise defects of type `DEFECT_INCORRECT` and above instead of just `DEFECT_FATAL`. Uncaught issues of `DEFECT_INCORRECT` can often cause the module to have parsing issues that may be misleading, this just ensures the issue is clarified. This behavior can be reverted back to the previous with `ErrorBehavior.OLE_DEFECT_INCORRECT`.
 
 **v0.41.5**
 * Fixed an issue from version `0.41.3` where the header being present but missing the `From` field would cause an exception.

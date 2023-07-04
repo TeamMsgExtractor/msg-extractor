@@ -140,7 +140,11 @@ class MSGFile:
             if not path:
                 raise ValueError(':param path: must be set and must not be empty.')
             try:
-                self.__ole = olefile.OleFileIO(path)
+                if ErrorBehavior.OLE_DEFECT_INCORRECT in self.errorBehavior:
+                    defect = olefile.DEFECT_FATAL
+                else:
+                    defect = olefile.DEFECT_INCORRECT
+                self.__ole = olefile.OleFileIO(path, raise_defects = defect)
             except OSError as e:
                 logger.error(e)
                 if str(e) == 'not an OLE2 structured storage file':
