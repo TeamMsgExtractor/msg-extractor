@@ -406,6 +406,9 @@ def getCommandArgs(args) -> argparse.Namespace:
     # --extract-embedded
     parser.add_argument('--extract-embedded', dest='extractEmbedded', action='store_true',
                         help='Extracts the embedded MSG files as MSG files instead of running their save functions.')
+    # --overwrite-existing
+    parser.add_argument('--overwrite-existing', dest='overwriteExisting', action='store_true',
+                        help='Disables filename conflict resolution code for attachments when saving a file, causing files to be overwriten if two attachments with the same filename are on an MSG file.')
     # --skip-not-implemented
     parser.add_argument('--skip-not-implemented', '--skip-ni', dest='skipNotImplemented', action='store_true',
                         help='Skips any attachments that are not implemented, allowing saving of the rest of the message.')

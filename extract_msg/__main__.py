@@ -50,6 +50,7 @@ def main() -> None:
         'extractEmbedded': args.extractEmbedded,
         'html': args.html,
         'json': args.json,
+        'overwriteExisting': args.overwriteExisting,
         'pdf': args.pdf,
         'preparedHtml': args.preparedHtml,
         'rtf': args.rtf,
