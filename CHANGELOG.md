@@ -2,6 +2,7 @@
 * [[TeamMsgExtractor #372](https://github.com/TeamMsgExtractor/msg-extractor/issues/372)] Changed the way that the save functions return a value. This makes the return value from all save functions much more informative, allowing a user to separate if a fole or folder (or if more than one) was saved from the function. It also guarentees that all classes from this module will return the relevent path(s) if data is actually saved.
 * [[TeamMsgExtractor #288](https://github.com/TeamMsgExtractor/msg-extractor/issues/288)] Added feature to allow attachment save functions to simply overwrite existing files of the same name. This can be done with the `overwriteExisting` keyword argument from code or the `--overwrite-existing` option from the command line.
 * [[TeamMsgExtractor #40](https://github.com/TeamMsgExtractor/msg-extractor/issues/40)] Added new submodule `custom_attachments`. This submodule provides an extendable way to handle custom attachment types, attachment types whose structure and formatting are not defined in the Microsoft documentation for MSG files. This includes a handler to at least partially cover support for Outlook images.
+* [[TeamMsgExtractor #373](https://github.com/TeamMsgExtractor/msg-extractor/issues/373)] Added the `encoding` submodule for encoding tasks, including proper support for Microsoft's implementation of cp950. This gets added to the codecs list as "windows-950".
 * Fixed an issue in the save functions that left the possibility for the zip files to not end up closing if the save function created it and then had an exception.
 * Added new property `AttachmentBase.clsid` which returns the listed CLSID value of the data stream/storage of the attachment.
 * Changed internal behavior of `MSGFile.attachments`. This should not cause any noticeable changes to the output.
@@ -25,7 +26,6 @@
 * Changed the option to suppress `RTFDE` errors to fall under the `ErrorBehavior` enum. Usage of the original option will be allowable, but is being marked as deprecated. However, it is still a dedicated option from the command line.
     * Also fixed the option not properly ignoring some RTFDE errors, specifically the ones that it is normal for the module to throw.
 * Removed some constants that are not used by the module.
-* Added the `encoding` submodule for encoding tasks, including proper support for Microsoft's implementation of cp950. This gets added to the codecs list as "windows-950".
 * Updated to support `RTFDE` version `0.1.0`. Users encountering random erros from that module should find that those errors have disappeared. If you get errors from it still, bring up the issue on their GitHub.
 * Fixed bug that would cause weird behavior if you gave an empty string as the path for an MSG file.
 * Added support for `IPM.StickyNote`.
@@ -45,6 +45,7 @@
 * Fixed sender not being properly decoded in some circumstances.
 * Changed behavior of `MSGFile` to have olefile raise defects of type `DEFECT_INCORRECT` and above instead of just `DEFECT_FATAL`. Uncaught issues of `DEFECT_INCORRECT` can often cause the module to have parsing issues that may be misleading, this just ensures the issue is clarified. This behavior can be reverted back to the previous with `ErrorBehavior.OLE_DEFECT_INCORRECT`.
 * Fixed potential issues that may have made is possible for certain attachments to ignore filename conflict resolution code.
+* Changed the
 
 **v0.41.5**
 * Fixed an issue from version `0.41.3` where the header being present but missing the `From` field would cause an exception.
