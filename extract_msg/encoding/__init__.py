@@ -62,7 +62,8 @@ _CODE_PAGES = {
     932: 'shift_jis', # ANSI/OEM Japanese; Japanese (Shift-JIS)
     936: 'gb2312', # ANSI/OEM Simplified Chinese (PRC, Singapore); Chinese Simplified (GB2312)
     949: 'ks_c_5601-1987', # ANSI/OEM Korean (Unified Hangul Code)
-    # We *must* use a custom encoding because of a core Python issue.
+    # We *must* use a custom encoding because the Python implementation differs
+    # from the Microsoft implementation.
     950: 'windows-950', # ANSI/OEM Traditional Chinese (Taiwan; Hong Kong SAR, PRC); Chinese Traditional (Big5)
     1026: 'IBM1026', # IBM EBCDIC Turkish (Latin 5)
     1047: 'cp1047', # IBM EBCDIC Latin 1/Open System
@@ -117,8 +118,8 @@ _CODE_PAGES = {
     10081: 'x-mac-turkish', # Turkish (Mac)
     # UNSUPPORTED.
     10082: 'x-mac-croatian', # Croatian (Mac)
-    12000: 'utf-32', # Unicode UTF-32, little endian byte order; available only to managed applications
-    12001: 'utf-32BE', # Unicode UTF-32, big endian byte order; available only to managed applications
+    12000: 'utf-32', # Unicode UTF-32, little endian byte order
+    12001: 'utf-32BE', # Unicode UTF-32, big endian byte order
     # UNSUPPORTED.
     20000: 'x-Chinese_CNS', # CNS Taiwan; Chinese Traditional (CNS)
     # UNSUPPORTED.
