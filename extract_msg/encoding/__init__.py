@@ -11,8 +11,8 @@ __all__ = [
 import ebcdic as _
 import codecs
 
-from . import win950
 from ..exceptions import UnknownCodepageError, UnsupportedEncodingError
+from .utils import createSBEncoding, createVBEncoding
 
 
 # This is a dictionary matching the code page number to it's encoding name.
@@ -264,8 +264,10 @@ def lookupCodePage(id_ : int) -> str:
 def _lookupEncoding(name):
     return _codecsInfo.get(name)
 
-
+from ._dt import _win874_dec, _win950_dec
 _codecsInfo = {
-    'windows_950': win950.getregentry(),
+    'windows_950': createVBEncoding('windows-950', _win950_dec.decodingTable),
+    'windows_874': createSBEncoding('windows-874', _win874_dec.decodingTable),
 }
+
 codecs.register(_lookupEncoding)

@@ -45,7 +45,7 @@
 * Fixed sender not being properly decoded in some circumstances.
 * Changed behavior of `MSGFile` to have olefile raise defects of type `DEFECT_INCORRECT` and above instead of just `DEFECT_FATAL`. Uncaught issues of `DEFECT_INCORRECT` can often cause the module to have parsing issues that may be misleading, this just ensures the issue is clarified. This behavior can be reverted back to the previous with `ErrorBehavior.OLE_DEFECT_INCORRECT`.
 * Fixed potential issues that may have made is possible for certain attachments to ignore filename conflict resolution code.
-* Changed the
+* Added support for the windows-874 encoding. This includes infrastructure to more easily support new single-byte encodings, only needing a decoding table to make them work.
 
 **v0.41.5**
 * Fixed an issue from version `0.41.3` where the header being present but missing the `From` field would cause an exception.
