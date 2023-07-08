@@ -56,7 +56,6 @@ _CODE_PAGES = {
     866: 'cp866', # OEM Russian; Cyrillic (DOS)
     869: 'ibm869', # OEM Modern Greek; Greek, Modern (DOS)
     870: 'cp870', # IBM870 # IBM EBCDIC Multilingual/ROECE (Latin 2); IBM EBCDIC Multilingual Latin 2
-    # UNSUPPORTED.
     874: 'windows-874', # ANSI/OEM Thai (ISO 8859-11); Thai (Windows)
     875: 'cp875', # IBM EBCDIC Greek Modern
     932: 'shift_jis', # ANSI/OEM Japanese; Japanese (Shift-JIS)
@@ -77,8 +76,8 @@ _CODE_PAGES = {
     1147: 'cp1147', # IBM EBCDIC France (20297 + Euro symbol); IBM EBCDIC (France-Euro)
     1148: 'cp1148ms', # IBM EBCDIC International (500 + Euro symbol); IBM EBCDIC (International-Euro)
     1149: 'cp1149', # IBM EBCDIC Icelandic (20871 + Euro symbol); IBM EBCDIC (Icelandic-Euro)
-    1200: 'utf-16-le', # Unicode UTF-16, little endian byte order (BMP of ISO 10646); available only to managed applications
-    1201: 'utf-16-be', # Unicode UTF-16, big endian byte order; available only to managed applications
+    1200: 'utf-16-le', # Unicode UTF-16, little endian byte order (BMP of ISO 10646);
+    1201: 'utf-16-be', # Unicode UTF-16, big endian byte order;
     1250: 'windows-1250', # ANSI Central European; Central European (Windows)
     1251: 'windows-1251', # ANSI Cyrillic; Cyrillic (Windows)
     1252: 'windows-1252', # ANSI Latin 1; Western European (Windows)
