@@ -96,7 +96,6 @@ _CODE_PAGES = {
     10004: 'x-mac-arabic', # Arabic (Mac)
     # UNSUPPORTED.
     10005: 'x-mac-hebrew', # Hebrew (Mac)
-    # UNSUPPORTED.
     10006: 'x-mac-greek', # Greek (Mac)
     10007: 'x-mac-cyrillic', # Cyrillic (Mac)
     # UNSUPPORTED.
@@ -107,11 +106,8 @@ _CODE_PAGES = {
     10017: 'x-mac-ukrainian', # Ukrainian (Mac)
     # UNSUPPORTED.
     10021: 'x-mac-thai', # Thai (Mac)
-    # UNSUPPORTED.
     10029: 'x-mac-ce', # MAC Latin 2; Central European (Mac)
-    # UNSUPPORTED.
     10079: 'x-mac-icelandic', # Icelandic (Mac)
-    # UNSUPPORTED.
     10081: 'x-mac-turkish', # Turkish (Mac)
     # UNSUPPORTED.
     10082: 'x-mac-croatian', # Croatian (Mac)
@@ -264,11 +260,16 @@ def _lookupEncoding(name):
 
 from .utils import createSBEncoding as _sb, createVBEncoding as _vb
 from ._dt import (
-        _mac_cyrillic, _win874_dec, _win950_dec
+        _mac_ce, _mac_cyrillic, _mac_greek, _mac_iceland, _mac_turkish,
+        _win874_dec, _win950_dec
     )
 
 _codecsInfo = {
+    'x_mac_ce': _sb('x-mac-ce', _mac_ce.decodingTable),
     'x_mac_cyrillic': _sb('x-mac-cyrillic', _mac_cyrillic.decodingTable),
+    'x_mac_greek': _sb('x-mac-greek', _mac_greek.decodingTable),
+    'x_mac_icelandic': _sb('x-mac-icelandic', _mac_iceland.decodingTable),
+    'x_mac_turkish': _sb('x-mac-turkish', _mac_turkish.decodingTable),
     'windows_950': _vb('windows-950', _win950_dec.decodingTable),
     'windows_874': _sb('windows-874', _win874_dec.decodingTable),
 }

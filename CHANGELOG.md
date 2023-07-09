@@ -6,7 +6,11 @@
     * Added infrastructure to make it easy to add variable-byte (up to two bytes) encodings and single-byte encodings.
     * Added the following encodings:
         * windows-874
+        * x-mac-ce
         * x-mac-cyrillic
+        * x-mac-greek
+        * x-mac-icelandic
+        * x-mac-turkish
 * Fixed an issue in the save functions that left the possibility for the zip files to not end up closing if the save function created it and then had an exception.
 * Added new property `AttachmentBase.clsid` which returns the listed CLSID value of the data stream/storage of the attachment.
 * Changed internal behavior of `MSGFile.attachments`. This should not cause any noticeable changes to the output.
