@@ -1,3 +1,5 @@
+# Based on https://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP874.TXT
+
 __all__ = [
     'decodingTable',
 ]

@@ -3,7 +3,10 @@
 * [[TeamMsgExtractor #288](https://github.com/TeamMsgExtractor/msg-extractor/issues/288)] Added feature to allow attachment save functions to simply overwrite existing files of the same name. This can be done with the `overwriteExisting` keyword argument from code or the `--overwrite-existing` option from the command line.
 * [[TeamMsgExtractor #40](https://github.com/TeamMsgExtractor/msg-extractor/issues/40)] Added new submodule `custom_attachments`. This submodule provides an extendable way to handle custom attachment types, attachment types whose structure and formatting are not defined in the Microsoft documentation for MSG files. This includes a handler to at least partially cover support for Outlook images.
 * [[TeamMsgExtractor #373](https://github.com/TeamMsgExtractor/msg-extractor/issues/373)] Added the `encoding` submodule for encoding tasks, including proper support for Microsoft's implementation of CP950. This gets added to the codecs list as "windows-950".
-    * Added support for the windows-874 encoding. This includes infrastructure to more easily support new single-byte encodings, only needing a decoding table to make them work.
+    * Added infrastructure to make it easy to add variable-byte (up to two bytes) encodings and single-byte encodings.
+    * Added the following encodings:
+        * windows-874
+        * x-mac-cyrillic
 * Fixed an issue in the save functions that left the possibility for the zip files to not end up closing if the save function created it and then had an exception.
 * Added new property `AttachmentBase.clsid` which returns the listed CLSID value of the data stream/storage of the attachment.
 * Changed internal behavior of `MSGFile.attachments`. This should not cause any noticeable changes to the output.

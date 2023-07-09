@@ -12,7 +12,6 @@ import ebcdic as _
 import codecs
 
 from ..exceptions import UnknownCodepageError, UnsupportedEncodingError
-from .utils import createSBEncoding, createVBEncoding
 
 
 # This is a dictionary matching the code page number to it's encoding name.
@@ -99,7 +98,6 @@ _CODE_PAGES = {
     10005: 'x-mac-hebrew', # Hebrew (Mac)
     # UNSUPPORTED.
     10006: 'x-mac-greek', # Greek (Mac)
-    # UNSUPPORTED.
     10007: 'x-mac-cyrillic', # Cyrillic (Mac)
     # UNSUPPORTED.
     10008: 'x-mac-chinesesimp', # MAC Simplified Chinese (GB 2312); Chinese Simplified (Mac)
@@ -264,10 +262,15 @@ def lookupCodePage(id_ : int) -> str:
 def _lookupEncoding(name):
     return _codecsInfo.get(name)
 
-from ._dt import _win874_dec, _win950_dec
+from .utils import createSBEncoding as _sb, createVBEncoding as _vb
+from ._dt import (
+        _mac_cyrillic, _win874_dec, _win950_dec
+    )
+
 _codecsInfo = {
-    'windows_950': createVBEncoding('windows-950', _win950_dec.decodingTable),
-    'windows_874': createSBEncoding('windows-874', _win874_dec.decodingTable),
+    'x_mac_cyrillic': _sb('x-mac-cyrillic', _mac_cyrillic.decodingTable),
+    'windows_950': _vb('windows-950', _win950_dec.decodingTable),
+    'windows_874': _sb('windows-874', _win874_dec.decodingTable),
 }
 
 codecs.register(_lookupEncoding)
