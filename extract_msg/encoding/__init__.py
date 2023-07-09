@@ -243,6 +243,7 @@ _CODE_PAGES = {
     65001: 'utf-8', # Unicode (UTF-8)
 }
 
+# Register new encodings.
 
 def lookupCodePage(id_ : int) -> str:
     """
