@@ -29,7 +29,7 @@ if __name__ == "__main__":
             # Skip comment lines.
             if not line.strip().startswith('#'):
                 items = line.split('\t')
-                if len(items) != 1:
+                if len(items) != 1 and items[1]:
                     table[int(items[0], 16)] = int(items[1], 16)
 
     with open('.'.join(sys.argv[1].split('.')[:-1] + ['py']), 'w') as f:
