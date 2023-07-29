@@ -7,7 +7,8 @@ This module contains the set of extract_msg exceptions.
 """
 
 __all__ = [
-    'BadHtmlError',
+    'ExMsgBaseException',
+
     'ConversionError',
     'DataNotFoundError',
     'DeencapMalformedData',
@@ -27,63 +28,74 @@ __all__ = [
     'WKError',
 ]
 
+# Base exception types.
 
-import logging
-
-
-# Add logger bus.
-logger = logging.getLogger(__name__)
-logger.addHandler(logging.NullHandler())
-
-
-class BadHtmlError(ValueError):
+class ExMsgBaseException(Exception):
     """
-    HTML failed to pass validation.
+    The base class for all custom exceptions the module uses.
     """
 
-class ConversionError(Exception):
+# I would want this to also be a subclass of NotImplementedError, but Python
+# docs say that CPython can make that a bit problematic due to things from the C
+# side of the code.
+class FeatureNotImplemented(ExMsgBaseException):
+    """
+    The base class for a feature not yet being implemented in the module.
+    """
+
+# More specific exceptions.
+
+
+class ConversionError(ExMsgBaseException):
     """
     An error occured during type conversion.
     """
 
-class DataNotFoundError(Exception):
+class DataNotFoundError(ExMsgBaseException):
     """
     Requested stream type was unavailable.
     """
 
-class DeencapMalformedData(Exception):
+class DeencapMalformedData(ExMsgBaseException):
     """
     Data to deencapsulate was malformed in some way.
     """
 
-class DeencapNotEncapsulated(Exception):
+class DeencapNotEncapsulated(ExMsgBaseException):
     """
     Data to deencapsulate did not contain any encapsulated data.
     """
 
-class ExecutableNotFound(Exception):
+class ExecutableNotFound(ExMsgBaseException):
     """
     Could not find the specified executable.
     """
 
-class IncompatibleOptionsError(Exception):
+class IncompatibleOptionsError(ExMsgBaseException):
     """
     Provided options are incompatible with each other.
     """
 
-class InvalidFileFormatError(OSError):
+class InvalidFileFormatError(ExMsgBaseException):
     """
     An Invalid File Format Error occurred.
     """
 
-class InvaildPropertyIdError(Exception):
+class InvaildPropertyIdError(ExMsgBaseException):
     """
     The provided property ID was invalid.
     """
 
-class InvalidVersionError(Exception):
+class PrefixError(ExMsgBaseException):
     """
-    The version specified is invalid.
+    An issue was detected with the provided prefix. This should never occur if
+    you have no manually provided a prefix.
+    """
+
+class SecurityError(ExMsgBaseException):
+    """
+    A code path was triggered that would use an insecure feature, but that
+    insecure feature was not enabled.
     """
 
 class StandardViolationError(InvalidFileFormatError):
@@ -91,11 +103,11 @@ class StandardViolationError(InvalidFileFormatError):
     A critical violation of the MSG standards was detected and could not be
     recovered from. Recoverable violations will result in log messages instead.
 
-    Any that could reasonably be skipped, although are likely to still cause 
+    Any that could reasonably be skipped, although are likely to still cause
     errors down the line, can be suppressed.
     """
 
-class TZError(Exception):
+class TZError(ExMsgBaseException):
     """
     Specifically not an OSError to avoid being caught by parts of the module.
     This error represents a fatal error in the datetime parsing as it usually
@@ -105,34 +117,34 @@ class TZError(Exception):
     TeamMsgExtractor#169 for information on why you are getting this error.
     """
 
-class UnknownCodepageError(Exception):
+class UnknownCodepageError(ExMsgBaseException):
     """
     The codepage provided was not one we know of.
     """
 
-class UnsupportedEncodingError(NotImplementedError):
+class UnsupportedEncodingError(FeatureNotImplemented):
     """
     The codepage provided is known but is not supported.
     """
 
-class UnknownTypeError(Exception):
+class UnknownTypeError(ExMsgBaseException):
     """
     The type specified is not one that is recognized.
     """
 
-class UnsupportedMSGTypeError(NotImplementedError):
+class UnsupportedMSGTypeError(FeatureNotImplemented):
     """
     An exception that is raised when an MSG class is recognized by not
     supported.
     """
 
-class UnrecognizedMSGTypeError(TypeError):
+class UnrecognizedMSGTypeError(ExMsgBaseException):
     """
     An exception that is raised when the module cannot determine how to properly
     open a specific class of msg file.
     """
 
-class WKError(RuntimeError):
+class WKError(ExMsgBaseException):
     """
     An error occured while running wkhtmltopdf.
     """

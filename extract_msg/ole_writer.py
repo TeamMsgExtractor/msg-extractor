@@ -21,8 +21,7 @@ from red_black_dict_mod import RedBlackTree
 
 # Allow for nice type checking.
 if TYPE_CHECKING:
-    from .msg import MSGFile
-
+    from .msg_classes import MSGFile
 
 
 class DirectoryEntry:
@@ -70,7 +69,7 @@ class DirectoryEntry:
 
         nameBytes = self.name.encode('utf-16-le')
 
-        return constants.ST_CF_DIR_ENTRY.pack(
+        return constants.st.ST_CF_DIR_ENTRY.pack(
                                               nameBytes,
                                               len(nameBytes) + 2,
                                               self.type,
@@ -436,25 +435,25 @@ class OleWriter:
         # Reserved.
         f.write(b'\x00\x00\x00\x00\x00\x00')
         # Number of directory sectors. Version 3 says this *must* be 0.
-        f.write(constants.ST_LE_UI32.pack(0))
+        f.write(constants.st.ST_LE_UI32.pack(0))
         # Number of FAT sectors.
-        f.write(constants.ST_LE_UI32.pack(numFat))
+        f.write(constants.st.ST_LE_UI32.pack(numFat))
         # First directory sector location (Sector for the directory stream).
         # We place that right after the DIFAT and FAT.
-        f.write(constants.ST_LE_UI32.pack(numFat + numDifat))
+        f.write(constants.st.ST_LE_UI32.pack(numFat + numDifat))
         # Transation signature number.
         f.write(b'\x00\x00\x00\x00')
         # Mini stream cutoff size.
         f.write(b'\x00\x10\x00\x00')
         # First mini FAT sector location.
-        f.write(constants.ST_LE_UI32.pack((numFat + numDifat + ceilDiv(self.__dirEntryCount, 4)) if self.__numMinifat > 0 else 0xFFFFFFFE))
+        f.write(constants.st.ST_LE_UI32.pack((numFat + numDifat + ceilDiv(self.__dirEntryCount, 4)) if self.__numMinifat > 0 else 0xFFFFFFFE))
         # Number of mini FAT sectors.
-        f.write(constants.ST_LE_UI32.pack(ceilDiv(self.__numMinifatSectors, 128)))
+        f.write(constants.st.ST_LE_UI32.pack(ceilDiv(self.__numMinifatSectors, 128)))
         # First DIFAT sector location. If there are none, set to 0xFFFFFFFE (End
         # of chain).
-        f.write(constants.ST_LE_UI32.pack(0 if numDifat else 0xFFFFFFFE))
+        f.write(constants.st.ST_LE_UI32.pack(0 if numDifat else 0xFFFFFFFE))
         # Number of DIFAT sectors.
-        f.write(constants.ST_LE_UI32.pack(numDifat))
+        f.write(constants.st.ST_LE_UI32.pack(numDifat))
 
         # To make life easier on me, I'm having the code start with the DIFAT
         # followed by the FAT sectors, as I can write them all at once before
@@ -465,9 +464,9 @@ class OleWriter:
             # This kind of sucks to code, ngl.
             if x > 109 and (x - 109) % 127 == 0:
                 # If we are at the end of a DIFAT sector, write the jump.
-                f.write(constants.ST_LE_UI32.pack((x - 109) // 127))
+                f.write(constants.st.ST_LE_UI32.pack((x - 109) // 127))
             # Write the next FAT sector location.
-            f.write(constants.ST_LE_UI32.pack(x + numDifat))
+            f.write(constants.st.ST_LE_UI32.pack(x + numDifat))
 
         # Finally, fill out the last DIFAT sector with null entries.
         if numFat > 109:
@@ -489,7 +488,7 @@ class OleWriter:
 
         # Fill in the values for the directory stream.
         for x in range(offset + 1, offset + ceilDiv(self.__dirEntryCount, 4)):
-            f.write(constants.ST_LE_UI32.pack(x))
+            f.write(constants.st.ST_LE_UI32.pack(x))
 
         # Write the end of chain marker.
         f.write(b'\xFE\xFF\xFF\xFF')
@@ -500,7 +499,7 @@ class OleWriter:
         if self.__numMinifatSectors > 0:
             # Mini FAT chain.
             for x in range(offset + 1, offset + ceilDiv(self.__numMinifat, 16)):
-                f.write(constants.ST_LE_UI32.pack(x))
+                f.write(constants.st.ST_LE_UI32.pack(x))
 
             # Write the end of chain marker.
             f.write(b'\xFE\xFF\xFF\xFF')
@@ -509,7 +508,7 @@ class OleWriter:
 
             # The mini stream sectors.
             for x in range(offset + 1, offset + self.__numMinifat):
-                f.write(constants.ST_LE_UI32.pack(x))
+                f.write(constants.st.ST_LE_UI32.pack(x))
 
             # Write the end of chain marker.
             f.write(b'\xFE\xFF\xFF\xFF')
@@ -524,7 +523,7 @@ class OleWriter:
             size = ceilDiv(len(entry.data), 512)
             entry.startingSectorLocation = offset
             for x in range(offset + 1, offset + size):
-                f.write(constants.ST_LE_UI32.pack(x))
+                f.write(constants.st.ST_LE_UI32.pack(x))
 
             # Write the end of chain marker.
             f.write(b'\xFE\xFF\xFF\xFF')
@@ -577,7 +576,7 @@ class OleWriter:
             if x.type == DirectoryEntryType.STREAM and len(x.data) < 4096:
                 size = ceilDiv(len(x.data), 64)
                 for x in range(currentSector + 1, currentSector + size):
-                    f.write(constants.ST_LE_UI32.pack(x))
+                    f.write(constants.st.ST_LE_UI32.pack(x))
                 if size > 0:
                     f.write(b'\xFE\xFF\xFF\xFF')
                 currentSector += size
@@ -879,7 +878,7 @@ class OleWriter:
         # First, validate the new name.
         if not isinstance(newName, str):
             raise ValueError('New name must be a string.')
-        if constants.RE_INVALID_OLE_PATH.search(newName):
+        if constants.re.INVALID_OLE_PATH.search(newName):
             raise ValueError('Invalid character(s) in new name. Must not contain the following characters: \\//!:')
         if len(newName) > 31:
             raise ValueError('New name must be less than 32 characters.')

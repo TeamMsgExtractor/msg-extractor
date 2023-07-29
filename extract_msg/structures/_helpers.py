@@ -25,27 +25,27 @@ class BytesReader(io.BytesIO):
         super().__init__(*args, **kwargs)
         self.__le = bool(littleEndian)
         if self.__le:
-            self.__int8_t = constants.ST_LE_I8
-            self.__int16_t = constants.ST_LE_I16
-            self.__int32_t = constants.ST_LE_I32
-            self.__int64_t = constants.ST_LE_I64
-            self.__uint8_t = constants.ST_LE_UI8
-            self.__uint16_t = constants.ST_LE_UI16
-            self.__uint32_t = constants.ST_LE_UI32
-            self.__uint64_t = constants.ST_LE_UI64
-            self.__float_t = constants.ST_LE_F32
-            self.__double_t = constants.ST_LE_F64
+            self.__int8_t = constants.st.ST_LE_I8
+            self.__int16_t = constants.st.ST_LE_I16
+            self.__int32_t = constants.st.ST_LE_I32
+            self.__int64_t = constants.st.ST_LE_I64
+            self.__uint8_t = constants.st.ST_LE_UI8
+            self.__uint16_t = constants.st.ST_LE_UI16
+            self.__uint32_t = constants.st.ST_LE_UI32
+            self.__uint64_t = constants.st.ST_LE_UI64
+            self.__float_t = constants.st.ST_LE_F32
+            self.__double_t = constants.st.ST_LE_F64
         else:
-            self.__int8_t = constants.ST_BE_I8
-            self.__int16_t = constants.ST_BE_I16
-            self.__int32_t = constants.ST_BE_I32
-            self.__int64_t = constants.ST_BE_I64
-            self.__uint8_t = constants.ST_BE_UI8
-            self.__uint16_t = constants.ST_BE_UI16
-            self.__uint32_t = constants.ST_BE_UI32
-            self.__uint64_t = constants.ST_BE_UI64
-            self.__float_t = constants.ST_BE_F32
-            self.__double_t = constants.ST_BE_F64
+            self.__int8_t = constants.st.ST_BE_I8
+            self.__int16_t = constants.st.ST_BE_I16
+            self.__int32_t = constants.st.ST_BE_I32
+            self.__int64_t = constants.st.ST_BE_I64
+            self.__uint8_t = constants.st.ST_BE_UI8
+            self.__uint16_t = constants.st.ST_BE_UI16
+            self.__uint32_t = constants.st.ST_BE_UI32
+            self.__uint64_t = constants.st.ST_BE_UI64
+            self.__float_t = constants.st.ST_BE_F32
+            self.__double_t = constants.st.ST_BE_F64
 
     def _readDecodedString(self, encoding, width : int = 1) -> str:
         """

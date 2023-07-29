@@ -21,7 +21,7 @@ class BusinessCardDisplayDefinition:
     def __init__(self, data : bytes):
         self.__rawData = data
         reader = BytesReader(data)
-        unpacked = constants.ST_BC_HEAD.unpack(reader.read(13))
+        unpacked = constants.st.ST_BC_HEAD.unpack(reader.read(13))
         # Because doc says it must be ignored, we don't check the reserved here.
         reader.read(4)
         self.__majorVersion = unpacked[0]
@@ -139,7 +139,7 @@ class BusinessCardDisplayDefinition:
 class FieldInfo:
     def __init__(self, data : bytes, extraInfo : bytes):
         self.__raw = data
-        unpacked = constants.ST_BC_FIELD_INFO.unpack(data)
+        unpacked = constants.st.ST_BC_FIELD_INFO.unpack(data)
         self.__textPropertyID = unpacked[0]
         self.__textFormat = BCTextFormat(unpacked[1])
         self.__labelFormat = BCLabelFormat(unpacked[2])

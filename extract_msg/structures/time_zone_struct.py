@@ -14,7 +14,7 @@ class TimeZoneStruct:
 
     def __init__(self, data : bytes):
         self.__rawData = data
-        unpacked = constants.ST_TZ.unpack(data)
+        unpacked = constants.st.ST_TZ.unpack(data)
         self.__bias = unpacked[0]
         self.__standardBias = unpacked[1]
         self.__daylightBias = unpacked[2]

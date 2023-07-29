@@ -35,11 +35,11 @@ class RecurrencePattern:
         if self.__patternType == RecurPatternType.DAY:
             self.__patternTypeSpecific = None
         elif self.__patternType == RecurPatternType.WEEK:
-            self.__patternTypeSpecific = RPTSW.fromBits(reader.readUnsignedInt())
+            self.__patternTypeSpecific = RPTSW(reader.readUnsignedInt())
         elif self.__patternType in (RecurPatternType.MONTH_NTH, RecurPatternType.HJ_MONTH_NTH):
             self.__patternTypeSpecific = reader.readUnsignedInt()
         else:
-            self.__patternTypeSpecific = (RPTSW.fromBits(reader.readUnsignedInt()),
+            self.__patternTypeSpecific = (RPTSW(reader.readUnsignedInt()),
                                           RecurMonthNthWeek(reader.readUnsignedInt()))
 
         self.__endType = RecurEndType.fromInt(reader.readUnsignedInt())

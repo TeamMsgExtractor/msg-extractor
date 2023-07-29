@@ -19,7 +19,6 @@
 __pycache__/
 
 # Ignore new .msg files added from testing
-
 /example-msg-files/expected-outputs/
 /example-msg-files/*.msg
 

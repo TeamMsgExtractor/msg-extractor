@@ -33,7 +33,7 @@ class SystemTime:
         """
         Packs the current data into bytes.
         """
-        return constants.ST_SYSTEMTIME.pack(self.year, self.month,
+        return constants.st.ST_SYSTEMTIME.pack(self.year, self.month,
                                             self.dayOfWeek, self.day, self.hour,
                                             self.minute, self.second,
                                             self.milliseconds)
@@ -42,7 +42,7 @@ class SystemTime:
         """
         Fills out the fields of this instance by unpacking the bytes.
         """
-        unpacked = constants.ST_SYSTEMTIME.unpack(data)
+        unpacked = constants.st.ST_SYSTEMTIME.unpack(data)
         self.year = unpacked[0]
         self.month = unpacked[1]
         self.dayOfWeek = unpacked[2]

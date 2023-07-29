@@ -27,53 +27,42 @@ https://github.com/TeamMsgExtractor/msg-extractor
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 __author__ = 'Destiny Peterson & Matthew Walker'
-__date__ = '2023-06-11'
-__version__ = '0.41.5'
+__date__ = '2023-07-29'
+__version__ = '0.42.0'
 
 __all__ = [
     # Modules:
-    'constants',
+    'attachments',
     'enums',
     'exceptions',
+    'msg_classes',
+    'properties',
 
     # Classes:
-    'AppointmentMeeting',
     'Attachment',
-    'Contact',
-    'MeetingForwardNotification',
-    'MeetingRequest',
-    'MeetingResponse',
+    'AttachmentBase',
     'Message',
-    'MessageBase',
-    'MessageSigned',
-    'MessageSignedBase',
     'MSGFile',
-    'Post',
-    'Properties',
+    'Named',
+    'NamedProperties',
+    'OleWriter',
+    'PropertiesStore',
     'Recipient',
-    'Task',
+    'SignedAttachment',
 
-    #Functions:
-    'createProp',
+    # Functions:
     'openMsg',
     'openMsgBulk',
 ]
 
+
+# Ensure these are imported before anything else.
 from . import constants, enums, exceptions
-from .appointment import AppointmentMeeting
-from .attachment import Attachment
-from .contact import Contact
-from .meeting_forward import MeetingForwardNotification
-from .meeting_request import MeetingRequest
-from .meeting_response import MeetingResponse
-from .message import Message
-from .message_base import MessageBase
-from .message_signed import MessageSigned
-from .message_signed_base import MessageSignedBase
-from .msg import MSGFile
-from .post import Post
-from .prop import createProp
-from .properties import Properties
+
+from . import attachments, msg_classes, properties
+from .attachments import Attachment, AttachmentBase, SignedAttachment
+from .msg_classes import Message, MSGFile
+from .ole_writer import OleWriter
+from .open_msg import openMsg, openMsgBulk
+from .properties import Named, NamedProperties, PropertiesStore
 from .recipient import Recipient
-from .task import Task
-from .utils import openMsg, openMsgBulk

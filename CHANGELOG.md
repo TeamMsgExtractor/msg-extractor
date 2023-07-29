@@ -1,3 +1,59 @@
+**v0.42.0**
+* [[TeamMsgExtractor #372](https://github.com/TeamMsgExtractor/msg-extractor/issues/372)] Changed the way that the save functions return a value. This makes the return value from all save functions much more informative, allowing a user to separate if a fole or folder (or if more than one) was saved from the function. It also guarentees that all classes from this module will return the relevent path(s) if data is actually saved.
+* [[TeamMsgExtractor #288](https://github.com/TeamMsgExtractor/msg-extractor/issues/288)] Added feature to allow attachment save functions to simply overwrite existing files of the same name. This can be done with the `overwriteExisting` keyword argument from code or the `--overwrite-existing` option from the command line.
+* [[TeamMsgExtractor #40](https://github.com/TeamMsgExtractor/msg-extractor/issues/40)] Added new submodule `custom_attachments`. This submodule provides an extendable way to handle custom attachment types, attachment types whose structure and formatting are not defined in the Microsoft documentation for MSG files. This includes a handler to at least partially cover support for Outlook images.
+* [[TeamMsgExtractor #373](https://github.com/TeamMsgExtractor/msg-extractor/issues/373)] Added the `encoding` submodule for encoding tasks, including proper support for Microsoft's implementation of CP950. This gets added to the codecs list as "windows-950".
+    * Added infrastructure to make it easy to add variable-byte (up to two bytes) encodings and single-byte encodings.
+    * Added the following encodings:
+        * windows-874
+        * x-mac-ce
+        * x-mac-cyrillic
+        * x-mac-greek
+        * x-mac-icelandic
+        * x-mac-turkish
+* Fixed an issue in the save functions that left the possibility for the zip files to not end up closing if the save function created it and then had an exception.
+* Added new property `AttachmentBase.clsid` which returns the listed CLSID value of the data stream/storage of the attachment.
+* Changed internal behavior of `MSGFile.attachments`. This should not cause any noticeable changes to the output.
+* Refactored code significantly to make it more organized.
+* Changed the exports from the main module to only include an important subset of the module. For other items, you'll have to import the submodule that it falls under to access it. Submodules export all important pieces, so it will be easier to find.
+    * This includes having many modules be under entirely new paths. Some of these changes have been done with no deprecation, something I generally try to avoid. This is happening at the same time as the public api is significantly changing, which makes it more acceptable.
+* Fixed `__main__` using the wrong enum for error behavior.
+* Fixed `Named.get` being severely out of date (it's not used anywhere by the module which is why it wasn't noticed).
+* Fixed `Named.__getitem__` being entirely case-sensitive.
+* Switched much of the internal code (and the `treePath` property of all classes that have it) to using `weakref.ReferenceType` to avoid hard cyclic references.
+* Fixed `Recipient._getTypedStream` never returning a value.
+* Added additional type hints in various places.
+* Modified tests.py to only run if it is run as a file instead of imported.
+* Changed `knownMsgClass` to a private function since it is explicitly not being exported by any part of the module.
+* Removed unusued function `getFullClassName`.
+* Fixes to the HTML body when saving as HTML will no longer require the `preparedHtml`/`--prepared-html` option.
+* Removed unused exceptions.
+* Entirely reoganized the way attachments are initialized, including the class that will be used in various circumstances. Embedded MSG files, custom attachments, and web attachments will all use dedicated classes that are subclasses of AttachmentBase.
+    * With this change, the way to specify a new Attachment class is to override the function used when creating attachments. This can be done by passing `attachmentInit = myFunction` as an option to `openMsg`. This function MUST return an instance of AttachmentBase.
+* Added first implementation of web attachments. Saving is not currently possible, but basic relevent property access is now possible. Saving will not be stopped by this attachment if `skipNotImplemented = True` is passed to the save function.
+* Changed the option to suppress `RTFDE` errors to fall under the `ErrorBehavior` enum. Usage of the original option will be allowable, but is being marked as deprecated. However, it is still a dedicated option from the command line.
+    * Also fixed the option not properly ignoring some RTFDE errors, specifically the ones that it is normal for the module to throw.
+* Removed some constants that are not used by the module.
+* Updated to support `RTFDE` version `0.1.0`. Users encountering random erros from that module should find that those errors have disappeared. If you get errors from it still, bring up the issue on their GitHub.
+* Fixed bug that would cause weird behavior if you gave an empty string as the path for an MSG file.
+* Added support for `IPM.StickyNote`.
+* Fixed an issue that would cause MSG file to never close if an error happened during any of the `__init__` functions for MSG classes.
+* Removed unneeded `chardet` dependency.
+* Removed `Contact.__init__` as it didn't provide any unique behavior.
+* Changed the documentation of `openMsg` to specify that it accepts all options recognized by MSGFile subclasses, allowing the doc string to not be modified every time one of them is changed.
+    * Changed the documentaion of various `__init__` methods to do the same thing.
+* Added `dataType` property to `AttachmentBase` and `SignedAttachment` for checking the class that the data will be, if accessible. Returns `None` if the data is inaccessible, including because accessing it would throw an exception.
+* Added new enum `InsecureFeatures` and option `insecureFeatures`. This option will allow certain features with security implcations to be used for files that you trust. Currently the only feature it supports is the usage of `PIL`/`Pillow` to open and modify images. All features like this will be opt-in to reduce possible vulnerabilities.
+* Modified all custom exceptions the module uses to derive from a single base class for better organization.
+    * Added new exceptions to handle some of the situations previously handled by base Python exceptions.
+* Changed internal handling of the `prefix` option for `MSGFile.__init__` (and therefore `openMsg`). If you are not setting this manually, you should notice little difference.
+* Made enums less strict and converted all using `fromBits` to be `IntFlag` enums.
+* Fixed `CalendarBase.keywords` being blatantly incorrect (it was so bad I don't know how it slipped through).
+* Fixed `Contact.gender` being blatantly incorrect.
+* Fixed sender not being properly decoded in some circumstances.
+* Changed behavior of `MSGFile` to have olefile raise defects of type `DEFECT_INCORRECT` and above instead of just `DEFECT_FATAL`. Uncaught issues of `DEFECT_INCORRECT` can often cause the module to have parsing issues that may be misleading, this just ensures the issue is clarified. This behavior can be reverted back to the previous with `ErrorBehavior.OLE_DEFECT_INCORRECT`.
+* Fixed potential issues that may have made is possible for certain attachments to ignore filename conflict resolution code.
+
 **v0.41.5**
 * Fixed an issue from version `0.41.3` where the header being present but missing the `From` field would cause an exception.
 

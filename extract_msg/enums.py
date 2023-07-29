@@ -1,27 +1,79 @@
 __all__ = [
-    'AddressBookType', 'AppointmentAuxilaryFlag', 'AppointmentColor',
-    'AppointmentStateFlag', 'AttachErrorBehavior', 'AttachmentType',
-    'BCImageAlignment', 'BCImageSource', 'BCLabelFormat', 'BCTemplateID',
-    'BCTextFormat', 'BodyTypes', 'BusyStatus', 'ClientIntentFlag', 'Color',
-    'ContactAddressIndex', 'ContactLinkState', 'DeencapType',
-    'DirectoryEntryType', 'DisplayType', 'ElectronicAddressProperties',
-    'EntryIDType', 'EntryIDTypeHex', 'ErrorCode', 'ErrorCodeType', 'Gender',
-    'IconIndex', 'Importance', 'Intelligence', 'MacintoshEncoding',
-    'MeetingObjectChange', 'MeetingRecipientType', 'MeetingType',
-    'MessageFormat', 'MessageType', 'NamedPropertyType', 'OORBodyFormat',
-    'PostalAddressID', 'Priority', 'PropertiesType', 'RecipientRowFlagType',
-    'RecipientType', 'RecurCalendarType', 'RecurDOW', 'RecurEndType',
-    'RecurFrequency', 'RecurMonthNthWeek', 'RecurPatternTypeSpecificWeekday',
-    'RecurPatternType', 'ResponseStatus', 'ResponseType', 'RuleActionType',
-    'Sensitivity', 'ServerProcessingAction', 'SideEffect', 'TaskAcceptance',
-    'TaskHistory', 'TaskMode', 'TaskMultipleRecipients', 'TaskOwnership',
-    'TaskRequestType', 'TaskState', 'TaskStatus', 'TZFlag',
+    'AddressBookType',
+    'AppointmentAuxilaryFlag',
+    'AppointmentColor',
+    'AppointmentStateFlag',
+    'AttachmentPermissionType',
+    'AttachmentType',
+    'BCImageAlignment',
+    'BCImageSource',
+    'BCLabelFormat',
+    'BCTemplateID',
+    'BCTextFormat',
+    'BodyTypes',
+    'BusyStatus',
+    'ClientIntentFlag',
+    'Color',
+    'ContactAddressIndex',
+    'ContactLinkState',
+    'DeencapType',
+    'DirectoryEntryType',
+    'DisplayType',
+    'DVAspect',
+    'ElectronicAddressProperties',
+    'EntryIDType',
+    'EntryIDTypeHex',
+    'ErrorBehavior',
+    'ErrorCode',
+    'ErrorCodeType',
+    'Gender',
+    'IconIndex',
+    'Importance',
+    'InsecureFeatures',
+    'Intelligence',
+    'MacintoshEncoding',
+    'MeetingObjectChange',
+    'MeetingRecipientType',
+    'MeetingType',
+    'MessageFormat',
+    'MessageType',
+    'NamedPropertyType',
+    'NoteColor',
+    'OORBodyFormat',
+    'PostalAddressID',
+    'Priority',
+    'PropertiesType',
+    'RecipientRowFlagType',
+    'RecipientType',
+    'RecurCalendarType',
+    'RecurDOW',
+    'RecurEndType',
+    'RecurFrequency',
+    'RecurMonthNthWeek',
+    'RecurPatternTypeSpecificWeekday',
+    'RecurPatternType',
+    'ResponseStatus',
+    'ResponseType',
+    'RuleActionType',
+    'SaveType',
+    'Sensitivity',
+    'ServerProcessingAction',
+    'SideEffect',
+    'TaskAcceptance',
+    'TaskHistory',
+    'TaskMode',
+    'TaskMultipleRecipients',
+    'TaskOwnership',
+    'TaskRequestType',
+    'TaskState',
+    'TaskStatus',
+    'TZFlag',
 ]
 
 
 import enum
 
-from typing import Set, Union
+from typing import Union
 
 
 class AddressBookType(enum.Enum):
@@ -43,7 +95,7 @@ class AddressBookType(enum.Enum):
 
 
 
-class AppointmentAuxilaryFlag(enum.Enum):
+class AppointmentAuxilaryFlag(enum.IntFlag):
     """
     Describes the auxilary state of the object.
 
@@ -54,21 +106,6 @@ class AppointmentAuxilaryFlag(enum.Enum):
     REPAIR_UPDATE_MESSAGE: The meeting request is a Repair Update Message sent
         from a server-side calendar repair system.
     """
-    @classmethod
-    def fromBits(cls, value : int) -> Set['AppointmentAuxilaryFlag']:
-        """
-        Takes an int and returns a set of the flags.
-        """
-        flags = set()
-        for x in range(7):
-            bit = value & (1 << x)
-            if bit:
-                if x in (3, 4, 6):
-                    raise ValueError('Reserved bit was set.')
-                flags.add(cls(bit))
-
-        return flags
-
     COPIED = 0b1
     FORCE_MEETING_RESPONSE = 0b10
     FORWARDED = 0b100
@@ -91,22 +128,25 @@ class AppointmentColor(enum.Enum):
 
 
 
-class AppointmentStateFlag(enum.Enum):
+class AppointmentStateFlag(enum.IntFlag):
     """
     MEETING: The object is a Meeting object or meeting-related object.
     RECEIVED: The represented object was received from someone else.
     CANCELED: The Meeting object that is represented has been canceled.
     """
-    @classmethod
-    def fromBits(cls, value : int) -> Set['AppointmentStateFlag']:
-        """
-        Takes an int and returns a set of the flags.
-        """
-        return {cls(1 << x) for x in range(3) if (value & (1 << x)) != 0}
-
     MEETING = 0b1
     RECEIVED = 0b10
     CANCELED = 0b100
+
+
+
+class AttachmentPermissionType(enum.Enum):
+    """
+    The permission type data associated with a web reference attachment.
+    """
+    NONE = 0
+    VIEW = 1
+    EDIT = 2
 
 
 
@@ -131,6 +171,7 @@ class AttachmentType(enum.Enum):
     BROKEN = 4
     UNSUPPORTED = 5
     SIGNED_EMBEDDED = 6
+    CUSTOM = 7
 
     UNKNOWN = 0xFFFFFFFF
 
@@ -271,11 +312,10 @@ class BodyTypes(enum.IntFlag):
     method for generated bodies (if you check a body and it is not null, but it
     is not listed in the enum, then it was generated from another body).
 
-    This is an IntFlag enum, so to check if a body was found use the & operator
-    with the body you are checking and ensuring the result isn't BodyTypes.None.
-    You can also convert the result to a bool. For example:
+    This is an IntFlag enum, so to check if a body was found use the in operator
+    with the body you are checking. For example:
 
-    >>> rtfFound = bool(msg.detectedBodies & BodyTypes.RTF)
+    >>> rtfFound = BodyTypes.RTF msg.detectedBodies
     """
     NONE = 0b000
     PLAIN = 0b001
@@ -304,7 +344,7 @@ class BusyStatus(enum.Enum):
 
 
 
-class ClientIntentFlag(enum.Enum):
+class ClientIntentFlag(enum.IntFlag):
     """
     An action a user has taken on a Meeting object.
 
@@ -327,13 +367,6 @@ class ClientIntentFlag(enum.Enum):
     CANCELED: The user canceled a meeting request.
     EXCEPTION_CANCELED: The user canceled an exception to a recurring series.
     """
-    @classmethod
-    def fromBits(cls, value : int) -> Set['ClientIntentFlag']:
-        """
-        Takes an int and returns a set of the flags.
-        """
-        return {cls(1 << x) for x in range(13) if (value & (1 << x))}
-
     MANAGER = 0b1
     DELEGATE = 0b10
     DELETED_WITH_NO_RESPONSE = 0b100
@@ -353,6 +386,7 @@ class ClientIntentFlag(enum.Enum):
 class Color(enum.IntEnum):
     RED = 0
     BLACK = 1
+
 
 
 class ContactAddressIndex(enum.Enum):
@@ -415,21 +449,17 @@ class DisplayType(enum.Enum):
 
 
 
+class DVAspect(enum.IntEnum):
+    """
+    Part of the extra data for Outlook signatures. Different sources seem to
+    disagree on the meanings, so I'm sticking to the meanings in the official
+    Microsoft documentation of the DVASPECT enumeration.
+    """
+    CONTENT = 1
+    ICON = 4
+
+
 class ElectronicAddressProperties(enum.Enum):
-    @classmethod
-    def fromBits(cls, value : int) -> Set['ElectronicAddressProperties']:
-        """
-        Converts an int, with the left most bit referring to 0x00000000, to a
-        set of this enum.
-
-        :raises ValueError: The value was less than 0.
-        """
-        if value < 0:
-            raise ValueError('Value must not be negative.')
-        # This is a quick compressed way to convert the bits in the int into
-        # a tuple of instances of this class should any bit be a 1.
-        return {cls(int(index)) for index, val in enumerate(bin(value)[:1:-1]) if val == '1'}
-
     EMAIL_1 = 0x00000000
     EMAIL_2 = 0x00000001
     EMAIL_3 = 0x00000002
@@ -489,22 +519,37 @@ class EntryIDTypeHex(enum.Enum):
 class ErrorBehavior(enum.IntFlag):
     """
     The behavior to follow when handling an error in an MSG file and it's
-    attachments. This is an int flag enum, so the options you want will be ORed
-    with each other.
+    attachments. Specifying an option indicates the behavior for the situation
+    is to log a message, if anything, instead of raising an exception. This is
+    an int flag enum, so the options you want will be ORed with each other.
 
     THROW: Throw the exception regardless of type.
     ATTACH_NOT_IMPLEMENTED: Silence the exception for NotImplementedError.
     ATTACH_BROKEN: Silence the exception for broken attachments.
-    ATTACH_SUPPRESS_ALL: Silence the exception for NotImplementedError and for broken
-        attachments.
-    STANDARDS_VIOLATION
+    ATTACH_SUPPRESS_ALL: Silence the exception for NotImplementedError and for
+        broken attachments.
+    RTFDE_MALFORMED: Silences errors about malformed RTF data.
+    RTFDE_UNKNOWN_ERROR: Silences errors from RTFDE that are not normal.
+    RTFDE: Silences all errors from RTFDE.
+    STANDARDS_VIOLATION: Silences StandardViolationError where acceptable.
+    OLE_DEFECT_INCORRECT: Silences defects of type DEFECT_INCORRECT that are
+        enabled by default. This can lead to strange bugs.
+    SUPPRESS_ALL: Silences all of the above.
     """
-    THROW = 0b000
-    ATTACH_NOT_IMPLEMENTED = 0b001
-    ATTACH_BROKEN = 0b010
-    ATTACH_SUPPRESS_ALL = 0b011
-    STANDARDS_VIOLATION = 0b100
-    SUPPRESS_ALL = 0b111
+    THROW = 0b000000
+    # Attachments.
+    ATTACH_NOT_IMPLEMENTED = 0b000001
+    ATTACH_BROKEN = 0b000010
+    ATTACH_SUPPRESS_ALL = 0b000011
+    # RTFDE.
+    RTFDE_MALFORMED = 0b000100
+    RTFDE_UNKNOWN_ERROR = 0b001000
+    RTFDE = 0b001100
+    # General.
+    STANDARDS_VIOLATION = 0b010000
+    OLE_DEFECT_INCORRECT = 0b100000
+
+    SUPPRESS_ALL = 0b111111
 
 
 
@@ -1150,6 +1195,29 @@ class Importance(enum.Enum):
 
 
 
+class InsecureFeatures(enum.IntFlag):
+    """
+    Insecure options that can be enabled for an MSG file.
+
+    Using ALL is not recommended unless you check this list before updating to
+    a new version of the module, as new features may have been added. It is
+    also not recommended to use these on files you do not trust.
+
+    The following features are avilable:
+    NONE: No insecure features are allowed (default).
+    PIL_IMAGE_PARSING: Various operations requiring PIL or Pillow that will read
+        image data from parts of the MSG file. These operations are usually
+        constructing new images or are converting from one format to another.
+        This may expose you to security issues from those libraries.
+
+    ALL: All of the previously listed features will be enabled for the MSG file.
+    """
+    NONE = 0b0000
+    PIL_IMAGE_PARSING = 0b0001
+    ALL = 0b1111
+
+
+
 class Intelligence(enum.Enum):
     ERROR = -1
     DUMB = 0
@@ -1168,7 +1236,7 @@ class MacintoshEncoding(enum.Enum):
 
 
 
-class MeetingObjectChange(enum.Enum):
+class MeetingObjectChange(enum.IntFlag):
     """
     Indicates a property that has changed on a meeting object.
 
@@ -1183,23 +1251,6 @@ class MeetingObjectChange(enum.Enum):
     RESPONSE: The responseRequested or replyRequested property has changed.
     ALLOW_PROPOSE: The appointmentNotAllowPropose property has changed.
     """
-    @classmethod
-    def fromBits(cls, value : int) -> Set['MeetingObjectChange']:
-        """
-        Takes an int and returns a set of the changes.
-        """
-        changes = set()
-        for x in range(32):
-            if x in (8, 11) or (12 < x < 31):
-                continue
-            bit = value & (1 << x)
-            if bit:
-                if x in (12, 31):
-                    raise ValueError('Reserved bit was set.')
-                changes.add(cls(bit))
-
-        return changes
-
     START = 0b1
     END = 0b10
     RECUR = 0b100
@@ -1267,6 +1318,15 @@ class MessageType(enum.Enum):
 class NamedPropertyType(enum.Enum):
     NUMERICAL_NAMED = 0
     STRING_NAMED = 1
+
+
+
+class NoteColor(enum.Enum):
+    BLUE = 0
+    GREEN = 1
+    PINK = 2
+    YELLOW = 3
+    WHITE = 4
 
 
 
@@ -1402,17 +1462,10 @@ class RecurMonthNthWeek(enum.Enum):
 
 
 
-class RecurPatternTypeSpecificWeekday(enum.Enum):
+class RecurPatternTypeSpecificWeekday(enum.IntFlag):
     """
     See [MS-OXOCAL] for details.
     """
-    @classmethod
-    def fromBits(cls, value : int) -> Set['RecurPatternTypeSpecificWeekday']:
-        """
-        Takes an int and returns a set of the weekdays.
-        """
-        return {cls(1 << x) for x in range(1, 8) if (value & (1 << x))}
-
     SATURDAY = 0b10
     FRIDAY = 0b100
     THURSDAY = 0b1000
@@ -1483,6 +1536,31 @@ class RuleActionType(enum.Enum):
 
 
 
+class SaveType(enum.Enum):
+    """
+    Specifies the way that a function saved the data. Used to determine how the
+    return value from a save function should be read.
+
+    CUSTOM: An unlisted save method was used, and the second value is
+        unspecified.
+    NONE: No data was saved, and the second tuple value should be None.
+    FILE: A single file was save, and the location is the second value.
+    FILES: Multiple files were created, and the second value is a list of the
+        locations.
+    FOLDER: A folder was created to store data, and the location is the second
+        value.
+    FOLDERS: Multiple folders were created to store data, and the second value
+        is a list of the locations.
+    """
+    CUSTOM = -1
+    NONE = 0
+    FILE = 1
+    FILES = 2
+    FOLDER = 3
+    FOLDERS = 4
+
+
+
 class Sensitivity(enum.Enum):
     NORMAL = 0
     PERSONAL = 1
@@ -1491,17 +1569,10 @@ class Sensitivity(enum.Enum):
 
 
 
-class ServerProcessingAction(enum.Enum):
+class ServerProcessingAction(enum.IntFlag):
     """
     Actions taken on a meeting-related object.
     """
-    @classmethod
-    def fromBits(cls, value : int) -> Set['ServerProcessingAction']:
-        """
-        Takes an int and returns a set of the weekdays.
-        """
-        return {cls(1 << x) for x in range(16) if (value & (1 << x))}
-
     DELEGATOR_WANTS_COPY = 0x00000002
     CREATED_ON_PRINCIPLE = 0x00000010
     UPDATED_CAL_ITEM = 0x00000080
@@ -1512,7 +1583,7 @@ class ServerProcessingAction(enum.Enum):
 
 
 
-class SideEffect(enum.Enum):
+class SideEffect(enum.IntFlag):
     """
     A flag for how a Message object is handled by the client in relation to
     certain user interface actions.
@@ -1538,13 +1609,6 @@ class SideEffect(enum.Enum):
     OPEN_TO_PERM_DELETE: The client opens the Message object to permanently
         delete it.
     """
-    @classmethod
-    def fromBits(cls, value : int) -> Set['SideEffect']:
-        """
-        Takes an int and returns a set of the side effects.
-        """
-        return {cls(1 << x) for x in range(15) if (value & (1 << x))}
-
     OPEN_TO_DELETE = 0b1
     NO_FRAME = 0b1000
     COERCE_TO_INDEX = 0b10000
@@ -1604,14 +1668,7 @@ class TaskMode(enum.Enum):
 
 
 
-class TaskMultipleRecipients(enum.Enum):
-    @classmethod
-    def fromBits(cls, value : int) -> Set['TaskMultipleRecipients']:
-        """
-        Takes an int and returns a set of the flags.
-        """
-        return {cls(1 << x) for x in range(2) if (value & (1 << x))}
-
+class TaskMultipleRecipients(enum.IntFlag):
     SENT = 0x00000001
     RECEIVED = 0x00000002
 
@@ -1702,20 +1759,13 @@ class TaskStatus(enum.Enum):
 
 
 
-class TZFlag(enum.Enum):
+class TZFlag(enum.IntFlag):
     """
     Flags for a TZRule object as defined in [MS-OXOCAL].
 
     RECUR_CURRENT_TZREG: The rule is associated with a recurring series.
     EFFECTIVE_TZREG: The rule is the effective rule.
     """
-    @classmethod
-    def fromBits(cls, value : int) -> Set['TZFlag']:
-        """
-        Takes an int and returns a set of the flags.
-        """
-        return {cls(1 << x) for x in range(2) if (value & (1 << x))}
-
     RECUR_CURRENT_TZREG = 0b1
     EFFECTIVE_TZREG = 0b10
 
@@ -1764,7 +1814,7 @@ class _EnumDeprecator:
 
 
 
-# Deprecated Enums
+# Deprecated Enums. These are not exported but may be directly accessed.
 AttachErrorBehavior = _EnumDeprecator(
     'AttachErrorBehavior',
     ErrorBehavior,

@@ -222,7 +222,7 @@ class FolderEntryID(EntryID):
         self.__folderType = MessageType(reader.readUnsignedShort())
         self.__databaseGuid = bytesToGuid(reader.read(16))
         # This entry is 6 bytes, so we pull some shenanigans to unpack it.
-        self.__globalCounter = constants.ST_LE_UI64.unpack(reader.read(6) + b'\x00\x00')
+        self.__globalCounter = constants.st.ST_LE_UI64.unpack(reader.read(6) + b'\x00\x00')
         reader.assertNull(2, 'Pad bytes were not 0.')
 
     @property
@@ -262,11 +262,11 @@ class MessageEntryID(EntryID):
         self.__messageType = MessageType(reader.readUnsignedShort())
         self.__folderDatabaseGuid = bytesToGuid(reader.read(16))
         # This entry is 6 bytes, so we pull some shenanigans to unpack it.
-        self.__folderGlobalCounter = constants.ST_LE_UI64.unpack(reader.read(6) + b'\x00\x00')
+        self.__folderGlobalCounter = constants.st.ST_LE_UI64.unpack(reader.read(6) + b'\x00\x00')
         reader.assertNull(2, 'Pad bytes were not 0.')
         self.__messageDatabaseGuid = bytesToGuid(reader.read(16))
         # This entry is 6 bytes, so we pull some shenanigans to unpack it.
-        self.__messageGlobalCounter = constants.ST_LE_UI64.unpack(reader.read(6) + b'\x00\x00')
+        self.__messageGlobalCounter = constants.st.ST_LE_UI64.unpack(reader.read(6) + b'\x00\x00')
         reader.assertNull(2, 'Pad bytes were not 0.')
         # Not sure why Microsoft decided to say "yes, let's do 2 6-byte integers
         # followed by 2 pad bits each" instead of just 2 8-byte integers with a
@@ -453,7 +453,7 @@ class PermanentEntryID(EntryID):
 
     def __init__(self, data : bytes):
         super().__init__(data)
-        unpacked = constants.STPEID.unpack(data[:28])
+        unpacked = constants.st.STPEID.unpack(data[:28])
         if unpacked[0] != 0:
             raise TypeError(f'Not a PermanentEntryID (expected 0, got {unpacked[0]}).')
         self.__displayTypeString = DisplayType(unpacked[2])
