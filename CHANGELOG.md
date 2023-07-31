@@ -1,3 +1,7 @@
+**v0.42.1**
+* Fixed some constants being accessed with the wrong name (names were changed in reorganization).
+* Removed unused regular expression.
+
 **v0.42.0**
 * [[TeamMsgExtractor #372](https://github.com/TeamMsgExtractor/msg-extractor/issues/372)] Changed the way that the save functions return a value. This makes the return value from all save functions much more informative, allowing a user to separate if a file or folder (or if more than one) was saved from the function. It also guarantees that all classes from this module will return the relevant path(s) if data is actually saved.
 * [[TeamMsgExtractor #288](https://github.com/TeamMsgExtractor/msg-extractor/issues/288)] Added feature to allow attachment save functions to simply overwrite existing files of the same name. This can be done with the `overwriteExisting` keyword argument from code or the `--overwrite-existing` option from the command line.
