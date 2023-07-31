@@ -52,7 +52,7 @@ class EmbeddedMsgAttachment(AttachmentBase):
             customFilename = str(customFilename)
             # First we need to validate it. If there are invalid characters,
             # this will detect it.
-            if constants.re.INVALID_FILENAME_CHARACTERS.search(customFilename):
+            if constants.re.INVALID_FILENAME_CHARS.search(customFilename):
                 raise ValueError('Invalid character found in customFilename. Must not contain any of the following characters: \\/:*?"<>|')
             return customFilename
         else:
