@@ -1,3 +1,6 @@
+**v0.42.2**
+* Fix bug in `AttachmentBase.mimetype` that would cause it to throw an error when accessed. This bug was introduced in `v0.42.0`.
+
 **v0.42.1**
 * Fixed some constants being accessed with the wrong name (names were changed in reorganization).
 * Removed unused regular expression.
