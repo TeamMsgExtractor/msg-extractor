@@ -1,3 +1,9 @@
+**v0.43.0**
+* [[TeamMsgExtractor #56](https://github.com/TeamMsgExtractor/msg-extractor/issues/56)] [[TeamMsgExtractor #248](https://github.com/TeamMsgExtractor/msg-extractor/issues/248)] Added new function `MessageBase.asEmailMessage` which will convert the `MessageBase` instance, if possible, to an `email.message.EmailMessage` object. If an embedded MSG file on a `MessageBase` object is of a class that does not have this function, it will simply be attached to the instance as bytes.
+* Changed imports in `message_base.py` to help with type checkers.
+* Changed from using `email.parser.EmailParser` to `email.parser.HeaderParser` in `MessageBase.header`.
+* Changed some of the internal code for `MessageBase.header`. This should improve usage of it, and should not have any notiocable negative changes. You man notice some of the values parse slightly differently, but this effect should be mostly supressed.
+
 **v0.42.2**
 * Fix bug in `AttachmentBase.mimetype` that would cause it to throw an error when accessed. This bug was introduced in `v0.42.0`.
 

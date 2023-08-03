@@ -5,6 +5,7 @@ __all__ = [
 
 import base64
 import datetime
+import email.message
 import email.utils
 import functools
 import html
@@ -20,7 +21,9 @@ import bs4
 import compressed_rtf
 import RTFDE
 
-from email.parser import Parser as EmailParser
+from email import policy
+from email.message import EmailMessage
+from email.parser import HeaderParser
 from typing import Callable, List, Optional, Union
 
 from .. import constants
@@ -30,8 +33,8 @@ from ..enums import (
         BodyTypes, DeencapType, ErrorBehavior, RecipientType, SaveType
     )
 from ..exceptions import (
-        DataNotFoundError, DeencapMalformedData, DeencapNotEncapsulated,
-        IncompatibleOptionsError, WKError
+        ConversionError, DataNotFoundError, DeencapMalformedData,
+        DeencapNotEncapsulated, IncompatibleOptionsError, WKError
     )
 from .msg import MSGFile
 from ..structures.report_tag import ReportTag
@@ -154,6 +157,59 @@ class MessageBase(MSGFile):
                 value = value.replace('  ', ' ')
 
         return value
+
+    def asEmailMessage(self) -> EmailMessage:
+        """
+        Returns an instance of EmailMessage used to represent the contents of
+        this message.
+
+        :raises ConversionError: The function failed to convert one of the
+            attachments into a form that it could attach, and the attachment
+            data type was not None.
+        """
+        ret = EmailMessage()
+
+        # Copy the headers.
+        for key, value in self.header.items():
+            ret[key] = value
+
+        # Attach the body to the EmailMessage instance.
+        if self.htmlBody:
+            ret.set_content(self.body, subtype = 'html', cte = 'quoted-printable')
+        elif self.body:
+            ret.set_content(self.body, cte = 'quoted-printable')
+
+        # Process attachments.
+        for att in self.attachments:
+            if att.dataType:
+                if hasattr(att.dataType, 'asEmailMessage'):
+                    # Replace the extension with '.eml'.
+                    filename = att.getFilename()
+                    if filename.lower().endswith('.msg'):
+                        filename = filename[:-4] + '.eml'
+                    ret.add_attachment(
+                                        att.data.asEmailMessage(),
+                                        filename = filename,
+                                        cid = att.contentId)
+                else:
+                    if issubclass(att.dataType, bytes):
+                        data = att.data
+                    elif issubclass(att.dataType, MSGFile):
+                        if hasattr(att.dataType, 'asBytes'):
+                            data = att.asBytes
+                        else:
+                            data = att.data.exportBytes()
+                    else:
+                        raise ConversionError(f'Could not find a suitable method to attach attachment data type "{att.dataType}".')
+                    mime = att.mimetype or 'application/octet-stream'
+                    mainType, subType = mime.split('/')[0], mime.split('/')[-1]
+                    ret.add_attachment(data,
+                                       maintype = mainType,
+                                       subtype = subType,
+                                       filename = att.getFilename(),
+                                       cid = att.contentId)
+
+        return ret
 
     def deencapsulateBody(self, rtfBody : bytes, bodyType : DeencapType) -> Optional[Union[bytes, str]]:
         """
@@ -1009,11 +1065,12 @@ class MessageBase(MSGFile):
         """
         headerText = self.headerText
         if headerText:
-            header = EmailParser().parsestr(headerText)
-            header['date'] = self.date
+            header = HeaderParser(policy = policy.default).parsestr(headerText)
+            del header['Date']
+            header['Date'] = self.date
         else:
             logger.info('Header is empty or was not found. Header will be generated from other streams.')
-            header = EmailParser().parsestr('')
+            header = HeaderParser(policy = policy.default).parsestr('')
             header.add_header('Date', self.date)
             header.add_header('From', self.sender)
             header.add_header('To', self.to)
