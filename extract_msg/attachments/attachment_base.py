@@ -506,7 +506,7 @@ class AttachmentBase(abc.ABC):
         """
         The content-type mime header of the attachment, if specified.
         """
-        return self._getStreamAs('__substg1.0_370E', partial(tryGetMimetype, self), False)
+        return tryGetMimetype(self, self._getStringStream('__substg1.0_370E'))
 
     @property
     def msg(self) -> MSGFile:
