@@ -1,0 +1,8 @@
+extract_msg.rst
+extract_msg.attachments.rst
+extract_msg.attachments.custom_att_handler.rst
+extract_msg.constants.rst
+extract_msg.encoding.rst
+extract_msg.msg_classes.rst
+extract_msg.properties.rst
+extract_msg.structures.rst

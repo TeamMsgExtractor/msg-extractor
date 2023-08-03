@@ -4,74 +4,74 @@ extract\_msg.structures package
 Submodules
 ----------
 
-extract\_msg.structures.business\_card module
----------------------------------------------
+extract\_msg.structures.business\_card.py module
+------------------------------------------------
 
-.. automodule:: extract_msg.structures.business_card
+.. automodule:: extract_msg.structures.business_card.py
    :members:
    :undoc-members:
    :show-inheritance:
 
-extract\_msg.structures.entry\_id module
-----------------------------------------
-
-.. automodule:: extract_msg.structures.entry_id
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-extract\_msg.structures.misc\_id module
----------------------------------------
-
-.. automodule:: extract_msg.structures.misc_id
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-extract\_msg.structures.recurrence\_pattern module
---------------------------------------------------
-
-.. automodule:: extract_msg.structures.recurrence_pattern
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-extract\_msg.structures.report\_tag module
-------------------------------------------
-
-.. automodule:: extract_msg.structures.report_tag
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-extract\_msg.structures.system\_time module
+extract\_msg.structures.entry\_id.py module
 -------------------------------------------
 
-.. automodule:: extract_msg.structures.system_time
+.. automodule:: extract_msg.structures.entry_id.py
    :members:
    :undoc-members:
    :show-inheritance:
 
-extract\_msg.structures.time\_zone\_definition module
+extract\_msg.structures.misc\_id.py module
+------------------------------------------
+
+.. automodule:: extract_msg.structures.misc_id.py
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.structures.recurrence\_pattern.py module
 -----------------------------------------------------
 
-.. automodule:: extract_msg.structures.time_zone_definition
+.. automodule:: extract_msg.structures.recurrence_pattern.py
    :members:
    :undoc-members:
    :show-inheritance:
 
-extract\_msg.structures.time\_zone\_struct module
--------------------------------------------------
+extract\_msg.structures.report\_tag.py module
+---------------------------------------------
 
-.. automodule:: extract_msg.structures.time_zone_struct
+.. automodule:: extract_msg.structures.report_tag.py
    :members:
    :undoc-members:
    :show-inheritance:
 
-extract\_msg.structures.tz\_rule module
----------------------------------------
+extract\_msg.structures.system\_time.py module
+----------------------------------------------
 
-.. automodule:: extract_msg.structures.tz_rule
+.. automodule:: extract_msg.structures.system_time.py
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.structures.time\_zone\_definition.py module
+--------------------------------------------------------
+
+.. automodule:: extract_msg.structures.time_zone_definition.py
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.structures.time\_zone\_struct.py module
+----------------------------------------------------
+
+.. automodule:: extract_msg.structures.time_zone_struct.py
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.structures.tz\_rule.py module
+------------------------------------------
+
+.. automodule:: extract_msg.structures.tz_rule.py
    :members:
    :undoc-members:
    :show-inheritance:
