@@ -202,6 +202,9 @@ def decodeRfc2047(encoded : str) -> str:
     """
     Decodes text encoded using the method specified in RFC 2047.
     """
+    # Fix an issue with folded header fields.
+    encoded = encoded.replace('\r\n', '')
+
     # This returns a list of tuples containing the bytes and the encoding they
     # are using, so we decode each one and join them together.
     #

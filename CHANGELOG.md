@@ -5,6 +5,7 @@
 * Minor regoanization within `extract_msg/utils.py`.
 * Minor changes to docstrings.
 * Minor README updates.
+* Fix issue with folded header fields decoding incorrectly when given to `extract_msg.utils.decodeRfc2047`.
 
 **v0.43.0**
 * [[TeamMsgExtractor #56](https://github.com/TeamMsgExtractor/msg-extractor/issues/56)] [[TeamMsgExtractor #248](https://github.com/TeamMsgExtractor/msg-extractor/issues/248)] Added new function `MessageBase.asEmailMessage` which will convert the `MessageBase` instance, if possible, to an `email.message.EmailMessage` object. If an embedded MSG file on a `MessageBase` object is of a class that does not have this function, it will simply be attached to the instance as bytes.
