@@ -89,6 +89,7 @@ class MessageBase(MSGFile):
         # The rest needs to be in a try-except block to ensure the file closes
         # if an error occurs.
         try:
+            self.__headerInit = False
             self.__recipientSeparator = kwargs.get('recipientSeparator', ';')
             self.__deencap = kwargs.get('deencapsulationFunc')
             # Initialize properties in the order that is least likely to cause bugs.
@@ -125,7 +126,7 @@ class MessageBase(MSGFile):
         recipientInt = RecipientType(recipientInt)
         value = None
         # Check header first.
-        if self.headerInit():
+        if self.headerInit:
             value = self.header[recipientType]
             if value:
                 value = decodeRfc2047(value)
@@ -135,7 +136,7 @@ class MessageBase(MSGFile):
         # it manually.
         if not value:
             # Check if the header has initialized.
-            if self.headerInit():
+            if self.headerInit:
                 logger.info(f'Header found, but "{recipientType}" is not included. Will be generated from other streams.')
 
             # Get a list of the recipients of the specified type.
@@ -471,16 +472,6 @@ class MessageBase(MSGFile):
         """
         # Inject the header into the data.
         return self.injectRtfHeader()
-
-    def headerInit(self) -> bool:
-        """
-        Checks whether the header has been initialized.
-        """
-        try:
-            self._header
-            return True
-        except AttributeError:
-            return False
 
     def injectHtmlHeader(self, prepared : bool = False) -> bytes:
         """
@@ -1080,6 +1071,7 @@ class MessageBase(MSGFile):
             # TODO find authentication results outside of header
             header.add_header('Authentication-Results', None)
 
+        self.__headerInit = True
         return header
 
     @property
@@ -1138,6 +1130,13 @@ class MessageBase(MSGFile):
                 'Importance': self.importanceString,
             },
         }
+
+    @property
+    def headerInit(self) -> bool:
+        """
+        Checks whether the header has been initialized.
+        """
+        return self.__headerInit
 
     @functools.cached_property
     def headerText(self) -> Optional[str]:
@@ -1240,12 +1239,12 @@ class MessageBase(MSGFile):
     @functools.cached_property
     def messageId(self) -> Optional[str]:
         headerResult = None
-        if self.headerInit():
+        if self.headerInit:
             headerResult = self.header['message-id']
         if headerResult is not None:
             return headerResult
 
-        if self.headerInit():
+        if self.headerInit:
             logger.info('Header found, but "Message-Id" is not included. Will be generated from other streams.')
         return self._getStringStream('__substg1.0_1035')
 
@@ -1323,7 +1322,7 @@ class MessageBase(MSGFile):
         Returns the message sender, if it exists.
         """
         # Check header first
-        if self.headerInit():
+        if self.headerInit:
             headerResult = self.header['from']
             if headerResult is not None:
                 return decodeRfc2047(headerResult)

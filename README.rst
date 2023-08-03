@@ -1,4 +1,4 @@
-|License: GPL v3| |PyPI3| |PyPI2|
+|License: GPL v3| |PyPI3| |PyPI2| |Read the Docs|
 
 extract-msg
 =============
@@ -9,7 +9,7 @@ The python package extract_msg automates the extraction of key email
 data (from, to, cc, date, subject, body) and the email's attachments.
 
 Documentation can be found in the code, on the `wiki`_, and on the
-`read the docs`_ page.
+`Read the Docs`_ page.
 
 NOTICE
 ======
@@ -242,11 +242,16 @@ your access to the newest major version of extract-msg.
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
 
-.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.43.0-blue.svg
-   :target: https://pypi.org/project/extract-msg/0.43.0/
+.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.44.0-blue.svg
+   :target: https://pypi.org/project/extract-msg/0.44.0/
 
 .. |PyPI2| image:: https://img.shields.io/badge/python-3.8+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-3816/
+
+.. |Read the Docs| image:: https://readthedocs.org/projects/msg-extractor/badge/?version=latest
+    :target: https://msg-extractor.readthedocs.io/en/stable/?badge=latest
+    :alt: Documentation Status
+
 .. _Matthew Walker: https://github.com/mattgwwalker
 .. _Destiny Peterson (The Elemental of Destruction): https://github.com/TheElementalOfDestruction
 .. _JP Bourget: https://github.com/punkrokk
@@ -261,5 +266,5 @@ your access to the newest major version of extract-msg.
 .. _Patreon: https://www.patreon.com/DestructionE
 .. _msg-explorer: https://pypi.org/project/msg-explorer/
 .. _wiki: https://github.com/TeamMsgExtractor/msg-extractor/wiki
-.. _read the docs: https://msg-extractor.rtfd.io/
+.. _Read the Docs: https://msg-extractor.rtfd.io/
 .. _Changelog: https://github.com/TeamMsgExtractor/msg-extractor/blob/master/CHANGELOG.md
