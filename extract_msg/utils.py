@@ -15,6 +15,7 @@ __all__ = [
     'ceilDiv',
     'cloneOleFile',
     'createZipOpen',
+    'decodeRfc2047',
     'dictGetCasedKey',
     'divide',
     'filetimeToDatetime',
@@ -275,6 +276,13 @@ def filetimeToDatetime(rawTime : int) -> datetime.datetime:
         raise
     except Exception as e:
         raise ValueError(f'Timestamp value of {filetimeToUtc(rawTime)} caused an exception. This was probably caused by the time stamp being too far in the future.')
+
+
+def filetimeToUtc(inp : int) -> float:
+    """
+    Converts a FILETIME into a unix timestamp.
+    """
+    return (inp - 116444736000000000) / 10000000.0
 
 
 def findWk(path = None):
@@ -581,15 +589,6 @@ def inputToString(bytesInputVar, encoding) -> str:
         raise ConversionError('Cannot convert to str type.')
 
 
-def isEncapsulatedRtf(inp : bytes) -> bool:
-    """
-    Currently the detection is made to be *extremly* basic, but this will work
-    for now. In the future this will be fixed so that literal text in the body
-    of a message won't cause false detection.
-    """
-    return b'\\fromhtml' in inp
-
-
 def isEmptyString(inp : str) -> bool:
     """
     Returns true if the input is None or is an Empty string.
@@ -597,11 +596,13 @@ def isEmptyString(inp : str) -> bool:
     return (inp == '' or inp is None)
 
 
-def filetimeToUtc(inp : int) -> float:
+def isEncapsulatedRtf(inp : bytes) -> bool:
     """
-    Converts a FILETIME into a unix timestamp.
+    Currently the detection is made to be *extremly* basic, but this will work
+    for now. In the future this will be fixed so that literal text in the body
+    of a message won't cause false detection.
     """
-    return (inp - 116444736000000000) / 10000000.0
+    return b'\\fromhtml' in inp
 
 
 def makeWeakRef(obj : Optional[_T]) -> Optional[weakref.ReferenceType[_T]]:
