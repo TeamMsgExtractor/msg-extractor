@@ -57,7 +57,7 @@ class MSGFile:
         :param path: path to the msg file in the system or is the raw msg file.
         :param prefix: Used for extracting embedded msg files inside the main
             one. Do not set manually unless you know what you are doing.
-        :param parentMsg: Used for synchronizing named properties instances. Do
+        :param parentMsg: Used for synchronizing instances of shared objects. Do
             not set this unless you know what you are doing.
         :param initAttachment: Optional, the method used when creating an
             attachment for an MSG file. MUST be a function that takes 2
