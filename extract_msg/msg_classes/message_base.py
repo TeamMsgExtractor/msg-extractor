@@ -5,6 +5,7 @@ __all__ = [
 
 import base64
 import datetime
+import email.message
 import email.utils
 import functools
 import html
@@ -20,7 +21,9 @@ import bs4
 import compressed_rtf
 import RTFDE
 
-from email.parser import Parser as EmailParser
+from email import policy
+from email.message import EmailMessage
+from email.parser import HeaderParser
 from typing import Callable, List, Optional, Union
 
 from .. import constants
@@ -154,6 +157,43 @@ class MessageBase(MSGFile):
                 value = value.replace('  ', ' ')
 
         return value
+
+    def asEmailMessage(self) -> EmailMessage:
+        """
+        Returns an instance of EmailMessage used to represent the contents of
+        this message.
+        """
+        ret = EmailMessage()
+
+        # Copy the headers.
+        for key, value in self.header.items():
+            ret[key] = value
+
+        # Attach the body to the EmailMessage instance.
+        if self.htmlBody:
+            ret.set_content(self.body, subtype = 'html', cte = 'quoted-printable')
+        elif self.body:
+            ret.set_content(self.body, cte = 'quoted-printable')
+
+        # Process attachments.
+        for att in self.attachments:
+            if att.dataType:
+                if issubclass(att.dataType, bytes):
+                    mime = att.mimetype or 'application/octet-stream'
+                    mainType, subType = mime.split('/')[0], mime.split('/')[-1]
+                    ret.add_attachment(att.data,
+                                       maintype = mainType,
+                                       subtype = subType,
+                                       filename = att.getFilename(),
+                                       cid = att.contentId)
+                elif issubclass(att.dataType, MSGFile):
+                    if hasattr(att.dataType, 'asEmailMessage'):
+                        ret.add_attachment(
+                                           att.data.asEmailMessage(),
+                                           filename = att.getFilename(),
+                                           cid = att.contentId)
+
+        return ret
 
     def deencapsulateBody(self, rtfBody : bytes, bodyType : DeencapType) -> Optional[Union[bytes, str]]:
         """
@@ -1009,11 +1049,12 @@ class MessageBase(MSGFile):
         """
         headerText = self.headerText
         if headerText:
-            header = EmailParser().parsestr(headerText)
-            header['date'] = self.date
+            header = HeaderParser(policy = policy.default).parsestr(headerText)
+            del header['Date']
+            header['Date'] = self.date
         else:
             logger.info('Header is empty or was not found. Header will be generated from other streams.')
-            header = EmailParser().parsestr('')
+            header = HeaderParser(policy = policy.default).parsestr('')
             header.add_header('Date', self.date)
             header.add_header('From', self.sender)
             header.add_header('To', self.to)
