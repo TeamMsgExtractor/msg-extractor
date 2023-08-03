@@ -33,8 +33,8 @@ from ..enums import (
         BodyTypes, DeencapType, ErrorBehavior, RecipientType, SaveType
     )
 from ..exceptions import (
-        DataNotFoundError, DeencapMalformedData, DeencapNotEncapsulated,
-        IncompatibleOptionsError, WKError
+        ConversionError, DataNotFoundError, DeencapMalformedData,
+        DeencapNotEncapsulated, IncompatibleOptionsError, WKError
     )
 from .msg import MSGFile
 from ..structures.report_tag import ReportTag
@@ -162,6 +162,10 @@ class MessageBase(MSGFile):
         """
         Returns an instance of EmailMessage used to represent the contents of
         this message.
+
+        :raises ConversionError: The function failed to convert one of the
+            attachments into a form that it could attach, and the attachment
+            data type was not None.
         """
         ret = EmailMessage()
 
@@ -178,20 +182,32 @@ class MessageBase(MSGFile):
         # Process attachments.
         for att in self.attachments:
             if att.dataType:
-                if issubclass(att.dataType, bytes):
+                if hasattr(att.dataType, 'asEmailMessage'):
+                    # Replace the extension with '.eml'.
+                    filename = att.getFilename()
+                    if filename.lower().endswith('.msg'):
+                        filename = filename[:-4] + '.eml'
+                    ret.add_attachment(
+                                        att.data.asEmailMessage(),
+                                        filename = filename,
+                                        cid = att.contentId)
+                else:
+                    if issubclass(att.dataType, bytes):
+                        data = att.data
+                    elif issubclass(att.dataType, MSGFile):
+                        if hasattr(att.dataType, 'asBytes'):
+                            data = att.asBytes
+                        else:
+                            data = att.data.exportBytes()
+                    else:
+                        raise ConversionError(f'Could not find a suitable method to attach attachment data type "{att.dataType}".')
                     mime = att.mimetype or 'application/octet-stream'
                     mainType, subType = mime.split('/')[0], mime.split('/')[-1]
-                    ret.add_attachment(att.data,
+                    ret.add_attachment(data,
                                        maintype = mainType,
                                        subtype = subType,
                                        filename = att.getFilename(),
                                        cid = att.contentId)
-                elif issubclass(att.dataType, MSGFile):
-                    if hasattr(att.dataType, 'asEmailMessage'):
-                        ret.add_attachment(
-                                           att.data.asEmailMessage(),
-                                           filename = att.getFilename(),
-                                           cid = att.contentId)
 
         return ret
 
