@@ -1,3 +1,12 @@
+**v0.44.0**
+* Fixed a bug that caused `MessageBase.headerInit` to always return `False` after the 0.42.0 update.
+* Changed `MessageBase.headerInit` to a property.
+* Fixed `extract_msg.utils.__all__`.
+* Minor regoanization within `extract_msg/utils.py`.
+* Minor changes to docstrings.
+* Minor README updates.
+* Fix issue with folded header fields decoding incorrectly when given to `extract_msg.utils.decodeRfc2047`.
+
 **v0.43.0**
 * [[TeamMsgExtractor #56](https://github.com/TeamMsgExtractor/msg-extractor/issues/56)] [[TeamMsgExtractor #248](https://github.com/TeamMsgExtractor/msg-extractor/issues/248)] Added new function `MessageBase.asEmailMessage` which will convert the `MessageBase` instance, if possible, to an `email.message.EmailMessage` object. If an embedded MSG file on a `MessageBase` object is of a class that does not have this function, it will simply be attached to the instance as bytes.
 * Changed imports in `message_base.py` to help with type checkers.

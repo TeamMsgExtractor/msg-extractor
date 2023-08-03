@@ -35,7 +35,7 @@ class CalendarBase(MessageBase):
         recipientInt = MeetingRecipientType(recipientInt)
         value = None
         # Check header first.
-        if self.headerInit():
+        if self.headerInit:
             value = self.header[recipientType]
             if value:
                 value = value.replace(',', self.recipientSeparator)
@@ -44,7 +44,7 @@ class CalendarBase(MessageBase):
         # it manually.
         if not value:
             # Check if the header has initialized.
-            if self.headerInit():
+            if self.headerInit:
                 logger.info(f'Header found, but "{recipientType}" is not included. Will be generated from other streams.')
 
             # Get a list of the recipients of the specified type.
