@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 __all__ = [
     'AddressBookEntryID',
     'ContactAddressEntryID',
@@ -35,7 +38,7 @@ class EntryID:
     """
 
     @classmethod
-    def autoCreate(cls, data) -> 'EntryID':
+    def autoCreate(cls, data) -> EntryID:
         """
         Automatically determines the type of EntryID and returns an instance of
         the correct subclass. If the subclass cannot be determined, will return
@@ -187,7 +190,7 @@ class ContactAddressEntryID(EntryID):
         self.__entryID = MessageEntryID(reader.read(self.__entryIdCount))
 
     @property
-    def entryID(self) -> 'MessageEntryID':
+    def entryID(self) -> MessageEntryID:
         """
         The EntryID contained in this object.
         """

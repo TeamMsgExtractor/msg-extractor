@@ -12,6 +12,7 @@ __all__ = [
 ]
 
 
+import abc
 import datetime
 import logging
 
@@ -37,7 +38,7 @@ def createProp(data : bytes) -> PropBase:
         return VariableLengthProp(data)
 
 
-class PropBase:
+class PropBase(abc.ABC):
     """
     Base class for Prop instances.
     """

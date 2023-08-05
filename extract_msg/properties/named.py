@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
-_T = TypeVar("_T")
+_T = TypeVar('_T')
 
 
 class Named:

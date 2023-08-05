@@ -56,7 +56,7 @@ class TimeZoneDefinition:
         return self.__rawData
 
     @property
-    def rules(self) -> Tuple[TZRule]:
+    def rules(self) -> Tuple[TZRule, ...]:
         """
         A tuple of TZRule structures that specifies a time zone.
         """

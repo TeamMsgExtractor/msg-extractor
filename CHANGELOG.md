@@ -5,6 +5,7 @@
 * Fixed spelling errors in some exception strings.
 * Made `NamedPropertyBase` a subclass of `abc.ABC`.
 * Cleaned up some of the code for named properties to remove unused variables.
+* Changed `PropBase` to be a subclass of `abc.ABC`.
 
 **v0.44.0**
 * Fixed a bug that caused `MessageBase.headerInit` to always return `False` after the 0.42.0 update.

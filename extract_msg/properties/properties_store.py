@@ -8,7 +8,7 @@ import datetime
 import logging
 import pprint
 
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Iterator, Optional, TypeVar, Union
 from warnings import warn
 
 from .. import constants
@@ -19,6 +19,8 @@ from ..utils import divide, properHex
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
+_T = TypeVar('_T')
 
 
 class PropertiesStore:
@@ -34,7 +36,7 @@ class PropertiesStore:
             raise TypeError(':param data: MUST be bytes.')
         self.__rawData = data
         self.__len = len(data)
-        self.__props : Dict[PropBase] = {}
+        self.__props : Dict[str, PropBase] = {}
         self.__naid = None
         self.__nrid = None
         self.__ac = None
@@ -79,10 +81,10 @@ class PropertiesStore:
     def __contains__(self, key) -> bool:
         return self.__props.__contains__(key)
 
-    def __getitem__(self, key) -> PropBase:
+    def __getitem__(self, key : str) -> PropBase:
         return self.__props.__getitem__(key)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[str]:
         return self.__props.__iter__()
 
     def __len__(self) -> int:
@@ -94,7 +96,7 @@ class PropertiesStore:
     def __repr__(self) -> str:
         return self.__props.__repr__()
 
-    def get(self, name, default = None) -> Optional[Union[PropBase, Any]]:
+    def get(self, name, default : _T = None) -> Union[PropBase, _T]:
         """
         Retrieve the property of :param name:. Returns the value of
         :param default: if the property could not be found.
@@ -194,14 +196,14 @@ class PropertiesStore:
         return self.__nrid
 
     @property
-    def props(self) -> Dict:
+    def props(self) -> Dict[str, PropBase]:
         """
         Returns a copy of the internal properties dict.
         """
         return copy.deepcopy(self.__props)
 
     @property
-    def _propDict(self) -> Dict:
+    def _propDict(self) -> Dict[str, PropBase]:
         """
         A direct reference to the underlying property dictionary. Used in one
         place in the code, and not recommended to be used if you are not a
