@@ -8,25 +8,27 @@ import html
 import logging
 import re
 
-from typing import List, Optional
+from typing import Generic, List, Optional, Type, TypeVar
 
+from ..attachments import AttachmentBase, SignedAttachment
 from ..enums import DeencapType, ErrorBehavior
 from ..exceptions import StandardViolationError
 from .message_base import MessageBase
-from ..attachments import SignedAttachment
 from ..utils import inputToBytes, inputToString, unwrapMultipart
 
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
+_T = TypeVar('_T')
 
-class MessageSignedBase(MessageBase):
+
+class MessageSignedBase(MessageBase, Generic[_T]):
     """
     Base class for Message like msg files.
     """
 
-    def __init__(self, path, **kwargs):
+    def __init__(self, path, signedAttachmentClass : Type[_T] = SignedAttachment, **kwargs):
         """
         Supports all of the options from :method MessageBase.__init__: with some
         additional ones.
@@ -34,45 +36,41 @@ class MessageSignedBase(MessageBase):
         :param signedAttachmentClass: optional, the class the object will use
             for signed attachments.
         """
-        self.__signedAttachmentClass = kwargs.get('signedAttachmentClass', SignedAttachment)
+        self.__sAttCls = signedAttachmentClass
         super().__init__(path, **kwargs)
 
-    @property
-    def attachments(self) -> List:
+    @functools.cached_property
+    def attachments(self) -> List[_T]:
         """
         Returns a list of all attachments.
 
         :raises StandardViolationError: The standard for signed messages was
             blatantly violated.
         """
-        try:
-            return self._sAttachments
-        except AttributeError:
-            atts = super().attachments
+        atts = self._rawAttachments
 
-            if len(atts) != 1:
-                if ErrorBehavior.STANDARDS_VIOLATION in self.errorBehavior:
-                    if len(atts) == 0:
-                        logger.error('Signed message has no attachments, a violation of the standard.')
-                        self._sAttachments = []
-                        self._signedBody = None
-                        self._signedHtmlBody = None
-                        return
-                    # If there is at least one attachment, just try to use the
-                    # first.
-                else:
-                    raise StandardViolationError('Signed messages without exactly 1 (regular) attachment constitue a violation of the standard.')
+        if len(atts) != 1:
+            if ErrorBehavior.STANDARDS_VIOLATION in self.errorBehavior:
+                if len(atts) == 0:
+                    logger.error('Signed message has no attachments, a violation of the standard.')
+                    self._sAttachments = []
+                    self._signedBody = None
+                    self._signedHtmlBody = None
+                    return []
+                # If there is at least one attachment, just try to use the
+                # first.
+            else:
+                raise StandardViolationError('Signed messages without exactly 1 (regular) attachment constitute a violation of the standard.')
 
-            # We need to unwrap the multipart stream.
-            unwrapped = unwrapMultipart(atts[0].data)
+        # We need to unwrap the multipart stream.
+        unwrapped = unwrapMultipart(atts[0].data)
 
-            # Now store everything where it needs to be and make the
-            # attachments.
-            self._sAttachments = [self.__signedAttachmentClass(self, **att) for att in unwrapped['attachments']]
-            self._signedBody = unwrapped['plain_body']
-            self._signedHtmlBody = inputToBytes(unwrapped['html_body'], 'utf-8')
+        # Now store everything where it needs to be and make the
+        # attachments.
+        self._signedBody = unwrapped['plain_body']
+        self._signedHtmlBody = inputToBytes(unwrapped['html_body'], 'utf-8')
 
-            return self._sAttachments
+        return [self.__sAttCls(self, **att) for att in unwrapped['attachments']]
 
     @functools.cached_property
     def body(self) -> Optional[str]:
@@ -119,18 +117,18 @@ class MessageSignedBase(MessageBase):
         return htmlBody
 
     @functools.cached_property
-    def _rawAttachments(self) -> List:
+    def _rawAttachments(self) -> List[AttachmentBase]:
         """
         A property to allow access to the non-signed attachments.
         """
         return super().attachments
 
     @property
-    def signedAttachmentClass(self):
+    def signedAttachmentClass(self) -> Type[_T]:
         """
         The attachment class used for signed attachments.
         """
-        return self.__signedAttachmentClass
+        return self.__sAttCls
 
     @functools.cached_property
     def signedBody(self) -> Optional[str]:

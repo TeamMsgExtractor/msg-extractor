@@ -19,7 +19,7 @@ import zipfile
 
 import olefile
 
-from typing import Any, Callable, cast, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, cast, Dict, List, Optional, Set, Tuple, Union
 
 from .. import constants
 from ..attachments import (
@@ -443,7 +443,7 @@ class MSGFile:
                 return True, parseType(int(_type, 16), contents, self.stringEncoding, extras)
         return False, None # We didn't find the stream.
 
-    def _oleListDir(self, streams : bool = True, storages : bool = False) -> List:
+    def _oleListDir(self, streams : bool = True, storages : bool = False) -> List[List[str]]:
         """
         Calls :method OleFileIO.listdir: from the OleFileIO instance associated
         with this MSG file. Useful for if you need access to all the top level
@@ -559,7 +559,7 @@ class MSGFile:
             inp = self.__prefix + inp
         return inp
 
-    def listDir(self, streams : bool = True, storages : bool = False, includePrefix : bool = True) -> List[List]:
+    def listDir(self, streams : bool = True, storages : bool = False, includePrefix : bool = True) -> List[List[str]]:
         """
         Replacement for OleFileIO.listdir that runs at the current prefix
         directory.
@@ -584,7 +584,7 @@ class MSGFile:
                 entries = [x[prefixLength:] for x in entries]
             self.__listDirRes[(streams, storages, includePrefix)] = entries
 
-            return self.__listDirRes[(streams, storages, includePrefix)]
+            return entries
 
     def slistDir(self, streams : bool = True, storages : bool = False) -> List[str]:
         """
@@ -611,7 +611,7 @@ class MSGFile:
             if not (skipHidden and attachment.hidden):
                 attachment.save(**kwargs)
 
-    def saveRaw(self, path):
+    def saveRaw(self, path) -> None:
         # Create a 'raw' folder.
         path = pathlib.Path(path)
         # Make the location.
@@ -777,7 +777,7 @@ class MSGFile:
         return self.__inscFeat
 
     @property
-    def kwargs(self) -> dict:
+    def kwargs(self) -> Dict[str, object]:
         """
         The kwargs used to initialize this message, excluding the prefix. This
         is used for initializing embedded msg files.

@@ -73,7 +73,10 @@ import olefile
 import tzlocal
 
 from html import escape as htmlEscape
-from typing import Any, Dict, List, Optional, TypeVar, TYPE_CHECKING, Union
+from typing import (
+        Any, Callable, Dict, List, Optional, Sequence, TypeVar, TYPE_CHECKING,
+        Union
+    )
 
 from . import constants
 from .enums import AttachmentType
@@ -184,7 +187,7 @@ def cloneOleFile(sourcePath, outputPath) -> None:
     writer.write(outputPath)
 
 
-def createZipOpen(func):
+def createZipOpen(func) -> Callable:
     """
     Creates a wrapper for the open function of a ZipFile that will automatically
     set the current date as the modified time to the current time.
@@ -246,7 +249,7 @@ def divide(string, length : int) -> List:
     >>>> print(a)
     ['Hello', ' Worl', 'd!']
     """
-    return [string[length * x:length * (x + 1)] for x in range(int(ceilDiv(len(string), length)))]
+    return [string[length * x:length * (x + 1)] for x in range(ceilDiv(len(string), length))]
 
 
 def filetimeToDatetime(rawTime : int) -> datetime.datetime:
@@ -326,7 +329,7 @@ def fromTimeStamp(stamp : int) -> datetime.datetime:
     return datetime.datetime.fromtimestamp(stamp, tz)
 
 
-def getCommandArgs(args) -> argparse.Namespace:
+def getCommandArgs(args : Sequence[str]) -> argparse.Namespace:
     """
     Parse command-line arguments.
 
@@ -534,7 +537,7 @@ def htmlSanitize(inp : str) -> str:
     return inp
 
 
-def inputToBytes(stringInputVar, encoding) -> bytes:
+def inputToBytes(stringInputVar, encoding : str) -> bytes:
     """
     Converts the input into bytes.
 
@@ -550,7 +553,7 @@ def inputToBytes(stringInputVar, encoding) -> bytes:
         raise ConversionError('Cannot convert to bytes.')
 
 
-def inputToMsgPath(inp) -> List:
+def inputToMsgPath(inp) -> List[str]:
     """
     Converts the input into an msg path.
 
@@ -979,7 +982,7 @@ def unsignedToSignedInt(uInt : int) -> int:
     return constants.st.STI32.unpack(constants.st.STUI32.pack(uInt))[0]
 
 
-def unwrapMsg(msg : MSGFile) -> Dict:
+def unwrapMsg(msg : MSGFile) -> Dict[str, List]:
     """
     Takes a recursive message-attachment structure and unwraps it into a linear
     dictionary for easy iteration. Dictionary contains 4 keys: "attachments" for

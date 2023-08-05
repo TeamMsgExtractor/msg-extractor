@@ -10,11 +10,15 @@ __all__ = [
 ]
 
 
+import abc
 import copy
 import logging
 import pprint
 
-from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING, Union
+from typing import (
+        Any, Dict, Iterable, Iterator, List, Optional, Tuple, TYPE_CHECKING,
+        TypeVar, Union
+    )
 
 from .. import constants
 from ..enums import NamedPropertyType
@@ -29,6 +33,8 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
+_T = TypeVar("_T")
 
 
 class Named:
@@ -46,14 +52,9 @@ class Named:
         self.guidStream = guidStream
         self.entryStream = entryStream
         self.namesStream = self._getStream('__substg1.0_00040102') or self._getStream('__substg1.0_00040102', False)
-        # The if else stuff is for protection against None.
-        guidStreamLength = len(guidStream) if guidStream else 0
-        entryStreamLength = len(entryStream) if entryStream else 0
 
-        self.__propertiesDict = {}
-        self.__properties = []
-        self.__guids = tuple()
-        self.__names = {}
+        self.__propertiesDict : Dict[Tuple[str, str], NamedPropertyBase]= {}
+        self.__properties : List[NamedPropertyBase] = []
 
         # Check that we even have any entries. If there are none, nothing to do.
         if entryStream:
@@ -72,7 +73,6 @@ class Named:
                 entries.append(entry)
 
             self.entries = entries
-            self.__guids = guids
 
             for entry in entries:
                 self.__properties.append(StringNamedProperty(entry, self.__getName(entry['id'])) if entry['pkind'] == NamedPropertyType.STRING_NAMED else NumericalNamedProperty(entry))
@@ -84,7 +84,7 @@ class Named:
     def __contains__(self, key) -> bool:
         return key in self.__propertiesDict
 
-    def __getitem__(self, propertyName : Tuple[str, str]):
+    def __getitem__(self, propertyName : Tuple[str, str]) -> NamedPropertyBase:
         # Validate the key.
         if not hasattr(propertyName, '__len__') or len(propertyName) != 2:
             raise TypeError('Named property key must be a tuple of two strings.')
@@ -97,7 +97,7 @@ class Named:
 
         raise KeyError(propertyName)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Tuple[str, str]]:
         return self.__propertiesDict.__iter__()
 
     def __len__(self) -> int:
@@ -183,7 +183,7 @@ class Named:
             raise ReferenceError('The msg file for this Named instance has been garbage collected.')
         return msg.sExists([self.__dir, filename])
 
-    def get(self, propertyName, default = None):
+    def get(self, propertyName : Tuple[str, str], default : _T = None) -> Union[NamedPropertyBase, _T]:
         """
         Tries to get a named property based on its key. Returns :param default:
         if not found. Key is a tuple of the name and the property set GUID.
@@ -193,10 +193,10 @@ class Named:
         except KeyError:
             return default
 
-    def keys(self):
+    def keys(self) -> Iterable[Tuple[str, str]]:
         return self.__propertiesDict.keys()
 
-    def pprintKeys(self):
+    def pprintKeys(self) -> None:
         """
         Uses the pprint function on a sorted list of keys.
         """
@@ -225,7 +225,7 @@ class Named:
         return msg
 
     @property
-    def namedProperties(self) -> Dict:
+    def namedProperties(self) -> Dict[Tuple[str, str], NamedPropertyBase]:
         """
         Returns a copy of the dictionary containing all the named properties.
         """
@@ -238,9 +238,9 @@ class NamedProperties:
     An instance that uses a Named instance and an extract-msg class to read the
     data of named properties.
     """
-    def __init__(self, named, streamSource : Union[MSGFile, AttachmentBase]):
+    def __init__(self, named : Named, streamSource : Union[MSGFile, AttachmentBase]):
         """
-        :param named: The named instance to refer to for named properties
+        :param named: The Named instance to refer to for named properties
             entries.
         :param streamSource: The source to use for acquiring the data of a named
             property.
@@ -278,8 +278,8 @@ class NamedProperties:
 
 
 
-class NamedPropertyBase:
-    def __init__(self, entry):
+class NamedPropertyBase(abc.ABC):
+    def __init__(self, entry : Dict):
         self.__entry = entry
         self.__guidIndex = entry['guid_index']
         self.__namedPropertyID = entry['pid']
@@ -315,7 +315,7 @@ class NamedPropertyBase:
         return self.__propertyStreamID
 
     @property
-    def rawEntry(self) -> dict:
+    def rawEntry(self) -> Dict:
         return copy.deepcopy(self.__entry)
 
     @property
@@ -326,16 +326,16 @@ class NamedPropertyBase:
         return self.__entry['rawStream']
 
     @property
+    @abc.abstractmethod
     def type(self) -> NamedPropertyType:
         """
         The type of named property.
         """
-        raise NotImplementedError('NamedPropertyBase cannot be used directly. Subclass it before using it.')
 
 
 
 class StringNamedProperty(NamedPropertyBase):
-    def __init__(self, entry, name):
+    def __init__(self, entry : Dict, name : str):
         super().__init__(entry)
         self.__name = name
 
@@ -390,7 +390,7 @@ class StringNamedProperty(NamedPropertyBase):
 
 
 class NumericalNamedProperty(NamedPropertyBase):
-    def __init__(self, entry):
+    def __init__(self, entry : Dict):
         super().__init__(entry)
         self.__propertyID = properHex(entry['id'], 4).upper()
         self.__streamID = 0x1000 + (entry['id'] ^ (self.guidIndex << 1)) % 0x1F

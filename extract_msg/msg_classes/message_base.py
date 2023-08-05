@@ -24,7 +24,7 @@ import RTFDE
 from email import policy
 from email.message import EmailMessage
 from email.parser import HeaderParser
-from typing import Callable, List, Optional, Union
+from typing import Callable, Dict, List, Optional, Union
 
 from .. import constants
 from .._rtf.create_doc import createDocument
@@ -119,7 +119,7 @@ class MessageBase(MSGFile):
                 pass
             raise
 
-    def _genRecipient(self, recipientType, recipientInt : RecipientType) -> Optional[str]:
+    def _genRecipient(self, recipientType : str, recipientInt : RecipientType) -> Optional[str]:
         """
         Returns the specified recipient field.
         """
@@ -1075,7 +1075,7 @@ class MessageBase(MSGFile):
         return header
 
     @property
-    def headerDict(self) -> dict:
+    def headerDict(self) -> Dict:
         """
         Returns a dictionary of the entries in the header
         """

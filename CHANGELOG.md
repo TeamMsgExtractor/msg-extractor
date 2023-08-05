@@ -1,3 +1,11 @@
+**v0.??.??**
+* Updated typing information for some functions and classes.
+* Fixed a bug with `MessageSignedBase.attachments` that would cause it to return None instead of an empty list if the number of normal attachments was 0 was the error behavior was set to ignore violations of the standard.
+* Updated `MessageSignedBase.attachments` to use `functools.cached_property` instead of `property`.
+* Fixed spelling errors in some exception strings.
+* Made `NamedPropertyBase` a subclass of `abc.ABC`.
+* Cleaned up some of the code for named properties to remove unused variables.
+
 **v0.44.0**
 * Fixed a bug that caused `MessageBase.headerInit` to always return `False` after the 0.42.0 update.
 * Changed `MessageBase.headerInit` to a property.
