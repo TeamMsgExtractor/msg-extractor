@@ -11,6 +11,7 @@
     * As mentioned, a number of these deprecated functions have been moved to the public api. It is recommended that you run tests with your code after enabling deprecation warnings to see what should be changed.
 * Removed items deprecated in or before `0.42.0`.
 * Changed the API for the private method `_genRecipient`. This is not intended for use outside of the module *except* for subclasses. The change removed the allowance of ints for the second argument, requiring that it be a valid enum type.
+* Convert many enum types to `IntEnum`.
 
 **v0.44.0**
 * Fixed a bug that caused `MessageBase.headerInit` to always return `False` after the 0.42.0 update.
