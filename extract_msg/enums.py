@@ -76,7 +76,7 @@ import enum
 from typing import Dict, Union
 
 
-class AddressBookType(enum.Enum):
+class AddressBookType(enum.IntEnum):
     """
     The type of object that an address book entry ID represents. MUST be one of
     these or it is invalid.
@@ -113,7 +113,7 @@ class AppointmentAuxilaryFlag(enum.IntFlag):
 
 
 
-class AppointmentColor(enum.Enum):
+class AppointmentColor(enum.IntEnum):
     NONE = 0x00000000
     RED = 0x00000001
     BLUE = 0x00000002
@@ -140,7 +140,7 @@ class AppointmentStateFlag(enum.IntFlag):
 
 
 
-class AttachmentPermissionType(enum.Enum):
+class AttachmentPermissionType(enum.IntEnum):
     """
     The permission type data associated with a web reference attachment.
     """
@@ -150,7 +150,7 @@ class AttachmentPermissionType(enum.Enum):
 
 
 
-class AttachmentType(enum.Enum):
+class AttachmentType(enum.IntEnum):
     """
     The type represented by the attachment.
 
@@ -177,7 +177,7 @@ class AttachmentType(enum.Enum):
 
 
 
-class BCImageAlignment(enum.Enum):
+class BCImageAlignment(enum.IntEnum):
     STRETCH = 0x00
     TOP_LEFT = 0x01
     TOP_CENTER = 0x02
@@ -191,13 +191,13 @@ class BCImageAlignment(enum.Enum):
 
 
 
-class BCImageSource(enum.Enum):
+class BCImageSource(enum.IntEnum):
     CONTACT_PHOTO = 0
     CARD_PHOTO = 1
 
 
 
-class BCLabelFormat(enum.Enum):
+class BCLabelFormat(enum.IntEnum):
     """
     The format for a label of a business card. Left of the underscore represents
     the alignment, right indicates reading order.
@@ -212,7 +212,7 @@ class BCLabelFormat(enum.Enum):
 
 
 
-class BCTemplateID(enum.Enum):
+class BCTemplateID(enum.IntEnum):
     """
     The template ID for a business card.
 
@@ -243,7 +243,7 @@ class BCTemplateID(enum.Enum):
 
 
 
-class BCTextFormat(enum.Enum):
+class BCTextFormat(enum.IntEnum):
     """
     Converts the bits of the text format to an understandable enum value.
 
@@ -325,7 +325,7 @@ class BodyTypes(enum.IntFlag):
 
 
 
-class BusyStatus(enum.Enum):
+class BusyStatus(enum.IntEnum):
     """
     The availability of a use for the event described by the object.
 
@@ -389,7 +389,7 @@ class Color(enum.IntEnum):
 
 
 
-class ContactAddressIndex(enum.Enum):
+class ContactAddressIndex(enum.IntEnum):
     EMAIL_1 = 0
     EMAIL_2 = 1
     EMAIL_3 = 2
@@ -399,7 +399,7 @@ class ContactAddressIndex(enum.Enum):
 
 
 
-class ContactLinkState(enum.Enum):
+class ContactLinkState(enum.IntEnum):
     """
     Values for PidLidContactLinkGlobalAddressListLinkState.
 
@@ -415,7 +415,7 @@ class ContactLinkState(enum.Enum):
 
 
 
-class DeencapType(enum.Enum):
+class DeencapType(enum.IntEnum):
     """
     Enum to specify to custom deencapsulation functions the type of data being
     requested.
@@ -434,7 +434,7 @@ class DirectoryEntryType(enum.IntEnum):
 
 
 
-class DisplayType(enum.Enum):
+class DisplayType(enum.IntEnum):
     MAILUSER = 0x0000
     DISTLIST = 0x0001
     FORUM = 0x0002
@@ -459,7 +459,7 @@ class DVAspect(enum.IntEnum):
     ICON = 4
 
 
-class ElectronicAddressProperties(enum.Enum):
+class ElectronicAddressProperties(enum.IntEnum):
     EMAIL_1 = 0x00000000
     EMAIL_2 = 0x00000001
     EMAIL_3 = 0x00000002
@@ -553,7 +553,7 @@ class ErrorBehavior(enum.IntFlag):
 
 
 
-class ErrorCode(enum.Enum):
+class ErrorCode(enum.IntEnum):
     SUCCESS = 0x00000000
     GENERAL_FAILURE = 0x80004005
     OUT_OF_MEMORY = 0x8007000E
@@ -626,7 +626,7 @@ class ErrorCode(enum.Enum):
 
 
 
-class ErrorCodeType(enum.Enum):
+class ErrorCodeType(enum.IntEnum):
     """
     Enum representing values for PtypErrorCode.
 
@@ -1153,7 +1153,7 @@ class ErrorCodeType(enum.Enum):
 
 
 
-class Gender(enum.Enum):
+class Gender(enum.IntEnum):
     # Seems rather binary, which is less than ideal. We are directly using the
     # terms used by the documentation.
     UNSPECIFIED = 0x0000
@@ -1162,7 +1162,7 @@ class Gender(enum.Enum):
 
 
 
-class IconIndex(enum.Enum):
+class IconIndex(enum.IntEnum):
     @classmethod
     def tryMake(cls, value : int) -> Union['IconIndex', int]:
         """
@@ -1188,7 +1188,7 @@ class IconIndex(enum.Enum):
 
 
 
-class Importance(enum.Enum):
+class Importance(enum.IntEnum):
     LOW = 0
     MEDIUM = 1
     HIGH = 2
@@ -1218,14 +1218,14 @@ class InsecureFeatures(enum.IntFlag):
 
 
 
-class Intelligence(enum.Enum):
+class Intelligence(enum.IntEnum):
     ERROR = -1
     DUMB = 0
     SMART = 1
 
 
 
-class MacintoshEncoding(enum.Enum):
+class MacintoshEncoding(enum.IntEnum):
     """
     The encoding to use for Macintosh-specific data attachments.
     """
@@ -1265,7 +1265,7 @@ class MeetingObjectChange(enum.IntFlag):
 
 
 
-class MeetingRecipientType(enum.Enum):
+class MeetingRecipientType(enum.IntEnum):
     ORGANIZER = 0x01
     SENDABLE_REQUIRED_ATTENDEE = 0x01
     SENDABLE_OPTIONAL_ATTENDEE = 0x02
@@ -1273,7 +1273,7 @@ class MeetingRecipientType(enum.Enum):
 
 
 
-class MeetingType(enum.Enum):
+class MeetingType(enum.IntEnum):
     """
     The type of Meeting Request object of Meeting Update object.
 
@@ -1298,13 +1298,13 @@ class MeetingType(enum.Enum):
 
 
 
-class MessageFormat(enum.Enum):
+class MessageFormat(enum.IntEnum):
     TNEF = 0
     MIME = 1
 
 
 
-class MessageType(enum.Enum):
+class MessageType(enum.IntEnum):
     PRIVATE_FOLDER = 0x0001
     PUBLIC_FOLDER = 0x0003
     MAPPED_PUBLIC_FOLDER = 0x0005
@@ -1315,13 +1315,13 @@ class MessageType(enum.Enum):
 
 
 
-class NamedPropertyType(enum.Enum):
+class NamedPropertyType(enum.IntEnum):
     NUMERICAL_NAMED = 0
     STRING_NAMED = 1
 
 
 
-class NoteColor(enum.Enum):
+class NoteColor(enum.IntEnum):
     BLUE = 0
     GREEN = 1
     PINK = 2
@@ -1330,7 +1330,7 @@ class NoteColor(enum.Enum):
 
 
 
-class OORBodyFormat(enum.Enum):
+class OORBodyFormat(enum.IntEnum):
     """
     The body format for One Off Recipients.
     """
@@ -1344,7 +1344,7 @@ class OORBodyFormat(enum.Enum):
 
 
 
-class PostalAddressID(enum.Enum):
+class PostalAddressID(enum.IntEnum):
     UNSPECIFIED = 0x00000000
     HOME = 0x00000001
     WORK = 0x00000002
@@ -1352,14 +1352,14 @@ class PostalAddressID(enum.Enum):
 
 
 
-class Priority(enum.Enum):
+class Priority(enum.IntEnum):
     URGENT = 0x00000001
     NORMAL = 0x00000000
     NOT_URGENT = 0xFFFFFFFF
 
 
 
-class PropertiesType(enum.Enum):
+class PropertiesType(enum.IntEnum):
     """
     The type of the properties instance.
     """
@@ -1370,7 +1370,7 @@ class PropertiesType(enum.Enum):
 
 
 
-class RecipientRowFlagType(enum.Enum):
+class RecipientRowFlagType(enum.IntEnum):
     NOTYPE = 0x0
     X500DN = 0x1
     MSMAIL = 0x2
@@ -1382,7 +1382,7 @@ class RecipientRowFlagType(enum.Enum):
 
 
 
-class RecipientType(enum.Enum):
+class RecipientType(enum.IntEnum):
     """
     The type of recipient.
     """
@@ -1393,7 +1393,7 @@ class RecipientType(enum.Enum):
 
 
 
-class RecurCalendarType(enum.Enum):
+class RecurCalendarType(enum.IntEnum):
     DEFAULT = 0x0000
     CAL_GREGORIAN = 0x0001
     CAL_GREGORIAN_US = 0x0002
@@ -1418,7 +1418,7 @@ class RecurCalendarType(enum.Enum):
 
 
 
-class RecurDOW(enum.Enum):
+class RecurDOW(enum.IntEnum):
     SUNDAY = 0x00000000
     MONDAY = 0x00000001
     TUESDAY = 0x00000002
@@ -1429,7 +1429,7 @@ class RecurDOW(enum.Enum):
 
 
 
-class RecurEndType(enum.Enum):
+class RecurEndType(enum.IntEnum):
     @classmethod
     def fromInt(cls, value) -> 'RecurEndType':
         """
@@ -1442,7 +1442,7 @@ class RecurEndType(enum.Enum):
     NEVER_END = 0x00002023
 
 
-class RecurFrequency(enum.Enum):
+class RecurFrequency(enum.IntEnum):
     """
     See [MS-OXOCAL] for details.
     """
@@ -1453,7 +1453,7 @@ class RecurFrequency(enum.Enum):
 
 
 
-class RecurMonthNthWeek(enum.Enum):
+class RecurMonthNthWeek(enum.IntEnum):
     FIRST = 0x00000001
     SECOND = 0x00000002
     THIRD = 0x00000003
@@ -1476,7 +1476,7 @@ class RecurPatternTypeSpecificWeekday(enum.IntFlag):
 
 
 
-class RecurPatternType(enum.Enum):
+class RecurPatternType(enum.IntEnum):
     """
     See [MS-OXOCAL] for details.
     """
@@ -1491,7 +1491,7 @@ class RecurPatternType(enum.Enum):
 
 
 
-class ResponseStatus(enum.Enum):
+class ResponseStatus(enum.IntEnum):
     """
     The response status of an attendee.
 
@@ -1521,7 +1521,7 @@ class ResponseType(enum.Enum):
 
 
 
-class RuleActionType(enum.Enum):
+class RuleActionType(enum.IntEnum):
     OP_MOVE = 0x01
     OP_COPY = 0x02
     OP_REPLY = 0x03
@@ -1536,7 +1536,7 @@ class RuleActionType(enum.Enum):
 
 
 
-class SaveType(enum.Enum):
+class SaveType(enum.IntEnum):
     """
     Specifies the way that a function saved the data. Used to determine how the
     return value from a save function should be read.
@@ -1561,7 +1561,7 @@ class SaveType(enum.Enum):
 
 
 
-class Sensitivity(enum.Enum):
+class Sensitivity(enum.IntEnum):
     NORMAL = 0
     PERSONAL = 1
     PRIVATE = 2
@@ -1623,7 +1623,7 @@ class SideEffect(enum.IntFlag):
 
 
 
-class TaskAcceptance(enum.Enum):
+class TaskAcceptance(enum.IntEnum):
     """
     The acceptance state of the task.
     """
@@ -1634,7 +1634,7 @@ class TaskAcceptance(enum.Enum):
 
 
 
-class TaskHistory(enum.Enum):
+class TaskHistory(enum.IntEnum):
     """
     The type of the last change to the Task object.
     """
@@ -1647,7 +1647,7 @@ class TaskHistory(enum.Enum):
 
 
 
-class TaskMode(enum.Enum):
+class TaskMode(enum.IntEnum):
     """
     The mode of the Task object used in task communication (PidLidTaskMode).
 
@@ -1674,7 +1674,7 @@ class TaskMultipleRecipients(enum.IntFlag):
 
 
 
-class TaskOwnership(enum.Enum):
+class TaskOwnership(enum.IntEnum):
     """
     The role of the current user relative to the Task object.
 
@@ -1690,7 +1690,7 @@ class TaskOwnership(enum.Enum):
 
 
 
-class TaskRequestType(enum.Enum):
+class TaskRequestType(enum.IntEnum):
     """
     The type of task request.
 
@@ -1720,7 +1720,7 @@ class TaskRequestType(enum.Enum):
 
 
 
-class TaskState(enum.Enum):
+class TaskState(enum.IntEnum):
     """
     NOT_ASSIGNED: The Task object is not assigned.
     ASSIGNEES_COPY_ACCEPTED: The Task object is the task assignee's copy of an
@@ -1741,7 +1741,7 @@ class TaskState(enum.Enum):
 
 
 
-class TaskStatus(enum.Enum):
+class TaskStatus(enum.IntEnum):
     """
     The status of a task object (PidLidTaskStatus).
 
