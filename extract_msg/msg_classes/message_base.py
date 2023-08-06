@@ -76,15 +76,6 @@ class MessageBase(MSGFile):
             internally or they will not be caught. The original deencapsulation
             method will not run if this is set.
         """
-        if 'ignoreRtfDeErrors' in kwargs:
-            import warnings
-            warnings.warn(':param ignoreRtfDeErrors: is deprecated. Use :param ErrorBehavior: instead.', DeprecationWarning)
-
-            if kwargs.get('ignoreRtfDeErrors', False):
-                errorBehavior = kwargs.get('errorBehavior', ErrorBehavior.THROW)
-                errorBehavior |= ErrorBehavior.RTFDE
-                kwargs['errorBehavior'] = errorBehavior
-
         super().__init__(path, **kwargs)
         # The rest needs to be in a try-except block to ensure the file closes
         # if an error occurs.
@@ -119,15 +110,14 @@ class MessageBase(MSGFile):
                 pass
             raise
 
-    def _genRecipient(self, recipientType : str, recipientInt : RecipientType) -> Optional[str]:
+    def _genRecipient(self, recipientStr : str, recipientType : RecipientType) -> Optional[str]:
         """
         Returns the specified recipient field.
         """
-        recipientInt = RecipientType(recipientInt)
         value = None
         # Check header first.
         if self.headerInit:
-            value = self.header[recipientType]
+            value = self.header[recipientStr]
             if value:
                 value = decodeRfc2047(value)
                 value = value.replace(',', self.__recipientSeparator)
@@ -137,10 +127,10 @@ class MessageBase(MSGFile):
         if not value:
             # Check if the header has initialized.
             if self.headerInit:
-                logger.info(f'Header found, but "{recipientType}" is not included. Will be generated from other streams.')
+                logger.info(f'Header found, but "{recipientStr}" is not included. Will be generated from other streams.')
 
             # Get a list of the recipients of the specified type.
-            foundRecipients = tuple(recipient.formatted for recipient in self.recipients if recipient.type == recipientInt)
+            foundRecipients = tuple(recipient.formatted for recipient in self.recipients if recipient.type is recipientType)
 
             # If we found recipients, join them with the recipient separator
             # and a space.
@@ -932,7 +922,7 @@ class MessageBase(MSGFile):
         Returns the message body, if it exists.
         """
         # If the body exists but is empty, that means it should be returned.
-        if (body := self._getStringStream('__substg1.0_1000')) is not None:
+        if (body := self.getStringStream('__substg1.0_1000')) is not None:
             pass
         elif self.rtfBody:
             # If the body doesn't exist, see if we can get it from the RTF
@@ -959,7 +949,7 @@ class MessageBase(MSGFile):
         """
         Returns the compressed RTF stream, if it exists.
         """
-        return self._getStream('__substg1.0_10090102')
+        return self.getStream('__substg1.0_10090102')
 
     @property
     def crlf(self) -> str:
@@ -1143,14 +1133,14 @@ class MessageBase(MSGFile):
         """
         The raw text of the header stream, if it exists.
         """
-        return self._getStringStream('__substg1.0_007D')
+        return self.getStringStream('__substg1.0_007D')
 
     @functools.cached_property
     def htmlBody(self) -> Optional[bytes]:
         """
         Returns the html body, if it exists.
         """
-        if (htmlBody := self._getStream('__substg1.0_10130102')) is not None:
+        if (htmlBody := self.getStream('__substg1.0_10130102')) is not None:
             pass
         elif self.rtfBody:
             logger.info('HTML body was not found, attempting to generate from RTF.')
@@ -1213,7 +1203,7 @@ class MessageBase(MSGFile):
         """
         Returns the message id that this message is in reply to.
         """
-        return self._getStringStream('__substg1.0_1042')
+        return self.getStringStream('__substg1.0_1042')
 
     @functools.cached_property
     def isRead(self) -> bool:
@@ -1246,7 +1236,7 @@ class MessageBase(MSGFile):
 
         if self.headerInit:
             logger.info('Header found, but "Message-Id" is not included. Will be generated from other streams.')
-        return self._getStringStream('__substg1.0_1035')
+        return self.getStringStream('__substg1.0_1035')
 
     @functools.cached_property
     def parsedDate(self):
@@ -1328,8 +1318,8 @@ class MessageBase(MSGFile):
                 return decodeRfc2047(headerResult)
             logger.info('Header found, but "sender" is not included. Will be generated from other streams.')
         # Extract from other fields
-        text = self._getStringStream('__substg1.0_0C1A')
-        email = self._getStringStream('__substg1.0_5D01')
+        text = self.getStringStream('__substg1.0_0C1A')
+        email = self.getStringStream('__substg1.0_5D01')
         # Will not give an email address sometimes. Seems to exclude the email
         # address if YOU are the sender.
         result = None
@@ -1347,7 +1337,7 @@ class MessageBase(MSGFile):
         """
         Returns the message subject, if it exists.
         """
-        return self._getStringStream('__substg1.0_0037')
+        return self.getStringStream('__substg1.0_0037')
 
     @functools.cached_property
     def to(self) -> Optional[str]:

@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 __all__ = [
     'Recipient',
 ]
@@ -6,7 +9,7 @@ __all__ = [
 import functools
 import logging
 
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple, TYPE_CHECKING, Union
 
 from .enums import ErrorBehavior, MeetingRecipientType, PropertiesType, RecipientType
 from .exceptions import StandardViolationError
@@ -15,6 +18,9 @@ from .properties.properties_store import PropertiesStore
 from .structures.entry_id import PermanentEntryID
 from .utils import makeWeakRef, verifyPropertyId, verifyType
 
+
+if TYPE_CHECKING:
+    from .msg_classes.msg import MSGFile
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -25,7 +31,7 @@ class Recipient:
     Contains the data of one of the recipients in an MSG file.
     """
 
-    def __init__(self, _dir, msg):
+    def __init__(self, _dir, msg : MSGFile):
         self.__msg = makeWeakRef(msg) # Allows calls to original msg file.
         self.__dir = _dir
         if not self.exists('__properties_version1.0'):
@@ -33,11 +39,11 @@ class Recipient:
                 logger.error('Recipients MUST have a property stream.')
             else:
                 raise StandardViolationError('Recipients MUST have a property stream.') from None
-        self.__props = PropertiesStore(self._getStream('__properties_version1.0'), PropertiesType.RECIPIENT)
-        self.__email = self._getStringStream('__substg1.0_39FE')
+        self.__props = PropertiesStore(self.getStream('__properties_version1.0'), PropertiesType.RECIPIENT)
+        self.__email = self.getStringStream('__substg1.0_39FE')
         if not self.__email:
-            self.__email = self._getStringStream('__substg1.0_3003')
-        self.__name = self._getStringStream('__substg1.0_3001')
+            self.__email = self.getStringStream('__substg1.0_3003')
+        self.__name = self.getStringStream('__substg1.0_3001')
         self.__typeFlags = self.__props.get('0C150003').value or 0
         from .msg_classes.calendar_base import CalendarBase
         if isinstance(msg, CalendarBase):
@@ -79,9 +85,9 @@ class Recipient:
         :raises ReferenceError: The associated MSGFile instance has been garbage
             collected.
         """
-        if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
-        return msg._getStream([self.__dir, filename])
+        import warnings
+        warnings.warn(':method _getStream: has been deprecated and moved to the public api. Use :method getStream: instead (remove the underscore).', DeprecationWarning)
+        return self.getStream(filename)
 
     def _getStreamAs(self, streamID, stringStream : bool = True, overrideClass = None, preserveNone : bool = True):
         """
@@ -99,9 +105,9 @@ class Recipient:
             If this is changed to False, then the value will be used regardless.
         """
         if stringStream:
-            value = self._getStringStream(streamID)
+            value = self.getStringStream(streamID)
         else:
-            value = self._getStream(streamID)
+            value = self.getStream(streamID)
 
         # Check if we should be overriding the data type for this instance.
         if overrideClass is not None:
@@ -124,9 +130,9 @@ class Recipient:
         :raises ReferenceError: The associated MSGFile instance has been garbage
             collected.
         """
-        if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
-        return msg._getStringStream([self.__dir, filename])
+        import warnings
+        warnings.warn(':method _getStringStream: has been deprecated and moved to the public api. Use :method getStringStream: instead (remove the underscore).', DeprecationWarning)
+        return self.getStringStream(filename)
 
     def _getTypedAs(self, _id : str, overrideClass = None, preserveNone : bool = True):
         """
@@ -249,12 +255,44 @@ class Recipient:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.existsTypedProperty(id, self.__dir, _type, True, self.__props)
 
+    def getStream(self, filename) -> Optional[bytes]:
+        """
+        Gets a binary representation of the requested filename.
+
+        This should ALWAYS return a bytes object if it was found, otherwise
+        returns None.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
+        """
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
+        return msg.getStream([self.__dir, filename])
+
+    def getStringStream(self, filename) -> Optional[str]:
+        """
+        Gets a string representation of the requested filename.
+
+        Rather than the full filename, you should only feed this function the
+        filename sans the type. So if the full name is "__substg1.0_001A001F",
+        the filename this function should receive should be "__substg1.0_001A".
+
+        This should ALWAYS return a string if it was found, otherwise returns
+        None.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
+        """
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
+        return msg.getStringStream([self.__dir, filename])
+
     @functools.cached_property
     def account(self) -> Optional[str]:
         """
         Returns the account of this recipient.
         """
-        return self._getStringStream('__substg1.0_3A00')
+        return self.getStringStream('__substg1.0_3A00')
 
     @property
     def email(self) -> Optional[str]:
@@ -282,7 +320,7 @@ class Recipient:
         """
         Returns the instance key of this recipient.
         """
-        return self._getStream('__substg1.0_0FF60102')
+        return self.getStream('__substg1.0_0FF60102')
 
     @property
     def name(self) -> Optional[str]:
@@ -303,28 +341,28 @@ class Recipient:
         """
         Returns the instance key of this recipient.
         """
-        return self._getStream('__substg1.0_0FF90102')
+        return self.getStream('__substg1.0_0FF90102')
 
     @functools.cached_property
     def searchKey(self) -> Optional[bytes]:
         """
         Returns the search key of this recipient.
         """
-        return self._getStream('__substg1.0_300B0102')
+        return self.getStream('__substg1.0_300B0102')
 
     @functools.cached_property
     def smtpAddress(self) -> Optional[str]:
         """
         Returns the SMTP address of this recipient.
         """
-        return self._getStringStream('__substg1.0_39FE')
+        return self.getStringStream('__substg1.0_39FE')
 
     @functools.cached_property
     def transmittableDisplayName(self) -> Optional[str]:
         """
         Returns the transmittable display name of this recipient.
         """
-        return self._getStringStream('__substg1.0_3A20')
+        return self.getStringStream('__substg1.0_3A20')
 
     @property
     def type(self) -> Union[RecipientType, MeetingRecipientType]:

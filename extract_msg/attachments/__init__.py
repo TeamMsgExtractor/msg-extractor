@@ -63,7 +63,7 @@ def initStandardAttachment(msg : MSGFile, dir_) -> AttachmentBase:
         )
 
     # First, create the properties store to check things like attachment type.
-    propertiesStream = msg._getStream([dir_, '__properties_version1.0'])
+    propertiesStream = msg.getStream([dir_, '__properties_version1.0'])
     propStore = PropertiesStore(propertiesStream, PropertiesType.ATTACHMENT)
 
     try:

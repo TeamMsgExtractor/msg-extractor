@@ -30,7 +30,7 @@ class Contact(MessageBase):
         """
         The account name of the contact.
         """
-        return self._getStringStream('__substg1.0_3A00')
+        return self.getStringStream('__substg1.0_3A00')
 
     @functools.cached_property
     def addressBookProviderArrayType(self) -> Optional[ElectronicAddressProperties]:
@@ -54,14 +54,14 @@ class Contact(MessageBase):
         """
         The name of the contact's assistant.
         """
-        return self._getStringStream('__substg1.0_3A30')
+        return self.getStringStream('__substg1.0_3A30')
 
     @functools.cached_property
     def assistantTelephoneNumber(self) -> Optional[str]:
         """
         Contains the telephone number of the contact's administrative assistant.
         """
-        return self._getStringStream('__substg1.0_3A2E')
+        return self.getStringStream('__substg1.0_3A2E')
 
     @functools.cached_property
     def autoLog(self) -> bool:
@@ -184,7 +184,7 @@ class Contact(MessageBase):
         """
         Contains the number of the contact's business fax.
         """
-        return self._getStringStream('__substg1.0_3A24')
+        return self.getStringStream('__substg1.0_3A24')
 
     @functools.cached_property
     def businessFaxOriginalDisplayName(self) -> Optional[str]:
@@ -205,7 +205,7 @@ class Contact(MessageBase):
         """
         Contains the number of the contact's business telephone.
         """
-        return self._getStringStream('__substg1.0_3A08')
+        return self.getStringStream('__substg1.0_3A08')
 
     @functools.cached_property
     def businessTelephone2Number(self) -> Optional[Union[str, List[str]]]:
@@ -219,21 +219,21 @@ class Contact(MessageBase):
         """
         Contains the url of the homepage of the contact's business.
         """
-        return self._getStringStream('__substg1.0_3A51')
+        return self.getStringStream('__substg1.0_3A51')
 
     @functools.cached_property
     def callbackTelephoneNumber(self) -> Optional[str]:
         """
         Contains the contact's callback telephone number.
         """
-        return self._getStringStream('__substg1.0_3A02')
+        return self.getStringStream('__substg1.0_3A02')
 
     @functools.cached_property
     def carTelephoneNumber(self) -> Optional[str]:
         """
         Contains the number of the contact's car telephone.
         """
-        return self._getStringStream('__substg1.0_3A1E')
+        return self.getStringStream('__substg1.0_3A1E')
 
     @functools.cached_property
     def childrensNames(self) -> Optional[List[str]]:
@@ -247,21 +247,21 @@ class Contact(MessageBase):
         """
         Contains the number of the main telephone of the contact's company.
         """
-        return self._getStringStream('__substg1.0_3A57')
+        return self.getStringStream('__substg1.0_3A57')
 
     @functools.cached_property
     def companyName(self) -> Optional[str]:
         """
         The name of the company the contact works at.
         """
-        return self._getStringStream('__substg1.0_3A16')
+        return self.getStringStream('__substg1.0_3A16')
 
     @functools.cached_property
     def computerNetworkName(self) -> Optional[str]:
         """
         The name of the network to wwhich the contact's computer is connected.
         """
-        return self._getStringStream('__substg1.0_3A49')
+        return self.getStringStream('__substg1.0_3A49')
 
     @functools.cached_property
     def contactCharacterSet(self) -> Optional[int]:
@@ -359,28 +359,28 @@ class Contact(MessageBase):
         """
         The contact's customer ID number.
         """
-        return self._getStringStream('__substg1.0_3A4A')
+        return self.getStringStream('__substg1.0_3A4A')
 
     @functools.cached_property
     def departmentName(self) -> Optional[str]:
         """
         The name of the department the contact works in.
         """
-        return self._getStringStream('__substg1.0_3A18')
+        return self.getStringStream('__substg1.0_3A18')
 
     @functools.cached_property
     def displayName(self) -> Optional[str]:
         """
         The full name of the contact.
         """
-        return self._getStringStream('__substg1.0_3001')
+        return self.getStringStream('__substg1.0_3001')
 
     @functools.cached_property
     def displayNamePrefix(self) -> Optional[str]:
         """
         The contact's honorific title.
         """
-        return self._getStringStream('__substg1.0_3A45')
+        return self.getStringStream('__substg1.0_3A45')
 
     @functools.cached_property
     def email1(self) -> Optional[Dict]:
@@ -590,7 +590,7 @@ class Contact(MessageBase):
         """
         The contact's File Transfer Protocol url.
         """
-        return self._getStringStream('__substg1.0_3A4C')
+        return self.getStringStream('__substg1.0_3A4C')
 
     @functools.cached_property
     def gender(self) -> Optional[Gender]:
@@ -605,21 +605,21 @@ class Contact(MessageBase):
         A generational abbreviation that follows the full
         name of the contact.
         """
-        return self._getStringStream('__substg1.0_3A05')
+        return self.getStringStream('__substg1.0_3A05')
 
     @functools.cached_property
     def givenName(self) -> Optional[str]:
         """
         The first name of the contact.
         """
-        return self._getStringStream('__substg1.0_3A06')
+        return self.getStringStream('__substg1.0_3A06')
 
     @functools.cached_property
     def governmentIDNumber(self) -> Optional[str]:
         """
         The contact's government ID number.
         """
-        return self._getStringStream('__substg1.0_3A07')
+        return self.getStringStream('__substg1.0_3A07')
 
     @functools.cached_property
     def hasPicture(self) -> bool:
@@ -725,7 +725,7 @@ class Contact(MessageBase):
         """
         The hobies of the contact.
         """
-        return self._getStringStream('__substg1.0_3A43')
+        return self.getStringStream('__substg1.0_3A43')
 
     @functools.cached_property
     def homeAddress(self) -> Optional[str]:
@@ -739,7 +739,7 @@ class Contact(MessageBase):
         """
         The country portion of the contact's home address.
         """
-        return self._getStringStream('__substg1.0_3A5A')
+        return self.getStringStream('__substg1.0_3A5A')
 
     @functools.cached_property
     def homeAddressCountryCode(self) -> Optional[str]:
@@ -753,35 +753,35 @@ class Contact(MessageBase):
         """
         The locality or city portion of the contact's home address.
         """
-        return self._getStringStream('__substg1.0_3A59')
+        return self.getStringStream('__substg1.0_3A59')
 
     @functools.cached_property
     def homeAddressPostalCode(self) -> Optional[str]:
         """
         The postal code portion of the contact's home address.
         """
-        return self._getStringStream('__substg1.0_3A5B')
+        return self.getStringStream('__substg1.0_3A5B')
 
     @functools.cached_property
     def homeAddressPostOfficeBox(self) -> Optional[str]:
         """
         The number or identifier of the contact's home post office box.
         """
-        return self._getStringStream('__substg1.0_3A5E')
+        return self.getStringStream('__substg1.0_3A5E')
 
     @functools.cached_property
     def homeAddressStateOrProvince(self) -> Optional[str]:
         """
         The state or province portion of the contact's home address.
         """
-        return self._getStringStream('__substg1.0_3A5C')
+        return self.getStringStream('__substg1.0_3A5C')
 
     @functools.cached_property
     def homeAddressStreet(self) -> Optional[str]:
         """
         The street portion of the contact's home address.
         """
-        return self._getStringStream('__substg1.0_3A5D')
+        return self.getStringStream('__substg1.0_3A5D')
 
     @functools.cached_property
     def homeFax(self) -> Optional[Dict]:
@@ -821,7 +821,7 @@ class Contact(MessageBase):
         """
         Contains the number of the contact's home fax.
         """
-        return self._getStringStream('__substg1.0_3A25')
+        return self.getStringStream('__substg1.0_3A25')
 
     @functools.cached_property
     def homeFaxOriginalDisplayName(self) -> Optional[str]:
@@ -842,7 +842,7 @@ class Contact(MessageBase):
         """
         The number of the contact's home telephone.
         """
-        return self._getStringStream('__substg1.0_3A09')
+        return self.getStringStream('__substg1.0_3A09')
 
     @functools.cached_property
     def homeTelephone2Number(self) -> Optional[Union[str, List[str]]]:
@@ -856,7 +856,7 @@ class Contact(MessageBase):
         """
         The initials of the contact.
         """
-        return self._getStringStream('__substg1.0_3A0A')
+        return self.getStringStream('__substg1.0_3A0A')
 
     @functools.cached_property
     def instantMessagingAddress(self) -> Optional[str]:
@@ -878,28 +878,28 @@ class Contact(MessageBase):
         The Integrated Services Digital Network (ISDN) telephone number of the
         contact.
         """
-        return self._getStringStream('__substg1.0_3A2D')
+        return self.getStringStream('__substg1.0_3A2D')
 
     @functools.cached_property
     def jobTitle(self) -> Optional[str]:
         """
         The job title of the contact.
         """
-        return self._getStringStream('__substg1.0_3A17')
+        return self.getStringStream('__substg1.0_3A17')
 
     @functools.cached_property
     def language(self) -> Optional[str]:
         """
         The language that the contact uses.
         """
-        return self._getStringStream('__substg1.0_3A0C')
+        return self.getStringStream('__substg1.0_3A0C')
 
     @functools.cached_property
     def lastModifiedBy(self) -> Optional[str]:
         """
         The name of the last user to modify the contact file.
         """
-        return self._getStringStream('__substg1.0_3FFA')
+        return self.getStringStream('__substg1.0_3FFA')
 
     @functools.cached_property
     def location(self) -> Optional[str]:
@@ -907,21 +907,21 @@ class Contact(MessageBase):
         The location of the contact. For example, this could be the building or
         office number of the contact.
         """
-        return self._getStringStream('__substg1.0_3A0D')
+        return self.getStringStream('__substg1.0_3A0D')
 
     @functools.cached_property
     def mailAddress(self) -> Optional[str]:
         """
         The complete mail address of the contact.
         """
-        return self._getStringStream('__substg1.0_3A15')
+        return self.getStringStream('__substg1.0_3A15')
 
     @functools.cached_property
     def mailAddressCountry(self) -> Optional[str]:
         """
         The country portion of the contact's mail address.
         """
-        return self._getStringStream('__substg1.0_3A26')
+        return self.getStringStream('__substg1.0_3A26')
 
     @functools.cached_property
     def mailAddressCountryCode(self) -> Optional[str]:
@@ -935,70 +935,70 @@ class Contact(MessageBase):
         """
         The locality or city portion of the contact's mail address.
         """
-        return self._getStringStream('__substg1.0_3A27')
+        return self.getStringStream('__substg1.0_3A27')
 
     @functools.cached_property
     def mailAddressPostalCode(self) -> Optional[str]:
         """
         The postal code portion of the contact's mail address.
         """
-        return self._getStringStream('__substg1.0_3A2A')
+        return self.getStringStream('__substg1.0_3A2A')
 
     @functools.cached_property
     def mailAddressPostOfficeBox(self) -> Optional[str]:
         """
         The number or identifier of the contact's mail post office box.
         """
-        return self._getStringStream('__substg1.0_3A2B')
+        return self.getStringStream('__substg1.0_3A2B')
 
     @functools.cached_property
     def mailAddressStateOrProvince(self) -> Optional[str]:
         """
         The state or province portion of the contact's mail address.
         """
-        return self._getStringStream('__substg1.0_3A28')
+        return self.getStringStream('__substg1.0_3A28')
 
     @functools.cached_property
     def mailAddressStreet(self) -> Optional[str]:
         """
         The street portion of the contact's mail address.
         """
-        return self._getStringStream('__substg1.0_3A29')
+        return self.getStringStream('__substg1.0_3A29')
 
     @functools.cached_property
     def managerName(self) -> Optional[str]:
         """
         The name of the contact's manager.
         """
-        return self._getStringStream('__substg1.0_3A4E')
+        return self.getStringStream('__substg1.0_3A4E')
 
     @functools.cached_property
     def middleName(self) -> Optional[str]:
         """
         The middle name(s) of the contact.
         """
-        return self._getStringStream('__substg1.0_3A44')
+        return self.getStringStream('__substg1.0_3A44')
 
     @functools.cached_property
     def mobileTelephoneNumber(self) -> Optional[str]:
         """
         The mobile telephone number of the contact.
         """
-        return self._getStringStream('__substg1.0_3A1C')
+        return self.getStringStream('__substg1.0_3A1C')
 
     @functools.cached_property
     def nickname(self) -> Optional[str]:
         """
         The nickname of the contanct.
         """
-        return self._getStringStream('__substg1.0_3A4F')
+        return self.getStringStream('__substg1.0_3A4F')
 
     @functools.cached_property
     def officeLocation(self) -> Optional[str]:
         """
         The location of the office that the contact works in.
         """
-        return self._getStringStream('__substg1.0_3A19')
+        return self.getStringStream('__substg1.0_3A19')
 
     @functools.cached_property
     def organizationalIDNumber(self) -> Optional[str]:
@@ -1006,7 +1006,7 @@ class Contact(MessageBase):
         The organizational ID number for the contact, such as an employee ID
         number.
         """
-        return self._getStringStream('__substg1.0_3A10')
+        return self.getStringStream('__substg1.0_3A10')
 
     @functools.cached_property
     def oscSyncEnabled(self) -> bool:
@@ -1028,7 +1028,7 @@ class Contact(MessageBase):
         """
         The country portion of the contact's other address.
         """
-        return self._getStringStream('__substg1.0_3A60')
+        return self.getStringStream('__substg1.0_3A60')
 
     @functools.cached_property
     def otherAddressCountryCode(self) -> Optional[str]:
@@ -1042,56 +1042,56 @@ class Contact(MessageBase):
         """
         The locality or city portion of the contact's other address.
         """
-        return self._getStringStream('__substg1.0_3A5F')
+        return self.getStringStream('__substg1.0_3A5F')
 
     @functools.cached_property
     def otherAddressPostalCode(self) -> Optional[str]:
         """
         The postal code portion of the contact's other address.
         """
-        return self._getStringStream('__substg1.0_3A61')
+        return self.getStringStream('__substg1.0_3A61')
 
     @functools.cached_property
     def otherAddressPostOfficeBox(self) -> Optional[str]:
         """
         The number or identifier of the contact's other post office box.
         """
-        return self._getStringStream('__substg1.0_3A64')
+        return self.getStringStream('__substg1.0_3A64')
 
     @functools.cached_property
     def otherAddressStateOrProvince(self) -> Optional[str]:
         """
         The state or province portion of the contact's other address.
         """
-        return self._getStringStream('__substg1.0_3A62')
+        return self.getStringStream('__substg1.0_3A62')
 
     @functools.cached_property
     def otherAddressStreet(self) -> Optional[str]:
         """
         The street portion of the contact's other address.
         """
-        return self._getStringStream('__substg1.0_3A63')
+        return self.getStringStream('__substg1.0_3A63')
 
     @functools.cached_property
     def otherTelephoneNumber(self) -> Optional[str]:
         """
         Contains the number of the contact's other telephone.
         """
-        return self._getStringStream('__substg1.0_3A1F')
+        return self.getStringStream('__substg1.0_3A1F')
 
     @functools.cached_property
     def pagerTelephoneNumber(self) -> Optional[str]:
         """
         The contact's pager telephone number.
         """
-        return self._getStringStream('__substg1.0_3A21')
+        return self.getStringStream('__substg1.0_3A21')
 
     @functools.cached_property
     def personalHomePage(self) -> Optional[str]:
         """
         The contact's personal web page UL.
         """
-        return self._getStringStream('__substg1.0_3A50')
+        return self.getStringStream('__substg1.0_3A50')
 
     @functools.cached_property
     def phoneticCompanyName(self) -> Optional[str]:
@@ -1160,7 +1160,7 @@ class Contact(MessageBase):
         """
         Contains the number of the contact's primary fax.
         """
-        return self._getStringStream('__substg1.0_3A23')
+        return self.getStringStream('__substg1.0_3A23')
 
     @functools.cached_property
     def primaryFaxOriginalDisplayName(self) -> Optional[str]:
@@ -1181,21 +1181,21 @@ class Contact(MessageBase):
         """
         Contains the number of the contact's primary telephone.
         """
-        return self._getStringStream('__substg1.0_3A1A')
+        return self.getStringStream('__substg1.0_3A1A')
 
     @functools.cached_property
     def profession(self) -> Optional[str]:
         """
         The profession of the contact.
         """
-        return self._getStringStream('__substg1.0_3A46')
+        return self.getStringStream('__substg1.0_3A46')
 
     @functools.cached_property
     def radioTelephoneNumber(self) -> Optional[str]:
         """
         Contains the number of the contact's radio telephone.
         """
-        return self._getStringStream('__substg1.0_3A1D')
+        return self.getStringStream('__substg1.0_3A1D')
 
     @functools.cached_property
     def referenceEntryID(self) -> Optional[EntryID]:
@@ -1211,21 +1211,21 @@ class Contact(MessageBase):
         """
         The name of the person who referred this contact to the user.
         """
-        return self._getStringStream('__substg1.0_3A47')
+        return self.getStringStream('__substg1.0_3A47')
 
     @functools.cached_property
     def spouseName(self) -> Optional[str]:
         """
         The name of the contact's spouse.
         """
-        return self._getStringStream('__substg1.0_3A48')
+        return self.getStringStream('__substg1.0_3A48')
 
     @functools.cached_property
     def surname(self) -> Optional[str]:
         """
         The surname of the contact.
         """
-        return self._getStringStream('__substg1.0_3A11')
+        return self.getStringStream('__substg1.0_3A11')
 
     @functools.cached_property
     def tddTelephoneNumber(self) -> Optional[str]:
@@ -1233,7 +1233,7 @@ class Contact(MessageBase):
         The telephone number for the contact's text telephone (TTY) or
         telecommunication device for the deaf (TDD).
         """
-        return self._getStringStream('__substg1.0_3A4B')
+        return self.getStringStream('__substg1.0_3A4B')
 
     @functools.cached_property
     def telexNumber(self) -> Optional[Union[str, List[str]]]:

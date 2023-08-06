@@ -8,8 +8,7 @@ import datetime
 import logging
 import pprint
 
-from typing import Any, Dict, Iterator, Optional, TypeVar, Union
-from warnings import warn
+from typing import Dict, Iterable, Iterator, Optional, Tuple, TypeVar, Union
 
 from .. import constants
 from ..enums import Intelligence, PropertiesType
@@ -96,7 +95,7 @@ class PropertiesStore:
     def __repr__(self) -> str:
         return self.__props.__repr__()
 
-    def get(self, name, default : _T = None) -> Union[PropBase, _T]:
+    def get(self, name : str, default : _T = None) -> Union[PropBase, _T]:
         """
         Retrieve the property of :param name:. Returns the value of
         :param default: if the property could not be found.
@@ -110,17 +109,10 @@ class PropertiesStore:
             logger.debug(self.__props)
             return default
 
-    def has_key(self, key) -> bool:
-        """
-        Checks if :param key: is a key in the properties dictionary.
-        """
-        warn('`Properties.has_key` is deprecated. Use the `in` keyword instead.', DeprecationWarning)
-        return key in self.__props
-
-    def items(self):
+    def items(self) -> Iterable[PropBase]:
         return self.__props.items()
 
-    def keys(self):
+    def keys(self) -> Iterable[str]:
         return self.__props.keys()
 
     def pprintKeys(self) -> None:
@@ -129,7 +121,7 @@ class PropertiesStore:
         """
         pprint.pprint(sorted(tuple(self.__props.keys())))
 
-    def values(self):
+    def values(self) -> Iterable[Tuple[str, PropBase]]:
         return self.__props.values()
 
     items.__doc__ = dict.items.__doc__

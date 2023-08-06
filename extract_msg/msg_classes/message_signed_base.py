@@ -77,7 +77,7 @@ class MessageSignedBase(MessageBase, Generic[_T]):
         """
         Returns the message body, if it exists.
         """
-        if (body := self._getStringStream('__substg1.0_1000')) is not None:
+        if (body := self.getStringStream('__substg1.0_1000')) is not None:
             pass
         elif self.signedBody:
             body = self.signedBody
@@ -99,7 +99,7 @@ class MessageSignedBase(MessageBase, Generic[_T]):
         """
         Returns the html body, if it exists.
         """
-        if (htmlBody := self._getStream('__substg1.0_10130102')) is not None:
+        if (htmlBody := self.getStream('__substg1.0_10130102')) is not None:
             pass
         elif self.signedHtmlBody:
             htmlBody = self.signedHtmlBody

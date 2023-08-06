@@ -47,11 +47,11 @@ class Named:
     def __init__(self, msg : MSGFile):
         self.__msg = makeWeakRef(msg)
         # Get the basic streams. If all are emtpy, then nothing to do.
-        guidStream = self._getStream('__substg1.0_00020102') or self._getStream('__substg1.0_00020102', False)
-        entryStream = self._getStream('__substg1.0_00030102') or self._getStream('__substg1.0_00030102', False)
+        guidStream = self.getStream('__substg1.0_00020102', False)
+        entryStream = self.getStream('__substg1.0_00030102', False)
         self.guidStream = guidStream
         self.entryStream = entryStream
-        self.namesStream = self._getStream('__substg1.0_00040102') or self._getStream('__substg1.0_00040102', False)
+        self.namesStream = self.getStream('__substg1.0_00040102', False)
 
         self.__propertiesDict : Dict[Tuple[str, str], NamedPropertyBase]= {}
         self.__properties : List[NamedPropertyBase] = []
@@ -139,9 +139,9 @@ class Named:
         :raises ReferenceError: The associated MSGFile instance has been garbage
             collected.
         """
-        if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Named instance has been garbage collected.')
-        return msg._getStream([self.__dir, filename], prefix = prefix)
+        import warnings
+        warnings.warn(':method _getStream: has been deprecated and moved to the public api. Use :method getStream: instead (remove the underscore).', DeprecationWarning)
+        return self.getStream(filename, prefix)
 
     def _getStringStream(self, filename, prefix = True) -> Optional[str]:
         """
@@ -157,9 +157,9 @@ class Named:
         :raises ReferenceError: The associated MSGFile instance has been garbage
             collected.
         """
-        if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Named instance has been garbage collected.')
-        return msg._getStringStream([self.__dir, filename], prefix = prefix)
+        import warnings
+        warnings.warn(':method _getStringStream: has been deprecated and moved to the public api. Use :method getStringStream: instead (remove the underscore).', DeprecationWarning)
+        return self.getStringStream(filename, prefix)
 
     def exists(self, filename) -> bool:
         """
@@ -193,6 +193,41 @@ class Named:
         except KeyError:
             return default
 
+    def getStream(self, filename, prefix = True) -> Optional[bytes]:
+        """
+        Gets a binary representation of the requested filename.
+
+        This should ALWAYS return a bytes object if it was found, otherwise
+        returns None.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
+        """
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Named instance has been garbage collected.')
+        return msg.getStream([self.__dir, filename], prefix = prefix)
+
+    def getStringStream(self, filename, prefix = True) -> Optional[str]:
+        """
+        Gets a string representation of the requested filename.
+
+        Rather than the full filename, you should only feed this function the
+        filename sans the type. So if the full name is "__substg1.0_001A001F",
+        the filename this function should receive should be "__substg1.0_001A".
+
+        This should ALWAYS return a string if it was found, otherwise returns
+        None.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
+        """
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Named instance has been garbage collected.')
+        return msg.getStringStream([self.__dir, filename], prefix = prefix)
+
+    def items(self) -> Iterable[NamedPropertyBase]:
+        return self.__propertiesDict.items()
+
     def keys(self) -> Iterable[Tuple[str, str]]:
         return self.__propertiesDict.keys()
 
@@ -202,7 +237,7 @@ class Named:
         """
         pprint.pprint(sorted(self.__propertiesDict.keys()))
 
-    def values(self):
+    def values(self) -> Iterable[Tuple[Tuple[str, str], NamedPropertyBase]]:
         return self.__propertiesDict.values()
 
     @property

@@ -417,7 +417,7 @@ class CalendarBase(MessageBase):
         """
         The meeting organizer.
         """
-        return self._getStringStream('__substg1.0_0042')
+        return self.getStringStream('__substg1.0_0042')
 
     @functools.cached_property
     def ownerAppointmentID(self) -> Optional[int]:

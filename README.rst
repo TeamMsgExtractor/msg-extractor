@@ -198,6 +198,23 @@ installed:
 * ``all``: Installs all of the extras.
 * ``mime``: Installs dependency used for mimetype generation when a mimetype is not specified.
 
+Versioning
+----------
+
+This module uses Semantic Versioning, however it has not always done so. All versions greater than or equal to 0.40.* conform successfully. As the package is currently in major version zero (0.*.*), anything MAY change at any time, as per point 4 of the SemVer specification. However, I, Destiny, am aware of the module's usage in other packages and code, and so I have taken efforts to make the versioning more reliable.
+
+Any change to the minor version MUST be considered a potentially breaking change, and the changelog should be checked before assuming the API will function in the way it did in the previous minor version. I do, however, try to keep the API relatively stable between minor versions, so most typical usage is likely to remain entirely unaffected.
+
+Any change to a patch version before the 1.0.0 release SHOULD either add functionality or have no visible difference in usage, aside from changes to the typing infomation or from a bug fix correcting the data that a component created.
+
+In addition to the above conditions, it must be noted that any class, variable, function, etc., that is preceded by one or more underscores, excluding items preceded by two underscores and also proceeded by two underscores, MUST NOT be considered part of the public api. These methods may change at any time, in any way.
+
+I am aware of the F.A.Q. question that suggests that I should probably have pushed the module to a 1.0.0 release due to its usage in production, however there are a number of different items on the TODO list that I feel should be completed before that time. While some are simply important features I believe should exist, others are overhauls to sections of the public API that have needed careful fixing for quite a while, fixes that have slowly been happening throughout the versions. An important change was made in the 0.45.0 release which deprecates a large number of commonly used private functions and created more stable versions of them in the public API.
+
+Additionally, my focus on versioning info has revealed that some of the dependencies are still in major version 0 *or* do not necessarily conform to Semantic Versioning. As such, these packages are more tightly constrained on what versions are considered acceptable, and careful consideration should be taken before extending the accepted range of versions.
+
+Details on Semantic Versioning can be found at `semver.org`_.
+
 Todo
 ----
 
@@ -268,3 +285,4 @@ your access to the newest major version of extract-msg.
 .. _wiki: https://github.com/TeamMsgExtractor/msg-extractor/wiki
 .. _Read the Docs: https://msg-extractor.rtfd.io/
 .. _Changelog: https://github.com/TeamMsgExtractor/msg-extractor/blob/master/CHANGELOG.md
+.. _`semver.org`: https://semver.org

@@ -32,17 +32,17 @@ class OutlookImageDIB(CustomAttachmentHandler):
     def __init__(self, attachment : AttachmentBase):
         super().__init__(attachment)
         # First we need to get the mailstream.
-        stream = attachment._getStream('__substg1.0_3701000D/\x03MailStream')
+        stream = attachment.getStream('__substg1.0_3701000D/\x03MailStream')
         if not stream:
             raise ValueError('MailStream could not be found.')
         if len(stream) != 12:
             raise ValueError('MailStream is the wrong length.')
         # Next get the bitmap data.
-        self.__data = attachment._getStream('__substg1.0_3701000D/CONTENTS')
+        self.__data = attachment.getStream('__substg1.0_3701000D/CONTENTS')
         if not self.__data:
             raise ValueError('Bitmap data could not be read for Outlook signature.')
         # Get the OLE data.
-        oleStream = attachment._getStream('__substg1.0_3701000D/\x01Ole')
+        oleStream = attachment.getStream('__substg1.0_3701000D/\x01Ole')
         if not oleStream:
             raise ValueError('OLE stream could not be found.')
 

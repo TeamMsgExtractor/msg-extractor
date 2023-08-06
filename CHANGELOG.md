@@ -1,11 +1,16 @@
-**v0.??.??**
+**v0.45.0**
 * Updated typing information for some functions and classes.
 * Fixed a bug with `MessageSignedBase.attachments` that would cause it to return None instead of an empty list if the number of normal attachments was 0 was the error behavior was set to ignore violations of the standard.
 * Updated `MessageSignedBase.attachments` to use `functools.cached_property` instead of `property`.
 * Fixed spelling errors in some exception strings.
 * Made `NamedPropertyBase` a subclass of `abc.ABC`.
-* Cleaned up some of the code for named properties to remove unused variables.
+* Cleaned up some of the code for named properties to remove unused variables and remove inefficient code.
 * Changed `PropBase` to be a subclass of `abc.ABC`.
+* Added detailed versioning info to the README.
+* Deprecated many private functions, including methods on many of the classes. Of primary note are `_getStream` and `_getStringStream`, which have been moved to the public API as `getStream` and `getStringStream`. Any deprecated functions still exist and will forward to a public API function if they are not being removed. Additionally, all internal usage of them has been removed. This change is one of the big preparations that is needed for the `1.0.0` release.
+    * As mentioned, a number of these deprecated functions have been moved to the public api. It is recommended that you run tests with your code after enabling deprecation warnings to see what should be changed.
+* Removed items deprecated in or before `0.42.0`.
+* Changed the API for the private method `_genRecipient`. This is not intended for use outside of the module *except* for subclasses. The change removed the allowance of ints for the second argument, requiring that it be a valid enum type.
 
 **v0.44.0**
 * Fixed a bug that caused `MessageBase.headerInit` to always return `False` after the 0.42.0 update.

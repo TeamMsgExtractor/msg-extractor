@@ -104,9 +104,9 @@ class AttachmentBase(abc.ABC):
         :raises ReferenceError: The associated MSGFile instance has been garbage
             collected.
         """
-        if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
-        return msg._getStream([self.__dir, filename])
+        import warnings
+        warnings.warn(':method _getStream: has been deprecated and moved to the public api. Use :method getStream: instead (remove the underscore).', DeprecationWarning)
+        return self.getStream(filename)
 
     def _getStreamAs(self, streamID, stringStream : bool = True, overrideClass = None, preserveNone : bool = True):
         """
@@ -124,9 +124,9 @@ class AttachmentBase(abc.ABC):
             If this is changed to False, then the value will be used regardless.
         """
         if stringStream:
-            value = self._getStringStream(streamID)
+            value = self.getStringStream(streamID)
         else:
-            value = self._getStream(streamID)
+            value = self.getStream(streamID)
 
         # Check if we should be overriding the data type for this instance.
         if overrideClass is not None:
@@ -146,9 +146,9 @@ class AttachmentBase(abc.ABC):
         :raises ReferenceError: The associated MSGFile instance has been garbage
             collected.
         """
-        if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
-        return msg._getStringStream([self.__dir, filename])
+        import warnings
+        warnings.warn(':method _getStringStream: has been deprecated and moved to the public api. Use :method getStringStream: instead (remove the underscore).', DeprecationWarning)
+        return self.getStringStream(filename)
 
     def _getTypedAs(self, _id : str, overrideClass = None, preserveNone : bool = True):
         """
@@ -320,6 +320,35 @@ class AttachmentBase(abc.ABC):
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
         return msg.existsTypedProperty(id, self.__dir, _type, True, self.__props)
 
+    def getStream(self, filename) -> Optional[bytes]:
+        """
+        Gets a binary representation of the requested filename.
+
+        This should ALWAYS return a bytes object if it was found, otherwise
+        returns None.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
+        """
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+        return msg.getStream([self.__dir, filename])
+
+    def getStringStream(self, filename) -> Optional[str]:
+        """
+        Gets a string representation of the requested filename.
+        Checks for both ASCII and Unicode representations and returns
+        a value if possible.  If there are both ASCII and Unicode
+        versions, then :param prefer: specifies which will be
+        returned.
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
+        """
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+        return msg.getStringStream([self.__dir, filename])
+
     @abc.abstractmethod
     def getFilename(self, **kwargs) -> str:
         """
@@ -366,7 +395,7 @@ class AttachmentBase(abc.ABC):
         b'*\\x86H\\x86\\xf7\\x14\\x03\\x0b\\x01' if encoded in MacBinary format,
         otherwise it is unset.
         """
-        return self._getStream('__substg1.0_37020102')
+        return self.getStream('__substg1.0_37020102')
 
     @functools.cached_property
     def additionalInformation(self) -> Optional[str]:
@@ -377,14 +406,14 @@ class AttachmentBase(abc.ABC):
         four-letter Macintosh file creator code and ":TYPE" is a four-letter
         Macintosh type code.
         """
-        return self._getStringStream('__substg1.0_370F')
+        return self.getStringStream('__substg1.0_370F')
 
     @functools.cached_property
     def cid(self) -> Optional[str]:
         """
         Returns the Content ID of the attachment, if it exists.
         """
-        return self._getStringStream('__substg1.0_3712')
+        return self.getStringStream('__substg1.0_3712')
 
     @cached_property
     def clsid(self) -> str:
@@ -454,7 +483,7 @@ class AttachmentBase(abc.ABC):
         """
         Returns the display name of the folder.
         """
-        return self._getStringStream('__substg1.0_3001')
+        return self.getStringStream('__substg1.0_3001')
 
     @functools.cached_property
     def exceptionReplaceTime(self) -> Optional[datetime.datetime]:
@@ -471,7 +500,7 @@ class AttachmentBase(abc.ABC):
         """
         The reported extension for the file.
         """
-        return self._getStringStream('__substg1.0_3703')
+        return self.getStringStream('__substg1.0_3703')
 
     @functools.cached_property
     def hidden(self) -> bool:
@@ -492,21 +521,21 @@ class AttachmentBase(abc.ABC):
         """
         Returns the long file name of the attachment, if it exists.
         """
-        return self._getStringStream('__substg1.0_3707')
+        return self.getStringStream('__substg1.0_3707')
 
     @functools.cached_property
     def longPathname(self) -> Optional[str]:
         """
         The fully qualified path and file name with extension.
         """
-        return self._getStringStream('__substg1.0_370D')
+        return self.getStringStream('__substg1.0_370D')
 
     @functools.cached_property
     def mimetype(self) -> Optional[str]:
         """
         The content-type mime header of the attachment, if specified.
         """
-        return tryGetMimetype(self, self._getStringStream('__substg1.0_370E'))
+        return tryGetMimetype(self, self.getStringStream('__substg1.0_370E'))
 
     @property
     def msg(self) -> MSGFile:
@@ -543,7 +572,7 @@ class AttachmentBase(abc.ABC):
         The class name of an object that can display the contents of the
         message.
         """
-        return self._getStringStream('__substg1.0_371A')
+        return self.getStringStream('__substg1.0_371A')
 
     @property
     def props(self) -> PropertiesStore:
@@ -566,7 +595,7 @@ class AttachmentBase(abc.ABC):
         """
         Returns the short file name of the attachment, if it exists.
         """
-        return self._getStringStream('__substg1.0_3704')
+        return self.getStringStream('__substg1.0_3704')
 
     @property
     def treePath(self) -> List[weakref.ReferenceType]:

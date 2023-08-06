@@ -112,14 +112,6 @@ class MSGFile:
         self.__attachmentsDelayed = kwargs.get('delayAttachments', False)
         self.__attachmentsReady = False
         self.__errorBehavior = ErrorBehavior(kwargs.get('errorBehavior', ErrorBehavior.THROW))
-        if self.__errorBehavior is None:
-            if 'attachmentErrorBehavior' in kwargs:
-                import warnings
-                warnings.warn(':param attachmentErrorsBehavior: is deprecated. Use :param ErrorBehavior: instead.', DeprecationWarning)
-
-                # Get the error behavior and call the old class to convert it if
-                # necessary.
-                self.__errorBehavior = AttachErrorBehavior(kwargs['attachmentErrorBehavior'])
 
         if overrideEncoding is not None:
             codecs.lookup(overrideEncoding)
@@ -179,7 +171,7 @@ class MSGFile:
             self.__prefixList = prefixl
             self.__prefixLen = len(prefixl)
             if prefix and not filename:
-                filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix = False)
+                filename = self.getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix = False)
             if filename:
                 self.filename = filename
             elif hasLen(path):
@@ -279,13 +271,9 @@ class MSGFile:
         This should ALWAYS return a bytes object if it was found, otherwise
         returns None.
         """
-        filename = self.fixPath(filename, prefix)
-        if self.exists(filename, False):
-            with self.__ole.openstream(filename) as stream:
-                return stream.read() or b''
-        else:
-            logger.info(f'Stream "{filename}" was requested but could not be found. Returning `None`.')
-            return None
+        import warnings
+        warnings.warn(':method _getStream: has been deprecated and moved to the public api. Use :method getStream: instead (remove the underscore).', DeprecationWarning)
+        return self.getStream(filename, prefix)
 
     def _getStreamAs(self, streamID, stringStream : bool = True, overrideClass = None, preserveNone : bool = True):
         """
@@ -303,9 +291,9 @@ class MSGFile:
             If this is changed to False, then the value will be used regardless.
         """
         if stringStream:
-            value = self._getStringStream(streamID)
+            value = self.getStringStream(streamID)
         else:
-            value = self._getStream(streamID)
+            value = self.getStream(streamID)
 
         # Check if we should be overriding the data type for this instance.
         if overrideClass is not None:
@@ -325,12 +313,9 @@ class MSGFile:
         This should ALWAYS return a string if it was found, otherwise returns
         None.
         """
-        filename = self.fixPath(filename, prefix)
-        if self.areStringsUnicode:
-            return windowsUnicode(self._getStream(filename + '001F', prefix = False))
-        else:
-            tmp = self._getStream(filename + '001E', prefix = False)
-            return None if tmp is None else tmp.decode(self.stringEncoding)
+        import warnings
+        warnings.warn(':method _getStringStream: has been deprecated and moved to the public api. Use :method getStringStream: instead (remove the underscore).', DeprecationWarning)
+        return self.getStringStream(filename, prefix)
 
     def _getTypedAs(self, _id : str, overrideClass = None, preserveNone : bool = True):
         """
@@ -412,7 +397,7 @@ class MSGFile:
         filename = self.fixPath(filename, prefix)
         for x in (filename + _type,) if _type is not None else self.slistDir():
             if x.startswith(filename) and x.find('-') == -1:
-                contents = self._getStream(x, False)
+                contents = self.getStream(x, False)
                 if contents is None:
                     continue
                 if len(contents) == 0:
@@ -436,7 +421,7 @@ class MSGFile:
                         if self.exists(x + '-00000000', False):
                             for y in range(streams):
                                 if self.exists(x + '-' + properHex(y, 8), False):
-                                    extras.append(self._getStream(x + '-' + properHex(y, 8), False))
+                                    extras.append(self.getStream(x + '-' + properHex(y, 8), False))
                     elif _type in ('1002', '1003', '1004', '1005', '1007', '1014', '1040', '1048'):
                         extras = divide(contents, (2 if _type in constants.MULTIPLE_2_BYTES else 4 if _type in constants.MULTIPLE_4_BYTES else 8 if _type in constants.MULTIPLE_8_BYTES else 16))
                         contents = streams
@@ -470,7 +455,7 @@ class MSGFile:
         for dir_ in self.listDir():
             if dir_[-1].endswith('001E') or dir_[-1].endswith('001F'):
                 print('Directory: ' + str(dir_[:-1]))
-                print(f'Contents: {self._getStream(dir_)}')
+                print(f'Contents: {self.getStream(dir_)}')
 
     def exists(self, inp, prefix : bool = True) -> bool:
         """
@@ -559,6 +544,39 @@ class MSGFile:
             inp = self.__prefix + inp
         return inp
 
+    def getStream(self, filename, prefix : bool = True) -> Optional[bytes]:
+        """
+        Gets a binary representation of the requested filename.
+
+        This should ALWAYS return a bytes object if it was found, otherwise
+        returns None.
+        """
+        filename = self.fixPath(filename, prefix)
+        if self.exists(filename, False):
+            with self.__ole.openstream(filename) as stream:
+                return stream.read() or b''
+        else:
+            logger.info(f'Stream "{filename}" was requested but could not be found. Returning `None`.')
+            return None
+
+    def getStringStream(self, filename, prefix : bool = True) -> Optional[str]:
+        """
+        Gets a string representation of the requested filename.
+
+        Rather than the full filename, you should only feed this function the
+        filename sans the type. So if the full name is "__substg1.0_001A001F",
+        the filename this function should receive should be "__substg1.0_001A".
+
+        This should ALWAYS return a string if it was found, otherwise returns
+        None.
+        """
+        filename = self.fixPath(filename, prefix)
+        if self.areStringsUnicode:
+            return windowsUnicode(self.getStream(filename + '001F', prefix = False))
+        else:
+            tmp = self.getStream(filename + '001E', prefix = False)
+            return None if tmp is None else tmp.decode(self.stringEncoding)
+
     def listDir(self, streams : bool = True, storages : bool = False, includePrefix : bool = True) -> List[List[str]]:
         """
         Replacement for OleFileIO.listdir that runs at the current prefix
@@ -636,7 +654,7 @@ class MSGFile:
 
                 # Save contents of directory.
                 with zfile.open(sysdir + '/' + filename, 'w') as f:
-                    data = self._getStream(dir_)
+                    data = self.getStream(dir_)
                     # Specifically check for None. If this is bytes we still want to do this line.
                     # There was actually this weird issue where for some reason data would be bytes
                     # but then also simultaneously register as None?
@@ -701,7 +719,7 @@ class MSGFile:
         """
         The class type of the MSG file.
         """
-        return self._getStringStream('__substg1.0_001A')
+        return self.getStringStream('__substg1.0_001A')
 
     @functools.cached_property
     def commonEnd(self) -> Optional[datetime.datetime]:
@@ -861,7 +879,7 @@ class MSGFile:
         """
         Returns the Properties instance used by the MSGFile instance.
         """
-        if not (stream := self._getStream('__properties_version1.0')):
+        if not (stream := self.getStream('__properties_version1.0')):
             if ErrorBehavior.STANDARDS_VIOLATION in self.__errorBehavior:
                 logger.error('File does not contain a property stream.')
             else:

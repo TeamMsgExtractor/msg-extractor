@@ -1811,17 +1811,3 @@ class _EnumDeprecator:
 
         return self.__new.__getitem__(self.__nameConv.get(name, name))
 
-
-
-
-# Deprecated Enums. These are not exported but may be directly accessed.
-AttachErrorBehavior = _EnumDeprecator(
-    'AttachErrorBehavior',
-    ErrorBehavior,
-    {
-        'BROKEN': 'ATTACH_SUPPRESS_ALL',
-        'NOT_IMPLEMENTED': 'ATTACH_NOT_IMPLEMENTED',
-    },
-    {
-        2: 3
-    })
