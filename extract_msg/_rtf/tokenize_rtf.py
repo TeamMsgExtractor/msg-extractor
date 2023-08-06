@@ -99,7 +99,7 @@ def _finishTag(startText : bytes, reader : io.BytesIO) -> Tuple[bytes, Optional[
     return startText, name, param, nextChar
 
 
-def _readControl(startChar : bytes, reader : io.BytesIO) -> Tuple[Tuple[Token], bytes]:
+def _readControl(startChar : bytes, reader : io.BytesIO) -> Tuple[Tuple[Token, ...], bytes]:
     """
     Attempts to read the next data as a control, returning as many tokens
     as necessary.
@@ -163,7 +163,7 @@ def _readControl(startChar : bytes, reader : io.BytesIO) -> Tuple[Tuple[Token], 
             return (Token(startChar, TokenType.SYMBOL),), reader.read(1)
 
 
-def _readText(startChar : bytes, reader : io.BytesIO) -> Tuple[Tuple[Token], bytes]:
+def _readText(startChar : bytes, reader : io.BytesIO) -> Tuple[Tuple[Token, ...], bytes]:
     """
     Attempts to read the next data as text.
     """

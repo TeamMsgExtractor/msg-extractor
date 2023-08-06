@@ -30,9 +30,9 @@ class DirectoryEntry:
     Originals should be inaccessible outside of the class.
     """
     name : str = ''
-    rightChild : 'DirectoryEntry' = None
-    leftChild : 'DirectoryEntry' = None
-    childTreeRoot : 'DirectoryEntry' = None
+    rightChild : DirectoryEntry = None
+    leftChild : DirectoryEntry = None
+    childTreeRoot : DirectoryEntry = None
     stateBits : int = 0
     creationTime : int = 0
     modifiedTime : int = 0

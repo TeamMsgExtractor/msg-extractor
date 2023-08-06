@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 __all__ = [
     'AddressBookType',
     'AppointmentAuxilaryFlag',
@@ -1164,7 +1167,7 @@ class Gender(enum.IntEnum):
 
 class IconIndex(enum.IntEnum):
     @classmethod
-    def tryMake(cls, value : int) -> Union['IconIndex', int]:
+    def tryMake(cls, value : int) -> Union[IconIndex, int]:
         """
         Try to make an instance, returning the value on failure.
         """
@@ -1431,7 +1434,7 @@ class RecurDOW(enum.IntEnum):
 
 class RecurEndType(enum.IntEnum):
     @classmethod
-    def fromInt(cls, value) -> 'RecurEndType':
+    def fromInt(cls, value) -> RecurEndType:
         """
         Some enum values CAN be created from more than one int, so handle that.
         """
@@ -1700,7 +1703,7 @@ class TaskRequestType(enum.IntEnum):
     UPDATE: Task has been updated.
     """
     @classmethod
-    def fromClassType(cls, classType : str) -> 'TaskRequestType':
+    def fromClassType(cls, classType : str) -> TaskRequestType:
         """
         Convert a class type string into a TaskRequestType.
         """
