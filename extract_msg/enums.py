@@ -73,7 +73,7 @@ __all__ = [
 
 import enum
 
-from typing import Union
+from typing import Dict, Union
 
 
 class AddressBookType(enum.Enum):
@@ -1776,7 +1776,7 @@ class _EnumDeprecator:
     Special class for handling deprecated enums in a way that shouldn't break
     existing code, including code for checking `is` on a member of the enum.
     """
-    def __init__(self, oldClassName : str, newClass : enum.Enum, nameConversion : dict = {}, valueConversion : dict = {}):
+    def __init__(self, oldClassName : str, newClass : enum.Enum, nameConversion : Dict = {}, valueConversion : Dict = {}):
         """
         :param oldClassName: The name to use in the deprecation message.
         :param newClass: The new enum class to look for the value in.
