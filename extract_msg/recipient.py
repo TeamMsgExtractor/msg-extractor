@@ -187,12 +187,19 @@ class Recipient:
         FIXED_LENGTH_PROPS_STRING or VARIABLE_LENGTH_PROPS_STRING.
         """
         verifyPropertyId(propertyID)
-        verifyType(_type)
-        propertyID = propertyID.upper()
-        for x in (propertyID + _type,) if _type is not None else self.props:
-            if x.startswith(propertyID):
-                prop = self.props[x]
-                return True, (prop.value if isinstance(prop, FixedLengthProp) else prop)
+        if _type:
+            verifyType(_type)
+            prop = self.props.get(propertyID + _type)
+            if isinstance(prop, FixedLengthProp):
+                return True, prop.value
+            else:
+                return False, None
+        else:
+            props = self.props.getProperties(propertyID)
+            for prop in props:
+                if isinstance(prop, FixedLengthProp):
+                    return True, prop.value
+
         return False, None
 
     def _getTypedStream(self, filename, _type = None):

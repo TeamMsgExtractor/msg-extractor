@@ -225,7 +225,7 @@ class Named:
             raise ReferenceError('The msg file for this Named instance has been garbage collected.')
         return msg.getStringStream([self.__dir, filename], prefix = prefix)
 
-    def items(self) -> Iterable[NamedPropertyBase]:
+    def items(self) -> Iterable[Tuple[Tuple[str, str], NamedPropertyBase]]:
         return self.__propertiesDict.items()
 
     def keys(self) -> Iterable[Tuple[str, str]]:
@@ -237,7 +237,7 @@ class Named:
         """
         pprint.pprint(sorted(self.__propertiesDict.keys()))
 
-    def values(self) -> Iterable[Tuple[Tuple[str, str], NamedPropertyBase]]:
+    def values(self) -> Iterable[NamedPropertyBase]:
         return self.__propertiesDict.values()
 
     @property

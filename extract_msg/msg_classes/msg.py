@@ -357,7 +357,7 @@ class MSGFile:
             found, result = self._getTypedProperty(_id, _type)
             return result if found else None
 
-    def _getTypedProperty(self, propertyID : str, _type = None) -> Tuple[bool, Optional[object]]:
+    def _getTypedProperty(self, propertyID : str, _type = None) -> Tuple[bool, Optional[Any]]:
         """
         Gets the property with the specified id as the type that it is supposed
         to be. :param id: MUST be a 4 digit hexadecimal string.
@@ -367,15 +367,22 @@ class MSGFile:
         FIXED_LENGTH_PROPS_STRING or VARIABLE_LENGTH_PROPS_STRING.
         """
         verifyPropertyId(propertyID)
-        verifyType(_type)
-        propertyID = propertyID.upper()
-        for x in (propertyID + _type,) if _type is not None else self.props:
-            if x.startswith(propertyID):
-                prop = self.props[x]
-                return True, (prop.value if isinstance(prop, FixedLengthProp) else prop)
+        if _type:
+            verifyType(_type)
+            prop = self.props.get(propertyID + _type)
+            if isinstance(prop, FixedLengthProp):
+                return True, prop.value
+            else:
+                return False, None
+        else:
+            props = self.props.getProperties(propertyID)
+            for prop in props:
+                if isinstance(prop, FixedLengthProp):
+                    return True, prop.value
+
         return False, None
 
-    def _getTypedStream(self, filename, prefix : bool = True, _type = None):
+    def _getTypedStream(self, filename, prefix : bool = True, _type = None) -> Tuple[bool, Optional[Any]]:
         """
         Gets the contents of the specified stream as the type that it is
         supposed to be.
@@ -396,9 +403,8 @@ class MSGFile:
         verifyType(_type)
         filename = self.fixPath(filename, prefix)
         for x in (filename + _type,) if _type is not None else self.slistDir():
-            if x.startswith(filename) and x.find('-') == -1:
-                contents = self.getStream(x, False)
-                if contents is None:
+            if x.startswith(filename) and '-' not in x:
+                if (contents := self.getStream(x, False)) is None:
                     continue
                 if len(contents) == 0:
                     return True, None # We found the file, but it was empty.

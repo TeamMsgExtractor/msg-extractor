@@ -221,8 +221,6 @@ def tokenizeRTF(data : bytes, validateStart : bool = True) -> None:
         tokens = []
         nextChar = reader.read(1)
 
-    newToken = None
-
     # At every iteration, so long as there is more data, nextChar should be
     # set. As such, use it to determine what kind of data to try to read,
     # using the delimeter of that type of data to know what to do next.

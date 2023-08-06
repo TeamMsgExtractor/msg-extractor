@@ -8,7 +8,9 @@ import datetime
 import logging
 import pprint
 
-from typing import Dict, Iterable, Iterator, Optional, Tuple, TypeVar, Union
+from typing import (
+        Dict, Iterable, Iterator, List, Optional, Tuple, TypeVar, Union
+    )
 
 from .. import constants
 from ..enums import Intelligence, PropertiesType
@@ -36,6 +38,9 @@ class PropertiesStore:
         self.__rawData = data
         self.__len = len(data)
         self.__props : Dict[str, PropBase] = {}
+        # This maps short IDs to all properties that use that ID. More than one
+        # property with the same ID but a different type may exist.
+        self.__idMapping : Dict[str, List[str]] = {}
         self.__naid = None
         self.__nrid = None
         self.__ac = None
@@ -73,6 +78,12 @@ class PropertiesStore:
             if len(st) == 16:
                 prop = createProp(st)
                 self.__props[prop.name] = prop
+
+                # Add the ID to our mapping list.
+                id_ = prop.name[:4]
+                if id_ not in self.__idMapping:
+                    self.__idMapping[id_] = []
+                self.__idMapping[id_].append(prop.name)
             else:
                 logger.warning(f'Found stream from divide that was not 16 bytes: {st}. Ignoring.')
         self.__pl = len(self.__props)
@@ -80,8 +91,10 @@ class PropertiesStore:
     def __contains__(self, key) -> bool:
         return self.__props.__contains__(key)
 
-    def __getitem__(self, key : str) -> PropBase:
-        return self.__props.__getitem__(key)
+    def __getitem__(self, key : Union[str, int]) -> PropBase:
+        if (found := self._mapId(key)):
+            return self.__props.__getitem__(found)
+        raise KeyError(key)
 
     def __iter__(self) -> Iterator[str]:
         return self.__props.__iter__()
@@ -95,21 +108,73 @@ class PropertiesStore:
     def __repr__(self) -> str:
         return self.__props.__repr__()
 
-    def get(self, name : str, default : _T = None) -> Union[PropBase, _T]:
+    def _mapId(self, id_ : Union[int, str]) -> str:
+        """
+        Converts an input into an appropriate property ID.
+
+        This is a complex function, allowing the user to specify an int or
+        string. If the input is a string that is not 4 characters, it is
+        returned. Otherwise, a series of checks will be
+        performed. If the input is an int that is less than 0x10000, it is
+        considered a property ID without a type and converted to a 4 character
+        hexadecimal string. Otherwise, it is converted to an 8 character
+        hexadecimal string and returned.
+
+        Once the input is a 4 character string from the other paths, it will
+        then be checked against the list of found property IDs, and the first
+        full ID will be returned.
+
+        If a valid conversion could not be done, returns an empty string.
+
+        All strings returned will be uppercase.
+        """
+        # See if we need to convert to 4 character string and map or if we just
+        # need to return quickly.
+        if isinstance(id_, str):
+            id_ = id_.upper()
+            if len(id_) != 4:
+                return id_
+        elif isinstance(id_, int):
+            if id_ >= 0x10000:
+                return f'{id_:08X}'
+            else:
+                id_ = f'{id_:04X}'
+        else:
+            return ''
+
+        return self.__idMapping.get(id_, ('',))[0]
+
+    def get(self, name : Union[str, int], default : _T = None) -> Union[PropBase, _T]:
         """
         Retrieve the property of :param name:. Returns the value of
         :param default: if the property could not be found.
         """
-        try:
-            return self.__props[name]
-        except KeyError:
-            # DEBUG
-            logger.debug('KeyError exception.')
-            logger.debug(properHex(self.__rawData))
-            logger.debug(self.__props)
+        if (name := self._mapId(name)):
+            return self.__props.get(name, default)
+        else:
             return default
 
-    def items(self) -> Iterable[PropBase]:
+    def getProperties(self, id_ : Union[str, int]) -> List[PropBase]:
+        """
+        Gets all properties with the specified ID.
+
+        :param ID: An 4 digit hexadecimal string or an int that is less than
+            0x10000.
+        """
+        if isinstance(id_, int):
+            if id_ >= 0x10000:
+                return []
+            else:
+                id_ = f'{id_:04X}'
+        elif isinstance(id_, str):
+            if len(id_) == 4:
+                id_ = id_.upper()
+            else:
+                return []
+
+        return [self[x] for x in self.__idMapping.get(id_, [])]
+
+    def items(self) -> Iterable[Tuple[str, PropBase]]:
         return self.__props.items()
 
     def keys(self) -> Iterable[str]:
@@ -121,7 +186,7 @@ class PropertiesStore:
         """
         pprint.pprint(sorted(tuple(self.__props.keys())))
 
-    def values(self) -> Iterable[Tuple[str, PropBase]]:
+    def values(self) -> Iterable[PropBase]:
         return self.__props.values()
 
     items.__doc__ = dict.items.__doc__

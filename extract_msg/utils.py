@@ -1199,7 +1199,7 @@ def verifyPropertyId(id : str) -> None:
             raise InvaildPropertyIdError('ID was not a 4 digit hexadecimal string')
 
 
-def verifyType(_type) -> str:
+def verifyType(_type) -> None:
     """
     Verifies that the type is valid. Raises an exception if it is not.
 
