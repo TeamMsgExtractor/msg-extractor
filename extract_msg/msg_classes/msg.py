@@ -39,7 +39,7 @@ from ..properties.prop import FixedLengthProp
 from ..properties.properties_store import PropertiesStore
 from ..utils import  (
         divide, hasLen, inputToMsgPath, makeWeakRef, msgPathToString,
-        parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
+        parseType, verifyPropertyId, verifyType, windowsUnicode
     )
 
 
@@ -426,8 +426,8 @@ class MSGFile:
                     if _type in ('101F', '101E', '1102'):
                         if self.exists(x + '-00000000', False):
                             for y in range(streams):
-                                if self.exists(x + '-' + properHex(y, 8), False):
-                                    extras.append(self.getStream(x + '-' + properHex(y, 8), False))
+                                if self.exists((name := f'{x}-{y:08X}'), False):
+                                    extras.append(self.getStream(name, False))
                     elif _type in ('1002', '1003', '1004', '1005', '1007', '1014', '1040', '1048'):
                         extras = divide(contents, (2 if _type in constants.MULTIPLE_2_BYTES else 4 if _type in constants.MULTIPLE_4_BYTES else 8 if _type in constants.MULTIPLE_8_BYTES else 16))
                         contents = streams

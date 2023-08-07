@@ -15,7 +15,7 @@ from typing import (
 from .. import constants
 from ..enums import Intelligence, PropertiesType
 from .prop import createProp, PropBase
-from ..utils import divide, properHex
+from ..utils import divide
 
 
 logger = logging.getLogger(__name__)
