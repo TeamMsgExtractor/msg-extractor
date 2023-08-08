@@ -19,7 +19,7 @@ import zipfile
 
 import olefile
 
-from typing import Any, Callable, cast, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, cast, Dict, List, Optional, Tuple, Union
 
 from .. import constants
 from ..attachments import (
@@ -27,8 +27,8 @@ from ..attachments import (
     )
 from ..encoding import lookupCodePage
 from ..enums import (
-        AttachErrorBehavior, ErrorBehavior, InsecureFeatures, Importance,
-        Priority, PropertiesType, SaveType, Sensitivity, SideEffect
+        ErrorBehavior, InsecureFeatures, Importance, Priority, PropertiesType,
+        SaveType, Sensitivity, SideEffect
     )
 from ..exceptions import (
         ConversionError, InvalidFileFormatError, PrefixError,
@@ -550,12 +550,114 @@ class MSGFile:
             inp = self.__prefix + inp
         return inp
 
+    def getMultipleBinary(self, filename, prefix : bool = True) -> Optional[List[bytes]]:
+        """
+        Gets a multiple binary property as a list of bytes objects.
+
+        Like :method getStringStream:, the 4 character type suffix should be
+        omitted. So if you want the stream "__substg1.0_00011102" then the
+        filename would simply be "__substg1.0_0001".
+
+        :param prefix: Bool, whether to search for the entry at the root of the
+            MSG file (False) or look in the current child MSG file (True).
+        """
+        filename = self.fixPath(filename, prefix) + '1102'
+        multStream = self.getStream(filename)
+        if multStream is None:
+            return None
+
+        if len(multStream) == 0:
+            return []
+        elif len(multStream) & 7 != 0:
+            raise StandardViolationError(f'Length stream for multiple binary was not a multiple of 8.')
+        else:
+            ret = [self.getStream(filename + f'-{x:08X}') for x in range(len(multStream) // 8)]
+            # We could do more checking here, but we'll just check for None.
+            if (index := next((x for x in ret if x is None), -1)) != -1:
+                logger.error('Unable to get the desired number of binary streams for multiple, not all streams were found.')
+                return ret[:index]
+            return ret
+
+    def getMultipleString(self, filename, prefix : bool = True) -> Optional[List[str]]:
+        """
+        Gets a multiple string property as a list of str objects.
+
+        Like :method getStringStream:, the 4 character type suffix should be
+        omitted. So if you want the stream "__substg1.0_00011102" then the
+        filename would simply be "__substg1.0_0001".
+
+        :param prefix: Bool, whether to search for the entry at the root of the
+            MSG file (False) or look in the current child MSG file (True).
+        """
+        filename = self.fixPath(filename, prefix) + '101F' if self.areStringsUnicode else '101E'
+        multStream = self.getStream(filename)
+        if multStream is None:
+            return []
+
+        if len(multStream) == 0:
+            return []
+        elif len(multStream) & 3 != 0:
+            raise StandardViolationError(f'Length stream for multiple string was not a multiple of 4.')
+        else:
+            ret = [self.getStream(filename + f'-{x:08X}') for x in range(len(multStream) // 4)]
+            # We could do more checking here, but we'll just check for None.
+            for index, item in enumerate(ret):
+                if item is None:
+                    logger.error('Unable to get the desired number of string streams for multiple, not all streams were found.')
+                    return ret[:index]
+                # Decode the bytes and remove the null byte.
+                ret[index] = item.decode(self.stringEncoding)[:-1]
+            return ret
+
+    def getSingleOrMultipleBinary(self, filename, prefix : bool = True) -> Optional[Union[List[bytes], bytes]]:
+        """
+        A combination of :method getStringStream: and
+        :method getMultipleString:.
+
+        Checks to see if a single binary stream exists to return, otherwise
+        tries to return the multiple binary stream of the same ID.
+
+        Like :method getStringStream:, the 4 character type suffix should be
+        omitted. So if you want the stream "__substg1.0_00010102" then the
+        filename would simply be "__substg1.0_0001".
+        """
+        filename = self.fixPath(filename, prefix)
+        # Check for a single binary stream first.
+        if (ret := self.getStream(filename + '0102', False)) is not None:
+            return ret
+        # Otherwise, we just let the return from `getMultipleBinary` do the
+        # work.
+        return self.getMultipleBinary(filename, False)
+
+    def getSingleOrMultipleString(self, filename, prefix : bool = True) -> Optional[Union[List[str], str]]:
+        """
+        A combination of :method getStringStream: and
+        :method getMultipleString:.
+
+        Checks to see if a single string stream exists to return, otherwise
+        tries to return the multiple string stream of the same ID.
+
+        Like :method getStringStream:, the 4 character type suffix should be
+        omitted. So if you want the stream "__substg1.0_0001001F" then the
+        filename would simply be "__substg1.0_0001".
+        """
+        filename = self.fixPath(filename, prefix)
+        # Check for a single stribng stream first.
+        if (ret := self.getStringStream(filename, False)) is not None:
+            return ret
+        # Otherwise, we just let the return from `getMultipleString` do the
+        # work.
+        return self.getMultipleString(filename, False)
+
     def getStream(self, filename, prefix : bool = True) -> Optional[bytes]:
         """
         Gets a binary representation of the requested filename.
 
         This should ALWAYS return a bytes object if it was found, otherwise
         returns None.
+
+        :param prefix: Bool, whether to search for the entry at the root of the
+            MSG file (False) or look in the current child MSG file (True).
         """
         filename = self.fixPath(filename, prefix)
         if self.exists(filename, False):
@@ -575,6 +677,9 @@ class MSGFile:
 
         This should ALWAYS return a string if it was found, otherwise returns
         None.
+
+        :param prefix: Bool, whether to search for the entry at the root of the
+            MSG file (False) or look in the current child MSG file (True).
         """
         filename = self.fixPath(filename, prefix)
         if self.areStringsUnicode:
@@ -610,12 +715,12 @@ class MSGFile:
 
             return entries
 
-    def slistDir(self, streams : bool = True, storages : bool = False) -> List[str]:
+    def slistDir(self, streams : bool = True, storages : bool = False, includePrefix : bool = True) -> List[str]:
         """
         Replacement for OleFileIO.listdir that runs at the current prefix
         directory. Returns a list of strings instead of lists.
         """
-        return [msgPathToString(x) for x in self.listDir(streams, storages)]
+        return [msgPathToString(x) for x in self.listDir(streams, storages, includePrefix)]
 
     def save(self, **kwargs) -> constants.SAVE_TYPE:
         if kwargs.get('skipNotImplemented', False):

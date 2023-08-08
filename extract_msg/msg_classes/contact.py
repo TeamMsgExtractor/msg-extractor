@@ -212,7 +212,7 @@ class Contact(MessageBase):
         """
         Contains the second number or numbers of the contact's business.
         """
-        return self._getTypedAs('3A1B')
+        return self.getSingleOrMultipleString('__substg1.0_3A1B')
 
     @functools.cached_property
     def businessHomePage(self) -> Optional[str]:
@@ -240,7 +240,7 @@ class Contact(MessageBase):
         """
         A list of the named of the contact's children.
         """
-        return self._getTypedAs('3A58')
+        return self.getMultipleString('__substg1.0_3A58')
 
     @functools.cached_property
     def companyMainTelephoneNumber(self) -> Optional[str]:
@@ -437,7 +437,7 @@ class Contact(MessageBase):
         return self._getNamedAs('8085', ps.PSETID_ADDRESS, EntryID.autoCreate)
 
     @functools.cached_property
-    def email2(self) -> Optional[dict]:
+    def email2(self) -> Optional[Dict]:
         """
         Returns a dict of the data for email 2. Returns None if no fields are
         set.
@@ -488,7 +488,7 @@ class Contact(MessageBase):
         return self._getNamedAs('8095', ps.PSETID_ADDRESS, EntryID.autoCreate)
 
     @functools.cached_property
-    def email3(self) -> Optional[dict]:
+    def email3(self) -> Optional[Dict]:
         """
         Returns a dict of the data for email 3. Returns None if no fields are
         set.
@@ -849,7 +849,7 @@ class Contact(MessageBase):
         """
         The number(s) of the contact's second home telephone.
         """
-        return self._getTypedAs('3A2F')
+        return self.getSingleOrMultipleString('__substg1.0_3A2F')
 
     @functools.cached_property
     def initials(self) -> Optional[str]:
@@ -1123,7 +1123,7 @@ class Contact(MessageBase):
         return self._getNamedAs('8022', ps.PSETID_ADDRESS, lambda x : PostalAddressID(x or 0), False)
 
     @functools.cached_property
-    def primaryFax(self) -> Optional[dict]:
+    def primaryFax(self) -> Optional[Dict]:
         """
         Returns a dict of the data for the primary fax. Returns None if no
         fields are set.
@@ -1240,14 +1240,14 @@ class Contact(MessageBase):
         """
         The contact's telex number(s).
         """
-        return self._getTypedAs('3A2C')
+        return self.getSingleOrMultipleString('__substg1.0_3A2C')
 
     @functools.cached_property
     def userX509Certificate(self) -> Optional[List[bytes]]:
         """
         A list of certificates for the contact.
         """
-        return self._getTypedAs('3A70')
+        return self.getMultipleBinary('3A70')
 
     @functools.cached_property
     def weddingAnniversary(self) -> Optional[datetime.datetime]:

@@ -723,9 +723,9 @@ def parseType(_type : int, stream, encoding, extras):
     elif _type == 0x0102:  # PtypBinary
         return value
     elif _type & 0x1000 == 0x1000:  # PtypMultiple
-        # TODO parsing for `multiple` types.
+        # TODO parsing for remaining "multiple" types.
         if _type in (0x101F, 0x101E): # PtypMultipleString/PtypMultipleString8
-            ret = [x.decode(encoding) for x in extras]
+            ret = [x.decode(encoding)[:-1] for x in extras]
             lengths = struct.unpack(f'<{len(ret)}i', stream)
             lengthLengths = len(lengths)
             if lengthLengths > lengthExtras:

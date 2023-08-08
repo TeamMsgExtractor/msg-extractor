@@ -1,4 +1,5 @@
 **v0.45.0**
+* BREAKING: Changed parsing of string multiple properties to remove the trailing null byte. This *will* cause the output of parsing them to differ.
 * Updated typing information for some functions and classes.
 * Fixed a bug with `MessageSignedBase.attachments` that would cause it to return None instead of an empty list if the number of normal attachments was 0 was the error behavior was set to ignore violations of the standard.
 * Updated `MessageSignedBase.attachments` to use `functools.cached_property` instead of `property`.
@@ -14,6 +15,13 @@
 * Convert many enum types to `IntEnum`.
 * Extended functionality of `PropertiesStore` to allow for integer property names and getting a property based on just the ID. You can also get a list of all properties that use a given ID.
 * Improved internal code related to getting a property with a potentially unknown type.
+* Added a number of entirely new functions to the public API on `MSGFile`, `AttachmentBase`, `PropertiesStore`, and `Recipient` objects:
+    * `getMultipleBinary`: Gets a multiple binary property as a list of `bytes` objects.
+    * `getSingleOrMultipleBinary`: A combination of `getStream` and `getMultipleBinary` which prefers a single binary stream. Returns a single `bytes` object or a list of `bytes` objects.
+    * `getMultipleString`: Gets a multiple string property as a list of `str` objects.
+    * `getSingleOrMultipleString`: A combination of `getStringStream` and `getMultipleString` which prefers a single string stream. Returns a single bytes objecct or a list of bytes objects.
+* Removed `Named._getStringStream` and `Named.sExists`. The named properties storage will *always*
+* Changed all `Named` methods to no longer have a prefix argument. The prefix should *always* be false sense the named property mapping will only exist in the top level directory.
 
 **v0.44.0**
 * Fixed a bug that caused `MessageBase.headerInit` to always return `False` after the 0.42.0 update.

@@ -47,11 +47,11 @@ class Named:
     def __init__(self, msg : MSGFile):
         self.__msg = makeWeakRef(msg)
         # Get the basic streams. If all are emtpy, then nothing to do.
-        guidStream = self.getStream('__substg1.0_00020102', False)
-        entryStream = self.getStream('__substg1.0_00030102', False)
+        guidStream = self.getStream('__substg1.0_00020102')
+        entryStream = self.getStream('__substg1.0_00030102')
         self.guidStream = guidStream
         self.entryStream = entryStream
-        self.namesStream = self.getStream('__substg1.0_00040102', False)
+        self.namesStream = self.getStream('__substg1.0_00040102')
 
         self.__propertiesDict : Dict[Tuple[str, str], NamedPropertyBase]= {}
         self.__properties : List[NamedPropertyBase] = []
@@ -129,7 +129,7 @@ class Named:
 
         return self.namesStream[offset:offset + length].decode('utf-16-le')
 
-    def _getStream(self, filename, prefix = True) -> Optional[bytes]:
+    def _getStream(self, filename) -> Optional[bytes]:
         """
         Gets a binary representation of the requested filename.
 
@@ -141,25 +141,7 @@ class Named:
         """
         import warnings
         warnings.warn(':method _getStream: has been deprecated and moved to the public api. Use :method getStream: instead (remove the underscore).', DeprecationWarning)
-        return self.getStream(filename, prefix)
-
-    def _getStringStream(self, filename, prefix = True) -> Optional[str]:
-        """
-        Gets a string representation of the requested filename.
-
-        Rather than the full filename, you should only feed this function the
-        filename sans the type. So if the full name is "__substg1.0_001A001F",
-        the filename this function should receive should be "__substg1.0_001A".
-
-        This should ALWAYS return a string if it was found, otherwise returns
-        None.
-
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
-        """
-        import warnings
-        warnings.warn(':method _getStringStream: has been deprecated and moved to the public api. Use :method getStringStream: instead (remove the underscore).', DeprecationWarning)
-        return self.getStringStream(filename, prefix)
+        return self.getStream(filename)
 
     def exists(self, filename) -> bool:
         """
@@ -170,18 +152,7 @@ class Named:
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Named instance has been garbage collected.')
-        return msg.exists([self.__dir, filename])
-
-    def sExists(self, filename) -> bool:
-        """
-        Checks if the string stream exists inside the named properties folder.
-
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
-        """
-        if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Named instance has been garbage collected.')
-        return msg.sExists([self.__dir, filename])
+        return msg.exists([self.__dir, filename], False)
 
     def get(self, propertyName : Tuple[str, str], default : _T = None) -> Union[NamedPropertyBase, _T]:
         """
@@ -193,7 +164,7 @@ class Named:
         except KeyError:
             return default
 
-    def getStream(self, filename, prefix = True) -> Optional[bytes]:
+    def getStream(self, filename) -> Optional[bytes]:
         """
         Gets a binary representation of the requested filename.
 
@@ -205,25 +176,7 @@ class Named:
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Named instance has been garbage collected.')
-        return msg.getStream([self.__dir, filename], prefix = prefix)
-
-    def getStringStream(self, filename, prefix = True) -> Optional[str]:
-        """
-        Gets a string representation of the requested filename.
-
-        Rather than the full filename, you should only feed this function the
-        filename sans the type. So if the full name is "__substg1.0_001A001F",
-        the filename this function should receive should be "__substg1.0_001A".
-
-        This should ALWAYS return a string if it was found, otherwise returns
-        None.
-
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
-        """
-        if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Named instance has been garbage collected.')
-        return msg.getStringStream([self.__dir, filename], prefix = prefix)
+        return msg.getStream([self.__dir, filename], False)
 
     def items(self) -> Iterable[Tuple[Tuple[str, str], NamedPropertyBase]]:
         return self.__propertiesDict.items()
