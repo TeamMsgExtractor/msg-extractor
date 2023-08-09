@@ -74,8 +74,8 @@ import tzlocal
 
 from html import escape as htmlEscape
 from typing import (
-        Any, Callable, Dict, List, Optional, Sequence, TypeVar, TYPE_CHECKING,
-        Union
+        Any, Callable, Dict, Iterable, List, Optional, Sequence, TypeVar,
+        TYPE_CHECKING, Union
     )
 
 from . import constants
@@ -622,14 +622,12 @@ def makeWeakRef(obj : Optional[_T]) -> Optional[weakref.ReferenceType[_T]]:
         return None
 
 
-def msgPathToString(inp) -> str:
+def msgPathToString(inp : Union[str, Iterable[str]]) -> str:
     """
     Converts an MSG path (one of the internal paths inside an MSG file) into a
     string.
     """
-    if inp is None:
-        return None
-    if isinstance(inp, (list, tuple)):
+    if not isinstance(inp, str):
         inp = '/'.join(inp)
     inp.replace('\\', '/')
     return inp
@@ -825,7 +823,7 @@ def rtfSanitizeHtml(inp : str) -> str:
                 output += char
         elif ord(char) < 32 or 128 <= ord(char) <= 255:
             # Otherwise, see if it is just a small escape.
-            output += "\\'" + properHex(char, 2)
+            output += f"\\'{ord(char):02X}"
         else:
             # Handle Unicode characters.
             enc = char.encode('utf-16-le')
@@ -849,7 +847,7 @@ def rtfSanitizePlain(inp : str) -> str:
             output += char
         elif ord(char) < 32 or 128 <= ord(char) <= 255:
             # Otherwise, see if it is just a small escape.
-            output += "\\'" + properHex(char, 2)
+            output += f"\\'{ord(char):02X}"
         else:
             # Handle Unicode characters.
             # Handle Unicode characters.
@@ -952,9 +950,8 @@ def tryGetMimetype(att, mimetype : Union[str, None]) -> Union[str, None]:
     if mimetype:
         return mimetype
 
-    # We only try anything if it is a plain attachment or signed attachment.
-    # Web attachments and embedded MSG files are completely ignored.
-    if att.type in (AttachmentType.DATA, AttachmentType.SIGNED):
+    # We only try anything if the data is bytes.
+    if att.dataType:
         # Try to import our dependency module to use it.
         try:
             import magic

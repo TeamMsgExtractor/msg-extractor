@@ -53,7 +53,7 @@ class Named:
         self.entryStream = entryStream
         self.namesStream = self.getStream('__substg1.0_00040102')
 
-        self.__propertiesDict : Dict[Tuple[str, str], NamedPropertyBase]= {}
+        self.__propertiesDict : Dict[Tuple[str, str], NamedPropertyBase] = {}
         self.__properties : List[NamedPropertyBase] = []
 
         # Check that we even have any entries. If there are none, nothing to do.
@@ -251,7 +251,7 @@ class NamedProperties:
         else:
             return source._getTypedData(self.__named[item].propertyStreamID)
 
-    def get(self, item, default = None):
+    def get(self, item, default : _T = None) -> Union[Any, _T]:
         """
         Get a named property, returning the value of :param default: if not
         found. Item must be a tuple with 2 items: the name and the GUID string.
@@ -317,7 +317,8 @@ class NamedPropertyBase(abc.ABC):
     @abc.abstractmethod
     def type(self) -> NamedPropertyType:
         """
-        The type of named property.
+        Returns the type of the named property. This will be a member of the
+        NamedPropertyType enum.
         """
 
 
@@ -371,7 +372,8 @@ class StringNamedProperty(NamedPropertyBase):
     @property
     def type(self) -> NamedPropertyType:
         """
-        Returns the type of the named property. This will either be NUMERICAL_NAMED or STRING_NAMED.
+        Returns the type of the named property. This will be a member of the
+        NamedPropertyType enum.
         """
         return NamedPropertyType.STRING_NAMED
 
@@ -380,7 +382,7 @@ class StringNamedProperty(NamedPropertyBase):
 class NumericalNamedProperty(NamedPropertyBase):
     def __init__(self, entry : Dict):
         super().__init__(entry)
-        self.__propertyID = properHex(entry['id'], 4).upper()
+        self.__propertyID = f'{entry["id"]:04X}'
         self.__streamID = 0x1000 + (entry['id'] ^ (self.guidIndex << 1)) % 0x1F
 
     @property
@@ -393,13 +395,14 @@ class NumericalNamedProperty(NamedPropertyBase):
     @property
     def streamID(self) -> int:
         """
-        Returns the streamID of the named property. This may not be accurate
+        Returns the streamID of the named property. This may not be accurate.
         """
         return self.__streamID
 
     @property
     def type(self) -> NamedPropertyType:
         """
-        Returns the type of the named property. This will either be NUMERICAL_NAMED or STRING_NAMED.
+        Returns the type of the named property. This will be a member of the
+        NamedPropertyType enum.
         """
         return NamedPropertyType.NUMERICAL_NAMED

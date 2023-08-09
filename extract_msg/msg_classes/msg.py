@@ -253,10 +253,7 @@ class MSGFile:
             :param overrideClass: when the value could not be found (is None).
             If this is changed to False, then the value will be used regardless.
         """
-        try:
-            value = self.props[propertyName].value
-        except (KeyError, AttributeError):
-            value = None
+        value = self.props.getValue(propertyName)
         # Check if we should be overriding the data type for this instance.
         if overrideClass is not None:
             if (value is not None or not preserveNone):
@@ -777,11 +774,7 @@ class MSGFile:
         """
         Returns a boolean telling if the strings are unicode encoded.
         """
-        if '340D0003' in self.props:
-            if (self.props['340D0003'].value & 0x40000) != 0:
-                return True
-
-        return False
+        return (self.props.getValue('340D0003', 0) & 0x40000) != 0
 
     @functools.cached_property
     def attachments(self) -> Union[List[AttachmentBase], List[SignedAttachment]]:
@@ -1033,7 +1026,7 @@ class MSGFile:
                     logger.warning('Encoding property not found. Defaulting to ISO-8859-15.')
                     self.__stringEncoding = 'iso-8859-15'
                 else:
-                    enc = self.props['3FFD0003'].value
+                    enc = cast(int, self.props['3FFD0003'].value)
                     # Now we just need to translate that value.
                     self.__stringEncoding = lookupCodePage(enc)
                 return self.__stringEncoding

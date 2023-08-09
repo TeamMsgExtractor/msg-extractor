@@ -9,12 +9,12 @@ import logging
 import pprint
 
 from typing import (
-        Dict, Iterable, Iterator, List, Optional, Tuple, TypeVar, Union
+        Any, Dict, Iterable, Iterator, List, Optional, Tuple, TypeVar, Union
     )
 
 from .. import constants
 from ..enums import Intelligence, PropertiesType
-from .prop import createProp, PropBase
+from .prop import createProp, FixedLengthProp, PropBase
 from ..utils import divide
 
 
@@ -173,6 +173,29 @@ class PropertiesStore:
                 return []
 
         return [self[x] for x in self.__idMapping.get(id_, [])]
+
+    def getValue(self, name : Union[str, int], default : _T = None) -> Union[Any, _T]:
+        """
+        Attempts to get the first property
+        """
+        if isinstance(name, int):
+            if name >= 0x10000:
+                name = f'{name:08X}'
+            else:
+                name = f'{name:04X}'
+        if len(name) == 4:
+            for prop in self.getProperties(name):
+                if isinstance(prop, FixedLengthProp):
+                    return prop.value
+            return default
+        elif len(name) == 8:
+            if (prop := self.get()):
+                if isinstance(prop, FixedLengthProp):
+                    return prop.value
+                else:
+                    return default
+        else:
+            raise ValueError('Property name must be an int less than 0x100000000, a 4 character hex string, or an 8 character hex string.')
 
     def items(self) -> Iterable[Tuple[str, PropBase]]:
         return self.__props.items()

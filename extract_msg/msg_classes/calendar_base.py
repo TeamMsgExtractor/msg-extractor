@@ -248,7 +248,7 @@ class CalendarBase(MessageBase):
         """
         The end date of the appointment.
         """
-        return self._getPropertyAs('00610040')
+        return self.props.getValue('00610040')
 
     @functools.cached_property
     def globalObjectID(self) -> Optional[GlobalObjectID]:
@@ -387,7 +387,7 @@ class CalendarBase(MessageBase):
         Assists a client or server in finding a Calendar object but is not
         guarenteed to be unique amoung all objects.
         """
-        return self._getPropertyAs('00620003')
+        return self.props.getValue('00620003')
 
     @functools.cached_property
     def ownerCriticalChange(self) -> Optional[datetime.datetime]:
@@ -417,7 +417,7 @@ class CalendarBase(MessageBase):
         """
         Whether the organizer requests a reply from attendees.
         """
-        return self._getPropertyAs('0C17000B', bool, False)
+        return bool(self.props.getValue('0C17000B'))
 
     @functools.cached_property
     def requiredAttendees(self) -> Optional[str]:
@@ -438,21 +438,21 @@ class CalendarBase(MessageBase):
         """
         Whether to send Meeting Response objects to the organizer.
         """
-        return self._getPropertyAs('0063000B', bool, False)
+        return bool(self.props.getValue('0063000B'))
 
     @functools.cached_property
     def responseStatus(self) -> ResponseStatus:
         """
         The response status of an attendee.
         """
-        return self._getNamedAs('8218', ps.PSETID_APPOINTMENT, lambda x: ResponseStatus(x or 0), False)
+        return ResponseStatus(self.namedProperties.get(('8218', ps.PSETID_APPOINTMENT), 0))
 
     @functools.cached_property
     def startDate(self) -> Optional[datetime.datetime]:
         """
         The start date of the appointment.
         """
-        return self._getPropertyAs('00600040')
+        return self.props.getValue('00600040')
 
     @functools.cached_property
     def timeZoneDescription(self) -> Optional[str]:

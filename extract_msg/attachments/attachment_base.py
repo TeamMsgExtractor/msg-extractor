@@ -14,8 +14,8 @@ import os
 import pathlib
 import weakref
 
-from functools import cached_property, partial
-from typing import List, Optional, Tuple, Type, TYPE_CHECKING
+from functools import cached_property
+from typing import List, Optional, Tuple, Type, TYPE_CHECKING, Union
 
 from .. import constants
 from ..enums import AttachmentType
@@ -327,6 +327,74 @@ class AttachmentBase(abc.ABC):
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
         return msg.existsTypedProperty(id, self.__dir, _type, True, self.__props)
 
+    def getMultipleBinary(self, filename) -> Optional[List[bytes]]:
+        """
+        Gets a multiple binary property as a list of bytes objects.
+
+        Like :method getStringStream:, the 4 character type suffix should be
+        omitted. So if you want the stream "__substg1.0_00011102" then the
+        filename would simply be "__substg1.0_0001".
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
+        """
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+        return msg.getMultipleBinary([self.__dir, filename])
+
+    def getMultipleString(self, filename) -> Optional[List[str]]:
+        """
+        Gets a multiple string property as a list of str objects.
+
+        Like :method getStringStream:, the 4 character type suffix should be
+        omitted. So if you want the stream "__substg1.0_00011102" then the
+        filename would simply be "__substg1.0_0001".
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
+        """
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+        return msg.getMultipleString([self.__dir, filename])
+
+    def getSingleOrMultipleBinary(self, filename) -> Optional[Union[List[bytes], bytes]]:
+        """
+        A combination of :method getStringStream: and
+        :method getMultipleString:.
+
+        Checks to see if a single binary stream exists to return, otherwise
+        tries to return the multiple binary stream of the same ID.
+
+        Like :method getStringStream:, the 4 character type suffix should be
+        omitted. So if you want the stream "__substg1.0_00010102" then the
+        filename would simply be "__substg1.0_0001".
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
+        """
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+        return msg.getSingleOrMultipleBinary([self.__dir, filename])
+
+    def getSingleOrMultipleString(self, filename) -> Optional[Union[List[str], str]]:
+        """
+        A combination of :method getStringStream: and
+        :method getMultipleString:.
+
+        Checks to see if a single string stream exists to return, otherwise
+        tries to return the multiple string stream of the same ID.
+
+        Like :method getStringStream:, the 4 character type suffix should be
+        omitted. So if you want the stream "__substg1.0_0001001F" then the
+        filename would simply be "__substg1.0_0001".
+
+        :raises ReferenceError: The associated MSGFile instance has been garbage
+            collected.
+        """
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+        return msg.getSingleOrMultipleString([self.__dir, filename])
+
     def getStream(self, filename) -> Optional[bytes]:
         """
         Gets a binary representation of the requested filename.
@@ -463,7 +531,7 @@ class AttachmentBase(abc.ABC):
         """
 
     @functools.cached_property
-    def dataType(self) -> Optional[Type[type]]:
+    def dataType(self) -> Optional[Type[object]]:
         """
         The class that the data type will use, if it can be retrieved.
 

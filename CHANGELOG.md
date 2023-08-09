@@ -9,11 +9,13 @@
 * Changed `PropBase` to be a subclass of `abc.ABC`.
 * Added detailed versioning info to the README.
 * Deprecated many private functions, including methods on many of the classes. Of primary note are `_getStream` and `_getStringStream`, which have been moved to the public API as `getStream` and `getStringStream`. Any deprecated functions still exist and will forward to a public API function if they are not being removed. Additionally, all internal usage of them has been removed. This change is one of the big preparations that is needed for the `1.0.0` release.
-    * As mentioned, a number of these deprecated functions have been moved to the public api. It is recommended that you run tests with your code after enabling deprecation warnings to see what should be changed.
+    * As mentioned, a number of these deprecated functions have been moved to the public API. It is recommended that you run tests with your code after enabling deprecation warnings to see what should be changed.
 * Removed items deprecated in or before `0.42.0`.
 * Changed the API for the private method `_genRecipient`. This is not intended for use outside of the module *except* for subclasses. The change removed the allowance of ints for the second argument, requiring that it be a valid enum type.
 * Convert many enum types to `IntEnum`.
 * Extended functionality of `PropertiesStore` to allow for integer property names and getting a property based on just the ID. You can also get a list of all properties that use a given ID.
+* Added new function `PropertiesStore.getProperties` which gets a list of all properties matching the property ID. Return type is a list of `PropBase` instances.
+* Added new function `PropertiesStore.getValue` which looks for the first matching `FixedLengthProp` and returns the value from it.
 * Improved internal code related to getting a property with a potentially unknown type.
 * Added a number of entirely new functions to the public API on `MSGFile`, `AttachmentBase`, `PropertiesStore`, and `Recipient` objects:
     * `getMultipleBinary`: Gets a multiple binary property as a list of `bytes` objects.
@@ -22,6 +24,7 @@
     * `getSingleOrMultipleString`: A combination of `getStringStream` and `getMultipleString` which prefers a single string stream. Returns a single bytes objecct or a list of bytes objects.
 * Removed `Named._getStringStream` and `Named.sExists`. The named properties storage will *always*
 * Changed all `Named` methods to no longer have a prefix argument. The prefix should *always* be false sense the named property mapping will only exist in the top level directory.
+* Adjusted `tryGetMimeType` to allows any attachments whose `data` property would return a `bytes` instance.
 
 **v0.44.0**
 * Fixed a bug that caused `MessageBase.headerInit` to always return `False` after the 0.42.0 update.

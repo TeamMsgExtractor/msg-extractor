@@ -83,7 +83,7 @@ class Contact(MessageBase):
         """
         The birthday of the contact at 11:59 UTC.
         """
-        return self._getPropertyAs('3A420040')
+        return self.props.getValue('3A420040')
 
     @functools.cached_property
     def birthdayEventEntryID(self) -> Optional[EntryID]:
@@ -593,11 +593,11 @@ class Contact(MessageBase):
         return self.getStringStream('__substg1.0_3A4C')
 
     @functools.cached_property
-    def gender(self) -> Optional[Gender]:
+    def gender(self) -> Gender:
         """
         The gender of the contact.
         """
-        return self._getPropertyAs('3A4D0002', lambda x : Gender(x or 0), False)
+        return Gender(self.props.getValue('3A4D0002', 0))
 
     @functools.cached_property
     def generation(self) -> Optional[str]:
@@ -1014,7 +1014,7 @@ class Contact(MessageBase):
         Whether contact synchronization with an external source (such as a
         social networking site) is handled by the server.
         """
-        return self._getPropertyAs('7C24000B', bool, False)
+        return bool(self.props.getValue('7C24000B'))
 
     @functools.cached_property
     def otherAddress(self) -> Optional[str]:
@@ -1120,7 +1120,7 @@ class Contact(MessageBase):
         Indicates which physical address is the Mailing Address for this
         contact.
         """
-        return self._getNamedAs('8022', ps.PSETID_ADDRESS, lambda x : PostalAddressID(x or 0), False)
+        return PostalAddressID(self.namedProperties.get(('8022', ps.PSETID_ADDRESS), 0))
 
     @functools.cached_property
     def primaryFax(self) -> Optional[Dict]:
@@ -1254,7 +1254,7 @@ class Contact(MessageBase):
         """
         The wedding anniversary of the contact at 11:59 UTC.
         """
-        return self._getPropertyAs('3A410040')
+        return self.props.getValue('3A410040')
 
     @functools.cached_property
     def weddingAnniversaryEventEntryID(self) -> Optional[EntryID]:

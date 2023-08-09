@@ -30,7 +30,7 @@ class MeetingRelated(CalendarBase):
         """
         Indicates whether a client has processed a meeting-related object.
         """
-        return self._getPropertyAs('7D01000B', bool, False)
+        return bool(self.props.getValue('7D01000B'))
 
     @functools.cached_property
     def serverProcessed(self) -> bool:

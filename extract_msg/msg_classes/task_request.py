@@ -60,7 +60,7 @@ class TaskRequest(MessageBase):
         Indicates whether a client has already processed a received task
         communication.
         """
-        return self._getPropertyAs('7D01000B', bool, False)
+        return bool(self.props.getValue('7D01000B'))
 
     @functools.cached_property
     def taskMode(self) -> Optional[TaskMode]:

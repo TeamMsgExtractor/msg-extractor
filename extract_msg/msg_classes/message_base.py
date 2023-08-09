@@ -1247,7 +1247,7 @@ class MessageBase(MSGFile):
         """
         The date and time the message was received by the server.
         """
-        return self._getPropertyAs('0E060040')
+        return self.props.getValue('0E060040')
 
     @property
     def recipientSeparator(self) -> str:
