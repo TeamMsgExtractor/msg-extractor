@@ -16,7 +16,7 @@ from .exceptions import StandardViolationError
 from .properties.prop import FixedLengthProp
 from .properties.properties_store import PropertiesStore
 from .structures.entry_id import PermanentEntryID
-from .utils import makeWeakRef, verifyPropertyId, verifyType
+from .utils import makeWeakRef, msgPathToString, verifyPropertyId, verifyType
 
 
 if TYPE_CHECKING:
@@ -225,7 +225,7 @@ class Recipient:
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
-        return msg._getTypedStream(self, [self.__dir, filename], True, _type)
+        return msg._getTypedStream(self, [self.__dir, msgPathToString(filename)], True, _type)
 
     def exists(self, filename) -> bool:
         """
@@ -236,7 +236,7 @@ class Recipient:
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
-        return msg.exists([self.__dir, filename])
+        return msg.exists([self.__dir, msgPathToString(filename)])
 
     def sExists(self, filename) -> bool:
         """
@@ -247,7 +247,7 @@ class Recipient:
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
-        return msg.sExists([self.__dir, filename])
+        return msg.sExists([self.__dir, msgPathToString(filename)])
 
     def existsTypedProperty(self, id, _type = None) -> bool:
         """
@@ -275,7 +275,7 @@ class Recipient:
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
-        return msg.getMultipleBinary([self.__dir, filename])
+        return msg.getMultipleBinary([self.__dir, msgPathToString(filename)])
 
     def getMultipleString(self, filename) -> Optional[List[str]]:
         """
@@ -290,7 +290,7 @@ class Recipient:
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
-        return msg.getMultipleString([self.__dir, filename])
+        return msg.getMultipleString([self.__dir, msgPathToString(filename)])
 
     def getSingleOrMultipleBinary(self, filename) -> Optional[Union[List[bytes], bytes]]:
         """
@@ -309,7 +309,7 @@ class Recipient:
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
-        return msg.getSingleOrMultipleBinary([self.__dir, filename])
+        return msg.getSingleOrMultipleBinary([self.__dir, msgPathToString(filename)])
 
     def getSingleOrMultipleString(self, filename) -> Optional[Union[List[str], str]]:
         """
@@ -328,7 +328,7 @@ class Recipient:
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
-        return msg.getSingleOrMultipleString([self.__dir, filename])
+        return msg.getSingleOrMultipleString([self.__dir, msgPathToString(filename)])
 
     def getStream(self, filename) -> Optional[bytes]:
         """
@@ -342,7 +342,7 @@ class Recipient:
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
-        return msg.getStream([self.__dir, filename])
+        return msg.getStream([self.__dir, msgPathToString(filename)])
 
     def getStringStream(self, filename) -> Optional[str]:
         """
@@ -360,7 +360,7 @@ class Recipient:
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
-        return msg.getStringStream([self.__dir, filename])
+        return msg.getStringStream([self.__dir, msgPathToString(filename)])
 
     @functools.cached_property
     def account(self) -> Optional[str]:

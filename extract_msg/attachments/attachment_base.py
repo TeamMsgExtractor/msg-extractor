@@ -22,7 +22,10 @@ from ..enums import AttachmentType
 from ..properties.named import NamedProperties
 from ..properties.prop import FixedLengthProp
 from ..properties.properties_store import PropertiesStore
-from ..utils import makeWeakRef, tryGetMimetype, verifyPropertyId, verifyType
+from ..utils import (
+        makeWeakRef, msgPathToString, tryGetMimetype, verifyPropertyId,
+        verifyType
+    )
 
 
 # Allow for nice type checking.
@@ -38,7 +41,7 @@ class AttachmentBase(abc.ABC):
     The base class for all Attachments used by the module, if not overriden.
     """
 
-    def __init__(self, msg : MSGFile, dir_, propStore : PropertiesStore):
+    def __init__(self, msg : MSGFile, dir_ : str, propStore : PropertiesStore):
         """
         :param msg: the Message instance that the attachment belongs to.
         :param dir_: the directory inside the msg file where the attachment is located.
@@ -248,7 +251,7 @@ class AttachmentBase(abc.ABC):
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
-        return msg._getTypedStream([self.__dir, filename], True, _type)
+        return msg._getTypedStream([self.__dir, msgPathToString(filename)], True, _type)
 
     def _handleFnc(self, _zip, filename, customPath, kwargs) -> pathlib.Path:
         """
@@ -301,7 +304,7 @@ class AttachmentBase(abc.ABC):
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
-        return msg.exists([self.__dir, filename])
+        return msg.exists([self.__dir, msgPathToString(filename)])
 
     def sExists(self, filename) -> bool:
         """
@@ -340,7 +343,7 @@ class AttachmentBase(abc.ABC):
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
-        return msg.getMultipleBinary([self.__dir, filename])
+        return msg.getMultipleBinary([self.__dir, msgPathToString(filename)])
 
     def getMultipleString(self, filename) -> Optional[List[str]]:
         """
@@ -355,7 +358,7 @@ class AttachmentBase(abc.ABC):
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
-        return msg.getMultipleString([self.__dir, filename])
+        return msg.getMultipleString([self.__dir, msgPathToString(filename)])
 
     def getSingleOrMultipleBinary(self, filename) -> Optional[Union[List[bytes], bytes]]:
         """
@@ -374,7 +377,7 @@ class AttachmentBase(abc.ABC):
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
-        return msg.getSingleOrMultipleBinary([self.__dir, filename])
+        return msg.getSingleOrMultipleBinary([self.__dir, msgPathToString(filename)])
 
     def getSingleOrMultipleString(self, filename) -> Optional[Union[List[str], str]]:
         """
@@ -393,7 +396,7 @@ class AttachmentBase(abc.ABC):
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
-        return msg.getSingleOrMultipleString([self.__dir, filename])
+        return msg.getSingleOrMultipleString([self.__dir, msgPathToString(filename)])
 
     def getStream(self, filename) -> Optional[bytes]:
         """
@@ -407,7 +410,7 @@ class AttachmentBase(abc.ABC):
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
-        return msg.getStream([self.__dir, filename])
+        return msg.getStream([self.__dir, msgPathToString(filename)])
 
     def getStringStream(self, filename) -> Optional[str]:
         """
@@ -422,7 +425,7 @@ class AttachmentBase(abc.ABC):
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
-        return msg.getStringStream([self.__dir, filename])
+        return msg.getStringStream([self.__dir, msgPathToString(filename)])
 
     @abc.abstractmethod
     def getFilename(self, **kwargs) -> str:

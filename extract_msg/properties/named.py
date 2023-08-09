@@ -22,7 +22,7 @@ from typing import (
 
 from .. import constants
 from ..enums import NamedPropertyType
-from ..utils import bytesToGuid, divide, makeWeakRef, properHex
+from ..utils import bytesToGuid, divide, makeWeakRef, msgPathToString
 from compressed_rtf.crc32 import crc32
 
 
@@ -152,7 +152,7 @@ class Named:
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Named instance has been garbage collected.')
-        return msg.exists([self.__dir, filename], False)
+        return msg.exists([self.__dir, msgPathToString(filename)], False)
 
     def get(self, propertyName : Tuple[str, str], default : _T = None) -> Union[NamedPropertyBase, _T]:
         """
@@ -176,7 +176,7 @@ class Named:
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Named instance has been garbage collected.')
-        return msg.getStream([self.__dir, filename], False)
+        return msg.getStream([self.__dir, msgPathToString(filename)], False)
 
     def items(self) -> Iterable[Tuple[Tuple[str, str], NamedPropertyBase]]:
         return self.__propertiesDict.items()

@@ -883,7 +883,7 @@ class MSGFile:
         }[self.importance]
 
     @property
-    def initAttachmentFunc(self) -> Callable[[MSGFile, Any], AttachmentBase]:
+    def initAttachmentFunc(self) -> Callable[[MSGFile, str], AttachmentBase]:
         """
         Returns the method for initializing attachments being used, should you
         need to use it externally for whatever reason.
