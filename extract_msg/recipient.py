@@ -44,7 +44,7 @@ class Recipient:
         if not self.__email:
             self.__email = self.getStringStream('__substg1.0_3003')
         self.__name = self.getStringStream('__substg1.0_3001')
-        self.__typeFlags = self.__props.getValue('0C150003') or 0
+        self.__typeFlags = self.__props.getValue('0C150003', 0)
         from .msg_classes.calendar_base import CalendarBase
         if isinstance(msg, CalendarBase):
             self.__type = MeetingRecipientType(0xF & self.__typeFlags)

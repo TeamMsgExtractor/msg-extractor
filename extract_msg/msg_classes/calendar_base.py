@@ -395,7 +395,7 @@ class CalendarBase(MessageBase):
         The date and time at which a Meeting Request object was sent by the
         organizer, in UTC.
         """
-        return self._getNamedAs('001A', ps.PSETID_MEETING)
+        return self.namedProperties.get(('001A', ps.PSETID_MEETING))
 
     @functools.cached_property
     def recurrencePattern(self) -> Optional[str]:
@@ -403,14 +403,14 @@ class CalendarBase(MessageBase):
         A description of the recurrence specified by the appointmentRecur
         property.
         """
-        return self._getNamedAs('8232', ps.PSETID_APPOINTMENT)
+        return self.namedProperties.get(('8232', ps.PSETID_APPOINTMENT))
 
     @functools.cached_property
     def recurring(self) -> bool:
         """
         Specifies whether the object represents a recurring series.
         """
-        return self._getNamedAs('8223', ps.PSETID_APPOINTMENT, bool, True)
+        return bool(self.namedProperties.get(('8223', ps.PSETID_APPOINTMENT), False))
 
     @functools.cached_property
     def replyRequested(self) -> bool:
@@ -424,14 +424,14 @@ class CalendarBase(MessageBase):
         """
         Returns the required attendees of the meeting.
         """
-        return self._getNamedAs('0006', ps.PSETID_MEETING)
+        return self.namedProperties.get(('0006', ps.PSETID_MEETING))
 
     @functools.cached_property
     def resourceAttendees(self) -> Optional[str]:
         """
         Returns the resource attendees of the meeting.
         """
-        return self._getNamedAs('0008', ps.PSETID_MEETING)
+        return self.namedProperties.get(('0008', ps.PSETID_MEETING))
 
     @functools.cached_property
     def responseRequested(self) -> bool:
@@ -460,7 +460,7 @@ class CalendarBase(MessageBase):
         A human-readable description of the time zone that is represented by the
         data in the timeZoneStruct property.
         """
-        return self._getNamedAs('8234', ps.PSETID_APPOINTMENT)
+        return self.namedProperties.get(('8234', ps.PSETID_APPOINTMENT))
 
     @functools.cached_property
     def timeZoneStruct(self) -> Optional[TimeZoneStruct]:
@@ -482,4 +482,4 @@ class CalendarBase(MessageBase):
         """
         A list of all the sendable attendees, who are also required attendees.
         """
-        return self._getNamedAs('823B', ps.PSETID_APPOINTMENT)
+        return self.namedProperties.get(('823B', ps.PSETID_APPOINTMENT))

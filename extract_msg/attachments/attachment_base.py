@@ -568,7 +568,7 @@ class AttachmentBase(abc.ABC):
 
         Only applicable if the attachment is an Exception object.
         """
-        return self._getPropertyAs('7FF90040')
+        return self.props.getValue('7FF90040')
 
     @functools.cached_property
     def extension(self) -> Optional[str]:
@@ -582,14 +582,14 @@ class AttachmentBase(abc.ABC):
         """
         Indicates whether an Attachment object is hidden from the end user.
         """
-        return self._getPropertyAs('7FFE000B', bool, False)
+        return bool(self.props.getValue('7FFE000B'))
 
     @functools.cached_property
     def isAttachmentContactPhoto(self) -> bool:
         """
         Whether the attachment is a contact photo for a Contact object.
         """
-        return self._getPropertyAs('7FFF000B', bool, False)
+        return bool(self.props.getValue('7FFF000B'))
 
     @functools.cached_property
     def longFilename(self) -> Optional[str]:
@@ -663,7 +663,7 @@ class AttachmentBase(abc.ABC):
         within the main message text. A value of 0xFFFFFFFF indicates a hidden
         attachment that is not to be rendered.
         """
-        return self._getPropertyAs('370B0003')
+        return self.props.getValue('370B0003')
 
     @property
     def shortFilename(self) -> Optional[str]:
