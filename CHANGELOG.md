@@ -22,9 +22,12 @@
     * `getSingleOrMultipleBinary`: A combination of `getStream` and `getMultipleBinary` which prefers a single binary stream. Returns a single `bytes` object or a list of `bytes` objects.
     * `getMultipleString`: Gets a multiple string property as a list of `str` objects.
     * `getSingleOrMultipleString`: A combination of `getStringStream` and `getMultipleString` which prefers a single string stream. Returns a single bytes objecct or a list of bytes objects.
+    * `getPropertyVal`: Shortcut for `instance.props.getValue` that allows new behavior to be added by overriding it.
+    * `getNamedProp`: Shortcut for `instance.namedProperties.get((propertyName, guid), default)` that allows new behavior to be added by overriding it.
 * Removed `Named._getStringStream` and `Named.sExists`. The named properties storage will *always*
 * Changed all `Named` methods to no longer have a prefix argument. The prefix should *always* be false sense the named property mapping will only exist in the top level directory.
 * Adjusted `tryGetMimeType` to allows any attachments whose `data` property would return a `bytes` instance.
+* Changed internal code to use public SPI functions wherever possible. This includes making many private API functions use calls to the public API for getting bits of data.
 
 **v0.44.0**
 * Fixed a bug that caused `MessageBase.headerInit` to always return `False` after the 0.42.0 update.

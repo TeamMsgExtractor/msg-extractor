@@ -69,7 +69,7 @@ class Contact(MessageBase):
         Whether the client should create a Journal object for each action
         associated with the Contact object.
         """
-        return self._getNamedAs('8025', ps.PSETID_ADDRESS, bool, False)
+        return bool(self.getNamedProp('8025', ps.PSETID_ADDRESS))
 
     @functools.cached_property
     def billing(self) -> Optional[str]:
@@ -83,7 +83,7 @@ class Contact(MessageBase):
         """
         The birthday of the contact at 11:59 UTC.
         """
-        return self.props.getValue('3A420040')
+        return self.getPropertyVal('3A420040')
 
     @functools.cached_property
     def birthdayEventEntryID(self) -> Optional[EntryID]:
@@ -98,7 +98,7 @@ class Contact(MessageBase):
         """
         The birthday of the contact at 0:00 in the client's local time zone.
         """
-        return self._getNamedAs('80DE', ps.PSETID_ADDRESS)
+        return self.getNamedProp('80DE', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def businessCard(self) -> bytes:
@@ -136,7 +136,7 @@ class Contact(MessageBase):
         The image to be used on a business card. Must be either a PNG file or a
         JPEG file.
         """
-        return self._getNamedAs('8041', ps.PSETID_ADDRESS)
+        return self.getNamedProp('8041', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def businessCardDisplayDefinition(self) -> Optional[BusinessCardDisplayDefinition]:
@@ -169,7 +169,7 @@ class Contact(MessageBase):
         """
         The type of address for the fax. MUST be set to "FAX" if present.
         """
-        return self._getNamedAs('80C2', ps.PSETID_ADDRESS)
+        return self.getNamedProp('80C2', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def businessFaxEmailAddress(self) -> Optional[str]:
@@ -177,7 +177,7 @@ class Contact(MessageBase):
         Contains a user-readable display name, followed by the "@" character,
         followed by a fax number.
         """
-        return self._getNamedAs('80C3', ps.PSETID_ADDRESS)
+        return self.getNamedProp('80C3', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def businessFaxNumber(self) -> Optional[str]:
@@ -191,7 +191,7 @@ class Contact(MessageBase):
         """
         The normalized subject for the contact.
         """
-        return self._getNamedAs('80C4', ps.PSETID_ADDRESS)
+        return self.getNamedProp('80C4', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def businessFaxOriginalEntryId(self) -> Optional[EntryID]:
@@ -268,14 +268,14 @@ class Contact(MessageBase):
         """
         The character set that is used for this Contact object.
         """
-        return self._getNamedAs('8023', ps.PSETID_ADDRESS)
+        return self.getNamedProp('8023', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def contactItemData(self) -> Optional[List[int]]:
         """
         Used to help display the contact information.
         """
-        return self._getNamedAs('8007', ps.PSETID_ADDRESS)
+        return self.getNamedProp('8007', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def contactLinkedGlobalAddressListEntryID(self) -> Optional[EntryID]:
@@ -289,7 +289,7 @@ class Contact(MessageBase):
         """
         The GUID of the GAL contact to which the duplicate contact is linked.
         """
-        return self._getNamedAs('80E8', ps.PSETID_ADDRESS)
+        return self.getNamedProp('80E8', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def contactLinkGlobalAddressListLinkState(self) -> Optional[ContactLinkState]:
@@ -304,7 +304,7 @@ class Contact(MessageBase):
         A list of any contacts that were previously rejected for linking with
         the duplicate contact.
         """
-        return self._getNamedAs('80E5', ps.PSETID_ADDRESS)
+        return self.getNamedProp('80E5', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def contactLinkSMTPAddressCache(self) -> Optional[List[str]]:
@@ -312,7 +312,7 @@ class Contact(MessageBase):
         A list of the SMTP addresses that are used by the GAL contact that are
         linked to the duplicate contact.
         """
-        return self._getNamedAs('80E3', ps.PSETID_ADDRESS)
+        return self.getNamedProp('80E3', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def contactPhoto(self) -> Optional[bytes]:
@@ -331,28 +331,28 @@ class Contact(MessageBase):
         """
         Used to store custom text for a business card.
         """
-        return self._getNamedAs('804F', ps.PSETID_ADDRESS)
+        return self.getNamedProp('804F', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def contactUserField2(self) -> Optional[str]:
         """
         Used to store custom text for a business card.
         """
-        return self._getNamedAs('8050', ps.PSETID_ADDRESS)
+        return self.getNamedProp('8050', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def contactUserField3(self) -> Optional[str]:
         """
         Used to store custom text for a business card.
         """
-        return self._getNamedAs('8051', ps.PSETID_ADDRESS)
+        return self.getNamedProp('8051', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def contactUserField4(self) -> Optional[str]:
         """
         Used to store custom text for a business card.
         """
-        return self._getNamedAs('8052', ps.PSETID_ADDRESS)
+        return self.getNamedProp('8052', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def customerID(self) -> Optional[str]:
@@ -405,21 +405,21 @@ class Contact(MessageBase):
         """
         The address type of the first email address.
         """
-        return self._getNamedAs('8082', ps.PSETID_ADDRESS)
+        return self.getNamedProp('8082', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def email1DisplayName(self) -> Optional[str]:
         """
         The user-readable display name of the first email address.
         """
-        return self._getNamedAs('8080', ps.PSETID_ADDRESS)
+        return self.getNamedProp('8080', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def email1EmailAddress(self) -> Optional[str]:
         """
         The first email address.
         """
-        return self._getNamedAs('8083', ps.PSETID_ADDRESS)
+        return self.getNamedProp('8083', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def email1OriginalDisplayName(self) -> Optional[str]:
@@ -427,7 +427,7 @@ class Contact(MessageBase):
         The first SMTP email address that corresponds to the first email address
         for the contact.
         """
-        return self._getNamedAs('8084', ps.PSETID_ADDRESS)
+        return self.getNamedProp('8084', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def email1OriginalEntryId(self) -> Optional[EntryID]:
@@ -456,21 +456,21 @@ class Contact(MessageBase):
         """
         The address type of the second email address.
         """
-        return self._getNamedAs('8092', ps.PSETID_ADDRESS)
+        return self.getNamedProp('8092', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def email2DisplayName(self) -> Optional[str]:
         """
         The user-readable display name of the second email address.
         """
-        return self._getNamedAs('8090', ps.PSETID_ADDRESS)
+        return self.getNamedProp('8090', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def email2EmailAddress(self) -> Optional[str]:
         """
         The second email address.
         """
-        return self._getNamedAs('8093', ps.PSETID_ADDRESS)
+        return self.getNamedProp('8093', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def email2OriginalDisplayName(self) -> Optional[str]:
@@ -478,7 +478,7 @@ class Contact(MessageBase):
         The second SMTP email address that corresponds to the second email address
         for the contact.
         """
-        return self._getNamedAs('8094', ps.PSETID_ADDRESS)
+        return self.getNamedProp('8094', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def email2OriginalEntryId(self) -> Optional[EntryID]:
@@ -507,21 +507,21 @@ class Contact(MessageBase):
         """
         The address type of the third email address.
         """
-        return self._getNamedAs('80A2', ps.PSETID_ADDRESS)
+        return self.getNamedProp('80A2', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def email3DisplayName(self) -> Optional[str]:
         """
         The user-readable display name of the third email address.
         """
-        return self._getNamedAs('80A0', ps.PSETID_ADDRESS)
+        return self.getNamedProp('80A0', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def email3EmailAddress(self) -> Optional[str]:
         """
         The third email address.
         """
-        return self._getNamedAs('80A3', ps.PSETID_ADDRESS)
+        return self.getNamedProp('80A3', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def email3OriginalDisplayName(self) -> Optional[str]:
@@ -529,7 +529,7 @@ class Contact(MessageBase):
         The third SMTP email address that corresponds to the third email address
         for the contact.
         """
-        return self._getNamedAs('80A4', ps.PSETID_ADDRESS)
+        return self.getNamedProp('80A4', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def email3OriginalEntryId(self) -> Optional[EntryID]:
@@ -567,7 +567,7 @@ class Contact(MessageBase):
         The name under which to file a contact when displaying a list of
         contacts.
         """
-        return self._getNamedAs('8005', ps.PSETID_ADDRESS)
+        return self.getNamedProp('8005', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def fileUnderID(self) -> Optional[int]:
@@ -575,7 +575,7 @@ class Contact(MessageBase):
         The format to use for fileUnder. See PidLidFileUnderId in [MS-OXOCNTC]
         for details.
         """
-        return self._getNamedAs('8006', ps.PSETID_ADDRESS)
+        return self.getNamedProp('8006', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def freeBusyLocation(self) -> Optional[str]:
@@ -583,7 +583,7 @@ class Contact(MessageBase):
         A URL path from which a client can retrieve free/busy status information
         for the contact as an iCalendat file.
         """
-        return self._getNamedAs('80D8', ps.PSETID_ADDRESS)
+        return self.getNamedProp('80D8', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def ftpSite(self) -> Optional[str]:
@@ -597,7 +597,7 @@ class Contact(MessageBase):
         """
         The gender of the contact.
         """
-        return Gender(self.props.getValue('3A4D0002', 0))
+        return Gender(self.getPropertyVal('3A4D0002', 0))
 
     @functools.cached_property
     def generation(self) -> Optional[str]:
@@ -626,7 +626,7 @@ class Contact(MessageBase):
         """
         Whether the contact has a contact photo.
         """
-        return self._getNamedAs('8015', ps.PSETID_ADDRESS, bool, False)
+        return bool(self.getNamedProp('8015', ps.PSETID_ADDRESS))
 
     @property
     def headerFormatProperties(self) -> HEADER_FORMAT_TYPE:
@@ -732,7 +732,7 @@ class Contact(MessageBase):
         """
         The complete home address of the contact.
         """
-        return self._getNamedAs('801A', ps.PSETID_ADDRESS)
+        return self.getNamedProp('801A', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def homeAddressCountry(self) -> Optional[str]:
@@ -746,7 +746,7 @@ class Contact(MessageBase):
         """
         The country code portion of the contact's home address.
         """
-        return self._getNamedAs('80DA', ps.PSETID_ADDRESS)
+        return self.getNamedProp('80DA', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def homeAddressLocality(self) -> Optional[str]:
@@ -806,7 +806,7 @@ class Contact(MessageBase):
         """
         The type of address for the fax. MUST be set to "FAX" if present.
         """
-        return self._getNamedAs('80D2', ps.PSETID_ADDRESS)
+        return self.getNamedProp('80D2', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def homeFaxEmailAddress(self) -> Optional[str]:
@@ -814,7 +814,7 @@ class Contact(MessageBase):
         Contains a user-readable display name, followed by the "@" character,
         followed by a fax number.
         """
-        return self._getNamedAs('80D3', ps.PSETID_ADDRESS)
+        return self.getNamedProp('80D3', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def homeFaxNumber(self) -> Optional[str]:
@@ -828,7 +828,7 @@ class Contact(MessageBase):
         """
         The normalized subject for the contact.
         """
-        return self._getNamedAs('80D4', ps.PSETID_ADDRESS)
+        return self.getNamedProp('80D4', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def homeFaxOriginalEntryId(self) -> Optional[EntryID]:
@@ -863,14 +863,14 @@ class Contact(MessageBase):
         """
         The instant messaging address of the contact.
         """
-        return self._getNamedAs('8062', ps.PSETID_ADDRESS)
+        return self.getNamedProp('8062', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def isContactLinked(self) -> bool:
         """
         Whether the contact is linked to other contacts.
         """
-        return self._getNamedAs('80E0', ps.PSETID_ADDRESS, bool, False)
+        return bool(self.getNamedProp('80E0', ps.PSETID_ADDRESS))
 
     @functools.cached_property
     def isdnNumber(self) -> Optional[str]:
@@ -928,7 +928,7 @@ class Contact(MessageBase):
         """
         The country code portion of the contact's mail address.
         """
-        return self._getNamedAs('80DD', ps.PSETID_ADDRESS)
+        return self.getNamedProp('80DD', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def mailAddressLocality(self) -> Optional[str]:
@@ -1014,14 +1014,14 @@ class Contact(MessageBase):
         Whether contact synchronization with an external source (such as a
         social networking site) is handled by the server.
         """
-        return bool(self.props.getValue('7C24000B'))
+        return bool(self.getPropertyVal('7C24000B'))
 
     @functools.cached_property
     def otherAddress(self) -> Optional[str]:
         """
         The complete other address of the contact.
         """
-        return self._getNamedAs('801C', ps.PSETID_ADDRESS)
+        return self.getNamedProp('801C', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def otherAddressCountry(self) -> Optional[str]:
@@ -1035,7 +1035,7 @@ class Contact(MessageBase):
         """
         The country code portion of the contact's other address.
         """
-        return self._getNamedAs('80DC', ps.PSETID_ADDRESS)
+        return self.getNamedProp('80DC', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def otherAddressLocality(self) -> Optional[str]:
@@ -1098,21 +1098,21 @@ class Contact(MessageBase):
         """
         The phonetic pronunciation of the contact's company name.
         """
-        return self._getNamedAs('802E', ps.PSETID_ADDRESS)
+        return self.getNamedProp('802E', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def phoneticGivenName(self) -> Optional[str]:
         """
         The phonetic pronunciation of the contact's given name.
         """
-        return self._getNamedAs('802C', ps.PSETID_ADDRESS)
+        return self.getNamedProp('802C', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def phoneticSurname(self) -> Optional[str]:
         """
         The phonetic pronunciation of the given name of the contact.
         """
-        return self._getNamedAs('802D', ps.PSETID_ADDRESS)
+        return self.getNamedProp('802D', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def postalAddressID(self) -> PostalAddressID:
@@ -1120,7 +1120,7 @@ class Contact(MessageBase):
         Indicates which physical address is the Mailing Address for this
         contact.
         """
-        return PostalAddressID(self.namedProperties.get(('8022', ps.PSETID_ADDRESS), 0))
+        return PostalAddressID(self.getNamedProp('8022', ps.PSETID_ADDRESS, 0))
 
     @functools.cached_property
     def primaryFax(self) -> Optional[Dict]:
@@ -1145,7 +1145,7 @@ class Contact(MessageBase):
         """
         The type of address for the fax. MUST be set to "FAX" if present.
         """
-        return self._getNamedAs('80B2', ps.PSETID_ADDRESS)
+        return self.getNamedProp('80B2', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def primaryFaxEmailAddress(self) -> Optional[str]:
@@ -1153,7 +1153,7 @@ class Contact(MessageBase):
         Contains a user-readable display name, followed by the "@" character,
         followed by a fax number.
         """
-        return self._getNamedAs('80B3', ps.PSETID_ADDRESS)
+        return self.getNamedProp('80B3', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def primaryFaxNumber(self) -> Optional[str]:
@@ -1167,7 +1167,7 @@ class Contact(MessageBase):
         """
         The normalized subject for the contact.
         """
-        return self._getNamedAs('80B4', ps.PSETID_ADDRESS)
+        return self.getNamedProp('80B4', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def primaryFaxOriginalEntryId(self) -> Optional[EntryID]:
@@ -1254,7 +1254,7 @@ class Contact(MessageBase):
         """
         The wedding anniversary of the contact at 11:59 UTC.
         """
-        return self.props.getValue('3A410040')
+        return self.getPropertyVal('3A410040')
 
     @functools.cached_property
     def weddingAnniversaryEventEntryID(self) -> Optional[EntryID]:
@@ -1270,67 +1270,67 @@ class Contact(MessageBase):
         The wedding anniversary of the contact at 0:00 in the client's local
         time zone.
         """
-        return self._getNamedAs('80DF', ps.PSETID_ADDRESS)
+        return self.getNamedProp('80DF', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def webpageUrl(self) -> Optional[str]:
         """
         The contact's business web page url. SHOULD be the same as businessUrl.
         """
-        return self._getNamedAs('802B', ps.PSETID_ADDRESS)
+        return self.getNamedProp('802B', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def workAddress(self) -> Optional[str]:
         """
         The complete work address of the contact.
         """
-        return self._getNamedAs('801B', ps.PSETID_ADDRESS)
+        return self.getNamedProp('801B', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def workAddressCountry(self) -> Optional[str]:
         """
         The country portion of the contact's work address.
         """
-        return self._getNamedAs('8049', ps.PSETID_ADDRESS)
+        return self.getNamedProp('8049', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def workAddressCountryCode(self) -> Optional[str]:
         """
         The country code portion of the contact's work address.
         """
-        return self._getNamedAs('80DB', ps.PSETID_ADDRESS)
+        return self.getNamedProp('80DB', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def workAddressLocality(self) -> Optional[str]:
         """
         The locality or city portion of the contact's work address.
         """
-        return self._getNamedAs('8046', ps.PSETID_ADDRESS)
+        return self.getNamedProp('8046', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def workAddressPostalCode(self) -> Optional[str]:
         """
         The postal code portion of the contact's work address.
         """
-        return self._getNamedAs('8048', ps.PSETID_ADDRESS)
+        return self.getNamedProp('8048', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def workAddressPostOfficeBox(self) -> Optional[str]:
         """
         The number or identifier of the contact's work post office box.
         """
-        return self._getNamedAs('804A', ps.PSETID_ADDRESS)
+        return self.getNamedProp('804A', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def workAddressStateOrProvince(self) -> Optional[str]:
         """
         The state or province portion of the contact's work address.
         """
-        return self._getNamedAs('8047', ps.PSETID_ADDRESS)
+        return self.getNamedProp('8047', ps.PSETID_ADDRESS)
 
     @functools.cached_property
     def workAddressStreet(self) -> Optional[str]:
         """
         The street portion of the contact's work address.
         """
-        return self._getNamedAs('8045', ps.PSETID_ADDRESS)
+        return self.getNamedProp('8045', ps.PSETID_ADDRESS)

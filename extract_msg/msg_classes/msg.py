@@ -19,7 +19,9 @@ import zipfile
 
 import olefile
 
-from typing import Any, Callable, cast, Dict, List, Optional, Tuple, Union
+from typing import (
+        Any, Callable, cast, Dict, List, Optional, Tuple, TypeVar, Union
+    )
 
 from .. import constants
 from ..attachments import (
@@ -37,7 +39,7 @@ from ..exceptions import (
 from ..properties.named import Named, NamedProperties
 from ..properties.prop import FixedLengthProp
 from ..properties.properties_store import PropertiesStore
-from ..utils import  (
+from ..utils import (
         divide, hasLen, inputToMsgPath, makeWeakRef, msgPathToString,
         parseType, verifyPropertyId, verifyType, windowsUnicode
     )
@@ -45,6 +47,8 @@ from ..utils import  (
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
+_T = TypeVar('_T')
 
 
 class MSGFile:
@@ -217,7 +221,7 @@ class MSGFile:
             :param overrideClass: when the value could not be found (is None).
             If this is changed to False, then the value will be used regardless.
         """
-        value = self.namedProperties.get((propertyName, guid))
+        value = self.getNamedProp(propertyName, guid)
         # Check if we should be overriding the data type for this instance.
         if overrideClass is not None:
             if value is not None or not preserveNone:
@@ -253,7 +257,7 @@ class MSGFile:
             :param overrideClass: when the value could not be found (is None).
             If this is changed to False, then the value will be used regardless.
         """
-        value = self.props.getValue(propertyName)
+        value = self.getPropertyVal(propertyName)
         # Check if we should be overriding the data type for this instance.
         if overrideClass is not None:
             if (value is not None or not preserveNone):
@@ -606,6 +610,22 @@ class MSGFile:
                 ret[index] = item.decode(self.stringEncoding)[:-1]
             return ret
 
+    def getNamedProp(self, propertyName : str, guid : str, default : _T = None) -> Union[Any, _T]:
+        """
+        instance.namedProperties.get((propertyName, guid), default)
+
+        Can be override to create new behavior.
+        """
+        return self.namedProperties.get((propertyName, guid), default)
+
+    def getPropertyVal(self, name, default : _T = None) -> Union[Any, _T]:
+        """
+        instance.props.getValue(name, default)
+
+        Can be overriden to create new behavior.
+        """
+        return self.props.getValue(name, default)
+
     def getSingleOrMultipleBinary(self, filename, prefix : bool = True) -> Optional[Union[List[bytes], bytes]]:
         """
         A combination of :method getStringStream: and
@@ -774,7 +794,7 @@ class MSGFile:
         """
         Returns a boolean telling if the strings are unicode encoded.
         """
-        return (self.props.getValue('340D0003', 0) & 0x40000) != 0
+        return (self.getPropertyVal('340D0003', 0) & 0x40000) != 0
 
     @functools.cached_property
     def attachments(self) -> Union[List[AttachmentBase], List[SignedAttachment]]:
@@ -816,7 +836,7 @@ class MSGFile:
         Indicates whether the contents of this message are regarded as
         classified information.
         """
-        return self._getNamedAs('85B5', constants.ps.PSETID_COMMON, overrideClass = bool, preserveNone = False)
+        return bool(self.getNamedProp('85B5', constants.ps.PSETID_COMMON))
 
     @functools.cached_property
     def classType(self) -> Optional[str]:
@@ -830,14 +850,14 @@ class MSGFile:
         """
         The end time for the object.
         """
-        return self._getNamedAs('8517', constants.ps.PSETID_COMMON)
+        return self.getNamedProp('8517', constants.ps.PSETID_COMMON)
 
     @functools.cached_property
     def commonStart(self) -> Optional[datetime.datetime]:
         """
         The start time for the object.
         """
-        return self._getNamedAs('8516', constants.ps.PSETID_COMMON)
+        return self.getNamedProp('8516', constants.ps.PSETID_COMMON)
 
     @functools.cached_property
     def currentVersion(self) -> Optional[int]:
@@ -845,14 +865,14 @@ class MSGFile:
         Specifies the build number of the client application that sent the
         message.
         """
-        return self._getNamedAs('8552', constants.ps.PSETID_COMMON)
+        return self.getNamedProp('8552', constants.ps.PSETID_COMMON)
 
     @functools.cached_property
     def currentVersionName(self) -> Optional[str]:
         """
         Specifies the name of the client application that sent the message.
         """
-        return self._getNamedAs('8554', constants.ps.PSETID_COMMON)
+        return self.getNamedProp('8554', constants.ps.PSETID_COMMON)
 
     @property
     def errorBehavior(self) -> ErrorBehavior:
@@ -1026,7 +1046,7 @@ class MSGFile:
                     logger.warning('Encoding property not found. Defaulting to ISO-8859-15.')
                     self.__stringEncoding = 'iso-8859-15'
                 else:
-                    enc = cast(int, self.props['3FFD0003'].value)
+                    enc = cast(int, self.getPropertyVal('3FFD0003'))
                     # Now we just need to translate that value.
                     self.__stringEncoding = lookupCodePage(enc)
                 return self.__stringEncoding
