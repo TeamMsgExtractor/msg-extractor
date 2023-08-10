@@ -370,18 +370,14 @@ class MSGFile:
         verifyPropertyId(propertyID)
         if _type:
             verifyType(_type)
-            prop = self.props.get(propertyID + _type)
-            if isinstance(prop, FixedLengthProp):
-                return True, prop.value
-            else:
-                return False, None
-        else:
-            props = self.props.getProperties(propertyID)
-            for prop in props:
-                if isinstance(prop, FixedLengthProp):
-                    return True, prop.value
+            propertyID += _type
 
-        return False, None
+        notFound = object()
+        ret = self.getPropertyVal(propertyID, notFound)
+        if ret is notFound:
+            return False, None
+
+        return True, ret
 
     def _getTypedStream(self, filename, prefix : bool = True, _type = None) -> Tuple[bool, Optional[Any]]:
         """

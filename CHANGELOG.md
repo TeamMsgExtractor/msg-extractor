@@ -28,6 +28,7 @@
 * Changed all `Named` methods to no longer have a prefix argument. The prefix should *always* be false sense the named property mapping will only exist in the top level directory.
 * Adjusted `tryGetMimeType` to allows any attachments whose `data` property would return a `bytes` instance.
 * Changed internal code to use public SPI functions wherever possible. This includes making many private API functions use calls to the public API for getting bits of data.
+* Fixed potential issue with `AttachmentBase.clsid` which had the potential to cause some attachments to fail to generate a CLSID.
 
 **v0.44.0**
 * Fixed a bug that caused `MessageBase.headerInit` to always return `False` after the 0.42.0 update.

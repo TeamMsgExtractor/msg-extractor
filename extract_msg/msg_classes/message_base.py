@@ -1210,10 +1210,7 @@ class MessageBase(MSGFile):
         """
         Returns if this email has been marked as read.
         """
-        try:
-            return bool(self.props['0E070003'].value & 1)
-        except (AttributeError, KeyError):
-            return False
+        return bool(self.getPropertyVal('0E070003', 0) & 1)
 
     @functools.cached_property
     def isSent(self) -> bool:
@@ -1221,10 +1218,7 @@ class MessageBase(MSGFile):
         Returns if this email has been marked as sent. Assumes True if no flags
         are found.
         """
-        if not self.props.get('0E070003'):
-            return True
-        else:
-            return not bool(self.props['0E070003'].value & 8)
+        return not bool(self.getPropertyVal('0E070003', 0) & 8)
 
     @functools.cached_property
     def messageId(self) -> Optional[str]:
@@ -1247,7 +1241,7 @@ class MessageBase(MSGFile):
         """
         The date and time the message was received by the server.
         """
-        return self.props.getValue('0E060040')
+        return self.getPropertyVal('0E060040')
 
     @property
     def recipientSeparator(self) -> str:

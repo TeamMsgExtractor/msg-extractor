@@ -57,7 +57,7 @@ class WebAttachment(AttachmentBase):
         """
         The type of web service manipulating the attachment.
         """
-        return self._getNamedAs('AttachmentProviderType', constants.ps.PSETID_ATTACHMENT)
+        return self.getNamedProp('AttachmentProviderType', constants.ps.PSETID_ATTACHMENT)
 
     @property
     def type(self) -> AttachmentType:

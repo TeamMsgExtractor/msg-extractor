@@ -15,7 +15,9 @@ import pathlib
 import weakref
 
 from functools import cached_property
-from typing import List, Optional, Tuple, Type, TYPE_CHECKING, Union
+from typing import (
+        Any, List, Optional, Tuple, Type, TYPE_CHECKING, TypeVar, Union
+    )
 
 from .. import constants
 from ..enums import AttachmentType
@@ -34,6 +36,8 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
+_T = TypeVar('_T')
 
 
 class AttachmentBase(abc.ABC):
@@ -66,7 +70,7 @@ class AttachmentBase(abc.ABC):
             :param overrideClass: when the value could not be found (is None).
             If this is changed to False, then the value will be used regardless.
         """
-        value = self.namedProperties.get((propertyName, guid))
+        value = self.getNamedProp(propertyName, guid)
         # Check if we should be overriding the data type for this instance.
         if overrideClass is not None:
             if value is not None or not preserveNone:
@@ -86,10 +90,8 @@ class AttachmentBase(abc.ABC):
             :param overrideClass: when the value could not be found (is None).
             If this is changed to False, then the value will be used regardless.
         """
-        try:
-            value = self.props[propertyName].value
-        except (KeyError, AttributeError):
-            value = None
+        value = self.getPropertyVal(propertyName)
+
         # Check if we should be overriding the data type for this instance.
         if overrideClass is not None:
             if (value is not None or not preserveNone):
@@ -212,18 +214,14 @@ class AttachmentBase(abc.ABC):
         verifyPropertyId(propertyID)
         if _type:
             verifyType(_type)
-            prop = self.props.get(propertyID + _type)
-            if isinstance(prop, FixedLengthProp):
-                return True, prop.value
-            else:
-                return False, None
-        else:
-            props = self.props.getProperties(propertyID)
-            for prop in props:
-                if isinstance(prop, FixedLengthProp):
-                    return True, prop.value
+            propertyID += _type
 
-        return False, None
+        notFound = object()
+        ret = self.getPropertyVal(propertyID, notFound)
+        if ret is notFound:
+            return False, None
+
+        return True, ret
 
     def _getTypedStream(self, filename, _type = None):
         """
@@ -359,6 +357,22 @@ class AttachmentBase(abc.ABC):
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
         return msg.getMultipleString([self.__dir, msgPathToString(filename)])
+
+    def getNamedProp(self, propertyName : str, guid : str, default : _T = None) -> Union[Any, _T]:
+        """
+        instance.namedProperties.get((propertyName, guid), default)
+
+        Can be override to create new behavior.
+        """
+        return self.namedProperties.get((propertyName, guid), default)
+
+    def getPropertyVal(self, name, default : _T = None) -> Union[Any, _T]:
+        """
+        instance.props.getValue(name, default)
+
+        Can be overriden to create new behavior.
+        """
+        return self.props.getValue(name, default)
 
     def getSingleOrMultipleBinary(self, filename) -> Optional[Union[List[bytes], bytes]]:
         """
@@ -502,17 +516,10 @@ class AttachmentBase(abc.ABC):
         clsid = '00000000-0000-0000-0000-000000000000'
         dataStream = None
 
-        # See if we can find the data stream/storage.
-        if self.type in (AttachmentType.CUSTOM, AttachmentType.MSG):
+        if self.exists('__substg1.0_3701000D'):
             dataStream = [self.__dir, '__substg1.0_3701000D']
-        elif self.type is AttachmentType.DATA:
+        elif self.exists('__substg1.0_37010102'):
             dataStream = [self.__dir, '__substg1.0_37010102']
-        elif self.type is AttachmentType.UNSUPPORTED:
-            # Special check for custom attachments.
-            if self.exists('__substg1.0_3701000D'):
-                dataStream = [self.__dir, '__substg1.0_3701000D']
-            elif self.exists('__substg1.0_37010102'):
-                dataStream = [self.__dir, '__substg1.0_37010102']
 
         # If we found the right item, get the CLSID.
         if dataStream:
@@ -571,7 +578,7 @@ class AttachmentBase(abc.ABC):
 
         Only applicable if the attachment is an Exception object.
         """
-        return self.props.getValue('7FF90040')
+        return self.getPropertyVal('7FF90040')
 
     @functools.cached_property
     def extension(self) -> Optional[str]:
@@ -585,14 +592,14 @@ class AttachmentBase(abc.ABC):
         """
         Indicates whether an Attachment object is hidden from the end user.
         """
-        return bool(self.props.getValue('7FFE000B'))
+        return bool(self.getPropertyVal('7FFE000B'))
 
     @functools.cached_property
     def isAttachmentContactPhoto(self) -> bool:
         """
         Whether the attachment is a contact photo for a Contact object.
         """
-        return bool(self.props.getValue('7FFF000B'))
+        return bool(self.getPropertyVal('7FFF000B'))
 
     @functools.cached_property
     def longFilename(self) -> Optional[str]:
@@ -666,7 +673,7 @@ class AttachmentBase(abc.ABC):
         within the main message text. A value of 0xFFFFFFFF indicates a hidden
         attachment that is not to be rendered.
         """
-        return self.props.getValue('370B0003')
+        return self.getPropertyVal('370B0003')
 
     @property
     def shortFilename(self) -> Optional[str]:

@@ -9,7 +9,7 @@ __all__ = [
 import functools
 import logging
 
-from typing import List, Optional, Tuple, TYPE_CHECKING, Union
+from typing import Any, List, Optional, Tuple, TYPE_CHECKING, TypeVar, Union
 
 from .enums import ErrorBehavior, MeetingRecipientType, PropertiesType, RecipientType
 from .exceptions import StandardViolationError
@@ -24,6 +24,8 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
+_T = TypeVar('_T')
 
 
 class Recipient:
@@ -291,6 +293,14 @@ class Recipient:
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.getMultipleString([self.__dir, msgPathToString(filename)])
+
+    def getPropertyVal(self, name, default : _T = None) -> Union[Any, _T]:
+        """
+        instance.props.getValue(name, default)
+
+        Can be overriden to create new behavior.
+        """
+        return self.props.getValue(name, default)
 
     def getSingleOrMultipleBinary(self, filename) -> Optional[Union[List[bytes], bytes]]:
         """
