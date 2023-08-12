@@ -25,7 +25,7 @@ class MeetingRequest(MeetingRelated):
         object that is to be generated from the Meeting Request object. MUST
         start with "IPM.Appointment".
         """
-        return self._getNamedAs('0024', ps.PSETID_MEETING)
+        return self.getNamedProp('0024', ps.PSETID_MEETING)
 
     @functools.cached_property
     def calendarType(self) -> Optional[RecurCalendarType]:
@@ -53,7 +53,7 @@ class MeetingRequest(MeetingRelated):
         recurring series, and it was forwarded (even when forwarded by the
         organizer) rather than being an invitation sent by the organizer.
         """
-        return self._getNamedAs('820A', ps.PSETID_APPOINTMENT, bool, False)
+        return bool(self.getNamedProp('820A', ps.PSETID_APPOINTMENT))
 
     @property
     def headerFormatProperties(self) -> HEADER_FORMAT_TYPE:
@@ -154,7 +154,7 @@ class MeetingRequest(MeetingRelated):
         """
         The original value of the location property before a meeting update.
         """
-        return self._getNamedAs('0028', ps.PSETID_MEETING)
+        return self.getNamedProp('0028', ps.PSETID_MEETING)
 
     @functools.cached_property
     def oldWhenEndWhole(self) -> Optional[datetime.datetime]:
@@ -162,7 +162,7 @@ class MeetingRequest(MeetingRelated):
         The original value of the appointmentEndWhole property before a meeting
         update.
         """
-        return self._getNamedAs('002A', ps.PSETID_MEETING)
+        return self.getNamedProp('002A', ps.PSETID_MEETING)
 
     @functools.cached_property
     def oldWhenStartWhole(self) -> Optional[datetime.datetime]:
@@ -170,4 +170,4 @@ class MeetingRequest(MeetingRelated):
         The original value of the appointmentStartWhole property before a
         meeting update.
         """
-        return self._getNamedAs('0029', ps.PSETID_MEETING)
+        return self.getNamedProp('0029', ps.PSETID_MEETING)

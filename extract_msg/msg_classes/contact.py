@@ -38,7 +38,7 @@ class Contact(MessageBase):
         A union of which Electronic Address properties are set on the contact.
 
         Property is stored in the MSG file as a sinlge int. The result should be
-        identical to addressBookProviderEmailList.
+        a union of the flags specified by addressBookProviderEmailList.
         """
         return self._getNamedAs('8029', ps.PSETID_ADDRESS, ElectronicAddressProperties)
 
@@ -47,7 +47,7 @@ class Contact(MessageBase):
         """
         A set of which Electronic Address properties are set on the contact.
         """
-        return self._getNamedAs('8028', ps.PSETID_ADDRESS, lambda x : {ElectronicAddressProperties(y) for y in x})
+        return self._getNamedAs('8028', ps.PSETID_ADDRESS, ElectronicAddressProperties.fromIter)
 
     @functools.cached_property
     def assistant(self) -> Optional[str]:
@@ -76,7 +76,7 @@ class Contact(MessageBase):
         """
         Billing information for the contact.
         """
-        return self._getNamedAs('8535', ps.PSETID_COMMON)
+        return self.getNamedProp('8535', ps.PSETID_COMMON)
 
     @functools.cached_property
     def birthday(self) -> Optional[datetime.datetime]:

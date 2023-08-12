@@ -209,24 +209,19 @@ class MSGFile:
     def __exit__(self, *_) -> None:
         self.close()
 
-    def _getNamedAs(self, propertyName : str, guid : str, overrideClass = None, preserveNone : bool = True):
+    def _getNamedAs(self, propertyName : str, guid : str, overrideClass : Callable[..., _T]) -> Optional[_T]:
         """
         Returns the named property, setting the class if specified.
 
         :param overrideClass: Class/function to use to morph the data that was
             read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. By
-            default, this will be completely ignored if the value was not found.
-        :param preserveNone: If true (default), causes the function to ignore
-            :param overrideClass: when the value could not be found (is None).
-            If this is changed to False, then the value will be used regardless.
+            function or the function itself, if that is what is provided. If
+            the value is None, this function is not called. If you want it to
+            be called regardless, you should handle the data directly.
         """
         value = self.getNamedProp(propertyName, guid)
-        # Check if we should be overriding the data type for this instance.
-        if overrideClass is not None:
-            if value is not None or not preserveNone:
-                value = overrideClass(value)
-
+        if value is not None:
+            value = overrideClass(value)
         return value
 
     def _getOleEntry(self, filename, prefix : bool = True) -> olefile.olefile.OleDirectoryEntry:

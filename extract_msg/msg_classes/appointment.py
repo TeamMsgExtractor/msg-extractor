@@ -29,14 +29,14 @@ class AppointmentMeeting(Calendar):
         Indicates to the organizer that there are counter proposals that have
         not been accepted or rejected by the organizer.
         """
-        return self._getNamedAs('8257', ps.PSETID_APPOINTMENT, bool, False)
+        return bool(self.getNamedProp('8257', ps.PSETID_APPOINTMENT))
 
     @functools.cached_property
     def appointmentLastSequence(self) -> Optional[int]:
         """
         The last sequence number that was sent to any attendee.
         """
-        return self._getNamedAs('8203', ps.PSETID_APPOINTMENT)
+        return self.getNamedProp('8203', ps.PSETID_APPOINTMENT)
 
     @functools.cached_property
     def appointmentProposalNumber(self) -> Optional[int]:
@@ -44,14 +44,14 @@ class AppointmentMeeting(Calendar):
         The number of attendees who have sent counter propostals that have not
         been accepted or rejected by the organizer.
         """
-        return self._getNamedAs('8259', ps.PSETID_APPOINTMENT)
+        return self.getNamedProp('8259', ps.PSETID_APPOINTMENT)
 
     @functools.cached_property
     def appointmentReplyName(self) -> Optional[datetime.datetime]:
         """
         The user who last replied to the meeting request or meeting update.
         """
-        return self._getNamedAs('8230', ps.PSETID_APPOINTMENT)
+        return self.getNamedProp('8230', ps.PSETID_APPOINTMENT)
 
     @functools.cached_property
     def appointmentReplyTime(self) -> Optional[datetime.datetime]:
@@ -59,7 +59,7 @@ class AppointmentMeeting(Calendar):
         The date and time at which the attendee responded to a received Meeting
         Request object of Meeting Update object in UTC.
         """
-        return self._getNamedAs('8220', ps.PSETID_APPOINTMENT)
+        return self.getNamedProp('8220', ps.PSETID_APPOINTMENT)
 
     @functools.cached_property
     def appointmentSequenceTime(self) -> Optional[datetime.datetime]:
@@ -67,7 +67,7 @@ class AppointmentMeeting(Calendar):
         The date and time at which the appointmentSequence property was last
         modified.
         """
-        return self._getNamedAs('8202', ps.PSETID_APPOINTMENT)
+        return self.getNamedProp('8202', ps.PSETID_APPOINTMENT)
 
     @functools.cached_property
     def autoFillLocation(self) -> bool:
@@ -79,14 +79,14 @@ class AppointmentMeeting(Calendar):
         A value of False indicates that the value of the location property is
         not automatically set.
         """
-        return self._getNamedAs('823A', ps.PSETID_APPOINTMENT, bool, False)
+        return bool(self.getNamedProp('823A', ps.PSETID_APPOINTMENT))
 
     @functools.cached_property
     def fInvited(self) -> bool:
         """
         Whether a Meeting Request object has been sent out.
         """
-        return self._getNamedAs('8229', ps.PSETID_APPOINTMENT, bool, False)
+        return bool(self.getNamedProp('8229', ps.PSETID_APPOINTMENT))
 
     @property
     def headerFormatProperties(self) -> HEADER_FORMAT_TYPE:

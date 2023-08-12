@@ -76,7 +76,7 @@ __all__ = [
 
 import enum
 
-from typing import Dict, Union
+from typing import Dict, Iterable, List, Set, Union
 
 
 class AddressBookType(enum.IntEnum):
@@ -463,6 +463,13 @@ class DVAspect(enum.IntEnum):
 
 
 class ElectronicAddressProperties(enum.IntEnum):
+    @classmethod
+    def fromIter(cls, items : Iterable[int]) -> Set[ElectronicAddressProperties]:
+        """
+        Uses the iterable of ints to create a set of this enum.
+        """
+        return {cls(x) for x in items}
+
     EMAIL_1 = 0x00000000
     EMAIL_2 = 0x00000001
     EMAIL_3 = 0x00000002
@@ -1505,6 +1512,14 @@ class ResponseStatus(enum.IntEnum):
     DECLINED: The attendee has declined.
     NOT_RESPONDED: The attendee has not yet responded.
     """
+
+    @classmethod
+    def fromIter(cls, items : Iterable[int]) -> List[ResponseStatus]:
+        """
+        Uses the iterable of ints to create a list of this enum.
+        """
+        return {cls(x) for x in items}
+
     NONE = 0x00000000
     ORGANIZED = 0x00000001
     TENTATIVE = 0x00000002

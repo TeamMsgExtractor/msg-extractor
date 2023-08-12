@@ -26,7 +26,7 @@ class MeetingForwardNotification(MeetingRelated):
         Incomplete, looks to be the same structure as
         appointmentUnsendableRecipients, so we need more examples of this.
         """
-        return self._getNamedAs('8261', constants.ps.PSETID_APPOINTMENT)
+        return self.getNamedProp('8261', constants.ps.PSETID_APPOINTMENT)
 
     @property
     def headerFormatProperties(self) -> constants.HEADER_FORMAT_TYPE:
@@ -96,4 +96,4 @@ class MeetingForwardNotification(MeetingRelated):
         Indicates that the Meeting Forward Notification object was out-of-date
         when it was received.
         """
-        return self._getNamedAs('8045', constants.ps.PSETID_COMMON, bool, False)
+        return bool(self.getNamedProp('8045', constants.ps.PSETID_COMMON))

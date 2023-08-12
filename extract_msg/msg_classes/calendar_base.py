@@ -349,21 +349,21 @@ class CalendarBase(MessageBase):
         """
         A ResponseStatus for each of the attendees in nonSendableBcc.
         """
-        return self._getNamedAs('8545', ps.PSETID_COMMON, lambda x : list(ResponseStatus(y) for y in x))
+        return self._getNamedAs('8545', ps.PSETID_COMMON, ResponseStatus.fromIter)
 
     @functools.cached_property
     def nonSendCcTrackStatus(self) -> Optional[List[ResponseStatus]]:
         """
         A ResponseStatus for each of the attendees in nonSendableCc.
         """
-        return self._getNamedAs('8544', ps.PSETID_COMMON, lambda x : list(ResponseStatus(y) for y in x))
+        return self._getNamedAs('8544', ps.PSETID_COMMON, ResponseStatus.fromIter)
 
     @functools.cached_property
     def nonSendToTrackStatus(self) -> Optional[List[ResponseStatus]]:
         """
         A ResponseStatus for each of the attendees in nonSendableTo.
         """
-        return self._getNamedAs('8543', ps.PSETID_COMMON, lambda x : list(ResponseStatus(y) for y in x))
+        return self._getNamedAs('8543', ps.PSETID_COMMON, ResponseStatus.fromIter)
 
     @functools.cached_property
     def optionalAttendees(self) -> Optional[str]:
