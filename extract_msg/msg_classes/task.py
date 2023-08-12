@@ -95,7 +95,7 @@ class Task(MessageBase):
         """
         Indicates the acceptance state of the task.
         """
-        return self._getNamedAs('812A', constants.ps.PSETID_TASK, TaskAcceptance)
+        return self.getNamedAs('812A', constants.ps.PSETID_TASK, TaskAcceptance)
 
     @functools.cached_property
     def taskAccepted(self) -> bool:
@@ -211,7 +211,7 @@ class Task(MessageBase):
         """
         Indicates the type of change that was last made to the Task object.
         """
-        return self._getNamedAs('811A', constants.ps.PSETID_TASK, TaskHistory)
+        return self.getNamedAs('811A', constants.ps.PSETID_TASK, TaskHistory)
 
     @functools.cached_property
     def taskLastDelegate(self) -> Optional[str]:
@@ -241,7 +241,7 @@ class Task(MessageBase):
         """
         Used in a task communication. Should be 0 (UNASSIGNED) on task objects.
         """
-        return self._getNamedAs('8518', constants.ps.PSETID_COMMON, TaskMode)
+        return self.getNamedAs('8518', constants.ps.PSETID_COMMON, TaskMode)
 
     @functools.cached_property
     def taskMultipleRecipients(self) -> Optional[TaskMultipleRecipients]:
@@ -249,7 +249,7 @@ class Task(MessageBase):
         Returns a union of flags that specify optimization hints about the
         recipients of a Task object.
         """
-        return self._getNamedAs('8120', constants.ps.PSETID_TASK, TaskMultipleRecipients)
+        return self.getNamedAs('8120', constants.ps.PSETID_TASK, TaskMultipleRecipients)
 
     @functools.cached_property
     def taskNoCompute(self) -> Optional[bool]:
@@ -264,7 +264,7 @@ class Task(MessageBase):
         """
         Specifies a number that aids custom sorting of Task objects.
         """
-        return self._getNamedAs('8123', constants.ps.PSETID_TASK, unsignedToSignedInt)
+        return self.getNamedAs('8123', constants.ps.PSETID_TASK, unsignedToSignedInt)
 
     @functools.cached_property
     def taskOwner(self) -> Optional[str]:
@@ -278,7 +278,7 @@ class Task(MessageBase):
         """
         Contains the name of the owner of the task.
         """
-        return self._getNamedAs('8129', constants.ps.PSETID_TASK, TaskOwnership)
+        return self.getNamedAs('8129', constants.ps.PSETID_TASK, TaskOwnership)
 
     @functools.cached_property
     def taskRecurrence(self) -> Optional[RecurrencePattern]:
@@ -286,7 +286,7 @@ class Task(MessageBase):
         Contains a RecurrencePattern structure that provides information about
         recurring tasks.
         """
-        return self._getNamedAs('8116', constants.ps.PSETID_TASK, RecurrencePattern)
+        return self.getNamedAs('8116', constants.ps.PSETID_TASK, RecurrencePattern)
 
     @functools.cached_property
     def taskResetReminder(self) -> bool:
@@ -315,14 +315,14 @@ class Task(MessageBase):
         """
         Indicates the current assignment state of the Task object.
         """
-        return self._getNamedAs('8113', constants.ps.PSETID_TASK, TaskState)
+        return self.getNamedAs('8113', constants.ps.PSETID_TASK, TaskState)
 
     @functools.cached_property
     def taskStatus(self) -> Optional[TaskStatus]:
         """
         The completion status of a task.
         """
-        return self._getNamedAs('8101', constants.ps.PSETID_TASK, TaskStatus)
+        return self.getNamedAs('8101', constants.ps.PSETID_TASK, TaskStatus)
 
     @functools.cached_property
     def taskStatusOnComplete(self) -> bool:

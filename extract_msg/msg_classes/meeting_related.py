@@ -46,7 +46,7 @@ class MeetingRelated(CalendarBase):
         A union of which actions have been taken on the Meeting Request object
         or Meeting Update object.
         """
-        return self._getNamedAs('85CD', ps.PSETID_CALENDAR_ASSISTANT, ServerProcessingAction)
+        return self.getNamedAs('85CD', ps.PSETID_CALENDAR_ASSISTANT, ServerProcessingAction)
 
     @functools.cached_property
     def timeZone(self) -> Optional[int]:

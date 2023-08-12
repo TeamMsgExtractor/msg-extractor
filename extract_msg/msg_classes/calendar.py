@@ -23,7 +23,7 @@ class Calendar(CalendarBase):
         """
         A set of the actions a user has taken on a Meeting object.
         """
-        return self._getNamedAs('0015', ps.PSETID_CALENDAR_ASSISTANT, ClientIntentFlag)
+        return self.getNamedAs('0015', ps.PSETID_CALENDAR_ASSISTANT, ClientIntentFlag)
 
     @functools.cached_property
     def fExceptionalAttendees(self) -> Optional[bool]:

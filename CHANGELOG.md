@@ -24,11 +24,15 @@
     * `getSingleOrMultipleString`: A combination of `getStringStream` and `getMultipleString` which prefers a single string stream. Returns a single bytes objecct or a list of bytes objects.
     * `getPropertyVal`: Shortcut for `instance.props.getValue` that allows new behavior to be added by overriding it.
     * `getNamedProp`: Shortcut for `instance.namedProperties.get((propertyName, guid), default)` that allows new behavior to be added by overriding it.
-* Removed `Named._getStringStream` and `Named.sExists`. The named properties storage will *always*
+* Removed `Named._getStringStream` and `Named.sExists`. The named properties storage will *always* use regular streams and not string streams.
 * Changed all `Named` methods to no longer have a prefix argument. The prefix should *always* be false sense the named property mapping will only exist in the top level directory.
 * Adjusted `tryGetMimeType` to allows any attachments whose `data` property would return a `bytes` instance.
-* Changed internal code to use public SPI functions wherever possible. This includes making many private API functions use calls to the public API for getting bits of data.
+* Changed internal code to use public API functions wherever possible. This includes making many private API functions use calls to the public API for getting bits of data.
 * Fixed potential issue with `AttachmentBase.clsid` which had the potential to cause some attachments to fail to generate a CLSID.
+* Outright removed or changed a significant portion of the private API. I have rarely, if ever, seen references to these parts, so this should cause you no issues. Some of these have also been moved to the public API, either identically or with changes, and the mapping is as such:
+    * `_getNamedAs` -> `getNamedAs`: Changed to *always* require a conversion argument. If you were previously using it to plainly get a named property or to handle the properly being None or a real value, you should use the return value of `getNamedProp` instead.
+    * `_getPropertyAs` -> `getPropertyAs`: Same as above, use `getPropertyVal` instead for None or plain access.
+    * `_getStreamAs` -> `getStreamAs`, `getStringStreamAs`: Once again, see above. Use `getStream` and `getStringStream`, respectively.
 
 **v0.44.0**
 * Fixed a bug that caused `MessageBase.headerInit` to always return `False` after the 0.42.0 update.

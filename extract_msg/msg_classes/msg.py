@@ -209,21 +209,6 @@ class MSGFile:
     def __exit__(self, *_) -> None:
         self.close()
 
-    def _getNamedAs(self, propertyName : str, guid : str, overrideClass : Callable[..., _T]) -> Optional[_T]:
-        """
-        Returns the named property, setting the class if specified.
-
-        :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. If
-            the value is None, this function is not called. If you want it to
-            be called regardless, you should handle the data directly.
-        """
-        value = self.getNamedProp(propertyName, guid)
-        if value is not None:
-            value = overrideClass(value)
-        return value
-
     def _getOleEntry(self, filename, prefix : bool = True) -> olefile.olefile.OleDirectoryEntry:
         """
         Finds the directory entry from the olefile for the stream or storage
@@ -240,26 +225,6 @@ class MSGFile:
 
         return self.__ole.direntries[sid]
 
-    def _getPropertyAs(self, propertyName, overrideClass = None, preserveNone : bool = True):
-        """
-        Returns the property, setting the class if specified.
-
-        :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. By
-            default, this will be completely ignored if the value was not found.
-        :param preserveNone: If True (default), causes the function to ignore
-            :param overrideClass: when the value could not be found (is None).
-            If this is changed to False, then the value will be used regardless.
-        """
-        value = self.getPropertyVal(propertyName)
-        # Check if we should be overriding the data type for this instance.
-        if overrideClass is not None:
-            if (value is not None or not preserveNone):
-                value = overrideClass(value)
-
-        return value
-
     def _getStream(self, filename, prefix : bool = True) -> Optional[bytes]:
         """
         Gets a binary representation of the requested filename.
@@ -270,33 +235,6 @@ class MSGFile:
         import warnings
         warnings.warn(':method _getStream: has been deprecated and moved to the public api. Use :method getStream: instead (remove the underscore).', DeprecationWarning)
         return self.getStream(filename, prefix)
-
-    def _getStreamAs(self, streamID, stringStream : bool = True, overrideClass = None, preserveNone : bool = True):
-        """
-        Returns the specified stream, modifying it to the class if specified.
-
-        If the specified stream is not a string stream, make sure to set
-        :param stringStream: to False.
-
-        :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. By
-            default, this will be completely ignored if the value was not found.
-        :param preserveNone: If true (default), causes the function to ignore
-            :param overrideClass: when the value could not be found (is None).
-            If this is changed to False, then the value will be used regardless.
-        """
-        if stringStream:
-            value = self.getStringStream(streamID)
-        else:
-            value = self.getStream(streamID)
-
-        # Check if we should be overriding the data type for this instance.
-        if overrideClass is not None:
-            if value is not None or not preserveNone:
-                value = overrideClass(value)
-
-        return value
 
     def _getStringStream(self, filename, prefix : bool = True) -> Optional[str]:
         """
@@ -601,6 +539,21 @@ class MSGFile:
                 ret[index] = item.decode(self.stringEncoding)[:-1]
             return ret
 
+    def getNamedAs(self, propertyName : str, guid : str, overrideClass : Callable[..., _T]) -> Optional[_T]:
+        """
+        Returns the named property, setting the class if specified.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. If
+            the value is None, this function is not called. If you want it to
+            be called regardless, you should handle the data directly.
+        """
+        value = self.getNamedProp(propertyName, guid)
+        if value is not None:
+            value = overrideClass(value)
+        return value
+
     def getNamedProp(self, propertyName : str, guid : str, default : _T = None) -> Union[Any, _T]:
         """
         instance.namedProperties.get((propertyName, guid), default)
@@ -608,6 +561,23 @@ class MSGFile:
         Can be override to create new behavior.
         """
         return self.namedProperties.get((propertyName, guid), default)
+
+    def getPropertyAs(self, propertyName, overrideClass : Callable[..., _T]) -> Optional[_T]:
+        """
+        Returns the property, setting the class if found.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. If
+            the value is None, this function is not called. If you want it to
+            be called regardless, you should handle the data directly.
+        """
+        value = self.getPropertyVal(propertyName)
+
+        if value is not None:
+            value = overrideClass(value)
+
+        return value
 
     def getPropertyVal(self, name, default : _T = None) -> Union[Any, _T]:
         """
@@ -675,6 +645,24 @@ class MSGFile:
             logger.info(f'Stream "{filename}" was requested but could not be found. Returning `None`.')
             return None
 
+    def getStreamAs(self, streamID, overrideClass : Callable[..., _T]) -> Optional[_T]:
+        """
+        Returns the specified stream, modifying it to the specified class if it
+        is found.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. If
+            the value is None, this function is not called. If you want it to
+            be called regardless, you should handle the data directly.
+        """
+        value = self.getStream(streamID)
+
+        if value is not None:
+            value = overrideClass(value)
+
+        return value
+
     def getStringStream(self, filename, prefix : bool = True) -> Optional[str]:
         """
         Gets a string representation of the requested filename.
@@ -695,6 +683,24 @@ class MSGFile:
         else:
             tmp = self.getStream(filename + '001E', prefix = False)
             return None if tmp is None else tmp.decode(self.stringEncoding)
+
+    def getStringStreamAs(self, streamID, overrideClass : Callable[..., _T]) -> Optional[_T]:
+        """
+        Returns the specified string stream, modifying it to the specified
+        class if it is found.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. If
+            the value is None, this function is not called. If you want it to
+            be called regardless, you should handle the data directly.
+        """
+        value = self.getStream(streamID)
+
+        if value is not None:
+            value = overrideClass(value)
+
+        return value
 
     def listDir(self, streams : bool = True, storages : bool = False, includePrefix : bool = True) -> List[List[str]]:
         """
@@ -878,7 +884,7 @@ class MSGFile:
         """
         The specified importance of the msg file.
         """
-        return self._getPropertyAs('00170003', Importance)
+        return self.getPropertyAs('00170003', Importance)
 
     @property
     def importanceString(self) -> Union[str, None]:
@@ -987,7 +993,7 @@ class MSGFile:
         """
         The specified priority of the msg file.
         """
-        return self._getPropertyAs('00260003', Priority)
+        return self.getPropertyAs('00260003', Priority)
 
     @functools.cached_property
     def props(self) -> PropertiesStore:
@@ -1009,7 +1015,7 @@ class MSGFile:
         """
         The specified sensitivity of the msg file.
         """
-        return self._getPropertyAs('00360003', Sensitivity)
+        return self.getPropertyAs('00360003', Sensitivity)
 
     @functools.cached_property
     def sideEffects(self) -> Optional[SideEffect]:
@@ -1017,7 +1023,7 @@ class MSGFile:
         Controls how a Message object is handled by the client in relation to
         certain user interface actions by the user, such as deleting a message.
         """
-        return self._getNamedAs('8510', constants.ps.PSETID_COMMON, SideEffect)
+        return self.getNamedAs('8510', constants.ps.PSETID_COMMON, SideEffect)
 
     @property
     def stringEncoding(self):

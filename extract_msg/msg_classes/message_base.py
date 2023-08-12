@@ -1266,7 +1266,7 @@ class MessageBase(MSGFile):
         """
         Data that is used to correlate the report and the original message.
         """
-        return self._getStreamAs('__substg1.0_00310102', False, ReportTag)
+        return self.getStreamAs('__substg1.0_00310102', ReportTag)
 
     @functools.cached_property
     def rtfBody(self) -> Optional[bytes]:

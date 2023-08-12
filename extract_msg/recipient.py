@@ -9,7 +9,9 @@ __all__ = [
 import functools
 import logging
 
-from typing import Any, List, Optional, Tuple, TYPE_CHECKING, TypeVar, Union
+from typing import (
+        Any, Callable, List, Optional, Tuple, TYPE_CHECKING, TypeVar, Union
+    )
 
 from .enums import ErrorBehavior, MeetingRecipientType, PropertiesType, RecipientType
 from .exceptions import StandardViolationError
@@ -54,29 +56,6 @@ class Recipient:
             self.__type = RecipientType(0xF & self.__typeFlags)
         self.__formatted = f'{self.__name} <{self.__email}>'
 
-    def _getPropertyAs(self, propertyName, overrideClass = None, preserveNone : bool = True):
-        """
-        Returns the property, setting the class if specified.
-
-        :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. By
-            default, this will be completely ignored if the value was not found.
-        :param preserveNone: If True (default), causes the function to ignore
-            :param overrideClass: when the value could not be found (is None).
-            If this is changed to False, then the value will be used regardless.
-        """
-        try:
-            value = self.props[propertyName].value
-        except (KeyError, AttributeError):
-            value = None
-        # Check if we should be overriding the data type for this instance.
-        if overrideClass is not None:
-            if (value is not None or not preserveNone):
-                value = overrideClass(value)
-
-        return value
-
     def _getStream(self, filename) -> Optional[bytes]:
         """
         Gets a binary representation of the requested filename.
@@ -90,33 +69,6 @@ class Recipient:
         import warnings
         warnings.warn(':method _getStream: has been deprecated and moved to the public api. Use :method getStream: instead (remove the underscore).', DeprecationWarning)
         return self.getStream(filename)
-
-    def _getStreamAs(self, streamID, stringStream : bool = True, overrideClass = None, preserveNone : bool = True):
-        """
-        Returns the specified stream, modifying it to the class if specified.
-
-        If the specified stream is not a string stream, make sure to set
-        :param stringStream: to False.
-
-        :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. By
-            default, this will be completely ignored if the value was not found.
-        :param preserveNone: If true (default), causes the function to ignore
-            :param overrideClass: when the value could not be found (is None).
-            If this is changed to False, then the value will be used regardless.
-        """
-        if stringStream:
-            value = self.getStringStream(streamID)
-        else:
-            value = self.getStream(streamID)
-
-        # Check if we should be overriding the data type for this instance.
-        if overrideClass is not None:
-            if value is not None or not preserveNone:
-                value = overrideClass(value)
-
-        return value
 
     def _getStringStream(self, filename) -> Optional[str]:
         """
@@ -294,6 +246,23 @@ class Recipient:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.getMultipleString([self.__dir, msgPathToString(filename)])
 
+    def getPropertyAs(self, propertyName, overrideClass : Callable[..., _T]) -> Optional[_T]:
+        """
+        Returns the property, setting the class if found.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. If
+            the value is None, this function is not called. If you want it to
+            be called regardless, you should handle the data directly.
+        """
+        value = self.getPropertyVal(propertyName)
+
+        if value is not None:
+            value = overrideClass(value)
+
+        return value
+
     def getPropertyVal(self, name, default : _T = None) -> Union[Any, _T]:
         """
         instance.props.getValue(name, default)
@@ -354,6 +323,24 @@ class Recipient:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.getStream([self.__dir, msgPathToString(filename)])
 
+    def getStreamAs(self, streamID, overrideClass : Callable[..., _T]) -> Optional[_T]:
+        """
+        Returns the specified stream, modifying it to the specified class if it
+        is found.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. If
+            the value is None, this function is not called. If you want it to
+            be called regardless, you should handle the data directly.
+        """
+        value = self.getStream(streamID)
+
+        if value is not None:
+            value = overrideClass(value)
+
+        return value
+
     def getStringStream(self, filename) -> Optional[str]:
         """
         Gets a string representation of the requested filename.
@@ -371,6 +358,24 @@ class Recipient:
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.getStringStream([self.__dir, msgPathToString(filename)])
+
+    def getStringStreamAs(self, streamID, overrideClass : Callable[..., _T]) -> Optional[_T]:
+        """
+        Returns the specified string stream, modifying it to the specified
+        class if it is found.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. If
+            the value is None, this function is not called. If you want it to
+            be called regardless, you should handle the data directly.
+        """
+        value = self.getStream(streamID)
+
+        if value is not None:
+            value = overrideClass(value)
+
+        return value
 
     @functools.cached_property
     def account(self) -> Optional[str]:
@@ -391,7 +396,7 @@ class Recipient:
         """
         Returns the recipient's Entry ID.
         """
-        return self._getStreamAs('__substg1.0_0FFF0102', False, PermanentEntryID)
+        return self.getStreamAs('__substg1.0_0FFF0102', PermanentEntryID)
 
     @property
     def formatted(self) -> str:

@@ -175,4 +175,4 @@ class AppointmentMeeting(Calendar):
         """
         The EntryID of the delegator's message store.
         """
-        return self._getNamedAs('8237', ps.PSETID_APPOINTMENT, EntryID.autoCreate)
+        return self.getNamedAs('8237', ps.PSETID_APPOINTMENT, EntryID.autoCreate)

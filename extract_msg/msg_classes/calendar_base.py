@@ -40,14 +40,14 @@ class CalendarBase(MessageBase):
         """
         The auxiliary state of the object.
         """
-        return self._getNamedAs('8207', ps.PSETID_APPOINTMENT, AppointmentAuxilaryFlag)
+        return self.getNamedAs('8207', ps.PSETID_APPOINTMENT, AppointmentAuxilaryFlag)
 
     @functools.cached_property
     def appointmentColor(self) -> Optional[AppointmentColor]:
         """
         The color to be used when displaying a Calendar object.
         """
-        return self._getNamedAs('8214', ps.PSETID_APPOINTMENT, AppointmentColor)
+        return self.getNamedAs('8214', ps.PSETID_APPOINTMENT, AppointmentColor)
 
     @functools.cached_property
     def appointmentDuration(self) -> Optional[int]:
@@ -77,7 +77,7 @@ class CalendarBase(MessageBase):
         Specifies the dates and times when a recurring series occurs by using
         one of the recurrence patterns and ranges specified in this section.
         """
-        return self._getNamedAs('8216', ps.PSETID_APPOINTMENT, RecurrencePattern)
+        return self.getNamedAs('8216', ps.PSETID_APPOINTMENT, RecurrencePattern)
 
     @functools.cached_property
     def appointmentSequence(self) -> Optional[int]:
@@ -100,7 +100,7 @@ class CalendarBase(MessageBase):
         """
         The appointment state of the object.
         """
-        return self._getNamedAs('8217', ps.PSETID_APPOINTMENT, AppointmentStateFlag)
+        return self.getNamedAs('8217', ps.PSETID_APPOINTMENT, AppointmentStateFlag)
 
     @functools.cached_property
     def appointmentSubType(self) -> bool:
@@ -115,7 +115,7 @@ class CalendarBase(MessageBase):
         Specifies the time zone information for the appointmentEndWhole property
         Used to convert the end date and time to and from UTC.
         """
-        return self._getNamedAs('825F', ps.PSETID_APPOINTMENT, TimeZoneDefinition)
+        return self.getNamedAs('825F', ps.PSETID_APPOINTMENT, TimeZoneDefinition)
 
     @functools.cached_property
     def appointmentTimeZoneDefinitionRecur(self) -> Optional[TimeZoneDefinition]:
@@ -123,7 +123,7 @@ class CalendarBase(MessageBase):
         Specified the time zone information that specifies how to convert the
         meeting date and time on a recurring series to and from UTC.
         """
-        return self._getNamedAs('8260', ps.PSETID_APPOINTMENT, TimeZoneDefinition)
+        return self.getNamedAs('8260', ps.PSETID_APPOINTMENT, TimeZoneDefinition)
 
     @functools.cached_property
     def appointmentTimeZoneDefinitionStartDisplay(self) -> Optional[TimeZoneDefinition]:
@@ -131,7 +131,7 @@ class CalendarBase(MessageBase):
         Specifies the time zone information for the appointmentStartWhole
         property. Used to convert the start date and time to and from UTC.
         """
-        return self._getNamedAs('825E', ps.PSETID_APPOINTMENT, TimeZoneDefinition)
+        return self.getNamedAs('825E', ps.PSETID_APPOINTMENT, TimeZoneDefinition)
 
     @functools.cached_property
     def appointmentUnsendableRecipients(self) -> Optional[bytes]:
@@ -163,7 +163,7 @@ class CalendarBase(MessageBase):
         """
         Indicates the EntryID of the contact associated with the birthday event.
         """
-        return self._getNamedAs('BirthdayContactEntryId', ps.PSETID_ADDRESS, EntryID.autoCreate)
+        return self.getNamedAs('BirthdayContactEntryId', ps.PSETID_ADDRESS, EntryID.autoCreate)
 
     @functools.cached_property
     def birthdayContactPersonGuid(self) -> Optional[bytes]:
@@ -179,7 +179,7 @@ class CalendarBase(MessageBase):
         Specified the availability of a user for the event described by the
         object.
         """
-        return self._getNamedAs('8205', ps.PSETID_APPOINTMENT, BusyStatus)
+        return self.getNamedAs('8205', ps.PSETID_APPOINTMENT, BusyStatus)
 
     @functools.cached_property
     def cc(self) -> Optional[str]:
@@ -202,7 +202,7 @@ class CalendarBase(MessageBase):
         an Exception object to a recurring series, where the year, month, and
         day fields are all 0.
         """
-        return self._getNamedAs('0023', ps.PSETID_MEETING, GlobalObjectID)
+        return self.getNamedAs('0023', ps.PSETID_MEETING, GlobalObjectID)
 
     @functools.cached_property
     def clipEnd(self) -> Optional[datetime.datetime]:
@@ -255,14 +255,14 @@ class CalendarBase(MessageBase):
         """
         The unique identifier or the Calendar object.
         """
-        return self._getNamedAs('0003', ps.PSETID_MEETING, GlobalObjectID)
+        return self.getNamedAs('0003', ps.PSETID_MEETING, GlobalObjectID)
 
     @functools.cached_property
     def iconIndex(self) -> Optional[Union[IconIndex, int]]:
         """
         The icon to use for the object.
         """
-        return self._getPropertyAs('10800003', IconIndex.tryMake)
+        return self.getPropertyAs('10800003', IconIndex.tryMake)
 
     @functools.cached_property
     def isBirthdayContactWritable(self) -> bool:
@@ -299,7 +299,7 @@ class CalendarBase(MessageBase):
         A list of PidTagEntryId properties of Task objects related to the
         Calendar object that are set by a client.
         """
-        return self._getNamedAs('820C', ps.PSETID_APPOINTMENT, lambda x : list(EntryID.autoCreate(y) for y in x))
+        return self.getNamedAs('820C', ps.PSETID_APPOINTMENT, lambda x : list(EntryID.autoCreate(y) for y in x))
 
     @functools.cached_property
     def location(self) -> Optional[str]:
@@ -349,21 +349,21 @@ class CalendarBase(MessageBase):
         """
         A ResponseStatus for each of the attendees in nonSendableBcc.
         """
-        return self._getNamedAs('8545', ps.PSETID_COMMON, ResponseStatus.fromIter)
+        return self.getNamedAs('8545', ps.PSETID_COMMON, ResponseStatus.fromIter)
 
     @functools.cached_property
     def nonSendCcTrackStatus(self) -> Optional[List[ResponseStatus]]:
         """
         A ResponseStatus for each of the attendees in nonSendableCc.
         """
-        return self._getNamedAs('8544', ps.PSETID_COMMON, ResponseStatus.fromIter)
+        return self.getNamedAs('8544', ps.PSETID_COMMON, ResponseStatus.fromIter)
 
     @functools.cached_property
     def nonSendToTrackStatus(self) -> Optional[List[ResponseStatus]]:
         """
         A ResponseStatus for each of the attendees in nonSendableTo.
         """
-        return self._getNamedAs('8543', ps.PSETID_COMMON, ResponseStatus.fromIter)
+        return self.getNamedAs('8543', ps.PSETID_COMMON, ResponseStatus.fromIter)
 
     @functools.cached_property
     def optionalAttendees(self) -> Optional[str]:
@@ -467,7 +467,7 @@ class CalendarBase(MessageBase):
         Set on a recurring series to specify time zone information. Specifies
         how to convert time fields between local time and UTC.
         """
-        return self._getNamedAs('8233', ps.PSETID_APPOINTMENT, TimeZoneStruct)
+        return self.getNamedAs('8233', ps.PSETID_APPOINTMENT, TimeZoneStruct)
 
     @functools.cached_property
     def to(self) -> Optional[str]:

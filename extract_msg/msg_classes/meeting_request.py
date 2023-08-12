@@ -34,7 +34,7 @@ class MeetingRequest(MeetingRelated):
         property if the Meeting Request object represents a recurring series or
         an exception.
         """
-        return self._getNamedAs('001C', ps.PSETID_MEETING, RecurCalendarType)
+        return self.getNamedAs('001C', ps.PSETID_MEETING, RecurCalendarType)
 
     @functools.cached_property
     def changeHighlight(self) -> Optional[MeetingObjectChange]:
@@ -44,7 +44,7 @@ class MeetingRequest(MeetingRelated):
 
         Returns a union of the set flags.
         """
-        return self._getNamedAs('8204', ps.PSETID_APPOINTMENT, MeetingObjectChange)
+        return self.getNamedAs('8204', ps.PSETID_APPOINTMENT, MeetingObjectChange)
 
     @functools.cached_property
     def forwardInstance(self) -> bool:
@@ -140,14 +140,14 @@ class MeetingRequest(MeetingRelated):
         calendar at the time the Meeting Request object or Meeting Update object
         was sent.
         """
-        return self._getNamedAs('8224', ps.PSETID_APPOINTMENT, BusyStatus)
+        return self.getNamedAs('8224', ps.PSETID_APPOINTMENT, BusyStatus)
 
     @functools.cached_property
     def meetingType(self) -> Optional[MeetingType]:
         """
         The type of Meeting Request object or Meeting Update object.
         """
-        return self._getNamedAs('0026', ps.PSETID_MEETING, MeetingType)
+        return self.getNamedAs('0026', ps.PSETID_MEETING, MeetingType)
 
     @functools.cached_property
     def oldLocation(self) -> Optional[str]:

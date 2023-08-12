@@ -40,14 +40,14 @@ class Contact(MessageBase):
         Property is stored in the MSG file as a sinlge int. The result should be
         a union of the flags specified by addressBookProviderEmailList.
         """
-        return self._getNamedAs('8029', ps.PSETID_ADDRESS, ElectronicAddressProperties)
+        return self.getNamedAs('8029', ps.PSETID_ADDRESS, ElectronicAddressProperties)
 
     @functools.cached_property
     def addressBookProviderEmailList(self) -> Optional[Set[ElectronicAddressProperties]]:
         """
         A set of which Electronic Address properties are set on the contact.
         """
-        return self._getNamedAs('8028', ps.PSETID_ADDRESS, ElectronicAddressProperties.fromIter)
+        return self.getNamedAs('8028', ps.PSETID_ADDRESS, ElectronicAddressProperties.fromIter)
 
     @functools.cached_property
     def assistant(self) -> Optional[str]:
@@ -91,7 +91,7 @@ class Contact(MessageBase):
         The EntryID of an optional Appointement object that represents the
         contact's birtday.
         """
-        return self._getNamedAs('804D', ps.PSETID_ADDRESS, EntryID.autoCreate)
+        return self.getNamedAs('804D', ps.PSETID_ADDRESS, EntryID.autoCreate)
 
     @functools.cached_property
     def birthdayLocal(self) -> Optional[datetime.datetime]:
@@ -144,7 +144,7 @@ class Contact(MessageBase):
         Specifies the customization details for displaying a contact as a
         business card.
         """
-        return self._getNamedAs('8040', ps.PSETID_ADDRESS, BusinessCardDisplayDefinition)
+        return self.getNamedAs('8040', ps.PSETID_ADDRESS, BusinessCardDisplayDefinition)
 
     @functools.cached_property
     def businessFax(self) -> Optional[Dict]:
@@ -198,7 +198,7 @@ class Contact(MessageBase):
         """
         The one-off EntryID corresponding to this fax address.
         """
-        return self._getNamedAs('80C5', ps.PSETID_ADDRESS, EntryID.autoCreate)
+        return self.getNamedAs('80C5', ps.PSETID_ADDRESS, EntryID.autoCreate)
 
     @functools.cached_property
     def businessTelephoneNumber(self) -> Optional[str]:
@@ -282,7 +282,7 @@ class Contact(MessageBase):
         """
         The EntryID of the GAL object to which the duplicate contact is linked.
         """
-        return self._getNamedAs('80E2', ps.PSETID_ADDRESS, EntryID.autoCreate)
+        return self.getNamedAs('80E2', ps.PSETID_ADDRESS, EntryID.autoCreate)
 
     @functools.cached_property
     def contactLinkGlobalAddressListLinkID(self) -> Optional[str]:
@@ -296,7 +296,7 @@ class Contact(MessageBase):
         """
         The state of linking between the GAL contact and the duplicate contact.
         """
-        return self._getNamedAs('80E6', ps.PSETID_ADDRESS, ContactLinkState)
+        return self.getNamedAs('80E6', ps.PSETID_ADDRESS, ContactLinkState)
 
     @functools.cached_property
     def contactLinkLinkRejectHistory(self) -> Optional[List[bytes]]:
@@ -434,7 +434,7 @@ class Contact(MessageBase):
         """
         The EntryID of the object correspinding to this electronic address.
         """
-        return self._getNamedAs('8085', ps.PSETID_ADDRESS, EntryID.autoCreate)
+        return self.getNamedAs('8085', ps.PSETID_ADDRESS, EntryID.autoCreate)
 
     @functools.cached_property
     def email2(self) -> Optional[Dict]:
@@ -485,7 +485,7 @@ class Contact(MessageBase):
         """
         The EntryID of the object correspinding to this electronic address.
         """
-        return self._getNamedAs('8095', ps.PSETID_ADDRESS, EntryID.autoCreate)
+        return self.getNamedAs('8095', ps.PSETID_ADDRESS, EntryID.autoCreate)
 
     @functools.cached_property
     def email3(self) -> Optional[Dict]:
@@ -536,7 +536,7 @@ class Contact(MessageBase):
         """
         The EntryID of the object correspinding to this electronic address.
         """
-        return self._getNamedAs('80A5', ps.PSETID_ADDRESS, EntryID.autoCreate)
+        return self.getNamedAs('80A5', ps.PSETID_ADDRESS, EntryID.autoCreate)
 
     @functools.cached_property
     def emails(self) -> Tuple[Union[Dict, None], Union[Dict, None], Union[Dict, None]]:
@@ -835,7 +835,7 @@ class Contact(MessageBase):
         """
         The one-off EntryID corresponding to this fax address.
         """
-        return self._getNamedAs('80D5', ps.PSETID_ADDRESS, EntryID.autoCreate)
+        return self.getNamedAs('80D5', ps.PSETID_ADDRESS, EntryID.autoCreate)
 
     @functools.cached_property
     def homeTelephoneNumber(self) -> Optional[str]:
@@ -1174,7 +1174,7 @@ class Contact(MessageBase):
         """
         The one-off EntryID corresponding to this fax address.
         """
-        return self._getNamedAs('80B5', ps.PSETID_ADDRESS, EntryID.autoCreate)
+        return self.getNamedAs('80B5', ps.PSETID_ADDRESS, EntryID.autoCreate)
 
     @functools.cached_property
     def primaryTelephoneNumber(self) -> Optional[str]:
@@ -1204,7 +1204,7 @@ class Contact(MessageBase):
         Contact object unless the Contact object is a copy of an earlier
         original.
         """
-        return self._getNamedAs('85BD', ps.PSETID_COMMON, EntryID.autoCreate)
+        return self.getNamedAs('85BD', ps.PSETID_COMMON, EntryID.autoCreate)
 
     @functools.cached_property
     def referredByName(self) -> Optional[str]:
@@ -1262,7 +1262,7 @@ class Contact(MessageBase):
         The EntryID of an optional Appointement object that represents the
         contact's wedding anniversary.
         """
-        return self._getNamedAs('804E', ps.PSETID_ADDRESS, EntryID.autoCreate)
+        return self.getNamedAs('804E', ps.PSETID_ADDRESS, EntryID.autoCreate)
 
     @functools.cached_property
     def weddingAnniversaryLocal(self) -> Optional[datetime.datetime]:

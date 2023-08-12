@@ -23,7 +23,7 @@ class StickyNote(MessageBase):
         """
         The color of the sticky note.
         """
-        return self._getNamedAs('8B00', constants.ps.PSETID_NOTE, NoteColor)
+        return self.getNamedAs('8B00', constants.ps.PSETID_NOTE, NoteColor)
 
     @functools.cached_property
     def noteHeight(self) -> Optional[int]:

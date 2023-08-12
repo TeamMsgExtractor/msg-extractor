@@ -67,7 +67,7 @@ class TaskRequest(MessageBase):
         """
         The assignment status of the embedded Task object.
         """
-        return self._getNamedAs('8518', constants.ps.PSETID_COMMON, TaskMode)
+        return self.getNamedAs('8518', constants.ps.PSETID_COMMON, TaskMode)
 
     @functools.cached_property
     def taskObject(self) -> Optional[Task]:
@@ -105,4 +105,4 @@ class TaskRequest(MessageBase):
         """
         The type of task request.
         """
-        return self._getStreamAs('__substg1.0_001A', TaskRequestType.fromClassType)
+        return self.getStringStreamAs('__substg1.0_001A', TaskRequestType.fromClassType)
