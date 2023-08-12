@@ -189,11 +189,12 @@ class PropertiesStore:
                     return prop.value
             return default
         elif len(name) == 8:
-            if (prop := self.get()):
+            if (prop := self.get(name)):
                 if isinstance(prop, FixedLengthProp):
                     return prop.value
                 else:
                     return default
+            return default
         else:
             raise ValueError('Property name must be an int less than 0x100000000, a 4 character hex string, or an 8 character hex string.')
 
