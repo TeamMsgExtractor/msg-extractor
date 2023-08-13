@@ -862,7 +862,7 @@ class MSGFile:
         Returns a class that contains the list of Address Book EntryIDs linked
         to this Message object.
         """
-        return self.getNamedAs('', constants.ps.PSETID_COMMON, ContactLinkEntry)
+        return self.getNamedAs('8585', constants.ps.PSETID_COMMON, ContactLinkEntry)
 
     @functools.cached_property
     def contacts(self) -> Optional[List[str]]:
