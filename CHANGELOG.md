@@ -21,7 +21,7 @@
     * `getMultipleBinary`: Gets a multiple binary property as a list of `bytes` objects.
     * `getSingleOrMultipleBinary`: A combination of `getStream` and `getMultipleBinary` which prefers a single binary stream. Returns a single `bytes` object or a list of `bytes` objects.
     * `getMultipleString`: Gets a multiple string property as a list of `str` objects.
-    * `getSingleOrMultipleString`: A combination of `getStringStream` and `getMultipleString` which prefers a single string stream. Returns a single bytes objecct or a list of bytes objects.
+    * `getSingleOrMultipleString`: A combination of `getStringStream` and `getMultipleString` which prefers a single string stream. Returns a single bytes object or a list of bytes objects.
     * `getPropertyVal`: Shortcut for `instance.props.getValue` that allows new behavior to be added by overriding it.
     * `getNamedProp`: Shortcut for `instance.namedProperties.get((propertyName, guid), default)` that allows new behavior to be added by overriding it.
 * Removed `Named._getStringStream` and `Named.sExists`. The named properties storage will *always* use regular streams and not string streams.
