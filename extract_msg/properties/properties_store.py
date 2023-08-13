@@ -8,17 +8,20 @@ import datetime
 import logging
 import pprint
 
-from typing import Any, Dict, Optional, Union
-from warnings import warn
+from typing import (
+        Any, Dict, Iterable, Iterator, List, Optional, Tuple, TypeVar, Union
+    )
 
 from .. import constants
 from ..enums import Intelligence, PropertiesType
-from .prop import createProp, PropBase
-from ..utils import divide, properHex
+from .prop import createProp, FixedLengthProp, PropBase
+from ..utils import divide
 
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
+_T = TypeVar('_T')
 
 
 class PropertiesStore:
@@ -34,7 +37,10 @@ class PropertiesStore:
             raise TypeError(':param data: MUST be bytes.')
         self.__rawData = data
         self.__len = len(data)
-        self.__props : Dict[PropBase] = {}
+        self.__props : Dict[str, PropBase] = {}
+        # This maps short IDs to all properties that use that ID. More than one
+        # property with the same ID but a different type may exist.
+        self.__idMapping : Dict[str, List[str]] = {}
         self.__naid = None
         self.__nrid = None
         self.__ac = None
@@ -72,6 +78,12 @@ class PropertiesStore:
             if len(st) == 16:
                 prop = createProp(st)
                 self.__props[prop.name] = prop
+
+                # Add the ID to our mapping list.
+                id_ = prop.name[:4]
+                if id_ not in self.__idMapping:
+                    self.__idMapping[id_] = []
+                self.__idMapping[id_].append(prop.name)
             else:
                 logger.warning(f'Found stream from divide that was not 16 bytes: {st}. Ignoring.')
         self.__pl = len(self.__props)
@@ -79,10 +91,12 @@ class PropertiesStore:
     def __contains__(self, key) -> bool:
         return self.__props.__contains__(key)
 
-    def __getitem__(self, key) -> PropBase:
-        return self.__props.__getitem__(key)
+    def __getitem__(self, key : Union[str, int]) -> PropBase:
+        if (found := self._mapId(key)):
+            return self.__props.__getitem__(found)
+        raise KeyError(key)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[str]:
         return self.__props.__iter__()
 
     def __len__(self) -> int:
@@ -94,31 +108,100 @@ class PropertiesStore:
     def __repr__(self) -> str:
         return self.__props.__repr__()
 
-    def get(self, name, default = None) -> Optional[Union[PropBase, Any]]:
+    def _mapId(self, id_ : Union[int, str]) -> str:
+        """
+        Converts an input into an appropriate property ID.
+
+        This is a complex function, allowing the user to specify an int or
+        string. If the input is a string that is not 4 characters, it is
+        returned. Otherwise, a series of checks will be
+        performed. If the input is an int that is less than 0x10000, it is
+        considered a property ID without a type and converted to a 4 character
+        hexadecimal string. Otherwise, it is converted to an 8 character
+        hexadecimal string and returned.
+
+        Once the input is a 4 character string from the other paths, it will
+        then be checked against the list of found property IDs, and the first
+        full ID will be returned.
+
+        If a valid conversion could not be done, returns an empty string.
+
+        All strings returned will be uppercase.
+        """
+        # See if we need to convert to 4 character string and map or if we just
+        # need to return quickly.
+        if isinstance(id_, str):
+            id_ = id_.upper()
+            if len(id_) != 4:
+                return id_
+        elif isinstance(id_, int):
+            if id_ >= 0x10000:
+                return f'{id_:08X}'
+            else:
+                id_ = f'{id_:04X}'
+        else:
+            return ''
+
+        return self.__idMapping.get(id_, ('',))[0]
+
+    def get(self, name : Union[str, int], default : _T = None) -> Union[PropBase, _T]:
         """
         Retrieve the property of :param name:. Returns the value of
         :param default: if the property could not be found.
         """
-        try:
-            return self.__props[name]
-        except KeyError:
-            # DEBUG
-            logger.debug('KeyError exception.')
-            logger.debug(properHex(self.__rawData))
-            logger.debug(self.__props)
+        if (name := self._mapId(name)):
+            return self.__props.get(name, default)
+        else:
             return default
 
-    def has_key(self, key) -> bool:
+    def getProperties(self, id_ : Union[str, int]) -> List[PropBase]:
         """
-        Checks if :param key: is a key in the properties dictionary.
-        """
-        warn('`Properties.has_key` is deprecated. Use the `in` keyword instead.', DeprecationWarning)
-        return key in self.__props
+        Gets all properties with the specified ID.
 
-    def items(self):
+        :param ID: An 4 digit hexadecimal string or an int that is less than
+            0x10000.
+        """
+        if isinstance(id_, int):
+            if id_ >= 0x10000:
+                return []
+            else:
+                id_ = f'{id_:04X}'
+        elif isinstance(id_, str):
+            if len(id_) == 4:
+                id_ = id_.upper()
+            else:
+                return []
+
+        return [self[x] for x in self.__idMapping.get(id_, [])]
+
+    def getValue(self, name : Union[str, int], default : _T = None) -> Union[Any, _T]:
+        """
+        Attempts to get the first property
+        """
+        if isinstance(name, int):
+            if name >= 0x10000:
+                name = f'{name:08X}'
+            else:
+                name = f'{name:04X}'
+        if len(name) == 4:
+            for prop in self.getProperties(name):
+                if isinstance(prop, FixedLengthProp):
+                    return prop.value
+            return default
+        elif len(name) == 8:
+            if (prop := self.get(name)):
+                if isinstance(prop, FixedLengthProp):
+                    return prop.value
+                else:
+                    return default
+            return default
+        else:
+            raise ValueError('Property name must be an int less than 0x100000000, a 4 character hex string, or an 8 character hex string.')
+
+    def items(self) -> Iterable[Tuple[str, PropBase]]:
         return self.__props.items()
 
-    def keys(self):
+    def keys(self) -> Iterable[str]:
         return self.__props.keys()
 
     def pprintKeys(self) -> None:
@@ -127,7 +210,7 @@ class PropertiesStore:
         """
         pprint.pprint(sorted(tuple(self.__props.keys())))
 
-    def values(self):
+    def values(self) -> Iterable[PropBase]:
         return self.__props.values()
 
     items.__doc__ = dict.items.__doc__
@@ -194,14 +277,14 @@ class PropertiesStore:
         return self.__nrid
 
     @property
-    def props(self) -> Dict:
+    def props(self) -> Dict[str, PropBase]:
         """
         Returns a copy of the internal properties dict.
         """
         return copy.deepcopy(self.__props)
 
     @property
-    def _propDict(self) -> Dict:
+    def _propDict(self) -> Dict[str, PropBase]:
         """
         A direct reference to the underlying property dictionary. Used in one
         place in the code, and not recommended to be used if you are not a

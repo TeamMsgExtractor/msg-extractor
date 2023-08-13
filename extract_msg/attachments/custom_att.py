@@ -34,7 +34,7 @@ class CustomAttachment(AttachmentBase):
     The attachment entry for custom attachments.
     """
 
-    def __init__(self, msg : MSGFile, dir_, propStore : PropertiesStore):
+    def __init__(self, msg : MSGFile, dir_ : str, propStore : PropertiesStore):
         super().__init__(msg, dir_, propStore)
 
         self.__customHandler = getHandler(self)

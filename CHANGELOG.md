@@ -1,3 +1,39 @@
+**v0.45.0**
+* BREAKING: Changed parsing of string multiple properties to remove the trailing null byte. This *will* cause the output of parsing them to differ.
+* Updated typing information for some functions and classes.
+* Fixed a bug with `MessageSignedBase.attachments` that would cause it to return None instead of an empty list if the number of normal attachments was 0 was the error behavior was set to ignore violations of the standard.
+* Updated `MessageSignedBase.attachments` to use `functools.cached_property` instead of `property`.
+* Fixed spelling errors in some exception strings.
+* Made `NamedPropertyBase` a subclass of `abc.ABC`.
+* Cleaned up some of the code for named properties to remove unused variables and remove inefficient code.
+* Changed `PropBase` to be a subclass of `abc.ABC`.
+* Added detailed versioning info to the README.
+* Deprecated many private functions, including methods on many of the classes. Of primary note are `_getStream` and `_getStringStream`, which have been moved to the public API as `getStream` and `getStringStream`. Any deprecated functions still exist and will forward to a public API function if they are not being removed. Additionally, all internal usage of them has been removed. This change is one of the big preparations that is needed for the `1.0.0` release.
+    * As mentioned, a number of these deprecated functions have been moved to the public API. It is recommended that you run tests with your code after enabling deprecation warnings to see what should be changed.
+* Removed items deprecated in or before `0.42.0`.
+* Changed the API for the private method `_genRecipient`. This is not intended for use outside of the module *except* for subclasses. The change removed the allowance of ints for the second argument, requiring that it be a valid enum type.
+* Convert many enum types to `IntEnum`.
+* Extended functionality of `PropertiesStore` to allow for integer property names and getting a property based on just the ID. You can also get a list of all properties that use a given ID.
+* Added new function `PropertiesStore.getProperties` which gets a list of all properties matching the property ID. Return type is a list of `PropBase` instances.
+* Added new function `PropertiesStore.getValue` which looks for the first matching `FixedLengthProp` and returns the value from it.
+* Improved internal code related to getting a property with a potentially unknown type.
+* Added a number of entirely new functions to the public API on `MSGFile`, `AttachmentBase`, `PropertiesStore`, and `Recipient` objects:
+    * `getMultipleBinary`: Gets a multiple binary property as a list of `bytes` objects.
+    * `getSingleOrMultipleBinary`: A combination of `getStream` and `getMultipleBinary` which prefers a single binary stream. Returns a single `bytes` object or a list of `bytes` objects.
+    * `getMultipleString`: Gets a multiple string property as a list of `str` objects.
+    * `getSingleOrMultipleString`: A combination of `getStringStream` and `getMultipleString` which prefers a single string stream. Returns a single bytes objecct or a list of bytes objects.
+    * `getPropertyVal`: Shortcut for `instance.props.getValue` that allows new behavior to be added by overriding it.
+    * `getNamedProp`: Shortcut for `instance.namedProperties.get((propertyName, guid), default)` that allows new behavior to be added by overriding it.
+* Removed `Named._getStringStream` and `Named.sExists`. The named properties storage will *always* use regular streams and not string streams.
+* Changed all `Named` methods to no longer have a prefix argument. The prefix should *always* be false sense the named property mapping will only exist in the top level directory.
+* Adjusted `tryGetMimeType` to allows any attachments whose `data` property would return a `bytes` instance.
+* Changed internal code to use public API functions wherever possible. This includes making many private API functions use calls to the public API for getting bits of data.
+* Fixed potential issue with `AttachmentBase.clsid` which had the potential to cause some attachments to fail to generate a CLSID.
+* Outright removed or changed a significant portion of the private API. I have rarely, if ever, seen references to these parts, so this should cause you no issues. Some of these have also been moved to the public API, either identically or with changes, and the mapping is as such:
+    * `_getNamedAs` -> `getNamedAs`: Changed to *always* require a conversion argument. If you were previously using it to plainly get a named property or to handle the properly being None or a real value, you should use the return value of `getNamedProp` instead.
+    * `_getPropertyAs` -> `getPropertyAs`: Same as above, use `getPropertyVal` instead for None or plain access.
+    * `_getStreamAs` -> `getStreamAs`, `getStringStreamAs`: Once again, see above. Use `getStream` and `getStringStream`, respectively.
+
 **v0.44.0**
 * Fixed a bug that caused `MessageBase.headerInit` to always return `False` after the 0.42.0 update.
 * Changed `MessageBase.headerInit` to a property.

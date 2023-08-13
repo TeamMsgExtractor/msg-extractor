@@ -30,9 +30,9 @@ class DirectoryEntry:
     Originals should be inaccessible outside of the class.
     """
     name : str = ''
-    rightChild : 'DirectoryEntry' = None
-    leftChild : 'DirectoryEntry' = None
-    childTreeRoot : 'DirectoryEntry' = None
+    rightChild : DirectoryEntry = None
+    leftChild : DirectoryEntry = None
+    childTreeRoot : DirectoryEntry = None
     stateBits : int = 0
     creationTime : int = 0
     modifiedTime : int = 0
@@ -744,7 +744,7 @@ class OleWriter:
 
         for x in entries:
             entry = msg._getOleEntry(x)
-            data = msg._getStream(x) if entry.entry_type == DirectoryEntryType.STREAM else None
+            data = msg.getStream(x) if entry.entry_type == DirectoryEntryType.STREAM else None
             # THe properties stream on embedded messages actualy needs to be
             # transformed a little (*why* it is like that is a mystery to me).
             # Basically we just need to add a "reserved" section to it in a
@@ -767,7 +767,7 @@ class OleWriter:
             # Create our generator.
             gen = (x for x in msg._oleListDir() if len(x) > 1 and x[0] == '__nameid_version1.0')
             for x in gen:
-                self.addOleEntry(x, msg._getOleEntry(x, prefix = False), msg._getStream(x, prefix = False))
+                self.addOleEntry(x, msg._getOleEntry(x, prefix = False), msg.getStream(x, prefix = False))
 
     def fromOleFile(self, ole : OleFileIO, rootPath = []) -> None:
         """

@@ -23,10 +23,10 @@ class SystemTime:
     def __init__(self, data : bytes):
         self.unpack(data)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return self.pack() == other.pack()
 
-    def __ne__(self, other):
+    def __ne__(self, other) -> bool:
         return not self.__eq__(other)
 
     def pack(self) -> bytes:

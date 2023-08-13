@@ -35,7 +35,7 @@ class Attachment(AttachmentBase):
     A standard data attachment of an MSG file.
     """
 
-    def __init__(self, msg : MSGFile, dir_, propStore : PropertiesStore):
+    def __init__(self, msg : MSGFile, dir_ : str, propStore : PropertiesStore):
         """
         :param msg: The MSGFile instance that the attachment belongs to.
         :param dir_: The directory inside the MSG file where the attachment is
@@ -44,7 +44,7 @@ class Attachment(AttachmentBase):
             use.
         """
         super().__init__(msg, dir_, propStore)
-        self.__data = self._getStream('__substg1.0_37010102')
+        self.__data = self.getStream('__substg1.0_37010102')
 
     def getFilename(self, **kwargs) -> str:
         """

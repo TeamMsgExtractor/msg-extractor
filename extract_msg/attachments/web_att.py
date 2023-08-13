@@ -43,21 +43,21 @@ class WebAttachment(AttachmentBase):
         """
         The permission type data associated with a web reference attachment.
         """
-        return self._getNamedAs('AttachmentOriginalPermissionType', constants.ps.PSETID_ATTACHMENT, AttachmentPermissionType)
+        return self.getNamedAs('AttachmentOriginalPermissionType', constants.ps.PSETID_ATTACHMENT, AttachmentPermissionType)
 
     @functools.cached_property
     def permissionType(self) -> Optional[AttachmentPermissionType]:
         """
         The permission type data associated with a web reference attachment.
         """
-        return self._getNamedAs('AttachmentPermissionType', constants.ps.PSETID_ATTACHMENT, AttachmentPermissionType)
+        return self.getNamedAs('AttachmentPermissionType', constants.ps.PSETID_ATTACHMENT, AttachmentPermissionType)
 
     @functools.cached_property
     def providerName(self) -> Optional[str]:
         """
         The type of web service manipulating the attachment.
         """
-        return self._getNamedAs('AttachmentProviderType', constants.ps.PSETID_ATTACHMENT)
+        return self.getNamedProp('AttachmentProviderType', constants.ps.PSETID_ATTACHMENT)
 
     @property
     def type(self) -> AttachmentType:

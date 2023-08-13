@@ -12,6 +12,7 @@ __all__ = [
 ]
 
 
+import abc
 import datetime
 import logging
 
@@ -19,7 +20,7 @@ from typing import Any
 
 from .. import constants
 from ..enums import ErrorCode, ErrorCodeType
-from ..utils import filetimeToDatetime, properHex
+from ..utils import filetimeToDatetime
 
 
 logger = logging.getLogger(__name__)
@@ -33,18 +34,18 @@ def createProp(data : bytes) -> PropBase:
     else:
         if temp not in constants.VARIABLE_LENGTH_PROPS:
             # DEBUG.
-            logger.warning(f'Unknown property type: {properHex(temp)}')
+            logger.warning(f'Unknown property type: {temp:04X}')
         return VariableLengthProp(data)
 
 
-class PropBase:
+class PropBase(abc.ABC):
     """
     Base class for Prop instances.
     """
 
     def __init__(self, data : bytes):
         self.__rawData = data
-        self.__name = properHex(data[3::-1]).upper()
+        self.__name = data[3::-1].hex().upper()
         self.__type, self.__flags = constants.st.ST2.unpack(data)
         self.__fm = self.__flags & 1 == 1
         self.__fr = self.__flags & 2 == 2
@@ -164,8 +165,7 @@ class FixedLengthProp(PropBase):
             try:
                 value = filetimeToDatetime(rawTime)
             except ValueError as e:
-                logger.exception(e)
-                logger.error(self.rawData)
+                logger.exception(self.rawData)
         elif _type == 0x0048:  # PtypGuid
             # TODO parsing for this
             pass

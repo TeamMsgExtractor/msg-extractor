@@ -23,14 +23,14 @@ class MeetingRelated(CalendarBase):
         """
         The date and time at which the meeting-related object was sent.
         """
-        return self._getNamedAs('0001', ps.PSETID_MEETING)
+        return self.getNamedProp('0001', ps.PSETID_MEETING)
 
     @functools.cached_property
     def processed(self) -> bool:
         """
         Indicates whether a client has processed a meeting-related object.
         """
-        return self._getPropertyAs('7D01000B', bool, False)
+        return bool(self.getPropertyVal('7D01000B'))
 
     @functools.cached_property
     def serverProcessed(self) -> bool:
@@ -38,7 +38,7 @@ class MeetingRelated(CalendarBase):
         Indicates that the Meeting Request object or Meeting Update object has
         been processed.
         """
-        return self._getNamedAs('85CC', ps.PSETID_CALENDAR_ASSISTANT, bool, False)
+        return bool(self.getNamedProp('85CC', ps.PSETID_CALENDAR_ASSISTANT))
 
     @functools.cached_property
     def serverProcessingActions(self) -> Optional[ServerProcessingAction]:
@@ -46,7 +46,7 @@ class MeetingRelated(CalendarBase):
         A union of which actions have been taken on the Meeting Request object
         or Meeting Update object.
         """
-        return self._getNamedAs('85CD', ps.PSETID_CALENDAR_ASSISTANT, ServerProcessingAction)
+        return self.getNamedAs('85CD', ps.PSETID_CALENDAR_ASSISTANT, ServerProcessingAction)
 
     @functools.cached_property
     def timeZone(self) -> Optional[int]:
@@ -55,11 +55,11 @@ class MeetingRelated(CalendarBase):
 
         See PidLidTimeZone in [MS-OXOCAL] for details.
         """
-        return self._getNamedAs('000C', ps.PSETID_MEETING)
+        return self.getNamedProp('000C', ps.PSETID_MEETING)
 
     @functools.cached_property
     def where(self) -> Optional[str]:
         """
         PidLidWhere. Should be the same as location.
         """
-        return self._getNamedAs('0002', ps.PSETID_MEETING)
+        return self.getNamedProp('0002', ps.PSETID_MEETING)

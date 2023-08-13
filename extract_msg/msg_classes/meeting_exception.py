@@ -35,7 +35,7 @@ class MeetingException(MeetingRelated):
         The date and time within the recurrence pattern that the exception will
         replace. The value is specified in UTC.
         """
-        return self._getNamedAs('8228', constants.ps.PSETID_APPOINTMENT)
+        return self.getNamedProp('8228', constants.ps.PSETID_APPOINTMENT)
 
     @functools.cached_property
     def fExceptionalBody(self) -> bool:
@@ -44,11 +44,11 @@ class MeetingException(MeetingRelated):
         differs from the Recurring Calendar object. If True, the Exception MUST
         have a body.
         """
-        return self._getNamedAs('8206', constants.ps.PSETID_APPOINTMENT, bool, False)
+        return bool(self.getNamedProp('8206', constants.ps.PSETID_APPOINTMENT))
 
     @functools.cached_property
     def fInvited(self) -> bool:
         """
         Indicates if invitations have been sent for this exception.
         """
-        return self._getNamedAs('8229', constants.ps.PSETID_APPOINTMENT, bool, False)
+        return bool(self.getNamedProp('8229', constants.ps.PSETID_APPOINTMENT))

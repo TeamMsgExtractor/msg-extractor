@@ -75,7 +75,7 @@ class BusinessCardDisplayDefinition:
         return self.__fieldInfoSize
 
     @property
-    def fields(self) -> Tuple['FieldInfo']:
+    def fields(self) -> Tuple['FieldInfo', ...]:
         """
         The field info structures
         """

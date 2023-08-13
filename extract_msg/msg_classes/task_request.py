@@ -6,7 +6,7 @@ __all__ = [
 import functools
 import logging
 
-from typing import Optional
+from typing import cast, Optional
 
 from .. import constants
 from ..enums import ErrorBehavior, TaskMode, TaskRequestType
@@ -60,14 +60,14 @@ class TaskRequest(MessageBase):
         Indicates whether a client has already processed a received task
         communication.
         """
-        return self._getPropertyAs('7D01000B', bool, False)
+        return bool(self.getPropertyVal('7D01000B'))
 
     @functools.cached_property
     def taskMode(self) -> Optional[TaskMode]:
         """
         The assignment status of the embedded Task object.
         """
-        return self._getNamedAs('8518', constants.ps.PSETID_COMMON, TaskMode)
+        return self.getNamedAs('8518', constants.ps.PSETID_COMMON, TaskMode)
 
     @functools.cached_property
     def taskObject(self) -> Optional[Task]:
@@ -90,7 +90,7 @@ class TaskRequest(MessageBase):
         if task is None:
             if ErrorBehavior.STANDARDS_VIOLATION in self.errorBehavior:
                 logger.error('Task object not found on TaskRequest object.')
-                return
+                return None
             raise StandardViolationError('Task object not found on TaskRequest object.')
 
         # We know we have the task, let's make sure it's at index 0. If not,
@@ -98,13 +98,11 @@ class TaskRequest(MessageBase):
         if task[0] != 0:
             logger.warning('Embedded task object was not located at index 0.')
 
-        self._taskObject = task[1]
-
-        return self._taskObject
+        return cast(Task, task[1])
 
     @functools.cached_property
     def taskRequestType(self) -> TaskRequestType:
         """
         The type of task request.
         """
-        return self._getStreamAs('__substg1.0_001A', TaskRequestType.fromClassType)
+        return self.getStringStreamAs('__substg1.0_001A', TaskRequestType.fromClassType)

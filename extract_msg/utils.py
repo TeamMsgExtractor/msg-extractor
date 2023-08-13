@@ -73,7 +73,10 @@ import olefile
 import tzlocal
 
 from html import escape as htmlEscape
-from typing import Any, Dict, List, Optional, TypeVar, TYPE_CHECKING, Union
+from typing import (
+        Any, Callable, Dict, Iterable, List, Optional, Sequence, TypeVar,
+        TYPE_CHECKING, Union
+    )
 
 from . import constants
 from .enums import AttachmentType
@@ -184,7 +187,7 @@ def cloneOleFile(sourcePath, outputPath) -> None:
     writer.write(outputPath)
 
 
-def createZipOpen(func):
+def createZipOpen(func) -> Callable:
     """
     Creates a wrapper for the open function of a ZipFile that will automatically
     set the current date as the modified time to the current time.
@@ -246,7 +249,7 @@ def divide(string, length : int) -> List:
     >>>> print(a)
     ['Hello', ' Worl', 'd!']
     """
-    return [string[length * x:length * (x + 1)] for x in range(int(ceilDiv(len(string), length)))]
+    return [string[length * x:length * (x + 1)] for x in range(ceilDiv(len(string), length))]
 
 
 def filetimeToDatetime(rawTime : int) -> datetime.datetime:
@@ -326,7 +329,7 @@ def fromTimeStamp(stamp : int) -> datetime.datetime:
     return datetime.datetime.fromtimestamp(stamp, tz)
 
 
-def getCommandArgs(args) -> argparse.Namespace:
+def getCommandArgs(args : Sequence[str]) -> argparse.Namespace:
     """
     Parse command-line arguments.
 
@@ -534,7 +537,7 @@ def htmlSanitize(inp : str) -> str:
     return inp
 
 
-def inputToBytes(stringInputVar, encoding) -> bytes:
+def inputToBytes(stringInputVar, encoding : str) -> bytes:
     """
     Converts the input into bytes.
 
@@ -550,7 +553,7 @@ def inputToBytes(stringInputVar, encoding) -> bytes:
         raise ConversionError('Cannot convert to bytes.')
 
 
-def inputToMsgPath(inp) -> List:
+def inputToMsgPath(inp) -> List[str]:
     """
     Converts the input into an msg path.
 
@@ -619,14 +622,12 @@ def makeWeakRef(obj : Optional[_T]) -> Optional[weakref.ReferenceType[_T]]:
         return None
 
 
-def msgPathToString(inp) -> str:
+def msgPathToString(inp : Union[str, Iterable[str]]) -> str:
     """
     Converts an MSG path (one of the internal paths inside an MSG file) into a
     string.
     """
-    if inp is None:
-        return None
-    if isinstance(inp, (list, tuple)):
+    if not isinstance(inp, str):
         inp = '/'.join(inp)
     inp.replace('\\', '/')
     return inp
@@ -720,9 +721,9 @@ def parseType(_type : int, stream, encoding, extras):
     elif _type == 0x0102:  # PtypBinary
         return value
     elif _type & 0x1000 == 0x1000:  # PtypMultiple
-        # TODO parsing for `multiple` types.
+        # TODO parsing for remaining "multiple" types.
         if _type in (0x101F, 0x101E): # PtypMultipleString/PtypMultipleString8
-            ret = [x.decode(encoding) for x in extras]
+            ret = [x.decode(encoding)[:-1] for x in extras]
             lengths = struct.unpack(f'<{len(ret)}i', stream)
             lengthLengths = len(lengths)
             if lengthLengths > lengthExtras:
@@ -822,7 +823,7 @@ def rtfSanitizeHtml(inp : str) -> str:
                 output += char
         elif ord(char) < 32 or 128 <= ord(char) <= 255:
             # Otherwise, see if it is just a small escape.
-            output += "\\'" + properHex(char, 2)
+            output += f"\\'{ord(char):02X}"
         else:
             # Handle Unicode characters.
             enc = char.encode('utf-16-le')
@@ -846,7 +847,7 @@ def rtfSanitizePlain(inp : str) -> str:
             output += char
         elif ord(char) < 32 or 128 <= ord(char) <= 255:
             # Otherwise, see if it is just a small escape.
-            output += "\\'" + properHex(char, 2)
+            output += f"\\'{ord(char):02X}"
         else:
             # Handle Unicode characters.
             # Handle Unicode characters.
@@ -949,9 +950,8 @@ def tryGetMimetype(att, mimetype : Union[str, None]) -> Union[str, None]:
     if mimetype:
         return mimetype
 
-    # We only try anything if it is a plain attachment or signed attachment.
-    # Web attachments and embedded MSG files are completely ignored.
-    if att.type in (AttachmentType.DATA, AttachmentType.SIGNED):
+    # We only try anything if the data is bytes.
+    if att.dataType:
         # Try to import our dependency module to use it.
         try:
             import magic
@@ -979,7 +979,7 @@ def unsignedToSignedInt(uInt : int) -> int:
     return constants.st.STI32.unpack(constants.st.STUI32.pack(uInt))[0]
 
 
-def unwrapMsg(msg : MSGFile) -> Dict:
+def unwrapMsg(msg : MSGFile) -> Dict[str, List]:
     """
     Takes a recursive message-attachment structure and unwraps it into a linear
     dictionary for easy iteration. Dictionary contains 4 keys: "attachments" for
@@ -1196,7 +1196,7 @@ def verifyPropertyId(id : str) -> None:
             raise InvaildPropertyIdError('ID was not a 4 digit hexadecimal string')
 
 
-def verifyType(_type) -> str:
+def verifyType(_type) -> None:
     """
     Verifies that the type is valid. Raises an exception if it is not.
 

@@ -37,7 +37,7 @@ class Post(MessageBase):
         """
         The name of the conversation being posted to.
         """
-        return self._getStringStream('__substg1.0_0070')
+        return self.getStringStream('__substg1.0_0070')
 
     @property
     def headerFormatProperties(self) -> constants.HEADER_FORMAT_TYPE:

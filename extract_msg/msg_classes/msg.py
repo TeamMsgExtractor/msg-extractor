@@ -19,7 +19,9 @@ import zipfile
 
 import olefile
 
-from typing import Any, Callable, cast, List, Optional, Set, Tuple, Union
+from typing import (
+        Any, Callable, cast, Dict, List, Optional, Tuple, TypeVar, Union
+    )
 
 from .. import constants
 from ..attachments import (
@@ -27,8 +29,8 @@ from ..attachments import (
     )
 from ..encoding import lookupCodePage
 from ..enums import (
-        AttachErrorBehavior, ErrorBehavior, InsecureFeatures, Importance,
-        Priority, PropertiesType, SaveType, Sensitivity, SideEffect
+        ErrorBehavior, InsecureFeatures, Importance, Priority, PropertiesType,
+        SaveType, Sensitivity, SideEffect
     )
 from ..exceptions import (
         ConversionError, InvalidFileFormatError, PrefixError,
@@ -37,14 +39,16 @@ from ..exceptions import (
 from ..properties.named import Named, NamedProperties
 from ..properties.prop import FixedLengthProp
 from ..properties.properties_store import PropertiesStore
-from ..utils import  (
+from ..utils import (
         divide, hasLen, inputToMsgPath, makeWeakRef, msgPathToString,
-        parseType, properHex, verifyPropertyId, verifyType, windowsUnicode
+        parseType, verifyPropertyId, verifyType, windowsUnicode
     )
 
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
+_T = TypeVar('_T')
 
 
 class MSGFile:
@@ -112,14 +116,6 @@ class MSGFile:
         self.__attachmentsDelayed = kwargs.get('delayAttachments', False)
         self.__attachmentsReady = False
         self.__errorBehavior = ErrorBehavior(kwargs.get('errorBehavior', ErrorBehavior.THROW))
-        if self.__errorBehavior is None:
-            if 'attachmentErrorBehavior' in kwargs:
-                import warnings
-                warnings.warn(':param attachmentErrorsBehavior: is deprecated. Use :param ErrorBehavior: instead.', DeprecationWarning)
-
-                # Get the error behavior and call the old class to convert it if
-                # necessary.
-                self.__errorBehavior = AttachErrorBehavior(kwargs['attachmentErrorBehavior'])
 
         if overrideEncoding is not None:
             codecs.lookup(overrideEncoding)
@@ -179,7 +175,7 @@ class MSGFile:
             self.__prefixList = prefixl
             self.__prefixLen = len(prefixl)
             if prefix and not filename:
-                filename = self._getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix = False)
+                filename = self.getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix = False)
             if filename:
                 self.filename = filename
             elif hasLen(path):
@@ -213,26 +209,6 @@ class MSGFile:
     def __exit__(self, *_) -> None:
         self.close()
 
-    def _getNamedAs(self, propertyName : str, guid : str, overrideClass = None, preserveNone : bool = True):
-        """
-        Returns the named property, setting the class if specified.
-
-        :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. By
-            default, this will be completely ignored if the value was not found.
-        :param preserveNone: If true (default), causes the function to ignore
-            :param overrideClass: when the value could not be found (is None).
-            If this is changed to False, then the value will be used regardless.
-        """
-        value = self.namedProperties.get((propertyName, guid))
-        # Check if we should be overriding the data type for this instance.
-        if overrideClass is not None:
-            if value is not None or not preserveNone:
-                value = overrideClass(value)
-
-        return value
-
     def _getOleEntry(self, filename, prefix : bool = True) -> olefile.olefile.OleDirectoryEntry:
         """
         Finds the directory entry from the olefile for the stream or storage
@@ -249,29 +225,6 @@ class MSGFile:
 
         return self.__ole.direntries[sid]
 
-    def _getPropertyAs(self, propertyName, overrideClass = None, preserveNone : bool = True):
-        """
-        Returns the property, setting the class if specified.
-
-        :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. By
-            default, this will be completely ignored if the value was not found.
-        :param preserveNone: If True (default), causes the function to ignore
-            :param overrideClass: when the value could not be found (is None).
-            If this is changed to False, then the value will be used regardless.
-        """
-        try:
-            value = self.props[propertyName].value
-        except (KeyError, AttributeError):
-            value = None
-        # Check if we should be overriding the data type for this instance.
-        if overrideClass is not None:
-            if (value is not None or not preserveNone):
-                value = overrideClass(value)
-
-        return value
-
     def _getStream(self, filename, prefix : bool = True) -> Optional[bytes]:
         """
         Gets a binary representation of the requested filename.
@@ -279,40 +232,9 @@ class MSGFile:
         This should ALWAYS return a bytes object if it was found, otherwise
         returns None.
         """
-        filename = self.fixPath(filename, prefix)
-        if self.exists(filename, False):
-            with self.__ole.openstream(filename) as stream:
-                return stream.read() or b''
-        else:
-            logger.info(f'Stream "{filename}" was requested but could not be found. Returning `None`.')
-            return None
-
-    def _getStreamAs(self, streamID, stringStream : bool = True, overrideClass = None, preserveNone : bool = True):
-        """
-        Returns the specified stream, modifying it to the class if specified.
-
-        If the specified stream is not a string stream, make sure to set
-        :param stringStream: to False.
-
-        :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. By
-            default, this will be completely ignored if the value was not found.
-        :param preserveNone: If true (default), causes the function to ignore
-            :param overrideClass: when the value could not be found (is None).
-            If this is changed to False, then the value will be used regardless.
-        """
-        if stringStream:
-            value = self._getStringStream(streamID)
-        else:
-            value = self._getStream(streamID)
-
-        # Check if we should be overriding the data type for this instance.
-        if overrideClass is not None:
-            if value is not None or not preserveNone:
-                value = overrideClass(value)
-
-        return value
+        import warnings
+        warnings.warn(':method _getStream: has been deprecated and moved to the public api. Use :method getStream: instead (remove the underscore).', DeprecationWarning)
+        return self.getStream(filename, prefix)
 
     def _getStringStream(self, filename, prefix : bool = True) -> Optional[str]:
         """
@@ -325,12 +247,9 @@ class MSGFile:
         This should ALWAYS return a string if it was found, otherwise returns
         None.
         """
-        filename = self.fixPath(filename, prefix)
-        if self.areStringsUnicode:
-            return windowsUnicode(self._getStream(filename + '001F', prefix = False))
-        else:
-            tmp = self._getStream(filename + '001E', prefix = False)
-            return None if tmp is None else tmp.decode(self.stringEncoding)
+        import warnings
+        warnings.warn(':method _getStringStream: has been deprecated and moved to the public api. Use :method getStringStream: instead (remove the underscore).', DeprecationWarning)
+        return self.getStringStream(filename, prefix)
 
     def _getTypedAs(self, _id : str, overrideClass = None, preserveNone : bool = True):
         """
@@ -372,7 +291,7 @@ class MSGFile:
             found, result = self._getTypedProperty(_id, _type)
             return result if found else None
 
-    def _getTypedProperty(self, propertyID : str, _type = None) -> Tuple[bool, Optional[object]]:
+    def _getTypedProperty(self, propertyID : str, _type = None) -> Tuple[bool, Optional[Any]]:
         """
         Gets the property with the specified id as the type that it is supposed
         to be. :param id: MUST be a 4 digit hexadecimal string.
@@ -382,15 +301,18 @@ class MSGFile:
         FIXED_LENGTH_PROPS_STRING or VARIABLE_LENGTH_PROPS_STRING.
         """
         verifyPropertyId(propertyID)
-        verifyType(_type)
-        propertyID = propertyID.upper()
-        for x in (propertyID + _type,) if _type is not None else self.props:
-            if x.startswith(propertyID):
-                prop = self.props[x]
-                return True, (prop.value if isinstance(prop, FixedLengthProp) else prop)
-        return False, None
+        if _type:
+            verifyType(_type)
+            propertyID += _type
 
-    def _getTypedStream(self, filename, prefix : bool = True, _type = None):
+        notFound = object()
+        ret = self.getPropertyVal(propertyID, notFound)
+        if ret is notFound:
+            return False, None
+
+        return True, ret
+
+    def _getTypedStream(self, filename, prefix : bool = True, _type = None) -> Tuple[bool, Optional[Any]]:
         """
         Gets the contents of the specified stream as the type that it is
         supposed to be.
@@ -411,9 +333,8 @@ class MSGFile:
         verifyType(_type)
         filename = self.fixPath(filename, prefix)
         for x in (filename + _type,) if _type is not None else self.slistDir():
-            if x.startswith(filename) and x.find('-') == -1:
-                contents = self._getStream(x, False)
-                if contents is None:
+            if x.startswith(filename) and '-' not in x:
+                if (contents := self.getStream(x, False)) is None:
                     continue
                 if len(contents) == 0:
                     return True, None # We found the file, but it was empty.
@@ -435,15 +356,15 @@ class MSGFile:
                     if _type in ('101F', '101E', '1102'):
                         if self.exists(x + '-00000000', False):
                             for y in range(streams):
-                                if self.exists(x + '-' + properHex(y, 8), False):
-                                    extras.append(self._getStream(x + '-' + properHex(y, 8), False))
+                                if self.exists((name := f'{x}-{y:08X}'), False):
+                                    extras.append(self.getStream(name, False))
                     elif _type in ('1002', '1003', '1004', '1005', '1007', '1014', '1040', '1048'):
                         extras = divide(contents, (2 if _type in constants.MULTIPLE_2_BYTES else 4 if _type in constants.MULTIPLE_4_BYTES else 8 if _type in constants.MULTIPLE_8_BYTES else 16))
                         contents = streams
                 return True, parseType(int(_type, 16), contents, self.stringEncoding, extras)
         return False, None # We didn't find the stream.
 
-    def _oleListDir(self, streams : bool = True, storages : bool = False) -> List:
+    def _oleListDir(self, streams : bool = True, storages : bool = False) -> List[List[str]]:
         """
         Calls :method OleFileIO.listdir: from the OleFileIO instance associated
         with this MSG file. Useful for if you need access to all the top level
@@ -470,7 +391,7 @@ class MSGFile:
         for dir_ in self.listDir():
             if dir_[-1].endswith('001E') or dir_[-1].endswith('001F'):
                 print('Directory: ' + str(dir_[:-1]))
-                print(f'Contents: {self._getStream(dir_)}')
+                print(f'Contents: {self.getStream(dir_)}')
 
     def exists(self, inp, prefix : bool = True) -> bool:
         """
@@ -559,7 +480,229 @@ class MSGFile:
             inp = self.__prefix + inp
         return inp
 
-    def listDir(self, streams : bool = True, storages : bool = False, includePrefix : bool = True) -> List[List]:
+    def getMultipleBinary(self, filename, prefix : bool = True) -> Optional[List[bytes]]:
+        """
+        Gets a multiple binary property as a list of bytes objects.
+
+        Like :method getStringStream:, the 4 character type suffix should be
+        omitted. So if you want the stream "__substg1.0_00011102" then the
+        filename would simply be "__substg1.0_0001".
+
+        :param prefix: Bool, whether to search for the entry at the root of the
+            MSG file (False) or look in the current child MSG file (True).
+        """
+        filename = self.fixPath(filename, prefix) + '1102'
+        multStream = self.getStream(filename)
+        if multStream is None:
+            return None
+
+        if len(multStream) == 0:
+            return []
+        elif len(multStream) & 7 != 0:
+            raise StandardViolationError(f'Length stream for multiple binary was not a multiple of 8.')
+        else:
+            ret = [self.getStream(filename + f'-{x:08X}') for x in range(len(multStream) // 8)]
+            # We could do more checking here, but we'll just check for None.
+            if (index := next((x for x in ret if x is None), -1)) != -1:
+                logger.error('Unable to get the desired number of binary streams for multiple, not all streams were found.')
+                return ret[:index]
+            return ret
+
+    def getMultipleString(self, filename, prefix : bool = True) -> Optional[List[str]]:
+        """
+        Gets a multiple string property as a list of str objects.
+
+        Like :method getStringStream:, the 4 character type suffix should be
+        omitted. So if you want the stream "__substg1.0_00011102" then the
+        filename would simply be "__substg1.0_0001".
+
+        :param prefix: Bool, whether to search for the entry at the root of the
+            MSG file (False) or look in the current child MSG file (True).
+        """
+        filename = self.fixPath(filename, prefix) + '101F' if self.areStringsUnicode else '101E'
+        multStream = self.getStream(filename)
+        if multStream is None:
+            return []
+
+        if len(multStream) == 0:
+            return []
+        elif len(multStream) & 3 != 0:
+            raise StandardViolationError(f'Length stream for multiple string was not a multiple of 4.')
+        else:
+            ret = [self.getStream(filename + f'-{x:08X}') for x in range(len(multStream) // 4)]
+            # We could do more checking here, but we'll just check for None.
+            for index, item in enumerate(ret):
+                if item is None:
+                    logger.error('Unable to get the desired number of string streams for multiple, not all streams were found.')
+                    return ret[:index]
+                # Decode the bytes and remove the null byte.
+                ret[index] = item.decode(self.stringEncoding)[:-1]
+            return ret
+
+    def getNamedAs(self, propertyName : str, guid : str, overrideClass : Callable[..., _T]) -> Optional[_T]:
+        """
+        Returns the named property, setting the class if specified.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. If
+            the value is None, this function is not called. If you want it to
+            be called regardless, you should handle the data directly.
+        """
+        value = self.getNamedProp(propertyName, guid)
+        if value is not None:
+            value = overrideClass(value)
+        return value
+
+    def getNamedProp(self, propertyName : str, guid : str, default : _T = None) -> Union[Any, _T]:
+        """
+        instance.namedProperties.get((propertyName, guid), default)
+
+        Can be override to create new behavior.
+        """
+        return self.namedProperties.get((propertyName, guid), default)
+
+    def getPropertyAs(self, propertyName, overrideClass : Callable[..., _T]) -> Optional[_T]:
+        """
+        Returns the property, setting the class if found.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. If
+            the value is None, this function is not called. If you want it to
+            be called regardless, you should handle the data directly.
+        """
+        value = self.getPropertyVal(propertyName)
+
+        if value is not None:
+            value = overrideClass(value)
+
+        return value
+
+    def getPropertyVal(self, name, default : _T = None) -> Union[Any, _T]:
+        """
+        instance.props.getValue(name, default)
+
+        Can be overriden to create new behavior.
+        """
+        return self.props.getValue(name, default)
+
+    def getSingleOrMultipleBinary(self, filename, prefix : bool = True) -> Optional[Union[List[bytes], bytes]]:
+        """
+        A combination of :method getStringStream: and
+        :method getMultipleString:.
+
+        Checks to see if a single binary stream exists to return, otherwise
+        tries to return the multiple binary stream of the same ID.
+
+        Like :method getStringStream:, the 4 character type suffix should be
+        omitted. So if you want the stream "__substg1.0_00010102" then the
+        filename would simply be "__substg1.0_0001".
+        """
+        filename = self.fixPath(filename, prefix)
+        # Check for a single binary stream first.
+        if (ret := self.getStream(filename + '0102', False)) is not None:
+            return ret
+        # Otherwise, we just let the return from `getMultipleBinary` do the
+        # work.
+        return self.getMultipleBinary(filename, False)
+
+    def getSingleOrMultipleString(self, filename, prefix : bool = True) -> Optional[Union[List[str], str]]:
+        """
+        A combination of :method getStringStream: and
+        :method getMultipleString:.
+
+        Checks to see if a single string stream exists to return, otherwise
+        tries to return the multiple string stream of the same ID.
+
+        Like :method getStringStream:, the 4 character type suffix should be
+        omitted. So if you want the stream "__substg1.0_0001001F" then the
+        filename would simply be "__substg1.0_0001".
+        """
+        filename = self.fixPath(filename, prefix)
+        # Check for a single stribng stream first.
+        if (ret := self.getStringStream(filename, False)) is not None:
+            return ret
+        # Otherwise, we just let the return from `getMultipleString` do the
+        # work.
+        return self.getMultipleString(filename, False)
+
+    def getStream(self, filename, prefix : bool = True) -> Optional[bytes]:
+        """
+        Gets a binary representation of the requested filename.
+
+        This should ALWAYS return a bytes object if it was found, otherwise
+        returns None.
+
+        :param prefix: Bool, whether to search for the entry at the root of the
+            MSG file (False) or look in the current child MSG file (True).
+        """
+        filename = self.fixPath(filename, prefix)
+        if self.exists(filename, False):
+            with self.__ole.openstream(filename) as stream:
+                return stream.read() or b''
+        else:
+            logger.info(f'Stream "{filename}" was requested but could not be found. Returning `None`.')
+            return None
+
+    def getStreamAs(self, streamID, overrideClass : Callable[..., _T]) -> Optional[_T]:
+        """
+        Returns the specified stream, modifying it to the specified class if it
+        is found.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. If
+            the value is None, this function is not called. If you want it to
+            be called regardless, you should handle the data directly.
+        """
+        value = self.getStream(streamID)
+
+        if value is not None:
+            value = overrideClass(value)
+
+        return value
+
+    def getStringStream(self, filename, prefix : bool = True) -> Optional[str]:
+        """
+        Gets a string representation of the requested filename.
+
+        Rather than the full filename, you should only feed this function the
+        filename sans the type. So if the full name is "__substg1.0_001A001F",
+        the filename this function should receive should be "__substg1.0_001A".
+
+        This should ALWAYS return a string if it was found, otherwise returns
+        None.
+
+        :param prefix: Bool, whether to search for the entry at the root of the
+            MSG file (False) or look in the current child MSG file (True).
+        """
+        filename = self.fixPath(filename, prefix)
+        if self.areStringsUnicode:
+            return windowsUnicode(self.getStream(filename + '001F', prefix = False))
+        else:
+            tmp = self.getStream(filename + '001E', prefix = False)
+            return None if tmp is None else tmp.decode(self.stringEncoding)
+
+    def getStringStreamAs(self, streamID, overrideClass : Callable[..., _T]) -> Optional[_T]:
+        """
+        Returns the specified string stream, modifying it to the specified
+        class if it is found.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. If
+            the value is None, this function is not called. If you want it to
+            be called regardless, you should handle the data directly.
+        """
+        value = self.getStream(streamID)
+
+        if value is not None:
+            value = overrideClass(value)
+
+        return value
+
+    def listDir(self, streams : bool = True, storages : bool = False, includePrefix : bool = True) -> List[List[str]]:
         """
         Replacement for OleFileIO.listdir that runs at the current prefix
         directory.
@@ -584,14 +727,14 @@ class MSGFile:
                 entries = [x[prefixLength:] for x in entries]
             self.__listDirRes[(streams, storages, includePrefix)] = entries
 
-            return self.__listDirRes[(streams, storages, includePrefix)]
+            return entries
 
-    def slistDir(self, streams : bool = True, storages : bool = False) -> List[str]:
+    def slistDir(self, streams : bool = True, storages : bool = False, includePrefix : bool = True) -> List[str]:
         """
         Replacement for OleFileIO.listdir that runs at the current prefix
         directory. Returns a list of strings instead of lists.
         """
-        return [msgPathToString(x) for x in self.listDir(streams, storages)]
+        return [msgPathToString(x) for x in self.listDir(streams, storages, includePrefix)]
 
     def save(self, **kwargs) -> constants.SAVE_TYPE:
         if kwargs.get('skipNotImplemented', False):
@@ -611,7 +754,7 @@ class MSGFile:
             if not (skipHidden and attachment.hidden):
                 attachment.save(**kwargs)
 
-    def saveRaw(self, path):
+    def saveRaw(self, path) -> None:
         # Create a 'raw' folder.
         path = pathlib.Path(path)
         # Make the location.
@@ -636,7 +779,7 @@ class MSGFile:
 
                 # Save contents of directory.
                 with zfile.open(sysdir + '/' + filename, 'w') as f:
-                    data = self._getStream(dir_)
+                    data = self.getStream(dir_)
                     # Specifically check for None. If this is bytes we still want to do this line.
                     # There was actually this weird issue where for some reason data would be bytes
                     # but then also simultaneously register as None?
@@ -648,11 +791,7 @@ class MSGFile:
         """
         Returns a boolean telling if the strings are unicode encoded.
         """
-        if '340D0003' in self.props:
-            if (self.props['340D0003'].value & 0x40000) != 0:
-                return True
-
-        return False
+        return (self.getPropertyVal('340D0003', 0) & 0x40000) != 0
 
     @functools.cached_property
     def attachments(self) -> Union[List[AttachmentBase], List[SignedAttachment]]:
@@ -694,28 +833,28 @@ class MSGFile:
         Indicates whether the contents of this message are regarded as
         classified information.
         """
-        return self._getNamedAs('85B5', constants.ps.PSETID_COMMON, overrideClass = bool, preserveNone = False)
+        return bool(self.getNamedProp('85B5', constants.ps.PSETID_COMMON))
 
     @functools.cached_property
     def classType(self) -> Optional[str]:
         """
         The class type of the MSG file.
         """
-        return self._getStringStream('__substg1.0_001A')
+        return self.getStringStream('__substg1.0_001A')
 
     @functools.cached_property
     def commonEnd(self) -> Optional[datetime.datetime]:
         """
         The end time for the object.
         """
-        return self._getNamedAs('8517', constants.ps.PSETID_COMMON)
+        return self.getNamedProp('8517', constants.ps.PSETID_COMMON)
 
     @functools.cached_property
     def commonStart(self) -> Optional[datetime.datetime]:
         """
         The start time for the object.
         """
-        return self._getNamedAs('8516', constants.ps.PSETID_COMMON)
+        return self.getNamedProp('8516', constants.ps.PSETID_COMMON)
 
     @functools.cached_property
     def currentVersion(self) -> Optional[int]:
@@ -723,14 +862,14 @@ class MSGFile:
         Specifies the build number of the client application that sent the
         message.
         """
-        return self._getNamedAs('8552', constants.ps.PSETID_COMMON)
+        return self.getNamedProp('8552', constants.ps.PSETID_COMMON)
 
     @functools.cached_property
     def currentVersionName(self) -> Optional[str]:
         """
         Specifies the name of the client application that sent the message.
         """
-        return self._getNamedAs('8554', constants.ps.PSETID_COMMON)
+        return self.getNamedProp('8554', constants.ps.PSETID_COMMON)
 
     @property
     def errorBehavior(self) -> ErrorBehavior:
@@ -745,7 +884,7 @@ class MSGFile:
         """
         The specified importance of the msg file.
         """
-        return self._getPropertyAs('00170003', Importance)
+        return self.getPropertyAs('00170003', Importance)
 
     @property
     def importanceString(self) -> Union[str, None]:
@@ -761,7 +900,7 @@ class MSGFile:
         }[self.importance]
 
     @property
-    def initAttachmentFunc(self) -> Callable[[MSGFile, Any], AttachmentBase]:
+    def initAttachmentFunc(self) -> Callable[[MSGFile, str], AttachmentBase]:
         """
         Returns the method for initializing attachments being used, should you
         need to use it externally for whatever reason.
@@ -777,7 +916,7 @@ class MSGFile:
         return self.__inscFeat
 
     @property
-    def kwargs(self) -> dict:
+    def kwargs(self) -> Dict[str, object]:
         """
         The kwargs used to initialize this message, excluding the prefix. This
         is used for initializing embedded msg files.
@@ -854,14 +993,14 @@ class MSGFile:
         """
         The specified priority of the msg file.
         """
-        return self._getPropertyAs('00260003', Priority)
+        return self.getPropertyAs('00260003', Priority)
 
     @functools.cached_property
     def props(self) -> PropertiesStore:
         """
         Returns the Properties instance used by the MSGFile instance.
         """
-        if not (stream := self._getStream('__properties_version1.0')):
+        if not (stream := self.getStream('__properties_version1.0')):
             if ErrorBehavior.STANDARDS_VIOLATION in self.__errorBehavior:
                 logger.error('File does not contain a property stream.')
             else:
@@ -876,7 +1015,7 @@ class MSGFile:
         """
         The specified sensitivity of the msg file.
         """
-        return self._getPropertyAs('00360003', Sensitivity)
+        return self.getPropertyAs('00360003', Sensitivity)
 
     @functools.cached_property
     def sideEffects(self) -> Optional[SideEffect]:
@@ -884,7 +1023,7 @@ class MSGFile:
         Controls how a Message object is handled by the client in relation to
         certain user interface actions by the user, such as deleting a message.
         """
-        return self._getNamedAs('8510', constants.ps.PSETID_COMMON, SideEffect)
+        return self.getNamedAs('8510', constants.ps.PSETID_COMMON, SideEffect)
 
     @property
     def stringEncoding(self):
@@ -904,7 +1043,7 @@ class MSGFile:
                     logger.warning('Encoding property not found. Defaulting to ISO-8859-15.')
                     self.__stringEncoding = 'iso-8859-15'
                 else:
-                    enc = self.props['3FFD0003'].value
+                    enc = cast(int, self.getPropertyVal('3FFD0003'))
                     # Now we just need to translate that value.
                     self.__stringEncoding = lookupCodePage(enc)
                 return self.__stringEncoding
