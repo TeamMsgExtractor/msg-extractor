@@ -5,6 +5,7 @@ files. Broken up by structure type.
 
 __all__ = [
     '_helpers',
+    'contact_link_entry',
     'business_card',
     'entry_id',
     'misc_id',

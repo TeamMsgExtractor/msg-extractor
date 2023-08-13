@@ -16,7 +16,9 @@ __all__ = [
 ]
 
 
+import abc
 import logging
+
 from typing import Union
 
 from ._helpers import BytesReader
@@ -30,7 +32,7 @@ logger.addHandler(logging.NullHandler())
 
 
 # First we define the main EntryID structure that is the base for the others.
-class EntryID:
+class EntryID(abc.ABC):
     """
     Base class for all EntryID structures. Use :classmethod autoCreate: to
     automatically create the correct EntryID structure type from the specified
@@ -116,6 +118,14 @@ class EntryID:
         return self.__flags == b'\x00\x00\x00\x00'
 
     @property
+    @abc.abstractmethod
+    def position(self) -> int:
+        """
+        Used to tell the amount of bytes read in this EntryID. Useful for
+        EntryID data that has been chained together with no separator.
+        """
+
+    @property
     def providerUID(self) -> bytes:
         """
         The 16 byte UID that identifies the type of Entry ID.
@@ -147,6 +157,11 @@ class AddressBookEntryID(EntryID):
 
         self.__type = AddressBookType(reader.readUnsignedInt())
         self.__X500DN = reader.readByteString()
+        self.__position = reader.tell()
+
+    @property
+    def position(self) -> int:
+        return self.__position
 
     @property
     def type(self) -> AddressBookType:

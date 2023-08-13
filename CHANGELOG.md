@@ -1,3 +1,9 @@
+**v0.45.1**
+* Changed the base class of `EntryID` from no base class to `abc.ABC`.
+* Added `position` property to `EntryID` to tell how many bytes were used to create the `EntryID`.
+* Added additional properties to `MSGFile`: `contacts` and `contactLinkEntry`.
+* Added support for Journal objects.
+
 **v0.45.0**
 * BREAKING: Changed parsing of string multiple properties to remove the trailing null byte. This *will* cause the output of parsing them to differ.
 * Updated typing information for some functions and classes.

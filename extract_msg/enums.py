@@ -34,6 +34,7 @@ __all__ = [
     'Importance',
     'InsecureFeatures',
     'Intelligence',
+    'LogFlags',
     'MacintoshEncoding',
     'MeetingObjectChange',
     'MeetingRecipientType',
@@ -1232,6 +1233,12 @@ class Intelligence(enum.IntEnum):
     ERROR = -1
     DUMB = 0
     SMART = 1
+
+
+
+class LogFlags(enum.IntFlag):
+    NO_JOURNAL_ASSOCIATED_ATT = 0x00000000
+    HAS_JOUNRAL_ASSOCIATED_ATT = 0x40000000
 
 
 

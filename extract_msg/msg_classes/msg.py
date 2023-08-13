@@ -37,8 +37,8 @@ from ..exceptions import (
         StandardViolationError
     )
 from ..properties.named import Named, NamedProperties
-from ..properties.prop import FixedLengthProp
 from ..properties.properties_store import PropertiesStore
+from ..structures.contact_link_entry import ContactLinkEntry
 from ..utils import (
         divide, hasLen, inputToMsgPath, makeWeakRef, msgPathToString,
         parseType, verifyPropertyId, verifyType, windowsUnicode
@@ -855,6 +855,22 @@ class MSGFile:
         The start time for the object.
         """
         return self.getNamedProp('8516', constants.ps.PSETID_COMMON)
+
+    @functools.cached_property
+    def contactLinkEntry(self) -> Optional[ContactLinkEntry]:
+        """
+        Returns a class that contains the list of Address Book EntryIDs linked
+        to this Message object.
+        """
+        return self.getNamedAs('', constants.ps.PSETID_COMMON, ContactLinkEntry)
+
+    @functools.cached_property
+    def contacts(self) -> Optional[List[str]]:
+        """
+        Contains the display name property of each Address Book EntryID
+        referenced in the value of the contactLinkEntry property.
+        """
+        return self.getNamedProp('853A', constants.ps.PSETID_COMMON)
 
     @functools.cached_property
     def currentVersion(self) -> Optional[int]:
