@@ -3,6 +3,8 @@
 * Added `position` property to `EntryID` to tell how many bytes were used to create the `EntryID`.
 * Added additional properties to `MSGFile`: `contacts` and `contactLinkEntry`.
 * Added support for Journal objects.
+* Changed internal code of `PermanentEntryID` to correctly parse the data. Previously the distinguished name did not actually end at the null character, instead ending at the end of the bytes provided. If there was trailing data, it would be captured inadvertantly.
+* Finished definition for `StoreObjectEntryID`.
 
 **v0.45.0**
 * BREAKING: Changed parsing of string multiple properties to remove the trailing null byte. This *will* cause the output of parsing them to differ.

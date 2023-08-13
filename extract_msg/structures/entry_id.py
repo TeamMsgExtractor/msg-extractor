@@ -19,11 +19,15 @@ __all__ = [
 import abc
 import logging
 
-from typing import Union
+from typing import Optional, Union
 
 from ._helpers import BytesReader
 from .. import constants
-from ..enums import AddressBookType, ContactAddressIndex, DisplayType, EntryIDType, MacintoshEncoding, MessageFormat, MessageType, OORBodyFormat
+from ..enums import (
+        AddressBookType, ContactAddressIndex, DisplayType, EntryIDType,
+        MacintoshEncoding, MessageFormat, MessageType, OORBodyFormat,
+        WrappedType
+    )
 from ..utils import bitwiseAdjustedAnd, bytesToGuid
 
 
@@ -157,7 +161,7 @@ class AddressBookEntryID(EntryID):
 
         self.__type = AddressBookType(reader.readUnsignedInt())
         self.__X500DN = reader.readByteString()
-        self.__position = reader.tell()
+        self.__position = reader.tell() + 20
 
     @property
     def position(self) -> int:
@@ -203,6 +207,7 @@ class ContactAddressEntryID(EntryID):
         self.__index = ContactAddressIndex(reader.readUnsignedInt())
         self.__entryIdCount = reader.readUnsignedInt()
         self.__entryID = MessageEntryID(reader.read(self.__entryIdCount))
+        self.__position = reader.tell() + 20
 
     @property
     def entryID(self) -> MessageEntryID:
@@ -224,6 +229,10 @@ class ContactAddressEntryID(EntryID):
         The electronic address in the contact information to use.
         """
         return self.__index
+
+    @property
+    def position(self) -> int:
+        return self.__position
 
 
 
@@ -265,6 +274,10 @@ class FolderEntryID(EntryID):
         """
         return self.__globalCounter
 
+    @property
+    def position(self) -> int:
+        return self.__SIZE__
+
 
 
 class MessageEntryID(EntryID):
@@ -287,7 +300,7 @@ class MessageEntryID(EntryID):
         self.__messageGlobalCounter = constants.st.ST_LE_UI64.unpack(reader.read(6) + b'\x00\x00')
         reader.assertNull(2, 'Pad bytes were not 0.')
         # Not sure why Microsoft decided to say "yes, let's do 2 6-byte integers
-        # followed by 2 pad bits each" instead of just 2 8-byte integers with a
+        # followed by 2 pad bytes each" instead of just 2 8-byte integers with a
         # maximum value, but here we are.
 
     @property
@@ -328,6 +341,10 @@ class MessageEntryID(EntryID):
         """
         return self.__messageType
 
+    @property
+    def position(self) -> int:
+        return self.__SIZE__
+
 
 
 class NNTPNewsgroupFolderEntryID(EntryID):
@@ -342,6 +359,7 @@ class NNTPNewsgroupFolderEntryID(EntryID):
         if self.__folderType != 0x000C:
             raise ValueError(f'Folder type was not 0x000C (got {self.__folderType})')
         self.__newsgroupName = reader.readAnsiString()
+        self.__position = reader.tell() + 20
 
     @property
     def folderType(self) -> int:
@@ -356,6 +374,10 @@ class NNTPNewsgroupFolderEntryID(EntryID):
         The name of the newsgroup.
         """
         return self.__newsgroupName
+
+    @property
+    def position(self) -> int:
+        return self.__position
 
 
 
@@ -405,6 +427,8 @@ class OneOffRecipient(EntryID):
             self.__displayName = reader.readByteString()
             self.__addressType = reader.readByteString()
             self.__emailAddress = reader.readByteString()
+
+        self.__position = reader.tell() + 20
 
     @property
     def addressType(self) -> Union[str, bytes]:
@@ -462,6 +486,10 @@ class OneOffRecipient(EntryID):
         """
         return self.__messageFormat
 
+    @property
+    def position(self) -> int:
+        return self.__position
+
 
 
 class PermanentEntryID(EntryID):
@@ -471,11 +499,13 @@ class PermanentEntryID(EntryID):
 
     def __init__(self, data : bytes):
         super().__init__(data)
-        unpacked = constants.st.STPEID.unpack(data[:28])
+        reader = BytesReader(data)
+        unpacked = reader.readStruct(constants.st.STPEID)
         if unpacked[0] != 0:
             raise TypeError(f'Not a PermanentEntryID (expected 0, got {unpacked[0]}).')
         self.__displayTypeString = DisplayType(unpacked[2])
-        self.__distinguishedName = data[28:-1].decode('ascii') # Cut off the null character at the end and decode the data as ascii
+        self.__distinguishedName = reader.readAsciiString()
+        self.__position = reader.tell()
 
     @property
     def displayTypeString(self) -> DisplayType:
@@ -490,6 +520,10 @@ class PermanentEntryID(EntryID):
         Returns the distinguished name.
         """
         return self.__distinguishedName
+
+    @property
+    def position(self) -> int:
+        return self.__position
 
 
 
@@ -509,6 +543,7 @@ class PersonalDistributionListEntryID(EntryID):
             raise ValueError(f'Index must be 255 (got {self.__version}).')
         self.__entryIdCount = reader.readUnsignedInt()
         self.__entryID = MessageEntryID(reader.read(self.__entryIdCount))
+        self.__position = reader.tell() + 20
 
     @property
     def entryID(self) -> MessageEntryID:
@@ -523,6 +558,11 @@ class PersonalDistributionListEntryID(EntryID):
         The size, in bytes, of the EntryID contained in this object.
         """
         return self.__entryIdCount
+
+    @property
+    def position(self) -> int:
+        return self.__position
+
 
 
 class StoreObjectEntryID(EntryID):
@@ -548,6 +588,18 @@ class StoreObjectEntryID(EntryID):
         if self.__wrappedFlags != 0:
             raise ValueError(f'Wrapped flags was not set to 0 (got {self.__wrappedFlags}).')
 
+        self.__wrappedProviderUID = reader.read(16)
+        self.__wrappedType = WrappedType(reader.readUnsignedInt())
+        # Don't know how this is encoded, just that it is "single-byte
+        # characters".
+        self.__serverShortname = reader.readByteString()
+        if self.__wrappedProviderUID == b'\x1B\x55\xFA\x20\xAA\x66\x11\xCD\x9B\xC8\x00\xAA\x00\x2F\xC4\x5A':
+            self.__mailboxDN = reader.readAsciiString()
+        else:
+            self.__mailboxDN = None
+
+        self.__position = reader.tell() + 20
+
     @property
     def dllFileName(self) -> bytes:
         """
@@ -560,8 +612,40 @@ class StoreObjectEntryID(EntryID):
         return self.__flag
 
     @property
+    def mailboxDN(self) -> Optional[str]:
+        """
+        A string representing the X500 DN of the mailbox, as specified in
+        [MS-OXOAB]. THis field is present only for mailbox databases.
+        """
+        return self.__mailboxDN
+
+    @property
+    def position(self) -> int:
+        return self.__position
+
+    @property
+    def serverShortname(self) -> bytes:
+        """
+        A string of single-byte characters indicating the short name or NetBIOS
+        name of the server.
+        """
+        return self.__serverShortname
+
+    @property
     def version(self) -> int:
         return self.__version
+
+    @property
+    def wrappedProviderUID(self) -> bytes:
+        return self.__wrappedProviderUID
+
+    @property
+    def wrappedType(self) -> WrappedType:
+        """
+        Determined by where the folder is located.
+        """
+        return self.__wrappedType
+
 
 
 class WrappedEntryID(EntryID):
@@ -584,6 +668,7 @@ class WrappedEntryID(EntryID):
             raise ValueError(f'Found wrapped entry id with invalid type (type bits were {bits}).')
 
         self.__embeddedIsOneOff = self.__type & 0x80 == 0
+        self.__position = 21 + self.__embeddedEntryID.position
 
     @property
     def embeddedEntryID(self) -> EntryID:
@@ -598,6 +683,10 @@ class WrappedEntryID(EntryID):
         Whether the embedded EntryID is a One-Off EntryID.
         """
         return self.__embeddedIsOneOff
+
+    @property
+    def position(self) -> int:
+        return self.__position
 
     @property
     def type(self) -> int:

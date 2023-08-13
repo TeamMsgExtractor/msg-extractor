@@ -72,6 +72,7 @@ __all__ = [
     'TaskState',
     'TaskStatus',
     'TZFlag',
+    'WrappedType',
 ]
 
 
@@ -1793,6 +1794,12 @@ class TZFlag(enum.IntFlag):
     """
     RECUR_CURRENT_TZREG = 0b1
     EFFECTIVE_TZREG = 0b10
+
+
+
+class WrappedType(enum.IntEnum):
+    MESSAGE_STORE = 0x6
+    MAILBOX_STORE = 0xC
 
 
 

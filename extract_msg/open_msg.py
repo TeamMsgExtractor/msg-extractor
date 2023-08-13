@@ -69,9 +69,10 @@ def openMsg(path, **kwargs) -> MSGFile:
     :raises UnrecognizedMSGTypeError: if the type is not recognized.
     """
     from .msg_classes import (
-            AppointmentMeeting, Contact, MeetingCancellation, MeetingException,
-            MeetingForwardNotification, MeetingRequest, MeetingResponse,
-            Message, MSGFile, MessageSigned, Post, StickyNote, Task, TaskRequest
+            AppointmentMeeting, Contact, Journal, MeetingCancellation,
+            MeetingException, MeetingForwardNotification, MeetingRequest,
+            MeetingResponse, Message, MSGFile, MessageSigned, Post, StickyNote,
+            Task, TaskRequest
         )
 
     # When the initial MSG file is opened, it should *always* delay attachments
@@ -110,6 +111,9 @@ def openMsg(path, **kwargs) -> MSGFile:
             return MessageSigned(path, **kwargs)
         else:
             return Message(path, **kwargs)
+    elif classType.startswith('ipm.activity'):
+        msg.close()
+        return Journal(path, **kwargs)
     elif classType.startswith('ipm.appointment'):
         msg.close()
         return AppointmentMeeting(path, **kwargs)
