@@ -21,7 +21,8 @@ class Journal(MessageBase):
     @functools.cached_property
     def companies(self) -> Optional[List[str]]:
         """
-        The start time for the object.
+        Contains a list of company names, each of which is accociated with a
+        contact this is precified in the contacts property.
         """
         return self.getNamedProp('8539', ps.PSETID_COMMON)
 
