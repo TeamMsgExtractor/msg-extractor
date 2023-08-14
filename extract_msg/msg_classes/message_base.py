@@ -251,7 +251,7 @@ class MessageBase(MSGFile):
         """
         print('Message')
         print('Subject:', self.subject)
-        print('Date:', self.date)
+        print('Date:', self.date.__format__(self.datetimeFormat))
         print('Body:')
         print(self.body)
 
@@ -324,7 +324,7 @@ class MessageBase(MSGFile):
             'cc': inputToString(self.cc, self.stringEncoding),
             'bcc': inputToString(self.bcc, self.stringEncoding),
             'subject': inputToString(self.subject, self.stringEncoding),
-            'date': inputToString(self.date, self.stringEncoding),
+            'date': inputToString(self.date.__format__(self.datetimeFormat), self.stringEncoding),
             'body': decode_utf7(self.body),
         })
 
@@ -1048,11 +1048,11 @@ class MessageBase(MSGFile):
         if headerText:
             header = HeaderParser(policy = policy.default).parsestr(headerText)
             del header['Date']
-            header['Date'] = self.date
+            header['Date'] = self.date.__format__(self.datetimeFormat)
         else:
             logger.info('Header is empty or was not found. Header will be generated from other streams.')
             header = HeaderParser(policy = policy.default).parsestr('')
-            header.add_header('Date', self.date)
+            header.add_header('Date', self.date.__format__(self.datetimeFormat))
             header.add_header('From', self.sender)
             header.add_header('To', self.to)
             header.add_header('Cc', self.cc)
@@ -1110,7 +1110,7 @@ class MessageBase(MSGFile):
         return {
             '-basic info-': {
                 'From': self.sender,
-                'Sent': self.date,
+                'Sent': self.date.__format__(self.datetimeFormat),
                 'To': self.to,
                 'Cc': self.cc,
                 'Bcc': self.bcc,
@@ -1231,10 +1231,6 @@ class MessageBase(MSGFile):
         if self.headerInit:
             logger.info('Header found, but "Message-Id" is not included. Will be generated from other streams.')
         return self.getStringStream('__substg1.0_1035')
-
-    @functools.cached_property
-    def parsedDate(self):
-        return email.utils.parsedate(self.date)
 
     @functools.cached_property
     def receivedTime(self) -> Optional[datetime.datetime]:

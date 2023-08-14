@@ -1,10 +1,16 @@
-**v0.45.1**
+**v0.46.0**
 * Changed the base class of `EntryID` from no base class to `abc.ABC`.
 * Added `position` property to `EntryID` to tell how many bytes were used to create the `EntryID`.
 * Added additional properties to `MSGFile`: `contacts` and `contactLinkEntry`.
 * Added support for Journal objects.
 * Changed internal code of `PermanentEntryID` to correctly parse the data. Previously the distinguished name did not actually end at the null character, instead ending at the end of the bytes provided. If there was trailing data, it would be captured inadvertantly.
 * Finished definition for `StoreObjectEntryID`.
+* Added new kwargs for MSG files: `dateFormat` and `datetimeFormat`. These allow the user to easily override the strings being used for format dates and dates that include a time component, respectively.
+    * In unifying all the formats into 2 options, you may notice that some will look a bit different starting from this version, as there was an unfortunately large amount of variation.
+* Removed `MessageBase.parsedDate`.
+* Fixed issues with `MessageBase.date` and related things either being incorrectly documented or doing things that are not specified by the documentation. It was *supposed* to have been changed to use `datetime` objects, but it was still using strings.
+* Removed unused function `extract_msg.utils.isEmptyString`.
+* Removed unused function `extract_msg.utils.properHex`.
 
 **v0.45.0**
 * BREAKING: Changed parsing of string multiple properties to remove the trailing null byte. This *will* cause the output of parsing them to differ.

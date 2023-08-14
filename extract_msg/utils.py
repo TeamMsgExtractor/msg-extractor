@@ -29,7 +29,6 @@ __all__ = [
     'inputToMsgPath',
     'inputToString',
     'isEncapsulatedRtf',
-    'isEmptyString',
     'makeWeakRef',
     'msgPathToString',
     'parseType',
@@ -595,13 +594,6 @@ def inputToString(bytesInputVar, encoding) -> str:
         raise ConversionError('Cannot convert to str type.')
 
 
-def isEmptyString(inp : str) -> bool:
-    """
-    Returns true if the input is None or is an Empty string.
-    """
-    return (inp == '' or inp is None)
-
-
 def isEncapsulatedRtf(inp : bytes) -> bool:
     """
     Currently the detection is made to be *extremly* basic, but this will work
@@ -620,6 +612,21 @@ def makeWeakRef(obj : Optional[_T]) -> Optional[weakref.ReferenceType[_T]]:
         return weakref.ref(obj)
     except TypeError:
         return None
+
+def minutesToDurationStr(minutes : int) -> str:
+    """
+    Converts the number of minutes into a duration string.
+    """
+    if minutes == 0:
+        return '0 hours'
+    elif minutes == 1:
+        return '1 minute'
+    elif minutes < 60:
+        return f'{minutes} minutes'
+    elif minutes % 60 == 0:
+        return f'{minutes // 60} hours'
+    else:
+        return f'{minutes // 60} hours {minutes % 60} minutes'
 
 
 def msgPathToString(inp : Union[str, Iterable[str]]) -> str:
@@ -774,23 +781,6 @@ def prepareFilename(filename) -> str:
     """
     # I would use re here, but it tested to be slightly slower than this.
     return ''.join(i for i in filename if i not in r'\/:*?"<>|' + '\x00').strip()
-
-
-def properHex(inp, length : int = 0) -> str:
-    """
-    Takes in various input types and converts them into a hex string whose
-    length will always be even.
-    """
-    a = ''
-    if isinstance(inp, str):
-        a = ''.join([hex(ord(inp[x]))[2:].rjust(2, '0') for x in range(len(inp))])
-    elif isinstance(inp, bytes):
-        a = inp.hex()
-    elif isinstance(inp, int):
-        a = hex(inp)[2:]
-    if len(a) % 2 != 0:
-        a = '0' + a
-    return a.rjust(length, '0').upper()
 
 
 def roundUp(inp : int, mult : int) -> int:

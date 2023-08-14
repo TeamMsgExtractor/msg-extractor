@@ -84,6 +84,9 @@ class MSGFile:
         :param insecureFeatures: Optional, an enum value that specifies if
             certain insecure features should be enabled. These features should
             only be used on data that you trust. Uses the InsecureFeatures enum.
+        :param dateFormat: Optional, the format string to use for dates.
+        :param datetimeFormat: Optional, the format string to use for dates
+            that include a time component.
 
         :raises InvalidFileFormatError: If the file is not an OleFile or could
             not be parsed as an MSG file.
@@ -116,6 +119,8 @@ class MSGFile:
         self.__attachmentsDelayed = kwargs.get('delayAttachments', False)
         self.__attachmentsReady = False
         self.__errorBehavior = ErrorBehavior(kwargs.get('errorBehavior', ErrorBehavior.THROW))
+        self.__dateFormat = kwargs.get('dateFormat', constants.DATE_FORMAT)
+        self.__dtFormat = kwargs.get('datetimeFormat', constants.DT_FORMAT)
 
         if overrideEncoding is not None:
             codecs.lookup(overrideEncoding)
@@ -886,6 +891,22 @@ class MSGFile:
         Specifies the name of the client application that sent the message.
         """
         return self.getNamedProp('8554', constants.ps.PSETID_COMMON)
+
+    @property
+    def dateFormat(self) -> str:
+        """
+        The format string to use when converting dates to strings. This is used
+        for dates with no time component.
+        """
+        return self.__dateFormat
+
+    @property
+    def datetimeFormat(self) -> str:
+        """
+        The format string to use when converting datetimes to strings. This is
+        used for dates that have time components.
+        """
+        return self.__dtFormat
 
     @property
     def errorBehavior(self) -> ErrorBehavior:

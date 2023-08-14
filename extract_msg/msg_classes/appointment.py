@@ -141,8 +141,8 @@ class AppointmentMeeting(Calendar):
                 'Location': self.location,
             },
             '-date-': {
-                'Start': self.startDate.__format__('%a, %d %b %Y %H:%M %z') if self.startDate else None,
-                'End': self.endDate.__format__('%a, %d %b %Y %H:%M %z') if self.endDate else None,
+                'Start': self.startDate.__format__(self.datetimeFormat) if self.startDate else None,
+                'End': self.endDate.__format__(self.datetimeFormat) if self.endDate else None,
             },
             '-recurrence-': {
                 'Recurrance': recur,

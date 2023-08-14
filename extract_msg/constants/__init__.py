@@ -11,7 +11,9 @@ __all__ = [
     'st',
 
     # Constants.
+    'DATE_FORMAT',
     'DEFAULT_CLSID',
+    'DT_FORMAT',
     'FIXED_LENGTH_PROPS',
     'FIXED_LENGTH_PROPS_STRING',
     'HEADER_FORMAT',
@@ -46,6 +48,11 @@ from typing import Dict, List, Tuple, Union
 
 from . import ps, re, st
 from ..enums import SaveType
+
+
+# Constants for formating datetime objects.
+DATE_FORMAT = '%d %B, %Y'
+DT_FORMAT = '%a, %d %b %Y %H:%M:%S %z'
 
 
 # Typing Constants.

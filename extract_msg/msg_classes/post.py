@@ -27,7 +27,7 @@ class Post(MessageBase):
         return json.dumps({
             'from': inputToString(self.sender, self.stringEncoding),
             'subject': inputToString(self.subject, self.stringEncoding),
-            'date': inputToString(self.date, self.stringEncoding),
+            'date': inputToString(self.date.__format__(self.datetimeFormat), self.stringEncoding),
             'conversation': inputToString(self.conversation, self.stringEncoding),
             'body': decode_utf7(self.body),
         })
@@ -66,7 +66,7 @@ class Post(MessageBase):
         return {
             '-main details-': {
                 'From': self.sender,
-                'Posted At': self.date,
+                'Posted At': self.date.__format__(self.datetimeFormat),
                 'Conversation': self.conversation,
             },
             '-subject-': {

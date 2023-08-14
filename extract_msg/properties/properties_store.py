@@ -239,10 +239,10 @@ class PropertiesStore:
             self.__date = None
             if '00390040' in self:
                 dateValue = self.get('00390040').value
-                # A date can by bytes if it fails to initialize, so we check it
+                # A date can be bytes if it fails to initialize, so we check it
                 # first.
                 if isinstance(dateValue, datetime.datetime):
-                    self.__date = dateValue.__format__('%a, %d %b %Y %H:%M:%S %z')
+                    self.__date = dateValue
             return self.__date
 
     @property
