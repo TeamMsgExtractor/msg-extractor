@@ -111,5 +111,5 @@ class Journal(MessageBase):
                 'Start': self.logStart.__format__(self.datetimeFormat),
                 'End': self.logEnd.__format__(self.datetimeFormat),
                 'Duration': minutesToDurationStr(self.duration),
-            }
+            },
         }
