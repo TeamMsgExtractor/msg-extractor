@@ -69,7 +69,7 @@ class CustomAttachmentHandler(abc.ABC):
         """
 
     @property
-    def attachment(self):
+    def attachment(self) -> AttachmentBase:
         """
         The attachment this handler is associated with.
         """
@@ -77,7 +77,7 @@ class CustomAttachmentHandler(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def data(self) -> bytes:
+    def data(self) -> Optional[bytes]:
         """
         Gets the data for the attachment.
 

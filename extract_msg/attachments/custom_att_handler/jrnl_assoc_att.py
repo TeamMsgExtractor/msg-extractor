@@ -32,6 +32,15 @@ class JournalAssociatedAttachment(CustomAttachmentHandler):
 
         return True
 
+    def generateRtf(self) -> Optional[bytes]:
+        # TODO
+        return None
+
+    @property
+    def data(self) -> None:
+        # This type of attachment has no direct associated data.
+        return None
+
     @cached_property
     def mailMsgAttFld(self) -> Optional[EntryID]:
         """
@@ -84,6 +93,16 @@ class JournalAssociatedAttachment(CustomAttachmentHandler):
         # This is quite confusing but whatever. We'll just look for both of
         # them.
         return self.getStream('IOlePres000') or self.getStream('\x02OlePres000')
+
+    @property
+    def name(self) -> None:
+        # Doesn't save.
+        return None
+
+    @property
+    def obj(self) -> None:
+        # No object to represent this.
+        return None
 
 
 

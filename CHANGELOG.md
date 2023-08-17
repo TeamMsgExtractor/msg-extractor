@@ -16,6 +16,7 @@
 * Added new custom attachment handler for journal-associated attachments.
 * Changed `EntryID.autoCreate` to return `None` if given `None` or empty bytes.
 * Changed `EntryID.autoCreate` to raise a `FeatureNotImplemented` exception if no valid entry ID class is found.
+* Fix typing annocations for `CustomAttachmentHandler`.
 
 **v0.45.0**
 * BREAKING: Changed parsing of string multiple properties to remove the trailing null byte. This *will* cause the output of parsing them to differ.
