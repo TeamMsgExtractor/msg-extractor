@@ -28,6 +28,7 @@ from ..enums import (
         MacintoshEncoding, MessageFormat, MessageType, OORBodyFormat,
         WrappedType
     )
+from ..exceptions import FeatureNotImplemented
 from ..utils import bitwiseAdjustedAnd, bytesToGuid
 
 
@@ -44,12 +45,15 @@ class EntryID(abc.ABC):
     """
 
     @classmethod
-    def autoCreate(cls, data) -> EntryID:
+    def autoCreate(cls, data) -> Optional[EntryID]:
         """
         Automatically determines the type of EntryID and returns an instance of
         the correct subclass. If the subclass cannot be determined, will return
         a plain EntryID instance.
         """
+        if not data:
+            return None
+
         if len(data) < 20:
             raise ValueError('Cannot create an EntryID with less than 20 bytes.')
         providerUID = data[4:20]
@@ -87,9 +91,7 @@ class EntryID(abc.ABC):
         if providerUID == EntryIDType.WRAPPED:
             return WrappedEntryID(data)
 
-        logger.warn(f'UID for EntryID found in database, but no class was specified for it: {providerUID}')
-        # If all else fails and we do recognize it, just return a plain EntryID.
-        return cls(data)
+        raise FeatureNotImplemented(f'UID for EntryID found in database, but no class was specified for it: {providerUID}')
 
     def __init__(self, data : bytes):
         self.__flags = data[:4]

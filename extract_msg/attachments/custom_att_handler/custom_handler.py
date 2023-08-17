@@ -8,11 +8,15 @@ __all__ = [
 
 import abc
 
-from typing import Optional, TYPE_CHECKING
+from typing import Callable, Optional, TYPE_CHECKING, TypeVar
+
+from ...utils import msgPathToString
 
 
 if TYPE_CHECKING:
     from ..attachment_base import AttachmentBase
+
+_T = TypeVar('_T')
 
 
 class CustomAttachmentHandler(abc.ABC):
@@ -24,6 +28,30 @@ class CustomAttachmentHandler(abc.ABC):
     def __init__(self, attachment : AttachmentBase):
         super().__init__()
         self.__att = attachment
+
+    def getStream(self, path) -> Optional[bytes]:
+        """
+        Gets a stream from the custom data directory.
+        """
+        return self.attachment.getStream('__substg1.0_3701000D/' + msgPathToString(path))
+
+    def getStreamAs(self, streamID, overrideClass : Callable[..., _T]) -> Optional[_T]:
+        """
+        Returns the specified stream, modifying it to the specified class if it
+        is found.
+
+        :param overrideClass: Class/function to use to morph the data that was
+            read. The data will be the first argument to the class's __init__
+            function or the function itself, if that is what is provided. If
+            the value is None, this function is not called. If you want it to
+            be called regardless, you should handle the data directly.
+        """
+        value = self.getStream(streamID)
+
+        if value is not None:
+            value = overrideClass(value)
+
+        return value
 
     @classmethod
     @abc.abstractmethod
