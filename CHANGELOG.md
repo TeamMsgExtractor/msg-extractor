@@ -4,9 +4,9 @@
 * Added a number of properties to `MSGFile` from \[MS-OXCMSG\].
 * Moved some properties down to `MessageBase` from it's subclasses.
 * Added support for Journal objects.
-* Changed internal code of `PermanentEntryID` to correctly parse the data. Previously the distinguished name did not actually end at the null character, instead ending at the end of the bytes provided. If there was trailing data, it would be captured inadvertantly.
+* Changed internal code of `PermanentEntryID` to correctly parse the data. Previously the distinguished name did not actually end at the null character, instead ending at the end of the bytes provided. If there was trailing data, it would be captured inadvertently.
 * Finished definition for `StoreObjectEntryID`.
-* Added new kwargs for MSG files: `dateFormat` and `datetimeFormat`. These allow the user to easily override the strings being used for format dates and dates that include a time component, respectively.
+* Added new keyword arguments for MSG files: `dateFormat` and `datetimeFormat`. These allow the user to easily override the strings being used for format dates and dates that include a time component, respectively.
     * In unifying all the formats into 2 options, you may notice that some will look a bit different starting from this version, as there was an unfortunately large amount of variation.
 * Fixed code for `MessageBase.parsedDate` which could have incorrect values.
 * Fixed issues with `MessageBase.date` and related things either being incorrectly documented or doing things that are not specified by the documentation. It was *supposed* to have been changed to use `datetime` objects, but it was still using strings.
@@ -17,8 +17,8 @@
 * Added new custom attachment handler for journal-associated attachments.
 * Changed `EntryID.autoCreate` to return `None` if given `None` or empty bytes.
 * Changed `EntryID.autoCreate` to raise a `FeatureNotImplemented` exception if no valid entry ID class is found.
-* Fix typing annocations for `CustomAttachmentHandler`.
-* Removed unneed `imapclient` dependency.
+* Fix typing annotations for `CustomAttachmentHandler`.
+* Removed unneeded `imapclient` dependency.
 * Changed `getJson` to have values be null if they aren't found rather than an empty string.
 * Implemented the `getJson` method correctly for a number of classes.
 * Changed `Task.percentComplete` to always return a float.
