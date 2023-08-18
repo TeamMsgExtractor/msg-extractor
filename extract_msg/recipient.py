@@ -246,7 +246,7 @@ class Recipient:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.getMultipleString([self.__dir, msgPathToString(filename)])
 
-    def getPropertyAs(self, propertyName, overrideClass : Callable[..., _T]) -> Optional[_T]:
+    def getPropertyAs(self, propertyName, overrideClass : Callable[[Any], _T]) -> Optional[_T]:
         """
         Returns the property, setting the class if found.
 
@@ -323,7 +323,7 @@ class Recipient:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.getStream([self.__dir, msgPathToString(filename)])
 
-    def getStreamAs(self, streamID, overrideClass : Callable[..., _T]) -> Optional[_T]:
+    def getStreamAs(self, streamID, overrideClass : Callable[[Any], _T]) -> Optional[_T]:
         """
         Returns the specified stream, modifying it to the specified class if it
         is found.
@@ -359,7 +359,7 @@ class Recipient:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.getStringStream([self.__dir, msgPathToString(filename)])
 
-    def getStringStreamAs(self, streamID, overrideClass : Callable[..., _T]) -> Optional[_T]:
+    def getStringStreamAs(self, streamID, overrideClass : Callable[[Any], _T]) -> Optional[_T]:
         """
         Returns the specified string stream, modifying it to the specified
         class if it is found.

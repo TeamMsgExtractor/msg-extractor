@@ -544,7 +544,7 @@ class MSGFile:
                 ret[index] = item.decode(self.stringEncoding)[:-1]
             return ret
 
-    def getNamedAs(self, propertyName : str, guid : str, overrideClass : Callable[..., _T]) -> Optional[_T]:
+    def getNamedAs(self, propertyName : str, guid : str, overrideClass : Callable[[Any], _T]) -> Optional[_T]:
         """
         Returns the named property, setting the class if specified.
 
@@ -567,7 +567,7 @@ class MSGFile:
         """
         return self.namedProperties.get((propertyName, guid), default)
 
-    def getPropertyAs(self, propertyName, overrideClass : Callable[..., _T]) -> Optional[_T]:
+    def getPropertyAs(self, propertyName, overrideClass : Callable[[Any], _T]) -> Optional[_T]:
         """
         Returns the property, setting the class if found.
 
@@ -650,7 +650,7 @@ class MSGFile:
             logger.info(f'Stream "{filename}" was requested but could not be found. Returning `None`.')
             return None
 
-    def getStreamAs(self, streamID, overrideClass : Callable[..., _T]) -> Optional[_T]:
+    def getStreamAs(self, streamID, overrideClass : Callable[[Any], _T]) -> Optional[_T]:
         """
         Returns the specified stream, modifying it to the specified class if it
         is found.
@@ -689,7 +689,7 @@ class MSGFile:
             tmp = self.getStream(filename + '001E', prefix = False)
             return None if tmp is None else tmp.decode(self.stringEncoding)
 
-    def getStringStreamAs(self, streamID, overrideClass : Callable[..., _T]) -> Optional[_T]:
+    def getStringStreamAs(self, streamID, overrideClass : Callable[[Any], _T]) -> Optional[_T]:
         """
         Returns the specified string stream, modifying it to the specified
         class if it is found.
@@ -785,9 +785,8 @@ class MSGFile:
                 # Save contents of directory.
                 with zfile.open(sysdir + '/' + filename, 'w') as f:
                     data = self.getStream(dir_)
-                    # Specifically check for None. If this is bytes we still want to do this line.
-                    # There was actually this weird issue where for some reason data would be bytes
-                    # but then also simultaneously register as None?
+                    # Specifically check for None. If this is bytes we still
+                    # want to do this line.
                     if data is not None:
                         f.write(data)
 

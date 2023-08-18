@@ -8,7 +8,7 @@ __all__ = [
 
 import abc
 
-from typing import Callable, Optional, TYPE_CHECKING, TypeVar
+from typing import Any, Callable, Optional, TYPE_CHECKING, TypeVar
 
 from ...utils import msgPathToString
 
@@ -35,7 +35,7 @@ class CustomAttachmentHandler(abc.ABC):
         """
         return self.attachment.getStream('__substg1.0_3701000D/' + msgPathToString(path))
 
-    def getStreamAs(self, streamID, overrideClass : Callable[..., _T]) -> Optional[_T]:
+    def getStreamAs(self, streamID, overrideClass : Callable[[Any], _T]) -> Optional[_T]:
         """
         Returns the specified stream, modifying it to the specified class if it
         is found.
