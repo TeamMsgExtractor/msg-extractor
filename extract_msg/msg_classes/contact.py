@@ -3,9 +3,10 @@ __all__ = [
 ]
 
 
-import io
 import datetime
 import functools
+import io
+import json
 
 from typing import Dict, List, Optional, Set, Tuple, Union
 
@@ -16,14 +17,19 @@ from ..enums import (
     )
 from ..exceptions import SecurityError
 from .message_base import MessageBase
-from ..structures.entry_id import EntryID
 from ..structures.business_card import BusinessCardDisplayDefinition
+from ..structures.entry_id import EntryID
 
 
 class Contact(MessageBase):
     """
     Class used for parsing contacts.
     """
+
+    def getJson(self) -> str:
+        # To save a lot of trouble and repetiion, just return a JSON version of
+        # the header format properties.
+        return json.dumps(self.headerFormatProperties)
 
     @functools.cached_property
     def account(self) -> Optional[str]:
