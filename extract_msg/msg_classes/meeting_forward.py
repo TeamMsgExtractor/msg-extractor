@@ -4,18 +4,56 @@ __all__ = [
 
 
 import functools
+import json
 
 from typing import Optional
 
 from .. import constants
 from .meeting_related import MeetingRelated
-from ..enums import RecurPatternType
+from ..enums import RecurPatternType, ResponseStatus
 
 
 class MeetingForwardNotification(MeetingRelated):
     """
     Class for handling Meeting Forward Notification objects.
     """
+
+    def getJson(self) -> str:
+        meetingStatusString = {
+            ResponseStatus.NONE: None,
+            ResponseStatus.ORGANIZED: 'Meeting organizer',
+            ResponseStatus.TENTATIVE: 'Tentatively accepted',
+            ResponseStatus.ACCEPTED: 'Accepted',
+            ResponseStatus.DECLINED: 'Declined',
+            ResponseStatus.NOT_RESPONDED: 'Not yet responded',
+        }[self.responseStatus]
+
+        # Get the recurrence string.
+        recur = '(none)'
+        if self.appointmentRecur:
+            recur = {
+                RecurPatternType.DAY: 'Daily',
+                RecurPatternType.WEEK: 'Weekly',
+                RecurPatternType.MONTH: 'Monthly',
+                RecurPatternType.MONTH_NTH: 'Monthly',
+                RecurPatternType.MONTH_END: 'Monthly',
+                RecurPatternType.HJ_MONTH: 'Monthly',
+                RecurPatternType.HJ_MONTH_NTH: 'Monthly',
+                RecurPatternType.HJ_MONTH_END: 'Monthly',
+            }[self.appointmentRecur.patternType]
+
+        return json.dumps({
+            'recurrence': recur,
+            'recurrencePattern': self.recurrencePattern,
+            'body': self.body,
+            'meetingStatus': meetingStatusString,
+            'organizer': self.organizer,
+            'requiredAttendees': self.to,
+            'optionalAttendees': self.cc,
+            'resources': self.bcc,
+            'start': self.startDate.__format__(self.datetimeFormat) if self.endDate else None,
+            'end': self.endDate.__format__(self.datetimeFormat) if self.endDate else None,
+        })
 
     @functools.cached_property
     def forwardNotificationRecipients(self) -> Optional[bytes]:
