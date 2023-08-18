@@ -12,8 +12,6 @@ from .. import constants
 from .message_base import MessageBase
 from ..utils import inputToString
 
-from imapclient.imapclient import decode_utf7
-
 
 class Post(MessageBase):
     """
@@ -25,11 +23,11 @@ class Post(MessageBase):
         Returns the JSON representation of the Post.
         """
         return json.dumps({
-            'from': inputToString(self.sender, self.stringEncoding),
-            'subject': inputToString(self.subject, self.stringEncoding),
-            'date': inputToString(self.date.__format__(self.datetimeFormat), self.stringEncoding),
-            'conversation': inputToString(self.conversation, self.stringEncoding),
-            'body': decode_utf7(self.body),
+            'from': self.sender,
+            'subject': self.subject,
+            'date': self.date.__format__(self.datetimeFormat) if self.date else None,
+            'conversation': self.conversation,
+            'body': self.body,
         })
 
     @functools.cached_property
@@ -44,7 +42,7 @@ class Post(MessageBase):
         return {
             '-main details-': {
                 'From': self.sender,
-                'Posted At': self.date.__format__(self.datetimeFormat),
+                'Posted At': self.date.__format__(self.datetimeFormat) if self.date else None,
                 'Conversation': self.conversation,
             },
             '-subject-': {

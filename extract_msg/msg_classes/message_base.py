@@ -46,8 +46,6 @@ from ..utils import (
         prepareFilename, rtfSanitizeHtml, rtfSanitizePlain, validateHtml
     )
 
-from imapclient.imapclient import decode_utf7
-
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -252,7 +250,8 @@ class MessageBase(MSGFile):
         """
         print('Message')
         print('Subject:', self.subject)
-        print('Date:', self.date.__format__(self.datetimeFormat))
+        if self.date:
+            print('Date:', self.date.__format__(self.datetimeFormat))
         print('Body:')
         print(self.body)
 
@@ -271,11 +270,12 @@ class MessageBase(MSGFile):
         If self.headerFormatProperties is None, immediately returns an empty
         string.
         """
-        formattedProps = []
         allProps = self.headerFormatProperties
 
         if allProps is None:
             return ''
+
+        formattedProps = []
 
         for entry in allProps:
             isGroup = False
@@ -320,13 +320,13 @@ class MessageBase(MSGFile):
         Returns the JSON representation of the Message.
         """
         return json.dumps({
-            'from': inputToString(self.sender, self.stringEncoding),
-            'to': inputToString(self.to, self.stringEncoding),
-            'cc': inputToString(self.cc, self.stringEncoding),
-            'bcc': inputToString(self.bcc, self.stringEncoding),
-            'subject': inputToString(self.subject, self.stringEncoding),
-            'date': inputToString(self.date.__format__(self.datetimeFormat), self.stringEncoding),
-            'body': decode_utf7(self.body),
+            'from': self.sender,
+            'to': self.to,
+            'cc': self.cc,
+            'bcc': self.bcc,
+            'subject': self.subject,
+            'date': self.date.__format__(self.datetimeFormat) if self.date else None,
+            'body': self.body,
         })
 
     def getSaveBody(self, **_) -> bytes:
@@ -1044,7 +1044,8 @@ class MessageBase(MSGFile):
         else:
             logger.info('Header is empty or was not found. Header will be generated from other streams.')
             header = HeaderParser(policy = policy.default).parsestr('')
-            header.add_header('Date', email.utils.format_datetime(self.date))
+            if self.date:
+                header.add_header('Date', email.utils.format_datetime(self.date))
             header.add_header('From', self.sender)
             header.add_header('To', self.to)
             header.add_header('Cc', self.cc)
@@ -1099,7 +1100,7 @@ class MessageBase(MSGFile):
         return {
             '-basic info-': {
                 'From': self.sender,
-                'Sent': self.date.__format__(self.datetimeFormat),
+                'Sent': self.date.__format__(self.datetimeFormat) if self.date else None,
                 'To': self.to,
                 'Cc': self.cc,
                 'Bcc': self.bcc,
