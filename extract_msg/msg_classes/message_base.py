@@ -20,6 +20,7 @@ import zipfile
 import bs4
 import compressed_rtf
 import RTFDE
+import RTFDE.exceptions
 
 from email import policy
 from email.message import EmailMessage
@@ -966,45 +967,38 @@ class MessageBase(MSGFile):
         """
         return self.props.date if self.isSent else None
 
-    @property
+    @functools.cached_property
     def deencapsulatedRtf(self) -> Optional[RTFDE.DeEncapsulator]:
         """
         Returns the instance of the deencapsulated RTF body. If there is no RTF
         body or the body is not encasulated, returns None.
         """
-        try:
-            return self._deencapsultor
-        except AttributeError:
-            if self.rtfBody:
-                # If there is an RTF body, we try to deencapsulate it.
-                body = self.rtfBody
-                # Sometimes you get MSG files whose RTF body has stuff
-                # *after* the body, and RTFDE can't handle that. Here is
-                # how we compensate.
-                while body and body[-1] != 125:
-                    body = body[:-1]
+        if self.rtfBody:
+            # If there is an RTF body, we try to deencapsulate it.
+            body = self.rtfBody
+            # Sometimes you get MSG files whose RTF body has stuff
+            # *after* the body, and RTFDE can't handle that. Here is
+            # how we compensate.
+            while body and body[-1] != 125:
+                body = body[:-1]
 
-                try:
-                    self._deencapsultor = RTFDE.DeEncapsulator(body)
-                    self._deencapsultor.deencapsulate()
-                except RTFDE.exceptions.NotEncapsulatedRtf as e:
-                    logger.debug('RTF body is not encapsulated.')
-                    self._deencapsultor = None
-                except RTFDE.exceptions.MalformedEncapsulatedRtf as _e:
-                    if ErrorBehavior.RTFDE_MALFORMED not in self.errorBehavior:
-                        raise
-                    logger.info('RTF body contains malformed encapsulated content.')
-                    self._deencapsultor = None
-                except Exception:
-                    # If we are just ignoring the errors, log it then set to
-                    # None. Otherwise, continue the exception.
-                    if ErrorBehavior.RTFDE_UNKNOWN_ERROR not in self.errorBehavior:
-                        raise
-                    logger.exception('Unhandled error happened while using RTFDE. You have choosen to ignore these errors.')
-                    self._deencapsultor = None
-            else:
-                self._deencapsultor = None
-            return self._deencapsultor
+            try:
+                deencapsultor = RTFDE.DeEncapsulator(body)
+                deencapsultor.deencapsulate()
+                return deencapsultor
+            except RTFDE.exceptions.NotEncapsulatedRtf:
+                logger.debug('RTF body is not encapsulated.')
+            except RTFDE.exceptions.MalformedEncapsulatedRtf:
+                if ErrorBehavior.RTFDE_MALFORMED not in self.errorBehavior:
+                    raise
+                logger.info('RTF body contains malformed encapsulated content.')
+            except Exception:
+                # If we are just ignoring the errors, log it then set to
+                # None. Otherwise, continue the exception.
+                if ErrorBehavior.RTFDE_UNKNOWN_ERROR not in self.errorBehavior:
+                    raise
+                logger.exception('Unhandled error happened while using RTFDE. You have choosen to ignore these errors.')
+        return None
 
     @property
     def defaultFolderName(self) -> str:
@@ -1062,20 +1056,17 @@ class MessageBase(MSGFile):
         self.__headerInit = True
         return header
 
-    @property
+    @functools.cached_property
     def headerDict(self) -> Dict:
         """
         Returns a dictionary of the entries in the header
         """
+        headerDict = dict(self.header._headers)
         try:
-            return self._headerDict
-        except AttributeError:
-            self._headerDict = dict(self.header._headers)
-            try:
-                self._headerDict.pop('Received')
-            except KeyError:
-                pass
-            return self._headerDict
+            headerDict.pop('Received')
+        except KeyError:
+            pass
+        return headerDict
 
     @property
     def headerFormatProperties(self) -> constants.HEADER_FORMAT_TYPE:
