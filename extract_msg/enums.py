@@ -58,6 +58,7 @@ __all__ = [
     'RecurPatternType',
     'ResponseStatus',
     'ResponseType',
+    'RetentionFlags',
     'RuleActionType',
     'SaveType',
     'Sensitivity',
@@ -1544,6 +1545,25 @@ class ResponseType(enum.Enum):
     ACCEPT = 'pos'
     DECLINE = 'neg'
     TENTATIVE = 'tent'
+
+
+
+class RetentionFlags(enum.IntFlag):
+    """
+    Flags that specify the status of nature of an item's retention tag or
+    archive tag.
+
+    See the section labeled "PidTagRetentionFlags" of [MS-OXCMSG] for details.
+    """
+    EXPLICIT_TAG = 0x001
+    USER_OVERRIDE = 0x002
+    AUTO_TAG = 0x004
+    PERSONAL_TAG = 0x008
+    EXPLICIT_ARCHIVE_TAG = 0x010
+    KEEP_IN_PLACE = 0x020
+    SYSTEM_DATA = 0x040
+    NEEDS_RESCAN = 0x080
+    PENDING_RESCAN = 0x100
 
 
 

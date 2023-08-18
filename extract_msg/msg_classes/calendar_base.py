@@ -433,13 +433,6 @@ class CalendarBase(MessageBase):
         return self.getNamedProp('0008', ps.PSETID_MEETING)
 
     @functools.cached_property
-    def responseRequested(self) -> bool:
-        """
-        Whether to send Meeting Response objects to the organizer.
-        """
-        return bool(self.getPropertyVal('0063000B'))
-
-    @functools.cached_property
     def responseStatus(self) -> ResponseStatus:
         """
         The response status of an attendee.

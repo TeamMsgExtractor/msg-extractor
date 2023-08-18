@@ -30,7 +30,7 @@ from ..attachments import (
 from ..encoding import lookupCodePage
 from ..enums import (
         ErrorBehavior, InsecureFeatures, Importance, Priority, PropertiesType,
-        SaveType, Sensitivity, SideEffect
+        RetentionFlags, SaveType, Sensitivity, SideEffect
     )
 from ..exceptions import (
         ConversionError, InvalidFileFormatError, PrefixError,
@@ -1048,6 +1048,22 @@ class MSGFile:
                                PropertiesType.MESSAGE if self.prefix == '' else PropertiesType.MESSAGE_EMBED)
 
     @functools.cached_property
+    def retentionDate(self) -> Optional[datetime.datetime]:
+        """
+        The date, in UTC, after which a Message Object is expired by the server.
+        If None, the Message object never expires.
+        """
+        return self.getPropertyVal('301C0040')
+
+    @functools.cached_property
+    def retentionFlags(self) -> Optional[RetentionFlags]:
+        """
+        Flags that specify the status or nature of an item's retention tag or
+        archive tag.
+        """
+        return self.getPropertyAs('301D0003', RetentionFlags)
+
+    @functools.cached_property
     def sensitivity(self) -> Optional[Sensitivity]:
         """
         The specified sensitivity of the msg file.
@@ -1071,7 +1087,6 @@ class MSGFile:
             # Let's first check if the encoding will be unicode:
             if self.areStringsUnicode:
                 self.__stringEncoding = "utf-16-le"
-                return self.__stringEncoding
             else:
                 # Well, it's not unicode. Now we have to figure out what it IS.
                 if '3FFD0003' not in self.props:
@@ -1083,7 +1098,7 @@ class MSGFile:
                     enc = cast(int, self.getPropertyVal('3FFD0003'))
                     # Now we just need to translate that value.
                     self.__stringEncoding = lookupCodePage(enc)
-                return self.__stringEncoding
+            return self.__stringEncoding
 
     @property
     def treePath(self) -> List[weakref.ReferenceType]:

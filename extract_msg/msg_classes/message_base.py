@@ -24,7 +24,7 @@ import RTFDE
 from email import policy
 from email.message import EmailMessage
 from email.parser import HeaderParser
-from typing import Callable, Dict, List, Optional, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from .. import constants
 from .._rtf.create_doc import createDocument
@@ -1014,7 +1014,7 @@ class MessageBase(MSGFile):
         try:
             return self._defaultFolderName
         except AttributeError:
-            d = self.parsedDate
+            d = self.parsedDate or tuple([0] * 9)
 
             dirName = '{0:02d}-{1:02d}-{2:02d}_{3:02d}{4:02d}'.format(*d) if d else 'UnknownDate'
             dirName += ' ' + (prepareFilename(self.subject) if self.subject else '[No subject]')
@@ -1047,12 +1047,10 @@ class MessageBase(MSGFile):
         headerText = self.headerText
         if headerText:
             header = HeaderParser(policy = policy.default).parsestr(headerText)
-            del header['Date']
-            header['Date'] = self.date.__format__(self.datetimeFormat)
         else:
             logger.info('Header is empty or was not found. Header will be generated from other streams.')
             header = HeaderParser(policy = policy.default).parsestr('')
-            header.add_header('Date', self.date.__format__(self.datetimeFormat))
+            header.add_header('Date', email.utils.format_datetime(self.date))
             header.add_header('From', self.sender)
             header.add_header('To', self.to)
             header.add_header('Cc', self.cc)
@@ -1233,6 +1231,13 @@ class MessageBase(MSGFile):
         return self.getStringStream('__substg1.0_1035')
 
     @functools.cached_property
+    def parsedDate(self) -> Optional[Tuple[int, int, int, int, int, int, int, int, int]]:
+        """
+        Returns a 9 tuple of the parsed date from the header.
+        """
+        return email.utils.parsedate(self.header['Date'])
+
+    @functools.cached_property
     def receivedTime(self) -> Optional[datetime.datetime]:
         """
         The date and time the message was received by the server.
@@ -1263,6 +1268,13 @@ class MessageBase(MSGFile):
         Data that is used to correlate the report and the original message.
         """
         return self.getStreamAs('__substg1.0_00310102', ReportTag)
+
+    @functools.cached_property
+    def responseRequested(self) -> bool:
+        """
+        Whether to send Meeting Response objects to the organizer.
+        """
+        return bool(self.getPropertyVal('0063000B'))
 
     @functools.cached_property
     def rtfBody(self) -> Optional[bytes]:
