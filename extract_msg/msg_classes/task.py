@@ -5,6 +5,7 @@ __all__ = [
 
 import datetime
 import functools
+import json
 import logging
 
 from typing import Optional
@@ -27,6 +28,27 @@ class Task(MessageBase):
     """
     Class used for parsing task files.
     """
+
+    def getJson(self) -> str:
+        status = {
+            TaskStatus.NOT_STARTED: 'Not Started',
+            TaskStatus.IN_PROGRESS: 'In Progress',
+            TaskStatus.COMPLETE: 'Completed',
+            TaskStatus.WAITING_ON_OTHER: 'Waiting on someone else',
+            TaskStatus.DEFERRED: 'Deferred',
+            None: None,
+        }[self.taskStatus]
+
+        return json.dumps({
+            'subject': self.subject,
+            'status': status,
+            'percentComplete': f'{self.percentComplete*100:.0f}%',
+            'dateCompleted': self.taskDateCompleted.__format__(self.dateFormat) if self.taskDateCompleted else None,
+            'totalWork': f'{self.taskEstimatedEffort or 0} minutes',
+            'actualWork': f'{self.taskActualEffort or 0} minutes',
+            'owner': self.taskOwner,
+            'importance': self.importanceString,
+        })
 
     @property
     def headerFormatProperties(self) -> constants.HEADER_FORMAT_TYPE:
@@ -61,12 +83,12 @@ class Task(MessageBase):
         }
 
     @functools.cached_property
-    def percentComplete(self) -> Optional[float]:
+    def percentComplete(self) -> float:
         """
         Indicates whether a time-flagged Message object is complete. Returns a
         percentage in decimal form. 1.0 indicates it is complete.
         """
-        return self.getNamedProp('8102', constants.ps.PSETID_TASK)
+        return self.getNamedProp('8102', constants.ps.PSETID_TASK, 0.0)
 
     @functools.cached_property
     def taskAcceptanceState(self) -> Optional[TaskAcceptance]:

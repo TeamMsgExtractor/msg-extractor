@@ -21,6 +21,7 @@
 * Removed unneed `imapclient` dependency.
 * Changed `getJson` to have values be null if they aren't found rather than an empty string.
 * Implemented the `getJson` method correctly for a number of classes.
+* Changed `Task.percentComplete` to always return a float.
 
 **v0.45.0**
 * BREAKING: Changed parsing of string multiple properties to remove the trailing null byte. This *will* cause the output of parsing them to differ.
