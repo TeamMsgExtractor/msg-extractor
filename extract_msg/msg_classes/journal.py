@@ -3,8 +3,10 @@ __all__ = [
 ]
 
 
+import base64
 import datetime
 import functools
+import json
 
 from typing import List, Optional
 
@@ -18,6 +20,20 @@ class Journal(MessageBase):
     """
     Class for parsing Journal messages.
     """
+
+    def getJson(self) -> str:
+        return json.dumps({
+            'subject': self.subject,
+            'entryType': self.logTypeDesc,
+            'company': self.companies[0] if self.companies else None,
+            'start': self.logStart.__format__(self.datetimeFormat) if self.logStart else None,
+            'end': self.logEnd.__format__(self.datetimeFormat) if self.logEnd else None,
+            'duration': minutesToDurationStr(self.duration),
+            'body': self.body,
+            # There is a good chance the body property won't exist, so this is a
+            # backup.
+            'rtfBodyB64': base64.b64encode(self.rtfBody) if self.rtfBody else None,
+        })
 
     @functools.cached_property
     def companies(self) -> Optional[List[str]]:
@@ -108,8 +124,8 @@ class Journal(MessageBase):
                 'Company': self.companies[0] if self.companies else None,
             },
             '-time-': {
-                'Start': self.logStart.__format__(self.datetimeFormat),
-                'End': self.logEnd.__format__(self.datetimeFormat),
+                'Start': self.logStart.__format__(self.datetimeFormat) if self.logStart else None,
+                'End': self.logEnd.__format__(self.datetimeFormat) if self.logEnd else None,
                 'Duration': minutesToDurationStr(self.duration),
             },
         }
