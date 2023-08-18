@@ -21,7 +21,7 @@ class StickyNote(MessageBase):
             'body': self.body,
             'height': self.noteHeight,
             'width': self.noteWidth,
-            'color': None if self.noteColor is None else self.noteColor.name,
+            'color': None if self.noteColor is None else self.noteColor.name.lower(),
         })
 
     @property
