@@ -45,7 +45,7 @@ class EntryID(abc.ABC):
     """
 
     @classmethod
-    def autoCreate(cls, data) -> Optional[EntryID]:
+    def autoCreate(cls, data : Optional[bytes]) -> Optional[EntryID]:
         """
         Automatically determines the type of EntryID and returns an instance of
         the correct subclass. If the subclass cannot be determined, will return
@@ -202,10 +202,10 @@ class ContactAddressEntryID(EntryID):
     def __init__(self, data : bytes):
         super().__init__(data)
         reader = BytesReader(data[20:])
-        if reader.readUnsignedInt() != 3:
-            raise ValueError(f'Version must be 3 (got {self.__version}).')
-        if reader.readUnsignedInt() != 5:
-            raise ValueError(f'Type must be 4 (got {self.__version}).')
+        if (version := reader.readUnsignedInt()) != 3:
+            raise ValueError(f'Version must be 3 (got {version}).')
+        if (type_ := reader.readUnsignedInt()) != 5:
+            raise ValueError(f'Type must be 4 (got {type_}).')
         self.__index = ContactAddressIndex(reader.readUnsignedInt())
         self.__entryIdCount = reader.readUnsignedInt()
         self.__entryID = MessageEntryID(reader.read(self.__entryIdCount))
@@ -251,7 +251,7 @@ class FolderEntryID(EntryID):
         self.__folderType = MessageType(reader.readUnsignedShort())
         self.__databaseGuid = bytesToGuid(reader.read(16))
         # This entry is 6 bytes, so we pull some shenanigans to unpack it.
-        self.__globalCounter = constants.st.ST_LE_UI64.unpack(reader.read(6) + b'\x00\x00')
+        self.__globalCounter = constants.st.ST_LE_UI64.unpack(reader.read(6) + b'\x00\x00')[0]
         reader.assertNull(2, 'Pad bytes were not 0.')
 
     @property
@@ -295,11 +295,11 @@ class MessageEntryID(EntryID):
         self.__messageType = MessageType(reader.readUnsignedShort())
         self.__folderDatabaseGuid = bytesToGuid(reader.read(16))
         # This entry is 6 bytes, so we pull some shenanigans to unpack it.
-        self.__folderGlobalCounter = constants.st.ST_LE_UI64.unpack(reader.read(6) + b'\x00\x00')
+        self.__folderGlobalCounter = constants.st.ST_LE_UI64.unpack(reader.read(6) + b'\x00\x00')[0]
         reader.assertNull(2, 'Pad bytes were not 0.')
         self.__messageDatabaseGuid = bytesToGuid(reader.read(16))
         # This entry is 6 bytes, so we pull some shenanigans to unpack it.
-        self.__messageGlobalCounter = constants.st.ST_LE_UI64.unpack(reader.read(6) + b'\x00\x00')
+        self.__messageGlobalCounter = constants.st.ST_LE_UI64.unpack(reader.read(6) + b'\x00\x00')[0]
         reader.assertNull(2, 'Pad bytes were not 0.')
         # Not sure why Microsoft decided to say "yes, let's do 2 6-byte integers
         # followed by 2 pad bytes each" instead of just 2 8-byte integers with a
@@ -537,12 +537,12 @@ class PersonalDistributionListEntryID(EntryID):
     def __init__(self, data : bytes):
         super().__init__(data)
         reader = BytesReader(data[20:])
-        if reader.readUnsignedInt() != 3:
-            raise ValueError(f'Version must be 3 (got {self.__version}).')
-        if reader.readUnsignedInt() != 5:
-            raise ValueError(f'Type must be 5 (got {self.__version}).')
-        if reader.readUnsignedInt() != 0xFF:
-            raise ValueError(f'Index must be 255 (got {self.__version}).')
+        if (arg := reader.readUnsignedInt()) != 3:
+            raise ValueError(f'Version must be 3 (got {arg}).')
+        if (arg := reader.readUnsignedInt()) != 5:
+            raise ValueError(f'Type must be 5 (got {arg}).')
+        if (arg := reader.readUnsignedInt()) != 0xFF:
+            raise ValueError(f'Index must be 255 (got {arg}).')
         self.__entryIdCount = reader.readUnsignedInt()
         self.__entryID = MessageEntryID(reader.read(self.__entryIdCount))
         self.__position = reader.tell() + 20

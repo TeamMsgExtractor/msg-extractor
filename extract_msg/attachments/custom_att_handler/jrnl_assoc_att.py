@@ -21,10 +21,17 @@ if TYPE_CHECKING:
 class JournalAssociatedAttachment(CustomAttachmentHandler):
     def __init__(self, attachment : AttachmentBase):
         super().__init__(attachment)
+        stream = attachment.getStream('__substg1.0_3701000D/\x03MailStream')
+        if not stream:
+            raise ValueError('MailStream could not be found.')
+        if len(stream) != 12:
+            raise ValueError('MailStream is the wrong length.')
 
     @classmethod
     def isCorrectHandler(cls, attachment : AttachmentBase) -> bool:
         # This only applies to journal objects.
+        if not attachment.msg.classType:
+            return False
         if not attachment.msg.classType.lower().startswith('ipm.activity'):
             return False
         if attachment.clsid != '00020D09-0000-0000-C000-000000000046':

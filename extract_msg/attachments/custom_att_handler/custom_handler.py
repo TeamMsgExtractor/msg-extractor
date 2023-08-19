@@ -10,6 +10,7 @@ import abc
 
 from typing import Any, Callable, Optional, TYPE_CHECKING, TypeVar
 
+from ...constants import MSG_PATH
 from ...utils import msgPathToString
 
 
@@ -29,13 +30,13 @@ class CustomAttachmentHandler(abc.ABC):
         super().__init__()
         self.__att = attachment
 
-    def getStream(self, path) -> Optional[bytes]:
+    def getStream(self, path : MSG_PATH) -> Optional[bytes]:
         """
         Gets a stream from the custom data directory.
         """
         return self.attachment.getStream('__substg1.0_3701000D/' + msgPathToString(path))
 
-    def getStreamAs(self, streamID, overrideClass : Callable[[Any], _T]) -> Optional[_T]:
+    def getStreamAs(self, streamID : MSG_PATH, overrideClass : Callable[[Any], _T]) -> Optional[_T]:
         """
         Returns the specified stream, modifying it to the specified class if it
         is found.
@@ -63,7 +64,7 @@ class CustomAttachmentHandler(abc.ABC):
     @abc.abstractmethod
     def generateRtf(self) -> Optional[bytes]:
         """
-        Generates the RTF to inject in place of the \objattph tag.
+        Generates the RTF to inject in place of the \\objattph tag.
 
         If this function should do nothing, returns None.
         """

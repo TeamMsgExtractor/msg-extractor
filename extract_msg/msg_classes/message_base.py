@@ -7,6 +7,7 @@ import base64
 import datetime
 import email.message
 import email.utils
+import enum
 import functools
 import html
 import json
@@ -25,7 +26,7 @@ import RTFDE.exceptions
 from email import policy
 from email.message import EmailMessage
 from email.parser import HeaderParser
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, cast, Dict, List, Optional, Tuple, Type, Union
 
 from .. import constants
 from .._rtf.create_doc import createDocument
@@ -80,7 +81,7 @@ class MessageBase(MSGFile):
         # if an error occurs.
         try:
             self.__headerInit = False
-            self.__recipientSeparator = kwargs.get('recipientSeparator', ';')
+            self.__recipientSeparator : str = kwargs.get('recipientSeparator', ';')
             self.__deencap = kwargs.get('deencapsulationFunc')
             # Initialize properties in the order that is least likely to cause bugs.
             # TODO have each function check for initialization of needed data so
@@ -116,7 +117,7 @@ class MessageBase(MSGFile):
         value = None
         # Check header first.
         if self.headerInit:
-            value = self.header[recipientStr]
+            value = cast(Optional[str], self.header[recipientStr])
             if value:
                 value = decodeRfc2047(value)
                 value = value.replace(',', self.__recipientSeparator)
@@ -1058,11 +1059,11 @@ class MessageBase(MSGFile):
         return header
 
     @functools.cached_property
-    def headerDict(self) -> Dict:
+    def headerDict(self) -> Dict[str, Any]:
         """
         Returns a dictionary of the entries in the header
         """
-        headerDict = dict(self.header._headers)
+        headerDict = {x: self.header[x] for x in self.header}
         try:
             headerDict.pop('Received')
         except KeyError:
@@ -1253,6 +1254,17 @@ class MessageBase(MSGFile):
                 recipientDirs.append(dir_[prefixLen])
 
         return [Recipient(recipientDir, self) for recipientDir in recipientDirs]
+
+    @property
+    def recipientTypeClass() -> Type[enum.IntEnum]:
+        """
+        The class to use for a recipient's recipientType property.
+
+        The default is extract_msg.enums.RecipientType. If a subclass
+        attributes different meanings to the values, you can override this
+        property to return a valid enum.
+        """
+        return RecipientType
 
     @functools.cached_property
     def reportTag(self) -> Optional[ReportTag]:

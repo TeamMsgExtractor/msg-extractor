@@ -6,19 +6,23 @@ __all__ = [
 ]
 
 
+import enum
 import functools
 import logging
+import weakref
 
 from typing import (
-        Any, Callable, List, Optional, Tuple, TYPE_CHECKING, TypeVar, Union
+        Any, Callable, Generic, List, Optional, Tuple, TYPE_CHECKING, Type,
+        TypeVar, Union
     )
 
-from .enums import ErrorBehavior, MeetingRecipientType, PropertiesType, RecipientType
+from .constants import MSG_PATH
+from .enums import ErrorBehavior, PropertiesType
 from .exceptions import StandardViolationError
 from .properties.prop import FixedLengthProp
 from .properties.properties_store import PropertiesStore
 from .structures.entry_id import PermanentEntryID
-from .utils import makeWeakRef, msgPathToString, verifyPropertyId, verifyType
+from .utils import msgPathToString, verifyPropertyId, verifyType
 
 
 if TYPE_CHECKING:
@@ -28,15 +32,16 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 _T = TypeVar('_T')
+_RT = TypeVar('_RT', bound = enum.IntEnum)
 
 
-class Recipient:
+class Recipient(Generic[_RT]):
     """
     Contains the data of one of the recipients in an MSG file.
     """
 
-    def __init__(self, _dir, msg : MSGFile):
-        self.__msg = makeWeakRef(msg) # Allows calls to original msg file.
+    def __init__(self, _dir : str, msg : MSGFile, recipientTypeClass : Type[_RT]):
+        self.__msg = weakref.ref(msg) # Allows calls to original msg file.
         self.__dir = _dir
         if not self.exists('__properties_version1.0'):
             if ErrorBehavior.STANDARDS_VIOLATION in msg.errorBehavior:
@@ -49,14 +54,10 @@ class Recipient:
             self.__email = self.getStringStream('__substg1.0_3003')
         self.__name = self.getStringStream('__substg1.0_3001')
         self.__typeFlags = self.__props.getValue('0C150003', 0)
-        from .msg_classes.calendar_base import CalendarBase
-        if isinstance(msg, CalendarBase):
-            self.__type = MeetingRecipientType(0xF & self.__typeFlags)
-        else:
-            self.__type = RecipientType(0xF & self.__typeFlags)
+        self.__type = recipientTypeClass(0xF & self.__typeFlags)
         self.__formatted = f'{self.__name} <{self.__email}>'
 
-    def _getStream(self, filename) -> Optional[bytes]:
+    def _getStream(self, filename : MSG_PATH) -> Optional[bytes]:
         """
         Gets a binary representation of the requested filename.
 
@@ -70,7 +71,7 @@ class Recipient:
         warnings.warn(':method _getStream: has been deprecated and moved to the public api. Use :method getStream: instead (remove the underscore).', DeprecationWarning)
         return self.getStream(filename)
 
-    def _getStringStream(self, filename) -> Optional[str]:
+    def _getStringStream(self, filename : MSG_PATH) -> Optional[str]:
         """
         Gets a string representation of the requested filename.
 
@@ -181,7 +182,7 @@ class Recipient:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg._getTypedStream(self, [self.__dir, msgPathToString(filename)], True, _type)
 
-    def exists(self, filename) -> bool:
+    def exists(self, filename : MSG_PATH) -> bool:
         """
         Checks if stream exists inside the recipient folder.
 
@@ -309,7 +310,7 @@ class Recipient:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.getSingleOrMultipleString([self.__dir, msgPathToString(filename)])
 
-    def getStream(self, filename) -> Optional[bytes]:
+    def getStream(self, filename : MSG_PATH) -> Optional[bytes]:
         """
         Gets a binary representation of the requested filename.
 
@@ -341,7 +342,7 @@ class Recipient:
 
         return value
 
-    def getStringStream(self, filename) -> Optional[str]:
+    def getStringStream(self, filename : MSG_PATH) -> Optional[str]:
         """
         Gets a string representation of the requested filename.
 
@@ -359,7 +360,7 @@ class Recipient:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.getStringStream([self.__dir, msgPathToString(filename)])
 
-    def getStringStreamAs(self, streamID, overrideClass : Callable[[Any], _T]) -> Optional[_T]:
+    def getStringStreamAs(self, streamID : MSG_PATH, overrideClass : Callable[[Any], _T]) -> Optional[_T]:
         """
         Returns the specified string stream, modifying it to the specified
         class if it is found.
@@ -455,7 +456,7 @@ class Recipient:
         return self.getStringStream('__substg1.0_3A20')
 
     @property
-    def type(self) -> Union[RecipientType, MeetingRecipientType]:
+    def type(self) -> _RT:
         """
         Returns the recipient type. Type is:
             * Sender if `type & 0xf == 0`

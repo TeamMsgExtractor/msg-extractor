@@ -33,7 +33,6 @@ __all__ = [
     'msgPathToString',
     'parseType',
     'prepareFilename',
-    'properHex',
     'roundUp',
     'rtfSanitizeHtml',
     'rtfSanitizePlain',
@@ -88,12 +87,13 @@ from .exceptions import (
 # Allow for nice type checking.
 if TYPE_CHECKING:
     from .msg_classes.msg import MSGFile
+    from .attachments import AttachmentBase
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 logging.addLevelName(5, 'DEVELOPER')
 
-_T = TypeVar("_T")
+_T = TypeVar('_T')
 
 
 def addNumToDir(dirName : pathlib.Path) -> Optional[pathlib.Path]:
@@ -218,7 +218,7 @@ def decodeRfc2047(encoded : str) -> str:
     )
 
 
-def dictGetCasedKey(_dict : Dict, key : Any) -> Any:
+def dictGetCasedKey(_dict : Dict[str, Any], key : str) -> str:
     """
     Retrieves the key from the dictionary with the proper casing using a
     caseless key.
@@ -320,7 +320,7 @@ def fromTimeStamp(stamp : int) -> datetime.datetime:
     """
     try:
         tz = tzlocal.get_localzone()
-    except Exception as e:
+    except Exception:
         # I know "generalized exception catching is bad" but if *any* exception
         # happens here that is a subclass of Exception then something has gone
         # wrong with tzlocal.
@@ -512,7 +512,7 @@ def getCommandArgs(args : Sequence[str]) -> argparse.Namespace:
 
     return options
 
-def hasLen(obj) -> bool:
+def hasLen(obj : Any) -> bool:
     """
     Checks if :param obj: has a __len__ attribute.
     """
@@ -536,7 +536,7 @@ def htmlSanitize(inp : str) -> str:
     return inp
 
 
-def inputToBytes(stringInputVar, encoding : str) -> bytes:
+def inputToBytes(stringInputVar : Optional[Union[str, bytes]], encoding : str) -> bytes:
     """
     Converts the input into bytes.
 
@@ -552,7 +552,7 @@ def inputToBytes(stringInputVar, encoding : str) -> bytes:
         raise ConversionError('Cannot convert to bytes.')
 
 
-def inputToMsgPath(inp) -> List[str]:
+def inputToMsgPath(inp : constants.MSG_PATH) -> List[str]:
     """
     Converts the input into an msg path.
 
@@ -578,7 +578,7 @@ def inputToMsgPath(inp) -> List[str]:
     return ret
 
 
-def inputToString(bytesInputVar, encoding) -> str:
+def inputToString(bytesInputVar : Optional[Union[str, bytes]], encoding : str) -> str:
     """
     Converts the input into a string.
 
@@ -608,10 +608,11 @@ def makeWeakRef(obj : Optional[_T]) -> Optional[weakref.ReferenceType[_T]]:
     Attempts to return a weak reference to the object, returning None if not
     possible.
     """
-    try:
-        return weakref.ref(obj)
-    except TypeError:
+    if obj is None:
         return None
+    else:
+        return weakref.ref(obj)
+
 
 def minutesToDurationStr(minutes : int) -> str:
     """
@@ -774,7 +775,7 @@ def parseType(_type : int, stream, encoding, extras):
     return value
 
 
-def prepareFilename(filename) -> str:
+def prepareFilename(filename : str) -> str:
     """
     Adjusts :param filename: so that it can succesfully be used as an actual
     file name.
@@ -926,7 +927,7 @@ def setupLogging(defaultPath = None, defaultLevel = logging.WARN, logfile = None
     return True
 
 
-def tryGetMimetype(att, mimetype : Union[str, None]) -> Union[str, None]:
+def tryGetMimetype(att : AttachmentBase, mimetype : Union[str, None]) -> Union[str, None]:
     """
     Uses an optional dependency to try and get the mimetype of an attachment. If
     the mimetype has already been found, the optional dependency does not exist,
@@ -946,7 +947,8 @@ def tryGetMimetype(att, mimetype : Union[str, None]) -> Union[str, None]:
         try:
             import magic
 
-            return magic.from_buffer(att.data, mime = True)
+            if isinstance(att.data, (str, bytes)):
+                return magic.from_buffer(att.data, mime = True)
         except ImportError:
             logger.info('Mimetype not found on attachment, and `mime` dependency not installed. Won\'t try to generate.')
 

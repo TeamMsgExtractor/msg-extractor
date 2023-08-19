@@ -24,6 +24,7 @@ from typing import (
     )
 
 from .. import constants
+from ..constants import DATE_FORMAT, DT_FORMAT, MSG_PATH, ps, SAVE_TYPE
 from ..attachments import (
         AttachmentBase, initStandardAttachment, SignedAttachment
     )
@@ -104,7 +105,7 @@ class MSGFile:
         """
         # Retrieve all the kwargs that we need.
         self.__inscFeat = kwargs.get('insecureFeatures', InsecureFeatures.NONE)
-        prefix = kwargs.get('prefix', '')
+        prefix = cast(str, kwargs.get('prefix', ''))
         self.__parentMsg = makeWeakRef(cast(MSGFile, kwargs.get('parentMsg')))
         self.__treePath = kwargs.get('treePath', []) + [makeWeakRef(self)]
         # Verify it is a valid class.
@@ -119,8 +120,8 @@ class MSGFile:
         self.__attachmentsDelayed = kwargs.get('delayAttachments', False)
         self.__attachmentsReady = False
         self.__errorBehavior = ErrorBehavior(kwargs.get('errorBehavior', ErrorBehavior.THROW))
-        self.__dateFormat = kwargs.get('dateFormat', constants.DATE_FORMAT)
-        self.__dtFormat = kwargs.get('datetimeFormat', constants.DT_FORMAT)
+        self.__dateFormat = kwargs.get('dateFormat', DATE_FORMAT)
+        self.__dtFormat = kwargs.get('datetimeFormat', DT_FORMAT)
 
         if overrideEncoding is not None:
             codecs.lookup(overrideEncoding)
@@ -214,7 +215,7 @@ class MSGFile:
     def __exit__(self, *_) -> None:
         self.close()
 
-    def _getOleEntry(self, filename, prefix : bool = True) -> olefile.olefile.OleDirectoryEntry:
+    def _getOleEntry(self, filename : MSG_PATH, prefix : bool = True) -> olefile.olefile.OleDirectoryEntry:
         """
         Finds the directory entry from the olefile for the stream or storage
         specified. Use '/' to get the root entry.
@@ -230,7 +231,7 @@ class MSGFile:
 
         return self.__ole.direntries[sid]
 
-    def _getStream(self, filename, prefix : bool = True) -> Optional[bytes]:
+    def _getStream(self, filename : MSG_PATH, prefix : bool = True) -> Optional[bytes]:
         """
         Gets a binary representation of the requested filename.
 
@@ -241,7 +242,7 @@ class MSGFile:
         warnings.warn(':method _getStream: has been deprecated and moved to the public api. Use :method getStream: instead (remove the underscore).', DeprecationWarning)
         return self.getStream(filename, prefix)
 
-    def _getStringStream(self, filename, prefix : bool = True) -> Optional[str]:
+    def _getStringStream(self, filename : MSG_PATH, prefix : bool = True) -> Optional[str]:
         """
         Gets a string representation of the requested filename.
 
@@ -317,7 +318,7 @@ class MSGFile:
 
         return True, ret
 
-    def _getTypedStream(self, filename, prefix : bool = True, _type = None) -> Tuple[bool, Optional[Any]]:
+    def _getTypedStream(self, filename : MSG_PATH, prefix : bool = True, _type = None) -> Tuple[bool, Optional[Any]]:
         """
         Gets the contents of the specified stream as the type that it is
         supposed to be.
@@ -353,7 +354,7 @@ class MSGFile:
                     elif _type in ('1002', '1003', '1004', '1005', '1007', '1014', '1040', '1048'):
                         try:
                             streams = self.props[x[-8:]].realLength
-                        except Exception:
+                        except (KeyError, AttributeError):
                             logger.error(f'Could not find matching VariableLengthProp for stream {x}')
                             streams = len(contents) // (2 if _type in constants.MULTIPLE_2_BYTES else 4 if _type in constants.MULTIPLE_4_BYTES else 8 if _type in constants.MULTIPLE_8_BYTES else 16)
                     else:
@@ -398,21 +399,21 @@ class MSGFile:
                 print('Directory: ' + str(dir_[:-1]))
                 print(f'Contents: {self.getStream(dir_)}')
 
-    def exists(self, inp, prefix : bool = True) -> bool:
+    def exists(self, inp : MSG_PATH, prefix : bool = True) -> bool:
         """
         Checks if :param inp: exists in the msg file.
         """
         inp = self.fixPath(inp, prefix)
         return self.__ole.exists(inp)
 
-    def sExists(self, inp, prefix : bool = True) -> bool:
+    def sExists(self, inp : MSG_PATH, prefix : bool = True) -> bool:
         """
         Checks if string stream :param inp: exists in the msg file.
         """
         inp = self.fixPath(inp, prefix)
         return self.exists(inp + '001F') or self.exists(inp + '001E')
 
-    def existsTypedProperty(self, _id, location = None, _type = None, prefix = True, propertiesInstance = None):
+    def existsTypedProperty(self, _id, location = None, _type = None, prefix : bool = True, propertiesInstance : Optional[PropertiesStore] = None) -> Tuple[bool, int]:
         """
         Determines if the stream with the provided id exists in the location
         specified. If no location is specified, the root directory is searched.
@@ -475,7 +476,7 @@ class MSGFile:
         self.export(out)
         return out.getvalue()
 
-    def fixPath(self, inp, prefix : bool = True) -> str:
+    def fixPath(self, inp : MSG_PATH, prefix : bool = True) -> str:
         """
         Changes paths so that they have the proper prefix (should :param prefix:
         be True) and are strings rather than lists or tuples.
@@ -485,7 +486,7 @@ class MSGFile:
             inp = self.__prefix + inp
         return inp
 
-    def getMultipleBinary(self, filename, prefix : bool = True) -> Optional[List[bytes]]:
+    def getMultipleBinary(self, filename : MSG_PATH, prefix : bool = True) -> Optional[List[bytes]]:
         """
         Gets a multiple binary property as a list of bytes objects.
 
@@ -513,7 +514,7 @@ class MSGFile:
                 return ret[:index]
             return ret
 
-    def getMultipleString(self, filename, prefix : bool = True) -> Optional[List[str]]:
+    def getMultipleString(self, filename : MSG_PATH, prefix : bool = True) -> Optional[List[str]]:
         """
         Gets a multiple string property as a list of str objects.
 
@@ -567,7 +568,7 @@ class MSGFile:
         """
         return self.namedProperties.get((propertyName, guid), default)
 
-    def getPropertyAs(self, propertyName, overrideClass : Callable[[Any], _T]) -> Optional[_T]:
+    def getPropertyAs(self, propertyName : Union[int, str], overrideClass : Callable[[Any], _T]) -> Optional[_T]:
         """
         Returns the property, setting the class if found.
 
@@ -584,7 +585,7 @@ class MSGFile:
 
         return value
 
-    def getPropertyVal(self, name, default : _T = None) -> Union[Any, _T]:
+    def getPropertyVal(self, name : Union[int, str], default : _T = None) -> Union[Any, _T]:
         """
         instance.props.getValue(name, default)
 
@@ -592,7 +593,7 @@ class MSGFile:
         """
         return self.props.getValue(name, default)
 
-    def getSingleOrMultipleBinary(self, filename, prefix : bool = True) -> Optional[Union[List[bytes], bytes]]:
+    def getSingleOrMultipleBinary(self, filename : MSG_PATH, prefix : bool = True) -> Optional[Union[List[bytes], bytes]]:
         """
         A combination of :method getStringStream: and
         :method getMultipleString:.
@@ -612,7 +613,7 @@ class MSGFile:
         # work.
         return self.getMultipleBinary(filename, False)
 
-    def getSingleOrMultipleString(self, filename, prefix : bool = True) -> Optional[Union[List[str], str]]:
+    def getSingleOrMultipleString(self, filename : MSG_PATH, prefix : bool = True) -> Optional[Union[List[str], str]]:
         """
         A combination of :method getStringStream: and
         :method getMultipleString:.
@@ -632,7 +633,7 @@ class MSGFile:
         # work.
         return self.getMultipleString(filename, False)
 
-    def getStream(self, filename, prefix : bool = True) -> Optional[bytes]:
+    def getStream(self, filename : MSG_PATH, prefix : bool = True) -> Optional[bytes]:
         """
         Gets a binary representation of the requested filename.
 
@@ -668,7 +669,7 @@ class MSGFile:
 
         return value
 
-    def getStringStream(self, filename, prefix : bool = True) -> Optional[str]:
+    def getStringStream(self, filename : MSG_PATH, prefix : bool = True) -> Optional[str]:
         """
         Gets a string representation of the requested filename.
 
@@ -741,7 +742,7 @@ class MSGFile:
         """
         return [msgPathToString(x) for x in self.listDir(streams, storages, includePrefix)]
 
-    def save(self, **kwargs) -> constants.SAVE_TYPE:
+    def save(self, **kwargs) -> SAVE_TYPE:
         if kwargs.get('skipNotImplemented', False):
             return (SaveType.NONE, None)
 
@@ -837,7 +838,7 @@ class MSGFile:
         Indicates whether the contents of this message are regarded as
         classified information.
         """
-        return bool(self.getNamedProp('85B5', constants.ps.PSETID_COMMON))
+        return bool(self.getNamedProp('85B5', ps.PSETID_COMMON))
 
     @functools.cached_property
     def classType(self) -> Optional[str]:
@@ -851,14 +852,14 @@ class MSGFile:
         """
         The end time for the object.
         """
-        return self.getNamedProp('8517', constants.ps.PSETID_COMMON)
+        return self.getNamedProp('8517', ps.PSETID_COMMON)
 
     @functools.cached_property
     def commonStart(self) -> Optional[datetime.datetime]:
         """
         The start time for the object.
         """
-        return self.getNamedProp('8516', constants.ps.PSETID_COMMON)
+        return self.getNamedProp('8516', ps.PSETID_COMMON)
 
     @functools.cached_property
     def contactLinkEntry(self) -> Optional[ContactLinkEntry]:
@@ -866,7 +867,7 @@ class MSGFile:
         Returns a class that contains the list of Address Book EntryIDs linked
         to this Message object.
         """
-        return self.getNamedAs('8585', constants.ps.PSETID_COMMON, ContactLinkEntry)
+        return self.getNamedAs('8585', ps.PSETID_COMMON, ContactLinkEntry)
 
     @functools.cached_property
     def contacts(self) -> Optional[List[str]]:
@@ -874,7 +875,7 @@ class MSGFile:
         Contains the display name property of each Address Book EntryID
         referenced in the value of the contactLinkEntry property.
         """
-        return self.getNamedProp('853A', constants.ps.PSETID_COMMON)
+        return self.getNamedProp('853A', ps.PSETID_COMMON)
 
     @functools.cached_property
     def currentVersion(self) -> Optional[int]:
@@ -882,14 +883,14 @@ class MSGFile:
         Specifies the build number of the client application that sent the
         message.
         """
-        return self.getNamedProp('8552', constants.ps.PSETID_COMMON)
+        return self.getNamedProp('8552', ps.PSETID_COMMON)
 
     @functools.cached_property
     def currentVersionName(self) -> Optional[str]:
         """
         Specifies the name of the client application that sent the message.
         """
-        return self.getNamedProp('8554', constants.ps.PSETID_COMMON)
+        return self.getNamedProp('8554', ps.PSETID_COMMON)
 
     @property
     def dateFormat(self) -> str:
@@ -1003,7 +1004,7 @@ class MSGFile:
         return self.__path
 
     @property
-    def prefix(self):
+    def prefix(self) -> str:
         """
         Returns the prefix of the Message instance. Intended for developer use.
         """
@@ -1075,10 +1076,10 @@ class MSGFile:
         Controls how a Message object is handled by the client in relation to
         certain user interface actions by the user, such as deleting a message.
         """
-        return self.getNamedAs('8510', constants.ps.PSETID_COMMON, SideEffect)
+        return self.getNamedAs('8510', ps.PSETID_COMMON, SideEffect)
 
     @property
-    def stringEncoding(self):
+    def stringEncoding(self) -> str:
         try:
             return self.__stringEncoding
         except AttributeError:

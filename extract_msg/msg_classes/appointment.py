@@ -184,7 +184,7 @@ class AppointmentMeeting(Calendar):
         Attempts to determine if the object is a Meeting. True if meeting, False
         if appointment.
         """
-        return self.appointmentStateFlags and AppointmentStateFlag.MEETING in self.appointmentStateFlags
+        return bool(self.appointmentStateFlags) and (AppointmentStateFlag.MEETING in self.appointmentStateFlags)
 
     @functools.cached_property
     def originalStoreEntryID(self) -> Optional[EntryID]:

@@ -33,10 +33,11 @@ __all__ = [
 from typing import List, Type, TYPE_CHECKING
 
 from .custom_handler import CustomAttachmentHandler
+from ...exceptions import FeatureNotImplemented
 
 
 # Create a way to register handlers.
-_knownHandlers : List[CustomAttachmentHandler] = []
+_knownHandlers : List[Type[CustomAttachmentHandler]] = []
 
 def registerHandler(handler : Type[CustomAttachmentHandler]) -> None:
     """
@@ -48,10 +49,9 @@ def registerHandler(handler : Type[CustomAttachmentHandler]) -> None:
     # Make sure it is a subclass of CustomAttachmentHandler.
     if not isinstance(handler, type):
         raise ValueError(':param handler: must be a class, not an instance of a class.')
-    if not issubclass(handler, CustomAttachmentHandler):
+    if not issubclass(handler, CustomAttachmentHandler): # pyright: ignore
         raise ValueError(':param handler: must be a subclass of CustomAttachmentHandler.')
     _knownHandlers.append(handler)
-
 
 
 # Import built-in handler modules. They will all automatically register their
@@ -78,4 +78,4 @@ def getHandler(attachment : AttachmentBase) -> CustomAttachmentHandler:
         if handler.isCorrectHandler(attachment):
             return handler(attachment)
 
-    raise NotImplementedError('No valid handler could be found for the attachment. Contact the developers for help.')
+    raise FeatureNotImplemented(f'No valid handler could be found for the attachment. Contact the developers for help. If the CLSID is not all zeros, include it in the title or message. (CLSID: {attachment.clsid})')

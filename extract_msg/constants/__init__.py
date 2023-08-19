@@ -22,6 +22,7 @@ __all__ = [
     'KNOWN_CLASS_TYPES',
     'KNOWN_FILE_FLAGS',
     'MAINDOC',
+    'MSG_PATH',
     'MULTIPLE_16_BYTES',
     'MULTIPLE_16_BYTES_HEX',
     'MULTIPLE_2_BYTES',
@@ -44,7 +45,7 @@ __all__ = [
 
 import datetime
 
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 from . import ps, re, st
 from ..enums import SaveType
@@ -58,8 +59,9 @@ DT_FORMAT = '%a, %d %b %Y %H:%M:%S %z'
 # Typing Constants.
 HEADER_FORMAT_VALUE_TYPE = Union[str, Tuple[Union[str, None], bool], None]
 # Basically a dict of HEADER_FORMAT_TYPE and dicts containing them.
-HEADER_FORMAT_TYPE = Dict[str, Union[HEADER_FORMAT_VALUE_TYPE, Dict[str, HEADER_FORMAT_VALUE_TYPE]]]
+HEADER_FORMAT_TYPE = Optional[Dict[str, Union[HEADER_FORMAT_VALUE_TYPE, Dict[str, HEADER_FORMAT_VALUE_TYPE]]]]
 SAVE_TYPE = Tuple[SaveType, Union[List[str], str, None]]
+MSG_PATH = Union[str, List[str], Tuple[str]]
 
 
 

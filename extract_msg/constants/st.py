@@ -3,7 +3,7 @@ Struct constants.
 """
 
 __all__ = [
-    'ST1'
+    'ST1',
     'ST2',
     'ST3',
     'STF32',

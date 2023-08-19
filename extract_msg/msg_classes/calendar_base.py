@@ -4,10 +4,11 @@ __all__ = [
 
 
 import datetime
+import enum
 import functools
 import logging
 
-from typing import List, Optional, Union
+from typing import List, Optional, Type, Union
 
 from ..constants import ps
 from ..enums import AppointmentAuxilaryFlag, AppointmentColor, AppointmentStateFlag, BusyStatus, IconIndex, MeetingRecipientType, ResponseStatus
@@ -395,6 +396,10 @@ class CalendarBase(MessageBase):
         organizer, in UTC.
         """
         return self.getNamedProp('001A', ps.PSETID_MEETING)
+
+    @property
+    def recipientTypeClass(self) -> Type[enum.IntEnum]:
+        return MeetingRecipientType
 
     @functools.cached_property
     def recurrencePattern(self) -> Optional[str]:

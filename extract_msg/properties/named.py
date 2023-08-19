@@ -14,6 +14,7 @@ import abc
 import copy
 import logging
 import pprint
+import weakref
 
 from typing import (
         Any, Dict, Iterable, Iterator, List, Optional, Tuple, TYPE_CHECKING,
@@ -22,7 +23,7 @@ from typing import (
 
 from .. import constants
 from ..enums import NamedPropertyType
-from ..utils import bytesToGuid, divide, makeWeakRef, msgPathToString
+from ..utils import bytesToGuid, divide, msgPathToString
 from compressed_rtf.crc32 import crc32
 
 
@@ -45,7 +46,7 @@ class Named:
     __dir = '__nameid_version1.0'
 
     def __init__(self, msg : MSGFile):
-        self.__msg = makeWeakRef(msg)
+        self.__msg = weakref.ref(msg)
         # Get the basic streams. If all are emtpy, then nothing to do.
         guidStream = self.getStream('__substg1.0_00020102')
         entryStream = self.getStream('__substg1.0_00030102')
@@ -129,7 +130,7 @@ class Named:
 
         return self.namesStream[offset:offset + length].decode('utf-16-le')
 
-    def _getStream(self, filename) -> Optional[bytes]:
+    def _getStream(self, filename : constants.MSG_PATH) -> Optional[bytes]:
         """
         Gets a binary representation of the requested filename.
 
@@ -143,7 +144,7 @@ class Named:
         warnings.warn(':method _getStream: has been deprecated and moved to the public api. Use :method getStream: instead (remove the underscore).', DeprecationWarning)
         return self.getStream(filename)
 
-    def exists(self, filename) -> bool:
+    def exists(self, filename : constants.MSG_PATH) -> bool:
         """
         Checks if stream exists inside the named properties folder.
 
@@ -164,7 +165,7 @@ class Named:
         except KeyError:
             return default
 
-    def getStream(self, filename) -> Optional[bytes]:
+    def getStream(self, filename : constants.MSG_PATH) -> Optional[bytes]:
         """
         Gets a binary representation of the requested filename.
 

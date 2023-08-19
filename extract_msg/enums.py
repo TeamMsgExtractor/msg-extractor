@@ -79,7 +79,7 @@ __all__ = [
 
 import enum
 
-from typing import Dict, Iterable, List, Set, Union
+from typing import Dict, Iterable, List, Set, Type, Union
 
 
 class AddressBookType(enum.IntEnum):
@@ -1450,7 +1450,7 @@ class RecurDOW(enum.IntEnum):
 
 class RecurEndType(enum.IntEnum):
     @classmethod
-    def fromInt(cls, value) -> RecurEndType:
+    def fromInt(cls, value : int) -> RecurEndType:
         """
         Some enum values CAN be created from more than one int, so handle that.
         """
@@ -1527,7 +1527,7 @@ class ResponseStatus(enum.IntEnum):
         """
         Uses the iterable of ints to create a list of this enum.
         """
-        return {cls(x) for x in items}
+        return [cls(x) for x in items]
 
     NONE = 0x00000000
     ORGANIZED = 0x00000001
@@ -1828,7 +1828,7 @@ class _EnumDeprecator:
     Special class for handling deprecated enums in a way that shouldn't break
     existing code, including code for checking `is` on a member of the enum.
     """
-    def __init__(self, oldClassName : str, newClass : enum.Enum, nameConversion : Dict = {}, valueConversion : Dict = {}):
+    def __init__(self, oldClassName : str, newClass : Type[enum.Enum], nameConversion : Dict[str, Any] = {}, valueConversion : Dict = {}):
         """
         :param oldClassName: The name to use in the deprecation message.
         :param newClass: The new enum class to look for the value in.
