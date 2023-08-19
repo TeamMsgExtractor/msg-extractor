@@ -247,7 +247,7 @@ class AttachmentBase(abc.ABC):
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
         return msg.sExists([self.__dir, filename])
 
-    def existsTypedProperty(self, id : Union[int, str], _type = None) -> bool:
+    def existsTypedProperty(self, id, _type = None) -> bool:
         """
         Determines if the stream with the provided id exists. The return of this
         function is 2 values, the first being a boolean for if anything was

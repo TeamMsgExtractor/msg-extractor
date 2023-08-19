@@ -28,9 +28,9 @@ class FolderID:
 
     def __init__(self, data : bytes):
         self.__rawData = data
-        self.__replicaID = constants.st.STUI16.unpack(data[:2])
+        self.__replicaID = constants.st.ST_DATA_UI16.unpack(data[:2])[0]
         # This entry is 6 bytes, so we pull some shenanigans to unpack it.
-        self.__globalCounter = constants.st.STUI64.unpack(data[2:8] + b'\x00\x00')
+        self.__globalCounter = constants.st.ST_LE_UI64.unpack(data[2:8] + b'\x00\x00')[0]
 
     @property
     def globalCounter(self) -> int:
@@ -141,9 +141,9 @@ class MessageID:
 
     def __init__(self, data : bytes):
         self.__rawData = data
-        self.__replicaID = constants.st.STUI16.unpack(data[:2])
+        self.__replicaID = constants.st.ST_LE_UI16.unpack(data[:2])[0]
         # This entry is 6 bytes, so we pull some shenanigans to unpack it.
-        self.__globalCounter = constants.st.STUI64.unpack(data[2:8] + b'\x00\x00')
+        self.__globalCounter = constants.st.ST_LE_UI64.unpack(data[2:8] + b'\x00\x00')[0]
 
     @property
     def globalCounter(self) -> int:
@@ -192,7 +192,7 @@ class ServerID:
         self.__rawData = data
         self.__folderID = FolderID(data[1:9])
         self.__messageID = MessageID(data[9:17])
-        self.__instance = constants.st.STUI32.unpack(data[17:21])
+        self.__instance = constants.st.STUI32.unpack(data[17:21])[0]
 
     @property
     def folderID(self) -> FolderID:

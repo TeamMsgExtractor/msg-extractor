@@ -10,7 +10,6 @@ from typing import Optional
 
 from .. import constants
 from .message_base import MessageBase
-from ..utils import inputToString
 
 
 class Post(MessageBase):

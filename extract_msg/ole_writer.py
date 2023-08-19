@@ -13,6 +13,7 @@ import re
 from typing import Dict, Iterator, List, Optional, Tuple, TYPE_CHECKING
 
 from . import constants
+from .constants import MSG_PATH
 from .enums import Color, DirectoryEntryType
 from .utils import ceilDiv, dictGetCasedKey, inputToMsgPath
 from olefile.olefile import OleDirectoryEntry, OleFileIO
@@ -30,9 +31,9 @@ class DirectoryEntry:
     Originals should be inaccessible outside of the class.
     """
     name : str = ''
-    rightChild : DirectoryEntry = None
-    leftChild : DirectoryEntry = None
-    childTreeRoot : DirectoryEntry = None
+    rightChild : Optional[DirectoryEntry] = None
+    leftChild : Optional[DirectoryEntry] = None
+    childTreeRoot : Optional[DirectoryEntry] = None
     stateBits : int = 0
     creationTime : int = 0
     modifiedTime : int = 0
@@ -100,7 +101,7 @@ class OleWriter:
         # The root entry will always exist, so this must be at least 1.
         self.__dirEntryCount = 1
         self.__dirEntries = {}
-        self.__largeEntries = []
+        self.__largeEntries : List[DirectoryEntry] = []
         self.__largeEntrySectors = 0
         self.__numMinifatSectors = 0
 
@@ -241,7 +242,6 @@ class OleWriter:
         self.__largeEntries.clear()
         self.__largeEntrySectors = 0
 
-        count = 0
         for entry in self.__walkEntries():
             self.__dirEntryCount += 1
             if entry.type == DirectoryEntryType.STREAM:
@@ -596,7 +596,7 @@ class OleWriter:
         if self.__numMinifatSectors & 7:
             f.write((b'\x00' * 64) * (8 - (self.__numMinifatSectors & 7)))
 
-    def addEntry(self, path, data : bytes = None, storage : bool = False, **kwargs) -> None:
+    def addEntry(self, path : MSG_PATH, data : Optional[bytes] = None, storage : bool = False, **kwargs) -> None:
         """
         Adds an entry to the OleWriter instance at the path specified, adding
         storages with default settings where necessary. If the entry is not a
@@ -637,7 +637,7 @@ class OleWriter:
         else:
             _dir[path[-1]] = entry
 
-    def addOleEntry(self, path, entry : OleDirectoryEntry, data : Optional[bytes] = None) -> None:
+    def addOleEntry(self, path : MSG_PATH, entry : OleDirectoryEntry, data : Optional[bytes] = None) -> None:
         """
         Uses the entry provided to add the data to the writer.
 
@@ -699,7 +699,7 @@ class OleWriter:
         # path does remember the case used.
         del _dir[dictGetCasedKey(_dir, path[-1])]
 
-    def editEntry(self, path, **kwargs) -> None:
+    def editEntry(self, path : MSG_PATH, **kwargs) -> None:
         """
         Used to edit values of an entry by setting the specific kwargs. Set a
         value to something other than None to set it.
@@ -769,7 +769,7 @@ class OleWriter:
             for x in gen:
                 self.addOleEntry(x, msg._getOleEntry(x, prefix = False), msg.getStream(x, prefix = False))
 
-    def fromOleFile(self, ole : OleFileIO, rootPath = []) -> None:
+    def fromOleFile(self, ole : OleFileIO, rootPath : MSG_PATH = []) -> None:
         """
         Copies all the streams from the proided OLE file into this writer.
 
@@ -826,7 +826,7 @@ class OleWriter:
 
             self.addOleEntry(x, entry, data)
 
-    def getEntry(self, path) -> DirectoryEntry:
+    def getEntry(self, path : MSG_PATH) -> DirectoryEntry:
         """
         Finds and returns a copy of an existing DirectoryEntry instance in the
         writer. Use this method to check the internal status of an entry.
@@ -836,7 +836,7 @@ class OleWriter:
         """
         return copy.copy(self.__getEntry(inputToMsgPath(path)))
 
-    def listItems(self, streams = True, storages = False) -> List[List[str]]:
+    def listItems(self, streams : bool = True, storages : bool = False) -> List[List[str]]:
         """
         Returns a list of the specified items currently in the writter.
 
@@ -866,7 +866,7 @@ class OleWriter:
         paths.sort()
         return paths
 
-    def renameEntry(self, path, newName : str) -> None:
+    def renameEntry(self, path : MSG_PATH, newName : str) -> None:
         """
         Changes the name of an entry, leaving it in it's current position.
 

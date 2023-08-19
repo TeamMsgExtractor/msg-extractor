@@ -4,7 +4,7 @@ __all__ = [
 ]
 
 
-from typing import Tuple
+from typing import Optional, Tuple
 
 from ._helpers import BytesReader
 from .. import constants
@@ -37,7 +37,7 @@ class BusinessCardDisplayDefinition:
                                   bitwiseAdjustedAnd(unpacked[8], 0xFF0000))
         self.__imageArea = unpacked[9]
         self.__extraInfoField = data[17 + 16 * self.__countOfFields:]
-        self.__fields = tuple(FieldInfo(reader.read(16), self.__extraInfoField) for x in range(self.__countOfFields))
+        self.__fields = tuple(FieldInfo(reader.read(16), self.__extraInfoField) for _ in range(self.__countOfFields))
 
     @property
     def backgroundColor(self) -> Tuple[int, int, int]:
@@ -150,7 +150,7 @@ class FieldInfo:
                             bitwiseAdjustedAnd(unpacked[5], 0xFF00),
                             bitwiseAdjustedAnd(unpacked[5], 0xFF0000))
 
-        self.__valueFontColor = (bitwiseAdjustedAnd(unpacked[6], 0xFF),
+        self.__labelFontColor = (bitwiseAdjustedAnd(unpacked[6], 0xFF),
                             bitwiseAdjustedAnd(unpacked[6], 0xFF00),
                             bitwiseAdjustedAnd(unpacked[6], 0xFF0000))
 
@@ -182,12 +182,12 @@ class FieldInfo:
         """
         An integer that specified the byte offset into the ExtraInfo field of
         BusinessCardDisplayDefinition. If the text field does not have a label,
-        must be 0xFFFE
+        must be 0xFFFE.
         """
         return self.__labelOffset
 
     @property
-    def labelText(self) -> str:
+    def labelText(self) -> Optional[str]:
         """
         The text of the label, if it exists.
         """

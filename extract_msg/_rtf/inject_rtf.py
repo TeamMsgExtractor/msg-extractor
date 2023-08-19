@@ -7,8 +7,10 @@ __all__ = [
 from .token import Token, TokenType
 from .tokenize_rtf import tokenizeRTF
 
-from typing import List, Iterable, Union
+from typing import List, Iterable, TypeVar, Union
 
+
+_T = TypeVar('_T')
 
 # A tuple of destinations used in the header. All ignorable ones are skipped
 # anyways, so we don't need to list those here.
@@ -45,7 +47,7 @@ _HEADER_SKIPPABLE = (
 )
 
 
-def _listInsertMult(dest : List, source : Iterable, index : int = -1):
+def _listInsertMult(dest : List[_T], source : Iterable[_T], index : int = -1):
     """
     Inserts into :param dest: all the items in :param source: at the index
     specified. :param dest: can be any mutable sequence with :method insert:,

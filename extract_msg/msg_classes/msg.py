@@ -129,13 +129,16 @@ class MSGFile:
             self.__stringEncoding = overrideEncoding
         self.__overrideEncoding = overrideEncoding
 
-        self.__listDirRes = {}
+        self.__listDirRes : Dict[Tuple[bool, bool, bool], List[List[str]]] = {}
 
         if self.__parentMsg:
             # We should be able to directly access the private variables of
             # another instance with no issue.
-            self.__ole = self.__parentMsg().__ole
-            self.__oleOwner = False
+            if (msg := self.__parentMsg()) is not None:
+                self.__ole = msg.__ole
+                self.__oleOwner = False
+            else:
+                raise ReferenceError('Parent MSG was garbage collected during init of child msg.')
         else:
             # Verify the path at least evaluates to True, as not doing so can
             # allow an OleFile to be created without a path.
@@ -651,7 +654,7 @@ class MSGFile:
             logger.info(f'Stream "{filename}" was requested but could not be found. Returning `None`.')
             return None
 
-    def getStreamAs(self, streamID, overrideClass : Callable[[Any], _T]) -> Optional[_T]:
+    def getStreamAs(self, streamID : MSG_PATH, overrideClass : Callable[[Any], _T]) -> Optional[_T]:
         """
         Returns the specified stream, modifying it to the specified class if it
         is found.
@@ -690,7 +693,7 @@ class MSGFile:
             tmp = self.getStream(filename + '001E', prefix = False)
             return None if tmp is None else tmp.decode(self.stringEncoding)
 
-    def getStringStreamAs(self, streamID, overrideClass : Callable[[Any], _T]) -> Optional[_T]:
+    def getStringStreamAs(self, streamID : MSG_PATH, overrideClass : Callable[[Any], _T]) -> Optional[_T]:
         """
         Returns the specified string stream, modifying it to the specified
         class if it is found.
@@ -953,7 +956,7 @@ class MSGFile:
         return self.__inscFeat
 
     @property
-    def kwargs(self) -> Dict[str, object]:
+    def kwargs(self) -> Dict[str, Any]:
         """
         The kwargs used to initialize this message, excluding the prefix. This
         is used for initializing embedded msg files.

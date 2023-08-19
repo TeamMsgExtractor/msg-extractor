@@ -17,7 +17,6 @@ __all__ = [
     'IncompatibleOptionsError',
     'InvalidFileFormatError',
     'InvaildPropertyIdError',
-    'InvalidVersionError',
     'StandardViolationError',
     'TZError',
     'UnknownCodepageError',

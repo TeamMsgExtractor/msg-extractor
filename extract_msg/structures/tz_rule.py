@@ -3,9 +3,6 @@ __all__ = [
 ]
 
 
-from typing import Set
-
-from .. import constants
 from ..enums import TZFlag
 from ._helpers import BytesReader
 from .system_time import SystemTime
@@ -59,7 +56,7 @@ class TZRule:
         return self.__daylightDate
 
     @property
-    def flags(self) -> Set[TZFlag]:
+    def flags(self) -> TZFlag:
         """
         The flags for this rule.
         """

@@ -79,7 +79,7 @@ class TaskRequest(MessageBase):
         return cast(Task, task[1])
 
     @functools.cached_property
-    def taskRequestType(self) -> TaskRequestType:
+    def taskRequestType(self) -> Optional[TaskRequestType]:
         """
         The type of task request.
         """

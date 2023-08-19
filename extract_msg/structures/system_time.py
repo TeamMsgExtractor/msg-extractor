@@ -11,20 +11,20 @@ class SystemTime:
     A SYSTEMTIME struct, as defined in [MS-DTYP].
     """
 
-    year : int = None
-    month : int = None
-    dayOfWeek : int = None
-    day : int = None
-    hour : int = None
-    minute : int = None
-    second : int = None
-    milliseconds : int = None
+    year : int = 0
+    month : int = 0
+    dayOfWeek : int = 0
+    day : int = 0
+    hour : int = 0
+    minute : int = 0
+    second : int = 0
+    milliseconds : int = 0
 
     def __init__(self, data : bytes):
         self.unpack(data)
 
     def __eq__(self, other) -> bool:
-        return self.pack() == other.pack()
+        return isinstance(other, SystemTime) and self.pack() == other.pack()
 
     def __ne__(self, other) -> bool:
         return not self.__eq__(other)

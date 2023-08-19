@@ -512,7 +512,7 @@ def getCommandArgs(args : Sequence[str]) -> argparse.Namespace:
 
     return options
 
-def hasLen(obj : Any) -> bool:
+def hasLen(obj) -> bool:
     """
     Checks if :param obj: has a __len__ attribute.
     """

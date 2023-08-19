@@ -1253,7 +1253,7 @@ class MessageBase(MSGFile):
                     dir_[prefixLen] not in recipientDirs:
                 recipientDirs.append(dir_[prefixLen])
 
-        return [Recipient(recipientDir, self) for recipientDir in recipientDirs]
+        return [Recipient(recipientDir, self, self.recipientTypeClass) for recipientDir in recipientDirs]
 
     @property
     def recipientTypeClass() -> Type[enum.IntEnum]:
