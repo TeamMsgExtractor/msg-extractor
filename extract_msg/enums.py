@@ -16,6 +16,7 @@ __all__ = [
     'BodyTypes',
     'BusyStatus',
     'ClientIntentFlag',
+    'ClipboardFormat',
     'Color',
     'ContactAddressIndex',
     'ContactLinkState',
@@ -79,7 +80,7 @@ __all__ = [
 
 import enum
 
-from typing import Dict, Iterable, List, Set, Type, Union
+from typing import Any, Dict, Iterable, List, Set, Type, Union
 
 
 class AddressBookType(enum.IntEnum):
@@ -386,6 +387,17 @@ class ClientIntentFlag(enum.IntFlag):
     RESPONDED_EXCEPTION_DECLINE = 0b10000000000
     CANCELED = 0b100000000000
     EXCEPTION_CANCELED = 0b1000000000000
+
+
+
+class ClipboardFormat(enum.IntEnum):
+    """
+    The standard clipboard formats, as specified in [MS-OLEDS].
+    """
+    CF_BITMAP = 0x00000002
+    CF_METAFILEPICT = 0x00000003
+    CF_DIB = 0x00000008
+    CF_ENHMETAFILE = 0x0000000E
 
 
 
