@@ -38,6 +38,7 @@ __all__ = [
     'exceptions',
     'msg_classes',
     'properties',
+    'structures',
 
     # Classes:
     'Attachment',
@@ -60,7 +61,7 @@ __all__ = [
 # Ensure these are imported before anything else.
 from . import constants, enums, exceptions
 
-from . import attachments, msg_classes, properties
+from . import attachments, msg_classes, properties, structures
 from .attachments import Attachment, AttachmentBase, SignedAttachment
 from .msg_classes import Message, MSGFile
 from .ole_writer import OleWriter
