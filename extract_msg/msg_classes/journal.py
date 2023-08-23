@@ -32,7 +32,7 @@ class Journal(MessageBase):
             'body': self.body,
             # There is a good chance the body property won't exist, so this is a
             # backup.
-            'rtfBodyB64': base64.b64encode(self.rtfBody) if self.rtfBody else None,
+            'rtfBodyB64': base64.b64encode(self.rtfBody).decode('ascii') if self.rtfBody else None,
         })
 
     @functools.cached_property
