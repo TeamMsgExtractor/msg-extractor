@@ -1,15 +1,17 @@
+from __future__ import annotations
+
+
 __all__ = [
     'ClipboardFormatOrAnsiString',
     'OLEPresentationStream',
 ]
 
 
-
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 from .. import constants
 from ._helpers import BytesReader
-from ..enums import ClipboardFormat, DVAspect
+from ..enums import ADVF, ClipboardFormat, DVAspect
 
 
 class ClipboardFormatOrAnsiString:
@@ -103,7 +105,7 @@ class ClipboardFormatOrAnsiString:
 
 
 class DVTargetDevice:
-    pass
+    pass # TODO
 
 
 
@@ -114,6 +116,15 @@ class OLEPresentationStream:
     ansiClipboardFormat : ClipboardFormatOrAnsiString
     targetDeviceSize : int
     targetDevice : Optional[DVTargetDevice]
+    aspect : Union[int, DVAspect]
+    lindex : int
+    advf : Union[int, ADVF]
+    width : int
+    height : int
+    data : int
+    reserved2 : Optional[bytes]
+    tocSignature : int
+    tocEntries : List[TOCEntry]
 
     def __init__(self, data : bytes):
         reader = BytesReader(data)
@@ -136,6 +147,34 @@ class OLEPresentationStream:
         else:
             self.targetDevice = None
 
-        self.aspect = DVAspect(reader.readUnsignedInt)
+        self.aspect = reader.readUnsignedInt()
+        self.lindex = reader.readUnsignedInt()
+        self.advf = reader.readUnsignedInt()
+
+        # Reserved1.
+        reader.readUnsignedInt()
+
+        self.width = reader.readUnsignedInt()
+        self.height = reader.readUnsignedInt()
+        size = reader.readUnsignedInt()
+        self.data = reader.read(size)
+
+        if self.ansiClipboardFormat.clipboardFormat is ClipboardFormat.CF_METAFILEPICT:
+            self.reserved2 = reader.read(18)
+        else:
+            self.reserved2 = None
+
+        self.tocSignature = reader.readUnsignedInt()
+        self.tocEntries = []
+        if self.tocSignature == 0x494E414E: # b'NANI' in little endian.
+            for x in range(reader.readUnsignedInt()):
+                self.tocEntries.append(TOCEntry(reader))
+
+
+
+class TOCEntry:
+    def __init__(self, reader : Union[bytes, BytesReader]):
+        if isinstance(reader, bytes):
+            reader = BytesReader(reader)
 
         # TODO

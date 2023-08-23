@@ -27,6 +27,8 @@
 * Correctly changed the returned value for `ResponseStatus.fromIter` to actually return a List instead of a set.
 * Filled out typing information for a significant portion of the module where variables or functions were missing it.
 * Corrected a number of minor issues.
+* Extended values for `DVAspect` enum.
+* Added new enums to go with parsing for `OLEPresentationStream`.
 
 **v0.45.0**
 * BREAKING: Changed parsing of string multiple properties to remove the trailing null byte. This *will* cause the output of parsing them to differ.

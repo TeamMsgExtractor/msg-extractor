@@ -3,6 +3,7 @@ from __future__ import annotations
 
 __all__ = [
     'AddressBookType',
+    'ADVF',
     'AppointmentAuxilaryFlag',
     'AppointmentColor',
     'AppointmentStateFlag',
@@ -99,6 +100,17 @@ class AddressBookType(enum.IntEnum):
     TEMPLATE = 0x101
     ONE_OFF_USER = 0x102
     SEARCH = 0x200
+
+
+
+class ADVF(enum.IntEnum):
+    ADVF_NODATA = 1
+    ADVF_PRIMEFIRST = 2
+    ADVF_ONLYONCE = 4
+    ADVF_DATAONSTOP = 64
+    ADVFCACHE_NOHANDLER = 8
+    ADVFCACHE_FORVEBUILTIN = 16
+    ADVFCACHE_ONSAVE = 32
 
 
 
@@ -474,7 +486,10 @@ class DVAspect(enum.IntEnum):
     Microsoft documentation of the DVASPECT enumeration.
     """
     CONTENT = 1
+    THUMBNAIL = 2
     ICON = 4
+    DOCPRINT = 8
+
 
 
 class ElectronicAddressProperties(enum.IntEnum):
