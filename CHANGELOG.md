@@ -30,6 +30,7 @@
 * Extended values for `DVAspect` enum.
 * Added new enums to go with parsing for `OLEPresentationStream`.
 * Changed `NNTPNewsgroupFolderEntryID.newsgroupName` to bytes instead of string since it is ANSI.
+* Fixed an issue that would cause headers to fail to parse properly if the header text starts with "Microsoft Mail Internet Headers Version 2.0" which is common on some MSG files. This is fixed by stripping that from the beginning before actually parsing the text. This is to circumvent CPython issue #85329, confirmed to still exist in *at least* some of the supported Python versions.
 
 **v0.45.0**
 * BREAKING: Changed parsing of string multiple properties to remove the trailing null byte. This *will* cause the output of parsing them to differ.
