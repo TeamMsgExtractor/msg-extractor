@@ -23,6 +23,7 @@ __all__ = [
     'findWk',
     'fromTimeStamp',
     'getCommandArgs',
+    'guessEncoding',
     'hasLen',
     'htmlSanitize',
     'inputToBytes',
@@ -72,15 +73,16 @@ import tzlocal
 
 from html import escape as htmlEscape
 from typing import (
-        Any, Callable, Dict, Iterable, List, Optional, Sequence, TypeVar,
+        Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple, TypeVar,
         TYPE_CHECKING, Union
     )
 
 from . import constants
 from .enums import AttachmentType
 from .exceptions import (
-        ConversionError, ExecutableNotFound, IncompatibleOptionsError,
-        InvaildPropertyIdError, TZError, UnknownTypeError
+        ConversionError, DependencyError, ExecutableNotFound,
+        IncompatibleOptionsError, InvaildPropertyIdError, TZError,
+        UnknownTypeError
     )
 
 
@@ -511,6 +513,38 @@ def getCommandArgs(args : Sequence[str]) -> argparse.Namespace:
         raise ValueError('--no-folders requires the --attachments-only option.')
 
     return options
+
+
+def guessEncoding(msg : MSGFile) -> Optional[str]:
+    """
+    Analyzes the strings on an MSG file and attempts to form a consensus about the encoding based on the top-level strings.
+
+    Returns None if no consensus could be formed.
+
+    :raises DependencyError: chardet is not installed or could not be used
+        properly.
+    """
+    try:
+        import chardet
+    except ImportError:
+        raise DependencyError('Cannot guess the encoding of an MSG file if chardet is not installed.')
+
+    data = b''
+    for name in (x[0] for x in msg.listDir(True, False, False) if len(x) == 1):
+        if name.lower().endswith('001f'):
+            # This is a guarentee.
+            return 'utf-16-le'
+        elif name.lower().endswith('001e'):
+            data += msg.getStream(name)
+
+    try:
+        if not data or (result := chardet.detect(data))['confidence'] < 0.5:
+            return None
+
+        return result['encoding']
+    except Exception as e:
+        raise DependencyError(f'Failed to detect encoding: {e}')
+
 
 def hasLen(obj) -> bool:
     """

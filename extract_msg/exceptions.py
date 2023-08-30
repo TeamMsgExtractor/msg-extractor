@@ -65,7 +65,13 @@ class DeencapNotEncapsulated(ExMsgBaseException):
     Data to deencapsulate did not contain any encapsulated data.
     """
 
-class ExecutableNotFound(ExMsgBaseException):
+class DependencyError(ExMsgBaseException):
+    """
+    An optional dependdency could not be found or was unable to be used as
+    expected.
+    """
+
+class ExecutableNotFound(DependencyError):
     """
     Could not find the specified executable.
     """
@@ -143,7 +149,7 @@ class UnrecognizedMSGTypeError(ExMsgBaseException):
     open a specific class of msg file.
     """
 
-class WKError(ExMsgBaseException):
+class WKError(DependencyError):
     """
     An error occured while running wkhtmltopdf.
     """

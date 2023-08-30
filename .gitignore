@@ -1,10 +1,13 @@
 # Mac
 .DS_Store
 
-# PyCharm crud
+# PyCharm stuff
 /extract_msg/.idea
 
-# build files and folders
+# VS Code stuff.
+/.vscode/
+
+# Build files and folders
 /build/
 *.egg-info/
 /dist/

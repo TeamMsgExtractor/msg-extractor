@@ -13,7 +13,7 @@ from typing import Optional, TYPE_CHECKING
 from . import registerHandler
 from .custom_handler import CustomAttachmentHandler
 from ...enums import DVAspect, InsecureFeatures
-from ...exceptions import SecurityError
+from ...exceptions import DependencyError, SecurityError
 
 
 if TYPE_CHECKING:
@@ -91,8 +91,7 @@ class OutlookImageDIB(CustomAttachmentHandler):
 
         If this function should do nothing, returns None.
 
-        This function requires PIL or Pillow. If neither are found, raises an
-        import error.
+        :raises DependencyError: PIL or Pillow could not be found.
         """
         if InsecureFeatures.PIL_IMAGE_PARSING not in self.attachment.msg.insecureFeatures:
             raise SecurityError('Generating the RTF for a custom attachment requires the insecure feature PIL_IMAGE_PARSING.')
@@ -100,7 +99,7 @@ class OutlookImageDIB(CustomAttachmentHandler):
         try:
             import PIL.Image
         except ImportError:
-            raise ImportError('PIL or Pillow is required for inserting an Outlook Image into the body.')
+            raise DependencyError('PIL or Pillow is required for inserting an Outlook Image into the body.')
 
         # First, convert the bitmap into a PNG so we can insert it into the
         # body.

@@ -83,17 +83,8 @@ class MessageBase(MSGFile):
             self.__headerInit = False
             self.__recipientSeparator : str = kwargs.get('recipientSeparator', ';')
             self.__deencap = kwargs.get('deencapsulationFunc')
-            # Initialize properties in the order that is least likely to cause bugs.
-            # TODO have each function check for initialization of needed data so
-            # these lines will be unnecessary.
-            self.props
             self.header
-            self.recipients
 
-            self.to
-            self.cc
-            self.sender
-            self.date
             # This variable keeps track of what the new line character should be.
             self._crlf = '\n'
             try:
@@ -101,8 +92,6 @@ class MessageBase(MSGFile):
             except Exception as e:
                 # Prevent an error in the body from preventing opening.
                 logger.exception('Critical error accessing the body. File opened but accessing the body will throw an exception.')
-            self.named
-            self.namedProperties
         except:
             try:
                 self.close()

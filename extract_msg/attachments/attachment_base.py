@@ -42,7 +42,7 @@ _T = TypeVar('_T')
 
 class AttachmentBase(abc.ABC):
     """
-    The base class for all Attachments used by the module, if not overriden.
+    The base class for all standard Attachments used by the module.
     """
 
     def __init__(self, msg : MSGFile, dir_ : str, propStore : PropertiesStore):
@@ -212,7 +212,7 @@ class AttachmentBase(abc.ABC):
                         raise FileExistsError(f'Could not create the specified file because it already exists ("{fullFilename}").')
         else:
             if not overwriteExisting and fullFilename.exists():
-                # Try to split the filename into a name and extention.
+                # Try to split the filename into a name and extension.
                 name, ext = os.path.splitext(filename)
                 # Try to add a number to it so that we can save without overwriting.
                 for i in range(2, 100):
@@ -259,6 +259,18 @@ class AttachmentBase(abc.ABC):
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
         return msg.existsTypedProperty(id, self.__dir, _type, True, self.__props)
+
+    @abc.abstractmethod
+    def getFilename(self, **kwargs) -> str:
+        """
+        Returns the filename to use for the attachment.
+
+        :param contentId:      Use the contentId, if available.
+        :param customFilename: A custom name to use for the file.
+
+        If the filename starts with "UnknownFilename" then there is no guarantee
+        that the files will have exactly the same filename.
+        """
 
     def getMultipleBinary(self, filename : MSG_PATH) -> Optional[List[bytes]]:
         """
@@ -334,7 +346,7 @@ class AttachmentBase(abc.ABC):
         """
         instance.props.getValue(name, default)
 
-        Can be overriden to create new behavior.
+        Can be overridden to create new behavior.
         """
         return self.props.getValue(name, default)
 
@@ -441,17 +453,25 @@ class AttachmentBase(abc.ABC):
 
         return value
 
-    @abc.abstractmethod
-    def getFilename(self, **kwargs) -> str:
+    def listDir(self, streams : bool = True, storages : bool = False) -> List[List[str]]:
         """
-        Returns the filename to use for the attachment.
+        Lists the streams and or storages that exist in the attachment
+        directory.
 
-        :param contentId:      Use the contentId, if available.
-        :param customFilename: A custom name to use for the file.
-
-        If the filename starts with "UnknownFilename" then there is no guarentee
-        that the files will have exactly the same filename.
+        Returns the paths *excluding* the attachment directory, allowing the
+        paths to be directly used for accessing a file.
         """
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+        return [path[1:] for path in msg.listDir(streams, storages, False)
+                if len(path) > 1 and path[0] == self.__dir]
+
+    def slistDir(self, streams : bool = True, storages : bool = False) -> List[str]:
+        """
+        Like listDir, except it returns the paths as strings.
+        """
+        return ['/'.join(path) for path in self.listDir(streams, storages)]
+
 
     @abc.abstractmethod
     def save(self, **kwargs) -> SAVE_TYPE:
@@ -669,7 +689,7 @@ class AttachmentBase(abc.ABC):
     @functools.cached_property
     def renderingPosition(self) -> Optional[int]:
         """
-        The offset, in redered characters, to use when rendering the attachment
+        The offset, in rendered characters, to use when rendering the attachment
         within the main message text. A value of 0xFFFFFFFF indicates a hidden
         attachment that is not to be rendered.
         """

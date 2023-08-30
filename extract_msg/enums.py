@@ -45,6 +45,9 @@ __all__ = [
     'MessageType',
     'NamedPropertyType',
     'NoteColor',
+    'ODTCf',
+    'ODTPersist1',
+    'ODTPersist2',
     'OORBodyFormat',
     'PostalAddressID',
     'Priority',
@@ -1373,6 +1376,71 @@ class NoteColor(enum.IntEnum):
     PINK = 2
     YELLOW = 3
     WHITE = 4
+
+
+
+class ODTCf(enum.IntEnum):
+    """
+    Values for the `cf` field of the ODT structure.
+    """
+    UNSPECIFIED = 0x0000
+    RICH_TEXT_FORMAT = 0x0001
+    TEXT_FORMAT = 0x0002
+    METAFILE = 0x0003
+    BITMAP = 0x0004
+    DEVICE_INDEPENDENT_BITMAP = 0x0005
+    HTML_FORMAT = 0x000A
+    UNICODE_TEXT_FORMAT = 0x0014
+
+
+
+class ODTPersist1(enum.IntFlag):
+    """
+    Flag values for ODTPersist1, in the order they would appear when unpacking a
+    little endian unsigned short.
+    """
+    NONE = 0b0000000000000000
+    RESERVED_1 = 0b0000000000000001
+    F_DEF_HANDLER = 0b0000000000000010
+    RESERVED_2 = 0b0000000000000100
+    RESERVED_3 = 0b0000000000001000
+    F_LINK = 0b0000000000010000
+    RESERVED_4 = 0b0000000000100000
+    F_ICON = 0b0000000001000000
+    F_IS_OLE1 = 0b0000000010000000
+    F_MANUAL = 0b0000000100000000
+    F_RECOMPOSE_ON_RESIZE = 0b0000001000000000
+    RESERVED_5 = 0b0000010000000000
+    RESERVED_6 = 0b0000100000000000
+    F_OCX = 0b0001000000000000
+    F_STREAM = 0b0010000000000000
+    RESERVED_7 = 0b0100000000000000
+    F_VIEW_OBJECT = 0b1000000000000000
+
+
+
+class ODTPersist2(enum.IntFlag):
+    """
+    Flag values for ODTPersist2, in the order they would appear when unpacking a
+    little endian unsigned short.
+    """
+    NONE = 0b0000000000000000
+    F_EMF = 0b0000000000000001
+    RESERVED_1 = 0b0000000000000010
+    F_QUERIED_EMF = 0b0000000000000100
+    F_STORED_AS_EMF = 0b0000000000001000
+    RESERVED_2 = 0b0000000000010000
+    RESERVED_3 = 0b0000000000100000
+    RESERVED_4 = 0b0000000001000000
+    RESERVED_5 = 0b0000000010000000
+    RESERVED_6 = 0b0000000100000000
+    RESERVED_7 = 0b0000001000000000
+    RESERVED_8 = 0b0000010000000000
+    RESERVED_9 = 0b0000100000000000
+    RESERVED_10 = 0b0001000000000000
+    RESERVED_11 = 0b0010000000000000
+    RESERVED_12 = 0b0100000000000000
+    RESERVED_13 = 0b1000000000000000
 
 
 

@@ -8,7 +8,7 @@ __all__ = [
 
 import abc
 
-from typing import Any, Callable, Optional, TYPE_CHECKING, TypeVar
+from typing import Any, Callable, Dict, Optional, TYPE_CHECKING, TypeVar
 
 from ...constants import MSG_PATH
 from ...utils import msgPathToString
@@ -29,6 +29,12 @@ class CustomAttachmentHandler(abc.ABC):
     def __init__(self, attachment : AttachmentBase):
         super().__init__()
         self.__att = attachment
+
+    def getPresentationStreams(self) -> Optional[Dict[int, bytes]]:
+        """
+        Returns a dict of all presentation streams, as bytes.
+        """
+        presLinks = [(x[-1][-3:], self.getStream(x[-1])) for x in self.attachment.listDir()]
 
     def getStream(self, path : MSG_PATH) -> Optional[bytes]:
         """

@@ -41,8 +41,8 @@ from ..properties.named import Named, NamedProperties
 from ..properties.properties_store import PropertiesStore
 from ..structures.contact_link_entry import ContactLinkEntry
 from ..utils import (
-        divide, hasLen, inputToMsgPath, makeWeakRef, msgPathToString,
-        parseType, verifyPropertyId, verifyType, windowsUnicode
+        divide, guessEncoding, hasLen, inputToMsgPath, makeWeakRef,
+        msgPathToString, parseType, verifyPropertyId, verifyType, windowsUnicode
     )
 
 
@@ -56,6 +56,8 @@ class MSGFile:
     """
     Parser for .msg files.
     """
+
+    filename : Optional[str]
 
     def __init__(self, path, **kwargs):
         """
@@ -77,8 +79,10 @@ class MSGFile:
         :param errorBehavior: Optional, the behavior to use in the event of
             certain types of errors. Uses the ErrorBehavior enum.
         :param overrideEncoding: Optional, an encoding to use instead of the one
-            specified by the msg file. Do not report encoding errors caused by
-            this.
+            specified by the msg file. If the value is "chardet" and you have
+            the chardet module installed, an attempt will be made to
+            auto-detect the encoding based on some of the string properties. Do
+            not report encoding errors caused by this.
         :param treePath: Internal variable used for giving representation of the
             path, as a tuple of objects, of the MSGFile. When passing, this is
             the path to the parent object of this instance.
@@ -124,9 +128,16 @@ class MSGFile:
         self.__dtFormat = kwargs.get('datetimeFormat', DT_FORMAT)
 
         if overrideEncoding is not None:
-            codecs.lookup(overrideEncoding)
+            if overrideEncoding.lower() == 'chardet':
+                encoding = guessEncoding(self)
+                if encoding:
+                    self.__overrideEncoding = encoding
+                else:
+                    logger.warning('Attempted to auto-detect encoding, but no consensus could be formed based on the top-level strings.')
+            else:
+                codecs.lookup(overrideEncoding)
+                self.__stringEncoding = overrideEncoding
             logger.warning('You have chosen to override the string encoding. Do not report encoding errors caused by this.')
-            self.__stringEncoding = overrideEncoding
         self.__overrideEncoding = overrideEncoding
 
         self.__listDirRes : Dict[Tuple[bool, bool, bool], List[List[str]]] = {}
@@ -361,7 +372,7 @@ class MSGFile:
                             logger.error(f'Could not find matching VariableLengthProp for stream {x}')
                             streams = len(contents) // (2 if _type in constants.MULTIPLE_2_BYTES else 4 if _type in constants.MULTIPLE_4_BYTES else 8 if _type in constants.MULTIPLE_8_BYTES else 16)
                     else:
-                        raise NotImplementedError(f'The stream specified is of type {_type}. We don\'t currently understand exactly how this type works. If it is mandatory that you have the contents of this stream, please create an issue labled "NotImplementedError: _getTypedStream {_type}".')
+                        raise NotImplementedError(f'The stream specified is of type {_type}. We don\'t currently understand exactly how this type works. If it is mandatory that you have the contents of this stream, please create an issue labeled "NotImplementedError: _getTypedStream {_type}".')
                     if _type in ('101F', '101E', '1102'):
                         if self.exists(x + '-00000000', False):
                             for y in range(streams):
@@ -592,7 +603,7 @@ class MSGFile:
         """
         instance.props.getValue(name, default)
 
-        Can be overriden to create new behavior.
+        Can be overridden to create new behavior.
         """
         return self.props.getValue(name, default)
 
@@ -716,7 +727,7 @@ class MSGFile:
         Replacement for OleFileIO.listdir that runs at the current prefix
         directory.
 
-        :param includePrefix: If false, removed the part of the path that is the
+        :param includePrefix: If False, removes the part of the path that is the
             prefix.
         """
         # Get the items from OleFileIO.
@@ -797,7 +808,7 @@ class MSGFile:
     @functools.cached_property
     def areStringsUnicode(self) -> bool:
         """
-        Returns a boolean telling if the strings are unicode encoded.
+        Returns a boolean telling if the strings are Unicode encoded.
         """
         return (self.getPropertyVal('340D0003', 0) & 0x40000) != 0
 
@@ -993,7 +1004,7 @@ class MSGFile:
     @property
     def overrideEncoding(self):
         """
-        Returns None is the encoding has not been overriden, otherwise returns
+        Returns None is the encoding has not been overridden, otherwise returns
         the encoding.
         """
         return self.__overrideEncoding
@@ -1087,11 +1098,11 @@ class MSGFile:
             return self.__stringEncoding
         except AttributeError:
             # We need to calculate the encoding.
-            # Let's first check if the encoding will be unicode:
+            # Let's first check if the encoding will be Unicode:
             if self.areStringsUnicode:
                 self.__stringEncoding = "utf-16-le"
             else:
-                # Well, it's not unicode. Now we have to figure out what it IS.
+                # Well, it's not Unicode. Now we have to figure out what it IS.
                 if '3FFD0003' not in self.props:
                     # If this property is not set by the client, we SHOULD set
                     # it to ISO-8859-15, but MAY set it to ISO-8859-1.

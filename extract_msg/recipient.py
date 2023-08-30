@@ -268,7 +268,7 @@ class Recipient(Generic[_RT]):
         """
         instance.props.getValue(name, default)
 
-        Can be overriden to create new behavior.
+        Can be overridden to create new behavior.
         """
         return self.props.getValue(name, default)
 
@@ -377,6 +377,25 @@ class Recipient(Generic[_RT]):
             value = overrideClass(value)
 
         return value
+
+    def listDir(self, streams : bool = True, storages : bool = False) -> List[List[str]]:
+        """
+        Lists the streams and or storages that exist in the attachment
+        directory.
+
+        Returns the paths *excluding* the attachment directory, allowing the
+        paths to be directly used for accessing a file.
+        """
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
+        return [path[1:] for path in msg.listDir(streams, storages, False)
+                if len(path) > 1 and path[0] == self.__dir]
+
+    def slistDir(self, streams : bool = True, storages : bool = False) -> List[str]:
+        """
+        Like listDir, except it returns the paths as strings.
+        """
+        return ['/'.join(path) for path in self.listDir(streams, storages)]
 
     @functools.cached_property
     def account(self) -> Optional[str]:

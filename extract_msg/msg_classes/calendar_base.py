@@ -383,9 +383,9 @@ class CalendarBase(MessageBase):
     @functools.cached_property
     def ownerAppointmentID(self) -> Optional[int]:
         """
-        A quasi-unique value amond all Calendar objects in a user's mailbox.
+        A quasi-unique value among all Calendar objects in a user's mailbox.
         Assists a client or server in finding a Calendar object but is not
-        guarenteed to be unique amoung all objects.
+        guaranteed to be unique among all objects.
         """
         return self.getPropertyVal('00620003')
 

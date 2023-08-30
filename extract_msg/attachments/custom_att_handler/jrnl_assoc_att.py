@@ -2,23 +2,36 @@ from __future__ import annotations
 
 
 __all__ = [
-    'JournalAssociatedAttachment',
+    'LinkedObjectAttachment',
 ]
 
 
 from functools import cached_property
-from typing import Optional, TYPE_CHECKING
+from typing import List, Optional, TYPE_CHECKING
 
 from . import registerHandler
 from .custom_handler import CustomAttachmentHandler
 from ...structures.entry_id import EntryID
+from ...structures.ole_pres import OLEPresentationStream
 
 
 if TYPE_CHECKING:
     from ..attachment_base import AttachmentBase
 
 
-class JournalAssociatedAttachment(CustomAttachmentHandler):
+class LinkedObjectAttachment(CustomAttachmentHandler):
+    """
+    A link to an Outlook object.
+
+    Not *positive* I understand what this attachment type is, but this seems to
+    be the most likely name. Contains presentation data about how to render it
+    as well as properties with data that link to it. It looks *similar* to what
+    the documentation for Journal specifies would be it's custom attachment
+    type, however some small details don't perfectly add up.
+
+    I've also only seen this on Journal objects thus far.
+    """
+
     def __init__(self, attachment : AttachmentBase):
         super().__init__(attachment)
         stream = attachment.getStream('__substg1.0_3701000D/\x03MailStream')
@@ -29,11 +42,6 @@ class JournalAssociatedAttachment(CustomAttachmentHandler):
 
     @classmethod
     def isCorrectHandler(cls, attachment : AttachmentBase) -> bool:
-        # This only applies to journal objects.
-        if not attachment.msg.classType:
-            return False
-        if not attachment.msg.classType.lower().startswith('ipm.activity'):
-            return False
         if attachment.clsid != '00020D09-0000-0000-C000-000000000046':
             return False
 
@@ -87,19 +95,28 @@ class JournalAssociatedAttachment(CustomAttachmentHandler):
         return self.getStream('MailMsgAttSrchKey')
 
     @cached_property
-    def metafileBytes(self) -> Optional[bytes]:
+    def presentationStreams(self) -> Optional[List[OLEPresentationStream]]:
         """
-        The metafile that contains the icon to be used when rendering the
-        attachment.
+        The presentation streams, as a list of OLEPresentationStream object.
 
         From my understanding, this MUST be set, but we are treating it as
-        SHOULD be set.
+        SHOULD be set. It also looks like the correct number to have is exactly
+        1, but I can't guarantee that, so this is a list.
         """
-        # The documentation specifies clearly that the filename is "IOlePres000"
-        # HOWEVER my tests revealed that the "I" is actually a "\x02" character.
-        # This is quite confusing but whatever. We'll just look for both of
-        # them.
-        return self.getStream('IOlePres000') or self.getStream('\x02OlePres000')
+        if self.presentationStreamsBytes:
+            return [OLEPresentationStream(x) for x in self.presentationStreams]
+        else:
+            return None
+
+    @cached_property
+    def presentationStreamsBytes(self) -> Optional[List[bytes]]:
+        """
+        The presentation streams, as a list of bytes.
+
+        From my understanding, there should exist EXACTLY 1 of these, but...
+        this appears to be an undocumented custom attachment that is easy to
+        make.
+        """
 
     @property
     def name(self) -> None:
@@ -113,4 +130,4 @@ class JournalAssociatedAttachment(CustomAttachmentHandler):
 
 
 
-registerHandler(JournalAssociatedAttachment)
+registerHandler(LinkedObjectAttachment)

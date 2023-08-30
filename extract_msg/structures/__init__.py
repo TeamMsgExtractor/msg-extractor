@@ -9,6 +9,7 @@ __all__ = [
     'business_card',
     'entry_id',
     'misc_id',
+    'odt',
     'recurrence_pattern',
     'report_tag',
     'system_time',
@@ -18,7 +19,7 @@ __all__ = [
 ]
 
 from . import (
-        _helpers, contact_link_entry, business_card, entry_id, misc_id,
+        _helpers, contact_link_entry, business_card, entry_id, misc_id, odt,
         recurrence_pattern, report_tag, system_time, time_zone_definition,
         time_zone_struct, tz_rule
     )
