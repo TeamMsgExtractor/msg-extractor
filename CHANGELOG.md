@@ -29,6 +29,7 @@
 * Corrected a number of minor issues.
 * Extended values for `DVAspect` enum.
 * Added new enums to go with parsing for `OLEPresentationStream`.
+* Changed `NNTPNewsgroupFolderEntryID.newsgroupName` to bytes instead of string since it is ANSI.
 
 **v0.45.0**
 * BREAKING: Changed parsing of string multiple properties to remove the trailing null byte. This *will* cause the output of parsing them to differ.

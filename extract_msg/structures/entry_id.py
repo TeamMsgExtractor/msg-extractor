@@ -360,7 +360,7 @@ class NNTPNewsgroupFolderEntryID(EntryID):
         self.__folderType = reader.readUnsignedShort()
         if self.__folderType != 0x000C:
             raise ValueError(f'Folder type was not 0x000C (got {self.__folderType})')
-        self.__newsgroupName = reader.readAnsiString()
+        self.__newsgroupName = reader.readByteString()
         self.__position = reader.tell() + 20
 
     @property
@@ -371,9 +371,9 @@ class NNTPNewsgroupFolderEntryID(EntryID):
         return self.__folderType
 
     @property
-    def newsgroupName(self) -> str:
+    def newsgroupName(self) -> bytes:
         """
-        The name of the newsgroup.
+        The name of the newsgroup, as an ANSI string.
         """
         return self.__newsgroupName
 
