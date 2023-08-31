@@ -1,5 +1,5 @@
 **v0.46.0**
-* [[TeamMsgExtractor #95](https://github.com/TeamMsgExtractor/msg-extractor/issues/95)] Adjusted the `overrideEncoding` property of `MSGFile` to allow automatic encoding detection. Simply set the property to the string `"chardet"` and, assuming the `chardet` module is installed, it will analyze a number of the strings to try and form a consensus about the encoding. This will *ignore* the specified encoding.
+* [[TeamMsgExtractor #95](https://github.com/TeamMsgExtractor/msg-extractor/issues/95)] Adjusted the `overrideEncoding` property of `MSGFile` to allow automatic encoding detection. Simply set the property to the string `"chardet"` and, assuming the `chardet` module is installed, it will analyze a number of the strings to try and form a consensus about the encoding. This will *ignore* the specified encoding *only if* if successfully detects. Otherwise it will log a warning and fall back to the default behavior.
 * Changed the base class of `EntryID` from no base class to `abc.ABC`.
 * Added `position` property to `EntryID` to tell how many bytes were used to create the `EntryID`.
 * Added a number of properties to `MSGFile` from \[MS-OXCMSG\].

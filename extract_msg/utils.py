@@ -535,7 +535,7 @@ def guessEncoding(msg : MSGFile) -> Optional[str]:
             # This is a guarentee.
             return 'utf-16-le'
         elif name.lower().endswith('001e'):
-            data += msg.getStream(name)
+            data += msg.getStream(name) + b'\n'
 
     try:
         if not data or (result := chardet.detect(data))['confidence'] < 0.5:

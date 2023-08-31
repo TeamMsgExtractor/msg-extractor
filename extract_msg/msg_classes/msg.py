@@ -127,19 +127,6 @@ class MSGFile:
         self.__dateFormat = kwargs.get('dateFormat', DATE_FORMAT)
         self.__dtFormat = kwargs.get('datetimeFormat', DT_FORMAT)
 
-        if overrideEncoding is not None:
-            if overrideEncoding.lower() == 'chardet':
-                encoding = guessEncoding(self)
-                if encoding:
-                    self.__overrideEncoding = encoding
-                else:
-                    logger.warning('Attempted to auto-detect encoding, but no consensus could be formed based on the top-level strings.')
-            else:
-                codecs.lookup(overrideEncoding)
-                self.__stringEncoding = overrideEncoding
-            logger.warning('You have chosen to override the string encoding. Do not report encoding errors caused by this.')
-        self.__overrideEncoding = overrideEncoding
-
         self.__listDirRes : Dict[Tuple[bool, bool, bool], List[List[str]]] = {}
 
         if self.__parentMsg:
@@ -171,6 +158,8 @@ class MSGFile:
             # closing. We set it here for error handling.
             self.__oleOwner = True
 
+        self.__open = True
+
         # The rest *must* be in a try-except block to ensure we close the file.
         try:
             kwargsCopy = copy.copy(kwargs)
@@ -194,6 +183,20 @@ class MSGFile:
             self.__prefix = prefix
             self.__prefixList = prefixl
             self.__prefixLen = len(prefixl)
+
+            if overrideEncoding is not None:
+                logger.warning('You have chosen to override the string encoding. Do not report encoding errors caused by this.')
+                if overrideEncoding.lower() == 'chardet':
+                    encoding = guessEncoding(self)
+                    if encoding:
+                        self.__stringEncoding = encoding.lower()
+                    else:
+                        logger.warning('Attempted to auto-detect encoding, but no consensus could be formed based on the top-level strings. Defaulting to normal detection methods.')
+                else:
+                    codecs.lookup(overrideEncoding)
+                    self.__stringEncoding = overrideEncoding
+            self.__overrideEncoding = overrideEncoding
+
             if prefix and not filename:
                 filename = self.getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix = False)
             if filename:
@@ -207,8 +210,6 @@ class MSGFile:
                 self.filename = str(path)
             else:
                 self.filename = None
-
-            self.__open = True
 
             # Now, load the attachments if we are not delaying them.
             if not self.__attachmentsDelayed:

@@ -235,7 +235,7 @@ class NamedProperties:
             property.
         """
         self.__named = named
-        self.__streamSource = makeWeakRef(streamSource)
+        self.__streamSource = weakref.ref(streamSource)
 
     def __getitem__(self, item):
         """
