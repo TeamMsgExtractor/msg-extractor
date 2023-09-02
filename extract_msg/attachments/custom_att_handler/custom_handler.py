@@ -14,6 +14,7 @@ from typing import Any, Callable, Dict, Optional, TYPE_CHECKING, TypeVar
 from ...constants import MSG_PATH
 from ...structures.odt import ODTStruct
 from ...structures.ole_pres import OLEPresentationStream
+from ...structures.ole_stream_struct import OleStreamStruct
 from ...utils import msgPathToString
 
 
@@ -106,12 +107,19 @@ class CustomAttachmentHandler(abc.ABC):
         bytes, returns None.
         """
 
-    @property
+    @functools.cached_property
     def objInfo(self) -> Optional[ODTStruct]:
         """
         The structure representing the stream "\\x03ObjInfo", if it exists.
         """
-        self.getStreamAs('\x03ObjInfo', ODTStruct)
+        return self.getStreamAs('\x03ObjInfo', ODTStruct)
+
+    @functools.cached_property
+    def ole(self) -> Optional[OleStreamStruct]:
+        """
+        The structure representing the stream "\\x01Ole", if it exists.
+        """
+        return self.getStreamAs('\x01Ole', OleStreamStruct)
 
     @functools.cached_property
     def presentationObjs(self) -> Optional[Dict[int, OLEPresentationStream]]:
