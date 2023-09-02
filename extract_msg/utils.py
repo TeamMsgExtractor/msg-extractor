@@ -73,7 +73,7 @@ import tzlocal
 
 from html import escape as htmlEscape
 from typing import (
-        Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple, TypeVar,
+        Any, Callable, Dict, Iterable, List, Optional, Sequence, TypeVar,
         TYPE_CHECKING, Union
     )
 
@@ -979,7 +979,7 @@ def tryGetMimetype(att : AttachmentBase, mimetype : Union[str, None]) -> Union[s
     if att.dataType:
         # Try to import our dependency module to use it.
         try:
-            import magic
+            import magic # pyright: ignore
 
             if isinstance(att.data, (str, bytes)):
                 return magic.from_buffer(att.data, mime = True)

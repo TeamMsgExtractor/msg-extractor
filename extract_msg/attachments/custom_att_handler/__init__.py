@@ -57,7 +57,7 @@ def registerHandler(handler : Type[CustomAttachmentHandler]) -> None:
 # Import built-in handler modules. They will all automatically register their
 # respecive handler(s).
 from .outlook_image_dib import OutlookImageDIB
-from .jrnl_assoc_att import LinkedObjectAttachment
+from .lnk_obj_att import LinkedObjectAttachment
 
 
 if TYPE_CHECKING:

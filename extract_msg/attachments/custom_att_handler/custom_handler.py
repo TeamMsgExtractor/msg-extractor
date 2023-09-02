@@ -7,10 +7,13 @@ __all__ = [
 
 
 import abc
+import functools
 
 from typing import Any, Callable, Dict, Optional, TYPE_CHECKING, TypeVar
 
 from ...constants import MSG_PATH
+from ...structures.odt import ODTStruct
+from ...structures.ole_pres import OLEPresentationStream
 from ...utils import msgPathToString
 
 
@@ -29,12 +32,6 @@ class CustomAttachmentHandler(abc.ABC):
     def __init__(self, attachment : AttachmentBase):
         super().__init__()
         self.__att = attachment
-
-    def getPresentationStreams(self) -> Optional[Dict[int, bytes]]:
-        """
-        Returns a dict of all presentation streams, as bytes.
-        """
-        presLinks = [(x[-1][-3:], self.getStream(x[-1])) for x in self.attachment.listDir()]
 
     def getStream(self, path : MSG_PATH) -> Optional[bytes]:
         """
@@ -108,3 +105,21 @@ class CustomAttachmentHandler(abc.ABC):
         If there is no object to represent the custom attachment, including
         bytes, returns None.
         """
+
+    @property
+    def objInfo(self) -> Optional[ODTStruct]:
+        """
+        The structure representing the stream "\\x03ObjInfo", if it exists.
+        """
+        self.getStreamAs('\x03ObjInfo', ODTStruct)
+
+    @functools.cached_property
+    def presentationObjs(self) -> Optional[Dict[int, OLEPresentationStream]]:
+        """
+        Returns a dict of all presentation streams, as bytes.
+        """
+        return {
+            int(x[1][-3:]): self.getStreamAs(x[-1], OLEPresentationStream)
+            for x in self.attachment.listDir()
+            if x[0] == '__substg1.0_3701000D' and x[1].startswith('\x01OlePres')
+        }
