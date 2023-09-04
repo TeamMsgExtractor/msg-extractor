@@ -131,20 +131,20 @@ class FixedLengthProp(PropBase):
                 logger.warning('Property type is PtypNull, but is not equal to 0.')
             value = None
         elif _type == 0x0002: # PtypInteger16
-            value = constants.st.STI16.unpack(value)[0]
+            value = constants.st.ST_LE_I16.unpack(value)[0]
         elif _type == 0x0003: # PtypInteger32
-            value = constants.st.STI32.unpack(value)[0]
+            value = constants.st.ST_LE_I32.unpack(value)[0]
         elif _type == 0x0004: # PtypFloating32
-            value = constants.st.STF32.unpack(value)[0]
+            value = constants.st.ST_LE_F32.unpack(value)[0]
         elif _type == 0x0005: # PtypFloating64
-            value = constants.st.STF64.unpack(value)[0]
+            value = constants.st.ST_LE_F64.unpack(value)[0]
         elif _type == 0x0006: # PtypCurrency
-            value = (constants.st.STI64.unpack(value))[0] / 10000.0
+            value = (constants.st.ST_LE_I64.unpack(value))[0] / 10000.0
         elif _type == 0x0007: # PtypFloatingTime
-            value = constants.st.STF64.unpack(value)[0]
+            value = constants.st.ST_LE_F64.unpack(value)[0]
             return constants.PYTPFLOATINGTIME_START + datetime.timedelta(days = value)
         elif _type == 0x000A: # PtypErrorCode
-            value = constants.st.STI32.unpack(value)[0]
+            value = constants.st.ST_LE_I32.unpack(value)[0]
             try:
                 value = ErrorCodeType(value)
             except ValueError:
@@ -157,11 +157,11 @@ class FixedLengthProp(PropBase):
                 except ValueError:
                     pass
         elif _type == 0x000B:  # PtypBoolean
-            value = constants.st.ST3.unpack(value)[0] == 1
+            value = constants.st.ST_LE_UI64.unpack(value)[0] == 1
         elif _type == 0x0014:  # PtypInteger64
-            value = constants.st.STI64.unpack(value)[0]
+            value = constants.st.ST_LE_I64.unpack(value)[0]
         elif _type == 0x0040:  # PtypTime
-            rawTime = constants.st.ST3.unpack(value)[0]
+            rawTime = constants.st.ST_LE_UI64.unpack(value)[0]
             try:
                 value = filetimeToDatetime(rawTime)
             except ValueError as e:

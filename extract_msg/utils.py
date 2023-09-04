@@ -728,7 +728,7 @@ def parseType(_type : int, stream, encoding, extras):
                 pass
         return value
     elif _type == 0x000B:  # PtypBoolean
-        return constants.st.ST3.unpack(value)[0] == 1
+        return constants.st.ST_LE_UI64.unpack(value)[0] == 1
     elif _type == 0x000D:  # PtypObject/PtypEmbeddedTable
         # TODO parsing for this.
         # Wait, that's the extension for an attachment folder, so parsing this
@@ -742,12 +742,12 @@ def parseType(_type : int, stream, encoding, extras):
     elif _type == 0x001F:  # PtypString
         return value.decode('utf-16-le')
     elif _type == 0x0040:  # PtypTime
-        rawTime = constants.st.ST3.unpack(value)[0]
+        rawTime = constants.st.ST_LE_UI64.unpack(value)[0]
         return filetimeToDatetime(rawTime)
     elif _type == 0x0048:  # PtypGuid
         return bytesToGuid(value)
     elif _type == 0x00FB:  # PtypServerId
-        count = constants.st.STUI16.unpack(value[:2])
+        count = constants.st.ST_LE_UI16.unpack(value[:2])
         # If the first byte is a 1 then it uses the ServerID structure.
         if value[3] == 1:
             from .structures.misc_id import ServerID
@@ -801,7 +801,7 @@ def parseType(_type : int, stream, encoding, extras):
             if _type == 0x1014: # PtypMultipleInteger64
                 return tuple(constants.st.STMI64.unpack(x)[0] for x in extras)
             if _type == 0x1040: # PtypMultipleTime
-                return tuple(filetimeToUtc(constants.st.ST3.unpack(x)[0]) for x in extras)
+                return tuple(filetimeToUtc(constants.st.ST_LE_UI64.unpack(x)[0]) for x in extras)
             if _type == 0x1048: # PtypMultipleGuid
                 return tuple(bytesToGuid(x) for x in extras)
         else:

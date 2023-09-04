@@ -26,7 +26,7 @@
 * Changed the `NotImplementedError` for custom attachment handler not being found to `FeatureNotImplemented`. Additionally, changed the error message to specify the CLSID found on the attachment to better enable people to report issues.
 * Changed code for `Recipient` and `MessageBase` that makes it rely on `MessageBase.recipientTypeClass` to determine the class to use for the `recipientType` property. Adjusted the typing of `Recipient` to have it reflect the type that will be used.
 * Correctly changed the returned value for `ResponseStatus.fromIter` to actually return a List instead of a set.
-* Filled out typing information for a significant portion of the module where variables or functions were missing it.
+* Filled out typing information for a significant portion of the module where variables or functions were missing it. This includes the entirety of the constants submodule.
 * Corrected a number of minor issues.
 * Extended values for `DVAspect` enum.
 * Added new enums to go with parsing for `OLEPresentationStream`.
