@@ -51,6 +51,9 @@ class RecurrencePattern:
         self.__startDate = reader.readUnsignedInt()
         self.__endDate = reader.readUnsignedInt()
 
+    def toBytes(self) -> bytes:
+        return self.__rawData
+
     @property
     def calendarType(self) -> RecurCalendarType:
         """
@@ -159,13 +162,6 @@ class RecurrencePattern:
         monthly recurrences.
         """
         return self.__period
-
-    @property
-    def rawData(self) -> bytes:
-        """
-        The raw bytes used to create this object.
-        """
-        return self.__rawData
 
     @property
     def readerVersion(self) -> int:

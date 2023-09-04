@@ -1,15 +1,14 @@
 __all__ = [
-    'Cf',
-    \
     'ODTStruct',
 ]
 
 import struct
-from typing import Optional
+from typing import final, Optional
 
 from ..enums import ODTCf, ODTPersist1, ODTPersist2
 
 
+@final
 class ODTStruct:
     def __init__(self, data : Optional[bytes]):
         if data:

@@ -19,7 +19,7 @@ import logging
 from typing import Any
 
 from .. import constants
-from ..enums import ErrorCode, ErrorCodeType
+from ..enums import ErrorCode, ErrorCodeType, PropertyFlags
 from ..utils import filetimeToDatetime
 
 
@@ -46,34 +46,14 @@ class PropBase(abc.ABC):
     def __init__(self, data : bytes):
         self.__rawData = data
         self.__name = data[3::-1].hex().upper()
-        self.__type, self.__flags = constants.st.ST2.unpack(data)
-        self.__fm = self.__flags & 1 == 1
-        self.__fr = self.__flags & 2 == 2
-        self.__fw = self.__flags & 4 == 4
+        self.__type, flags = constants.st.ST2.unpack(data)
+        self.__flags = PropertyFlags(flags)
+
+    def toBytes(self) -> bytes:
+        return self.__rawData
 
     @property
-    def flagMandatory(self) -> bool:
-        """
-        Boolean, is the "mandatory" flag set?
-        """
-        return self.__fm
-
-    @property
-    def flagReadable(self) -> bool:
-        """
-        Boolean, is the "readable" flag set?
-        """
-        return self.__fr
-
-    @property
-    def flagWritable(self) -> bool:
-        """
-        Boolean, is the "writable" flag set?
-        """
-        return self.__fw
-
-    @property
-    def flags(self) -> int:
+    def flags(self) -> PropertyFlags:
         """
         Integer that contains property flags.
         """
@@ -85,13 +65,6 @@ class PropBase(abc.ABC):
         Property "name".
         """
         return self.__name
-
-    @property
-    def rawData(self) -> bytes:
-        """
-        The raw bytes used to create this object.
-        """
-        return self.__rawData
 
     @property
     def type(self) -> int:

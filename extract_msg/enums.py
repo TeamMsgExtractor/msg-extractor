@@ -52,6 +52,7 @@ __all__ = [
     'PostalAddressID',
     'Priority',
     'PropertiesType',
+    'PropertyFlags',
     'RecipientRowFlagType',
     'RecipientType',
     'RecurCalendarType',
@@ -1481,6 +1482,13 @@ class PropertiesType(enum.IntEnum):
     MESSAGE_EMBED = 1
     ATTACHMENT = 2
     RECIPIENT = 3
+
+
+
+class PropertyFlags(enum.IntFlag):
+    MANDATORY = 0b001
+    READABLE = 0b010
+    WRITABLE = 0b100
 
 
 

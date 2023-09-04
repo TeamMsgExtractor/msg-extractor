@@ -98,6 +98,9 @@ class EntryID(abc.ABC):
         self.__providerUID = data[4:20]
         self.__rawData = data
 
+    def toBytes(self) -> bytes:
+        return self.__rawData
+
     @property
     def flags(self) -> bytes:
         """
@@ -137,13 +140,6 @@ class EntryID(abc.ABC):
         The 16 byte UID that identifies the type of Entry ID.
         """
         return self.__providerUID
-
-    @property
-    def rawData(self) -> bytes:
-        """
-        The raw bytes used in this Entry ID.
-        """
-        return self.__rawData
 
 
 

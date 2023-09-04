@@ -39,6 +39,9 @@ class BusinessCardDisplayDefinition:
         self.__extraInfoField = data[17 + 16 * self.__countOfFields:]
         self.__fields = tuple(FieldInfo(reader.read(16), self.__extraInfoField) for _ in range(self.__countOfFields))
 
+    def toBytes(self) -> bytes:
+        return self.__rawData
+
     @property
     def backgroundColor(self) -> Tuple[int, int, int]:
         """
@@ -121,13 +124,6 @@ class BusinessCardDisplayDefinition:
         return self.__minorVersion
 
     @property
-    def rawData(self) -> bytes:
-        """
-        The bytes used to generate this instance.
-        """
-        return self.__rawData
-
-    @property
     def templateID(self) -> BCTemplateID:
         """
         The layout of the business card.
@@ -138,7 +134,7 @@ class BusinessCardDisplayDefinition:
 
 class FieldInfo:
     def __init__(self, data : bytes, extraInfo : bytes):
-        self.__raw = data
+        self.__rawData = data
         unpacked = constants.st.ST_BC_FIELD_INFO.unpack(data)
         self.__textPropertyID = unpacked[0]
         self.__textFormat = BCTextFormat(unpacked[1])
@@ -153,6 +149,9 @@ class FieldInfo:
         self.__labelFontColor = (bitwiseAdjustedAnd(unpacked[6], 0xFF),
                             bitwiseAdjustedAnd(unpacked[6], 0xFF00),
                             bitwiseAdjustedAnd(unpacked[6], 0xFF0000))
+        
+    def toBytes(self) -> bytes:
+        return self.__rawData
 
     @property
     def fontSize(self) -> int:
@@ -192,13 +191,6 @@ class FieldInfo:
         The text of the label, if it exists.
         """
         return self.__labelText
-
-    @property
-    def rawData(self) -> bytes:
-        """
-        The bytes used to generate this instance.
-        """
-        return self.__raw
 
     @property
     def textFormat(self) -> BCTextFormat:

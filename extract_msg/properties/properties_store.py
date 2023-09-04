@@ -210,6 +210,9 @@ class PropertiesStore:
         """
         pprint.pprint(sorted(tuple(self.__props.keys())))
 
+    def toBytes(self) -> bytes:
+        return self.__rawData
+
     def values(self) -> Iterable[PropBase]:
         return self.__props.values()
 
@@ -291,13 +294,6 @@ class PropertiesStore:
         developer. Use `Properties.props` instead for a safe reference.
         """
         return self.__props
-
-    @property
-    def rawData(self) -> bytes:
-        """
-        The raw bytes used to create this object.
-        """
-        return self.__rawData
 
     @property
     def recipientCount(self) -> int:

@@ -3,9 +3,10 @@ __all__ = [
 ]
 
 
-from typing import Optional
+from typing import final, Optional
 
 
+@final
 class MonikerStream:
     def __init__(self, data : Optional[bytes]):
         if data:
@@ -16,7 +17,7 @@ class MonikerStream:
             self.__streamData = b''
 
     def toBytes(self) -> bytes:
-        pass # TODO
+        return self.__clsid + self.__streamData
 
     @property
     def clsid(self) -> bytes:
