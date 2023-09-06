@@ -24,7 +24,9 @@ from typing import (
     )
 
 from .. import constants
-from ..constants import DATE_FORMAT, DT_FORMAT, MSG_PATH, ps, SAVE_TYPE
+from ..constants import (
+        DATE_FORMAT, DT_FORMAT, MSG_PATH, OVERRIDE_CLASS, ps, SAVE_TYPE
+    )
 from ..attachments import (
         AttachmentBase, initStandardAttachment, SignedAttachment
     )
@@ -245,32 +247,6 @@ class MSGFile:
             sid = self.__ole._find(self.fixPath(filename, prefix))
 
         return self.__ole.direntries[sid]
-
-    def _getStream(self, filename : MSG_PATH, prefix : bool = True) -> Optional[bytes]:
-        """
-        Gets a binary representation of the requested filename.
-
-        This should ALWAYS return a bytes object if it was found, otherwise
-        returns None.
-        """
-        import warnings
-        warnings.warn(':method _getStream: has been deprecated and moved to the public api. Use :method getStream: instead (remove the underscore).', DeprecationWarning)
-        return self.getStream(filename, prefix)
-
-    def _getStringStream(self, filename : MSG_PATH, prefix : bool = True) -> Optional[str]:
-        """
-        Gets a string representation of the requested filename.
-
-        Rather than the full filename, you should only feed this function the
-        filename sans the type. So if the full name is "__substg1.0_001A001F",
-        the filename this function should receive should be "__substg1.0_001A".
-
-        This should ALWAYS return a string if it was found, otherwise returns
-        None.
-        """
-        import warnings
-        warnings.warn(':method _getStringStream: has been deprecated and moved to the public api. Use :method getStringStream: instead (remove the underscore).', DeprecationWarning)
-        return self.getStringStream(filename, prefix)
 
     def _getTypedAs(self, _id : str, overrideClass = None, preserveNone : bool = True):
         """
@@ -560,7 +536,7 @@ class MSGFile:
                 ret[index] = item.decode(self.stringEncoding)[:-1]
             return ret
 
-    def getNamedAs(self, propertyName : str, guid : str, overrideClass : Callable[[Any], _T]) -> Optional[_T]:
+    def getNamedAs(self, propertyName : str, guid : str, overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the named property, setting the class if specified.
 
@@ -583,7 +559,7 @@ class MSGFile:
         """
         return self.namedProperties.get((propertyName, guid), default)
 
-    def getPropertyAs(self, propertyName : Union[int, str], overrideClass : Callable[[Any], _T]) -> Optional[_T]:
+    def getPropertyAs(self, propertyName : Union[int, str], overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the property, setting the class if found.
 
@@ -666,7 +642,7 @@ class MSGFile:
             logger.info(f'Stream "{filename}" was requested but could not be found. Returning `None`.')
             return None
 
-    def getStreamAs(self, streamID : MSG_PATH, overrideClass : Callable[[Any], _T]) -> Optional[_T]:
+    def getStreamAs(self, streamID : MSG_PATH, overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the specified stream, modifying it to the specified class if it
         is found.
@@ -700,12 +676,13 @@ class MSGFile:
         """
         filename = self.fixPath(filename, prefix)
         if self.areStringsUnicode:
-            return windowsUnicode(self.getStream(filename + '001F', prefix = False))
+            tmp = self.getStream(filename + '001F', prefix = False)
         else:
             tmp = self.getStream(filename + '001E', prefix = False)
-            return None if tmp is None else tmp.decode(self.stringEncoding)
 
-    def getStringStreamAs(self, streamID : MSG_PATH, overrideClass : Callable[[Any], _T]) -> Optional[_T]:
+        return None if tmp is None else tmp.decode(self.stringEncoding)
+
+    def getStringStreamAs(self, streamID : MSG_PATH, overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the specified string stream, modifying it to the specified
         class if it is found.
@@ -1003,7 +980,7 @@ class MSGFile:
         return NamedProperties(self.named, self)
 
     @property
-    def overrideEncoding(self):
+    def overrideEncoding(self) -> Optional[str]:
         """
         Returns None is the encoding has not been overridden, otherwise returns
         the encoding.
@@ -1116,7 +1093,7 @@ class MSGFile:
             return self.__stringEncoding
 
     @property
-    def treePath(self) -> List[weakref.ReferenceType]:
+    def treePath(self) -> List[weakref.ReferenceType[Any]]:
         """
         A path, as a list of weak reference to the instances needed to get to
         this instance through the MSGFile-Attachment tree. These are weak

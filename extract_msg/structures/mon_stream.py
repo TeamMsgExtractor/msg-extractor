@@ -1,3 +1,4 @@
+# pyright: ignore[reportUnnecessaryIsInstance]
 __all__ = [
     'MonikerStream',
 ]
@@ -8,7 +9,7 @@ from typing import final, Optional
 
 @final
 class MonikerStream:
-    def __init__(self, data : Optional[bytes]):
+    def __init__(self, data : Optional[bytes] = None):
         if data:
             self.__clsid = data[:16]
             self.__streamData = data[16:]
@@ -26,9 +27,9 @@ class MonikerStream:
         capable of processing the stream data.
         """
         return self.__clsid
-    
+
     @clsid.setter
-    def setter(self, data : bytes) -> None:
+    def _(self, data : bytes) -> None:
         if not isinstance(data, bytes):
             raise TypeError('CLSID MUST be bytes.')
         if len(data) != 16:
@@ -41,10 +42,10 @@ class MonikerStream:
         An array of bytes that specifies the reference to the linked object.
         """
         return self.__streamData
-    
+
     @streamData.setter
-    def setter(self, data : bytes) -> None:
+    def _(self, data : bytes) -> None:
         if not isinstance(data, bytes):
             raise TypeError('Stream data MUST be bytes.')
         self.__streamData = data
-    
+

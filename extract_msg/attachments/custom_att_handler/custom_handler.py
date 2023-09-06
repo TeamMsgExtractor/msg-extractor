@@ -9,9 +9,9 @@ __all__ = [
 import abc
 import functools
 
-from typing import Any, Callable, Dict, Optional, TYPE_CHECKING, TypeVar
+from typing import Dict, Optional, TYPE_CHECKING, TypeVar
 
-from ...constants import MSG_PATH
+from ...constants import MSG_PATH, OVERRIDE_CLASS
 from ...structures.odt import ODTStruct
 from ...structures.ole_pres import OLEPresentationStream
 from ...structures.ole_stream_struct import OleStreamStruct
@@ -40,7 +40,7 @@ class CustomAttachmentHandler(abc.ABC):
         """
         return self.attachment.getStream('__substg1.0_3701000D/' + msgPathToString(path))
 
-    def getStreamAs(self, streamID : MSG_PATH, overrideClass : Callable[[Any], _T]) -> Optional[_T]:
+    def getStreamAs(self, streamID : MSG_PATH, overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the specified stream, modifying it to the specified class if it
         is found.

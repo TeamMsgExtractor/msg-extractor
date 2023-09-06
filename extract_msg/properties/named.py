@@ -52,7 +52,7 @@ class Named:
         entryStream = self.getStream('__substg1.0_00030102')
         self.guidStream = guidStream
         self.entryStream = entryStream
-        self.namesStream = self.getStream('__substg1.0_00040102')
+        self.namesStream = self.getStream('__substg1.0_00040102') or b''
 
         self.__propertiesDict : Dict[Tuple[str, str], NamedPropertyBase] = {}
         self.__properties : List[NamedPropertyBase] = []
@@ -129,20 +129,6 @@ class Named:
             raise ValueError(f'Failed to parse named property: length ({length}) of string overflows the string stream. This is probably due to a bad offset.')
 
         return self.namesStream[offset:offset + length].decode('utf-16-le')
-
-    def _getStream(self, filename : constants.MSG_PATH) -> Optional[bytes]:
-        """
-        Gets a binary representation of the requested filename.
-
-        This should ALWAYS return a bytes object if it was found, otherwise
-        returns None.
-
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
-        """
-        import warnings
-        warnings.warn(':method _getStream: has been deprecated and moved to the public api. Use :method getStream: instead (remove the underscore).', DeprecationWarning)
-        return self.getStream(filename)
 
     def exists(self, filename : constants.MSG_PATH) -> bool:
         """

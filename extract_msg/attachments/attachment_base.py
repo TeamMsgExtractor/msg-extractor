@@ -16,14 +16,12 @@ import weakref
 
 from functools import cached_property
 from typing import (
-        Any, Callable, List, Optional, Tuple, Type, TYPE_CHECKING, TypeVar,
-        Union
+        Any, List, Optional, Tuple, Type, TYPE_CHECKING, TypeVar, Union
     )
 
-from ..constants import MSG_PATH, SAVE_TYPE
+from ..constants import MSG_PATH, OVERRIDE_CLASS, SAVE_TYPE
 from ..enums import AttachmentType
 from ..properties.named import NamedProperties
-from ..properties.prop import FixedLengthProp
 from ..properties.properties_store import PropertiesStore
 from ..utils import (
         msgPathToString, tryGetMimetype, verifyPropertyId, verifyType
@@ -57,35 +55,6 @@ class AttachmentBase(abc.ABC):
         self.__props = propStore
         self.__namedProperties = NamedProperties(msg.named, self)
         self.__treePath = msg.treePath + [weakref.ref(self)]
-
-    def _getStream(self, filename : MSG_PATH) -> Optional[bytes]:
-        """
-        Gets a binary representation of the requested filename.
-
-        This should ALWAYS return a bytes object if it was found, otherwise
-        returns None.
-
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
-        """
-        import warnings
-        warnings.warn(':method _getStream: has been deprecated and moved to the public api. Use :method getStream: instead (remove the underscore).', DeprecationWarning)
-        return self.getStream(filename)
-
-    def _getStringStream(self, filename : MSG_PATH) -> Optional[str]:
-        """
-        Gets a string representation of the requested filename.
-        Checks for both ASCII and Unicode representations and returns
-        a value if possible.  If there are both ASCII and Unicode
-        versions, then :param prefer: specifies which will be
-        returned.
-
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
-        """
-        import warnings
-        warnings.warn(':method _getStringStream: has been deprecated and moved to the public api. Use :method getStringStream: instead (remove the underscore).', DeprecationWarning)
-        return self.getStringStream(filename)
 
     def _getTypedAs(self, _id : str, overrideClass = None, preserveNone : bool = True):
         """
@@ -245,7 +214,7 @@ class AttachmentBase(abc.ABC):
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
-        return msg.sExists([self.__dir, filename])
+        return msg.sExists([self.__dir, msgPathToString(filename)])
 
     def existsTypedProperty(self, id, _type = None) -> bool:
         """
@@ -302,7 +271,7 @@ class AttachmentBase(abc.ABC):
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
         return msg.getMultipleString([self.__dir, msgPathToString(filename)])
 
-    def getNamedAs(self, propertyName : str, guid : str, overrideClass : Callable[[Any], _T]) -> Optional[_T]:
+    def getNamedAs(self, propertyName : str, guid : str, overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the named property, setting the class if specified.
 
@@ -325,7 +294,7 @@ class AttachmentBase(abc.ABC):
         """
         return self.namedProperties.get((propertyName, guid), default)
 
-    def getPropertyAs(self, propertyName : Union[int, str], overrideClass : Callable[[Any], _T]) -> Optional[_T]:
+    def getPropertyAs(self, propertyName : Union[int, str], overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the property, setting the class if found.
 
@@ -402,7 +371,7 @@ class AttachmentBase(abc.ABC):
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
         return msg.getStream([self.__dir, msgPathToString(filename)])
 
-    def getStreamAs(self, streamID : MSG_PATH, overrideClass : Callable[[Any], _T]) -> Optional[_T]:
+    def getStreamAs(self, streamID : MSG_PATH, overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the specified stream, modifying it to the specified class if it
         is found.
@@ -435,7 +404,7 @@ class AttachmentBase(abc.ABC):
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
         return msg.getStringStream([self.__dir, msgPathToString(filename)])
 
-    def getStringStreamAs(self, streamID : MSG_PATH, overrideClass : Callable[[Any], _T]) -> Optional[_T]:
+    def getStringStreamAs(self, streamID : MSG_PATH, overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the specified string stream, modifying it to the specified
         class if it is found.
@@ -703,7 +672,7 @@ class AttachmentBase(abc.ABC):
         return self.getStringStream('__substg1.0_3704')
 
     @property
-    def treePath(self) -> List[weakref.ReferenceType]:
+    def treePath(self) -> List[weakref.ReferenceType[Any]]:
         """
         A path, as a tuple of instances, needed to get to this instance through
         the MSGFile-Attachment tree.

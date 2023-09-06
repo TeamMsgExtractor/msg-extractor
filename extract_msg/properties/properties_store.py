@@ -29,7 +29,7 @@ class PropertiesStore:
     Parser for msg properties files.
     """
 
-    def __init__(self, data : Optional[bytes], _type : Optional[PropertiesType] = None, skip : Optional[int] = None):
+    def __init__(self, data : Optional[bytes] = b'', _type : Optional[PropertiesType] = None, skip : Optional[int] = None):
         if not data:
             # If data comes back false, make sure is is empty bytes.
             data = b''

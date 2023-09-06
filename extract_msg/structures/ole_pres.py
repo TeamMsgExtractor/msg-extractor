@@ -37,7 +37,7 @@ class ClipboardFormatOrAnsiString:
         if self.markerOrLength > 0xFFFFFFFD:
             ret += constants.st.ST_LE_UI32.pack(self.clipboardFormat)
         elif self.markerOrLength > 0:
-            ret += self.ansiString
+            ret += self.__ansiString
         return ret
 
     @property
@@ -52,7 +52,7 @@ class ClipboardFormatOrAnsiString:
         return self.__ansiString
 
     @ansiString.setter
-    def setter(self, val : bytes) -> None:
+    def _(self, val : bytes) -> None:
         if not val:
             raise ValueError('Cannot set :property ansiString: to None or empty bytes. Set :property markerOrLength: to a value ')
 
@@ -69,7 +69,7 @@ class ClipboardFormatOrAnsiString:
         return self.__clipboardFormat
 
     @clipboardFormat.setter
-    def setter(self, val : ClipboardFormat) -> None:
+    def _(self, val : ClipboardFormat) -> None:
         if not val:
             raise ValueError('Cannot set clipboard format to None.')
         if self.markerOrLength < 0xFFFFFFFE:
@@ -88,7 +88,7 @@ class ClipboardFormatOrAnsiString:
         return self.__markerOrLength
 
     @markerOrLength.setter
-    def setter(self, val : int) -> None:
+    def _(self, val : int) -> None:
         if val < 0:
             raise ValueError('markerOrLength must be a positive integer.')
         if val > 0xFFFFFFFF:
@@ -125,7 +125,8 @@ class DevModeA:
         reader = BytesReader(data)
 
         try:
-            data = reader.readStruct(self.__parseStruct)
+            items = reader.readStruct(self.__parseStruct)
+            #TODO
         except IOError:
             return
 
@@ -133,6 +134,9 @@ class DevModeA:
 
     def __bool__(self) -> bool:
         return self.__valid
+
+    def toBytes(self) -> bytes:
+        pass # TODO
 
 
 
@@ -230,7 +234,7 @@ class DVTargetDevice:
         except struct.error:
             raise ValueError('DVTargetDevice structure contains too much data.')
         if self.__driverName:
-            ret += self.__driverName + 'b\x00'
+            ret += self.__driverName + b'\x00'
         if self.__deviceName:
             ret += self.__deviceName + b'\x00'
         if self.__portName:
@@ -249,7 +253,7 @@ class DVTargetDevice:
         return self.__driverName
 
     @driverName.setter
-    def setter(self, data : Optional[bytes]) -> None:
+    def _(self, data : Optional[bytes]) -> None:
         self.__driverName = None if not data else data
 
     @property
@@ -261,7 +265,7 @@ class DVTargetDevice:
         return self.__deviceName
 
     @deviceName.setter
-    def setter(self, data : Optional[bytes]) -> None:
+    def _(self, data : Optional[bytes]) -> None:
         self.__deviceName = None if not data else data
 
     @property
@@ -272,7 +276,7 @@ class DVTargetDevice:
         return self.__portName
 
     @portName.setter
-    def setter(self, data : Optional[bytes]) -> None:
+    def _(self, data : Optional[bytes]) -> None:
         self.__portName = None if not data else data
 
     @property
@@ -284,7 +288,7 @@ class DVTargetDevice:
         return self.__extDevMode
 
     @extDevMode.setter
-    def setter(self, data : Optional[DevModeA]) -> None:
+    def _(self, data : Optional[DevModeA]) -> None:
         self.__extDevMode = None if not data else data
 
 
@@ -301,7 +305,7 @@ class OLEPresentationStream:
     advf : Union[int, ADVF]
     width : int
     height : int
-    data : int
+    data : bytes
     reserved2 : Optional[bytes]
     tocSignature : int
     tocEntries : List[TOCEntry]
@@ -347,7 +351,7 @@ class OLEPresentationStream:
         self.tocSignature = reader.readUnsignedInt()
         self.tocEntries = []
         if self.tocSignature == 0x494E414E: # b'NANI' in little endian.
-            for x in range(reader.readUnsignedInt()):
+            for _ in range(reader.readUnsignedInt()):
                 self.tocEntries.append(TOCEntry(reader))
 
 

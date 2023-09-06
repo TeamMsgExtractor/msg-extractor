@@ -28,7 +28,9 @@ class OleStreamStruct:
         if rmsSize > 0:
             self.__rms = MonikerStream(reader.read(rmsSize))
 
-        # TODO implement the rest. It's all optional things.
+        if self.__flags & 1:
+            # Only check this stuff if this is not for an embedded object.
+            pass # TODO
 
     def toBytes(self) -> bytes:
         ret = b'\x01\x00\x00\x02'
@@ -44,15 +46,15 @@ class OleStreamStruct:
     @property
     def reservedMonikerStream(self) -> Optional[MonikerStream]:
         """
-
+        A MonikerStream structure that can contain any arbitrary value.
         """
         return self.__rms
 
     @reservedMonikerStream.setter
-    def setter(self, data : Optional[MonikerStream]) -> None:
+    def _(self, data : Optional[MonikerStream]) -> None:
         if data is not None and not isinstance(data, MonikerStream):
             raise TypeError('Reserved moniker stream must be a MonikerStream instance or None.')
-        
+
         self.__rms = data
-        
+
 

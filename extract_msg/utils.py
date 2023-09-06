@@ -45,7 +45,6 @@ __all__ = [
     'validateHtml',
     'verifyPropertyId',
     'verifyType',
-    'windowsUnicode',
 ]
 
 
@@ -1231,8 +1230,3 @@ def verifyType(_type) -> None:
     if _type is not None:
         if (_type not in constants.VARIABLE_LENGTH_PROPS_STRING) and (_type not in constants.FIXED_LENGTH_PROPS_STRING):
             raise UnknownTypeError(f'Unknown type {_type}.')
-
-
-def windowsUnicode(string) -> Optional[str]:
-    return str(string, 'utf-16-le') if string is not None else None
-

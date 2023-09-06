@@ -44,10 +44,15 @@ __all__ = [
 
 
 from datetime import datetime
-from typing import Dict, Final, List, Optional, Tuple, Union
+from typing import (
+        Any, Callable, Dict, Final, List, Optional, Tuple, Type, TypeVar, Union
+    )
 
 from . import ps, re, st
 from ..enums import SaveType
+
+
+_T = TypeVar('_T')
 
 
 # Constants for formating datetime objects.
@@ -61,7 +66,8 @@ HEADER_FORMAT_VALUE_TYPE = Union[str, Tuple[Union[str, None], bool], None]
 HEADER_FORMAT_TYPE = Optional[Dict[str, Union[HEADER_FORMAT_VALUE_TYPE, Dict[str, HEADER_FORMAT_VALUE_TYPE]]]]
 SAVE_TYPE = Tuple[SaveType, Union[List[str], str, None]]
 MSG_PATH = Union[str, List[str], Tuple[str]]
-
+# Type used for the getXAs methods' overrideClass argument.
+OVERRIDE_CLASS = Union[Type[_T], Callable[[Any], _T]]
 
 
 FIXED_LENGTH_PROPS : Final[Tuple[int, ...]] = (

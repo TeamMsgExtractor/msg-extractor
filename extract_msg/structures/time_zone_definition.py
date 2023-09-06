@@ -30,7 +30,7 @@ class TimeZoneDefinition:
         cchKeyName = reader.readUnsignedShort()
         self.__keyName = reader.read(2 * cchKeyName).decode('utf-16-le')
         cRules = reader.readUnsignedShort()
-        if len(cRules) < 1 or len(cRules) > 1024:
+        if cRules < 1 or cRules > 1024:
             raise ValueError('Value for cRules was out of range.')
         self.__rules = [reader.readClass(TZRule) for _ in range(cRules)]
 
@@ -59,11 +59,11 @@ class TimeZoneDefinition:
         return self.__keyName
 
     @keyName.setter
-    def setter(self, value : str) -> None:
+    def _(self, value : str) -> None:
         value = str(value)
         if len(value) > 260:
             raise ValueError('Key name must be a string less than 261 characters.')
-        
+
         self.__keyName = value
 
     @property
@@ -72,14 +72,14 @@ class TimeZoneDefinition:
         The major version.
         """
         return self.__majorVersion
-    
+
     @majorVersion.setter
-    def setter(self, value : int) -> None:
+    def _(self, value : int) -> None:
         if value > 255:
             raise ValueError('Major version cannot be greater than 255')
         if value < 0:
             raise ValueError('Major version must be positive.')
-        
+
         self.__minorVersion = value
 
     @property
@@ -88,14 +88,14 @@ class TimeZoneDefinition:
         The minor version.
         """
         return self.__minorVersion
-    
+
     @minorVersion.setter
-    def setter(self, value : int) -> None:
+    def _(self, value : int) -> None:
         if value > 255:
             raise ValueError('Minor version cannot be greater than 255')
         if value < 0:
             raise ValueError('Minor version must be positive.')
-        
+
         self.__minorVersion = value
 
     @property
