@@ -3,6 +3,8 @@ __all__ = [
 ]
 
 
+from typing import Optional
+
 from .. import constants
 
 
@@ -20,7 +22,8 @@ class SystemTime:
     second : int = 0
     milliseconds : int = 0
 
-    def __init__(self, data : bytes):
+    def __init__(self, data : Optional[bytes] = None):
+        data = data or (b'\x00' * 1)
         self.unpack(data)
 
     def __eq__(self, other) -> bool:
@@ -29,7 +32,7 @@ class SystemTime:
     def __ne__(self, other) -> bool:
         return not self.__eq__(other)
 
-    def pack(self) -> bytes:
+    def toBytes(self) -> bytes:
         """
         Packs the current data into bytes.
         """
