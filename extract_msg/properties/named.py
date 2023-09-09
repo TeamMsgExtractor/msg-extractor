@@ -48,8 +48,8 @@ class Named:
     def __init__(self, msg : MSGFile):
         self.__msg = weakref.ref(msg)
         # Get the basic streams. If all are emtpy, then nothing to do.
-        guidStream = self.getStream('__substg1.0_00020102')
-        entryStream = self.getStream('__substg1.0_00030102')
+        guidStream = self.getStream('__substg1.0_00020102') or b''
+        entryStream = self.getStream('__substg1.0_00030102') or b''
         self.guidStream = guidStream
         self.entryStream = entryStream
         self.namesStream = self.getStream('__substg1.0_00040102') or b''
@@ -223,7 +223,7 @@ class NamedProperties:
         self.__named = named
         self.__streamSource = weakref.ref(streamSource)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item : Union[Tuple[str, str], NamedPropertyBase]):
         """
         Get a named property using the [] operator. Item must be a named
         property instance or a tuple with 2 items: the name and the GUID string.
@@ -238,7 +238,7 @@ class NamedProperties:
         else:
             return source._getTypedData(self.__named[item].propertyStreamID)
 
-    def get(self, item, default : _T = None) -> Union[Any, _T]:
+    def get(self, item : Union[Tuple[str, str], NamedPropertyBase], default : _T = None) -> Union[Any, _T]:
         """
         Get a named property, returning the value of :param default: if not
         found. Item must be a tuple with 2 items: the name and the GUID string.
@@ -254,7 +254,7 @@ class NamedProperties:
 
 
 class NamedPropertyBase(abc.ABC):
-    def __init__(self, entry : Dict):
+    def __init__(self, entry : Dict[str, Any]):
         self.__entry = entry
         self.__guidIndex = entry['guid_index']
         self.__namedPropertyID = entry['pid']
@@ -290,7 +290,7 @@ class NamedPropertyBase(abc.ABC):
         return self.__propertyStreamID
 
     @property
-    def rawEntry(self) -> Dict:
+    def rawEntry(self) -> Dict[str, Any]:
         return copy.deepcopy(self.__entry)
 
     @property

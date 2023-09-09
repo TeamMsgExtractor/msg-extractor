@@ -72,8 +72,8 @@ import tzlocal
 
 from html import escape as htmlEscape
 from typing import (
-        Any, Callable, Dict, Iterable, List, Optional, Sequence, TypeVar,
-        TYPE_CHECKING, Union
+        Any, AnyStr, Callable, Dict, Iterable, List, Optional, Sequence,
+        TypeVar, TYPE_CHECKING, Union
     )
 
 from . import constants
@@ -231,7 +231,7 @@ def dictGetCasedKey(_dict : Dict[str, Any], key : str) -> str:
         raise KeyError(key)
 
 
-def divide(string, length : int) -> List:
+def divide(string : AnyStr, length : int) -> List[AnyStr]:
     """
     Divides a string into multiple substrings of equal length. If there is not
     enough for the last substring to be equal, it will simply use the rest of
@@ -674,7 +674,7 @@ def msgPathToString(inp : Union[str, Iterable[str]]) -> str:
     return inp
 
 
-def parseType(_type : int, stream, encoding, extras):
+def parseType(_type : int, stream : Union[int, bytes], encoding : str, extras : Sequence[bytes]):
     """
     Converts the data in :param stream: to a much more accurate type, specified
     by :param _type:.
@@ -746,7 +746,7 @@ def parseType(_type : int, stream, encoding, extras):
     elif _type == 0x0048:  # PtypGuid
         return bytesToGuid(value)
     elif _type == 0x00FB:  # PtypServerId
-        count = constants.st.ST_LE_UI16.unpack(value[:2])
+        count = constants.st.ST_LE_UI16.unpack(value[:2])[0]
         # If the first byte is a 1 then it uses the ServerID structure.
         if value[3] == 1:
             from .structures.misc_id import ServerID
@@ -1221,7 +1221,7 @@ def verifyPropertyId(id : str) -> None:
             raise InvaildPropertyIdError('ID was not a 4 digit hexadecimal string')
 
 
-def verifyType(_type) -> None:
+def verifyType(_type : Optional[str]) -> None:
     """
     Verifies that the type is valid. Raises an exception if it is not.
 

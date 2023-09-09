@@ -3,7 +3,7 @@ from __future__ import annotations
 
 __all__ = [
     # Classes:
-    'FixedLengthProp'
+    'FixedLengthProp',
     'PropBase',
     'VariableLengthProp',
 
@@ -84,9 +84,9 @@ class FixedLengthProp(PropBase):
 
     def __init__(self, data : bytes):
         super().__init__(data)
-        self.__value = self.parseType(self.type, constants.st.STFIX.unpack(data)[0])
+        self.__value = self._parseType(self.type, constants.st.STFIX.unpack(data)[0], data)
 
-    def parseType(self, _type : int, stream : bytes) -> Any:
+    def _parseType(self, _type : int, stream : bytes, raw : bytes) -> Any:
         """
         Converts the data in :param stream: to a much more accurate type,
         specified by :param _type:, if possible.
@@ -104,11 +104,11 @@ class FixedLengthProp(PropBase):
                 logger.warning('Property type is PtypNull, but is not equal to 0.')
             value = None
         elif _type == 0x0002: # PtypInteger16
-            value = constants.st.ST_LE_I16.unpack(value)[0]
+            value = constants.st.ST_LE_I16.unpack(value[:3])[0]
         elif _type == 0x0003: # PtypInteger32
-            value = constants.st.ST_LE_I32.unpack(value)[0]
+            value = constants.st.ST_LE_I32.unpack(value[:4])[0]
         elif _type == 0x0004: # PtypFloating32
-            value = constants.st.ST_LE_F32.unpack(value)[0]
+            value = constants.st.ST_LE_F32.unpack(value[:4])[0]
         elif _type == 0x0005: # PtypFloating64
             value = constants.st.ST_LE_F64.unpack(value)[0]
         elif _type == 0x0006: # PtypCurrency
@@ -117,7 +117,7 @@ class FixedLengthProp(PropBase):
             value = constants.st.ST_LE_F64.unpack(value)[0]
             return constants.PYTPFLOATINGTIME_START + datetime.timedelta(days = value)
         elif _type == 0x000A: # PtypErrorCode
-            value = constants.st.ST_LE_I32.unpack(value)[0]
+            value = constants.st.ST_LE_UI32.unpack(value[:4])[0]
             try:
                 value = ErrorCodeType(value)
             except ValueError:
@@ -137,8 +137,8 @@ class FixedLengthProp(PropBase):
             rawTime = constants.st.ST_LE_UI64.unpack(value)[0]
             try:
                 value = filetimeToDatetime(rawTime)
-            except ValueError as e:
-                logger.exception(self.rawData)
+            except ValueError:
+                logger.exception(raw)
         elif _type == 0x0048:  # PtypGuid
             # TODO parsing for this
             pass

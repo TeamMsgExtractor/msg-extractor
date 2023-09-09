@@ -44,7 +44,7 @@ from ..properties.properties_store import PropertiesStore
 from ..structures.contact_link_entry import ContactLinkEntry
 from ..utils import (
         divide, guessEncoding, hasLen, inputToMsgPath, makeWeakRef,
-        msgPathToString, parseType, verifyPropertyId, verifyType, windowsUnicode
+        msgPathToString, parseType, verifyPropertyId, verifyType
     )
 
 
@@ -110,20 +110,20 @@ class MSGFile:
         specific exceptions was raised.
         """
         # Retrieve all the kwargs that we need.
-        self.__inscFeat = kwargs.get('insecureFeatures', InsecureFeatures.NONE)
-        prefix = cast(str, kwargs.get('prefix', ''))
+        self.__inscFeat : InsecureFeatures = kwargs.get('insecureFeatures', InsecureFeatures.NONE)
+        prefix : str = cast(str, kwargs.get('prefix', ''))
         self.__parentMsg = makeWeakRef(cast(MSGFile, kwargs.get('parentMsg')))
-        self.__treePath = kwargs.get('treePath', []) + [makeWeakRef(self)]
+        self.__treePath = kwargs.get('treePath', []) + [weakref.ref(self)]
         # Verify it is a valid class.
         if self.__parentMsg and not isinstance(self.__parentMsg(), MSGFile):
             raise TypeError(':param parentMsg: must be an instance of MSGFile or a subclass.')
-        filename = kwargs.get('filename', None)
-        overrideEncoding = kwargs.get('overrideEncoding', None)
+        filename = kwargs.get('filename')
+        overrideEncoding = kwargs.get('overrideEncoding')
 
         # WARNING DO NOT MANUALLY MODIFY PREFIX. Let the program set it.
         self.__path = path
         self.__initAttachmentFunc = kwargs.get('initAttachment', initStandardAttachment)
-        self.__attachmentsDelayed = kwargs.get('delayAttachments', False)
+        self.__attachmentsDelayed = bool(kwargs.get('delayAttachments', False))
         self.__attachmentsReady = False
         self.__errorBehavior = ErrorBehavior(kwargs.get('errorBehavior', ErrorBehavior.THROW))
         self.__dateFormat = kwargs.get('dateFormat', DATE_FORMAT)
@@ -309,7 +309,7 @@ class MSGFile:
 
         return True, ret
 
-    def _getTypedStream(self, filename : MSG_PATH, prefix : bool = True, _type = None) -> Tuple[bool, Optional[Any]]:
+    def _getTypedStream(self, filename : MSG_PATH, prefix : bool = True, _type : Optional[str] = None) -> Tuple[bool, Optional[Any]]:
         """
         Gets the contents of the specified stream as the type that it is
         supposed to be.
@@ -335,7 +335,7 @@ class MSGFile:
                     continue
                 if len(contents) == 0:
                     return True, None # We found the file, but it was empty.
-                extras = []
+                extras : List[bytes]= []
                 _type = x[-4:]
                 if x[-4] == '1': # It's a multiple
                     if _type in ('101F', '101E'):
