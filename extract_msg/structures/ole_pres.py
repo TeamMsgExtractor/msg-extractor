@@ -9,7 +9,7 @@ __all__ = [
 
 import struct
 
-from typing import List, Optional, Union
+from typing import List, Final, Optional, Union
 
 from .. import constants
 from ._helpers import BytesReader
@@ -113,7 +113,7 @@ class DevModeA:
     converting to bool. If no data is prodided, the fields are set to default
     values.
     """
-    __parseStruct = struct.Struct('<32s32s4HI13H14xI4x4I16x')
+    PARSE_STRUCT : Final[struct.Struct] = struct.Struct('<32s32s4HI13H14xI4x4I16x')
 
     def __init__(self, data : Optional[bytes]):
         self.__valid = data is None
@@ -126,7 +126,8 @@ class DevModeA:
         reader = BytesReader(data)
 
         try:
-            items = reader.readStruct(self.__parseStruct)
+            items = reader.readStruct(self.PARSE_STRUCT)
+            # Double check these are the right indexes.
             self.__specVersion = items[0]
             self.__driverVersion = items[1]
             self.__size = items[2]
