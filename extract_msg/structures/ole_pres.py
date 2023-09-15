@@ -110,7 +110,8 @@ class DevModeA:
     """
     A DEVMODEA structure, as specified in [MS-OLEDS]. For the purposes of
     parsing from bytes, if something goes wrong this will evaluate to False when
-    converting to bool. If no data is prodided
+    converting to bool. If no data is prodided, the fields are set to default
+    values.
     """
     __parseStruct = struct.Struct('<32s32s4HI13H14xI4x4I16x')
 
@@ -126,7 +127,10 @@ class DevModeA:
 
         try:
             items = reader.readStruct(self.__parseStruct)
-            #TODO
+            self.__specVersion = items[0]
+            self.__driverVersion = items[1]
+            self.__size = items[2]
+            # TODO
         except IOError:
             return
 
@@ -215,15 +219,15 @@ class DVTargetDevice:
         currentPosition = 8
 
         offset1 = 8 if self.__driverName else 0
-        if offset1:
+        if self.__driverName:
             currentPosition += len(self.__driverName) + 1
 
         offset2 = currentPosition if self.__deviceName else 0
-        if offset2:
+        if self.__deviceName:
             currentPosition += len(self.__deviceName) + 1
 
         offset3 = currentPosition if self.__portName else 0
-        if offset3:
+        if self.__portName:
             currentPosition += len(self.__portName) + 1
 
         extDevModeBytes = self.__extDevMode.toBytes() if self.__extDevMode else None
@@ -336,7 +340,7 @@ class OLEPresentationStream:
         self.advf = reader.readUnsignedInt()
 
         # Reserved1.
-        reader.readUnsignedInt()
+        reader.read(4)
 
         self.width = reader.readUnsignedInt()
         self.height = reader.readUnsignedInt()
@@ -360,5 +364,16 @@ class TOCEntry:
     def __init__(self, reader : Union[bytes, BytesReader]):
         if isinstance(reader, bytes):
             reader = BytesReader(reader)
-
+            self.__clipFormat = ClipboardFormatOrAnsiString(reader)
+            targetDeviceSize = reader.readUnsignedInt()
+            self.__aspect = reader.readUnsignedInt()
+            self.__lindex = reader.readUnsignedInt()
+            self.__tymed = reader.readUnsignedInt()
+            reader.read(4)
+            self.__advf = reader.readUnsignedInt()
+            reader.read(4)
+            if targetDeviceSize == 0:
+                self.__targetDevice = None
+            else:
+                self.__targetDevice = DVTargetDevice(reader.read(targetDeviceSize))
         # TODO

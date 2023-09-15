@@ -1248,7 +1248,7 @@ class MessageBase(MSGFile):
         return [Recipient(recipientDir, self, self.recipientTypeClass) for recipientDir in recipientDirs]
 
     @property
-    def recipientTypeClass() -> Type[enum.IntEnum]:
+    def recipientTypeClass(self) -> Type[enum.IntEnum]:
         """
         The class to use for a recipient's recipientType property.
 
