@@ -7,6 +7,8 @@ __all__ = [
 ]
 
 
+import enum
+import logging
 import struct
 
 from typing import List, Final, Optional, Union
@@ -14,6 +16,10 @@ from typing import List, Final, Optional, Union
 from .. import constants
 from ._helpers import BytesReader
 from ..enums import ADVF, ClipboardFormat, DVAspect
+
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class ClipboardFormatOrAnsiString:
@@ -113,7 +119,7 @@ class DevModeA:
     converting to bool. If no data is prodided, the fields are set to default
     values.
     """
-    PARSE_STRUCT : Final[struct.Struct] = struct.Struct('<32s32s4HI13H14xI4x4I16x')
+    PARSE_STRUCT : Final[struct.Struct] = struct.Struct('<32s32s4HI13h14xI4x4I16x')
 
     def __init__(self, data : Optional[bytes]):
         self.__valid = data is None
@@ -127,10 +133,17 @@ class DevModeA:
 
         try:
             items = reader.readStruct(self.PARSE_STRUCT)
-            # Double check these are the right indexes.
-            self.__specVersion = items[0]
-            self.__driverVersion = items[1]
-            self.__size = items[2]
+            self.__deviceName = items[0]
+            self.__formName = items[1]
+            self.__specVersion = items[2]
+            self.__driverVersion = items[3]
+            if items[4] != self.PARSE_STRUCT.size:
+                logger.warn(f'Unexpected `size` field for DevModeA detected ({items[4]})')
+            self.__diverExtra = items[5]
+            self.__fields = _DevModeFields(items[6])
+            # TODO fields specifies if we should read the field or ignore it.
+            self.__orientation = items[7]
+            self.__paperSize = items[8]
             # TODO
         except IOError:
             return
@@ -145,6 +158,11 @@ class DevModeA:
 
 
 
+class _DevModeFields(enum.IntFlag):
+    DM_NUP = 0b00000000000000000000000000000000
+    DM_SCALE = 0b00000000000000000000000000000000
+    DM_ICMINTENT = 0b00000000000000000000000000000000
+    # TODO
 
 class DVTargetDevice:
     """

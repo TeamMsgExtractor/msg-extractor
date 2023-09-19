@@ -24,6 +24,7 @@ __all__ = [
     'DeencapType',
     'DirectoryEntryType',
     'DisplayType',
+    'DMPaperSize',
     'DVAspect',
     'ElectronicAddressProperties',
     'EntryIDType',
@@ -480,6 +481,33 @@ class DisplayType(enum.IntEnum):
     TEMPLATE = 0x0101
     ADDRESS_TEMPLATE = 0x0102
     SEARCH = 0x0200
+
+
+
+class DMPaperSize:
+    DMPAPER_LETTER = 0x0001
+    DMPAPER_LEGAL = 0x0005
+    DMPAPER_A3 = 0x0008
+    DMPAPER_A4 = 0x0009
+    DMPAPER_A4SMALL = 0x000A
+    DMPAPER_A5 = 0x000B
+    DMPAPER_B4 = 0x000C
+    DMPAPER_B5 = 0x000D
+    DMPAPER_10X14 = 0x0010
+    DMPAPER_11X17 = 0x0011
+    DMPAPER_CSHEET = 0x0018
+    DMPAPER_DBL_JAPANESE_POSTCARD = 0x0045
+    DMPAPER_A6 = 0x0046
+    DMPAPER_A3_ROTATED = 0x004C
+    DMPAPER_A4_ROTATED = 0x004D
+    DMPAPER_A5_ROTATED = 0x004E
+    DMPAPER_B4_JIS_ROTATED = 0x004F
+    DMPAPER_B5_JIS_ROTATED = 0x0050
+    DMPAPER_A6_ROTATED = 0x0053
+    DMPAPER_B6_JIS = 0x0058
+    DMPAPER_B6_JIS_ROTATED = 0x0059
+    DMPAPER_12X11 = 0x005A
+    # TODO
 
 
 
