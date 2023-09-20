@@ -14,4 +14,4 @@ USER_TEST_DIR = None
 if bool(userTestDir := os.environ.get('EXTRACT_MSG_TEST_DIR')):
     userTestDir = Path(userTestDir)
     if userTestDir.exists():
-        USER_TEST_DIR = userTestDir
+        USER_TEST_DIR = userTestDir # type: ignore
