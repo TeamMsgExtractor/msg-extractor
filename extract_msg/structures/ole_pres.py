@@ -121,12 +121,36 @@ class DevModeA:
     """
     PARSE_STRUCT : Final[struct.Struct] = struct.Struct('<32s32s4HI13h14xI4x4I16x')
 
-    def __init__(self, data : Optional[bytes]):
+    def __init__(self, data : Optional[bytes] = None):
         self.__valid = data is None
+        
+        # Set default values for fields that may not be initialized.
+        self.__orientation = 0
+        self.__paperSize = 0
+        self.__paperLength = 0
+        self.__paperWidth = 0
+        self.__scale = 0
+        self.__copies = 0
+        self.__defaultSource = 0
+        self.__printQuality = 0
+        self.__color = 0
+        self.__duplex = 0
+        self.__yResolution = 0
+        self.__ttOption = 0
+        self.__collate = 0
+        self.__nup = 0
+        self.__icmMethod = 0
+        self.__icmIntent = 0
+        self.__mediaType = 0
+        self.__ditherType = 0
+
         if self.__valid:
             self.__deviceName = b'\x00' * 32
             self.__formName = b'\x00' * 32
-            # TODO set all properties to null values.
+            self.__specVersion = 0
+            self.__driverVersion = 0
+            self.__driverExtra = 0
+            self.__fields = _DevModeFields[0]
             return
 
         reader = BytesReader(data)
@@ -139,12 +163,45 @@ class DevModeA:
             self.__driverVersion = items[3]
             if items[4] != self.PARSE_STRUCT.size:
                 logger.warn(f'Unexpected `size` field for DevModeA detected ({items[4]})')
-            self.__diverExtra = items[5]
+            self.__driverExtra = items[5]
             self.__fields = _DevModeFields(items[6])
             # TODO fields specifies if we should read the field or ignore it.
-            self.__orientation = items[7]
-            self.__paperSize = items[8]
-            # TODO
+            if _DevModeFields.DM_ORIENTATION in self.__fields:
+                self.__orientation = items[7]
+            if _DevModeFields.DM_PAPERSIZE in self.__fields:
+                self.__paperSize = items[8]
+            if _DevModeFields.DM_PAPERLENGTH in self.__fields:
+                self.__paperLength = items[9]
+            if _DevModeFields.DM_PAPERWIDTH in self.__fields:
+                self.__paperWidth = items[10]
+            if _DevModeFields.DM_SCALE in self.__fields:
+                self.__scale = items[11]
+            if _DevModeFields.DM_COPIES in self.__fields:
+                self.__copies = items[12]
+            if _DevModeFields.DM_DEFAULTSOURCE in self.__fields:
+                self.__defaultSource = items[13]
+            if _DevModeFields.DM_PRINTQUALITY in self.__fields:
+                self.__printQuality = items[14]
+            if _DevModeFields.DM_COLOR in self.__fields:
+                self.__color = items[15]
+            if _DevModeFields.DM_DUPLEX in self.__fields:
+                self.__duplex = items[16]
+            if _DevModeFields.DM_YRESOLUTION in self.__fields:
+                self.__yResolution = items[17]
+            if _DevModeFields.DM_TTOPTION in self.__fields:
+                self.__ttOption = items[18]
+            if _DevModeFields.DM_COLLATE in self.__fields:
+                self.__collate = items[19]
+            if _DevModeFields.DM_NUP in self.__fields:
+                self.__nup = items[20]
+            if _DevModeFields.DM_ICMMETHOD in self.__fields:
+                self.__icmMethod = items[21]
+            if _DevModeFields.DM_ICMINTENT in self.__fields:
+                self.__icmIntent = items[22]
+            if _DevModeFields.DM_MEDIATYPE in self.__fields:
+                self.__mediaType = items[23]
+            if _DevModeFields.DM_DITHERTYPE in self.__fields:
+                self.__ditherType = items[24]
         except IOError:
             return
 
@@ -154,15 +211,58 @@ class DevModeA:
         return self.__valid
 
     def toBytes(self) -> bytes:
-        pass # TODO
+        return self.PARSE_STRUCT.pack(
+                                     self.__deviceName,
+                                     self.__formName,
+                                     self.__specVersion,
+                                     self.__driverVersion,
+                                     self.PARSE_STRUCT.size,
+                                     self.__driverExtra,
+                                     self.__fields,
+                                     self.__orientation,
+                                     self.__paperSize,
+                                     self.__paperLength,
+                                     self.__paperWidth,
+                                     self.__scale,
+                                     self.__copies,
+                                     self.__defaultSource,
+                                     self.__printQuality,
+                                     self.__color,
+                                     self.__duplex,
+                                     self.__yResolution,
+                                     self.__ttOption,
+                                     self.__collate,
+                                     self.__nup,
+                                     self.__icmMethod,
+                                     self.__icmIntent,
+                                     self.__mediaType,
+                                     self.__ditherType,
+                                     )
 
 
 
 class _DevModeFields(enum.IntFlag):
-    DM_NUP = 0b00000000000000000000000000000000
-    DM_SCALE = 0b00000000000000000000000000000000
-    DM_ICMINTENT = 0b00000000000000000000000000000000
-    # TODO
+    DM_NUP           = 0b00000000000000000000000000000010
+    DM_SCALE         = 0b00000000000000000000000000001000
+    DM_PAPERWIDTH    = 0b00000000000000000000000000010000
+    DM_PAPERLENGTH   = 0b00000000000000000000000000100000
+    DM_PAPERSIZE     = 0b00000000000000000000000001000000
+    DM_ORIENTATION   = 0b00000000000000000000000010000000
+    DM_COLLATE       = 0b00000000000000000000000100000000
+    DM_TTOPTION      = 0b00000000000000000000001000000000
+    DM_YRESOLUTION   = 0b00000000000000000000010000000000
+    DM_DUPLEX        = 0b00000000000000000000100000000000
+    DM_COLOR         = 0b00000000000000000001000000000000
+    DM_PRINTQUALITY  = 0b00000000000000000010000000000000
+    DM_DEFAULTSOURCE = 0b00000000000000000100000000000000
+    DM_COPIES        = 0b00000000000000001000000000000000
+    DM_ICMMETHOD     = 0b00000000000000010000000000000000
+    DM_FORMNAME      = 0b00000000100000000000000000000000
+    DM_DITHERTYPE    = 0b00100000000000000000000000000000
+    DM_MEDIATYPE     = 0b01000000000000000000000000000000
+    DM_ICMINTENT     = 0b10000000000000000000000000000000
+
+
 
 class DVTargetDevice:
     """
