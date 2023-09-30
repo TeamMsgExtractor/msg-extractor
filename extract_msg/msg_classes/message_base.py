@@ -1033,7 +1033,7 @@ class MessageBase(MSGFile):
             # Fix an issue with prefixed headers not parsing correctly.
             if headerText.startswith('Microsoft Mail Internet Headers Version 2.0'):
                 headerText = headerText[43:].lstrip()
-            header = HeaderParser(policy = policy.default).parsestr(headerText)
+            header = HeaderParser(policy = policy.compat32).parsestr(headerText)
         else:
             logger.info('Header is empty or was not found. Header will be generated from other streams.')
             header = HeaderParser(policy = policy.default).parsestr('')
