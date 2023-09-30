@@ -43,8 +43,8 @@
 * Removed all instances of the `rawData` property in favor of the `toBytes` method. For now, many of these will simply return the raw data used, specifically those that are still unmodifiable. Any whose properties have the ability to be modified will have properly implemented versions. These classes also allow `None` to be passed as the value for their data, which will be the default if no arguments have been passed to the constructor. If no arguments or `None` is given as the data, it will create a new instance with default values. This is all in an effort to move towards the ability to create new MSG files and the `MSGWriter` class. All `toBytes` methods will either exclusively return `bytes` or will return `None` to specify that the structure isn't valid to convert to bytes. Structures that may be invalid will be annotated as `Optional[bytes]` for the return type.
 * Removed the individual `PropBase` flag properties and changed the main `flags` property to return an enum containing the flags.
 * Changed various data structs to allow modification and creation of new instances for writing to an MSG file.
-* changed `TZRule` to use unsigned values where applicable.
-* Changed `TZRule` to require the 14 null bytes (I noticed there is a note about outlook violating that standard and will look into it).
+* Changed `TZRule` to use unsigned values where applicable.
+* Changed `TZRule` to require the 14 null bytes (I commented it out completely on accident instead of swapping it to a plain read). It now logs a warning about the bytes not being null.
 * Removed unneeded function `windowsUnicode`.
 * Moved `FixedLengthProperty.parseType` to the private API. This was not intended for external use anyways, so leaving it as public API didn't make sense.
 

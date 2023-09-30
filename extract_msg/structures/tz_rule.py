@@ -3,12 +3,18 @@ __all__ = [
 ]
 
 
+import logging
+
 from struct import Struct
 from typing import Final, final, Optional
 
 from ..enums import TZFlag
 from ._helpers import BytesReader
 from .system_time import SystemTime
+
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 @final
@@ -39,7 +45,10 @@ class TZRule:
         reader.assertRead(b'\x3E\x00')
         self.__flags = TZFlag(reader.readUnsignedShort())
         self.__year = reader.readUnsignedShort()
-        reader.assertNull(14)
+        # This *MUST* be null, however I've seen Outlook not follow that. Simply
+        # log a warning about it even though it's a violation.
+        if any(b := reader.read(14)):
+            logger.warning(f'Read TZRule with non-null X section (got {b}).')
         self.__bias = reader.readInt()
         self.__standardBias = reader.readInt()
         self.__daylightBias = reader.readInt()
@@ -48,8 +57,8 @@ class TZRule:
 
     def toBytes(self) -> bytes:
         return self.__struct.pack(self.__majorVersion,
-                                  self.__minorVersion, 
-                                  62, 
+                                  self.__minorVersion,
+                                  62,
                                   0,
                                   self.__flags,
                                   self.__year,
