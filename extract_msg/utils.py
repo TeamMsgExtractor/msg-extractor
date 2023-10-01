@@ -192,9 +192,9 @@ def createZipOpen(func) -> Callable:
     Creates a wrapper for the open function of a ZipFile that will automatically
     set the current date as the modified time to the current time.
     """
-    def _open(name, mode, *args, **kwargs):
+    def _open(name, mode = 'r', *args, **kwargs):
         if mode == 'w':
-            name = zipfile.ZipInfo(name, datetime.datetime.now().timetuple())
+            name = zipfile.ZipInfo(name, datetime.datetime.now().timetuple()[:6])
 
         return func(name, mode, *args, **kwargs)
 

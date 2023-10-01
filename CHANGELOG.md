@@ -47,6 +47,7 @@
 * Changed `TZRule` to require the 14 null bytes (I commented it out completely on accident instead of swapping it to a plain read). It now logs a warning about the bytes not being null.
 * Removed unneeded function `windowsUnicode`.
 * Moved `FixedLengthProperty.parseType` to the private API. This was not intended for external use anyways, so leaving it as public API didn't make sense.
+* Fixed check for type in `ContactAddressEntryID` being the wrong value.
 
 **v0.45.0**
 * BREAKING: Changed parsing of string multiple properties to remove the trailing null byte. This *will* cause the output of parsing them to differ.

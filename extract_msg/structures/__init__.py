@@ -7,6 +7,7 @@ __all__ = [
     '_helpers',
     'contact_link_entry',
     'business_card',
+    'dev_mode_a',
     'entry_id',
     'misc_id',
     'odt',
@@ -21,7 +22,7 @@ __all__ = [
 ]
 
 from . import (
-        _helpers, contact_link_entry, business_card, entry_id, misc_id, odt, 
-        ole_pres, ole_stream_struct, recurrence_pattern, report_tag, 
+        _helpers, contact_link_entry, dev_mode_a, business_card, entry_id, misc_id, odt,
+        ole_pres, ole_stream_struct, recurrence_pattern, report_tag,
         system_time, time_zone_definition, time_zone_struct, tz_rule
     )

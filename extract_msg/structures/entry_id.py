@@ -200,7 +200,7 @@ class ContactAddressEntryID(EntryID):
         reader = BytesReader(data[20:])
         if (version := reader.readUnsignedInt()) != 3:
             raise ValueError(f'Version must be 3 (got {version}).')
-        if (type_ := reader.readUnsignedInt()) != 5:
+        if (type_ := reader.readUnsignedInt()) != 4:
             raise ValueError(f'Type must be 4 (got {type_}).')
         self.__index = ContactAddressIndex(reader.readUnsignedInt())
         self.__entryIdCount = reader.readUnsignedInt()
