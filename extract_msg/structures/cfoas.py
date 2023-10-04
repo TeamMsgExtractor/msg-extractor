@@ -48,7 +48,7 @@ class ClipboardFormatOrAnsiString:
     @ansiString.setter
     def _(self, val : bytes) -> None:
         if not val:
-            raise ValueError('Cannot set :property ansiString: to None or empty bytes. Set :property markerOrLength: to a value ')
+            raise ValueError('Cannot set :property ansiString: to None or empty bytes.')
 
         self.__ansiString = val
 
@@ -84,9 +84,9 @@ class ClipboardFormatOrAnsiString:
     @markerOrLength.setter
     def _(self, val : int) -> None:
         if val < 0:
-            raise ValueError('markerOrLength must be a positive integer.')
+            raise ValueError(':property markerOrLength: must be a positive integer.')
         if val > 0xFFFFFFFF:
-            raise ValueError('markerOrLength must be a 4 byte unsigned integer.')
+            raise ValueError(':property markerOrLength: must be a 4 byte unsigned integer.')
 
         if val == 0:
             self.__ansiString = None

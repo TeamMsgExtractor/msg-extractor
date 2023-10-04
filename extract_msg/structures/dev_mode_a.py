@@ -150,9 +150,9 @@ class DevModeA:
                 self.__fields ^= DevModeFields.DM_COLLATE
 
         if val < -32768:
-            raise ValueError('collate cannot be less than -32768.')
+            raise ValueError(':property collate: cannot be less than -32768.')
         if val > 32767:
-            raise ValueError('collate cannot be greater than 32767.')
+            raise ValueError(':property collate: cannot be greater than 32767.')
 
         self.__fields |= DevModeFields.DM_COLLATE
         self.__collate = val
@@ -169,9 +169,9 @@ class DevModeA:
                 self.__fields ^= DevModeFields.DM_COLOR
 
         if val < -32768:
-            raise ValueError('color cannot be less than -32768.')
+            raise ValueError(':property color: cannot be less than -32768.')
         if val > 32767:
-            raise ValueError('color cannot be greater than 32767.')
+            raise ValueError(':property color: cannot be greater than 32767.')
 
         self.__fields |= DevModeFields.DM_COLOR
         self.__color = val
@@ -188,9 +188,9 @@ class DevModeA:
                 self.__fields ^= DevModeFields.DM_COPIES
 
         if val < -32768:
-            raise ValueError('copies cannot be less than -32768.')
+            raise ValueError(':property copies: cannot be less than -32768.')
         if val > 32767:
-            raise ValueError('copies cannot be greater than 32767.')
+            raise ValueError(':property copies: cannot be greater than 32767.')
 
         self.__fields |= DevModeFields.DM_COPIES
         self.__copies = val
@@ -207,9 +207,9 @@ class DevModeA:
                 self.__fields ^= DevModeFields.DM_DEFAULTSOURCE
 
         if val < -32768:
-            raise ValueError('defaultSource cannot be less than -32768.')
+            raise ValueError(':property defaultSource: cannot be less than -32768.')
         if val > 32767:
-            raise ValueError('defaultSource cannot be greater than 32767.')
+            raise ValueError(':property defaultSource: cannot be greater than 32767.')
 
         self.__fields |= DevModeFields.DM_DEFAULTSOURCE
         self.__defaultSource = val
@@ -223,8 +223,10 @@ class DevModeA:
 
     @deviceName.setter
     def _(self, val : bytes) -> None:
+        if not isinstance(val, bytes):
+            raise TypeError(':property deviceName: must be bytes.')
         if len(val) != 32:
-            raise ValueError('deviceName must be exactly 32 bytes.')
+            raise ValueError(':property deviceName: must be exactly 32 bytes.')
 
         self.__deviceName = val
 
@@ -238,6 +240,8 @@ class DevModeA:
             self.__ditherType = 0
             if DevModeFields.DM_DITHERTYPE in self.__fields:
                 self.__fields ^= DevModeFields.DM_DITHERTYPE
+        elif not isinstance(val, int):
+            raise TypeError(':property ditherType: must be an int or None.')
 
         if val < 0:
             raise ValueError('ditherType must be positive.')
