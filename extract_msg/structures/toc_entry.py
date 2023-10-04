@@ -27,3 +27,9 @@ class TOCEntry:
             else:
                 self.__targetDevice = DVTargetDevice(reader.read(targetDeviceSize))
         # TODO
+
+    def toBytes(self) -> bytes:
+        ret = self.__clipFormat.toBytes()
+        # TODO
+
+        return ret
