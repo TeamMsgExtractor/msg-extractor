@@ -1036,7 +1036,7 @@ class MessageBase(MSGFile):
             header = HeaderParser(policy = policy.compat32).parsestr(headerText)
         else:
             logger.info('Header is empty or was not found. Header will be generated from other streams.')
-            header = HeaderParser(policy = policy.default).parsestr('')
+            header = HeaderParser(policy = policy.compat32).parsestr('')
             if self.date:
                 header.add_header('Date', email.utils.format_datetime(self.date))
             header.add_header('From', self.sender)
