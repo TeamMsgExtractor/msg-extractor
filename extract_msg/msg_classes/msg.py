@@ -448,6 +448,10 @@ class MSGFile:
         and directories will be added to it as if they were at the root,
         allowing you to save it as it's own MSG file.
 
+        This function pulls directly from the source MSG file, so modifications
+        to the properties of of an MSGFile object (or one of it's subclasses)
+        will not be reflected in the saved file.
+
         :param path: An IO device with a write method which accepts bytes or a
             path-like object (including strings and pathlib.Path objects).
         """
