@@ -20,7 +20,7 @@ class TOCEntry:
             self.__lindex = 0
             self.__tymed = 0
             self.__advf = 0
-            self.__targetDevice = None
+            self.__targetDevice = DVTargetDevice()
             return
 
         if isinstance(reader, bytes):
@@ -33,11 +33,10 @@ class TOCEntry:
         self.__tymed = reader.readUnsignedInt()
         reader.read(12)
         self.__advf = reader.readUnsignedInt()
-        reader.read(4)
-        if targetDeviceSize == 0:
-            self.__targetDevice = None
-        else:
-            self.__targetDevice = DVTargetDevice(reader.read(targetDeviceSize))
+
+        # Based off the wording of the documentation, it seems like this can't
+        # actually be 0 bytes, so this should be fine.
+        self.__targetDevice = DVTargetDevice(reader.read(targetDeviceSize))
 
 
     def __bytes__(self) -> bytes:
@@ -45,7 +44,7 @@ class TOCEntry:
 
     def toBytes(self) -> bytes:
         ret = bytes(self.__clipFormat)
-        td = bytes(self.__targetDevice) if self.__targetDevice else b''
+        td = bytes(self.__targetDevice)
         ret += st.ST_LE_UI32.pack(len(td))
         ret += st.ST_LE_UI32.pack(self.__aspect)
         ret += st.ST_LE_UI32.pack(self.__lindex)
@@ -117,6 +116,10 @@ class TOCEntry:
             raise ValueError(':property lindex: cannot be greater than 0xFFFFFFFF.')
 
         self.__lindex = val
+
+    @property
+    def targetDevice(self) -> DVTargetDevice:
+        return self.__targetDevice
 
     @property
     def tymed(self) -> int:
