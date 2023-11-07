@@ -129,5 +129,5 @@ class CustomAttachmentHandler(abc.ABC):
         return {
             int(x[1][-3:]): self.getStreamAs(x[-1], OLEPresentationStream)
             for x in self.attachment.listDir()
-            if x[0] == '__substg1.0_3701000D' and x[1].startswith('\x01OlePres')
+            if x[0] == '__substg1.0_3701000D' and x[1].startswith('\x02OlePres')
         }
