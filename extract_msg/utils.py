@@ -586,8 +586,7 @@ def inputToBytes(obj : Any, encoding : str) -> bytes:
     if obj is None:
         return b''
     if hasattr(obj, '__bytes__'):
-        try:
-
+        return bytes(obj)
 
     raise ConversionError('Cannot convert to bytes.')
 
