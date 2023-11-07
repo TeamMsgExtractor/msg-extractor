@@ -20,17 +20,6 @@ class OLEPresentationStream:
     """
     [MS-OLEDS] OLEPresentationStream.
     """
-    __ansiClipboardFormat : ClipboardFormatOrAnsiString
-    __targetDevice : Optional[DVTargetDevice]
-    __aspect : Union[int, DVAspect]
-    __lindex : int
-    __advf : Union[int, ADVF]
-    __width : int
-    __height : int
-    __data : bytes
-    __reserved2 : Optional[bytes]
-    __tocSignature : int
-    __tocEntries : List[TOCEntry]
 
     def __init__(self, data : bytes):
         reader = BytesReader(data)

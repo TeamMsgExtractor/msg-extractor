@@ -1,4 +1,3 @@
-# pyright: ignore[reportUnnecessaryIsInstance]
 __all__ = [
     'MonikerStream',
 ]
