@@ -32,6 +32,9 @@ class FolderID:
         # This entry is 6 bytes, so we pull some shenanigans to unpack it.
         self.__globalCounter = constants.st.ST_LE_UI64.unpack(data[2:8] + b'\x00\x00')[0]
 
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
     def toBytes(self) -> bytes:
         return self.__rawData
 
@@ -71,6 +74,9 @@ class GlobalObjectID:
         reader.assertNull(8, 'Reserved was not set to null.')
         size = reader.readUnsignedInt()
         self.__data = reader.read(size)
+
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
 
     def toBytes(self) -> bytes:
         return self.__rawData
@@ -137,6 +143,9 @@ class MessageID:
         # This entry is 6 bytes, so we pull some shenanigans to unpack it.
         self.__globalCounter = constants.st.ST_LE_UI64.unpack(data[2:8] + b'\x00\x00')[0]
 
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
     def toBytes(self) -> bytes:
         return self.__rawData
 
@@ -181,6 +190,9 @@ class ServerID:
         self.__folderID = FolderID(data[1:9])
         self.__messageID = MessageID(data[9:17])
         self.__instance = constants.st.STUI32.unpack(data[17:21])[0]
+
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
 
     def toBytes(self) -> bytes:
         return self.__rawData

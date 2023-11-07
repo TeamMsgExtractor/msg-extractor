@@ -24,6 +24,9 @@ class ODTStruct:
             self.__persist1 = ODTPersist1.NONE
             self.__persist2 = ODTPersist2.NONE
 
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
     def toBytes(self) -> bytes:
         return struct.pack('<HHH', self.__cf, self.__persist1, self.__persist2)
 

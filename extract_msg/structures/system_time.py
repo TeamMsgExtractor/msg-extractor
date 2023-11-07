@@ -17,10 +17,13 @@ class SystemTime:
         self.unpack(data)
 
     def __eq__(self, other : Any) -> bool:
-        return isinstance(other, SystemTime) and self.toBytes() == other.toBytes()
+        return isinstance(other, SystemTime) and bytes(self) == bytes(other)
 
     def __ne__(self, other : Any) -> bool:
         return not self.__eq__(other)
+
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
 
     def toBytes(self) -> bytes:
         """
@@ -58,7 +61,7 @@ class SystemTime:
         if value < 0:
             raise ValueError('Day must be positive.')
         if value > 0xFFFF:
-            raise ValueError('Day must be less than 65535.')
+            raise ValueError('Day cannot be greater than 0xFFFF.')
 
         self.__day = value
 
@@ -71,7 +74,7 @@ class SystemTime:
         if value < 0:
             raise ValueError('Day of week must be positive.')
         if value > 0xFFFF:
-            raise ValueError('Day of week must be less than 65535.')
+            raise ValueError('Day of week cannot be greater than 0xFFFF.')
 
         self.__dayOfWeek = value
 
@@ -84,7 +87,7 @@ class SystemTime:
         if value < 0:
             raise ValueError('Hour must be positive.')
         if value > 0xFFFF:
-            raise ValueError('Hour must be less than 65535.')
+            raise ValueError('Hour cannot be greater than 0xFFFF.')
 
         self.__hour = value
 
@@ -97,7 +100,7 @@ class SystemTime:
         if value < 0:
             raise ValueError('Milliseconds must be positive.')
         if value > 0xFFFF:
-            raise ValueError('Milliseconds must be less than 65535.')
+            raise ValueError('Milliseconds cannot be greater than 0xFFFF.')
 
         self.__milliseconds = value
 
@@ -110,7 +113,7 @@ class SystemTime:
         if value < 0:
             raise ValueError('Minute must be positive.')
         if value > 0xFFFF:
-            raise ValueError('Minute must be less than 65535.')
+            raise ValueError('Minute cannot be greater than 0xFFFF.')
 
         self.__minute = value
 
@@ -123,7 +126,7 @@ class SystemTime:
         if value < 0:
             raise ValueError('Month must be positive.')
         if value > 0xFFFF:
-            raise ValueError('Month must be less than 65535.')
+            raise ValueError('Month cannot be greater than 0xFFFF.')
 
         self.__month = value
 
@@ -136,7 +139,7 @@ class SystemTime:
         if value < 0:
             raise ValueError('Second must be positive.')
         if value > 0xFFFF:
-            raise ValueError('Second must be less than 65535.')
+            raise ValueError('Second cannot be greater than 0xFFFF.')
 
         self.__second = value
 
@@ -149,7 +152,7 @@ class SystemTime:
         if value < 0:
             raise ValueError('Year must be positive.')
         if value > 0xFFFF:
-            raise ValueError('Year must be less than 65535.')
+            raise ValueError('Year cannot be greater than 0xFFFF.')
 
         self.__year = value
 

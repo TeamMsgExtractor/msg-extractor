@@ -49,6 +49,9 @@ class PropBase(abc.ABC):
         self.__type, flags = constants.st.ST2.unpack(data)
         self.__flags = PropertyFlags(flags)
 
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
     def toBytes(self) -> bytes:
         return self.__rawData
 

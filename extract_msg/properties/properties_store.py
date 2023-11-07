@@ -88,6 +88,9 @@ class PropertiesStore:
                 logger.warning(f'Found stream from divide that was not 16 bytes: {st}. Ignoring.')
         self.__pl = len(self.__props)
 
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
     def __contains__(self, key) -> bool:
         return self.__props.__contains__(key)
 

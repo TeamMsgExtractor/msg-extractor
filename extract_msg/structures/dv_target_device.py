@@ -79,6 +79,12 @@ class DVTargetDevice:
             except IOError:
                 self.__extDevMode = None
 
+    def __bytes__(self) -> bytes:
+        ret = self.toBytes()
+        if not isinstance(ret, bytes):
+            raise TypeError(f'Cannot convert {self.__class__.__name__} instance to bytes.')
+        return ret
+
     def toBytes(self) -> Optional[bytes]:
         if not (self.driverName or self.deviceName or self.portName or self.extDevMode):
             return None
@@ -96,7 +102,7 @@ class DVTargetDevice:
         if self.__portName:
             currentPosition += len(self.__portName) + 1
 
-        extDevModeBytes = self.__extDevMode.toBytes() if self.__extDevMode else None
+        extDevModeBytes = bytes(self.__extDevMode) if self.__extDevMode else None
         offset4 = currentPosition if extDevModeBytes else 0
 
         try:

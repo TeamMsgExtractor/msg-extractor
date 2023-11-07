@@ -152,10 +152,10 @@ class DevModeA:
         elif not isinstance(val, int):
             raise TypeError(':property collate: must be an int or None.')
 
-        if val < -32768:
-            raise ValueError(':property collate: cannot be less than -32768.')
-        if val > 32767:
-            raise ValueError(':property collate: cannot be greater than 32767.')
+        if val < -0x8000:
+            raise ValueError(':property collate: cannot be less than -0x8000.')
+        if val > 0x7FFF:
+            raise ValueError(':property collate: cannot be greater than 0x7FFF.')
 
         self.__fields |= DevModeFields.DM_COLLATE
         self.__collate = val
@@ -174,10 +174,10 @@ class DevModeA:
         elif not isinstance(val, int):
             raise TypeError(':property color: must be an int or None.')
 
-        if val < -32768:
-            raise ValueError(':property color: cannot be less than -32768.')
-        if val > 32767:
-            raise ValueError(':property color: cannot be greater than 32767.')
+        if val < -0x8000:
+            raise ValueError(':property color: cannot be less than -0x8000.')
+        if val > 0x7FFF:
+            raise ValueError(':property color: cannot be greater than 0x7FFF.')
 
         self.__fields |= DevModeFields.DM_COLOR
         self.__color = val
@@ -196,10 +196,10 @@ class DevModeA:
         elif not isinstance(val, int):
             raise TypeError(':property copies: must be an int or None.')
 
-        if val < -32768:
-            raise ValueError(':property copies: cannot be less than -32768.')
-        if val > 32767:
-            raise ValueError(':property copies: cannot be greater than 32767.')
+        if val < -0x8000:
+            raise ValueError(':property copies: cannot be less than -0x8000.')
+        if val > 0x7FFF:
+            raise ValueError(':property copies: cannot be greater than 0x7FFF.')
 
         self.__fields |= DevModeFields.DM_COPIES
         self.__copies = val
@@ -218,10 +218,10 @@ class DevModeA:
         elif not isinstance(val, int):
             raise TypeError(':property defaultSource: must be an int or None.')
 
-        if val < -32768:
-            raise ValueError(':property defaultSource: cannot be less than -32768.')
-        if val > 32767:
-            raise ValueError(':property defaultSource: cannot be greater than 32767.')
+        if val < -0x8000:
+            raise ValueError(':property defaultSource: cannot be less than -0x8000.')
+        if val > 0x7FFF:
+            raise ValueError(':property defaultSource: cannot be greater than 0x7FFF.')
 
         self.__fields |= DevModeFields.DM_DEFAULTSOURCE
         self.__defaultSource = val
@@ -258,8 +258,8 @@ class DevModeA:
 
         if val < 0:
             raise ValueError(':property ditherType: must be positive.')
-        if val > 4294967295:
-            raise ValueError(':property ditherType: cannot be greater than 4294967295.')
+        if val > 0xFFFFFFFF:
+            raise ValueError(':property ditherType: cannot be greater than 0xFFFFFFFF.')
 
         self.__fields |= DevModeFields.DM_DITHERTYPE
         self.__ditherType = val
@@ -274,8 +274,8 @@ class DevModeA:
             raise TypeError(':property driverExtra: must be an int.')
         if val < 0:
             raise ValueError(':property driverExtra: must be positive.')
-        if val > 65535:
-            raise ValueError(':property driverExtra: cannot be greater than 65535.')
+        if val > 0xFFFF:
+            raise ValueError(':property driverExtra: cannot be greater than 0xFFFF.')
 
         self.__driverExtra = val
 
@@ -289,8 +289,8 @@ class DevModeA:
             raise TypeError(':property driverVersion: must be an int or None.')
         if val < 0:
             raise ValueError(':property driverVersion: must be positive.')
-        if val > 65535:
-            raise ValueError(':property driverVersion: cannot be greater than 65535.')
+        if val > 0xFFFF:
+            raise ValueError(':property driverVersion: cannot be greater than 0xFFFF.')
 
         self.__driverVersion = val
 
@@ -308,10 +308,10 @@ class DevModeA:
         elif not isinstance(val, int):
             raise TypeError(':property duplex: must be an int or None.')
 
-        if val < -32768:
-            raise ValueError(':property duplex: cannot be less than -32768.')
-        if val > 32767:
-            raise ValueError(':property duplex: cannot be greater than 32767.')
+        if val < -0x8000:
+            raise ValueError(':property duplex: cannot be less than -0x8000.')
+        if val > 0x7FFF:
+            raise ValueError(':property duplex: cannot be greater than 0x7FFF.')
 
         self.__fields |= DevModeFields.DM_DUPLEX
         self.__duplex = val
@@ -348,8 +348,8 @@ class DevModeA:
 
         if val < 0:
             raise ValueError(':property icmIntent: must be positive.')
-        if val > 4294967295:
-            raise ValueError(':property icmIntent: cannot be greater than 4294967295.')
+        if val > 0xFFFFFFFF:
+            raise ValueError(':property icmIntent: cannot be greater than 0xFFFFFFFF.')
 
         self.__fields |= DevModeFields.DM_ICMINTENT
         self.__icmIntent = val
@@ -370,8 +370,8 @@ class DevModeA:
 
         if val < 0:
             raise ValueError(':property icmMethod: must be positive.')
-        if val > 4294967295:
-            raise ValueError(':property icmMethod: cannot be greater than 4294967295.')
+        if val > 0xFFFFFFFF:
+            raise ValueError(':property icmMethod: cannot be greater than 0xFFFFFFFF.')
 
         self.__fields |= DevModeFields.DM_ICMMETHOD
         self.__icmMethod = val
@@ -392,8 +392,8 @@ class DevModeA:
 
         if val < 0:
             raise ValueError(':property mediaType: must be positive.')
-        if val > 4294967295:
-            raise ValueError(':property mediaType: cannot be greater than 4294967295.')
+        if val > 0xFFFFFFFF:
+            raise ValueError(':property mediaType: cannot be greater than 0xFFFFFFFF.')
 
         self.__fields |= DevModeFields.DM_MEDIATYPE
         self.__mediaType = val
@@ -414,8 +414,8 @@ class DevModeA:
 
         if val < 0:
             raise ValueError(':property nup: must be positive.')
-        if val > 4294967295:
-            raise ValueError(':property nup: cannot be greater than 4294967295.')
+        if val > 0xFFFFFFFF:
+            raise ValueError(':property nup: cannot be greater than 0xFFFFFFFF.')
 
         self.__fields |= DevModeFields.DM_NUP
         self.__nup = val
@@ -434,10 +434,10 @@ class DevModeA:
         elif not isinstance(val, int):
             raise TypeError(':property orientation: must be an int or None.')
 
-        if val < -32768:
-            raise ValueError(':property orientation: cannot be less than -32768.')
-        if val > 32767:
-            raise ValueError(':property orientation: cannot be greater than 32767.')
+        if val < -0x8000:
+            raise ValueError(':property orientation: cannot be less than -0x8000.')
+        if val > 0x7FFF:
+            raise ValueError(':property orientation: cannot be greater than 0x7FFF.')
 
         self.__fields |= DevModeFields.DM_ORIENTATION
         self.__orientation = val
@@ -456,10 +456,10 @@ class DevModeA:
         elif not isinstance(val, int):
             raise TypeError(':property paperLength: must be an int or None.')
 
-        if val < -32768:
-            raise ValueError(':property paperLength: cannot be less than -32768.')
-        if val > 32767:
-            raise ValueError(':property paperLength: cannot be greater than 32767.')
+        if val < -0x8000:
+            raise ValueError(':property paperLength: cannot be less than -0x8000.')
+        if val > 0x7FFF:
+            raise ValueError(':property paperLength: cannot be greater than 0x7FFF.')
 
         self.__fields |= DevModeFields.DM_PAPERLENGTH
         self.__paperLength = val
@@ -478,10 +478,10 @@ class DevModeA:
         elif not isinstance(val, int):
             raise TypeError(':property paperSize: must be an int or None.')
 
-        if val < -32768:
-            raise ValueError(':property paperSize: cannot be less than -32768.')
-        if val > 32767:
-            raise ValueError(':property paperSize: cannot be greater than 32767.')
+        if val < -0x8000:
+            raise ValueError(':property paperSize: cannot be less than -0x8000.')
+        if val > 0x7FFF:
+            raise ValueError(':property paperSize: cannot be greater than 0x7FFF.')
 
         self.__fields |= DevModeFields.DM_PAPERSIZE
         self.__paperSize = val
@@ -500,10 +500,10 @@ class DevModeA:
         elif not isinstance(val, int):
             raise TypeError(':property paperWidth: must be an int or None.')
 
-        if val < -32768:
-            raise ValueError(':property paperWidth: cannot be less than -32768.')
-        if val > 32767:
-            raise ValueError(':property paperWidth: cannot be greater than 32767.')
+        if val < -0x8000:
+            raise ValueError(':property paperWidth: cannot be less than -0x8000.')
+        if val > 0x7FFF:
+            raise ValueError(':property paperWidth: cannot be greater than 0x7FFF.')
 
         self.__fields |= DevModeFields.DM_PAPERWIDTH
         self.__paperWidth = val
@@ -522,10 +522,10 @@ class DevModeA:
         elif not isinstance(val, int):
             raise TypeError(':property printQuality: must be an int or None.')
 
-        if val < -32768:
-            raise ValueError(':property printQuality: cannot be less than -32768.')
-        if val > 32767:
-            raise ValueError(':property printQuality: cannot be greater than 32767.')
+        if val < -0x8000:
+            raise ValueError(':property printQuality: cannot be less than -0x8000.')
+        if val > 0x7FFF:
+            raise ValueError(':property printQuality: cannot be greater than 0x7FFF.')
 
         self.__fields |= DevModeFields.DM_PRINTQUALITY
         self.__printQuality = val
@@ -544,10 +544,10 @@ class DevModeA:
         elif not isinstance(val, int):
             raise TypeError(':property scale: must be an int or None.')
 
-        if val < -32768:
-            raise ValueError(':property scale: cannot be less than -32768.')
-        if val > 32767:
-            raise ValueError(':property scale: cannot be greater than 32767.')
+        if val < -0x8000:
+            raise ValueError(':property scale: cannot be less than -0x8000.')
+        if val > 0x7FFF:
+            raise ValueError(':property scale: cannot be greater than 0x7FFF.')
 
         self.__fields |= DevModeFields.DM_SCALE
         self.__scale = val
@@ -562,8 +562,8 @@ class DevModeA:
             raise TypeError(':property specVersion: must be an int.')
         if val < 0:
             raise ValueError(':property specVersion: must be positive.')
-        if val > 65535:
-            raise ValueError(':property specVersion: cannot be greater than 65535.')
+        if val > 0xFFFF:
+            raise ValueError(':property specVersion: cannot be greater than 0xFFFF.')
 
         self.__specVersion = val
 
@@ -581,10 +581,10 @@ class DevModeA:
         elif not isinstance(val, int):
             raise TypeError(':property ttOption: must be an int or None.')
 
-        if val < -32768:
-            raise ValueError(':property ttOption: cannot be less than -32768.')
-        if val > 32767:
-            raise ValueError(':property ttOption: cannot be greater than 32767.')
+        if val < -0x8000:
+            raise ValueError(':property ttOption: cannot be less than -0x8000.')
+        if val > 0x7FFF:
+            raise ValueError(':property ttOption: cannot be greater than 0x7FFF.')
 
         self.__fields |= DevModeFields.DM_TTOPTION
         self.__ttOption = val
@@ -603,10 +603,10 @@ class DevModeA:
         elif not isinstance(val, int):
             raise TypeError(':property yResolution: must be an int or None.')
 
-        if val < -32768:
-            raise ValueError(':property yResolution: cannot be less than -32768.')
-        if val > 32767:
-            raise ValueError(':property yResolution: cannot be greater than 32767.')
+        if val < -0x8000:
+            raise ValueError(':property yResolution: cannot be less than -0x8000.')
+        if val > 0x7FFF:
+            raise ValueError(':property yResolution: cannot be greater than 0x7FFF.')
 
         self.__fields |= DevModeFields.DM_YRESOLUTION
         self.__yResolution = val

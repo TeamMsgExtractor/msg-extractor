@@ -17,6 +17,9 @@ class MonikerStream:
             self.__clsid = b'\x00' * 16
             self.__streamData = b''
 
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
     def toBytes(self) -> bytes:
         return self.__clsid + self.__streamData
 

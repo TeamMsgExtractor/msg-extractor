@@ -53,10 +53,10 @@ class DirectoryEntry:
     clsid : bytes = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
     data : bytes = b''
 
-    def __init__(self):
-        pass
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
 
-    def toBytes(self):
+    def toBytes(self) -> bytes:
         """
         Converts the entry to bytes to be writen to a file.
         """

@@ -65,8 +65,8 @@ class TZRule:
                                   self.__bias,
                                   self.__standardBias,
                                   self.__daylightBias,
-                                  self.__standardDate.toBytes(),
-                                  self.__daylightDate.toBytes())
+                                  bytes(self.__standardDate),
+                                  bytes(self.__daylightDate))
 
     @property
     def bias(self) -> int:

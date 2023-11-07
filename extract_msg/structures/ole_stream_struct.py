@@ -32,12 +32,15 @@ class OleStreamStruct:
             # Only check this stuff if this is not for an embedded object.
             pass # TODO
 
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
     def toBytes(self) -> bytes:
         ret = b'\x01\x00\x00\x02'
         ret += st.ST_LE_UI32.pack(self.__flags)
         ret += st.ST_LE_UI32.pack(self.__linkUpdateOption)
         ret += b'\x00\x00\x00\x00'
-        rmsBytes = b'' if self.__rms is None else self.__rms.toBytes()
+        rmsBytes = b'' if self.__rms is None else bytes(self.__rms)
         ret += st.ST_LE_UI32.pack(len(rmsBytes)) + rmsBytes
         # TODO finish this with the optional properties.
 

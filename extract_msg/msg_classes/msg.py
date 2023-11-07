@@ -225,6 +225,9 @@ class MSGFile:
             # Raise the exception after trying to close the file.
             raise
 
+    def __bytes__(self) -> bytes:
+        return self.exportBytes()
+
     def __enter__(self) -> MSGFile:
         self.__ole.__enter__()
         return self

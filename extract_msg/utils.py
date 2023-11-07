@@ -569,20 +569,27 @@ def htmlSanitize(inp : str) -> str:
     return inp
 
 
-def inputToBytes(stringInputVar : Optional[Union[str, bytes]], encoding : str) -> bytes:
+def inputToBytes(obj : Any, encoding : str) -> bytes:
     """
     Converts the input into bytes.
 
-    :raises ConversionError: if the input cannot be converted.
+    :raises ConversionError: The input cannot be converted.
+    :raises UnicodeEncodeError: The input was a str but the encoding was not
+        valid.
+    :raises TypeError: The input has a __bytes__ method, but it failed.
+    :raises ValueError: Same as above.
     """
-    if isinstance(stringInputVar, bytes):
-        return stringInputVar
-    elif isinstance(stringInputVar, str):
-        return stringInputVar.encode(encoding)
-    elif stringInputVar is None:
+    if isinstance(obj, bytes):
+        return obj
+    if isinstance(obj, str):
+        return obj.encode(encoding)
+    if obj is None:
         return b''
-    else:
-        raise ConversionError('Cannot convert to bytes.')
+    if hasattr(obj, '__bytes__'):
+        try:
+
+
+    raise ConversionError('Cannot convert to bytes.')
 
 
 def inputToMsgPath(inp : constants.MSG_PATH) -> List[str]:

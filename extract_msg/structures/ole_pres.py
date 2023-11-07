@@ -76,14 +76,16 @@ class OLEPresentationStream:
             for _ in range(reader.readUnsignedInt()):
                 self.__tocEntries.append(TOCEntry(reader))
 
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
 
     def toBytes(self) -> bytes:
-        ret = self.__ansiClipboardFormat.toBytes()
+        ret = bytes(self.__ansiClipboardFormat)
 
         if self.__targetDevice is None:
             ret += b'\x04\x00\x00\x00'
         else:
-            dvData = self.__targetDevice.toBytes()
+            dvData = bytes(self.__targetDevice)
             ret += st.ST_LE_UI32.pack(len(dvData))
             ret += dvData
 
@@ -100,7 +102,7 @@ class OLEPresentationStream:
         if self.__tocSignature == 0x494E414E:
             ret += st.ST_LE_UI32.pack(len(self.__tocEntries))
             for entry in self.__tocEntries:
-                ret += entry.toBytes()
+                ret += bytes(entry)
         else:
             ret += b'\x00\x00\x00\x00'
 
@@ -109,7 +111,7 @@ class OLEPresentationStream:
     @property
     def advf(self) -> Union[int, ADVF]:
         """
-        An implementation specific hint on how to render the presentation data 
+        An implementation specific hint on how to render the presentation data
         on screen. May be ignored on processing.
         """
         return self.__advf
@@ -120,8 +122,8 @@ class OLEPresentationStream:
             raise TypeError(':property advf: must be an int.')
         if val < 0:
             raise ValueError(':property advf: must be positive.')
-        if val > 4294967295:
-            raise ValueError(':property advf: cannot be greater than 4294967295.')
+        if val > 0xFFFFFFFF:
+            raise ValueError(':property advf: cannot be greater than 0xFFFFFFFF.')
 
         self.__advf = val
 
@@ -132,7 +134,7 @@ class OLEPresentationStream:
     @property
     def aspect(self) -> Union[int, DVAspect]:
         """
-        An implementation specific hint on how to render the presentation data 
+        An implementation specific hint on how to render the presentation data
         on screen. May be ignored on processing.
         """
         return self.__aspect
@@ -143,8 +145,8 @@ class OLEPresentationStream:
             raise TypeError(':property aspect: must be an int.')
         if val < 0:
             raise ValueError(':property aspect: must be positive.')
-        if val > 4294967295:
-            raise ValueError(':property aspect: cannot be greater than 4294967295.')
+        if val > 0xFFFFFFFF:
+            raise ValueError(':property aspect: cannot be greater than 0xFFFFFFFF.')
 
         self.__aspect = val
 
@@ -174,8 +176,8 @@ class OLEPresentationStream:
             raise TypeError(':property height: must be an int.')
         if val < 0:
             raise ValueError(':property height: must be positive.')
-        if val > 4294967295:
-            raise ValueError(':property height: cannot be greater than 4294967295.')
+        if val > 0xFFFFFFFF:
+            raise ValueError(':property height: cannot be greater than 0xFFFFFFFF.')
 
         self.__height = val
 
@@ -192,15 +194,15 @@ class OLEPresentationStream:
             raise TypeError(':property lindex: must be an int.')
         if val < 0:
             raise ValueError(':property lindex: must be positive.')
-        if val > 4294967295:
-            raise ValueError(':property lindex: cannot be greater than 4294967295.')
+        if val > 0xFFFFFFFF:
+            raise ValueError(':property lindex: cannot be greater than 0xFFFFFFFF.')
 
         self.__lindex = val
 
     @property
     def reserved1(self) -> bytes:
         """
-        4 bytes that can contain any arbitrary data. Must be *exactly* 4 bytes 
+        4 bytes that can contain any arbitrary data. Must be *exactly* 4 bytes
         when setting.
         """
         return self.__reserved1
@@ -217,7 +219,7 @@ class OLEPresentationStream:
     @property
     def reserved2(self) -> Optional[bytes]:
         """
-        Optional additional data that is only set if the clipboard format of 
+        Optional additional data that is only set if the clipboard format of
         :property ansiClipboardFormat: is CF_METAFILEPICT.
 
         Getting this will automatically correct the value retrieved based on
@@ -266,12 +268,12 @@ class OLEPresentationStream:
     @property
     def tocSignature(self) -> int:
         """
-        If this field does not contain 0x494E414E, then :property tocEntries: 
-        MUST be empty. Modifications to the list will be lost when it is next 
+        If this field does not contain 0x494E414E, then :property tocEntries:
+        MUST be empty. Modifications to the list will be lost when it is next
         retrieved, meaning changes while this property is not 0x494E414E WILL be
         lost.
 
-        Setting this to a value other than 0x494E414E will clear the list 
+        Setting this to a value other than 0x494E414E will clear the list
         immediately.
         """
         return self.__tocSignature
@@ -282,9 +284,9 @@ class OLEPresentationStream:
             raise TypeError(':property tocSignature: must be an int.')
         if val < 0:
             raise ValueError(':property tocSignature: must be positive.')
-        if val > 4294967295:
-            raise ValueError(':property tocSignature: cannot be greater than 4294967295.')
-        
+        if val > 0xFFFFFFFF:
+            raise ValueError(':property tocSignature: cannot be greater than 0xFFFFFFFF.')
+
         if val != 0x494E414E:
             self.__tocEntries.clear()
 
@@ -303,8 +305,8 @@ class OLEPresentationStream:
             raise TypeError(':property width: must be an int.')
         if val < 0:
             raise ValueError(':property width: must be positive.')
-        if val > 4294967295:
-            raise ValueError(':property width: cannot be greater than 4294967295.')
+        if val > 0xFFFFFFFF:
+            raise ValueError(':property width: cannot be greater than 0xFFFFFFFF.')
 
         self.__width = val
 

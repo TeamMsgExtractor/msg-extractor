@@ -57,6 +57,9 @@ class ReportTag:
         else:
             self.__ansiText = None
 
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
     def toBytes(self) -> bytes:
         return self.__rawData
 

@@ -28,6 +28,9 @@ class ContactLinkEntry:
             if (size & 3) != 0:
                 reader.read(4 - (size & 3))
 
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
     def toBytes(self) -> bytes:
         ret = st.ST_LE_UI32.pack(len(self.entries))
 

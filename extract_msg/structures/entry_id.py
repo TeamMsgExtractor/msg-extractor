@@ -98,6 +98,9 @@ class EntryID(abc.ABC):
         self.__providerUID = data[4:20]
         self.__rawData = data
 
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
     def toBytes(self) -> bytes:
         return self.__rawData
 

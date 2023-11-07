@@ -11,7 +11,13 @@ from ..enums import ClipboardFormat
 
 
 class ClipboardFormatOrAnsiString:
-    def __init__(self, reader : Union[bytes, BytesReader]):
+    def __init__(self, reader : Optional[Union[bytes, BytesReader]] = None):
+        if reader is None:
+            self.__markerOrLength = 0
+            self.__clipboardFormat = None
+            self.__ansiString = None
+            return
+
         if isinstance(reader, bytes):
             reader = BytesReader(reader)
 
@@ -25,6 +31,9 @@ class ClipboardFormatOrAnsiString:
         else:
             self.__ansiString = None
             self.__clipboardFormat = None
+
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
 
     def toBytes(self) -> bytes:
         ret = constants.st.ST_LE_UI32.pack(self.markerOrLength)
@@ -86,7 +95,7 @@ class ClipboardFormatOrAnsiString:
         if val < 0:
             raise ValueError(':property markerOrLength: must be a positive integer.')
         if val > 0xFFFFFFFF:
-            raise ValueError(':property markerOrLength: must be a 4 byte unsigned integer.')
+            raise ValueError(':property markerOrLength: cannot be greater than 0xFFFFFFFF')
 
         if val == 0:
             self.__ansiString = None

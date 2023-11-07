@@ -51,6 +51,9 @@ class RecurrencePattern:
         self.__startDate = reader.readUnsignedInt()
         self.__endDate = reader.readUnsignedInt()
 
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
     def toBytes(self) -> bytes:
         return self.__rawData
 

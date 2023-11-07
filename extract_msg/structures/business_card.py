@@ -39,6 +39,9 @@ class BusinessCardDisplayDefinition:
         self.__extraInfoField = data[17 + 16 * self.__countOfFields:]
         self.__fields = tuple(FieldInfo(reader.read(16), self.__extraInfoField) for _ in range(self.__countOfFields))
 
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
     def toBytes(self) -> bytes:
         return self.__rawData
 
@@ -149,7 +152,10 @@ class FieldInfo:
         self.__labelFontColor = (bitwiseAdjustedAnd(unpacked[6], 0xFF),
                             bitwiseAdjustedAnd(unpacked[6], 0xFF00),
                             bitwiseAdjustedAnd(unpacked[6], 0xFF0000))
-        
+
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
     def toBytes(self) -> bytes:
         return self.__rawData
 

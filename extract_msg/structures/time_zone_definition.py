@@ -34,6 +34,9 @@ class TimeZoneDefinition:
             raise ValueError('Value for cRules was out of range.')
         self.__rules = [reader.readClass(TZRule) for _ in range(cRules)]
 
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
     def toBytes(self) -> bytes:
         # Validate some of the data.
         if len(self.__rules) < 1:
@@ -46,7 +49,7 @@ class TimeZoneDefinition:
         ret += b'\x02\x00'
         ret += st.ST_LE_UI16.pack(2* len(self.__keyName))
         ret += st.ST_LE_UI16.pack(len(self.__rules))
-        ret += b''.join(x.toBytes() for x in self.__rules)
+        ret += b''.join(bytes(x) for x in self.__rules)
 
         return ret
 

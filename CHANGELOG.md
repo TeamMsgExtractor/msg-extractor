@@ -41,6 +41,7 @@
 * Added new exception `DependencyError`.
 * Changed the errors for missing optional dependencies from `ImportError` to `DependencyError`.
 * Removed all instances of the `rawData` property in favor of the `toBytes` method. For now, many of these will simply return the raw data used, specifically those that are still unmodifiable. Any whose properties have the ability to be modified will have properly implemented versions. These classes also allow `None` to be passed as the value for their data, which will be the default if no arguments have been passed to the constructor. If no arguments or `None` is given as the data, it will create a new instance with default values. This is all in an effort to move towards the ability to create new MSG files and the `MSGWriter` class. All `toBytes` methods will either exclusively return `bytes` or will return `None` to specify that the structure isn't valid to convert to bytes. Structures that may be invalid will be annotated as `Optional[bytes]` for the return type.
+    * Additionally, these objects will also support the `__bytes__` method. If the object returned is *not* bytes, the method will throw a `TypeError`.
 * Removed the individual `PropBase` flag properties and changed the main `flags` property to return an enum containing the flags.
 * Changed various data structs to allow modification and creation of new instances for writing to an MSG file.
 * Changed `TZRule` to use unsigned values where applicable.
@@ -48,6 +49,7 @@
 * Removed unneeded function `windowsUnicode`.
 * Moved `FixedLengthProperty.parseType` to the private API. This was not intended for external use anyways, so leaving it as public API didn't make sense.
 * Fixed check for type in `ContactAddressEntryID` being the wrong value.
+* Modified `inputToBytes` to support objects with the `__bytes__` method. If the method exists *and works* then it will be used as a last resort.
 
 **v0.45.0**
 * BREAKING: Changed parsing of string multiple properties to remove the trailing null byte. This *will* cause the output of parsing them to differ.

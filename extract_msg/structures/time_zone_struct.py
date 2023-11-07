@@ -30,14 +30,17 @@ class TimeZoneStruct:
         self.__standardDate = SystemTime(unpacked[4])
         self.__daylightDate = SystemTime(unpacked[6])
 
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
     def toBytes(self) -> bytes:
         return constants.st.ST_TZ.pack(self.__bias,
                                        self.__standardBias,
                                        self.__daylightBias,
                                        self.standardYear,
-                                       self.__standardDate.toBytes(),
+                                       bytes(self.__standardDate),
                                        self.daylightYear,
-                                       self.__daylightDate.toBytes())
+                                       bytes(self.__daylightDate))
 
     @property
     def bias(self) -> int:
