@@ -73,7 +73,7 @@ import tzlocal
 from html import escape as htmlEscape
 from typing import (
         Any, AnyStr, Callable, Dict, Iterable, List, Optional, Sequence,
-        TypeVar, TYPE_CHECKING, Union
+        SupportsBytes, TypeVar, TYPE_CHECKING, Union
     )
 
 from . import constants
@@ -569,7 +569,7 @@ def htmlSanitize(inp : str) -> str:
     return inp
 
 
-def inputToBytes(obj : Any, encoding : str) -> bytes:
+def inputToBytes(obj : Union[bytes, None, str, SupportsBytes], encoding : str) -> bytes:
     """
     Converts the input into bytes.
 

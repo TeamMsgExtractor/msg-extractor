@@ -50,6 +50,8 @@
 * Moved `FixedLengthProperty.parseType` to the private API. This was not intended for external use anyways, so leaving it as public API didn't make sense.
 * Fixed check for type in `ContactAddressEntryID` being the wrong value.
 * Modified `inputToBytes` to support objects with the `__bytes__` method. If the method exists *and works* then it will be used as a last resort.
+* Modified `OleWriter` to accept objects with a `__bytes__` method for the data to use for an entry.
+* Added `__bytes__` method to `MSGFile`. This is equivalent to calling `MSGFile.exportBytes`.
 
 **v0.45.0**
 * BREAKING: Changed parsing of string multiple properties to remove the trailing null byte. This *will* cause the output of parsing them to differ.
