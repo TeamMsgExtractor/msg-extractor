@@ -36,6 +36,14 @@ extract\_msg.msg\_classes.contact.py module
    :undoc-members:
    :show-inheritance:
 
+extract\_msg.msg\_classes.journal.py module
+-------------------------------------------
+
+.. automodule:: extract_msg.msg_classes.journal.py
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 extract\_msg.msg\_classes.meeting\_cancellation.py module
 ---------------------------------------------------------
 

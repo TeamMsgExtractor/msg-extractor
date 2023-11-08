@@ -12,6 +12,38 @@ extract\_msg.structures.business\_card.py module
    :undoc-members:
    :show-inheritance:
 
+extract\_msg.structures.cfoas.py module
+---------------------------------------
+
+.. automodule:: extract_msg.structures.cfoas.py
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.structures.contact\_link\_entry.py module
+------------------------------------------------------
+
+.. automodule:: extract_msg.structures.contact_link_entry.py
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.structures.dev\_mode\_a.py module
+----------------------------------------------
+
+.. automodule:: extract_msg.structures.dev_mode_a.py
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.structures.dv\_target\_device.py module
+----------------------------------------------------
+
+.. automodule:: extract_msg.structures.dv_target_device.py
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 extract\_msg.structures.entry\_id.py module
 -------------------------------------------
 
@@ -24,6 +56,38 @@ extract\_msg.structures.misc\_id.py module
 ------------------------------------------
 
 .. automodule:: extract_msg.structures.misc_id.py
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.structures.mon\_stream.py module
+---------------------------------------------
+
+.. automodule:: extract_msg.structures.mon_stream.py
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.structures.odt.py module
+-------------------------------------
+
+.. automodule:: extract_msg.structures.odt.py
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.structures.ole\_pres.py module
+-------------------------------------------
+
+.. automodule:: extract_msg.structures.ole_pres.py
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.structures.ole\_stream\_struct.py module
+-----------------------------------------------------
+
+.. automodule:: extract_msg.structures.ole_stream_struct.py
    :members:
    :undoc-members:
    :show-inheritance:
@@ -64,6 +128,14 @@ extract\_msg.structures.time\_zone\_struct.py module
 ----------------------------------------------------
 
 .. automodule:: extract_msg.structures.time_zone_struct.py
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.structures.toc\_entry.py module
+--------------------------------------------
+
+.. automodule:: extract_msg.structures.toc_entry.py
    :members:
    :undoc-members:
    :show-inheritance:
