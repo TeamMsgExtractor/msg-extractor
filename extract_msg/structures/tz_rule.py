@@ -55,6 +55,9 @@ class TZRule:
         self.__standardDate = SystemTime(reader.read(16))
         self.__daylightDate = SystemTime(reader.read(16))
 
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
     def toBytes(self) -> bytes:
         return self.__struct.pack(self.__majorVersion,
                                   self.__minorVersion,

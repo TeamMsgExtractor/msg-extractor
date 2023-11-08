@@ -114,6 +114,9 @@ class DevModeA:
     def __bool__(self) -> bool:
         return self.__valid
 
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
     def toBytes(self) -> bytes:
         return self.PARSE_STRUCT.pack(
                                      self.__deviceName,
