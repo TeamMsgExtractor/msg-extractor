@@ -11,7 +11,7 @@ https://github.com/TeamMsgExtractor/msg-extractor
 
 # --- LICENSE.txt --------------------------------------------------------------
 #
-#    Copyright 2013-2022 Matthew Walker and Destiny Peterson
+#    Copyright 2013-2023 Matthew Walker and Destiny Peterson
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ https://github.com/TeamMsgExtractor/msg-extractor
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 __author__ = 'Destiny Peterson & Matthew Walker'
-__date__ = '2023-11-07'
+__date__ = '2023-11-08'
 __version__ = '0.46.0'
 
 __all__ = [
