@@ -13,5 +13,4 @@ python:
     - method: pip
       extra_requirements:
         - readthedocs
-        - sphinx-rtd-theme
       path: .
