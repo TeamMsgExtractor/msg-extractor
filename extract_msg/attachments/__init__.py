@@ -97,7 +97,7 @@ def initStandardAttachment(msg : MSGFile, dir_ : str) -> AttachmentBase:
 
                 propStore._propDict['37050003'] = createProp(propData)
 
-        attMethod = propStore['37050003'].value & 7
+        attMethod = propStore.getValue('37050003', 0) & 7
 
         if msg.exists([dir_, '__substg1.0_37010102']):
                 return Attachment(msg, dir_, propStore)
@@ -139,6 +139,6 @@ def initStandardAttachment(msg : MSGFile, dir_ : str) -> AttachmentBase:
     except Exception:
         if ErrorBehavior.ATTACH_BROKEN in msg.errorBehavior:
             _logger.exception(f'Error processing attachment at {dir_}')
-            return BrokenAttachment(msg, dir_)
+            return BrokenAttachment(msg, dir_, propStore)
         else:
             raise

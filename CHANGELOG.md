@@ -1,3 +1,59 @@
+**v0.46.0**
+* [[TeamMsgExtractor #95](https://github.com/TeamMsgExtractor/msg-extractor/issues/95)] Adjusted the `overrideEncoding` property of `MSGFile` to allow automatic encoding detection. Simply set the property to the string `"chardet"` and, assuming the `chardet` module is installed, it will analyze a number of the strings to try and form a consensus about the encoding. This will *ignore* the specified encoding *only if* if successfully detects. Otherwise it will log a warning and fall back to the default behavior.
+* [[TeamMsgExtractor #387](https://github.com/TeamMsgExtractor/msg-extractor/issues/387)] Changed `extract_msg.utils.decodeRfc2047` to not throw decoding errors if the content given is not ASCII.
+* [[TeamMsgExtractor #387](https://github.com/TeamMsgExtractor/msg-extractor/issues/387)] Changed header parsing policy to `email.policy.compat32` to prevent partial parsing of quoted header fields.
+* [[TeamMsgExtractor #388](https://github.com/TeamMsgExtractor/msg-extractor/issues/388)] Updated documentation of `MSGFile.export` to specify that updated fields on an `MSGFile` instance (and it's subclasses) will *not* be reflected in the result of the function. Many of the functions do use the newest version of a cached_property, but this is not one of them.
+* Removed methods deprecated in `v0.45.0`.
+* Changed the base class of `EntryID` from no base class to `abc.ABC`.
+* Added `position` property to `EntryID` to tell how many bytes were used to create the `EntryID`.
+* Added a number of properties to `MSGFile` from \[MS-OXCMSG\].
+* Moved some properties down to `MessageBase` from it's subclasses.
+* Added support for Journal objects.
+* Changed internal code of `PermanentEntryID` to correctly parse the data. Previously the distinguished name did not actually end at the null character, instead ending at the end of the bytes provided. If there was trailing data, it would be captured inadvertently.
+* Finished definition for `StoreObjectEntryID`.
+* Added new keyword arguments for MSG files: `dateFormat` and `datetimeFormat`. These allow the user to easily override the strings being used for format dates and dates that include a time component, respectively.
+    * In unifying all the formats into 2 options, you may notice that some will look a bit different starting from this version, as there was an unfortunately large amount of variation.
+* Fixed code for `MessageBase.parsedDate` which could have incorrect values.
+* Fixed issues with `MessageBase.date` and related things either being incorrectly documented or doing things that are not specified by the documentation. It was *supposed* to have been changed to use `datetime` objects, but it was still using strings.
+* Removed unused function `extract_msg.utils.isEmptyString`.
+* Removed unused function `extract_msg.utils.properHex`.
+* Added a `getStream` helper function to `CustomAttachmentHandler`.
+* Added a `getStreamAs` helper function to `CustomAttachmentHandler`.
+* Added new custom attachment handler for journal-associated attachments.
+* Changed `EntryID.autoCreate` to return `None` if given `None` or empty bytes.
+* Changed `EntryID.autoCreate` to raise a `FeatureNotImplemented` exception if no valid entry ID class is found.
+* Fix typing annotations for `CustomAttachmentHandler`.
+* Removed unneeded `imapclient` dependency.
+* Changed `getJson` to have values be null if they aren't found rather than an empty string.
+* Implemented the `getJson` method correctly for a number of classes.
+* Changed `Task.percentComplete` to always return a float.
+* Changed the `NotImplementedError` for custom attachment handler not being found to `FeatureNotImplemented`. Additionally, changed the error message to specify the CLSID found on the attachment to better enable people to report issues.
+* Changed code for `Recipient` and `MessageBase` that makes it rely on `MessageBase.recipientTypeClass` to determine the class to use for the `recipientType` property. Adjusted the typing of `Recipient` to have it reflect the type that will be used.
+* Correctly changed the returned value for `ResponseStatus.fromIter` to actually return a List instead of a set.
+* Filled out typing information for a significant portion of the module where variables or functions were missing it. This includes the entirety of the constants submodule.
+* Corrected a number of minor issues.
+* Extended values for `DVAspect` enum.
+* Added new enums to go with parsing for `OLEPresentationStream`.
+* Changed `NNTPNewsgroupFolderEntryID.newsgroupName` to bytes instead of string since it is ANSI.
+* Fixed an issue that would cause headers to fail to parse properly if the header text starts with "Microsoft Mail Internet Headers Version 2.0" which is common on some MSG files. This is fixed by stripping that from the beginning before actually parsing the text. This is to circumvent CPython issue #85329, confirmed to still exist in *at least* some of the supported Python versions.
+* Added `listDir` and `slistDir` as methods to `AttachmentBase`, `Recipient`, and `Named`. These *always* exclude the prefix, returning as if their directory is the root of the object. This allows the named to be directly used for accessing those files.
+* Numerous spelling fixes in docstrings, comments, and exceptions.
+* Reduced the amount of initialization performed by `MessageBase`. Much of this initialization was there from before a lot of stuff changed to `cached_property` and a number of internal variables were being used. Now all of the relevant variables will be initialized by the way they are accessed.
+* Added new exception `DependencyError`.
+* Changed the errors for missing optional dependencies from `ImportError` to `DependencyError`.
+* Removed all instances of the `rawData` property in favor of the `toBytes` method. For now, many of these will simply return the raw data used, specifically those that are still unmodifiable. Any whose properties have the ability to be modified will have properly implemented versions. These classes also allow `None` to be passed as the value for their data, which will be the default if no arguments have been passed to the constructor. If no arguments or `None` is given as the data, it will create a new instance with default values. This is all in an effort to move towards the ability to create new MSG files and the `MSGWriter` class. All `toBytes` methods will either exclusively return `bytes` or will return `None` to specify that the structure isn't valid to convert to bytes. Structures that may be invalid will be annotated as `Optional[bytes]` for the return type.
+    * Additionally, these objects will also support the `__bytes__` method. If the object returned is *not* bytes, the method will throw a `TypeError`.
+* Removed the individual `PropBase` flag properties and changed the main `flags` property to return an enum containing the flags.
+* Changed various data structs to allow modification and creation of new instances for writing to an MSG file.
+* Changed `TZRule` to use unsigned values where applicable.
+* Changed `TZRule` to require the 14 null bytes (I commented it out completely on accident instead of swapping it to a plain read). It now logs a warning about the bytes not being null.
+* Removed unneeded function `windowsUnicode`.
+* Moved `FixedLengthProperty.parseType` to the private API. This was not intended for external use anyways, so leaving it as public API didn't make sense.
+* Fixed check for type in `ContactAddressEntryID` being the wrong value.
+* Modified `inputToBytes` to support objects with the `__bytes__` method. If the method exists *and works* then it will be used as a last resort.
+* Modified `OleWriter` to accept objects with a `__bytes__` method for the data to use for an entry.
+* Added `__bytes__` method to `MSGFile`. This is equivalent to calling `MSGFile.exportBytes`.
+
 **v0.45.0**
 * BREAKING: Changed parsing of string multiple properties to remove the trailing null byte. This *will* cause the output of parsing them to differ.
 * Updated typing information for some functions and classes.
@@ -21,7 +77,7 @@
     * `getMultipleBinary`: Gets a multiple binary property as a list of `bytes` objects.
     * `getSingleOrMultipleBinary`: A combination of `getStream` and `getMultipleBinary` which prefers a single binary stream. Returns a single `bytes` object or a list of `bytes` objects.
     * `getMultipleString`: Gets a multiple string property as a list of `str` objects.
-    * `getSingleOrMultipleString`: A combination of `getStringStream` and `getMultipleString` which prefers a single string stream. Returns a single bytes objecct or a list of bytes objects.
+    * `getSingleOrMultipleString`: A combination of `getStringStream` and `getMultipleString` which prefers a single string stream. Returns a single bytes object or a list of bytes objects.
     * `getPropertyVal`: Shortcut for `instance.props.getValue` that allows new behavior to be added by overriding it.
     * `getNamedProp`: Shortcut for `instance.namedProperties.get((propertyName, guid), default)` that allows new behavior to be added by overriding it.
 * Removed `Named._getStringStream` and `Named.sExists`. The named properties storage will *always* use regular streams and not string streams.
@@ -38,7 +94,7 @@
 * Fixed a bug that caused `MessageBase.headerInit` to always return `False` after the 0.42.0 update.
 * Changed `MessageBase.headerInit` to a property.
 * Fixed `extract_msg.utils.__all__`.
-* Minor regoanization within `extract_msg/utils.py`.
+* Minor reorganization within `extract_msg/utils.py`.
 * Minor changes to docstrings.
 * Minor README updates.
 * Fix issue with folded header fields decoding incorrectly when given to `extract_msg.utils.decodeRfc2047`.
@@ -74,7 +130,7 @@
 * Changed internal behavior of `MSGFile.attachments`. This should not cause any noticeable changes to the output.
 * Refactored code significantly to make it more organized.
 * Changed the exports from the main module to only include an important subset of the module. For other items, you'll have to import the submodule that it falls under to access it. Submodules export all important pieces, so it will be easier to find.
-    * This includes having many modules be under entirely new paths. Some of these changes have been done with no deprecation, something I generally try to avoid. This is happening at the same time as the public api is significantly changing, which makes it more acceptable.
+    * This includes having many modules be under entirely new paths. Some of these changes have been done with no deprecation, something I generally try to avoid. This is happening at the same time as the public API is significantly changing, which makes it more acceptable.
 * Fixed `__main__` using the wrong enum for error behavior.
 * Fixed `Named.get` being severely out of date (it's not used anywhere by the module which is why it wasn't noticed).
 * Fixed `Named.__getitem__` being entirely case-sensitive.
@@ -86,7 +142,7 @@
 * Removed unused function `getFullClassName`.
 * Fixes to the HTML body when saving as HTML will no longer require the `preparedHtml`/`--prepared-html` option.
 * Removed unused exceptions.
-* Entirely reoganized the way attachments are initialized, including the class that will be used in various circumstances. Embedded MSG files, custom attachments, and web attachments will all use dedicated classes that are subclasses of `AttachmentBase`.
+* Entirely reorganized the way attachments are initialized, including the class that will be used in various circumstances. Embedded MSG files, custom attachments, and web attachments will all use dedicated classes that are subclasses of `AttachmentBase`.
     * With this change, the way to specify a new `Attachment` class is to override the function used when creating attachments. This can be done by passing `attachmentInit = myFunction` as an option to `openMsg`. This function MUST return an instance of `AttachmentBase`.
 * Added first implementation of web attachments. Saving is not currently possible, but basic relevant property access is now possible. Saving will not be stopped by this attachment if `skipNotImplemented = True` is passed to the save function.
 * Changed the option to suppress `RTFDE` errors to fall under the `ErrorBehavior` enum. Usage of the original option will be allowable, but is being marked as deprecated. However, it is still a dedicated option from the command line.
@@ -354,7 +410,7 @@
 * Fixed an issue that would cause signed attachments to not properly generate.
 
 **v0.34.0**
-* [[TeamMsgExtractor #102](https://github.com/TeamMsgExtractor/msg-extractor/issues/102)] Added the option to directly save body to pdf. This requires that you either have wkhtmltopdf on your path or that you provide a path directly to it in order to work. Simply pass `pdf = True` to save to turn it on. More details in the doc for the save function. You can also do this from the command line using the `--pdf` option, incompatible with other body types.
+* [[TeamMsgExtractor #102](https://github.com/TeamMsgExtractor/msg-extractor/issues/102)] Added the option to directly save body to pdf. This requires that you either have `wkhtmltopdf` on your path or that you provide a path directly to it in order to work. Simply pass `pdf = True` to save to turn it on. More details in the doc for the save function. You can also do this from the command line using the `--pdf` option, incompatible with other body types.
 * Added `--glob` option for allowing you to provide an msg path that will evaluate wildcards.
 * Removed per-file output names as they weren't actually functional and currently add too much complexity. If anyone knows a way to handle it directly with `argparse` let me know.
 * Added `chardet` as a requirement to help work around an error in `RTFDE`.
@@ -420,7 +476,7 @@
 * Updated docstring for `MessageBase.deencapsulatedRtf`.
 
 **v0.30.9**
-* Fixed the behavior of `Properties.get` so it actually behaves like a dict (that was the intent of it, but I did it the wrong way for some reason).
+* Fixed the behavior of `Properties.get` so it actually behaves like a `dict` (that was the intent of it, but I did it the wrong way for some reason).
 * Fixed a type that caused an exception when no HTML body could be found nor generated.
 
 **v0.30.8**
@@ -486,7 +542,7 @@
 
 **v0.29.3**
 * [[TeamMsgExtractor #226](https://github.com/TeamMsgExtractor/msg-extractor/issues/198)] Fix typo in command parsing that prevented the usage of `allowFallback`.
-* Fixed main still manually navigating to a new directory with os.chdir instead of using `customPath`.
+* Fixed main still manually navigating to a new directory with `os.chdir` instead of using `customPath`.
 * Fixed issue in main where the `--html` option was being using for both html *and* rtf. This meant if you wanted rtf it would not have used it, and if you wanted html it would have thrown an error.
 * Fixed `--out-name` having no effect.
 * Fixed `--out` having no effect.
@@ -563,7 +619,7 @@
 
 **v0.28.6**
 * [[TeamMsgExtractor #191](https://github.com/TeamMsgExtractor/msg-extractor/issues/191)] This feature was never properly implemented, so it's not officially supported. However, this specific issue should be fixed. This is a temporary patch until I can get around to rewriting the way the module saves files in general.
-* Added `venv` to the .gitignore list.
+* Added `venv` to the `.gitignore` list.
 * Added information to the readme.
 
 **v0.28.5**
@@ -594,7 +650,7 @@
 * [[TeamMsgExtractor #87](https://github.com/TeamMsgExtractor/msg-extractor/issues/87)] Added a new system to handle `NotImplementedError` and other exceptions. All msg classes now have an option called `attachmentErrorBehavior` that tells the class what to do if it has an error. The value should be one of three constants: `ATTACHMENT_ERROR_THROW`, `ATTACHMENT_ERROR_NOT_IMPLEMENTED`, or `ATTACHMENT_ERROR_BROKEN`. `ATTACHMENT_ERROR_THROW` tells the class to not catch and exceptions and just let the user handle them. `ATTACHMENT_ERROR_NOT_IMPLEMENTED` tells the class to catch `NotImplementedError` exceptions and put an instance of `UnsupportedAttachment` in place of a regular attachment. `ATTACHMENT_ERROR_BROKEN` tells the class to catch *all* exceptions and either replace the attachment with `UnsupportedAttachment` if it is a `NotImplementedError` or `BrokenAttachment` for all other exceptions. With both of those options, caught exceptions will be logged.
 * In making the previous point work, much code from `Attachment` has been moved to a new class called `AttachmentBase`. Both `BrokenAttachment` and `UnsupportedAttachment` are subclasses of `AttachmentBase` meaning data can be extracted from their streams in the same way as a functioning attachment.
 * [[TeamMsgExtractor #162](https://github.com/TeamMsgExtractor/msg-extractor/issues/162)] Pretty sure I actually got it this time. The execution flag should be applied by pip now.
-* Fixed typos in some exceptions
+* Fixed typos in some exceptions.
 
 **v0.27.16**
 * [[TeamMsgExtractor #177](https://github.com/TeamMsgExtractor/msg-extractor/issues/177)] Fixed incorrect struct being used. It should be the correct one now, but further testing will be required to confirm this.
@@ -621,7 +677,7 @@
 * [[TeamMsgExtractor #162](https://github.com/TeamMsgExtractor/msg-extractor/issues/162)] Fixed line endings in the wrapper script to be UNIX line endings rather than Windows line endings. Attempted to add the execution flag to the runnable script.
 
 **v0.27.9**
-* [[TeamMsgExtractor #161](https://github.com/TeamMsgExtractor/msg-extractor/issues/161)] Added commands to the command line that will allow the user to specify that they want the message data to be output to stdout rather than to a file.
+* [[TeamMsgExtractor #161](https://github.com/TeamMsgExtractor/msg-extractor/issues/161)] Added commands to the command line that will allow the user to specify that they want the message data to be output to `stdout` rather than to a file.
 * [[TeamMsgExtractor #162](https://github.com/TeamMsgExtractor/msg-extractor/issues/162)] Added a wrapper for extract_msg that will be installed.
 * Fixed some of the encoding names to allow them to actually be used in Python. The names they previously held were not aliases that currently exist.
 * Added more documentation to `constants.CODE_PAGES` to give more information about what it is. As it is a list of the possible encodings an msg file can use, I also specified which ones were supported by Python 3.
@@ -639,7 +695,7 @@
 **v0.27.5**
 * Fixed an error in `utils.divide` that would cause it to drop the extra data if there was not enough to create a full division. For example, if you had a string that was 10 characters, and divided by 3, you would only receive a total of 9 characters back.
 * Added some useful functions that will be used in the future.
-* [[TeamMsgExtractor #155](https://github.com/TeamMsgExtractor/msg-extractor/issues/155)] Updated to use new version of tzlocal.
+* [[TeamMsgExtractor #155](https://github.com/TeamMsgExtractor/msg-extractor/issues/155)] Updated to use new version of `tzlocal`.
 * Updated changelog to fit new repository.
 
 **v0.27.4**
@@ -755,7 +811,7 @@
 **v0.22.0**
 * [[TheElementalOfDestruction #18](https://github.com/TheElementalOfDestruction/msg-extractor/issues/18)] Added `--validate` option.
 * [[TheElementalOfDestruction #16](https://github.com/TheElementalOfDestruction/msg-extractor/issues/16)] Moved all dev code into its own scripts. Use `--dev` to use from the command line.
-* [[TeamMsgExtractor #67](https://github.com/TeamMsgExtractor/msg-extractor/issues/67)] Added compatibility module to enforce Unicode os functions.
+* [[TeamMsgExtractor #67](https://github.com/TeamMsgExtractor/msg-extractor/issues/67)] Added compatibility module to enforce Unicode `os` functions.
 * Added new function to `Message` class: `Message.sExists`. This function checks if a string stream exists. It's input should be formatted identically to that of `Message._getStringStream`.
 * Added new function to `Message` class: `Message.fix_path`. This function will add the proper prefix to the path (if the `prefix` parameter is true) and adjust the path to be a string rather than a list or tuple.
 * Added new function to `utils.py`: `get_full_class_name`. This function returns a string containing the module name and the class name of any instance of any class. It is returned in the format of `{module}.{class}`.
@@ -778,9 +834,7 @@
 **v0.20.8**
 * Fixed a tab issue and parameter type in `message.py`.
 
-
 **v0.20.7**
-
 * Separated classes into their own files to make things more manageable.
 * Placed `__doc__` back inside of `__init__.py`.
 * Rewrote the `Prop` class to be two different classes that extend from a base class.

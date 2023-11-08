@@ -5,7 +5,6 @@ __all__ = [
 
 from typing import Any, Tuple
 
-from .. import constants
 from ..enums import RecurCalendarType, RecurDOW, RecurEndType, RecurFrequency, RecurMonthNthWeek, RecurPatternType, RecurPatternTypeSpecificWeekday
 from ._helpers import BytesReader
 
@@ -46,11 +45,17 @@ class RecurrencePattern:
         self.__occurrenceCount = reader.readUnsignedInt()
         self.__firstDOW = RecurDOW(reader.readUnsignedInt())
         deletedInstanceCount = reader.readUnsignedInt()
-        self.__deletedInstanceDates = tuple(reader.readUnsignedInt() for x in range(deletedInstanceCount))
+        self.__deletedInstanceDates = tuple(reader.readUnsignedInt() for _ in range(deletedInstanceCount))
         modifiedInstanceCount = reader.readUnsignedInt()
-        self.__modifiedInstanceDates = tuple(reader.readUnsignedInt() for x in range(modifiedInstanceCount))
+        self.__modifiedInstanceDates = tuple(reader.readUnsignedInt() for _ in range(modifiedInstanceCount))
         self.__startDate = reader.readUnsignedInt()
         self.__endDate = reader.readUnsignedInt()
+
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
+    def toBytes(self) -> bytes:
+        return self.__rawData
 
     @property
     def calendarType(self) -> RecurCalendarType:
@@ -160,13 +165,6 @@ class RecurrencePattern:
         monthly recurrences.
         """
         return self.__period
-
-    @property
-    def rawData(self) -> bytes:
-        """
-        The raw bytes used to create this object.
-        """
-        return self.__rawData
 
     @property
     def readerVersion(self) -> int:

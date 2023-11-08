@@ -3,6 +3,7 @@ from __future__ import annotations
 
 __all__ = [
     'AddressBookType',
+    'ADVF',
     'AppointmentAuxilaryFlag',
     'AppointmentColor',
     'AppointmentStateFlag',
@@ -16,12 +17,15 @@ __all__ = [
     'BodyTypes',
     'BusyStatus',
     'ClientIntentFlag',
+    'ClipboardFormat',
     'Color',
     'ContactAddressIndex',
     'ContactLinkState',
     'DeencapType',
+    'DevModeFields',
     'DirectoryEntryType',
     'DisplayType',
+    'DMPaperSize',
     'DVAspect',
     'ElectronicAddressProperties',
     'EntryIDType',
@@ -34,6 +38,7 @@ __all__ = [
     'Importance',
     'InsecureFeatures',
     'Intelligence',
+    'LogFlags',
     'MacintoshEncoding',
     'MeetingObjectChange',
     'MeetingRecipientType',
@@ -42,10 +47,14 @@ __all__ = [
     'MessageType',
     'NamedPropertyType',
     'NoteColor',
+    'ODTCf',
+    'ODTPersist1',
+    'ODTPersist2',
     'OORBodyFormat',
     'PostalAddressID',
     'Priority',
     'PropertiesType',
+    'PropertyFlags',
     'RecipientRowFlagType',
     'RecipientType',
     'RecurCalendarType',
@@ -57,6 +66,7 @@ __all__ = [
     'RecurPatternType',
     'ResponseStatus',
     'ResponseType',
+    'RetentionFlags',
     'RuleActionType',
     'SaveType',
     'Sensitivity',
@@ -71,12 +81,13 @@ __all__ = [
     'TaskState',
     'TaskStatus',
     'TZFlag',
+    'WrappedType',
 ]
 
 
 import enum
 
-from typing import Dict, Iterable, List, Set, Union
+from typing import Any, Dict, Iterable, List, Set, Type, Union
 
 
 class AddressBookType(enum.IntEnum):
@@ -95,6 +106,17 @@ class AddressBookType(enum.IntEnum):
     TEMPLATE = 0x101
     ONE_OFF_USER = 0x102
     SEARCH = 0x200
+
+
+
+class ADVF(enum.IntEnum):
+    ADVF_NODATA = 1
+    ADVF_PRIMEFIRST = 2
+    ADVF_ONLYONCE = 4
+    ADVF_DATAONSTOP = 64
+    ADVFCACHE_NOHANDLER = 8
+    ADVFCACHE_FORVEBUILTIN = 16
+    ADVFCACHE_ONSAVE = 32
 
 
 
@@ -386,6 +408,17 @@ class ClientIntentFlag(enum.IntFlag):
 
 
 
+class ClipboardFormat(enum.IntEnum):
+    """
+    The standard clipboard formats, as specified in [MS-OLEDS].
+    """
+    CF_BITMAP = 0x00000002
+    CF_METAFILEPICT = 0x00000003
+    CF_DIB = 0x00000008
+    CF_ENHMETAFILE = 0x0000000E
+
+
+
 class Color(enum.IntEnum):
     RED = 0
     BLACK = 1
@@ -428,6 +461,29 @@ class DeencapType(enum.IntEnum):
 
 
 
+class DevModeFields(enum.IntFlag):
+    DM_NUP           = 0b00000000000000000000000000000010
+    DM_SCALE         = 0b00000000000000000000000000001000
+    DM_PAPERWIDTH    = 0b00000000000000000000000000010000
+    DM_PAPERLENGTH   = 0b00000000000000000000000000100000
+    DM_PAPERSIZE     = 0b00000000000000000000000001000000
+    DM_ORIENTATION   = 0b00000000000000000000000010000000
+    DM_COLLATE       = 0b00000000000000000000000100000000
+    DM_TTOPTION      = 0b00000000000000000000001000000000
+    DM_YRESOLUTION   = 0b00000000000000000000010000000000
+    DM_DUPLEX        = 0b00000000000000000000100000000000
+    DM_COLOR         = 0b00000000000000000001000000000000
+    DM_PRINTQUALITY  = 0b00000000000000000010000000000000
+    DM_DEFAULTSOURCE = 0b00000000000000000100000000000000
+    DM_COPIES        = 0b00000000000000001000000000000000
+    DM_ICMMETHOD     = 0b00000000000000010000000000000000
+    DM_FORMNAME      = 0b00000000100000000000000000000000
+    DM_DITHERTYPE    = 0b00100000000000000000000000000000
+    DM_MEDIATYPE     = 0b01000000000000000000000000000000
+    DM_ICMINTENT     = 0b10000000000000000000000000000000
+
+
+
 class DirectoryEntryType(enum.IntEnum):
     UNALLOCATED = 0
     UNKNOWN = 0
@@ -452,6 +508,33 @@ class DisplayType(enum.IntEnum):
 
 
 
+class DMPaperSize:
+    DMPAPER_LETTER = 0x0001
+    DMPAPER_LEGAL = 0x0005
+    DMPAPER_A3 = 0x0008
+    DMPAPER_A4 = 0x0009
+    DMPAPER_A4SMALL = 0x000A
+    DMPAPER_A5 = 0x000B
+    DMPAPER_B4 = 0x000C
+    DMPAPER_B5 = 0x000D
+    DMPAPER_10X14 = 0x0010
+    DMPAPER_11X17 = 0x0011
+    DMPAPER_CSHEET = 0x0018
+    DMPAPER_DBL_JAPANESE_POSTCARD = 0x0045
+    DMPAPER_A6 = 0x0046
+    DMPAPER_A3_ROTATED = 0x004C
+    DMPAPER_A4_ROTATED = 0x004D
+    DMPAPER_A5_ROTATED = 0x004E
+    DMPAPER_B4_JIS_ROTATED = 0x004F
+    DMPAPER_B5_JIS_ROTATED = 0x0050
+    DMPAPER_A6_ROTATED = 0x0053
+    DMPAPER_B6_JIS = 0x0058
+    DMPAPER_B6_JIS_ROTATED = 0x0059
+    DMPAPER_12X11 = 0x005A
+    # TODO
+
+
+
 class DVAspect(enum.IntEnum):
     """
     Part of the extra data for Outlook signatures. Different sources seem to
@@ -459,7 +542,10 @@ class DVAspect(enum.IntEnum):
     Microsoft documentation of the DVASPECT enumeration.
     """
     CONTENT = 1
+    THUMBNAIL = 2
     ICON = 4
+    DOCPRINT = 8
+
 
 
 class ElectronicAddressProperties(enum.IntEnum):
@@ -1235,6 +1321,12 @@ class Intelligence(enum.IntEnum):
 
 
 
+class LogFlags(enum.IntFlag):
+    NO_JOURNAL_ASSOCIATED_ATT = 0x00000000
+    HAS_JOUNRAL_ASSOCIATED_ATT = 0x40000000
+
+
+
 class MacintoshEncoding(enum.IntEnum):
     """
     The encoding to use for Macintosh-specific data attachments.
@@ -1340,6 +1432,71 @@ class NoteColor(enum.IntEnum):
 
 
 
+class ODTCf(enum.IntEnum):
+    """
+    Values for the `cf` field of the ODT structure.
+    """
+    UNSPECIFIED = 0x0000
+    RICH_TEXT_FORMAT = 0x0001
+    TEXT_FORMAT = 0x0002
+    METAFILE = 0x0003
+    BITMAP = 0x0004
+    DEVICE_INDEPENDENT_BITMAP = 0x0005
+    HTML_FORMAT = 0x000A
+    UNICODE_TEXT_FORMAT = 0x0014
+
+
+
+class ODTPersist1(enum.IntFlag):
+    """
+    Flag values for ODTPersist1, in the order they would appear when unpacking a
+    little endian unsigned short.
+    """
+    NONE = 0b0000000000000000
+    RESERVED_1 = 0b0000000000000001
+    F_DEF_HANDLER = 0b0000000000000010
+    RESERVED_2 = 0b0000000000000100
+    RESERVED_3 = 0b0000000000001000
+    F_LINK = 0b0000000000010000
+    RESERVED_4 = 0b0000000000100000
+    F_ICON = 0b0000000001000000
+    F_IS_OLE1 = 0b0000000010000000
+    F_MANUAL = 0b0000000100000000
+    F_RECOMPOSE_ON_RESIZE = 0b0000001000000000
+    RESERVED_5 = 0b0000010000000000
+    RESERVED_6 = 0b0000100000000000
+    F_OCX = 0b0001000000000000
+    F_STREAM = 0b0010000000000000
+    RESERVED_7 = 0b0100000000000000
+    F_VIEW_OBJECT = 0b1000000000000000
+
+
+
+class ODTPersist2(enum.IntFlag):
+    """
+    Flag values for ODTPersist2, in the order they would appear when unpacking a
+    little endian unsigned short.
+    """
+    NONE = 0b0000000000000000
+    F_EMF = 0b0000000000000001
+    RESERVED_1 = 0b0000000000000010
+    F_QUERIED_EMF = 0b0000000000000100
+    F_STORED_AS_EMF = 0b0000000000001000
+    RESERVED_2 = 0b0000000000010000
+    RESERVED_3 = 0b0000000000100000
+    RESERVED_4 = 0b0000000001000000
+    RESERVED_5 = 0b0000000010000000
+    RESERVED_6 = 0b0000000100000000
+    RESERVED_7 = 0b0000001000000000
+    RESERVED_8 = 0b0000010000000000
+    RESERVED_9 = 0b0000100000000000
+    RESERVED_10 = 0b0001000000000000
+    RESERVED_11 = 0b0010000000000000
+    RESERVED_12 = 0b0100000000000000
+    RESERVED_13 = 0b1000000000000000
+
+
+
 class OORBodyFormat(enum.IntEnum):
     """
     The body format for One Off Recipients.
@@ -1377,6 +1534,13 @@ class PropertiesType(enum.IntEnum):
     MESSAGE_EMBED = 1
     ATTACHMENT = 2
     RECIPIENT = 3
+
+
+
+class PropertyFlags(enum.IntFlag):
+    MANDATORY = 0b001
+    READABLE = 0b010
+    WRITABLE = 0b100
 
 
 
@@ -1441,7 +1605,7 @@ class RecurDOW(enum.IntEnum):
 
 class RecurEndType(enum.IntEnum):
     @classmethod
-    def fromInt(cls, value) -> RecurEndType:
+    def fromInt(cls, value : int) -> RecurEndType:
         """
         Some enum values CAN be created from more than one int, so handle that.
         """
@@ -1518,7 +1682,7 @@ class ResponseStatus(enum.IntEnum):
         """
         Uses the iterable of ints to create a list of this enum.
         """
-        return {cls(x) for x in items}
+        return [cls(x) for x in items]
 
     NONE = 0x00000000
     ORGANIZED = 0x00000001
@@ -1536,6 +1700,25 @@ class ResponseType(enum.Enum):
     ACCEPT = 'pos'
     DECLINE = 'neg'
     TENTATIVE = 'tent'
+
+
+
+class RetentionFlags(enum.IntFlag):
+    """
+    Flags that specify the status of nature of an item's retention tag or
+    archive tag.
+
+    See the section labeled "PidTagRetentionFlags" of [MS-OXCMSG] for details.
+    """
+    EXPLICIT_TAG = 0x001
+    USER_OVERRIDE = 0x002
+    AUTO_TAG = 0x004
+    PERSONAL_TAG = 0x008
+    EXPLICIT_ARCHIVE_TAG = 0x010
+    KEEP_IN_PLACE = 0x020
+    SYSTEM_DATA = 0x040
+    NEEDS_RESCAN = 0x080
+    PENDING_RESCAN = 0x100
 
 
 
@@ -1789,12 +1972,18 @@ class TZFlag(enum.IntFlag):
 
 
 
+class WrappedType(enum.IntEnum):
+    MESSAGE_STORE = 0x6
+    MAILBOX_STORE = 0xC
+
+
+
 class _EnumDeprecator:
     """
     Special class for handling deprecated enums in a way that shouldn't break
     existing code, including code for checking `is` on a member of the enum.
     """
-    def __init__(self, oldClassName : str, newClass : enum.Enum, nameConversion : Dict = {}, valueConversion : Dict = {}):
+    def __init__(self, oldClassName : str, newClass : Type[enum.Enum], nameConversion : Dict[str, Any] = {}, valueConversion : Dict = {}):
         """
         :param oldClassName: The name to use in the deprecation message.
         :param newClass: The new enum class to look for the value in.

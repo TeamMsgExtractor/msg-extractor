@@ -7,6 +7,7 @@ import base64
 import datetime
 import email.message
 import email.utils
+import enum
 import functools
 import html
 import json
@@ -20,11 +21,12 @@ import zipfile
 import bs4
 import compressed_rtf
 import RTFDE
+import RTFDE.exceptions
 
 from email import policy
 from email.message import EmailMessage
 from email.parser import HeaderParser
-from typing import Callable, Dict, List, Optional, Union
+from typing import Any, Callable, cast, Dict, List, Optional, Tuple, Type, Union
 
 from .. import constants
 from .._rtf.create_doc import createDocument
@@ -44,8 +46,6 @@ from ..utils import (
         htmlSanitize, inputToBytes, inputToString, isEncapsulatedRtf,
         prepareFilename, rtfSanitizeHtml, rtfSanitizePlain, validateHtml
     )
-
-from imapclient.imapclient import decode_utf7
 
 
 logger = logging.getLogger(__name__)
@@ -81,19 +81,10 @@ class MessageBase(MSGFile):
         # if an error occurs.
         try:
             self.__headerInit = False
-            self.__recipientSeparator = kwargs.get('recipientSeparator', ';')
+            self.__recipientSeparator : str = kwargs.get('recipientSeparator', ';')
             self.__deencap = kwargs.get('deencapsulationFunc')
-            # Initialize properties in the order that is least likely to cause bugs.
-            # TODO have each function check for initialization of needed data so
-            # these lines will be unnecessary.
-            self.props
             self.header
-            self.recipients
 
-            self.to
-            self.cc
-            self.sender
-            self.date
             # This variable keeps track of what the new line character should be.
             self._crlf = '\n'
             try:
@@ -101,8 +92,6 @@ class MessageBase(MSGFile):
             except Exception as e:
                 # Prevent an error in the body from preventing opening.
                 logger.exception('Critical error accessing the body. File opened but accessing the body will throw an exception.')
-            self.named
-            self.namedProperties
         except:
             try:
                 self.close()
@@ -117,7 +106,7 @@ class MessageBase(MSGFile):
         value = None
         # Check header first.
         if self.headerInit:
-            value = self.header[recipientStr]
+            value = cast(Optional[str], self.header[recipientStr])
             if value:
                 value = decodeRfc2047(value)
                 value = value.replace(',', self.__recipientSeparator)
@@ -251,7 +240,8 @@ class MessageBase(MSGFile):
         """
         print('Message')
         print('Subject:', self.subject)
-        print('Date:', self.date)
+        if self.date:
+            print('Date:', self.date.__format__(self.datetimeFormat))
         print('Body:')
         print(self.body)
 
@@ -270,11 +260,12 @@ class MessageBase(MSGFile):
         If self.headerFormatProperties is None, immediately returns an empty
         string.
         """
-        formattedProps = []
         allProps = self.headerFormatProperties
 
         if allProps is None:
             return ''
+
+        formattedProps = []
 
         for entry in allProps:
             isGroup = False
@@ -319,13 +310,13 @@ class MessageBase(MSGFile):
         Returns the JSON representation of the Message.
         """
         return json.dumps({
-            'from': inputToString(self.sender, self.stringEncoding),
-            'to': inputToString(self.to, self.stringEncoding),
-            'cc': inputToString(self.cc, self.stringEncoding),
-            'bcc': inputToString(self.bcc, self.stringEncoding),
-            'subject': inputToString(self.subject, self.stringEncoding),
-            'date': inputToString(self.date, self.stringEncoding),
-            'body': decode_utf7(self.body),
+            'from': self.sender,
+            'to': self.to,
+            'cc': self.cc,
+            'bcc': self.bcc,
+            'subject': self.subject,
+            'date': self.date.__format__(self.datetimeFormat) if self.date else None,
+            'body': self.body,
         })
 
     def getSaveBody(self, **_) -> bytes:
@@ -966,45 +957,38 @@ class MessageBase(MSGFile):
         """
         return self.props.date if self.isSent else None
 
-    @property
+    @functools.cached_property
     def deencapsulatedRtf(self) -> Optional[RTFDE.DeEncapsulator]:
         """
         Returns the instance of the deencapsulated RTF body. If there is no RTF
         body or the body is not encasulated, returns None.
         """
-        try:
-            return self._deencapsultor
-        except AttributeError:
-            if self.rtfBody:
-                # If there is an RTF body, we try to deencapsulate it.
-                body = self.rtfBody
-                # Sometimes you get MSG files whose RTF body has stuff
-                # *after* the body, and RTFDE can't handle that. Here is
-                # how we compensate.
-                while body and body[-1] != 125:
-                    body = body[:-1]
+        if self.rtfBody:
+            # If there is an RTF body, we try to deencapsulate it.
+            body = self.rtfBody
+            # Sometimes you get MSG files whose RTF body has stuff
+            # *after* the body, and RTFDE can't handle that. Here is
+            # how we compensate.
+            while body and body[-1] != 125:
+                body = body[:-1]
 
-                try:
-                    self._deencapsultor = RTFDE.DeEncapsulator(body)
-                    self._deencapsultor.deencapsulate()
-                except RTFDE.exceptions.NotEncapsulatedRtf as e:
-                    logger.debug('RTF body is not encapsulated.')
-                    self._deencapsultor = None
-                except RTFDE.exceptions.MalformedEncapsulatedRtf as _e:
-                    if ErrorBehavior.RTFDE_MALFORMED not in self.errorBehavior:
-                        raise
-                    logger.info('RTF body contains malformed encapsulated content.')
-                    self._deencapsultor = None
-                except Exception:
-                    # If we are just ignoring the errors, log it then set to
-                    # None. Otherwise, continue the exception.
-                    if ErrorBehavior.RTFDE_UNKNOWN_ERROR not in self.errorBehavior:
-                        raise
-                    logger.exception('Unhandled error happened while using RTFDE. You have choosen to ignore these errors.')
-                    self._deencapsultor = None
-            else:
-                self._deencapsultor = None
-            return self._deencapsultor
+            try:
+                deencapsultor = RTFDE.DeEncapsulator(body)
+                deencapsultor.deencapsulate()
+                return deencapsultor
+            except RTFDE.exceptions.NotEncapsulatedRtf:
+                logger.debug('RTF body is not encapsulated.')
+            except RTFDE.exceptions.MalformedEncapsulatedRtf:
+                if ErrorBehavior.RTFDE_MALFORMED not in self.errorBehavior:
+                    raise
+                logger.info('RTF body contains malformed encapsulated content.')
+            except Exception:
+                # If we are just ignoring the errors, log it then set to
+                # None. Otherwise, continue the exception.
+                if ErrorBehavior.RTFDE_UNKNOWN_ERROR not in self.errorBehavior:
+                    raise
+                logger.exception('Unhandled error happened while using RTFDE. You have choosen to ignore these errors.')
+        return None
 
     @property
     def defaultFolderName(self) -> str:
@@ -1014,7 +998,7 @@ class MessageBase(MSGFile):
         try:
             return self._defaultFolderName
         except AttributeError:
-            d = self.parsedDate
+            d = self.parsedDate or tuple([0] * 9)
 
             dirName = '{0:02d}-{1:02d}-{2:02d}_{3:02d}{4:02d}'.format(*d) if d else 'UnknownDate'
             dirName += ' ' + (prepareFilename(self.subject) if self.subject else '[No subject]')
@@ -1046,13 +1030,15 @@ class MessageBase(MSGFile):
         """
         headerText = self.headerText
         if headerText:
-            header = HeaderParser(policy = policy.default).parsestr(headerText)
-            del header['Date']
-            header['Date'] = self.date
+            # Fix an issue with prefixed headers not parsing correctly.
+            if headerText.startswith('Microsoft Mail Internet Headers Version 2.0'):
+                headerText = headerText[43:].lstrip()
+            header = HeaderParser(policy = policy.compat32).parsestr(headerText)
         else:
             logger.info('Header is empty or was not found. Header will be generated from other streams.')
-            header = HeaderParser(policy = policy.default).parsestr('')
-            header.add_header('Date', self.date)
+            header = HeaderParser(policy = policy.compat32).parsestr('')
+            if self.date:
+                header.add_header('Date', email.utils.format_datetime(self.date))
             header.add_header('From', self.sender)
             header.add_header('To', self.to)
             header.add_header('Cc', self.cc)
@@ -1064,20 +1050,17 @@ class MessageBase(MSGFile):
         self.__headerInit = True
         return header
 
-    @property
-    def headerDict(self) -> Dict:
+    @functools.cached_property
+    def headerDict(self) -> Dict[str, Any]:
         """
         Returns a dictionary of the entries in the header
         """
+        headerDict = {x: self.header[x] for x in self.header}
         try:
-            return self._headerDict
-        except AttributeError:
-            self._headerDict = dict(self.header._headers)
-            try:
-                self._headerDict.pop('Received')
-            except KeyError:
-                pass
-            return self._headerDict
+            headerDict.pop('Received')
+        except KeyError:
+            pass
+        return headerDict
 
     @property
     def headerFormatProperties(self) -> constants.HEADER_FORMAT_TYPE:
@@ -1110,7 +1093,7 @@ class MessageBase(MSGFile):
         return {
             '-basic info-': {
                 'From': self.sender,
-                'Sent': self.date,
+                'Sent': self.date.__format__(self.datetimeFormat) if self.date else None,
                 'To': self.to,
                 'Cc': self.cc,
                 'Bcc': self.bcc,
@@ -1233,8 +1216,11 @@ class MessageBase(MSGFile):
         return self.getStringStream('__substg1.0_1035')
 
     @functools.cached_property
-    def parsedDate(self):
-        return email.utils.parsedate(self.date)
+    def parsedDate(self) -> Optional[Tuple[int, int, int, int, int, int, int, int, int]]:
+        """
+        Returns a 9 tuple of the parsed date from the header.
+        """
+        return email.utils.parsedate(self.header['Date'])
 
     @functools.cached_property
     def receivedTime(self) -> Optional[datetime.datetime]:
@@ -1259,7 +1245,18 @@ class MessageBase(MSGFile):
                     dir_[prefixLen] not in recipientDirs:
                 recipientDirs.append(dir_[prefixLen])
 
-        return [Recipient(recipientDir, self) for recipientDir in recipientDirs]
+        return [Recipient(recipientDir, self, self.recipientTypeClass) for recipientDir in recipientDirs]
+
+    @property
+    def recipientTypeClass(self) -> Type[enum.IntEnum]:
+        """
+        The class to use for a recipient's recipientType property.
+
+        The default is extract_msg.enums.RecipientType. If a subclass
+        attributes different meanings to the values, you can override this
+        property to return a valid enum.
+        """
+        return RecipientType
 
     @functools.cached_property
     def reportTag(self) -> Optional[ReportTag]:
@@ -1267,6 +1264,13 @@ class MessageBase(MSGFile):
         Data that is used to correlate the report and the original message.
         """
         return self.getStreamAs('__substg1.0_00310102', ReportTag)
+
+    @functools.cached_property
+    def responseRequested(self) -> bool:
+        """
+        Whether to send Meeting Response objects to the organizer.
+        """
+        return bool(self.getPropertyVal('0063000B'))
 
     @functools.cached_property
     def rtfBody(self) -> Optional[bytes]:

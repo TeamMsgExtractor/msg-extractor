@@ -3,9 +3,10 @@ __all__ = [
 ]
 
 
-import io
 import datetime
 import functools
+import io
+import json
 
 from typing import Dict, List, Optional, Set, Tuple, Union
 
@@ -16,14 +17,19 @@ from ..enums import (
     )
 from ..exceptions import SecurityError
 from .message_base import MessageBase
-from ..structures.entry_id import EntryID
 from ..structures.business_card import BusinessCardDisplayDefinition
+from ..structures.entry_id import EntryID
 
 
 class Contact(MessageBase):
     """
     Class used for parsing contacts.
     """
+
+    def getJson(self) -> str:
+        # To save a lot of trouble and repetiion, just return a JSON version of
+        # the header format properties.
+        return json.dumps(self.headerFormatProperties)
 
     @functools.cached_property
     def account(self) -> Optional[str]:
@@ -630,28 +636,6 @@ class Contact(MessageBase):
 
     @property
     def headerFormatProperties(self) -> HEADER_FORMAT_TYPE:
-        """
-        Returns a dictionary of properties, in order, to be formatted into the
-        header. Keys are the names to use in the header while the values are one
-        of the following:
-        None: Signifies no data was found for the property and it should be
-            omitted from the header.
-        str: A string to be formatted into the header using the string encoding.
-        Tuple[Union[str, None], bool]: A string should be formatted into the
-            header. If the bool is True, then place an empty string if the value
-            is None, otherwise follow the same behavior as regular None.
-
-        Additional note: If the value is an empty string, it will be dropped as
-        well by default.
-
-        Additionally you can group members of a header together by placing them
-        in an embedded dictionary. Groups will be spaced out using a second
-        instance of the join string. If any member of a group is being printed,
-        it will be spaced apart from the next group/item.
-
-        If you class should not do *any* header injection, return None from this
-        property.
-        """
         def strListToStr(inp : Optional[Union[str, List[str]]]):
             """
             Small internal function for things that may return a string or list.
@@ -709,8 +693,8 @@ class Contact(MessageBase):
                 'Email3 Display As': self.email3DisplayName,
             },
             '-other-': {
-                'Birthday': self.birthday.__format__('%B %d, %Y') if self.birthdayLocal else None,
-                'Anniversary': self.weddingAnniversary.__format__('%B %d, %Y') if self.weddingAnniversaryLocal else None,
+                'Birthday': self.birthday.__format__(self.dateFormat) if self.birthdayLocal else None,
+                'Anniversary': self.weddingAnniversary.__format__(self.dateFormat) if self.weddingAnniversaryLocal else None,
                 'Spouse/Partner': self.spouseName,
                 'Profession': self.profession,
                 'Children': strListToStr(self.childrensNames),

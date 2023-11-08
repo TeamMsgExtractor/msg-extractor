@@ -44,7 +44,7 @@ class EmbeddedMsgAttachment(AttachmentBase):
         :param contentId:      Use the contentId, if available.
         :param customFilename: A custom name to use for the file.
 
-        If the filename starts with "UnknownFilename" then there is no guarentee
+        If the filename starts with "UnknownFilename" then there is no guarantee
         that the files will have exactly the same filename.
         """
         customFilename = kwargs.get('customFilename')

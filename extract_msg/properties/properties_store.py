@@ -29,7 +29,7 @@ class PropertiesStore:
     Parser for msg properties files.
     """
 
-    def __init__(self, data : Optional[bytes], _type : Optional[PropertiesType] = None, skip : Optional[int] = None):
+    def __init__(self, data : Optional[bytes] = b'', _type : Optional[PropertiesType] = None, skip : Optional[int] = None):
         if not data:
             # If data comes back false, make sure is is empty bytes.
             data = b''
@@ -87,6 +87,9 @@ class PropertiesStore:
             else:
                 logger.warning(f'Found stream from divide that was not 16 bytes: {st}. Ignoring.')
         self.__pl = len(self.__props)
+
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
 
     def __contains__(self, key) -> bool:
         return self.__props.__contains__(key)
@@ -210,6 +213,9 @@ class PropertiesStore:
         """
         pprint.pprint(sorted(tuple(self.__props.keys())))
 
+    def toBytes(self) -> bytes:
+        return self.__rawData
+
     def values(self) -> Iterable[PropBase]:
         return self.__props.values()
 
@@ -239,10 +245,10 @@ class PropertiesStore:
             self.__date = None
             if '00390040' in self:
                 dateValue = self.get('00390040').value
-                # A date can by bytes if it fails to initialize, so we check it
+                # A date can be bytes if it fails to initialize, so we check it
                 # first.
                 if isinstance(dateValue, datetime.datetime):
-                    self.__date = dateValue.__format__('%a, %d %b %Y %H:%M:%S %z')
+                    self.__date = dateValue
             return self.__date
 
     @property
@@ -291,13 +297,6 @@ class PropertiesStore:
         developer. Use `Properties.props` instead for a safe reference.
         """
         return self.__props
-
-    @property
-    def rawData(self) -> bytes:
-        """
-        The raw bytes used to create this object.
-        """
-        return self.__rawData
 
     @property
     def recipientCount(self) -> int:

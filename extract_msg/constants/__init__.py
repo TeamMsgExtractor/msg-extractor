@@ -11,7 +11,9 @@ __all__ = [
     'st',
 
     # Constants.
+    'DATE_FORMAT',
     'DEFAULT_CLSID',
+    'DT_FORMAT',
     'FIXED_LENGTH_PROPS',
     'FIXED_LENGTH_PROPS_STRING',
     'HEADER_FORMAT',
@@ -20,6 +22,7 @@ __all__ = [
     'KNOWN_CLASS_TYPES',
     'KNOWN_FILE_FLAGS',
     'MAINDOC',
+    'MSG_PATH',
     'MULTIPLE_16_BYTES',
     'MULTIPLE_16_BYTES_HEX',
     'MULTIPLE_2_BYTES',
@@ -40,23 +43,34 @@ __all__ = [
 ]
 
 
-import datetime
-
-from typing import Dict, List, Tuple, Union
+from datetime import datetime
+from typing import (
+        Any, Callable, Dict, Final, List, Optional, Tuple, Type, TypeVar, Union
+    )
 
 from . import ps, re, st
 from ..enums import SaveType
 
 
+_T = TypeVar('_T')
+
+
+# Constants for formating datetime objects.
+DATE_FORMAT : Final[str] = '%d %B, %Y'
+DT_FORMAT : Final[str] = '%a, %d %b %Y %H:%M:%S %z'
+
+
 # Typing Constants.
 HEADER_FORMAT_VALUE_TYPE = Union[str, Tuple[Union[str, None], bool], None]
 # Basically a dict of HEADER_FORMAT_TYPE and dicts containing them.
-HEADER_FORMAT_TYPE = Dict[str, Union[HEADER_FORMAT_VALUE_TYPE, Dict[str, HEADER_FORMAT_VALUE_TYPE]]]
+HEADER_FORMAT_TYPE = Optional[Dict[str, Union[HEADER_FORMAT_VALUE_TYPE, Dict[str, HEADER_FORMAT_VALUE_TYPE]]]]
 SAVE_TYPE = Tuple[SaveType, Union[List[str], str, None]]
+MSG_PATH = Union[str, List[str], Tuple[str]]
+# Type used for the getXAs methods' overrideClass argument.
+OVERRIDE_CLASS = Union[Type[_T], Callable[[Any], _T]]
 
 
-
-FIXED_LENGTH_PROPS = (
+FIXED_LENGTH_PROPS : Final[Tuple[int, ...]] = (
     0x0000,
     0x0001,
     0x0002,
@@ -72,7 +86,7 @@ FIXED_LENGTH_PROPS = (
     0x0048,
 )
 
-FIXED_LENGTH_PROPS_STRING = (
+FIXED_LENGTH_PROPS_STRING : Final[Tuple[str, ...]] = (
     '0000',
     '0001',
     '0002',
@@ -88,7 +102,7 @@ FIXED_LENGTH_PROPS_STRING = (
     '0048',
 )
 
-VARIABLE_LENGTH_PROPS = (
+VARIABLE_LENGTH_PROPS : Final[Tuple[int, ...]] = (
     0x000D,
     0x001E,
     0x001F,
@@ -110,7 +124,7 @@ VARIABLE_LENGTH_PROPS = (
     0x1102,
 )
 
-VARIABLE_LENGTH_PROPS_STRING = (
+VARIABLE_LENGTH_PROPS_STRING : Final[Tuple[str, ...]] = (
     '000D',
     '001E',
     '001F',
@@ -133,34 +147,34 @@ VARIABLE_LENGTH_PROPS_STRING = (
 )
 
 # Multiple type properties that take up 2 bytes.
-MULTIPLE_2_BYTES = (
+MULTIPLE_2_BYTES : Final[Tuple[str, ...]] = (
     '1002',
 )
 
-MULTIPLE_2_BYTES_HEX = (
+MULTIPLE_2_BYTES_HEX : Final[Tuple[int, ...]] = (
     0x1002,
 )
 
 # Multiple type properties that take up 4 bytes.
-MULTIPLE_4_BYTES = (
+MULTIPLE_4_BYTES : Final[Tuple[str, ...]] = (
     '1003',
     '1004',
 )
 
-MULTIPLE_4_BYTES_HEX = (
+MULTIPLE_4_BYTES_HEX : Final[Tuple[int, ...]] = (
     0x1003,
     0x1004,
 )
 
 # Multiple type properties that take up 8 bytes.
-MULTIPLE_8_BYTES = (
+MULTIPLE_8_BYTES : Final[Tuple[str, ...]] = (
     '1005',
     '1007',
     '1014',
     '1040',
 )
 
-MULTIPLE_8_BYTES_HEX = (
+MULTIPLE_8_BYTES_HEX : Final[Tuple[int, ...]] = (
     0x1005,
     0x1007,
     0x1014,
@@ -168,17 +182,17 @@ MULTIPLE_8_BYTES_HEX = (
 )
 
 # Multiple type properties that take up 16 bytes.
-MULTIPLE_16_BYTES = (
+MULTIPLE_16_BYTES : Final[Tuple[str, ...]] = (
     '1048',
 )
 
-MULTIPLE_16_BYTES_HEX = (
+MULTIPLE_16_BYTES_HEX : Final[Tuple[int, ...]] = (
     0x1048,
 )
 
 
 # Used to format the header for saving only the header.
-HEADER_FORMAT = """From: {From}
+HEADER_FORMAT : Final[str] = """From: {From}
 To: {To}
 Cc: {Cc}
 Bcc: {Bcc}
@@ -188,7 +202,7 @@ Message-ID: {Message-Id}
 """
 
 
-KNOWN_CLASS_TYPES = (
+KNOWN_CLASS_TYPES : Final[Tuple[str, ...]] = (
     'ipm.activity',
     'ipm.appointment', # [MS-OXOCAL]
     'ipm.contact', # [MS-OXOCNTC]
@@ -212,31 +226,31 @@ KNOWN_CLASS_TYPES = (
 
 # Each item is a tuple of the lowercase class type and the issue number
 # associated with it.
-REFUSED_CLASS_TYPES = (
+REFUSED_CLASS_TYPES : Final[Tuple[Tuple[str, str], ...]] = (
     ('ipm.outlook.recall', '235'),
 )
 
-PYTPFLOATINGTIME_START = datetime.datetime(1899, 12, 30)
-NULL_DATE = datetime.datetime(4500, 8, 31, 23, 59)
+PYTPFLOATINGTIME_START : Final[datetime] = datetime(1899, 12, 30)
+NULL_DATE : Final[datetime] = datetime(4500, 8, 31, 23, 59)
 
 # Constants used for argparse stuff.
-KNOWN_FILE_FLAGS = (
+KNOWN_FILE_FLAGS : Final[Tuple[str, ...]] = (
     '--out-name',
 )
-NEEDS_ARG = (
+NEEDS_ARG : Final[Tuple[str, ...]]= (
     '--out-name',
 )
-REPOSITORY_URL = 'https://github.com/TeamMsgExtractor/msg-extractor'
-MAINDOC = f"""extract_msg:
+REPOSITORY_URL : Final[str] = 'https://github.com/TeamMsgExtractor/msg-extractor'
+MAINDOC : Final[str] = f"""extract_msg:
 \tExtracts emails and attachments saved in Microsoft Outlook's .msg files.
 
 {REPOSITORY_URL}"""
 
 # Default class ID for the root entry for OleWriter. This should be
 # referencing Outlook if I understand it correctly.
-DEFAULT_CLSID = b'\x0b\r\x02\x00\x00\x00\x00\x00\xc0\x00\x00\x00\x00\x00\x00F'
+DEFAULT_CLSID : Final[bytes] = b'\x0b\r\x02\x00\x00\x00\x00\x00\xc0\x00\x00\x00\x00\x00\x00F'
 
-PTYPES = {
+PTYPES : Final[Dict[int, str]]= {
     0x0000: 'PtypUnspecified',
     0x0001: 'PtypNull',
     0x0002: 'PtypInteger16',  # Signed short.

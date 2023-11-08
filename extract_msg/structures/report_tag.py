@@ -57,6 +57,12 @@ class ReportTag:
         else:
             self.__ansiText = None
 
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
+    def toBytes(self) -> bytes:
+        return self.__rawData
+
     @property
     def ansiText(self) -> Optional[bytes]:
         """
@@ -91,13 +97,6 @@ class ReportTag:
         The search key of the original message.
         """
         return self.__messageSearchKey
-
-    @property
-    def rawData(self) -> bytes:
-        """
-        The raw bytes used to create this object.
-        """
-        return self.__rawData
 
     @property
     def searchFolderEntryID(self) -> Optional[EntryID]:

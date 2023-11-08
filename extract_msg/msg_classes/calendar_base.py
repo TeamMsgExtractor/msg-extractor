@@ -4,10 +4,11 @@ __all__ = [
 
 
 import datetime
+import enum
 import functools
 import logging
 
-from typing import List, Optional, Union
+from typing import List, Optional, Type, Union
 
 from ..constants import ps
 from ..enums import AppointmentAuxilaryFlag, AppointmentColor, AppointmentStateFlag, BusyStatus, IconIndex, MeetingRecipientType, ResponseStatus
@@ -382,9 +383,9 @@ class CalendarBase(MessageBase):
     @functools.cached_property
     def ownerAppointmentID(self) -> Optional[int]:
         """
-        A quasi-unique value amond all Calendar objects in a user's mailbox.
+        A quasi-unique value among all Calendar objects in a user's mailbox.
         Assists a client or server in finding a Calendar object but is not
-        guarenteed to be unique amoung all objects.
+        guaranteed to be unique among all objects.
         """
         return self.getPropertyVal('00620003')
 
@@ -395,6 +396,10 @@ class CalendarBase(MessageBase):
         organizer, in UTC.
         """
         return self.getNamedProp('001A', ps.PSETID_MEETING)
+
+    @property
+    def recipientTypeClass(self) -> Type[enum.IntEnum]:
+        return MeetingRecipientType
 
     @functools.cached_property
     def recurrencePattern(self) -> Optional[str]:
@@ -431,13 +436,6 @@ class CalendarBase(MessageBase):
         Returns the resource attendees of the meeting.
         """
         return self.getNamedProp('0008', ps.PSETID_MEETING)
-
-    @functools.cached_property
-    def responseRequested(self) -> bool:
-        """
-        Whether to send Meeting Response objects to the organizer.
-        """
-        return bool(self.getPropertyVal('0063000B'))
 
     @functools.cached_property
     def responseStatus(self) -> ResponseStatus:

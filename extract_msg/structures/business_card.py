@@ -4,7 +4,7 @@ __all__ = [
 ]
 
 
-from typing import Tuple
+from typing import Optional, Tuple
 
 from ._helpers import BytesReader
 from .. import constants
@@ -37,7 +37,13 @@ class BusinessCardDisplayDefinition:
                                   bitwiseAdjustedAnd(unpacked[8], 0xFF0000))
         self.__imageArea = unpacked[9]
         self.__extraInfoField = data[17 + 16 * self.__countOfFields:]
-        self.__fields = tuple(FieldInfo(reader.read(16), self.__extraInfoField) for x in range(self.__countOfFields))
+        self.__fields = tuple(FieldInfo(reader.read(16), self.__extraInfoField) for _ in range(self.__countOfFields))
+
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
+    def toBytes(self) -> bytes:
+        return self.__rawData
 
     @property
     def backgroundColor(self) -> Tuple[int, int, int]:
@@ -121,13 +127,6 @@ class BusinessCardDisplayDefinition:
         return self.__minorVersion
 
     @property
-    def rawData(self) -> bytes:
-        """
-        The bytes used to generate this instance.
-        """
-        return self.__rawData
-
-    @property
     def templateID(self) -> BCTemplateID:
         """
         The layout of the business card.
@@ -138,7 +137,7 @@ class BusinessCardDisplayDefinition:
 
 class FieldInfo:
     def __init__(self, data : bytes, extraInfo : bytes):
-        self.__raw = data
+        self.__rawData = data
         unpacked = constants.st.ST_BC_FIELD_INFO.unpack(data)
         self.__textPropertyID = unpacked[0]
         self.__textFormat = BCTextFormat(unpacked[1])
@@ -150,9 +149,15 @@ class FieldInfo:
                             bitwiseAdjustedAnd(unpacked[5], 0xFF00),
                             bitwiseAdjustedAnd(unpacked[5], 0xFF0000))
 
-        self.__valueFontColor = (bitwiseAdjustedAnd(unpacked[6], 0xFF),
+        self.__labelFontColor = (bitwiseAdjustedAnd(unpacked[6], 0xFF),
                             bitwiseAdjustedAnd(unpacked[6], 0xFF00),
                             bitwiseAdjustedAnd(unpacked[6], 0xFF0000))
+
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
+    def toBytes(self) -> bytes:
+        return self.__rawData
 
     @property
     def fontSize(self) -> int:
@@ -182,23 +187,16 @@ class FieldInfo:
         """
         An integer that specified the byte offset into the ExtraInfo field of
         BusinessCardDisplayDefinition. If the text field does not have a label,
-        must be 0xFFFE
+        must be 0xFFFE.
         """
         return self.__labelOffset
 
     @property
-    def labelText(self) -> str:
+    def labelText(self) -> Optional[str]:
         """
         The text of the label, if it exists.
         """
         return self.__labelText
-
-    @property
-    def rawData(self) -> bytes:
-        """
-        The bytes used to generate this instance.
-        """
-        return self.__raw
 
     @property
     def textFormat(self) -> BCTextFormat:

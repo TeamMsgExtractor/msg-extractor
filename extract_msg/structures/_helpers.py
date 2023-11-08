@@ -10,9 +10,11 @@ __all__ = [
 import io
 import struct
 
-from typing import Any, Tuple, Union
+from typing import Any, Optional, Tuple, Type, TypeVar, Union
 
 from .. import constants
+
+_T = TypeVar('_T')
 
 
 class BytesReader(io.BytesIO):
@@ -21,7 +23,7 @@ class BytesReader(io.BytesIO):
     stream.
     """
 
-    def __init__(self, *args, littleEndian = True, **kwargs):
+    def __init__(self, *args, littleEndian : bool = True, **kwargs):
         super().__init__(*args, **kwargs)
         self.__le = bool(littleEndian)
         if self.__le:
@@ -47,7 +49,7 @@ class BytesReader(io.BytesIO):
             self.__float_t = constants.st.ST_BE_F32
             self.__double_t = constants.st.ST_BE_F64
 
-    def _readDecodedString(self, encoding, width : int = 1) -> str:
+    def _readDecodedString(self, encoding : str, width : int = 1) -> str:
         """
         Reads a null terminated string with the specified character width
         decoded using the specified encoding. If it cannot be read or cannot be
@@ -61,7 +63,7 @@ class BytesReader(io.BytesIO):
                 self.seek(position)
             raise
 
-    def assertNull(self, length : int, errorMsg : str = None) -> bytes:
+    def assertNull(self, length : int, errorMsg : Optional[str] = None) -> bytes:
         """
         Reads the number of bytes specified and ensures they are all null.
 
@@ -91,7 +93,7 @@ class BytesReader(io.BytesIO):
 
         return valueRead
 
-    def assertRead(self, value : bytes, errorMsg : str = None) -> bytes:
+    def assertRead(self, value : bytes, errorMsg : Optional[str] = None) -> bytes:
         """
         Reads the number of bytes and compares them to the value provided. If it
         does not match, throws a value error.
@@ -114,7 +116,7 @@ class BytesReader(io.BytesIO):
         if len(value) == 0:
             return b''
 
-        if not isinstance(value, bytes):
+        if not isinstance(value, bytes): # pyright: ignore
             raise TypeError(':param value: was not bytes.')
 
         valueRead = self.tryReadBytes(len(value))
@@ -163,7 +165,6 @@ class BytesReader(io.BytesIO):
 
         position = self.tell()
         string = b''
-        endFound = False;
         null = b'\x00' * width
 
         while True:
@@ -181,7 +182,7 @@ class BytesReader(io.BytesIO):
                 # Otherwise add the character to our string.
                 string += nextChar
 
-    def readClass(self, _class):
+    def readClass(self, _class : Type[_T]) -> _T:
         """
         Takes anything with a __SIZE__ property and a call function that takes
         a single bytes argument and returns the result of that function.
@@ -190,6 +191,8 @@ class BytesReader(io.BytesIO):
         instance of the class created with that amount of bytes. However, there
         is little reason to truly limit it to only that.
         """
+        if not hasattr(_class, '__SIZE__'):
+            raise TypeError('Argument to readClass MUST have a __SIZE__ attribute.')
         value = self.tryReadBytes(_class.__SIZE__)
         if value:
             return _class(value)
@@ -246,7 +249,7 @@ class BytesReader(io.BytesIO):
         else:
             raise IOError('Not enough bytes left in buffer.')
 
-    def readStruct(self, _struct : Union[struct.Struct, Any]) -> Tuple:
+    def readStruct(self, _struct : Union[struct.Struct, Any]) -> Tuple[Any, ...]:
         """
         Read enough bytes for a struct and unpack it, returning the tuple of
         values.

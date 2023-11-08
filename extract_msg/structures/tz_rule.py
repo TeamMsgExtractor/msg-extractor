@@ -3,36 +3,73 @@ __all__ = [
 ]
 
 
-from typing import Set
+import logging
 
-from .. import constants
+from struct import Struct
+from typing import Final, final, Optional
+
 from ..enums import TZFlag
 from ._helpers import BytesReader
 from .system_time import SystemTime
 
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
+
+@final
 class TZRule:
     """
     A TZRule structure, as defined in [MS-OXOCAL].
     """
 
     __SIZE__ : int = 66
+    __struct : Final[Struct] = Struct('4B2H14x3i16s16s')
 
-    def __init__(self, data : bytes):
-        self.__rawData = data
+    def __init__(self, data : Optional[bytes] = None):
+        if not data:
+            self.__majorVersion = 2
+            self.__minorVersion = 1
+            self.__flags = TZFlag(0)
+            self.__year = 0
+            self.__bias = 0
+            self.__standardBias = 0
+            self.__daylightBias = 0
+            self.__standardDate = SystemTime()
+            self.__daylightDate = SystemTime()
+            return
+
         reader = BytesReader(data)
-        self.__majorVersion = reader.readByte()
-        self.__minorVersion = reader.readByte()
+        self.__majorVersion = reader.readUnsignedByte()
+        self.__minorVersion = reader.readUnsignedByte()
         reader.assertRead(b'\x3E\x00')
         self.__flags = TZFlag(reader.readUnsignedShort())
-        self.__year = reader.readShort()
-        # We *should* be doing this, but Outlook is violating the standard so...
-        #reader.assertNull(14)
+        self.__year = reader.readUnsignedShort()
+        # This *MUST* be null, however I've seen Outlook not follow that. Simply
+        # log a warning about it even though it's a violation.
+        if any(b := reader.read(14)):
+            logger.warning(f'Read TZRule with non-null X section (got {b}).')
         self.__bias = reader.readInt()
         self.__standardBias = reader.readInt()
         self.__daylightBias = reader.readInt()
         self.__standardDate = SystemTime(reader.read(16))
         self.__daylightDate = SystemTime(reader.read(16))
+
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
+    def toBytes(self) -> bytes:
+        return self.__struct.pack(self.__majorVersion,
+                                  self.__minorVersion,
+                                  62,
+                                  0,
+                                  self.__flags,
+                                  self.__year,
+                                  self.__bias,
+                                  self.__standardBias,
+                                  self.__daylightBias,
+                                  bytes(self.__standardDate),
+                                  bytes(self.__daylightDate))
 
     @property
     def bias(self) -> int:
@@ -59,7 +96,7 @@ class TZRule:
         return self.__daylightDate
 
     @property
-    def flags(self) -> Set[TZFlag]:
+    def flags(self) -> TZFlag:
         """
         The flags for this rule.
         """
@@ -78,13 +115,6 @@ class TZRule:
         The minor version.
         """
         return self.__minorVersion
-
-    @property
-    def rawData(self) -> bytes:
-        """
-        The raw bytes used to create this object.
-        """
-        return self.__rawData
 
     @property
     def standardBias(self) -> int:

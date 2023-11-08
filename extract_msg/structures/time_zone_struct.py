@@ -3,6 +3,8 @@ __all__ = [
 ]
 
 
+from typing import Optional
+
 from .. import constants
 from .system_time import SystemTime
 
@@ -12,16 +14,33 @@ class TimeZoneStruct:
     A TimeZoneStruct, as specified in [MS-OXOCAL].
     """
 
-    def __init__(self, data : bytes):
-        self.__rawData = data
+    def __init__(self, data : Optional[bytes] = None):
+        if not data:
+            self.__bias = 0
+            self.__standardBias = 0
+            self.__daylightBias = 0
+            self.__standardDate = SystemTime()
+            self.__daylightDate = SystemTime()
+
+            return
         unpacked = constants.st.ST_TZ.unpack(data)
         self.__bias = unpacked[0]
         self.__standardBias = unpacked[1]
         self.__daylightBias = unpacked[2]
-        self.__standardYear = unpacked[3]
         self.__standardDate = SystemTime(unpacked[4])
-        self.__daylightYear = unpacked[5]
         self.__daylightDate = SystemTime(unpacked[6])
+
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
+    def toBytes(self) -> bytes:
+        return constants.st.ST_TZ.pack(self.__bias,
+                                       self.__standardBias,
+                                       self.__daylightBias,
+                                       self.standardYear,
+                                       bytes(self.__standardDate),
+                                       self.daylightYear,
+                                       bytes(self.__daylightDate))
 
     @property
     def bias(self) -> int:
@@ -52,14 +71,7 @@ class TimeZoneStruct:
         """
         The value of the daylightDate field's year.
         """
-        return self.__daylightYear
-
-    @property
-    def rawData(self) -> bytes:
-        """
-        The raw bytes used to create this object.
-        """
-        return self.__rawData
+        return self.__daylightDate.year
 
     @property
     def standardBias(self) -> int:
@@ -87,4 +99,4 @@ class TimeZoneStruct:
         """
         The value of the standardDate field's year.
         """
-        return self.__standardYear
+        return self.__standardDate.year

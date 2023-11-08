@@ -8,6 +8,7 @@ __all__ = [
     'Calendar',
     'CalendarBase',
     'Contact',
+    'Journal',
     'MeetingCancellation',
     'MeetingException',
     'MeetingForwardNotification',
@@ -30,6 +31,7 @@ from .appointment import AppointmentMeeting
 from .calendar_base import CalendarBase
 from .calendar import Calendar
 from .contact import Contact
+from .journal import Journal
 from .meeting_cancellation import MeetingCancellation
 from .meeting_exception import MeetingException
 from .meeting_forward import MeetingForwardNotification

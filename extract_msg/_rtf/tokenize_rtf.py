@@ -5,7 +5,7 @@ __all__ = [
 
 import io
 
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 from .token import Token, TokenType
 
@@ -182,7 +182,7 @@ def _readText(startChar : bytes, reader : io.BytesIO) -> Tuple[Tuple[Token, ...]
     return tuple(Token(x, TokenType.TEXT) for x in chars), nextChar
 
 
-def tokenizeRTF(data : bytes, validateStart : bool = True) -> None:
+def tokenizeRTF(data : bytes, validateStart : bool = True) -> List[Token]:
     """
     Reads in the bytes and sets the tokens list to the contents after
     tokenizing. If tokenizing fails, the current tokens list will not be
@@ -215,7 +215,7 @@ def tokenizeRTF(data : bytes, validateStart : bool = True) -> None:
         nextChar = reader.read(1)
 
         # If the next character is a space, ignore it.
-        if nextChar == ' ':
+        if nextChar == b' ':
             nextChar = reader.read(1)
     else:
         tokens = []

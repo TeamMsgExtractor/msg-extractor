@@ -14,6 +14,7 @@ import abc
 import copy
 import logging
 import pprint
+import weakref
 
 from typing import (
         Any, Dict, Iterable, Iterator, List, Optional, Tuple, TYPE_CHECKING,
@@ -22,7 +23,7 @@ from typing import (
 
 from .. import constants
 from ..enums import NamedPropertyType
-from ..utils import bytesToGuid, divide, makeWeakRef, msgPathToString
+from ..utils import bytesToGuid, divide, msgPathToString
 from compressed_rtf.crc32 import crc32
 
 
@@ -45,13 +46,13 @@ class Named:
     __dir = '__nameid_version1.0'
 
     def __init__(self, msg : MSGFile):
-        self.__msg = makeWeakRef(msg)
+        self.__msg = weakref.ref(msg)
         # Get the basic streams. If all are emtpy, then nothing to do.
-        guidStream = self.getStream('__substg1.0_00020102')
-        entryStream = self.getStream('__substg1.0_00030102')
+        guidStream = self.getStream('__substg1.0_00020102') or b''
+        entryStream = self.getStream('__substg1.0_00030102') or b''
         self.guidStream = guidStream
         self.entryStream = entryStream
-        self.namesStream = self.getStream('__substg1.0_00040102')
+        self.namesStream = self.getStream('__substg1.0_00040102') or b''
 
         self.__propertiesDict : Dict[Tuple[str, str], NamedPropertyBase] = {}
         self.__properties : List[NamedPropertyBase] = []
@@ -129,21 +130,7 @@ class Named:
 
         return self.namesStream[offset:offset + length].decode('utf-16-le')
 
-    def _getStream(self, filename) -> Optional[bytes]:
-        """
-        Gets a binary representation of the requested filename.
-
-        This should ALWAYS return a bytes object if it was found, otherwise
-        returns None.
-
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
-        """
-        import warnings
-        warnings.warn(':method _getStream: has been deprecated and moved to the public api. Use :method getStream: instead (remove the underscore).', DeprecationWarning)
-        return self.getStream(filename)
-
-    def exists(self, filename) -> bool:
+    def exists(self, filename : constants.MSG_PATH) -> bool:
         """
         Checks if stream exists inside the named properties folder.
 
@@ -164,7 +151,7 @@ class Named:
         except KeyError:
             return default
 
-    def getStream(self, filename) -> Optional[bytes]:
+    def getStream(self, filename : constants.MSG_PATH) -> Optional[bytes]:
         """
         Gets a binary representation of the requested filename.
 
@@ -234,9 +221,9 @@ class NamedProperties:
             property.
         """
         self.__named = named
-        self.__streamSource = makeWeakRef(streamSource)
+        self.__streamSource = weakref.ref(streamSource)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item : Union[Tuple[str, str], NamedPropertyBase]):
         """
         Get a named property using the [] operator. Item must be a named
         property instance or a tuple with 2 items: the name and the GUID string.
@@ -251,7 +238,7 @@ class NamedProperties:
         else:
             return source._getTypedData(self.__named[item].propertyStreamID)
 
-    def get(self, item, default : _T = None) -> Union[Any, _T]:
+    def get(self, item : Union[Tuple[str, str], NamedPropertyBase], default : _T = None) -> Union[Any, _T]:
         """
         Get a named property, returning the value of :param default: if not
         found. Item must be a tuple with 2 items: the name and the GUID string.
@@ -267,7 +254,7 @@ class NamedProperties:
 
 
 class NamedPropertyBase(abc.ABC):
-    def __init__(self, entry : Dict):
+    def __init__(self, entry : Dict[str, Any]):
         self.__entry = entry
         self.__guidIndex = entry['guid_index']
         self.__namedPropertyID = entry['pid']
@@ -303,7 +290,7 @@ class NamedPropertyBase(abc.ABC):
         return self.__propertyStreamID
 
     @property
-    def rawEntry(self) -> Dict:
+    def rawEntry(self) -> Dict[str, Any]:
         return copy.deepcopy(self.__entry)
 
     @property

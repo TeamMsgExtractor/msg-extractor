@@ -12,6 +12,14 @@ extract\_msg.attachments.custom\_att\_handler.custom\_handler.py module
    :undoc-members:
    :show-inheritance:
 
+extract\_msg.attachments.custom\_att\_handler.lnk\_obj\_att.py module
+---------------------------------------------------------------------
+
+.. automodule:: extract_msg.attachments.custom_att_handler.lnk_obj_att.py
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 extract\_msg.attachments.custom\_att\_handler.outlook\_image\_dib.py module
 ---------------------------------------------------------------------------
 

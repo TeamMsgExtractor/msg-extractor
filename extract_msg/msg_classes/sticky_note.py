@@ -1,4 +1,5 @@
 import functools
+import json
 
 from typing import Optional
 
@@ -13,6 +14,15 @@ class StickyNote(MessageBase):
     """
     A sticky note.
     """
+    def getJson(self) -> str:
+        return json.dumps({
+            'subject': self.subject,
+            'date': self.date.__format__(self.datetimeFormat) if self.date else None,
+            'body': self.body,
+            'height': self.noteHeight,
+            'width': self.noteWidth,
+            'color': None if self.noteColor is None else self.noteColor.name.lower(),
+        })
 
     @property
     def headerFormatProperties(self) -> constants.HEADER_FORMAT_TYPE:

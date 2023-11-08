@@ -28,9 +28,15 @@ class FolderID:
 
     def __init__(self, data : bytes):
         self.__rawData = data
-        self.__replicaID = constants.st.STUI16.unpack(data[:2])
+        self.__replicaID = constants.st.ST_DATA_UI16.unpack(data[:2])[0]
         # This entry is 6 bytes, so we pull some shenanigans to unpack it.
-        self.__globalCounter = constants.st.STUI64.unpack(data[2:8] + b'\x00\x00')
+        self.__globalCounter = constants.st.ST_LE_UI64.unpack(data[2:8] + b'\x00\x00')[0]
+
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
+    def toBytes(self) -> bytes:
+        return self.__rawData
 
     @property
     def globalCounter(self) -> int:
@@ -38,13 +44,6 @@ class FolderID:
         An unsigned integer identifying the folder within its Store object.
         """
         return self.__globalCounter
-
-    @property
-    def rawData(self) -> bytes:
-        """
-        The raw bytes used to create this object.
-        """
-        return self.__rawData
 
     @property
     def replicaID(self) -> int:
@@ -75,6 +74,12 @@ class GlobalObjectID:
         reader.assertNull(8, 'Reserved was not set to null.')
         size = reader.readUnsignedInt()
         self.__data = reader.read(size)
+
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
+    def toBytes(self) -> bytes:
+        return self.__rawData
 
     @property
     def byteArrayID(self) -> bytes:
@@ -116,13 +121,6 @@ class GlobalObjectID:
         return self.__month
 
     @property
-    def rawData(self) -> bytes:
-        """
-        The raw bytes used to create this object.
-        """
-        return self.__rawData
-
-    @property
     def year(self) -> int:
         """
         The year from the PidLidExceptionReplaceTime property if the object
@@ -141,9 +139,15 @@ class MessageID:
 
     def __init__(self, data : bytes):
         self.__rawData = data
-        self.__replicaID = constants.st.STUI16.unpack(data[:2])
+        self.__replicaID = constants.st.ST_LE_UI16.unpack(data[:2])[0]
         # This entry is 6 bytes, so we pull some shenanigans to unpack it.
-        self.__globalCounter = constants.st.STUI64.unpack(data[2:8] + b'\x00\x00')
+        self.__globalCounter = constants.st.ST_LE_UI64.unpack(data[2:8] + b'\x00\x00')[0]
+
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
+    def toBytes(self) -> bytes:
+        return self.__rawData
 
     @property
     def globalCounter(self) -> int:
@@ -158,13 +162,6 @@ class MessageID:
         Tells if the object pointed to is actually a folder.
         """
         return self.__globalCounter == 0 and self.__replicaID == 0
-
-    @property
-    def rawData(self) -> bytes:
-        """
-        The raw bytes used to create this object.
-        """
-        return self.__rawData
 
     @property
     def replicaID(self) -> int:
@@ -192,7 +189,13 @@ class ServerID:
         self.__rawData = data
         self.__folderID = FolderID(data[1:9])
         self.__messageID = MessageID(data[9:17])
-        self.__instance = constants.st.STUI32.unpack(data[17:21])
+        self.__instance = constants.st.STUI32.unpack(data[17:21])[0]
+
+    def __bytes__(self) -> bytes:
+        return self.toBytes()
+
+    def toBytes(self) -> bytes:
+        return self.__rawData
 
     @property
     def folderID(self) -> FolderID:
@@ -217,10 +220,3 @@ class ServerID:
         properties will be 0.
         """
         return self.__messageID
-
-    @property
-    def rawData(self) -> bytes:
-        """
-        The raw data used to create this object.
-        """
-        return self.__rawData

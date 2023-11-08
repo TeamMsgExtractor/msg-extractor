@@ -6,19 +6,22 @@ __all__ = [
 ]
 
 
+import enum
 import functools
 import logging
+import weakref
 
 from typing import (
-        Any, Callable, List, Optional, Tuple, TYPE_CHECKING, TypeVar, Union
+        Any, Callable, Generic, List, Optional, TYPE_CHECKING, Type, TypeVar,
+        Union
     )
 
-from .enums import ErrorBehavior, MeetingRecipientType, PropertiesType, RecipientType
+from .constants import MSG_PATH, OVERRIDE_CLASS
+from .enums import ErrorBehavior, PropertiesType
 from .exceptions import StandardViolationError
-from .properties.prop import FixedLengthProp
 from .properties.properties_store import PropertiesStore
 from .structures.entry_id import PermanentEntryID
-from .utils import makeWeakRef, msgPathToString, verifyPropertyId, verifyType
+from .utils import msgPathToString
 
 
 if TYPE_CHECKING:
@@ -28,15 +31,16 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 _T = TypeVar('_T')
+_RT = TypeVar('_RT', bound = enum.IntEnum)
 
 
-class Recipient:
+class Recipient(Generic[_RT]):
     """
     Contains the data of one of the recipients in an MSG file.
     """
 
-    def __init__(self, _dir, msg : MSGFile):
-        self.__msg = makeWeakRef(msg) # Allows calls to original msg file.
+    def __init__(self, _dir : str, msg : MSGFile, recipientTypeClass : Type[_RT]):
+        self.__msg = weakref.ref(msg) # Allows calls to original msg file.
         self.__dir = _dir
         if not self.exists('__properties_version1.0'):
             if ErrorBehavior.STANDARDS_VIOLATION in msg.errorBehavior:
@@ -49,139 +53,10 @@ class Recipient:
             self.__email = self.getStringStream('__substg1.0_3003')
         self.__name = self.getStringStream('__substg1.0_3001')
         self.__typeFlags = self.__props.getValue('0C150003', 0)
-        from .msg_classes.calendar_base import CalendarBase
-        if isinstance(msg, CalendarBase):
-            self.__type = MeetingRecipientType(0xF & self.__typeFlags)
-        else:
-            self.__type = RecipientType(0xF & self.__typeFlags)
+        self.__type = recipientTypeClass(0xF & self.__typeFlags)
         self.__formatted = f'{self.__name} <{self.__email}>'
 
-    def _getStream(self, filename) -> Optional[bytes]:
-        """
-        Gets a binary representation of the requested filename.
-
-        This should ALWAYS return a bytes object if it was found, otherwise
-        returns None.
-
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
-        """
-        import warnings
-        warnings.warn(':method _getStream: has been deprecated and moved to the public api. Use :method getStream: instead (remove the underscore).', DeprecationWarning)
-        return self.getStream(filename)
-
-    def _getStringStream(self, filename) -> Optional[str]:
-        """
-        Gets a string representation of the requested filename.
-
-        Rather than the full filename, you should only feed this function the
-        filename sans the type. So if the full name is "__substg1.0_001A001F",
-        the filename this function should receive should be "__substg1.0_001A".
-
-        This should ALWAYS return a string if it was found, otherwise returns
-        None.
-
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
-        """
-        import warnings
-        warnings.warn(':method _getStringStream: has been deprecated and moved to the public api. Use :method getStringStream: instead (remove the underscore).', DeprecationWarning)
-        return self.getStringStream(filename)
-
-    def _getTypedAs(self, _id : str, overrideClass = None, preserveNone : bool = True):
-        """
-        Like the other get as functions, but designed for when something
-        could be multiple types (where only one will be present). This way you
-        have no need to set the type, it will be handled for you.
-
-        :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. By
-            default, this will be completely ignored if the value was not found.
-        :param preserveNone: If true (default), causes the function to ignore
-            :param overrideClass: when the value could not be found (is None).
-            If this is changed to False, then the value will be used regardless.
-        """
-        value = self._getTypedData(_id)
-        # Check if we should be overriding the data type for this instance.
-        if overrideClass is not None:
-            if value is not None or not preserveNone:
-                value = overrideClass(value)
-
-        return value
-
-    def _getTypedData(self, _id, _type = None):
-        """
-        Gets the data for the specified id as the type that it is supposed to
-        be. :param id: MUST be a 4 digit hexadecimal string.
-
-        If you know for sure what type the data is before hand, you can specify
-        it as being one of the strings in the constant FIXED_LENGTH_PROPS_STRING
-        or VARIABLE_LENGTH_PROPS_STRING.
-
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
-        """
-        verifyPropertyId(id)
-        _id = _id.upper()
-        found, result = self._getTypedStream('__substg1.0_' + _id, _type)
-        if found:
-            return result
-        else:
-            found, result = self._getTypedProperty(_id, _type)
-            return result if found else None
-
-    def _getTypedProperty(self, propertyID : str, _type = None) -> Tuple[bool, Optional[object]]:
-        """
-        Gets the property with the specified id as the type that it is supposed
-        to be. :param id: MUST be a 4 digit hexadecimal string.
-
-        If you know for sure what type the property is before hand, you can
-        specify it as being one of the strings in the constant
-        FIXED_LENGTH_PROPS_STRING or VARIABLE_LENGTH_PROPS_STRING.
-        """
-        verifyPropertyId(propertyID)
-        if _type:
-            verifyType(_type)
-            prop = self.props.get(propertyID + _type)
-            if isinstance(prop, FixedLengthProp):
-                return True, prop.value
-            else:
-                return False, None
-        else:
-            props = self.props.getProperties(propertyID)
-            for prop in props:
-                if isinstance(prop, FixedLengthProp):
-                    return True, prop.value
-
-        return False, None
-
-    def _getTypedStream(self, filename, _type = None):
-        """
-        Gets the contents of the specified stream as the type that it is
-        supposed to be.
-
-        Rather than the full filename, you should only feed this function the
-        filename sans the type. So if the full name is "__substg1.0_001A001F",
-        the filename this function should receive should be "__substg1.0_001A".
-
-        If you know for sure what type the stream is before hand, you can
-        specify it as being one of the strings in the constant
-        FIXED_LENGTH_PROPS_STRING or VARIABLE_LENGTH_PROPS_STRING.
-
-        If you have not specified the type, the type this function returns in
-        many cases cannot be predicted. As such, when using this function it is
-        best for you to check the type that it returns. If the function returns
-        None, that means it could not find the stream specified.
-
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
-        """
-        if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
-        return msg._getTypedStream(self, [self.__dir, msgPathToString(filename)], True, _type)
-
-    def exists(self, filename) -> bool:
+    def exists(self, filename : MSG_PATH) -> bool:
         """
         Checks if stream exists inside the recipient folder.
 
@@ -192,7 +67,7 @@ class Recipient:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.exists([self.__dir, msgPathToString(filename)])
 
-    def sExists(self, filename) -> bool:
+    def sExists(self, filename : MSG_PATH) -> bool:
         """
         Checks if the string stream exists inside the recipient folder.
 
@@ -216,7 +91,7 @@ class Recipient:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.existsTypedProperty(id, self.__dir, _type, True, self.__props)
 
-    def getMultipleBinary(self, filename) -> Optional[List[bytes]]:
+    def getMultipleBinary(self, filename : MSG_PATH) -> Optional[List[bytes]]:
         """
         Gets a multiple binary property as a list of bytes objects.
 
@@ -231,7 +106,7 @@ class Recipient:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.getMultipleBinary([self.__dir, msgPathToString(filename)])
 
-    def getMultipleString(self, filename) -> Optional[List[str]]:
+    def getMultipleString(self, filename : MSG_PATH) -> Optional[List[str]]:
         """
         Gets a multiple string property as a list of str objects.
 
@@ -246,7 +121,7 @@ class Recipient:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.getMultipleString([self.__dir, msgPathToString(filename)])
 
-    def getPropertyAs(self, propertyName, overrideClass : Callable[..., _T]) -> Optional[_T]:
+    def getPropertyAs(self, propertyName : Union[int, str], overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the property, setting the class if found.
 
@@ -263,15 +138,15 @@ class Recipient:
 
         return value
 
-    def getPropertyVal(self, name, default : _T = None) -> Union[Any, _T]:
+    def getPropertyVal(self, name : Union[int, str], default : _T = None) -> Union[Any, _T]:
         """
         instance.props.getValue(name, default)
 
-        Can be overriden to create new behavior.
+        Can be overridden to create new behavior.
         """
         return self.props.getValue(name, default)
 
-    def getSingleOrMultipleBinary(self, filename) -> Optional[Union[List[bytes], bytes]]:
+    def getSingleOrMultipleBinary(self, filename : MSG_PATH) -> Optional[Union[List[bytes], bytes]]:
         """
         A combination of :method getStringStream: and
         :method getMultipleString:.
@@ -290,7 +165,7 @@ class Recipient:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.getSingleOrMultipleBinary([self.__dir, msgPathToString(filename)])
 
-    def getSingleOrMultipleString(self, filename) -> Optional[Union[List[str], str]]:
+    def getSingleOrMultipleString(self, filename : MSG_PATH) -> Optional[Union[List[str], str]]:
         """
         A combination of :method getStringStream: and
         :method getMultipleString:.
@@ -309,7 +184,7 @@ class Recipient:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.getSingleOrMultipleString([self.__dir, msgPathToString(filename)])
 
-    def getStream(self, filename) -> Optional[bytes]:
+    def getStream(self, filename : MSG_PATH) -> Optional[bytes]:
         """
         Gets a binary representation of the requested filename.
 
@@ -323,7 +198,7 @@ class Recipient:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.getStream([self.__dir, msgPathToString(filename)])
 
-    def getStreamAs(self, streamID, overrideClass : Callable[..., _T]) -> Optional[_T]:
+    def getStreamAs(self, streamID : MSG_PATH, overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the specified stream, modifying it to the specified class if it
         is found.
@@ -341,7 +216,7 @@ class Recipient:
 
         return value
 
-    def getStringStream(self, filename) -> Optional[str]:
+    def getStringStream(self, filename : MSG_PATH) -> Optional[str]:
         """
         Gets a string representation of the requested filename.
 
@@ -359,7 +234,7 @@ class Recipient:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.getStringStream([self.__dir, msgPathToString(filename)])
 
-    def getStringStreamAs(self, streamID, overrideClass : Callable[..., _T]) -> Optional[_T]:
+    def getStringStreamAs(self, streamID : MSG_PATH, overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the specified string stream, modifying it to the specified
         class if it is found.
@@ -376,6 +251,25 @@ class Recipient:
             value = overrideClass(value)
 
         return value
+
+    def listDir(self, streams : bool = True, storages : bool = False) -> List[List[str]]:
+        """
+        Lists the streams and or storages that exist in the attachment
+        directory.
+
+        Returns the paths *excluding* the attachment directory, allowing the
+        paths to be directly used for accessing a file.
+        """
+        if (msg := self.__msg()) is None:
+            raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
+        return [path[1:] for path in msg.listDir(streams, storages, False)
+                if len(path) > 1 and path[0] == self.__dir]
+
+    def slistDir(self, streams : bool = True, storages : bool = False) -> List[str]:
+        """
+        Like listDir, except it returns the paths as strings.
+        """
+        return ['/'.join(path) for path in self.listDir(streams, storages)]
 
     @functools.cached_property
     def account(self) -> Optional[str]:
@@ -455,7 +349,7 @@ class Recipient:
         return self.getStringStream('__substg1.0_3A20')
 
     @property
-    def type(self) -> Union[RecipientType, MeetingRecipientType]:
+    def type(self) -> _RT:
         """
         Returns the recipient type. Type is:
             * Sender if `type & 0xf == 0`

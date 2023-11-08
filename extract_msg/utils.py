@@ -23,18 +23,17 @@ __all__ = [
     'findWk',
     'fromTimeStamp',
     'getCommandArgs',
+    'guessEncoding',
     'hasLen',
     'htmlSanitize',
     'inputToBytes',
     'inputToMsgPath',
     'inputToString',
     'isEncapsulatedRtf',
-    'isEmptyString',
     'makeWeakRef',
     'msgPathToString',
     'parseType',
     'prepareFilename',
-    'properHex',
     'roundUp',
     'rtfSanitizeHtml',
     'rtfSanitizePlain',
@@ -46,7 +45,6 @@ __all__ = [
     'validateHtml',
     'verifyPropertyId',
     'verifyType',
-    'windowsUnicode',
 ]
 
 
@@ -74,27 +72,29 @@ import tzlocal
 
 from html import escape as htmlEscape
 from typing import (
-        Any, Callable, Dict, Iterable, List, Optional, Sequence, TypeVar,
-        TYPE_CHECKING, Union
+        Any, AnyStr, Callable, Dict, Iterable, List, Optional, Sequence,
+        SupportsBytes, TypeVar, TYPE_CHECKING, Union
     )
 
 from . import constants
 from .enums import AttachmentType
 from .exceptions import (
-        ConversionError, ExecutableNotFound, IncompatibleOptionsError,
-        InvaildPropertyIdError, TZError, UnknownTypeError
+        ConversionError, DependencyError, ExecutableNotFound,
+        IncompatibleOptionsError, InvaildPropertyIdError, TZError,
+        UnknownTypeError
     )
 
 
 # Allow for nice type checking.
 if TYPE_CHECKING:
     from .msg_classes.msg import MSGFile
+    from .attachments import AttachmentBase
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 logging.addLevelName(5, 'DEVELOPER')
 
-_T = TypeVar("_T")
+_T = TypeVar('_T')
 
 
 def addNumToDir(dirName : pathlib.Path) -> Optional[pathlib.Path]:
@@ -192,9 +192,9 @@ def createZipOpen(func) -> Callable:
     Creates a wrapper for the open function of a ZipFile that will automatically
     set the current date as the modified time to the current time.
     """
-    def _open(name, mode, *args, **kwargs):
+    def _open(name, mode = 'r', *args, **kwargs):
         if mode == 'w':
-            name = zipfile.ZipInfo(name, datetime.datetime.now().timetuple())
+            name = zipfile.ZipInfo(name, datetime.datetime.now().timetuple()[:6])
 
         return func(name, mode, *args, **kwargs)
 
@@ -214,12 +214,12 @@ def decodeRfc2047(encoded : str) -> str:
     # decode_header header will return a string instead of bytes for the first
     # object if the input is not encoded, something that is frustrating.
     return ''.join(
-        x[0].decode(x[1] or 'ascii') if isinstance(x[0], bytes) else x[0]
+        x[0].decode(x[1] or 'raw-unicode-escape') if isinstance(x[0], bytes) else x[0]
         for x in email.header.decode_header(encoded)
     )
 
 
-def dictGetCasedKey(_dict : Dict, key : Any) -> Any:
+def dictGetCasedKey(_dict : Dict[str, Any], key : str) -> str:
     """
     Retrieves the key from the dictionary with the proper casing using a
     caseless key.
@@ -231,7 +231,7 @@ def dictGetCasedKey(_dict : Dict, key : Any) -> Any:
         raise KeyError(key)
 
 
-def divide(string, length : int) -> List:
+def divide(string : AnyStr, length : int) -> List[AnyStr]:
     """
     Divides a string into multiple substrings of equal length. If there is not
     enough for the last substring to be equal, it will simply use the rest of
@@ -321,7 +321,7 @@ def fromTimeStamp(stamp : int) -> datetime.datetime:
     """
     try:
         tz = tzlocal.get_localzone()
-    except Exception as e:
+    except Exception:
         # I know "generalized exception catching is bad" but if *any* exception
         # happens here that is a subclass of Exception then something has gone
         # wrong with tzlocal.
@@ -513,6 +513,38 @@ def getCommandArgs(args : Sequence[str]) -> argparse.Namespace:
 
     return options
 
+
+def guessEncoding(msg : MSGFile) -> Optional[str]:
+    """
+    Analyzes the strings on an MSG file and attempts to form a consensus about the encoding based on the top-level strings.
+
+    Returns None if no consensus could be formed.
+
+    :raises DependencyError: chardet is not installed or could not be used
+        properly.
+    """
+    try:
+        import chardet
+    except ImportError:
+        raise DependencyError('Cannot guess the encoding of an MSG file if chardet is not installed.')
+
+    data = b''
+    for name in (x[0] for x in msg.listDir(True, False, False) if len(x) == 1):
+        if name.lower().endswith('001f'):
+            # This is a guarentee.
+            return 'utf-16-le'
+        elif name.lower().endswith('001e'):
+            data += msg.getStream(name) + b'\n'
+
+    try:
+        if not data or (result := chardet.detect(data))['confidence'] < 0.5:
+            return None
+
+        return result['encoding']
+    except Exception as e:
+        raise DependencyError(f'Failed to detect encoding: {e}')
+
+
 def hasLen(obj) -> bool:
     """
     Checks if :param obj: has a __len__ attribute.
@@ -537,23 +569,29 @@ def htmlSanitize(inp : str) -> str:
     return inp
 
 
-def inputToBytes(stringInputVar, encoding : str) -> bytes:
+def inputToBytes(obj : Union[bytes, None, str, SupportsBytes], encoding : str) -> bytes:
     """
     Converts the input into bytes.
 
-    :raises ConversionError: if the input cannot be converted.
+    :raises ConversionError: The input cannot be converted.
+    :raises UnicodeEncodeError: The input was a str but the encoding was not
+        valid.
+    :raises TypeError: The input has a __bytes__ method, but it failed.
+    :raises ValueError: Same as above.
     """
-    if isinstance(stringInputVar, bytes):
-        return stringInputVar
-    elif isinstance(stringInputVar, str):
-        return stringInputVar.encode(encoding)
-    elif stringInputVar is None:
+    if isinstance(obj, bytes):
+        return obj
+    if isinstance(obj, str):
+        return obj.encode(encoding)
+    if obj is None:
         return b''
-    else:
-        raise ConversionError('Cannot convert to bytes.')
+    if hasattr(obj, '__bytes__'):
+        return bytes(obj)
+
+    raise ConversionError('Cannot convert to bytes.')
 
 
-def inputToMsgPath(inp) -> List[str]:
+def inputToMsgPath(inp : constants.MSG_PATH) -> List[str]:
     """
     Converts the input into an msg path.
 
@@ -579,7 +617,7 @@ def inputToMsgPath(inp) -> List[str]:
     return ret
 
 
-def inputToString(bytesInputVar, encoding) -> str:
+def inputToString(bytesInputVar : Optional[Union[str, bytes]], encoding : str) -> str:
     """
     Converts the input into a string.
 
@@ -593,13 +631,6 @@ def inputToString(bytesInputVar, encoding) -> str:
         return ''
     else:
         raise ConversionError('Cannot convert to str type.')
-
-
-def isEmptyString(inp : str) -> bool:
-    """
-    Returns true if the input is None or is an Empty string.
-    """
-    return (inp == '' or inp is None)
 
 
 def isEncapsulatedRtf(inp : bytes) -> bool:
@@ -616,10 +647,26 @@ def makeWeakRef(obj : Optional[_T]) -> Optional[weakref.ReferenceType[_T]]:
     Attempts to return a weak reference to the object, returning None if not
     possible.
     """
-    try:
-        return weakref.ref(obj)
-    except TypeError:
+    if obj is None:
         return None
+    else:
+        return weakref.ref(obj)
+
+
+def minutesToDurationStr(minutes : int) -> str:
+    """
+    Converts the number of minutes into a duration string.
+    """
+    if minutes == 0:
+        return '0 hours'
+    elif minutes == 1:
+        return '1 minute'
+    elif minutes < 60:
+        return f'{minutes} minutes'
+    elif minutes % 60 == 0:
+        return f'{minutes // 60} hours'
+    else:
+        return f'{minutes // 60} hours {minutes % 60} minutes'
 
 
 def msgPathToString(inp : Union[str, Iterable[str]]) -> str:
@@ -633,7 +680,7 @@ def msgPathToString(inp : Union[str, Iterable[str]]) -> str:
     return inp
 
 
-def parseType(_type : int, stream, encoding, extras):
+def parseType(_type : int, stream : Union[int, bytes], encoding : str, extras : Sequence[bytes]):
     """
     Converts the data in :param stream: to a much more accurate type, specified
     by :param _type:.
@@ -686,7 +733,7 @@ def parseType(_type : int, stream, encoding, extras):
                 pass
         return value
     elif _type == 0x000B:  # PtypBoolean
-        return constants.st.ST3.unpack(value)[0] == 1
+        return constants.st.ST_LE_UI64.unpack(value)[0] == 1
     elif _type == 0x000D:  # PtypObject/PtypEmbeddedTable
         # TODO parsing for this.
         # Wait, that's the extension for an attachment folder, so parsing this
@@ -700,12 +747,12 @@ def parseType(_type : int, stream, encoding, extras):
     elif _type == 0x001F:  # PtypString
         return value.decode('utf-16-le')
     elif _type == 0x0040:  # PtypTime
-        rawTime = constants.st.ST3.unpack(value)[0]
+        rawTime = constants.st.ST_LE_UI64.unpack(value)[0]
         return filetimeToDatetime(rawTime)
     elif _type == 0x0048:  # PtypGuid
         return bytesToGuid(value)
     elif _type == 0x00FB:  # PtypServerId
-        count = constants.st.STUI16.unpack(value[:2])
+        count = constants.st.ST_LE_UI16.unpack(value[:2])[0]
         # If the first byte is a 1 then it uses the ServerID structure.
         if value[3] == 1:
             from .structures.misc_id import ServerID
@@ -759,7 +806,7 @@ def parseType(_type : int, stream, encoding, extras):
             if _type == 0x1014: # PtypMultipleInteger64
                 return tuple(constants.st.STMI64.unpack(x)[0] for x in extras)
             if _type == 0x1040: # PtypMultipleTime
-                return tuple(filetimeToUtc(constants.st.ST3.unpack(x)[0]) for x in extras)
+                return tuple(filetimeToUtc(constants.st.ST_LE_UI64.unpack(x)[0]) for x in extras)
             if _type == 0x1048: # PtypMultipleGuid
                 return tuple(bytesToGuid(x) for x in extras)
         else:
@@ -767,30 +814,13 @@ def parseType(_type : int, stream, encoding, extras):
     return value
 
 
-def prepareFilename(filename) -> str:
+def prepareFilename(filename : str) -> str:
     """
     Adjusts :param filename: so that it can succesfully be used as an actual
     file name.
     """
     # I would use re here, but it tested to be slightly slower than this.
     return ''.join(i for i in filename if i not in r'\/:*?"<>|' + '\x00').strip()
-
-
-def properHex(inp, length : int = 0) -> str:
-    """
-    Takes in various input types and converts them into a hex string whose
-    length will always be even.
-    """
-    a = ''
-    if isinstance(inp, str):
-        a = ''.join([hex(ord(inp[x]))[2:].rjust(2, '0') for x in range(len(inp))])
-    elif isinstance(inp, bytes):
-        a = inp.hex()
-    elif isinstance(inp, int):
-        a = hex(inp)[2:]
-    if len(a) % 2 != 0:
-        a = '0' + a
-    return a.rjust(length, '0').upper()
 
 
 def roundUp(inp : int, mult : int) -> int:
@@ -936,7 +966,7 @@ def setupLogging(defaultPath = None, defaultLevel = logging.WARN, logfile = None
     return True
 
 
-def tryGetMimetype(att, mimetype : Union[str, None]) -> Union[str, None]:
+def tryGetMimetype(att : AttachmentBase, mimetype : Union[str, None]) -> Union[str, None]:
     """
     Uses an optional dependency to try and get the mimetype of an attachment. If
     the mimetype has already been found, the optional dependency does not exist,
@@ -954,9 +984,10 @@ def tryGetMimetype(att, mimetype : Union[str, None]) -> Union[str, None]:
     if att.dataType:
         # Try to import our dependency module to use it.
         try:
-            import magic
+            import magic # pyright: ignore
 
-            return magic.from_buffer(att.data, mime = True)
+            if isinstance(att.data, (str, bytes)):
+                return magic.from_buffer(att.data, mime = True)
         except ImportError:
             logger.info('Mimetype not found on attachment, and `mime` dependency not installed. Won\'t try to generate.')
 
@@ -1196,7 +1227,7 @@ def verifyPropertyId(id : str) -> None:
             raise InvaildPropertyIdError('ID was not a 4 digit hexadecimal string')
 
 
-def verifyType(_type) -> None:
+def verifyType(_type : Optional[str]) -> None:
     """
     Verifies that the type is valid. Raises an exception if it is not.
 
@@ -1205,8 +1236,3 @@ def verifyType(_type) -> None:
     if _type is not None:
         if (_type not in constants.VARIABLE_LENGTH_PROPS_STRING) and (_type not in constants.FIXED_LENGTH_PROPS_STRING):
             raise UnknownTypeError(f'Unknown type {_type}.')
-
-
-def windowsUnicode(string) -> Optional[str]:
-    return str(string, 'utf-16-le') if string is not None else None
-

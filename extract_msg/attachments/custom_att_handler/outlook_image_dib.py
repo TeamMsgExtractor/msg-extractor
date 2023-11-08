@@ -13,7 +13,7 @@ from typing import Optional, TYPE_CHECKING
 from . import registerHandler
 from .custom_handler import CustomAttachmentHandler
 from ...enums import DVAspect, InsecureFeatures
-from ...exceptions import SecurityError
+from ...exceptions import DependencyError, SecurityError
 
 
 if TYPE_CHECKING:
@@ -32,17 +32,17 @@ class OutlookImageDIB(CustomAttachmentHandler):
     def __init__(self, attachment : AttachmentBase):
         super().__init__(attachment)
         # First we need to get the mailstream.
-        stream = attachment.getStream('__substg1.0_3701000D/\x03MailStream')
+        stream = self.getStream('\x03MailStream')
         if not stream:
             raise ValueError('MailStream could not be found.')
         if len(stream) != 12:
             raise ValueError('MailStream is the wrong length.')
         # Next get the bitmap data.
-        self.__data = attachment.getStream('__substg1.0_3701000D/CONTENTS')
+        self.__data = self.getStream('CONTENTS')
         if not self.__data:
             raise ValueError('Bitmap data could not be read for Outlook signature.')
         # Get the OLE data.
-        oleStream = attachment.getStream('__substg1.0_3701000D/\x01Ole')
+        oleStream = self.getStream('\x01Ole')
         if not oleStream:
             raise ValueError('OLE stream could not be found.')
 
@@ -87,12 +87,11 @@ class OutlookImageDIB(CustomAttachmentHandler):
 
     def generateRtf(self) -> Optional[bytes]:
         """
-        Generates the RTF to inject in place of the \objattph tag.
+        Generates the RTF to inject in place of the \\objattph tag.
 
         If this function should do nothing, returns None.
 
-        This function requires PIL or Pillow. If neither are found, raises an
-        import error.
+        :raises DependencyError: PIL or Pillow could not be found.
         """
         if InsecureFeatures.PIL_IMAGE_PARSING not in self.attachment.msg.insecureFeatures:
             raise SecurityError('Generating the RTF for a custom attachment requires the insecure feature PIL_IMAGE_PARSING.')
@@ -100,7 +99,7 @@ class OutlookImageDIB(CustomAttachmentHandler):
         try:
             import PIL.Image
         except ImportError:
-            raise ImportError('PIL or Pillow is required for inserting an Outlook Image into the body.')
+            raise DependencyError('PIL or Pillow is required for inserting an Outlook Image into the body.')
 
         # First, convert the bitmap into a PNG so we can insert it into the
         # body.
