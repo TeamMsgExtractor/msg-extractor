@@ -455,8 +455,8 @@ class MSGFile:
         to the properties of of an MSGFile object (or one of it's subclasses)
         will not be reflected in the saved file.
 
-        :param path: An IO device with a write method which accepts bytes or a
-            path-like object (including strings and pathlib.Path objects).
+        :param path: A path-like object (including strings and pathlib.Path
+            objects) or an IO device with a write method which accepts bytes.
         """
         from ..ole_writer import OleWriter
 
