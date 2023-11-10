@@ -107,7 +107,7 @@ class FixedLengthProp(PropBase):
                 logger.warning('Property type is PtypNull, but is not equal to 0.')
             value = None
         elif _type == 0x0002: # PtypInteger16
-            value = constants.st.ST_LE_I16.unpack(value[:3])[0]
+            value = constants.st.ST_LE_I16.unpack(value[:2])[0]
         elif _type == 0x0003: # PtypInteger32
             value = constants.st.ST_LE_I32.unpack(value[:4])[0]
         elif _type == 0x0004: # PtypFloating32
