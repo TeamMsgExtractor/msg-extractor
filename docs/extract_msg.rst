@@ -17,50 +17,50 @@ Subpackages
 Submodules
 ----------
 
-extract\_msg.enums.py module
-----------------------------
+extract\_msg.enums module
+-------------------------
 
-.. automodule:: extract_msg.enums.py
+.. automodule:: extract_msg.enums
    :members:
    :undoc-members:
    :show-inheritance:
 
-extract\_msg.exceptions.py module
----------------------------------
+extract\_msg.exceptions module
+------------------------------
 
-.. automodule:: extract_msg.exceptions.py
+.. automodule:: extract_msg.exceptions
    :members:
    :undoc-members:
    :show-inheritance:
 
-extract\_msg.ole\_writer.py module
-----------------------------------
+extract\_msg.ole\_writer module
+-------------------------------
 
-.. automodule:: extract_msg.ole_writer.py
+.. automodule:: extract_msg.ole_writer
    :members:
    :undoc-members:
    :show-inheritance:
 
-extract\_msg.open\_msg.py module
---------------------------------
+extract\_msg.open\_msg module
+-----------------------------
 
-.. automodule:: extract_msg.open_msg.py
+.. automodule:: extract_msg.open_msg
    :members:
    :undoc-members:
    :show-inheritance:
 
-extract\_msg.recipient.py module
---------------------------------
+extract\_msg.recipient module
+-----------------------------
 
-.. automodule:: extract_msg.recipient.py
+.. automodule:: extract_msg.recipient
    :members:
    :undoc-members:
    :show-inheritance:
 
-extract\_msg.utils.py module
-----------------------------
+extract\_msg.utils module
+-------------------------
 
-.. automodule:: extract_msg.utils.py
+.. automodule:: extract_msg.utils
    :members:
    :undoc-members:
    :show-inheritance:

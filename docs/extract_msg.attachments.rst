@@ -12,66 +12,66 @@ Subpackages
 Submodules
 ----------
 
-extract\_msg.attachments.attachment.py module
----------------------------------------------
+extract\_msg.attachments.attachment module
+------------------------------------------
 
-.. automodule:: extract_msg.attachments.attachment.py
+.. automodule:: extract_msg.attachments.attachment
    :members:
    :undoc-members:
    :show-inheritance:
 
-extract\_msg.attachments.attachment\_base.py module
----------------------------------------------------
-
-.. automodule:: extract_msg.attachments.attachment_base.py
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-extract\_msg.attachments.broken\_att.py module
-----------------------------------------------
-
-.. automodule:: extract_msg.attachments.broken_att.py
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-extract\_msg.attachments.custom\_att.py module
-----------------------------------------------
-
-.. automodule:: extract_msg.attachments.custom_att.py
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-extract\_msg.attachments.emb\_msg\_att.py module
+extract\_msg.attachments.attachment\_base module
 ------------------------------------------------
 
-.. automodule:: extract_msg.attachments.emb_msg_att.py
+.. automodule:: extract_msg.attachments.attachment_base
    :members:
    :undoc-members:
    :show-inheritance:
 
-extract\_msg.attachments.signed\_att.py module
-----------------------------------------------
-
-.. automodule:: extract_msg.attachments.signed_att.py
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-extract\_msg.attachments.unsupported\_att.py module
----------------------------------------------------
-
-.. automodule:: extract_msg.attachments.unsupported_att.py
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-extract\_msg.attachments.web\_att.py module
+extract\_msg.attachments.broken\_att module
 -------------------------------------------
 
-.. automodule:: extract_msg.attachments.web_att.py
+.. automodule:: extract_msg.attachments.broken_att
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.attachments.custom\_att module
+-------------------------------------------
+
+.. automodule:: extract_msg.attachments.custom_att
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.attachments.emb\_msg\_att module
+---------------------------------------------
+
+.. automodule:: extract_msg.attachments.emb_msg_att
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.attachments.signed\_att module
+-------------------------------------------
+
+.. automodule:: extract_msg.attachments.signed_att
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.attachments.unsupported\_att module
+------------------------------------------------
+
+.. automodule:: extract_msg.attachments.unsupported_att
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.attachments.web\_att module
+----------------------------------------
+
+.. automodule:: extract_msg.attachments.web_att
    :members:
    :undoc-members:
    :show-inheritance:

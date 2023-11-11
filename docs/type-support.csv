@@ -1,17 +1,17 @@
-Message Class,Class Name,Support Level,Support Added,Saving Added,Saving Completed
-IPM,`MSGFile`,Open,0.29.0,Won't Add,
+**Message Class**,**Class Name**,**Support Level**,**Support Added**,**Saving Added**,**Saving Completed**
+IPM,``MSGFile``,Open,0.29.0,Won't Add,
 REPORT.*,,,,,
-IPM.Note.*,`Message`,Full,0.29.0,0.29.0,0.35.0
-IPM.Activity.*,`Journal`,Full,0.46.0,0.46.0,0.46.0
-IPM.Appointment.*,`AppointmentMeeting`(`Appointment` before 0.35.0),Full,0.29.0,0.35.0,0.35.0
+IPM.Note.*,``Message``,Full,0.29.0,0.29.0,0.35.0
+IPM.Activity.*,``Journal``,Full,0.46.0,0.46.0,0.46.0
+IPM.Appointment.*,``AppointmentMeeting`` (``Appointment`` before 0.35.0),Full,0.29.0,0.35.0,0.35.0
 IPM.Contact.*,,,,,
-IPM.Distlist.*,`Contact`,Full,0.29.0,0.35.0,0.35.0
+IPM.Distlist.*,``Contact``,Full,0.29.0,0.35.0,0.35.0
 IPM.Note.*.SMIME,,,,,
-IPM.Note.*.SMIME.MultipartSigned,`MessageSigned`,Full,0.31.0,0.31.0,0.35.0
-IPM.Post.*,`Post`,Full,0.35.0,0.35.0,0.35.0
-IPM.Schedule.Meeting.Cancelation.*,`MeetingCancellation`,Full,0.35.0,0.35.0,0.35.0
-IPM.Schedule.Meeting.Request.*,`MeetingRequest`,Full,0.35.0,0.35.0,0.35.0
-IPM.Schedule.Meeting.Resp.*,`MeetingResponse`,Full,0.35.0,0.35.0,0.35.0
-IPM.Schedule.Meeting.Notification.Forward.*,`MeetingForwardNotification`,Full,0.35.0,0.35.0,0.35.0
-IPM.Task.*,`Task`,Full,0.33.0,0.35.0,0.35.0
-IPM.OLE.CLASS.{00061055-0000-0000-C000-000000000046},`MeetingException`,Full,0.35.0,0.35.0,0.35.0
+IPM.Note.*.SMIME.MultipartSigned,``MessageSigned``,Full,0.31.0,0.31.0,0.35.0
+IPM.Post.*,``Post``,Full,0.35.0,0.35.0,0.35.0
+IPM.Schedule.Meeting.Cancelation.*,``MeetingCancellation``,Full,0.35.0,0.35.0,0.35.0
+IPM.Schedule.Meeting.Request.*,``MeetingRequest``,Full,0.35.0,0.35.0,0.35.0
+IPM.Schedule.Meeting.Resp.*,``MeetingResponse``,Full,0.35.0,0.35.0,0.35.0
+IPM.Schedule.Meeting.Notification.Forward.*,``MeetingForwardNotification``,Full,0.35.0,0.35.0,0.35.0
+IPM.Task.*,``Task``,Full,0.33.0,0.35.0,0.35.0
+IPM.OLE.CLASS.{00061055-0000-0000-C000-000000000046},``MeetingException``,Full,0.35.0,0.35.0,0.35.0

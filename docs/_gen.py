@@ -97,6 +97,8 @@ def generateFile(name : str, package : Package):
         if package.modules:
             f.write('Submodules\n----------\n\n')
             for module in package.modules:
+                if module.endswith('.py'):
+                    module = module[:-3]
                 temp = module.replace('_', '\\_') + ' module'
                 f.write(f'{temp}\n{"-" * len(temp)}\n\n')
                 f.write(f'.. automodule:: {module}\n')

@@ -4,26 +4,26 @@ extract\_msg.attachments.custom\_att\_handler package
 Submodules
 ----------
 
-extract\_msg.attachments.custom\_att\_handler.custom\_handler.py module
------------------------------------------------------------------------
+extract\_msg.attachments.custom\_att\_handler.custom\_handler module
+--------------------------------------------------------------------
 
-.. automodule:: extract_msg.attachments.custom_att_handler.custom_handler.py
+.. automodule:: extract_msg.attachments.custom_att_handler.custom_handler
    :members:
    :undoc-members:
    :show-inheritance:
 
-extract\_msg.attachments.custom\_att\_handler.lnk\_obj\_att.py module
----------------------------------------------------------------------
+extract\_msg.attachments.custom\_att\_handler.lnk\_obj\_att module
+------------------------------------------------------------------
 
-.. automodule:: extract_msg.attachments.custom_att_handler.lnk_obj_att.py
+.. automodule:: extract_msg.attachments.custom_att_handler.lnk_obj_att
    :members:
    :undoc-members:
    :show-inheritance:
 
-extract\_msg.attachments.custom\_att\_handler.outlook\_image\_dib.py module
----------------------------------------------------------------------------
+extract\_msg.attachments.custom\_att\_handler.outlook\_image\_dib module
+------------------------------------------------------------------------
 
-.. automodule:: extract_msg.attachments.custom_att_handler.outlook_image_dib.py
+.. automodule:: extract_msg.attachments.custom_att_handler.outlook_image_dib
    :members:
    :undoc-members:
    :show-inheritance:
