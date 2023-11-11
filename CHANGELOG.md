@@ -1,3 +1,6 @@
+**v0.46.2**
+* Adjusted typing information on regular expressions. They were using a subscript that was added in 3.9 (apparently that is something the type checker doesn't check for), which made the module incompatible with 3.8. If you are using 3.9 or higher a version check will switch to the more specific typing.
+
 **v0.46.1**
 * [[TeamMsgExtractor #394](https://github.com/TeamMsgExtractor/msg-extractor/issues/394)] Fix typo in props that caused the wrong number of bytes to be given to a struct.
 
