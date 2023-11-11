@@ -11,7 +11,6 @@ __all__ = [
     'STI16',
     'STI32',
     'STI64',
-    'STI8',
     'STMF32',
     'STMF64',
     'STMI16',
@@ -80,7 +79,6 @@ STNP_ENT : Final[struct.Struct] = struct.Struct('<IHH')
 STFIX : Final[struct.Struct] = struct.Struct('<8x8s')
 STVAR : Final[struct.Struct] = struct.Struct('<8xi4s')
 # Structs to help with email type to python type conversions
-STI8 : Final[struct.Struct] = struct.Struct('<b');
 STI16 : Final[struct.Struct] = struct.Struct('<h6x')
 STI32 : Final[struct.Struct] = struct.Struct('<I4x')
 STI64 : Final[struct.Struct] = struct.Struct('<q')
@@ -101,7 +99,7 @@ ST_BC_HEAD : Final[struct.Struct] = struct.Struct('BBBBBBBBIB')
 ST_BC_FIELD_INFO : Final[struct.Struct] = struct.Struct('HBBBxHII')
 # Structs for reading from a BytesReader. Some are just aliases for existing
 # structs, used for clarity and consistency in the code.
-ST_LE_I8 : Final[struct.Struct] = STI8
+ST_LE_I8 : Final[struct.Struct] = struct.Struct('<b')
 ST_LE_I16 : Final[struct.Struct] = STMI16
 ST_LE_I32 : Final[struct.Struct] = STMI32
 ST_LE_I64 : Final[struct.Struct] = STMI64
@@ -109,7 +107,7 @@ ST_LE_UI8 : Final[struct.Struct] = struct.Struct('<B')
 ST_LE_UI16 : Final[struct.Struct] = struct.Struct('<H')
 ST_LE_UI32 : Final[struct.Struct] = struct.Struct('<I')
 ST_LE_UI64 : Final[struct.Struct] = struct.Struct('<Q')
-ST_LE_F32 : Final[struct.Struct] = STF32
+ST_LE_F32 : Final[struct.Struct] = struct.Struct('<f')
 ST_LE_F64 : Final[struct.Struct] = STF64
 ST_BE_I8 : Final[struct.Struct] = struct.Struct('>b')
 ST_BE_I16 : Final[struct.Struct] = struct.Struct('>h')
