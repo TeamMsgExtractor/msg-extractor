@@ -91,7 +91,7 @@ class PropTests(unittest.TestCase):
             # Check which class the prop is to know what checks to use.
             if isinstance(prop, FixedLengthProp):
                 if isinstance(prop.value, float):
-                    self.assertAlmostEqual(prop.value, entry[5], errMsg)
+                    self.assertAlmostEqual(prop.value, entry[5], msg = errMsg)
                 elif isinstance(prop.value, enum.Enum) or prop.type == 1:
                     self.assertIs(prop.value, entry[5], errMsg)
                 else:
