@@ -142,9 +142,6 @@ class FixedLengthProp(PropBase):
                 value = filetimeToDatetime(rawTime)
             except ValueError:
                 logger.exception(raw)
-        elif _type == 0x0048:  # PtypGuid
-            # TODO parsing for this
-            pass
         return value
 
     @property
@@ -178,6 +175,8 @@ class VariableLengthProp(PropBase):
             self.__realLength = self.__length // 16
         elif self.type == 0x000D:
             self.__realLength = None
+        elif self.type == 0x0048:
+            self.__realLength = 16
         else:
             self.__realLength = self.__length
 

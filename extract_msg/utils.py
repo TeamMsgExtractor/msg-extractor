@@ -280,7 +280,7 @@ def filetimeToDatetime(rawTime : int) -> datetime.datetime:
     except TZError:
         # For TZError we just raise it again. It is a fatal error.
         raise
-    except Exception as e:
+    except Exception:
         raise ValueError(f'Timestamp value of {filetimeToUtc(rawTime)} caused an exception. This was probably caused by the time stamp being too far in the future.')
 
 

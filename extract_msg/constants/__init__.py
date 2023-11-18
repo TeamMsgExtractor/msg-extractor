@@ -83,7 +83,6 @@ FIXED_LENGTH_PROPS : Final[Tuple[int, ...]] = (
     0x000B,
     0x0014,
     0x0040,
-    0x0048,
 )
 
 FIXED_LENGTH_PROPS_STRING : Final[Tuple[str, ...]] = (
@@ -99,13 +98,13 @@ FIXED_LENGTH_PROPS_STRING : Final[Tuple[str, ...]] = (
     '000B',
     '0014',
     '0040',
-    '0048',
 )
 
 VARIABLE_LENGTH_PROPS : Final[Tuple[int, ...]] = (
     0x000D,
     0x001E,
     0x001F,
+    0x0048,
     0x00FB,
     0x00FD,
     0x00FE,
@@ -128,6 +127,7 @@ VARIABLE_LENGTH_PROPS_STRING : Final[Tuple[str, ...]] = (
     '000D',
     '001E',
     '001F',
+    '0048',
     '00FB',
     '00FD',
     '00FE',

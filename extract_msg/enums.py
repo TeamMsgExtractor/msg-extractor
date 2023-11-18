@@ -37,7 +37,6 @@ __all__ = [
     'IconIndex',
     'Importance',
     'InsecureFeatures',
-    'Intelligence',
     'LogFlags',
     'MacintoshEncoding',
     'MeetingObjectChange',
@@ -1311,13 +1310,6 @@ class InsecureFeatures(enum.IntFlag):
     NONE = 0b0000
     PIL_IMAGE_PARSING = 0b0001
     ALL = 0b1111
-
-
-
-class Intelligence(enum.IntEnum):
-    ERROR = -1
-    DUMB = 0
-    SMART = 1
 
 
 

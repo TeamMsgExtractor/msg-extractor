@@ -3,11 +3,13 @@ __all__ = [
 ]
 
 
+import datetime
 import enum
 import typing
 import unittest
 
-from extract_msg.enums import PropertyFlags
+from extract_msg.constants import PYTPFLOATINGTIME_START
+from extract_msg.enums import ErrorCodeType, PropertyFlags
 from extract_msg.properties.prop import (
         createProp, FixedLengthProp, VariableLengthProp
     )
@@ -24,7 +26,7 @@ _propChecks = [
         b'\x00\x00\x01\x02\x01\x00\x00\x00\x01\x23\x45\x67\x89\xAB\xCD\xEF',
         FixedLengthProp,
         '02010000',
-        0,
+        0x0000,
         PropertyFlags.MANDATORY,
         b'\x01\x23\x45\x67\x89\xAB\xCD\xEF'
     ),
@@ -33,7 +35,7 @@ _propChecks = [
         b'\x01\x00\x01\x02\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
         FixedLengthProp,
         '02010001',
-        1,
+        0x0001,
         PropertyFlags.READABLE,
         None
     ),
@@ -42,7 +44,7 @@ _propChecks = [
         b'\x02\x00\x01\x02\x04\x00\x00\x00\x01\x23\x45\x67\x89\xAB\xCD\xEF',
         FixedLengthProp,
         '02010002',
-        2,
+        0x0002,
         PropertyFlags.WRITABLE,
         0x2301
     ),
@@ -51,7 +53,7 @@ _propChecks = [
         b'\x03\x00\x01\x02\x01\x00\x00\x00\x01\x23\x45\x67\x89\xAB\xCD\xEF',
         FixedLengthProp,
         '02010003',
-        3,
+        0x0003,
         PropertyFlags.MANDATORY,
         0x67452301
     ),
@@ -60,7 +62,7 @@ _propChecks = [
         b'\x04\x00\x01\x02\x01\x00\x00\x00\x5B\xD3\xFC\x3D\x89\xAB\xCD\xEF',
         FixedLengthProp,
         '02010004',
-        4,
+        0x0004,
         PropertyFlags.MANDATORY,
         0.12345
     ),
@@ -69,9 +71,36 @@ _propChecks = [
         b'\x05\x00\x01\x02\x01\x00\x00\x00\x7C\xF2\xB0\x50\x6B\x9A\xBF\x3F',
         FixedLengthProp,
         '02010005',
-        5,
+        0x0005,
         PropertyFlags.MANDATORY,
         0.12345
+    ),
+    # Currency.
+    (
+        b'\x06\x00\x01\x02\x01\x00\x00\x00\x7C\xF2\xB0\x50\x6B\x9A\xBF\x3F',
+        FixedLengthProp,
+        '02010006',
+        0x0006,
+        PropertyFlags.MANDATORY,
+        0.12345
+    ),
+    # Floating Time.
+    (
+        b'\x07\x00\x01\x02\x01\x00\x00\x00\x00\x00\x00\x00\x00\x60\x40\x40',
+        FixedLengthProp,
+        '02010007',
+        0x0007,
+        PropertyFlags.MANDATORY,
+        PYTPFLOATINGTIME_START + datetime.timedelta(days = 32.75)
+    ),
+    # Error Code.
+    (
+        b'\x0A\x00\x01\x02\x01\x00\x00\x00\xD7\x04\x00\x00\x00\x00\x00\x00',
+        FixedLengthProp,
+        '0201000A',
+        0x000A,
+        PropertyFlags.MANDATORY,
+        ErrorCodeType.DELETE_MESSAGE
     ),
 ]
 

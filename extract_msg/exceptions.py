@@ -2,7 +2,7 @@
 
 """
 extract_msg.exceptions
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 This module contains the set of extract_msg exceptions.
 """
 
@@ -91,10 +91,16 @@ class InvaildPropertyIdError(ExMsgBaseException):
     The provided property ID was invalid.
     """
 
+class NotWritableError(ExMsgBaseException):
+    """
+    Modification was attempted on an instance that is not writable.
+    """
+
 class PrefixError(ExMsgBaseException):
     """
-    An issue was detected with the provided prefix. This should never occur if
-    you have no manually provided a prefix.
+    An issue was detected with the provided prefix.
+
+    This should never occur if you have no manually provided a prefix.
     """
 
 class SecurityError(ExMsgBaseException):
