@@ -7,6 +7,8 @@
 * Fixed an issue where `PtypGuid` was being parsed by the wrong property type. Despite having a fixed size, it is still a variable length property.
 * Fixed *all* of the setters not working. I didn't know they needed to use the same name as the getter, and I *swear* they were working at some point with the current setup. Some sources online suggested the original form should work, which is even stranger.
 * Unified all line endings to LF instead of a mix of CRLF and LF.
+* Changed enums `BCTextFormat` and `BCLabelFormat` to `IntFlag` enums. The values that exist are for the individual flags and not the groups of flags.
+* Made `FieldInfo` writable, however it can no longer be directly converted to bytes since it requires additional information outside of itself to convert to bytes. It still retains a `toBytes` method, however it requires an argument for the additional data.
 
 **v0.46.2**
 * Adjusted typing information on regular expressions. They were using a subscript that was added in Python 3.9 (apparently that is something the type checker doesn't check for), which made the module incompatible with Python 3.8. If you are using Python 3.9 or higher a version check will switch to the more specific typing.

@@ -96,7 +96,7 @@ STPEID : Final[struct.Struct] = struct.Struct('<B3x16s4xI')
 # structure.
 ST_BC_HEAD : Final[struct.Struct] = struct.Struct('BBBBBBBBIB')
 # Struct for completely unpacking the FieldInfo structure.
-ST_BC_FIELD_INFO : Final[struct.Struct] = struct.Struct('HBBBxHII')
+ST_BC_FIELD_INFO : Final[struct.Struct] = struct.Struct('HBBBxHBBBxBBBx')
 # Structs for reading from a BytesReader. Some are just aliases for existing
 # structs, used for clarity and consistency in the code.
 ST_LE_I8 : Final[struct.Struct] = struct.Struct('<b')
@@ -119,3 +119,6 @@ ST_BE_UI32 : Final[struct.Struct] = struct.Struct('>I')
 ST_BE_UI64 : Final[struct.Struct] = struct.Struct('>Q')
 ST_BE_F32: Final[struct.Struct]  = struct.Struct('>f')
 ST_BE_F64 : Final[struct.Struct] = struct.Struct('>d')
+# Struct for an RGB value that, in little endian, would be an int written in hex
+# as 0x00BBGGRR.
+ST_RGB : Final[struct.Struct] = struct.Struct('<BBBx')

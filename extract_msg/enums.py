@@ -270,65 +270,22 @@ class BCTemplateID(enum.IntEnum):
 
 
 
-class BCTextFormat(enum.IntEnum):
+class BCTextFormat(enum.IntFlag):
     """
-    Converts the bits of the text format to an understandable enum value.
+    The alignment and formatting for the text field.
 
-    Right value is the alignment, with left is the flags. The following flags
-    exist and will be in the following order if present:
-        U: Underline.
-        I: Italics.
-        B: Bold.
-        M: The text is multiline.
+    If none of the bits are set, the text field is displayed as a single line,
+    left-aligned.
+
+    RIGHT and CENTER are mutually exclusive.
     """
-    LEFT = 0b00000000
-    LEFT_M = 0b00000001
-    LEFT_B = 0b00000010
-    LEFT_BM = 0b00000011
-    LEFT_I = 0b00000100
-    LEFT_IM = 0b00000101
-    LEFT_IB = 0b00000110
-    LEFT_IBM = 0b00000111
-    LEFT_U = 0b00001000
-    LEFT_UM = 0b00001001
-    LEFT_UB = 0b00001010
-    LEFT_UBM = 0b00001011
-    LEFT_UI = 0b00001100
-    LEFT_UIM = 0b00001101
-    LEFT_UIB = 0b00001110
-    LEFT_UIBM = 0b00001111
-    CENTER = 0b00100000
-    CENTER_M = 0b00100001
-    CENTER_B = 0b00100010
-    CENTER_BM = 0b00100011
-    CENTER_I = 0b00100100
-    CENTER_IM = 0b00100101
-    CENTER_IB = 0b00100110
-    CENTER_IBM = 0b00100111
-    CENTER_U = 0b00101000
-    CENTER_UM = 0b00101001
-    CENTER_UB = 0b00101010
-    CENTER_UBM = 0b00101011
-    CENTER_UI = 0b00101100
-    CENTER_UIM = 0b00101101
-    CENTER_UIB = 0b00101110
-    CENTER_UIBM = 0b00101111
-    RIGHT = 0b00010000
-    RIGHT_M = 0b00010001
-    RIGHT_B = 0b00010010
-    RIGHT_BM = 0b00010011
-    RIGHT_I = 0b00010100
-    RIGHT_IM = 0b00010101
-    RIGHT_IB = 0b00010110
-    RIGHT_IBM = 0b00010111
-    RIGHT_U = 0b00011000
-    RIGHT_UM = 0b00011001
-    RIGHT_UB = 0b00011010
-    RIGHT_UBM = 0b00011011
-    RIGHT_UI = 0b00011100
-    RIGHT_UIM = 0b00011101
-    RIGHT_UIB = 0b00011110
-    RIGHT_UIBM = 0b00011111
+    DEFAULT = 0b000000
+    MULTILINE = 0b000001
+    BOLD = 0b000010
+    ITALIC = 0b000100
+    UNDERLINE = 0b001000
+    RIGHT = 0b010000
+    CENTER = 0b100000
 
 
 

@@ -4,12 +4,19 @@ __all__ = [
 ]
 
 
+import logging
+import struct
+
 from typing import Optional, Tuple
 
 from ._helpers import BytesReader
 from .. import constants
 from ..enums import BCImageAlignment, BCImageSource, BCLabelFormat, BCTemplateID, BCTextFormat
 from ..utils import bitwiseAdjustedAnd
+
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class BusinessCardDisplayDefinition:
@@ -136,28 +143,50 @@ class BusinessCardDisplayDefinition:
 
 
 class FieldInfo:
-    def __init__(self, data : bytes, extraInfo : bytes):
-        self.__rawData = data
+    def __init__(self, data : Optional[bytes] = None, extraInfo : Optional[bytes] = None):
+        if not data:
+            self.__textPropertyID = 0
+            self.__textFormat = BCTextFormat.DEFAULT
+            self.__labelFormat = BCLabelFormat.NO_LABEL
+            self.__fontSize = 0
+            self.__labelText = None
+            self.__valueFontColor = (0, 0, 0)
+            self.__labelFontColor = (0, 0, 0)
+            return
+
+        if extraInfo is None:
+            raise ValueError(':param extraInfo: MUST NOT be None if data is provided.')
+
         unpacked = constants.st.ST_BC_FIELD_INFO.unpack(data)
         self.__textPropertyID = unpacked[0]
         self.__textFormat = BCTextFormat(unpacked[1])
         self.__labelFormat = BCLabelFormat(unpacked[2])
         self.__fontSize = unpacked[3]
-        self.__labelOffset = unpacked[4]
         self.__labelText = None if unpacked[4] == 0xFFFE else BytesReader(extraInfo[unpacked[4]:]).readUtf16String()
-        self.__valueFontColor = (bitwiseAdjustedAnd(unpacked[5], 0xFF),
-                            bitwiseAdjustedAnd(unpacked[5], 0xFF00),
-                            bitwiseAdjustedAnd(unpacked[5], 0xFF0000))
+        self.__valueFontColor = unpacked[5:8]
+        self.__labelFontColor = unpacked[8:11]
 
-        self.__labelFontColor = (bitwiseAdjustedAnd(unpacked[6], 0xFF),
-                            bitwiseAdjustedAnd(unpacked[6], 0xFF00),
-                            bitwiseAdjustedAnd(unpacked[6], 0xFF0000))
+    def toBytes(self, offset : int) -> bytes:
+        """
+        Converts to bytes using the offset into the ExtraInfo field.
 
-    def __bytes__(self) -> bytes:
-        return self.toBytes()
+        :raise ValueError: The offset was out of range.
+        """
+        if offset < 0 or offset > 0xFFFF:
+            raise ValueError('Offset is out of range.')
 
-    def toBytes(self) -> bytes:
-        return self.__rawData
+        if not self.__labelText:
+            offset = 0xFFFE
+
+        return constants.st.ST_BC_FIELD_INFO.pack(
+                                                  self.__textPropertyID,
+                                                  self.__textFormat,
+                                                  self.__labelFormat,
+                                                  self.__fontSize,
+                                                  offset,
+                                                  *self.__valueFontColor,
+                                                  *self.__labelFontColor
+                                                 )
 
     @property
     def fontSize(self) -> int:
@@ -184,8 +213,22 @@ class FieldInfo:
     def labelFontColor(self) -> Tuple[int, int, int]:
         """
         A tuple of the RGB value of the color of the label.
+
+        Each channel is a number in range [0, 256).
         """
         return self.__labelFontColor
+
+    @labelFontColor.setter
+    def labelFontColor(self, value : Tuple[int, int, int]) -> None:
+        if not isinstance(value, tuple) or len(value) != 3:
+            raise TypeError(':property labelFontColor: MUST be a tuple of 3 ints.')
+        # Quickly try to pack the ints and raise a value error if that fails.
+        try:
+            constants.st.ST_RGB(*value)
+        except struct.error:
+            raise ValueError('Value for :property labelFontColor: not in range.')
+
+        self.__labelFontColor = value
 
     @property
     def labelFormat(self) -> BCLabelFormat:
@@ -194,14 +237,21 @@ class FieldInfo:
         """
         return self.__labelFormat
 
-    @property
-    def labelOffset(self) -> int:
-        """
-        An integer that specified the byte offset into the ExtraInfo field of
-        BusinessCardDisplayDefinition. If the text field does not have a label,
-        must be 0xFFFE.
-        """
-        return self.__labelOffset
+    @labelFormat.setter
+    def labelFormat(self, value : BCLabelFormat) -> None:
+        if not isinstance(value, BCLabelFormat):
+            raise TypeError(':property labelFormat: MUST be an instance of BCLabelFormat.')
+        # Check mutually exclusive flags.
+        if BCLabelFormat.ALIGN_LEFT in value and BCLabelFormat.ALIGN_RIGHT in value:
+            raise ValueError('BCLabelFormat.ALIGN_LEFT and BCLabelFormat.ALIGN_RIGHT are mutually exclusive.')
+
+        if value and BCLabelFormat.ALIGN_LEFT not in value and BCLabelFormat.ALIGN_RIGHT not in value:
+            raise ValueError(':property labelFormat: MUST have the ALIGN_LEFT or ALIGN_RIGHT bit set if any other bits are set.')
+
+        if BCLabelFormat > 0x110:
+            raise ValueError('Unknown bits set for :property labelFormat:.')
+
+        self.__textPropertyID = value
 
     @property
     def labelText(self) -> Optional[str]:
@@ -210,12 +260,34 @@ class FieldInfo:
         """
         return self.__labelText
 
+    @labelText.setter
+    def labelText(self, value : Optional[str]) -> None:
+        if not value:
+            self.__labelText = None
+        elif not isinstance(value, str):
+            raise TypeError(':property labelText: MUST be a str or None.')
+
+        self.__labelText = value
+
     @property
     def textFormat(self) -> BCTextFormat:
         """
         An enum value representing the formatting to use for the text.
         """
         return self.__textFormat
+
+    @textFormat.setter
+    def textFormat(self, value : BCTextFormat) -> None:
+        if not isinstance(value, BCTextFormat):
+            raise TypeError(':property textFormat: MUST be an instance of BCTextFormat.')
+        # Check mutually exclusive flags.
+        if BCTextFormat.CENTER in value and BCTextFormat.RIGHT in value:
+            raise ValueError('BCTextFormat.RIGHT and BCTextFormat.CENTER are mutually exclusive.')
+
+        if BCTextFormat > 0x101111:
+            raise ValueError('Unknown bits set for :property textFormat:.')
+
+        self.__textPropertyID = value
 
     @property
     def textPropertyID(self) -> int:
@@ -225,9 +297,34 @@ class FieldInfo:
         """
         return self.__textPropertyID
 
+    @textPropertyID.setter
+    def textPropertyID(self, value : int) -> None:
+        if not isinstance(value, int):
+            raise TypeError(':property textPropertyID: MUST be an int.')
+        if value < 0:
+            raise ValueError(':property textPropertyID: MUST be positive.')
+        if value > 0xFFFF:
+            raise ValueError(':property textPropertyID: MUST NOT be greater than 0xFFFF.')
+
+        self.__textPropertyID = value
+
     @property
     def valueFontColor(self) -> Tuple[int, int, int]:
         """
         A tuple of the RGB value of the color of the text field.
+
+        Each channel is a number in range [0, 256).
         """
         return self.__valueFontColor
+
+    @valueFontColor.setter
+    def valueFontColor(self, value : Tuple[int, int, int]) -> None:
+        if not isinstance(value, tuple) or len(value) != 3:
+            raise TypeError(':property valueFontColor: MUST be a tuple of 3 ints.')
+        # Quickly try to pack the ints and raise a value error if that fails.
+        try:
+            constants.st.ST_RGB(*value)
+        except struct.error:
+            raise ValueError('Value for :property valueFontColor: not in range.')
+
+        self.__valueFontColor = value
