@@ -21,7 +21,7 @@ class UnsupportedAttachment(AttachmentBase):
         Raises a NotImplementedError unless :param skipNotImplemented: is set to
         True. If it is, returns a value that indicates no data was saved.
         """
-        if not kwargs.get('skipNotImplemented', False):
+        if kwargs.get('skipNotImplemented', False):
             return (SaveType.NONE, None)
 
         raise NotImplementedError('Unsupported attachments cannot be saved.')
