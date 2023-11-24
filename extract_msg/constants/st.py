@@ -46,6 +46,7 @@ __all__ = [
     'ST_LE_UI32',
     'ST_LE_UI64',
     'ST_LE_UI8',
+    'ST_RGB',
     'ST_SYSTEMTIME',
     'ST_TZ',
 ]
