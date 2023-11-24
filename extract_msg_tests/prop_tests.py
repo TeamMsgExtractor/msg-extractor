@@ -77,12 +77,12 @@ _propChecks = [
     ),
     # Currency.
     (
-        b'\x06\x00\x01\x02\x01\x00\x00\x00\x7C\xF2\xB0\x50\x6B\x9A\xBF\x3F',
+        b'\x06\x00\x01\x02\x01\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00',
         FixedLengthProp,
         '02010006',
         0x0006,
         PropertyFlags.MANDATORY,
-        0.12345
+        0.0256
     ),
     # Floating Time.
     (
