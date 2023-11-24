@@ -29,7 +29,7 @@ class AttachmentTests(unittest.TestCase):
                 self.assertIsNone(att.data)
                 with self.assertRaises(NotImplementedError):
                     att.save()
-                att.save(skipNotImplemented = True)
+                self.assertEqual(att.save(skipNotImplemented = True), (enums.SaveType.NONE, None))
                 with self.assertRaises(NotImplementedError):
                     att.getFilename()
 
@@ -77,7 +77,7 @@ class AttachmentTests(unittest.TestCase):
                 self.assertIsNone(att.data)
                 with self.assertRaises(NotImplementedError):
                     att.save()
-                att.save(skipNotImplemented = True)
+                self.assertEqual(att.save(skipNotImplemented = True), (enums.SaveType.NONE, None))
                 with self.assertRaises(NotImplementedError):
                     att.getFilename()
 
