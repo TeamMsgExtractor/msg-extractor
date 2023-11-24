@@ -243,23 +243,23 @@ class BCTemplateID(enum.IntEnum):
     """
     The template ID for a business card.
 
-    IM_ALIGN_LEFT: The image area will be left aligned, stretching the full
-        height of the card vertically; text fields will appear to the right of
-        the image area.
-    IM_ALIGN_RIGHT: The image area will be right aligned, stretching the full
-        height of the card vertically; text fields will appear to the left of
-        the image area.
-    IM_ALIGN_TOP: The image area will be aligned to the top, stretching the full
-        width of the card horizontally; text fields will appear under the image
-        area.
-    IM_ALIGN_BOTTOM: The image area will be aligned to the bottom, stretching
-        the full width of the card horizontally; text fields will appear above
-        the image area.
-    NO_IMAGE: No image area is included in the card, only text fields are
-        included.
-    BACKGROUND: The image area will be used as a background for the card,
-        stretching the full height and width of the card. Text fields are
-        displayed on top of the image area.
+    * IM_ALIGN_LEFT: The image area will be left aligned, stretching the full
+      height of the card vertically; text fields will appear to the right of
+      the image area.
+    * IM_ALIGN_RIGHT: The image area will be right aligned, stretching the full
+      height of the card vertically; text fields will appear to the left of
+      the image area.
+    * IM_ALIGN_TOP: The image area will be aligned to the top, stretching the
+      full width of the card horizontally; text fields will appear under the
+      image area.
+    * IM_ALIGN_BOTTOM: The image area will be aligned to the bottom, stretching
+      the full width of the card horizontally; text fields will appear above
+      the image area.
+    * NO_IMAGE: No image area is included in the card, only text fields are
+      included.
+    * BACKGROUND: The image area will be used as a background for the card,
+      stretching the full height and width of the card. Text fields are
+      displayed on top of the image area.
     """
     IM_ALIGN_LEFT = 0x00
     IM_ALIGN_RIGHT = 0x01
@@ -299,7 +299,7 @@ class BodyTypes(enum.IntFlag):
     This is an IntFlag enum, so to check if a body was found use the in operator
     with the body you are checking. For example:
 
-    >>> rtfFound = BodyTypes.RTF msg.detectedBodies
+    >>> rtfFound : bool = BodyTypes.RTF in msg.detectedBodies
     """
     NONE = 0b000
     PLAIN = 0b001
@@ -313,12 +313,12 @@ class BusyStatus(enum.IntEnum):
     """
     The availability of a use for the event described by the object.
 
-    OL_FREE: The user is available.
-    OL_TENTATIVE: The user has a tentative event scheduled.
-    OL_BUSY: The user is busy.
-    OL_OUT_OF_OFFICE: The user is Out of Office.
-    OL_WORKING_ELSEWHERE: The user is working from a location other than the
-        office.
+    * OL_FREE: The user is available.
+    * OL_TENTATIVE: The user has a tentative event scheduled.
+    * OL_BUSY: The user is busy.
+    * OL_OUT_OF_OFFICE: The user is Out of Office.
+    * OL_WORKING_ELSEWHERE: The user is working from a location other than the
+      office.
     """
     OL_FREE = 0x00000000
     OL_TENTATIVE = 0x00000001
@@ -332,24 +332,24 @@ class ClientIntentFlag(enum.IntFlag):
     """
     An action a user has taken on a Meeting object.
 
-    MANAGER: The user is the owner of the Meeting object's Calendar folder. If
-        set, DELEGATE SHOULD NOT be set.
-    DELEGATE: The user is a delegate acting on a Meeting object in a delegator's
-        Calendar folder. If set, MANAGER SHOULD NOT be set.
-    DELETED_WITH_NO_RESPONSE: The user deleted the Meeting object with no
-        response sent to the organizer.
-    DELETED_EXCEPTION_WITH_NO_RESPONSE: The user deleted an exception to a
-        recurring series with no response sent to the organizer.
-    RESPONDED_TENTATIVE: The user tentatively accepted the meeting request.
-    RESPONSED_ACCEPT: The user accepted the meeting request.
-    RESPONDED_DECLINE: The user declined the meeting request.
-    MODIFIED_START_TIME: The user modified the start time.
-    MODIFIED_END_TIME: The user modified the end time.
-    MODIFIED_LOCATION: The user changed the location of the meeting.
-    RESPONDED_EXCEPTION_DECLINE: The user declined an exception to a recurring
-        series.
-    CANCELED: The user canceled a meeting request.
-    EXCEPTION_CANCELED: The user canceled an exception to a recurring series.
+    * MANAGER: The user is the owner of the Meeting object's Calendar folder. If
+      set, DELEGATE SHOULD NOT be set.
+    * DELEGATE: The user is a delegate acting on a Meeting object in a
+      delegator's Calendar folder. If set, MANAGER SHOULD NOT be set.
+    * DELETED_WITH_NO_RESPONSE: The user deleted the Meeting object with no
+      response sent to the organizer.
+    * DELETED_EXCEPTION_WITH_NO_RESPONSE: The user deleted an exception to a
+      recurring series with no response sent to the organizer.
+    * RESPONDED_TENTATIVE: The user tentatively accepted the meeting request.
+    * RESPONSED_ACCEPT: The user accepted the meeting request.
+    * RESPONDED_DECLINE: The user declined the meeting request.
+    * MODIFIED_START_TIME: The user modified the start time.
+    * MODIFIED_END_TIME: The user modified the end time.
+    * MODIFIED_LOCATION: The user changed the location of the meeting.
+    * RESPONDED_EXCEPTION_DECLINE: The user declined an exception to a recurring
+      series.
+    * CANCELED: The user canceled a meeting request.
+    * EXCEPTION_CANCELED: The user canceled an exception to a recurring series.
     """
     MANAGER = 0b1
     DELEGATE = 0b10
@@ -398,11 +398,11 @@ class ContactLinkState(enum.IntEnum):
     """
     Values for PidLidContactLinkGlobalAddressListLinkState.
 
-    DUPLICATE_NOT_LINKED: The duplicate contact is not linked to the GAL contact
-        or the GAL contact is not downloaded.
-    DUPLICATE_LINKED: The duplicate contact is linked to the GAL contact.
-    DUPLICATE_CANNOT_LINK: The duplicate contact cannot be automatically linked
-        to the GAL contact.
+    * DUPLICATE_NOT_LINKED: The duplicate contact is not linked to the GAL
+      contact or the GAL contact is not downloaded.
+    * DUPLICATE_LINKED: The duplicate contact is linked to the GAL contact.
+    * DUPLICATE_CANNOT_LINK: The duplicate contact cannot be automatically
+      linked to the GAL contact.
     """
     DUPLICATE_NOT_LINKED = 0
     DUPLICATE_LINKED = 1
@@ -578,18 +578,18 @@ class ErrorBehavior(enum.IntFlag):
     is to log a message, if anything, instead of raising an exception. This is
     an int flag enum, so the options you want will be ORed with each other.
 
-    THROW: Throw the exception regardless of type.
-    ATTACH_NOT_IMPLEMENTED: Silence the exception for NotImplementedError.
-    ATTACH_BROKEN: Silence the exception for broken attachments.
-    ATTACH_SUPPRESS_ALL: Silence the exception for NotImplementedError and for
-        broken attachments.
-    RTFDE_MALFORMED: Silences errors about malformed RTF data.
-    RTFDE_UNKNOWN_ERROR: Silences errors from RTFDE that are not normal.
-    RTFDE: Silences all errors from RTFDE.
-    STANDARDS_VIOLATION: Silences StandardViolationError where acceptable.
-    OLE_DEFECT_INCORRECT: Silences defects of type DEFECT_INCORRECT that are
-        enabled by default. This can lead to strange bugs.
-    SUPPRESS_ALL: Silences all of the above.
+    * THROW: Throw the exception regardless of type.
+    * ATTACH_NOT_IMPLEMENTED: Silence the exception for NotImplementedError.
+    * ATTACH_BROKEN: Silence the exception for broken attachments.
+    * ATTACH_SUPPRESS_ALL: Silence the exception for NotImplementedError and for
+      broken attachments.
+    * RTFDE_MALFORMED: Silences errors about malformed RTF data.
+    * RTFDE_UNKNOWN_ERROR: Silences errors from RTFDE that are not normal.
+    * RTFDE: Silences all errors from RTFDE.
+    * STANDARDS_VIOLATION: Silences StandardViolationError where acceptable.
+    * OLE_DEFECT_INCORRECT: Silences defects of type DEFECT_INCORRECT that are
+      enabled by default. This can lead to strange bugs.
+    * SUPPRESS_ALL: Silences all of the above.
     """
     THROW = 0b000000
     # Attachments.
@@ -1259,13 +1259,13 @@ class InsecureFeatures(enum.IntFlag):
     also not recommended to use these on files you do not trust.
 
     The following features are avilable:
-    NONE: No insecure features are allowed (default).
-    PIL_IMAGE_PARSING: Various operations requiring PIL or Pillow that will read
-        image data from parts of the MSG file. These operations are usually
-        constructing new images or are converting from one format to another.
-        This may expose you to security issues from those libraries.
-
-    ALL: All of the previously listed features will be enabled for the MSG file.
+    * NONE: No insecure features are allowed (default).
+    * PIL_IMAGE_PARSING: Various operations requiring PIL or Pillow that will
+      read image data from parts of the MSG file. These operations are usually
+      constructing new images or are converting from one format to another.
+      This may expose you to security issues from those libraries.
+    * ALL: All of the previously listed features will be enabled for the MSG
+      file.
     """
     NONE = 0b0000
     PIL_IMAGE_PARSING = 0b0001
@@ -1294,16 +1294,16 @@ class MeetingObjectChange(enum.IntFlag):
     """
     Indicates a property that has changed on a meeting object.
 
-    START: The start has changed.
-    END: The end has changed.
-    RECUR: The recurrence pattern has changed.
-    LOCATION: The location has changed.
-    SUBJECT: The subject has changed.
-    REQUIRED_ATTENDEE: One or more required attendees were added.
-    OPTIONAL_ATTENDEE: One or more optional attendees were added.
-    BODY: The body was modified.
-    RESPONSE: The responseRequested or replyRequested property has changed.
-    ALLOW_PROPOSE: The appointmentNotAllowPropose property has changed.
+    * START: The start has changed.
+    * END: The end has changed.
+    * RECUR: The recurrence pattern has changed.
+    * LOCATION: The location has changed.
+    * SUBJECT: The subject has changed.
+    * REQUIRED_ATTENDEE: One or more required attendees were added.
+    * OPTIONAL_ATTENDEE: One or more optional attendees were added.
+    * BODY: The body was modified.
+    * RESPONSE: The responseRequested or replyRequested property has changed.
+    * ALLOW_PROPOSE: The appointmentNotAllowPropose property has changed.
     """
     START = 0b1
     END = 0b10
@@ -1331,17 +1331,17 @@ class MeetingType(enum.IntEnum):
     """
     The type of Meeting Request object of Meeting Update object.
 
-    EMPTY: Unspecified.
-    REQUEST: The meeting request is the initial request.
-    FULL: Attendees were added, the meeting was cancelled and the organizer is
-        uncancelling it, and or the start, end, or recurrance property was
-        changed.
-    INFO: An informational update was made to the meeting and it is not one of
-        the conditions for FULL.
-    OUT_OF_DATE: A newer Meeting Request object or MeetingUpdate object was
-        received after this one.
-    DELEGATOR_COPY: Set on the delegator's copy when a delegate will handle
-        meeting-related objects.
+    * EMPTY: Unspecified.
+    * REQUEST: The meeting request is the initial request.
+    * FULL: Attendees were added, the meeting was cancelled and the organizer is
+      uncancelling it, and or the start, end, or recurrance property was
+      changed.
+    * INFO: An informational update was made to the meeting and it is not one of
+      the conditions for FULL.
+    * OUT_OF_DATE: A newer Meeting Request object or MeetingUpdate object was
+      received after this one.
+    * DELEGATOR_COPY: Set on the delegator's copy when a delegate will handle
+      meeting-related objects.
     """
     EMPTY = 0x00000000
     REQUEST = 0x00000001
@@ -1621,12 +1621,12 @@ class ResponseStatus(enum.IntEnum):
     """
     The response status of an attendee.
 
-    NONE: No response is required for this object.
-    ORGANIZED: This Meeting object belongs to the organizer.
-    TENTATIVE: The attendee has tentatively accepted.
-    ACCEPTED: The attendee has accepted.
-    DECLINED: The attendee has declined.
-    NOT_RESPONDED: The attendee has not yet responded.
+    * NONE: No response is required for this object.
+    * ORGANIZED: This Meeting object belongs to the organizer.
+    * TENTATIVE: The attendee has tentatively accepted.
+    * ACCEPTED: The attendee has accepted.
+    * DECLINED: The attendee has declined.
+    * NOT_RESPONDED: The attendee has not yet responded.
     """
 
     @classmethod
@@ -1694,16 +1694,16 @@ class SaveType(enum.IntEnum):
     Specifies the way that a function saved the data. Used to determine how the
     return value from a save function should be read.
 
-    CUSTOM: An unlisted save method was used, and the second value is
-        unspecified.
-    NONE: No data was saved, and the second tuple value should be None.
-    FILE: A single file was save, and the location is the second value.
-    FILES: Multiple files were created, and the second value is a list of the
-        locations.
-    FOLDER: A folder was created to store data, and the location is the second
-        value.
-    FOLDERS: Multiple folders were created to store data, and the second value
-        is a list of the locations.
+    * CUSTOM: An unlisted save method was used, and the second value is
+      unspecified.
+    * NONE: No data was saved, and the second tuple value should be None.
+    * FILE: A single file was save, and the location is the second value.
+    * FILES: Multiple files were created, and the second value is a list of the
+      locations.
+    * FOLDER: A folder was created to store data, and the location is the second
+      value.
+    * FOLDERS: Multiple folders were created to store data, and the second value
+      is a list of the locations.
     """
     CUSTOM = -1
     NONE = 0
@@ -1741,26 +1741,26 @@ class SideEffect(enum.IntFlag):
     A flag for how a Message object is handled by the client in relation to
     certain user interface actions.
 
-    OPEN_TO_DELETE: The client opens the Message object when deleting.
-    NO_FRAME: No UI is associated with the Message object.
-    COERCE_TO_INDEX: The client moves the Message object to the Inbox folder
-        when moving or copying to a Folder object with the PidTagContainerClass
-        property set to "IPF.Note".
-    OPEN_TO_COPY: The client opens the Message object when copying to another
-        folder.
-    OPEN_TO_MOVE: The client opens the Message object when moving to another
-        folder.
-    OPEN_FOR_CTX_MENU: The client opens the Message object when displaying
-        context-sensitive commands, such as a context menu, to the end user.
-    CANNOT_UNDO_DELETE: The client cannot undo a delete operation. Must not be
-        set unless the OPEN_TO_DELETE flag is set.
-    CANNOT_UNDO_COPY: The client cannot undo a copy operation. Must not be set
-        unless the OPEN_TO_COPY flag is set.
-    CANNOT_UNDO_MOVE: The client cannot undo a move operation. Must not be set
-        unless the OPEN_TO_MOVE flag is set.
-    HAS_SCRIPT: The Message object contains end-user script.
-    OPEN_TO_PERM_DELETE: The client opens the Message object to permanently
-        delete it.
+    * OPEN_TO_DELETE: The client opens the Message object when deleting.
+    * NO_FRAME: No UI is associated with the Message object.
+    * COERCE_TO_INDEX: The client moves the Message object to the Inbox folder
+      when moving or copying to a Folder object with the PidTagContainerClass
+      property set to "IPF.Note".
+    * OPEN_TO_COPY: The client opens the Message object when copying to another
+      folder.
+    * OPEN_TO_MOVE: The client opens the Message object when moving to another
+      folder.
+    * OPEN_FOR_CTX_MENU: The client opens the Message object when displaying
+      context-sensitive commands, such as a context menu, to the end user.
+    * CANNOT_UNDO_DELETE: The client cannot undo a delete operation. Must not be
+      set unless the OPEN_TO_DELETE flag is set.
+    * CANNOT_UNDO_COPY: The client cannot undo a copy operation. Must not be set
+      unless the OPEN_TO_COPY flag is set.
+    * CANNOT_UNDO_MOVE: The client cannot undo a move operation. Must not be set
+      unless the OPEN_TO_MOVE flag is set.
+    * HAS_SCRIPT: The Message object contains end-user script.
+    * OPEN_TO_PERM_DELETE: The client opens the Message object to permanently
+      delete it.
     """
     OPEN_TO_DELETE = 0b1
     NO_FRAME = 0b1000
@@ -1804,13 +1804,13 @@ class TaskMode(enum.IntEnum):
     """
     The mode of the Task object used in task communication (PidLidTaskMode).
 
-    UNASSIGNED: The Task object is not assigned.
-    EMBEDDED_REQUEST: The Task object is embedded in a task request.
-    ACCEPTED: The Task object has been accepted by the task assignee.
-    REJECTED: The Task object was rejected by the task assignee.
-    EMBEDDED_UPDATE: The Task object is embedded in a task update.
-    SELF_ASSIGNED: The Task object was assigned to the task assigner
-        (self-delegation).
+    * UNASSIGNED: The Task object is not assigned.
+    * EMBEDDED_REQUEST: The Task object is embedded in a task request.
+    * ACCEPTED: The Task object has been accepted by the task assignee.
+    * REJECTED: The Task object was rejected by the task assignee.
+    * EMBEDDED_UPDATE: The Task object is embedded in a task update.
+    * SELF_ASSIGNED: The Task object was assigned to the task assigner
+      (self-delegation).
     """
     UNASSIGNED = 0
     EMBEDDED_REQUEST = 1
@@ -1831,11 +1831,11 @@ class TaskOwnership(enum.IntEnum):
     """
     The role of the current user relative to the Task object.
 
-    NOT_ASSIGNED: The Task object is not assigned.
-    ASSIGNERS_COPY: The Task object is the task assigner's copy of the Task
-        object.
-    ASSIGNEES_COPY: The Task object is the task assignee's copy of the Task
-        object.
+    * NOT_ASSIGNED: The Task object is not assigned.
+    * ASSIGNERS_COPY: The Task object is the task assigner's copy of the Task
+      object.
+    * ASSIGNEES_COPY: The Task object is the task assignee's copy of the Task
+      object.
     """
     NOT_ASSIGNED = 0x00000000
     ASSIGNERS_COPY = 0x00000001
@@ -1847,11 +1847,12 @@ class TaskRequestType(enum.IntEnum):
     """
     The type of task request.
 
-    REQUEST: A plain request.
-    ACCEPT: Task has been accepted.
-    DECLINE: Task has been declined.
-    UPDATE: Task has been updated.
+    * REQUEST: A plain request.
+    * ACCEPT: Task has been accepted.
+    * DECLINE: Task has been declined.
+    * UPDATE: Task has been updated.
     """
+
     @classmethod
     def fromClassType(cls, classType : str) -> TaskRequestType:
         """
@@ -1875,16 +1876,18 @@ class TaskRequestType(enum.IntEnum):
 
 class TaskState(enum.IntEnum):
     """
-    NOT_ASSIGNED: The Task object is not assigned.
-    ASSIGNEES_COPY_ACCEPTED: The Task object is the task assignee's copy of an
-        assigned Task object.
-    ASSIGNERS_COPY_ACCEPTED: The Task object is the task assigner's copy of an
-        assigned Task object.
-    ASSIGNERS_COPY_REJECTED: The Task object is the task assigner's copy of a
-        rejected Task object.
-    EMBEDDED_REJECTION: This Task object was created to correspond to a Task
-        object that was embedded in a task rejection but could not be found
-        locally.
+    TaskState.
+
+    * NOT_ASSIGNED: The Task object is not assigned.
+    * ASSIGNEES_COPY_ACCEPTED: The Task object is the task assignee's copy of an
+      assigned Task object.
+    * ASSIGNERS_COPY_ACCEPTED: The Task object is the task assigner's copy of an
+      assigned Task object.
+    * ASSIGNERS_COPY_REJECTED: The Task object is the task assigner's copy of a
+      rejected Task object.
+    * EMBEDDED_REJECTION: This Task object was created to correspond to a Task
+      object that was embedded in a task rejection but could not be found
+      locally.
     """
     NOT_ASSIGNED = 0x00000001
     ASSIGNEES_COPY_ACCEPTED = 0x00000002
@@ -1898,11 +1901,11 @@ class TaskStatus(enum.IntEnum):
     """
     The status of a task object (PidLidTaskStatus).
 
-    NOT_STARTED: The user has not started the task.
-    IN_PROGRESS: The users's work on the Task object is in progress.
-    COMPLETE: The user's work on the Task object is complete.
-    WAITING_ON_OTHER: The user is waiting on somebody else.
-    DEFERRED: The user has deferred work on the Task object.
+    * NOT_STARTED: The user has not started the task.
+    * IN_PROGRESS: The users's work on the Task object is in progress.
+    * COMPLETE: The user's work on the Task object is complete.
+    * WAITING_ON_OTHER: The user is waiting on somebody else.
+    * DEFERRED: The user has deferred work on the Task object.
     """
     NOT_STARTED = 0x00000000
     IN_PROGRESS = 0x00000001
@@ -1916,8 +1919,8 @@ class TZFlag(enum.IntFlag):
     """
     Flags for a TZRule object as defined in [MS-OXOCAL].
 
-    RECUR_CURRENT_TZREG: The rule is associated with a recurring series.
-    EFFECTIVE_TZREG: The rule is the effective rule.
+    * RECUR_CURRENT_TZREG: The rule is associated with a recurring series.
+    * EFFECTIVE_TZREG: The rule is the effective rule.
     """
     RECUR_CURRENT_TZREG = 0b1
     EFFECTIVE_TZREG = 0b10
