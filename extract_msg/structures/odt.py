@@ -39,7 +39,7 @@ class ODTStruct:
         return self.__cf
 
     @cf.setter
-    def _(self, value : ODTCf) -> None:
+    def cf(self, value : ODTCf) -> None:
         if not isinstance(value, ODTCf):
             raise TypeError(':property cf: MUST be of type ODTCf.')
 
@@ -53,7 +53,7 @@ class ODTStruct:
         return self.__persist1
 
     @odtPersist1.setter
-    def _(self, value : ODTPersist1) -> None:
+    def odtPersist1(self, value : ODTPersist1) -> None:
         if not isinstance(value, ODTPersist1):
             raise TypeError(':property odtPersist1: MUST be of type ODTPersist1.')
 
@@ -67,7 +67,7 @@ class ODTStruct:
         return self.__persist2
 
     @odtPersist2.setter
-    def _(self, value : ODTPersist2) -> None:
+    def odtPersist2(self, value : ODTPersist2) -> None:
         if not isinstance(value, ODTPersist2):
             raise TypeError(':property odtPersist2: MUST be of type ODTPersist2.')
 

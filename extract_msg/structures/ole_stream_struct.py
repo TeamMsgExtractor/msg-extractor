@@ -54,7 +54,7 @@ class OleStreamStruct:
         return self.__rms
 
     @reservedMonikerStream.setter
-    def _(self, data : Optional[MonikerStream]) -> None:
+    def reservedMonikerStream(self, data : Optional[MonikerStream]) -> None:
         if data is not None and not isinstance(data, MonikerStream):
             raise TypeError('Reserved moniker stream must be a MonikerStream instance or None.')
 

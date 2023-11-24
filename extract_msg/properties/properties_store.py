@@ -107,7 +107,7 @@ class PropertiesStore:
     def __bytes__(self) -> bytes:
         return self.toBytes()
 
-    def __contains__(self, key) -> bool:
+    def __contains__(self, key : Any) -> bool:
         return self.__props.__contains__(key)
 
     def __delitem__(self, key : str) -> None:
@@ -301,7 +301,7 @@ class PropertiesStore:
             raise TypeError(f'Cannot remove property using type {type(nameOrProp)}.')
 
     def toBytes(self) -> bytes:
-        if self.writable:
+        if self.__writable:
             # The reserved field is present on all of them.
             ret = b'\x00' * 8
 
@@ -338,7 +338,7 @@ class PropertiesStore:
         return self.__ac
 
     @attachmentCount.setter
-    def _(self, value : int) -> None:
+    def attachmentCount(self, value : int) -> None:
         if not self.__writable:
             raise NotWritableError('PropertiesStore object is not writable.')
 
@@ -360,7 +360,7 @@ class PropertiesStore:
         except AttributeError:
             self.__date = None
             if '00390040' in self:
-                dateValue = self.get('00390040').value
+                dateValue = self.getValue('00390040')
                 # A date can be bytes if it fails to initialize, so we check it
                 # first.
                 if isinstance(dateValue, datetime.datetime):
@@ -391,7 +391,7 @@ class PropertiesStore:
         return self.__naid
 
     @nextAttachmentId.setter
-    def _(self, value : int) -> None:
+    def nextAttachmentId(self, value : int) -> None:
         if not self.__writable:
             raise NotWritableError('PropertiesStore object is not writable.')
 
@@ -417,7 +417,7 @@ class PropertiesStore:
         return self.__nrid
 
     @nextRecipientId.setter
-    def _(self, value : int) -> None:
+    def nextRecipientId(self, value : int) -> None:
         if not self.__writable:
             raise NotWritableError('PropertiesStore object is not writable.')
 
@@ -449,7 +449,7 @@ class PropertiesStore:
         return self.__rc
 
     @recipientCount.setter
-    def _(self, value : int) -> None:
+    def recipientCount(self, value : int) -> None:
         if not self.__writable:
             raise NotWritableError('PropertiesStore object is not writable.')
 
@@ -460,3 +460,10 @@ class PropertiesStore:
             raise TypeError('Attachment properties do not contain a recipient count.')
 
         self.__nrid = value
+
+    @property
+    def writable(self) -> bool:
+        """
+        Whether the instance accepts modification.
+        """
+        return self.__writable

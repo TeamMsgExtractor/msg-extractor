@@ -31,7 +31,7 @@ class MonikerStream:
         return self.__clsid
 
     @clsid.setter
-    def _(self, data : bytes) -> None:
+    def clsid(self, data : bytes) -> None:
         if not isinstance(data, bytes):
             raise TypeError('CLSID MUST be bytes.')
         if len(data) != 16:
@@ -46,7 +46,7 @@ class MonikerStream:
         return self.__streamData
 
     @streamData.setter
-    def _(self, data : bytes) -> None:
+    def streamData(self, data : bytes) -> None:
         if not isinstance(data, bytes):
             raise TypeError('Stream data MUST be bytes.')
         self.__streamData = data

@@ -129,7 +129,7 @@ class DVTargetDevice:
         return self.__driverName
 
     @driverName.setter
-    def _(self, data : Optional[bytes]) -> None:
+    def driverName(self, data : Optional[bytes]) -> None:
         self.__driverName = None if not data else data
 
     @property
@@ -141,7 +141,7 @@ class DVTargetDevice:
         return self.__deviceName
 
     @deviceName.setter
-    def _(self, data : Optional[bytes]) -> None:
+    def deviceName(self, data : Optional[bytes]) -> None:
         self.__deviceName = None if not data else data
 
     @property
@@ -152,7 +152,7 @@ class DVTargetDevice:
         return self.__portName
 
     @portName.setter
-    def _(self, data : Optional[bytes]) -> None:
+    def portName(self, data : Optional[bytes]) -> None:
         self.__portName = None if not data else data
 
     @property
@@ -164,5 +164,5 @@ class DVTargetDevice:
         return self.__extDevMode
 
     @extDevMode.setter
-    def _(self, data : Optional[DevModeA]) -> None:
+    def extDevMode(self, data : Optional[DevModeA]) -> None:
         self.__extDevMode = None if not data else data

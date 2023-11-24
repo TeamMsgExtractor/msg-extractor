@@ -123,12 +123,12 @@ class AppointmentAuxilaryFlag(enum.IntFlag):
     """
     Describes the auxilary state of the object.
 
-    COPIED: The Calendar object was copied from another Calendar folder.
-    FORCE_MEETING_RESPONSE: The client of server can require that a Meeting
-        Response object be sent to the organizer when a response is chosen.
-    FORWARDED: The object was forwarded by the organizer or another recipient.
-    REPAIR_UPDATE_MESSAGE: The meeting request is a Repair Update Message sent
-        from a server-side calendar repair system.
+    * COPIED: The Calendar object was copied from another Calendar folder.
+    * FORCE_MEETING_RESPONSE: The client of server can require that a Meeting
+      Response object be sent to the organizer when a response is chosen.
+    * FORWARDED: The object was forwarded by the organizer or another recipient.
+    * REPAIR_UPDATE_MESSAGE: The meeting request is a Repair Update Message sent
+      from a server-side calendar repair system.
     """
     COPIED = 0b1
     FORCE_MEETING_RESPONSE = 0b10
@@ -154,9 +154,11 @@ class AppointmentColor(enum.IntEnum):
 
 class AppointmentStateFlag(enum.IntFlag):
     """
-    MEETING: The object is a Meeting object or meeting-related object.
-    RECEIVED: The represented object was received from someone else.
-    CANCELED: The Meeting object that is represented has been canceled.
+    AppointmentStateFlag.
+
+    * MEETING: The object is a Meeting object or meeting-related object.
+    * RECEIVED: The represented object was received from someone else.
+    * CANCELED: The Meeting object that is represented has been canceled.
     """
     MEETING = 0b1
     RECEIVED = 0b10
@@ -178,15 +180,14 @@ class AttachmentType(enum.IntEnum):
     """
     The type represented by the attachment.
 
-    DATA: An attachment stored as plain bytes in the MSG file.
-    MSG: A normally embedded MSG file.
-    WEB: An attachment referencing a resource on the web.
-    SIGNED: An attachment of a signed message that is *not* an MSG file.
-    SIGNED_EMBEDDED: An MSG file embedded in a signed message.
-
-    BROKEN: An attachment with a critical issue.
-    UNSUPPORTED: An attachment that does not match any supported types.
-    UNKNOWN: The attachment type could not be determined.
+    * DATA: An attachment stored as plain bytes in the MSG file.
+    * MSG: A normally embedded MSG file.
+    * WEB: An attachment referencing a resource on the web.
+    * SIGNED: An attachment of a signed message that is *not* an MSG file.
+    * SIGNED_EMBEDDED: An MSG file embedded in a signed message.
+    * BROKEN: An attachment with a critical issue.
+    * UNSUPPORTED: An attachment that does not match any supported types.
+    * UNKNOWN: The attachment type could not be determined.
     """
     DATA = 0
     MSG = 1
@@ -221,18 +222,20 @@ class BCImageSource(enum.IntEnum):
 
 
 
-class BCLabelFormat(enum.IntEnum):
+class BCLabelFormat(enum.IntFlag):
     """
-    The format for a label of a business card. Left of the underscore represents
-    the alignment, right indicates reading order.
-    A
+    The format for a label of a business card.
+
+    If the bit for ``RIGHT_TO_LEFT`` is not set, the is left to
+    right.
+
+    ALIGN_LEFT and ALIGN_RIGHT are mutually exclusive.
     """
+    # Define normal values.
     NO_LABEL = 0b000
-    RIGHT_LTR = 0b001
-    LEFT_LTR = 0b010
-    UNKNOWN = 0b100
-    RIGHT_RTL = 0b101
-    LEFT_RTL = 0b110
+    ALIGN_RIGHT = 0b001
+    ALIGN_LEFT = 0b010
+    RIGHT_TO_LEFT = 0b100
 
 
 

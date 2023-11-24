@@ -163,10 +163,22 @@ class FieldInfo:
     def fontSize(self) -> int:
         """
         An integer that specifies the font size, in points, of the text field.
+
         MUST be between 3 and 32, or MUST be 0 if the text field is displayed as
         an empty line.
         """
         return self.__fontSize
+
+    @fontSize.setter
+    def fontSize(self, value : int) -> None:
+        if not isinstance(value, int):
+            raise TypeError(':property fontSize: MUST be an int.')
+
+        # Unsure if this is meant to be inclusive or exclusive.
+        if value == 0 or 3 <= value <= 32:
+            self.__fontSize = value
+        else:
+            raise ValueError(':property fontSize: MUST be 0 or between 3 and 32, inclusive.')
 
     @property
     def labelFontColor(self) -> Tuple[int, int, int]:
