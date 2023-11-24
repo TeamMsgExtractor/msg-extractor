@@ -441,7 +441,6 @@ class AttachmentBase(abc.ABC):
         """
         return ['/'.join(path) for path in self.listDir(streams, storages)]
 
-
     @abc.abstractmethod
     def save(self, **kwargs) -> SAVE_TYPE:
         """
@@ -472,9 +471,10 @@ class AttachmentBase(abc.ABC):
     @functools.cached_property
     def attachmentEncoding(self) -> Optional[bytes]:
         """
-        The encoding information about the attachment object. Will return
-        b'*\\x86H\\x86\\xf7\\x14\\x03\\x0b\\x01' if encoded in MacBinary format,
-        otherwise it is unset.
+        The encoding information about the attachment object.
+
+        Will return b'*\\x86H\\x86\\xf7\\x14\\x03\\x0b\\x01' if encoded in
+        MacBinary format, otherwise it is unset.
         """
         return self.getStream('__substg1.0_37020102')
 
@@ -626,7 +626,9 @@ class AttachmentBase(abc.ABC):
     @functools.cached_property
     def name(self) -> Optional[str]:
         """
-        The best name available for the file. Uses long filename before short.
+        The best name available for the file.
+
+        Uses long filename before short.
         """
         if self.type is AttachmentType.MSG:
             if self.displayName:
@@ -667,7 +669,7 @@ class AttachmentBase(abc.ABC):
     @property
     def shortFilename(self) -> Optional[str]:
         """
-        Returns the short file name of the attachment, if it exists.
+        The short file name of the attachment, if it exists.
         """
         return self.getStringStream('__substg1.0_3704')
 
