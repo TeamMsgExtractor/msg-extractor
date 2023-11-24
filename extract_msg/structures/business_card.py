@@ -118,8 +118,10 @@ class BusinessCardDisplayDefinition:
     @property
     def imageArea(self) -> int:
         """
-        An integet that specified the percent of space that the image will
-        occupy on the business card. Should be between 4 and 50.
+        An integer that specified the percent of space that the image will
+        occupy on the business card.
+
+        Should be between 4 and 50.
         """
         return self.__imageArea
 
