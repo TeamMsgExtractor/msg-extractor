@@ -141,7 +141,7 @@ class OleWriterExportTests(unittest.TestCase):
         for exportResultFile in (testFileDir / 'export-results').glob('*.msg'):
             # If we have an export result, find the original file, open it,
             # and export it as bytes to check against the known result.
-            with extract_msg.openMsg(testFileDir / exportResultFile.name) as msg:
+            with extract_msg.openMsg(testFileDir / exportResultFile.name, delayAttachments = True) as msg:
                 exportedBytes = msg.exportBytes()
 
             with open(exportResultFile, 'rb') as f:
