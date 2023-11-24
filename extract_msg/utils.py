@@ -1218,13 +1218,12 @@ def verifyPropertyId(id : str) -> None:
     """
     if not isinstance(id, str):
         raise InvaildPropertyIdError('ID was not a 4 digit hexadecimal string')
-    elif len(id) != 4:
+    if len(id) != 4:
         raise InvaildPropertyIdError('ID was not a 4 digit hexadecimal string')
-    else:
-        try:
-            int(id, 16)
-        except ValueError:
-            raise InvaildPropertyIdError('ID was not a 4 digit hexadecimal string')
+    try:
+        int(id, 16)
+    except ValueError:
+        raise InvaildPropertyIdError('ID was not a 4 digit hexadecimal string')
 
 
 def verifyType(_type : Optional[str]) -> None:
