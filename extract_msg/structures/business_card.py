@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 __all__ = [
     'BusinessCardDisplayDefinition',
     'FieldInfo',
@@ -7,12 +10,14 @@ __all__ = [
 import logging
 import struct
 
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 from ._helpers import BytesReader
 from .. import constants
-from ..enums import BCImageAlignment, BCImageSource, BCLabelFormat, BCTemplateID, BCTextFormat
-from ..utils import bitwiseAdjustedAnd
+from ..enums import (
+        BCImageAlignment, BCImageSource, BCLabelFormat, BCTemplateID,
+        BCTextFormat
+    )
 
 
 logger = logging.getLogger(__name__)
@@ -26,31 +31,67 @@ class BusinessCardDisplayDefinition:
     """
 
     def __init__(self, data : bytes):
-        self.__rawData = data
         reader = BytesReader(data)
         unpacked = constants.st.ST_BC_HEAD.unpack(reader.read(13))
         # Because doc says it must be ignored, we don't check the reserved here.
         reader.read(4)
         self.__majorVersion = unpacked[0]
+        if self.__majorVersion < 3:
+            raise ValueError('Major version was less than 3.')
         self.__minorVersion = unpacked[1]
         self.__templateID = BCTemplateID(unpacked[2])
-        self.__countOfFields = unpacked[3]
-        self.__fieldInfoSize = unpacked[4] # Must be 16.
-        self.__extraInfoSize = unpacked[5]
+        countOfFields = unpacked[3]
+        if unpacked[4] != 16:
+            raise ValueError('Value of FieldInfoSize was not 16.')
+        extraInfoSize = unpacked[5]
         self.__imageAlignment = BCImageAlignment(unpacked[6])
         self.__imageSource = BCImageSource(min(unpacked[7], 1))
-        self.__backgroundColor = (bitwiseAdjustedAnd(unpacked[8], 0xFF),
-                                  bitwiseAdjustedAnd(unpacked[8], 0xFF00),
-                                  bitwiseAdjustedAnd(unpacked[8], 0xFF0000))
-        self.__imageArea = unpacked[9]
-        self.__extraInfoField = data[17 + 16 * self.__countOfFields:]
-        self.__fields = tuple(FieldInfo(reader.read(16), self.__extraInfoField) for _ in range(self.__countOfFields))
+        self.__backgroundColor = unpacked[8:11]
+        self.__imageArea = unpacked[11]
+        extraInfoField = data[17 + 16 * countOfFields:]
+        extraInfoField = data[:extraInfoSize]
+        self.__fields = [FieldInfo(reader.read(16), extraInfoField)
+                         for _ in range(countOfFields)]
 
     def __bytes__(self) -> bytes:
         return self.toBytes()
 
     def toBytes(self) -> bytes:
-        return self.__rawData
+        # Pregenerate the extraInfo field.
+        offsets = []
+        extraInfo = b''
+        for info in self.__fields:
+            if info.labelText:
+                offsets.append(len(extraInfo))
+                extraInfo += info.labelText.encode('utf-16-le') + b'\x00\x00'
+            else:
+                offsets.append(0xFFFE)
+
+            if len(extraInfo) > 255:
+                raise ValueError('Label data can only be 127 characters total, including null characters.')
+
+        # Now that we have what we need, pack the header.
+        ret = constants.st.ST_BC_HEAD.pack(
+                                           self.__majorVersion,
+                                           self.__minorVersion,
+                                           self.__templateID,
+                                           len(self.__fields),
+                                           16,
+                                           len(extraInfo),
+                                           self.__imageAlignment,
+                                           self.__imageSource,
+                                           *self.__backgroundColor,
+                                           self.__imageArea
+                                          )
+
+        # Add the reserved.
+        ret += b'\x00\x00\x00\x00'
+
+        # Add each FieldInfo structure.
+        for index, info in enumerate(self.__fields):
+            ret += info.toBytes(offsets[index])
+
+        return ret + extraInfo
 
     @property
     def backgroundColor(self) -> Tuple[int, int, int]:
@@ -60,35 +101,7 @@ class BusinessCardDisplayDefinition:
         return self.__backgroundColor
 
     @property
-    def countOfFields(self) -> int:
-        """
-        The number of FieldInfo structures.
-        """
-        return self.__countOfFields
-
-    @property
-    def extraInfoField(self) -> bytes:
-        """
-        The raw data in the ExtraInfo field.
-        """
-        return self.__extraInfoField
-
-    @property
-    def extraInfoSize(self) -> int:
-        """
-        The size, in bytes, of the ExtraInfo field.
-        """
-        return self.__extraInfoSize
-
-    @property
-    def fieldInfoSize(self) -> int:
-        """
-        The size, in bytes, of each FieldInfo structure.
-        """
-        return self.__fieldInfoSize
-
-    @property
-    def fields(self) -> Tuple['FieldInfo', ...]:
+    def fields(self) -> List[FieldInfo]:
         """
         The field info structures
         """

@@ -95,7 +95,7 @@ STMF64 : Final[struct.Struct] = struct.Struct('<d')
 STPEID : Final[struct.Struct] = struct.Struct('<B3x16s4xI')
 # Struct for unpacking the first part of the BusinessCardDisplayDefinition
 # structure.
-ST_BC_HEAD : Final[struct.Struct] = struct.Struct('BBBBBBBBIB')
+ST_BC_HEAD : Final[struct.Struct] = struct.Struct('BBBBBBBBBBBxB')
 # Struct for completely unpacking the FieldInfo structure.
 ST_BC_FIELD_INFO : Final[struct.Struct] = struct.Struct('HBBBxHBBBxBBBx')
 # Structs for reading from a BytesReader. Some are just aliases for existing
