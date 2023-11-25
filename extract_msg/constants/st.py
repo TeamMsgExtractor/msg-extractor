@@ -17,7 +17,6 @@ __all__ = [
     'STMI32',
     'STMI64',
     'STNP_ENT',
-    'STNP_NAM',
     'STPEID',
     'STUI32',
     'STVAR',
@@ -69,11 +68,6 @@ ST_GUID : Final[struct.Struct] = struct.Struct('<IHH8s')
 ST_TZ : Final[struct.Struct] = struct.Struct('<iiiH16sH16s')
 # Struct for packing a compount file directory entry.
 ST_CF_DIR_ENTRY : Final[struct.Struct] = struct.Struct('<64sHBBIII16sIQQIQ')
-# Structs used by data.py
-ST_DATA_UI32 : Final[struct.Struct] = struct.Struct('<I')
-ST_DATA_UI16 : Final[struct.Struct] = struct.Struct('<H')
-# Structs used by named.py
-STNP_NAM : Final[struct.Struct] = struct.Struct('<i')
 # Struct used for unpacking the entries in the entry stream
 STNP_ENT : Final[struct.Struct] = struct.Struct('<IHH')
 # Structs used by prop.py

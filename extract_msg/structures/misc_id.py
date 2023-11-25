@@ -28,7 +28,7 @@ class FolderID:
 
     def __init__(self, data : bytes):
         self.__rawData = data
-        self.__replicaID = constants.st.ST_DATA_UI16.unpack(data[:2])[0]
+        self.__replicaID = constants.st.ST_LE_UI16.unpack(data[:2])[0]
         # This entry is 6 bytes, so we pull some shenanigans to unpack it.
         self.__globalCounter = constants.st.ST_LE_UI64.unpack(data[2:8] + b'\x00\x00')[0]
 

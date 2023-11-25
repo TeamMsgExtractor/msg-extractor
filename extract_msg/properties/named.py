@@ -120,7 +120,7 @@ class Named:
             raise ValueError('Failed to parse named property: offset was not in string stream.')
 
         # Get the length, in bytes, of the string.
-        length = constants.st.STNP_NAM.unpack(self.namesStream[offset:offset + 4])[0]
+        length = constants.st.ST_LE_I32.unpack(self.namesStream[offset:offset + 4])[0]
         offset += 4
 
         # Make sure the string can be read entirely. If it can't, something was
