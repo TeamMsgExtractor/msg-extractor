@@ -17,12 +17,13 @@ from extract_msg.properties.prop import (
 
 # List of tuples that contain a property string with data to check for. This
 # allows less lines needed for all the tests. The items are, in this order:
-# source bytes, output class, output name, output type, output flags, extras. If
-# the class is FixedLengthProp, extras will be a single item for the value,
-# otherwise it will be the values for length, real length, and reserved flags.
+# name, source bytes, output class, output name, output type, output flags,
+# extras. If  the class is FixedLengthProp, extras will be a single item for
+# the value, otherwise it will be the values for length, real length, and
+# reserved flags.
 _propChecks = [
-    # Unspecified.
     (
+        'Unspecified',
         b'\x00\x00\x01\x02\x01\x00\x00\x00\x01\x23\x45\x67\x89\xAB\xCD\xEF',
         FixedLengthProp,
         '02010000',
@@ -30,8 +31,8 @@ _propChecks = [
         PropertyFlags.MANDATORY,
         b'\x01\x23\x45\x67\x89\xAB\xCD\xEF'
     ),
-    # Null.
     (
+        'Null',
         b'\x01\x00\x01\x02\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
         FixedLengthProp,
         '02010001',
@@ -39,8 +40,8 @@ _propChecks = [
         PropertyFlags.READABLE,
         None
     ),
-    # Int16.
     (
+        'Int16',
         b'\x02\x00\x01\x02\x04\x00\x00\x00\x01\x23\x45\x67\x89\xAB\xCD\xEF',
         FixedLengthProp,
         '02010002',
@@ -48,8 +49,8 @@ _propChecks = [
         PropertyFlags.WRITABLE,
         0x2301
     ),
-    # Int32.
     (
+        'Int32',
         b'\x03\x00\x01\x02\x01\x00\x00\x00\x01\x23\x45\x67\x89\xAB\xCD\xEF',
         FixedLengthProp,
         '02010003',
@@ -57,8 +58,8 @@ _propChecks = [
         PropertyFlags.MANDATORY,
         0x67452301
     ),
-    # Float.
     (
+        'Float',
         b'\x04\x00\x01\x02\x01\x00\x00\x00\x5B\xD3\xFC\x3D\x89\xAB\xCD\xEF',
         FixedLengthProp,
         '02010004',
@@ -66,8 +67,8 @@ _propChecks = [
         PropertyFlags.MANDATORY,
         0.12345
     ),
-    # Double.
     (
+        'Double',
         b'\x05\x00\x01\x02\x01\x00\x00\x00\x7C\xF2\xB0\x50\x6B\x9A\xBF\x3F',
         FixedLengthProp,
         '02010005',
@@ -75,8 +76,8 @@ _propChecks = [
         PropertyFlags.MANDATORY,
         0.12345
     ),
-    # Currency.
     (
+        'Currency',
         b'\x06\x00\x01\x02\x01\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00',
         FixedLengthProp,
         '02010006',
@@ -84,8 +85,8 @@ _propChecks = [
         PropertyFlags.MANDATORY,
         0.0256
     ),
-    # Floating Time.
     (
+        'Floating Time',
         b'\x07\x00\x01\x02\x01\x00\x00\x00\x00\x00\x00\x00\x00\x60\x40\x40',
         FixedLengthProp,
         '02010007',
@@ -93,8 +94,8 @@ _propChecks = [
         PropertyFlags.MANDATORY,
         PYTPFLOATINGTIME_START + datetime.timedelta(days = 32.75)
     ),
-    # Error Code.
     (
+        'Error Code',
         b'\x0A\x00\x01\x02\x01\x00\x00\x00\xD7\x04\x00\x00\x00\x00\x00\x00',
         FixedLengthProp,
         '0201000A',
@@ -102,31 +103,67 @@ _propChecks = [
         PropertyFlags.MANDATORY,
         ErrorCodeType.DELETE_MESSAGE
     ),
+    (
+        'Boolean 0x0000',
+        b'\x0B\x00\x01\x02\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+        FixedLengthProp,
+        '0201000B',
+        0x000B,
+        PropertyFlags.MANDATORY,
+        False
+    ),
+    (
+        'Boolean 0x0001',
+        b'\x0B\x00\x01\x02\x01\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00',
+        FixedLengthProp,
+        '0201000B',
+        0x000B,
+        PropertyFlags.MANDATORY,
+        True
+    ),
+    (
+        'Boolean 0x0002',
+        b'\x0B\x00\x01\x02\x01\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00',
+        FixedLengthProp,
+        '0201000B',
+        0x000B,
+        PropertyFlags.MANDATORY,
+        True
+    ),
+    (
+        'Boolean 0x10000',
+        b'\x0B\x00\x01\x02\x01\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00',
+        FixedLengthProp,
+        '0201000B',
+        0x000B,
+        PropertyFlags.MANDATORY,
+        False
+    ),
 ]
 
 
 class PropTests(unittest.TestCase):
     def testCreateProps(self):
-        for index, entry in enumerate(_propChecks):
-            errMsg = f'Prop Test {index}'
-            prop = createProp(entry[0])
+        for entry in _propChecks:
+            with self.subTest(f'Prop Test {entry[0]}.'):
+                prop = createProp(entry[1])
 
-            # Common assertions.
-            self.assertIsInstance(prop, entry[1], errMsg)
-            self.assertEqual(prop.name, entry[2], errMsg)
-            self.assertEqual(prop.type, entry[3], errMsg)
-            self.assertIs(prop.flags, entry[4], errMsg)
+                # Common assertions.
+                self.assertIsInstance(prop, entry[2])
+                self.assertEqual(prop.name, entry[3])
+                self.assertEqual(prop.type, entry[4])
+                self.assertIs(prop.flags, entry[5])
 
-            # Check which class the prop is to know what checks to use.
-            if isinstance(prop, FixedLengthProp):
-                if isinstance(prop.value, float):
-                    self.assertAlmostEqual(prop.value, entry[5], msg = errMsg)
-                elif isinstance(prop.value, enum.Enum) or prop.type == 1:
-                    self.assertIs(prop.value, entry[5], errMsg)
+                # Check which class the prop is to know what checks to use.
+                if isinstance(prop, FixedLengthProp):
+                    if isinstance(prop.value, float):
+                        self.assertAlmostEqual(prop.value, entry[6])
+                    elif isinstance(prop.value, enum.Enum) or prop.type == 1:
+                        self.assertIs(prop.value, entry[6])
+                    else:
+                        self.assertEqual(prop.value, entry[6])
                 else:
-                    self.assertEqual(prop.value, entry[5], errMsg)
-            else:
-                prop = typing.cast(VariableLengthProp, prop)
-                self.assertEqual(prop.length, entry[5], errMsg)
-                self.assertEqual(prop.realLength, entry[6], errMsg)
-                self.assertEqual(prop.reservedFlags, entry[7], errMsg)
+                    prop = typing.cast(VariableLengthProp, prop)
+                    self.assertEqual(prop.length, entry[6])
+                    self.assertEqual(prop.realLength, entry[7])
+                    self.assertEqual(prop.reservedFlags, entry[8])
