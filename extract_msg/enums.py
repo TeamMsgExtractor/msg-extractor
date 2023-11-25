@@ -292,10 +292,12 @@ class BCTextFormat(enum.IntFlag):
 
 class BodyTypes(enum.IntFlag):
     """
-    Enum representing the types of bodies found in a message. This does not
-    include bodies generated from other sources, and so is a good detection
-    method for generated bodies (if you check a body and it is not null, but it
-    is not listed in the enum, then it was generated from another body).
+    Enum representing the types of bodies found in a message.
+
+    This does not include bodies generated from other sources, and so is a good
+    detection method for generated bodies (if you check a body and it is not
+    null, but it is not listed in the enum, then it was generated from another
+    body).
 
     This is an IntFlag enum, so to check if a body was found use the in operator
     with the body you are checking. For example:
@@ -468,7 +470,12 @@ class DisplayType(enum.IntEnum):
 
 
 
-class DMPaperSize:
+class DMPaperSize(enum.IntEnum):
+    """
+    The size of the output media for printers.
+
+    Value *should* be one of these, however
+    """
     DMPAPER_LETTER = 0x0001
     DMPAPER_LEGAL = 0x0005
     DMPAPER_A3 = 0x0008
@@ -479,7 +486,23 @@ class DMPaperSize:
     DMPAPER_B5 = 0x000D
     DMPAPER_10X14 = 0x0010
     DMPAPER_11X17 = 0x0011
+    DMPAPER_ENV_9 = 0x0013
+    DMPAPER_ENV_10 = 0x0014
+    DMPAPER_ENV_11 = 0x0015
+    DMPAPER_ENV_12 = 0x0016
+    DMPAPER_ENV_14 = 0x0017
     DMPAPER_CSHEET = 0x0018
+    DMPAPER_DSHEET = 0x0019
+    DMPAPER_ENV_DL = 0x001B
+    DMPAPER_ENV_C5 = 0x001C
+    DMPAPER_ENV_C3 = 0x001D
+    DMPAPER_ENV_C4 = 0x001E
+    DMPAPER_ENV_C6 = 0x001F
+    DMPAPER_ENV_C65 = 0x0020
+    DMPAPER_ENV_B4 = 0x0021
+    DMPAPER_ENV_B5 = 0x0022
+    DMPAPER_ENV_B6 = 0x0023
+    DMPAPER_ENV_ITALY = 0x0024
     DMPAPER_DBL_JAPANESE_POSTCARD = 0x0045
     DMPAPER_A6 = 0x0046
     DMPAPER_A3_ROTATED = 0x004C
@@ -487,6 +510,7 @@ class DMPaperSize:
     DMPAPER_A5_ROTATED = 0x004E
     DMPAPER_B4_JIS_ROTATED = 0x004F
     DMPAPER_B5_JIS_ROTATED = 0x0050
+    DMPAPER_DBL_JAPANESE_POSTCARD_ROTATED = 0x0052
     DMPAPER_A6_ROTATED = 0x0053
     DMPAPER_B6_JIS = 0x0058
     DMPAPER_B6_JIS_ROTATED = 0x0059
