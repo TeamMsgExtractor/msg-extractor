@@ -91,8 +91,9 @@ from typing import Any, Dict, Iterable, List, Set, Type, Union
 
 class AddressBookType(enum.IntEnum):
     """
-    The type of object that an address book entry ID represents. MUST be one of
-    these or it is invalid.
+    The type of object that an address book entry ID represents.
+
+    MUST be one of these or it is invalid.
     """
     LOCAL_MAIL_USER = 0x000
     DISTRIBUTION_LIST = 0x001
@@ -154,7 +155,7 @@ class AppointmentColor(enum.IntEnum):
 
 class AppointmentStateFlag(enum.IntFlag):
     """
-    AppointmentStateFlag.
+    The appointment start of the object.
 
     * MEETING: The object is a Meeting object or meeting-related object.
     * RECEIVED: The represented object was received from someone else.

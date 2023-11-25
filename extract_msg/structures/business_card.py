@@ -26,8 +26,9 @@ logger.addHandler(logging.NullHandler())
 
 class BusinessCardDisplayDefinition:
     """
-    Data structure for PidLidBusinessCardDisplayDefinition. Contains information
-    used to contruct a business card for a contact.
+    Data structure for PidLidBusinessCardDisplayDefinition.
+
+    Contains information used to contruct a business card for a contact.
     """
 
     def __init__(self, data : bytes):
@@ -100,20 +101,40 @@ class BusinessCardDisplayDefinition:
         """
         return self.__backgroundColor
 
+    @backgroundColor.setter
+    def backgroundColor(self, value : Tuple[int, int, int]) -> None:
+        if not isinstance(value, tuple) or len(value) != 3:
+            raise TypeError(':property backgroundColor: MUST be a tuple of 3 ints.')
+        # Quickly try to pack the ints and raise a value error if that fails.
+        try:
+            constants.st.ST_RGB(*value)
+        except struct.error:
+            raise ValueError('Value for :property backgroundColor: not in range.')
+
+        self.__backgroundColor = value
+
     @property
     def fields(self) -> List[FieldInfo]:
         """
-        The field info structures
+        The field info structures.
         """
         return self.__fields
 
     @property
     def imageAlignment(self) -> BCImageAlignment:
         """
-        The alighment of the image within the image area. Ignored if card is
-        text only.
+        The alignment of the image within the image area.
+
+        Ignored if card is text only.
         """
         return self.__imageAlignment
+
+    @imageAlignment.setter
+    def imageAlignment(self, value : BCImageAlignment) -> None:
+        if not isinstance(value, BCImageAlignment):
+            raise TypeError(':property imageAlignment: MUST be an instance of BCImageAlignment.')
+
+        self.__imageAlignment = value
 
     @property
     def imageArea(self) -> int:
@@ -125,6 +146,20 @@ class BusinessCardDisplayDefinition:
         """
         return self.__imageArea
 
+    @imageArea.setter
+    def imageArea(self, value : int) -> None:
+        if not isinstance(value, int):
+            raise TypeError(':property imageArea: MUST be an int.')
+        if value < 0:
+            raise ValueError(':property imageArea: MUST be positive.')
+        if value > 0xFF:
+            raise ValueError(':property imageArea: MUST be less than 0x100.')
+
+        if value < 4 or value > 50:
+            logger.warning(f'Business card image area was set to a value outside of suggested range of [4, 50] (got {value}).')
+
+        self.__imageArea = value
+
     @property
     def imageSource(self) -> BCImageSource:
         """
@@ -132,21 +167,55 @@ class BusinessCardDisplayDefinition:
         """
         return self.__imageSource
 
+    @imageSource.setter
+    def imageSource(self, value : BCImageSource) -> None:
+        if not isinstance(value, BCImageSource):
+            raise TypeError(':property imageSource: MUST be an instance of BCImageSource.')
+
+        self.__imageSource = value
+
     @property
     def majorVersion(self) -> int:
         """
-        An 8-bit value that specified the major version number. Must be 3 or
-        greater.
+        An 8-bit value that specified the major version number.
+
+        Must be 3 or greater.
         """
         return self.__majorVersion
+
+    @majorVersion.setter
+    def majorVersion(self, value : int) -> None:
+        if not isinstance(value, int):
+            raise TypeError(':property majorVersion: MUST be an int.')
+        if value < 3:
+            raise ValueError(':property majorVersion: MUST be 3 or greater.')
+        if value > 0xFF:
+            raise ValueError(':property majorVersion: MUST be less than 0x100.')
+
+        self.__majorVersion = value
 
     @property
     def minorVersion(self) -> int:
         """
-        An 8-bit value that specifies the minor version number. SHOULD be set to
-        0.
+        An 8-bit value that specifies the minor version number.
+
+        SHOULD be set to 0.
         """
         return self.__minorVersion
+
+    @minorVersion.setter
+    def minorVersion(self, value : int) -> None:
+        if not isinstance(value, int):
+            raise TypeError(':property minorVersion: MUST be an int.')
+        if value < 0:
+            raise ValueError(':property minorVersion: MUST be positive.')
+        if value > 0xFF:
+            raise ValueError(':property minorVersion: MUST be less than 0x100.')
+
+        if value != 0:
+            logger.warning('Business card minor version set to non-zero value.')
+
+        self.__minorVersion = value
 
     @property
     def templateID(self) -> BCTemplateID:
@@ -154,6 +223,13 @@ class BusinessCardDisplayDefinition:
         The layout of the business card.
         """
         return self.__templateID
+
+    @templateID.setter
+    def templateID(self, value : BCTemplateID):
+        if not isinstance(value, BCTemplateID):
+            raise TypeError(':property templateID: MUST be an instance of BCTemplateID.')
+
+        self.__templateID = value
 
 
 
@@ -307,8 +383,9 @@ class FieldInfo:
     @property
     def textPropertyID(self) -> int:
         """
-        The property to be used for the text field. If the value is 0, it
-        represents an empty field.
+        The property to be used for the text field.
+
+        If the value is 0, it represents an empty field.
         """
         return self.__textPropertyID
 
