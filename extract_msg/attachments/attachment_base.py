@@ -235,7 +235,7 @@ class AttachmentBase(abc.ABC):
         """
         Returns the filename to use for the attachment.
 
-        :param contentId:      Use the contentId, if available.
+        :param contentId: Use the contentId, if available.
         :param customFilename: A custom name to use for the file.
 
         If the filename starts with "UnknownFilename" then there is no guarantee
@@ -360,7 +360,7 @@ class AttachmentBase(abc.ABC):
 
     def getStream(self, filename : MSG_PATH) -> Optional[bytes]:
         """
-        Gets a binary representation of the requested filename.
+        Gets a binary representation of the requested stream.
 
         This should ALWAYS return a bytes object if it was found, otherwise
         returns None.
@@ -392,11 +392,14 @@ class AttachmentBase(abc.ABC):
 
     def getStringStream(self, filename : MSG_PATH) -> Optional[str]:
         """
-        Gets a string representation of the requested filename.
-        Checks for both ASCII and Unicode representations and returns
-        a value if possible.  If there are both ASCII and Unicode
-        versions, then :param prefer: specifies which will be
-        returned.
+        Gets a string representation of the requested stream.
+
+        Rather than the full filename, you should only feed this function the
+        filename sans the type. So if the full name is "__substg1.0_001A001F",
+        the filename this function should receive should be "__substg1.0_001A".
+
+        This should ALWAYS return a string if it was found, otherwise returns
+        None.
 
         :raises ReferenceError: The associated MSGFile instance has been garbage
             collected.
@@ -425,11 +428,11 @@ class AttachmentBase(abc.ABC):
 
     def listDir(self, streams : bool = True, storages : bool = False) -> List[List[str]]:
         """
-        Lists the streams and or storages that exist in the attachment
+        Lists the streams and/or storages that exist in the attachment
         directory.
 
         Returns the paths *excluding* the attachment directory, allowing the
-        paths to be directly used for accessing a file.
+        paths to be directly used for accessing a stream.
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
@@ -482,11 +485,12 @@ class AttachmentBase(abc.ABC):
     @functools.cached_property
     def additionalInformation(self) -> Optional[str]:
         """
-        The additional information about the attachment. This property MUST be
-        an empty string if attachmentEncoding is not set. Otherwise it MUST be
-        set to a string of the format ":CREA:TYPE" where ":CREA" is the
-        four-letter Macintosh file creator code and ":TYPE" is a four-letter
-        Macintosh type code.
+        The additional information about the attachment.
+
+        This property MUST be an empty string if attachmentEncoding is not set.
+        Otherwise it MUST be set to a string of the format ":CREA:TYPE" where
+        ":CREA" is the four-letter Macintosh file creator code and ":TYPE" is a
+        four-letter Macintosh type code.
         """
         return self.getStringStream('__substg1.0_370F')
 
@@ -527,7 +531,9 @@ class AttachmentBase(abc.ABC):
     @abc.abstractmethod
     def data(self) -> Optional[object]:
         """
-        The attachment data, if any. Returns None if there is no data to save.
+        The attachment data, if any.
+
+        Returns None if there is no data to save.
         """
 
     @functools.cached_property

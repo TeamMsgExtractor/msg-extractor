@@ -143,8 +143,10 @@ class Named:
 
     def get(self, propertyName : Tuple[str, str], default : _T = None) -> Union[NamedPropertyBase, _T]:
         """
-        Tries to get a named property based on its key. Returns :param default:
-        if not found. Key is a tuple of the name and the property set GUID.
+        Tries to get a named property based on its key.
+
+        Returns :param default: if not found. Key is a tuple of the name and
+        the property set GUID.
         """
         try:
             return self[propertyName]
