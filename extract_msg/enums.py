@@ -474,18 +474,27 @@ class DMPaperSize(enum.IntEnum):
     """
     The size of the output media for printers.
 
-    Value *should* be one of these, however
+    Value *SHOULD* be one of these, however it MAY be a device-specific value
+    that is greater than or equal to 0x0100.
     """
     DMPAPER_LETTER = 0x0001
+    DMPAPER_LETTERSMALL = 0x0002
+    DMPAPER_TABLOID = 0x0003
+    DMPAPER_LEDGER = 0x0004
     DMPAPER_LEGAL = 0x0005
+    DMPAPER_STATEMENT = 0x0006
+    DMPAPER_EXECUTIVE = 0x0007
     DMPAPER_A3 = 0x0008
     DMPAPER_A4 = 0x0009
     DMPAPER_A4SMALL = 0x000A
     DMPAPER_A5 = 0x000B
     DMPAPER_B4 = 0x000C
     DMPAPER_B5 = 0x000D
+    DMPAPER_FOLIO = 0x000E
+    DMPAPER_QUARTO = 0x000F
     DMPAPER_10X14 = 0x0010
     DMPAPER_11X17 = 0x0011
+    DMPAPER_NOTE = 0x0012
     DMPAPER_ENV_9 = 0x0013
     DMPAPER_ENV_10 = 0x0014
     DMPAPER_ENV_11 = 0x0015
@@ -493,6 +502,7 @@ class DMPaperSize(enum.IntEnum):
     DMPAPER_ENV_14 = 0x0017
     DMPAPER_CSHEET = 0x0018
     DMPAPER_DSHEET = 0x0019
+    DMPAPER_ESHEET = 0x001A
     DMPAPER_ENV_DL = 0x001B
     DMPAPER_ENV_C5 = 0x001C
     DMPAPER_ENV_C3 = 0x001D
@@ -503,27 +513,72 @@ class DMPaperSize(enum.IntEnum):
     DMPAPER_ENV_B5 = 0x0022
     DMPAPER_ENV_B6 = 0x0023
     DMPAPER_ENV_ITALY = 0x0024
+    DMPAPER_ENV_MONARCH = 0x0025
+    DMPAPER_ENV_PERSONAL = 0x0026
+    DMPAPER_FANFOLD_US = 0x0027
+    DMPAPER_FANFOLD_STD_GERMAN = 0x0028
+    DMPAPER_FANFOLD_LGL_GERMAN = 0x0029
     DMPAPER_DBL_JAPANESE_POSTCARD = 0x0045
     DMPAPER_A6 = 0x0046
+    DMPAPER_JENV_KAKU2 = 0x0047
+    DMPAPER_JENV_KAKU3 = 0x0048
+    DMPAPER_JENV_CHOU3 = 0x0049
+    DMPAPER_JENV_CHOU4 = 0x004A
+    DMPAPER_LETTER_ROTATED = 0x004B
     DMPAPER_A3_ROTATED = 0x004C
     DMPAPER_A4_ROTATED = 0x004D
     DMPAPER_A5_ROTATED = 0x004E
     DMPAPER_B4_JIS_ROTATED = 0x004F
     DMPAPER_B5_JIS_ROTATED = 0x0050
+    DMPAPER_JAPANESE_POSTCARD_ROTATED = 0x0051
     DMPAPER_DBL_JAPANESE_POSTCARD_ROTATED = 0x0052
     DMPAPER_A6_ROTATED = 0x0053
+    DMPAPER_JENV_KAKU2_ROTATED = 0x0054
+    DMPAPER_JENV_KAKU3_ROTATED = 0x0055
+    DMPAPER_JENV_CHOU3_ROTATED = 0x0056
+    DMPAPER_JENV_CHOU4_ROTATED = 0x0057
     DMPAPER_B6_JIS = 0x0058
     DMPAPER_B6_JIS_ROTATED = 0x0059
     DMPAPER_12X11 = 0x005A
+    DMPAPER_JENV_YOU4 = 0x005B
+    DMPAPER_JENV_YOU4_ROTATED = 0x005C
+    DMPAPER_P16K = 0x005D
+    DMPAPER_P32K = 0x005E
+    DMPAPER_P32KBIG = 0x005F
+    DMPAPER_PENV_1 = 0x0060
+    DMPAPER_PENV_2 = 0x0061
+    DMPAPER_PENV_3 = 0x0062
+    DMPAPER_PENV_4 = 0x0063
+    DMPAPER_PENV_5 = 0x0064
+    DMPAPER_PENV_6 = 0x0065
+    DMPAPER_PENV_7 = 0x0066
+    DMPAPER_PENV_8 = 0x0067
+    DMPAPER_PENV_9 = 0x0068
+    DMPAPER_PENV_10 = 0x0069
+    DMPAPER_P16K_ROTATED = 0x006A
+    DMPAPER_P32K_ROTATED = 0x006B
+    DMPAPER_P32KBIG_ROTATED = 0x006C
+    DMPAPER_PENV_1_ROTATED = 0x006D
+    DMPAPER_PENV_2_ROTATED = 0x006E
+    DMPAPER_PENV_3_ROTATED = 0x006F
+    DMPAPER_PENV_4_ROTATED = 0x0070
+    DMPAPER_PENV_5_ROTATED = 0x0071
+    DMPAPER_PENV_6_ROTATED = 0x0072
+    DMPAPER_PENV_7_ROTATED = 0x0073
+    DMPAPER_PENV_8_ROTATED = 0x0074
+    DMPAPER_PENV_9_ROTATED = 0x0075
+    DMPAPER_PENV_10_ROTATED = 0x0076
     # TODO
 
 
 
 class DVAspect(enum.IntEnum):
     """
-    Part of the extra data for Outlook signatures. Different sources seem to
-    disagree on the meanings, so I'm sticking to the meanings in the official
-    Microsoft documentation of the DVASPECT enumeration.
+    Part of the extra data for Outlook signatures.
+
+    Different sources seem to disagree on the meanings, so I'm sticking to the
+    meanings in the official Microsoft documentation of the DVASPECT
+    enumeration.
     """
     CONTENT = 1
     THUMBNAIL = 2
@@ -576,8 +631,9 @@ class EntryIDType(enum.Enum):
 
 class EntryIDTypeHex(enum.Enum):
     """
-    Converts a UID to the type of Entry ID structure. Uses a hex string instead
-    of bytes for the value.
+    Converts a UID to the type of Entry ID structure.
+
+    Uses a hex string instead of bytes for the value.
     """
     def toRaw(self):
         """
@@ -599,9 +655,11 @@ class EntryIDTypeHex(enum.Enum):
 class ErrorBehavior(enum.IntFlag):
     """
     The behavior to follow when handling an error in an MSG file and it's
-    attachments. Specifying an option indicates the behavior for the situation
-    is to log a message, if anything, instead of raising an exception. This is
-    an int flag enum, so the options you want will be ORed with each other.
+    attachments.
+
+    Specifying an option indicates the behavior for the situation is to log a
+    message, if anything, instead of raising an exception. This is an int flag
+    enum, so the options you want will be ORed with each other.
 
     * THROW: Throw the exception regardless of type.
     * ATTACH_NOT_IMPLEMENTED: Silence the exception for NotImplementedError.
@@ -1716,8 +1774,9 @@ class RuleActionType(enum.IntEnum):
 
 class SaveType(enum.IntEnum):
     """
-    Specifies the way that a function saved the data. Used to determine how the
-    return value from a save function should be read.
+    Specifies the way that a function saved the data.
+
+    Used to determine how the return value from a save function should be read.
 
     * CUSTOM: An unlisted save method was used, and the second value is
       unspecified.
