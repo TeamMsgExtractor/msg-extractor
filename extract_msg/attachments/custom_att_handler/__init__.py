@@ -2,13 +2,11 @@ from __future__ import annotations
 
 
 """
-Submodule designed to help with saving and using custom attachments. Custom
-attachments are those follow standards not defined in the MSG documentation. Use
-the function `getHandler` to get an instance of a subclass of
-CustomAttachmentHandler.
+Submodule designed to help with saving and using custom attachments.
 
-CustomAttachmentHandler subclasses will all define the following methods:
-    injectHtml: A method which takes HTML and inserts the
+Custom attachments are those follow standards not defined in the MSG
+documentation. Use the function `getHandler` to get an instance of a subclass of
+CustomAttachmentHandler.
 
 It should hopefully be completely unnecessary for your code to know what type of
 handler it is using, as the abstract base class should give all of the functions
@@ -67,8 +65,9 @@ if TYPE_CHECKING:
 # Function designed to route to the correct handler.
 def getHandler(attachment : AttachmentBase) -> CustomAttachmentHandler:
     """
-    Takes an attachment and uses it to find the correct handler. Returns an
-    instance created using the specified attachment.
+    Takes an attachment and uses it to find the correct handler.
+
+    Returns an instance created using the specified attachment.
 
     :raises NotImplementedError: No handler could be found.
     :raises ValueError: A handler was found, but something was wrong with the

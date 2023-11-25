@@ -50,7 +50,7 @@ class Attachment(AttachmentBase):
         """
         Returns the filename to use for the attachment.
 
-        :param contentId:      Use the contentId, if available.
+        :param contentId: Use the contentId, if available.
         :param customFilename: A custom name to use for the file.
 
         If the filename starts with "UnknownFilename" then there is no guarantee

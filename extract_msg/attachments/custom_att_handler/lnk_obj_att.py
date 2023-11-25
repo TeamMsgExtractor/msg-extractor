@@ -73,7 +73,7 @@ class LinkedObjectAttachment(CustomAttachmentHandler):
     @cached_property
     def mailMsgAttMsg(self) -> Optional[EntryID]:
         """
-        The EntryID linked Message object; required only if the
+        The EntryID linked Message object, required only if the
         mailMsgAttSrchKey property is None.
         """
         return EntryID.autoCreate(self.getStream('MailMsgAttMsg'))
@@ -89,7 +89,7 @@ class LinkedObjectAttachment(CustomAttachmentHandler):
     @cached_property
     def mailMsgAttSrchKey(self) -> Optional[bytes]:
         """
-        The search key for the linked message object; required only if
+        The search key for the linked message object, required only if
         mailMsgAttMsg is None.
         """
         return self.getStream('MailMsgAttSrchKey')

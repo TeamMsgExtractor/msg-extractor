@@ -100,8 +100,9 @@ class CustomAttachmentHandler(abc.ABC):
     @abc.abstractmethod
     def obj(self) -> Optional[object]:
         """
-        Returns an object representing the data. May return the same as
-        :property data:.
+        Returns an object representing the data.
+
+        May return the same value as :property data:.
 
         If there is no object to represent the custom attachment, including
         bytes, returns None.

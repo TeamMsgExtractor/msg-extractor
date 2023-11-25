@@ -185,7 +185,7 @@ class Recipient(Generic[_RT]):
 
     def getStream(self, filename : MSG_PATH) -> Optional[bytes]:
         """
-        Gets a binary representation of the requested filename.
+        Gets a binary representation of the requested stream.
 
         This should ALWAYS return a bytes object if it was found, otherwise
         returns None.
@@ -217,7 +217,7 @@ class Recipient(Generic[_RT]):
 
     def getStringStream(self, filename : MSG_PATH) -> Optional[str]:
         """
-        Gets a string representation of the requested filename.
+        Gets a string representation of the requested stream.
 
         Rather than the full filename, you should only feed this function the
         filename sans the type. So if the full name is "__substg1.0_001A001F",

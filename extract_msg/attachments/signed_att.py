@@ -6,7 +6,7 @@ __all__ = [
 ]
 
 
-import email
+import email.message
 import logging
 import os
 import pathlib
