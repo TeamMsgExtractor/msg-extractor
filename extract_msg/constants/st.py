@@ -33,7 +33,6 @@ __all__ = [
     'ST_BE_UI64',
     'ST_BE_UI8',
     'ST_CF_DIR_ENTRY',
-    'ST_DATA_UI16',
     'ST_GUID',
     'ST_LE_F32',
     'ST_LE_F64',
