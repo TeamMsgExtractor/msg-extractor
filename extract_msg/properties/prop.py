@@ -133,7 +133,7 @@ class FixedLengthProp(PropBase):
                 except ValueError:
                     pass
         elif _type == 0x000B:  # PtypBoolean
-            value = constants.st.ST_LE_UI64.unpack(value)[0] == 1
+            value = constants.st.ST_LE_UI64.unpack(value)[0] != 0
         elif _type == 0x0014:  # PtypInteger64
             value = constants.st.ST_LE_I64.unpack(value)[0]
         elif _type == 0x0040:  # PtypTime
