@@ -50,8 +50,9 @@ _HEADER_SKIPPABLE = (
 def _listInsertMult(dest : List[_T], source : Iterable[_T], index : int = -1):
     """
     Inserts into :param dest: all the items in :param source: at the index
-    specified. :param dest: can be any mutable sequence with :method insert:,
-    :method __len__:, and :method extend:.
+    specified.
+
+    :param dest: can be any mutable sequence with :method insert:, :method __len__:, and :method extend:.
 
     If :param index: is not specified, the default position is the end of the
     list. This is also where things will be inserted if index is greater than or
@@ -67,8 +68,9 @@ def _listInsertMult(dest : List[_T], source : Iterable[_T], index : int = -1):
 def injectStartRTF(document : bytes, injectTokens : Union[bytes, List[Token]]) -> List[Token]:
     """
     Injects the specified tokens into the document, returning a new copy of the
-    document as a list of Tokens. Injects the data just before the first
-    rendered character.
+    document as a list of Tokens.
+
+    Injects the data just before the first rendered character.
 
     :param document: The bytes representing the RTF document.
     :param injectTokens: The tokens to inject into the document. Can either be
@@ -84,8 +86,9 @@ def injectStartRTFTokenized(document : List[Token], injectTokens : Union[bytes, 
     """
     Like :function injectStartRTF:, injects the specified tokens into the
     document, returning a reference to the document, except that it accepts a
-    document in the form of a list of tokens. Injects the data just before the
-    first rendered character.
+    document in the form of a list of tokens.
+
+    Injects the data just before the first rendered character.
 
     :param document: The list of tokens representing the RTF document. Will only
         be modified if the function is successful.

@@ -12,8 +12,7 @@ import logging
 import weakref
 
 from typing import (
-        Any, Callable, Generic, List, Optional, TYPE_CHECKING, Type, TypeVar,
-        Union
+        Any, Generic, List, Optional, Tuple, TYPE_CHECKING, Type, TypeVar, Union
     )
 
 from .constants import MSG_PATH, OVERRIDE_CLASS
@@ -78,7 +77,7 @@ class Recipient(Generic[_RT]):
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.sExists([self.__dir, msgPathToString(filename)])
 
-    def existsTypedProperty(self, id, _type = None) -> bool:
+    def existsTypedProperty(self, id, _type = None) -> Tuple[bool, int]:
         """
         Determines if the stream with the provided id exists. The return of this
         function is 2 values, the first being a boolean for if anything was

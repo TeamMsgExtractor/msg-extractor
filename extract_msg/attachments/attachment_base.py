@@ -59,8 +59,9 @@ class AttachmentBase(abc.ABC):
     def _getTypedAs(self, _id : str, overrideClass = None, preserveNone : bool = True):
         """
         Like the other get as functions, but designed for when something
-        could be multiple types (where only one will be present). This way you
-        have no need to set the type, it will be handled for you.
+        could be multiple types (where only one will be present).
+
+        This way you have no need to set the type, it will be handled for you.
 
         :param overrideClass: Class/function to use to morph the data that was
             read. The data will be the first argument to the class's __init__
@@ -80,14 +81,14 @@ class AttachmentBase(abc.ABC):
 
     def _getTypedData(self, id, _type = None):
         """
-        Gets the data for the specified id as the type that it is
-        supposed to be. :param id: MUST be a 4 digit hexadecimal
-        string.
+        Gets the data for the specified id as the type that it is supposed to
+        be.
 
-        If you know for sure what type the data is before hand,
-        you can specify it as being one of the strings in the
-        constant FIXED_LENGTH_PROPS_STRING or
-        VARIABLE_LENGTH_PROPS_STRING.
+        :param id: MUST be a 4 digit hexadecimal string.
+
+        If you know for sure what type the data is before hand, you can specify
+        it as being one of the strings in the constant
+        FIXED_LENGTH_PROPS_STRING or VARIABLE_LENGTH_PROPS_STRING.
 
         :raises ReferenceError: The associated MSGFile instance has been garbage
             collected.
@@ -103,14 +104,14 @@ class AttachmentBase(abc.ABC):
 
     def _getTypedProperty(self, propertyID, _type = None) -> Tuple[bool, Optional[object]]:
         """
-        Gets the property with the specified id as the type that it
-        is supposed to be. :param id: MUST be a 4 digit hexadecimal
-        string.
+        Gets the property with the specified id as the type that it is supposed
+        to be.
 
-        If you know for sure what type the property is before hand,
-        you can specify it as being one of the strings in the
-        constant FIXED_LENGTH_PROPS_STRING or
-        VARIABLE_LENGTH_PROPS_STRING.
+        :param id: MUST be a 4 digit hexadecimal string.
+
+        If you know for sure what type the property is before hand, you can
+        specify it as being one of the strings in the constant
+        FIXED_LENGTH_PROPS_STRING or VARIABLE_LENGTH_PROPS_STRING.
         """
         verifyPropertyId(propertyID)
         if _type:
@@ -216,11 +217,11 @@ class AttachmentBase(abc.ABC):
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
         return msg.sExists([self.__dir, msgPathToString(filename)])
 
-    def existsTypedProperty(self, id, _type = None) -> bool:
+    def existsTypedProperty(self, id, _type = None) -> Tuple[bool, int]:
         """
-        Determines if the stream with the provided id exists. The return of this
-        function is 2 values, the first being a boolean for if anything was
-        found, and the second being how many were found.
+        Determines if the stream with the provided id exists.
+
+        The return of this function is 2 values, the first being a boolean for if anything was found, and the second being how many were found.
 
         :raises ReferenceError: The associated MSGFile instance has been garbage
             collected.
@@ -661,8 +662,9 @@ class AttachmentBase(abc.ABC):
     def renderingPosition(self) -> Optional[int]:
         """
         The offset, in rendered characters, to use when rendering the attachment
-        within the main message text. A value of 0xFFFFFFFF indicates a hidden
-        attachment that is not to be rendered.
+        within the main message text.
+
+        A value of 0xFFFFFFFF indicates a hidden attachment that is not to be rendered.
         """
         return self.getPropertyVal('370B0003')
 
