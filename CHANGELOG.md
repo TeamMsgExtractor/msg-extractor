@@ -18,6 +18,7 @@
 * Fixed exports for `extract_msg.constants.st`.
 * Updated various parts of the documentation to improve it and make it more consistent.
 * Fixed `Recipient.existsTypedProperty` and `AttachmentBase.existsTypedProperty` having the wrong return type.
+* Removed "TODO" markers on `OleStreamStruct` and finalized it to only handle the OLEStream for embedded objects.
 
 **v0.46.2**
 * Adjusted typing information on regular expressions. They were using a subscript that was added in Python 3.9 (apparently that is something the type checker doesn't check for), which made the module incompatible with Python 3.8. If you are using Python 3.9 or higher a version check will switch to the more specific typing.
