@@ -8,11 +8,12 @@ import enum
 import typing
 import unittest
 
-from extract_msg.constants import PYTPFLOATINGTIME_START
+from extract_msg.constants import NULL_DATE, PYTPFLOATINGTIME_START
 from extract_msg.enums import ErrorCodeType, PropertyFlags
 from extract_msg.properties.prop import (
         createProp, FixedLengthProp, VariableLengthProp
     )
+from extract_msg.utils import fromTimeStamp
 
 
 # List of tuples that contain a property string with data to check for. This
@@ -138,6 +139,42 @@ _propChecks = [
         0x000B,
         PropertyFlags.MANDATORY,
         False
+    ),
+    (
+        'Int64',
+        b'\x14\x00\x01\x02\x01\x00\x00\x00\x01\x02\x03\x04\x05\x06\x07\x08',
+        FixedLengthProp,
+        '02010014',
+        0x0014,
+        PropertyFlags.MANDATORY,
+        0x807060504030201
+    ),
+    (
+        'Time',
+        b'\x40\x00\x01\x02\x01\x00\x00\x00\x00\x80\x3E\xD5\xDE\xB1\x9D\x01',
+        FixedLengthProp,
+        '02010040',
+        0x0040,
+        PropertyFlags.MANDATORY,
+        fromTimeStamp(0)
+    ),
+    (
+        'Null Time 1',
+        b'\x40\x00\x01\x02\x01\x00\x00\x00\x00\x52\x13\xF6\xB3\xE5\xB2\x0C',
+        FixedLengthProp,
+        '02010040',
+        0x0040,
+        PropertyFlags.MANDATORY,
+        NULL_DATE
+    ),
+    (
+        'Null Time 2',
+        b'\x40\x00\x01\x02\x01\x00\x00\x00\x00\x40\xDD\xA3\x57\x45\xB3\x0C',
+        FixedLengthProp,
+        '02010040',
+        0x0040,
+        PropertyFlags.MANDATORY,
+        NULL_DATE
     ),
 ]
 
