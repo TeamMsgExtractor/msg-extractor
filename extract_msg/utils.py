@@ -315,7 +315,7 @@ def findWk(path = None):
     raise ExecutableNotFound('Could not find wkhtmltopdf.')
 
 
-def fromTimeStamp(stamp : int) -> datetime.datetime:
+def fromTimeStamp(stamp : float) -> datetime.datetime:
     """
     Returns a datetime from the UTC timestamp given the current timezone.
     """
