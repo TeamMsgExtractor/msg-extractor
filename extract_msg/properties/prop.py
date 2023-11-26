@@ -9,6 +9,7 @@ __all__ = [
 
     # Functions:
     'createProp',
+    'createNewProp',
 ]
 
 
@@ -27,7 +28,29 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
+def createNewProp(name : str):
+    """
+    Creates a blank property using the specified name.
+
+    :param name: An 8 character hex string containing the property ID and type.
+
+    :raises TypeError: A type other than a str was given.
+    :raises ValueError: The string was not 8 hex characters.
+    :raises ValueError: An invalid property type was given.
+    """
+    if not isinstance(name, str):
+        raise TypeError(':param name: MUST be a str.')
+    if len(name) != 8:
+        raise ValueError(':param name: MUST be 8 characters.')
+    return createProp(bytes.fromhex(name)[::-1] + b'\x00' * 12)
+
+
 def createProp(data : bytes) -> PropBase:
+    """
+    Creates an instance of PropBase from the specified bytes.
+
+    If the prop type is not recognized, a VariableLengthProp will be created.
+    """
     temp = constants.st.ST2.unpack(data)[0]
     if temp in constants.FIXED_LENGTH_PROPS:
         return FixedLengthProp(data)

@@ -8,10 +8,13 @@ import enum
 import typing
 import unittest
 
-from extract_msg.constants import NULL_DATE, PYTPFLOATINGTIME_START
+from extract_msg.constants import (
+        FIXED_LENGTH_PROPS_STRING, NULL_DATE, PYTPFLOATINGTIME_START,
+        VARIABLE_LENGTH_PROPS_STRING
+    )
 from extract_msg.enums import ErrorCodeType, PropertyFlags
 from extract_msg.properties.prop import (
-        createProp, FixedLengthProp, VariableLengthProp
+        createNewProp, createProp, FixedLengthProp, VariableLengthProp
     )
 from extract_msg.utils import fromTimeStamp
 
@@ -180,6 +183,11 @@ _propChecks = [
 
 
 class PropTests(unittest.TestCase):
+    def testCreateNewProps(self):
+        for type_ in FIXED_LENGTH_PROPS_STRING + VARIABLE_LENGTH_PROPS_STRING:
+            with self.subTest(f'Create New Prop {type_}.'):
+                createNewProp('0100' + type_)
+
     def testCreateProps(self):
         for entry in _propChecks:
             with self.subTest(f'Prop Test {entry[0]}.'):
