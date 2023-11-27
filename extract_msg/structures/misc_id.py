@@ -189,7 +189,7 @@ class ServerID:
         self.__rawData = data
         self.__folderID = FolderID(data[1:9])
         self.__messageID = MessageID(data[9:17])
-        self.__instance = constants.st.STUI32.unpack(data[17:21])[0]
+        self.__instance = constants.st.ST_LE_UI32.unpack(data[17:21])[0]
 
     def __bytes__(self) -> bytes:
         return self.toBytes()
