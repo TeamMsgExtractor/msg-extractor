@@ -50,6 +50,7 @@ from typing import (
 
 from . import ps, re, st
 from ..enums import SaveType
+from ..null_date import NullDate
 
 
 _T = TypeVar('_T')
@@ -231,7 +232,10 @@ REFUSED_CLASS_TYPES : Final[Tuple[Tuple[str, str], ...]] = (
 )
 
 PYTPFLOATINGTIME_START : Final[datetime] = datetime(1899, 12, 30)
-NULL_DATE : Final[datetime] = datetime(4500, 8, 31, 23, 59)
+# Do modifications before assigning to the constant.
+_tmp = NullDate(4500, 8, 31, 23, 59)
+_tmp.filetime = 915046235400000000
+NULL_DATE : Final[NullDate] = _tmp
 
 # Constants used for argparse stuff.
 KNOWN_FILE_FLAGS : Final[Tuple[str, ...]] = (

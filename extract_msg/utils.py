@@ -258,7 +258,7 @@ def filetimeToDatetime(rawTime : int) -> datetime.datetime:
 
     Some values have specialized meanings, listed below:
         915151392000000000: December 31, 4500, representing a null time. Returns
-            extract_msg.constants.NULL_DATE.
+            an instance of extract_msg.null_date.NullDate.
         915046235400000000: 23:59 on August 31, 4500, representing a null time.
             Returns extract_msg.constants.NULL_DATE.
     """
@@ -270,9 +270,11 @@ def filetimeToDatetime(rawTime : int) -> datetime.datetime:
         elif rawTime == 915151392000000000:
             # So this is actually a different null date, specifically
             # supposed to be December 31, 4500, but it's weird that the
-            # same spec has 2 different ones, so we just return the same
-            # one for both.
-            return constants.NULL_DATE
+            # same spec has 2 different ones. It's "the last valid date."
+            from .null_date import NullDate
+            date = NullDate(4500, 12, 31, 23, 59)
+            date.filetime = rawTime
+            return date
         elif rawTime == 915046235400000000:
             return constants.NULL_DATE
         else:
