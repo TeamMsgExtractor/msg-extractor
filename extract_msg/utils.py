@@ -718,7 +718,7 @@ def parseType(_type : int, stream : Union[int, bytes], encoding : str, extras : 
     elif _type == 0x0005:  # PtypFloating64
         return constants.st.ST_LE_F64.unpack(value)[0]
     elif _type == 0x0006:  # PtypCurrency
-        return decimal.Decimal((constants.st.ST_LE_I64.unpack(value))[0]) / 10000.0
+        return decimal.Decimal((constants.st.ST_LE_I64.unpack(value))[0]) / 10000
     elif _type == 0x0007:  # PtypFloatingTime
         value = constants.st.ST_LE_F64.unpack(value)[0]
         return constants.PYTPFLOATINGTIME_START + datetime.timedelta(days = value)

@@ -155,7 +155,7 @@ class FixedLengthProp(PropBase):
         elif _type == 0x0005: # PtypFloating64
             value = constants.st.ST_LE_F64.unpack(value)[0]
         elif _type == 0x0006: # PtypCurrency
-            value = decimal.Decimal((constants.st.ST_LE_I64.unpack(value))[0]) / 10000.0
+            value = decimal.Decimal((constants.st.ST_LE_I64.unpack(value))[0]) / 10000
         elif _type == 0x0007: # PtypFloatingTime
             value = constants.st.ST_LE_F64.unpack(value)[0]
             return constants.PYTPFLOATINGTIME_START + datetime.timedelta(days = value)
@@ -191,7 +191,6 @@ class FixedLengthProp(PropBase):
         :raises ValueError: An issue occured where the value was not converted
             to bytes.
         """
-
         # First convert the value back to bytes in some way.
         value = self.value
         if self.type == 0x0001:
