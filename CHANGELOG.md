@@ -13,7 +13,7 @@
 * Made `FieldInfo` writable, however it can no longer be directly converted to bytes since it requires additional information outside of itself to convert to bytes. It still retains a `toBytes` method, however it requires an argument for the additional data.
 * Fixed `UnsupportedAttachment` inverting the `skipNotImplemented` keyword argument.
 * Fixed `DMPaperSize` not being a subclass of `Enum`.
-* Extended values for DMPaperSize.
+* Extended values for `DMPaperSize`.
 * Removed unneeded structs.
 * Fixed exports for `extract_msg.constants.st`.
 * Updated various parts of the documentation to improve it and make it more consistent.
@@ -21,6 +21,11 @@
 * Removed "TODO" markers on `OleStreamStruct` and finalized it to only handle the OLEStream for embedded objects.
 * Fixed type annotations for `extract_msg.utils.fromTimeStamp`.
 * Added new function `extract_msg.properties.prop.createNewProp`. This function allows a new property to be created with default data based on the name. The name MUST be an 8 character hex string, the first 4 characters being the value for the property ID and the second 4 being the value for the type.
+* Fixed `VariableLengthProp.reservedFlags` returning the wrong type.
+* Adjusted many of the property structs to make it easier to use them for packing.
+* Renamed some of the property structs to be more informative.
+* Fixed `ServerID` using the wrong struct (would have thrown an exception for not having enough data).
+* Unified signing for integer properties. All integer properties are considered unsigned by default when read directly from the MSG file, however specific property accessors may convert to signed if the property is specifically intended to be so. This does not necessarily include properties that are *stored* as integers but have a value that is not an integer, like `PtypCurrency`.
 
 **v0.46.2**
 * Adjusted typing information on regular expressions. They were using a subscript that was added in Python 3.9 (apparently that is something the type checker doesn't check for), which made the module incompatible with Python 3.8. If you are using Python 3.9 or higher a version check will switch to the more specific typing.

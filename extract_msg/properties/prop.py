@@ -17,7 +17,7 @@ import abc
 import datetime
 import logging
 
-from typing import Any
+from typing import Any, Dict, Type
 
 from .. import constants
 from ..enums import ErrorCode, ErrorCodeType, PropertyFlags
@@ -51,7 +51,7 @@ def createProp(data : bytes) -> PropBase:
 
     If the prop type is not recognized, a VariableLengthProp will be created.
     """
-    temp = constants.st.ST2.unpack(data)[0]
+    temp = constants.st.ST_PROP_BASE.unpack(data[:8])[0]
     if temp in constants.FIXED_LENGTH_PROPS:
         return FixedLengthProp(data)
     else:
@@ -67,16 +67,18 @@ class PropBase(abc.ABC):
     """
 
     def __init__(self, data : bytes):
-        self.__rawData = data
         self.__name = data[3::-1].hex().upper()
-        self.__type, flags = constants.st.ST2.unpack(data)
+        self.__type, self.__pID, flags = constants.st.ST_PROP_BASE.unpack(data[:8])
         self.__flags = PropertyFlags(flags)
 
     def __bytes__(self) -> bytes:
         return self.toBytes()
 
+    @abc.abstractmethod
     def toBytes(self) -> bytes:
-        return self.__rawData
+        """
+        Converts the property into a string of 16 bytes.
+        """
 
     @property
     def flags(self) -> PropertyFlags:
@@ -85,12 +87,26 @@ class PropBase(abc.ABC):
         """
         return self.__flags
 
+    @flags.setter
+    def flags(self, value : PropertyFlags):
+        if not isinstance(value, PropertyFlags):
+            raise TypeError(':property flags: MUST be an instance of PropertyFlags.')
+
+        self.__flags = value
+
     @property
     def name(self) -> str:
         """
-        Property "name".
+        Hexadecimal representation of the property ID followed by the type.
         """
         return self.__name
+
+    @property
+    def propertyID(self) -> int:
+        """
+        The property ID for this property.
+        """
+        return self.__pID
 
     @property
     def type(self) -> int:
@@ -110,7 +126,7 @@ class FixedLengthProp(PropBase):
 
     def __init__(self, data : bytes):
         super().__init__(data)
-        self.__value = self._parseType(self.type, constants.st.STFIX.unpack(data)[0], data)
+        self.__value = self._parseType(self.type, data[8:], data)
 
     def _parseType(self, _type : int, stream : bytes, raw : bytes) -> Any:
         """
@@ -130,9 +146,9 @@ class FixedLengthProp(PropBase):
                 logger.warning('Property type is PtypNull, but is not equal to 0.')
             value = None
         elif _type == 0x0002: # PtypInteger16
-            value = constants.st.ST_LE_I16.unpack(value[:2])[0]
+            value = constants.st.ST_LE_UI16.unpack(value[:2])[0]
         elif _type == 0x0003: # PtypInteger32
-            value = constants.st.ST_LE_I32.unpack(value[:4])[0]
+            value = constants.st.ST_LE_UI32.unpack(value[:4])[0]
         elif _type == 0x0004: # PtypFloating32
             value = constants.st.ST_LE_F32.unpack(value[:4])[0]
         elif _type == 0x0005: # PtypFloating64
@@ -158,7 +174,7 @@ class FixedLengthProp(PropBase):
         elif _type == 0x000B:  # PtypBoolean
             value = constants.st.ST_LE_UI16.unpack(value[:2])[0] != 0
         elif _type == 0x0014:  # PtypInteger64
-            value = constants.st.ST_LE_I64.unpack(value)[0]
+            value = constants.st.ST_LE_UI64.unpack(value)[0]
         elif _type == 0x0040:  # PtypTime
             rawTime = constants.st.ST_LE_UI64.unpack(value)[0]
             try:
@@ -167,12 +183,73 @@ class FixedLengthProp(PropBase):
                 logger.exception(raw)
         return value
 
+    def toBytes(self) -> bytes:
+        return b''
+
+    @property
+    def signedValue(self) -> Any:
+        """
+        A signed representation of the value.
+
+        Setting the value through this property will convert it if necessary
+        before using the default value setter.
+
+        :raises struct.error: The value was out of range when setting.
+        """
+        if self.type == 0x0002:
+            return constants.st.ST_SBO_I16.unpack(constants.st.ST_SBO_UI16.pack(self.value))[0]
+        if self.type == 0x0003:
+            return constants.st.ST_SBO_I32.unpack(constants.st.ST_SBO_UI32.pack(self.value))[0]
+        if self.type == 0x0014:
+            return constants.st.ST_SBO_I64.unpack(constants.st.ST_SBO_UI64.pack(self.value))[0]
+
+        # If not any of those types, return without modification.
+        return self.value
+
+    @signedValue.setter
+    def signedValue(self, value : Any) -> None:
+        if self.type == 0x0002:
+            value = constants.st.ST_SBO_UI16.unpack(constants.st.ST_SBO_I16.pack(value))[0]
+        if self.type == 0x0003:
+            value = constants.st.ST_SBO_UI32.unpack(constants.st.ST_SBO_I32.pack(value))[0]
+        if self.type == 0x0014:
+            value = constants.st.ST_SBO_UI64.unpack(constants.st.ST_SBO_I64.pack(value))[0]
+
+        self.value = value
+
     @property
     def value(self) -> Any:
         """
         Property value.
         """
         return self.__value
+
+    @value.setter
+    def value(self, value : Any) -> None:
+        if self.type == 0x0000:
+            if not isinstance(value, bytes):
+                raise TypeError(':property value: MUST be bytes when type is 0x0000.')
+            if len(value) != 8:
+                raise ValueError(':property value: MUST be 8 bytes when type is 0x0000.')
+        elif self.type == 0x0001:
+            raise TypeError(':property value: cannot be set when type is 0x0001.')
+        elif self.type in (0x0002, 0x0003, 0x0014):
+            if not isinstance(value, int):
+                raise TypeError(f':property value: MUST be an int when type is 0x{self.type:04X}')
+            if value < 0:
+                raise ValueError(f':property value: MUST be positive when type is 0x{self.type:04X}.')
+            if self.type == 0x0002:
+                if value > 0xFFFF:
+                    raise ValueError(':property value: MUST be less than 0x10000 when type is 0x0002.')
+            elif self.type == 0x0003:
+                if value > 0xFFFF:
+                    raise ValueError(':property value: MUST be less than 0x100000000 when type is 0x0003.')
+            elif self.type == 0x0014:
+                if value > 0xFFFF:
+                    raise ValueError(':property value: MUST be less than 0x10000000000000000 when type is 0x0014.')
+        # TODO
+
+        self.__value = value
 
 
 
@@ -183,7 +260,7 @@ class VariableLengthProp(PropBase):
 
     def __init__(self, data : bytes):
         super().__init__(data)
-        self.__length, self.__reserved = constants.st.STVAR.unpack(data)
+        self.__length, self.__reserved = constants.st.ST_PROP_VAR.unpack(data[8:])
         if self.type == 0x001E:
             self.__realLength = self.__length - 1
         elif self.type == 0x001F:
@@ -203,19 +280,22 @@ class VariableLengthProp(PropBase):
         else:
             self.__realLength = self.__length
 
-    @property
-    def length(self) -> int:
-        """
-        The length field of the variable length property.
-        """
-        return self.__length
+    def toBytes(self) -> bytes:
+        ret = constants.st.ST_PROP_BASE.pack(self.type, self.propertyID, self.flags)
+        ret += constants.st.ST_PROP_VAR.pack()
 
     @property
-    def realLength(self) -> int:
+    def size(self) -> int:
         """
-        The ACTUAL length of the stream that this property corresponds to.
+        The size of the data the property corresponds to.
+
+        For multiple properties, this is
         """
         return self.__realLength
+
+    @size.setter
+    def size(self, value : int) -> None:
+        pass #TODO
 
     @property
     def reservedFlags(self) -> int:
@@ -223,3 +303,14 @@ class VariableLengthProp(PropBase):
         The reserved flags field of the variable length property.
         """
         return self.__reserved
+
+    @reservedFlags.setter
+    def reservedFlags(self, value : int) -> None:
+        if not isinstance(value, int):
+            raise TypeError(':property reservedFlags: MUST be an int.')
+        if value < 0:
+            raise ValueError(':property reservedFlags: MUST be positive.')
+        if value > 0xFFFFFFFF:
+            raise ValueError(':property reservedFlags: MUST be less than 0x100000000.')
+
+        self.__reserved = value

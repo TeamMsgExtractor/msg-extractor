@@ -23,8 +23,7 @@ from extract_msg.utils import fromTimeStamp
 # allows less lines needed for all the tests. The items are, in this order:
 # name, source bytes, output class, output name, output type, output flags,
 # extras. If  the class is FixedLengthProp, extras will be a single item for
-# the value, otherwise it will be the values for length, real length, and
-# reserved flags.
+# the value, otherwise it will be the values for size and reserved flags.
 _propChecks = [
     (
         'Unspecified',
@@ -209,6 +208,5 @@ class PropTests(unittest.TestCase):
                         self.assertEqual(prop.value, entry[6])
                 else:
                     prop = typing.cast(VariableLengthProp, prop)
-                    self.assertEqual(prop.length, entry[6])
-                    self.assertEqual(prop.realLength, entry[7])
-                    self.assertEqual(prop.reservedFlags, entry[8])
+                    self.assertEqual(prop.size, entry[6])
+                    self.assertEqual(prop.reservedFlags, entry[7])
