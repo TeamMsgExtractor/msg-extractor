@@ -15,6 +15,7 @@ __all__ = [
 
 import abc
 import datetime
+import decimal
 import logging
 
 from typing import Any, Dict, Type
@@ -154,7 +155,7 @@ class FixedLengthProp(PropBase):
         elif _type == 0x0005: # PtypFloating64
             value = constants.st.ST_LE_F64.unpack(value)[0]
         elif _type == 0x0006: # PtypCurrency
-            value = (constants.st.ST_LE_I64.unpack(value))[0] / 10000.0
+            value = decimal.Decimal((constants.st.ST_LE_I64.unpack(value))[0]) / 10000.0
         elif _type == 0x0007: # PtypFloatingTime
             value = constants.st.ST_LE_F64.unpack(value)[0]
             return constants.PYTPFLOATINGTIME_START + datetime.timedelta(days = value)
@@ -184,7 +185,60 @@ class FixedLengthProp(PropBase):
         return value
 
     def toBytes(self) -> bytes:
-        return b''
+        """
+        Converts the property into bytes.
+
+        :raises ValueError: An issue occured where the value was not converted
+            to bytes.
+        """
+
+        # First convert the value back to bytes in some way.
+        value = self.value
+        if self.type == 0x0001:
+            value = b'\x00\x00\x00\x00\x00\x00\x00\x00'
+        elif self.type == 0x0002:
+            value = constants.st.ST_LE_UI16.pack(value) + b'\x00' * 6
+        elif self.type == 0x0003 or self.type == 0x000A:
+            value = constants.st.ST_LE_UI32.pack(value) + b'\x00' * 4
+        elif self.type == 0x0004:
+            value = constants.st.ST_LE_F32.pack(value) + b'\x00' * 4
+        elif self.type == 0x0005:
+            value = constants.st.ST_LE_F64.pack(value)
+        elif self.type == 0x0006:
+            value = constants.st.ST_LE_I64.pack(int(value * 10000))
+        elif self.type == 0x0007:
+            value = constants.st.ST_LE_F64.pack(
+                (value - constants.PYTPFLOATINGTIME_START).total_seconds / 86400
+            )
+        elif self.type == 0x000B:
+            value = (b'\x01' + b'\x00' * 7) if value else (b'\x00' * 8)
+        elif self.type == 0x0014:
+            value = constants.st.ST_LE_UI64.pack(value)
+        elif self.type == 0x0040:
+            if hasattr(value, 'filetime') and value.filetime is not None:
+                value = value.filetime
+            elif isinstance(value, datetime.datetime):
+                try:
+                    value = value.timestamp()
+                except OSError:
+                    # Can't convert to a timestamp, so try to convert manually.
+                    value = decimal.Decimal((value - datetime.datetime(1601, 1, 1)).total_seconds())
+                else:
+                    value = decimal.Decimal(value)
+                    value += 11644473600
+
+                # Here we now have a Decimal value. We want to convert it to an
+                # int representing the 100 nanosecond intervals since the 0
+                # date.
+                value = int(value * 10000000)
+
+            if isinstance(value, int):
+                value = constants.st.ST_LE_UI64.pack(value)
+
+        if not isinstance(value, bytes):
+            raise ValueError(f'Failed to convert value to bytes (expected bytes at end, got {type(value)}). Please report to developer.')
+
+        return constants.st.ST_PROP_BASE.pack(self.type, self.propertyID, self.flags) + value
 
     @property
     def signedValue(self) -> Any:

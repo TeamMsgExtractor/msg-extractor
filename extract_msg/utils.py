@@ -52,6 +52,7 @@ import argparse
 import collections
 import copy
 import datetime
+import decimal
 import email.header
 import email.message
 import email.policy
@@ -269,8 +270,10 @@ def filetimeToDatetime(rawTime : int) -> datetime.datetime:
             return olefile.olefile.filetime2datetime(rawTime)
         elif rawTime == 915151392000000000:
             # So this is actually a different null date, specifically
-            # supposed to be December 31, 4500, but it's weird that the
-            # same spec has 2 different ones. It's "the last valid date."
+            # supposed to be December 31, 4500, but it's weird that the same
+            # spec has 2 different ones. It's "the last valid date." Checking
+            # the value of this though, it looks like it's actually one minute
+            # further in the future, according to the datetime module.
             from .null_date import NullDate
             date = NullDate(4500, 12, 31, 23, 59)
             date.filetime = rawTime
@@ -715,7 +718,7 @@ def parseType(_type : int, stream : Union[int, bytes], encoding : str, extras : 
     elif _type == 0x0005:  # PtypFloating64
         return constants.st.ST_LE_F64.unpack(value)[0]
     elif _type == 0x0006:  # PtypCurrency
-        return (constants.st.ST_LE_I64.unpack(value)[0]) / 10000.0
+        return decimal.Decimal((constants.st.ST_LE_I64.unpack(value))[0]) / 10000.0
     elif _type == 0x0007:  # PtypFloatingTime
         value = constants.st.ST_LE_F64.unpack(value)[0]
         return constants.PYTPFLOATINGTIME_START + datetime.timedelta(days = value)
