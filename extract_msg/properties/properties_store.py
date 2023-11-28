@@ -83,10 +83,10 @@ class PropertiesStore:
 
         if type_ == PropertiesType.MESSAGE:
             skip = 32
-            self.__nrid, self.__naid, self.__rc, self.__ac = constants.st.ST1.unpack(data[:24])
+            self.__nrid, self.__naid, self.__rc, self.__ac = constants.st.ST_PROPSTORE_HEADER.unpack(data[:24])
         elif type_ == PropertiesType.MESSAGE_EMBED:
             skip = 24
-            self.__nrid, self.__naid, self.__rc, self.__ac = constants.st.ST1.unpack(data[:24])
+            self.__nrid, self.__naid, self.__rc, self.__ac = constants.st.ST_PROPSTORE_HEADER.unpack(data[:24])
         else:
             skip = 8
         streams = divide(self.__rawData[skip:], 16)
@@ -307,7 +307,7 @@ class PropertiesStore:
 
             # Add additional fields depending on type.
             if self.__type is not PropertiesType.ATTACHMENT:
-                ret += constants.st.ST1.pack(self.__nrid, self.__naid, self.__rc, self.__ac)
+                ret += constants.st.ST_PROPSTORE_HEADER.pack(self.__nrid, self.__naid, self.__rc, self.__ac)
                 if self.__type is PropertiesType.MESSAGE:
                     ret += b'\x00' * 8
 

@@ -62,7 +62,7 @@ class Named:
             guids = tuple([None, constants.ps.PS_MAPI, constants.ps.PS_PUBLIC_STRINGS] + [bytesToGuid(x) for x in divide(guidStream, 16)])
             entries : List[Dict[str, Any]]= []
             for rawStream in divide(entryStream, 8):
-                tmp = constants.st.STNP_ENT.unpack(rawStream)
+                tmp = constants.st.ST_NP_ENT.unpack(rawStream)
                 entry = {
                     'id': tmp[0],
                     'pid': tmp[2],

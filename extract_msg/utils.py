@@ -705,21 +705,21 @@ def parseType(_type : int, stream : Union[int, bytes], encoding : str, extras : 
             logger.warning('Property type is PtypNull, but is not equal to 0.')
         return None
     elif _type == 0x0002:  # PtypInteger16
-        return constants.st.STI16.unpack(value)[0]
+        return constants.st.ST_LE_UI16.unpack(value[:2])[0]
     elif _type == 0x0003:  # PtypInteger32
-        return constants.st.STI32.unpack(value)[0]
+        return constants.st.ST_LE_UI32.unpack(value[:4])[0]
     elif _type == 0x0004:  # PtypFloating32
-        return constants.st.STF32.unpack(value)[0]
+        return constants.st.ST_LE_F32.unpack(value[:4])[0]
     elif _type == 0x0005:  # PtypFloating64
-        return constants.st.STF64.unpack(value)[0]
+        return constants.st.ST_LE_F64.unpack(value)[0]
     elif _type == 0x0006:  # PtypCurrency
-        return (constants.st.STI64.unpack(value)[0]) / 10000.0
+        return (constants.st.ST_LE_I64.unpack(value)[0]) / 10000.0
     elif _type == 0x0007:  # PtypFloatingTime
-        value = constants.st.STF64.unpack(value)[0]
+        value = constants.st.ST_LE_F64.unpack(value)[0]
         return constants.PYTPFLOATINGTIME_START + datetime.timedelta(days = value)
     elif _type == 0x000A:  # PtypErrorCode
         from .enums import ErrorCode, ErrorCodeType
-        value = constants.st.STUI32.unpack(value)[0]
+        value = constants.st.ST_LE_UI32.unpack(value[:4])[0]
         try:
             value = ErrorCodeType(value)
         except ValueError:
@@ -733,7 +733,7 @@ def parseType(_type : int, stream : Union[int, bytes], encoding : str, extras : 
                 pass
         return value
     elif _type == 0x000B:  # PtypBoolean
-        return constants.st.ST_LE_UI64.unpack(value)[0] == 1
+        return constants.st.ST_LE_UI16.unpack(value[:2])[0] != 0
     elif _type == 0x000D:  # PtypObject/PtypEmbeddedTable
         # TODO parsing for this.
         # Wait, that's the extension for an attachment folder, so parsing this
@@ -741,7 +741,7 @@ def parseType(_type : int, stream : Union[int, bytes], encoding : str, extras : 
         # without support for this.
         raise NotImplementedError('Current version of extract-msg does not support the parsing of PtypObject/PtypEmbeddedTable in this function.')
     elif _type == 0x0014:  # PtypInteger64
-        return constants.st.STI64.unpack(value)[0]
+        return constants.st.ST_LE_UI64.unpack(value)[0]
     elif _type == 0x001E:  # PtypString8
         return value.decode(encoding)
     elif _type == 0x001F:  # PtypString
@@ -781,7 +781,7 @@ def parseType(_type : int, stream : Union[int, bytes], encoding : str, extras : 
             return ret
         elif _type == 0x1102: # PtypMultipleBinary
             ret = copy.deepcopy(extras)
-            lengths = tuple(constants.st.STUI32.unpack(stream[pos*8:(pos+1)*8])[0] for pos in range(len(stream) // 8))
+            lengths = tuple(constants.st.ST_LE_UI32.unpack(stream[pos*8:pos*8+4])[0] for pos in range(len(stream) // 8))
             lengthLengths = len(lengths)
             if lengthLengths > lengthExtras:
                 logger.warning(f'Error while parsing multiple type. Expected {lengthLengths} stream{"s" if lengthLengths != 1 else ""}, got {lengthExtras}. Ignoring.')
@@ -793,18 +793,18 @@ def parseType(_type : int, stream : Union[int, bytes], encoding : str, extras : 
             if stream != len(extras):
                 logger.warning(f'Error while parsing multiple type. Expected {stream} entr{"y" if stream == 1 else "ies"}, got {len(extras)}. Ignoring.')
             if _type == 0x1002: # PtypMultipleInteger16
-                return tuple(constants.st.STMI16.unpack(x)[0] for x in extras)
+                return tuple(constants.st.ST_LE_UI16.unpack(x)[0] for x in extras)
             if _type == 0x1003: # PtypMultipleInteger32
-                return tuple(constants.st.STMI32.unpack(x)[0] for x in extras)
+                return tuple(constants.st.ST_LE_UI32.unpack(x)[0] for x in extras)
             if _type == 0x1004: # PtypMultipleFloating32
-                return tuple(constants.st.STMF32.unpack(x)[0] for x in extras)
+                return tuple(constants.st.ST_LE_F32.unpack(x)[0] for x in extras)
             if _type == 0x1005: # PtypMultipleFloating64
-                return tuple(constants.st.STMF64.unpack(x)[0] for x in extras)
+                return tuple(constants.st.ST_LE_F64.unpack(x)[0] for x in extras)
             if _type == 0x1007: # PtypMultipleFloatingTime
-                values = tuple(constants.st.STMF64.unpack(x)[0] for x in extras)
+                values = (constants.st.ST_LE_F64.unpack(x)[0] for x in extras)
                 return tuple(constants.PYTPFLOATINGTIME_START + datetime.timedelta(days = amount) for amount in values)
             if _type == 0x1014: # PtypMultipleInteger64
-                return tuple(constants.st.STMI64.unpack(x)[0] for x in extras)
+                return tuple(constants.st.ST_LE_UI64.unpack(x)[0] for x in extras)
             if _type == 0x1040: # PtypMultipleTime
                 return tuple(filetimeToUtc(constants.st.ST_LE_UI64.unpack(x)[0]) for x in extras)
             if _type == 0x1048: # PtypMultipleGuid
@@ -1007,7 +1007,7 @@ def unsignedToSignedInt(uInt : int) -> int:
         raise ValueError('Value is too large.')
     if uInt < 0:
         raise ValueError('Value is already signed.')
-    return constants.st.STI32.unpack(constants.st.STUI32.pack(uInt))[0]
+    return constants.st.ST_SBO_I32.unpack(constants.st.ST_SBO_UI32.pack(uInt))[0]
 
 
 def unwrapMsg(msg : MSGFile) -> Dict[str, List]:

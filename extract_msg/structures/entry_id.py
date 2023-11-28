@@ -501,7 +501,7 @@ class PermanentEntryID(EntryID):
     def __init__(self, data : bytes):
         super().__init__(data)
         reader = BytesReader(data)
-        unpacked = reader.readStruct(constants.st.STPEID)
+        unpacked = reader.readStruct(constants.st.ST_PEID)
         if unpacked[0] != 0:
             raise TypeError(f'Not a PermanentEntryID (expected 0, got {unpacked[0]}).')
         self.__displayTypeString = DisplayType(unpacked[2])
