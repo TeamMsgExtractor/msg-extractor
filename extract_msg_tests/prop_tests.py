@@ -4,6 +4,7 @@ __all__ = [
 
 
 import datetime
+import decimal
 import enum
 import typing
 import unittest
@@ -86,7 +87,7 @@ _propChecks = [
         '02010006',
         0x0006,
         PropertyFlags.MANDATORY,
-        0.0256
+        decimal.Decimal(0.0256)
     ),
     (
         'Floating Time',
@@ -200,7 +201,7 @@ class PropTests(unittest.TestCase):
 
                 # Check which class the prop is to know what checks to use.
                 if isinstance(prop, FixedLengthProp):
-                    if isinstance(prop.value, float):
+                    if isinstance(prop.value, (float, decimal.Decimal)):
                         self.assertAlmostEqual(prop.value, entry[6])
                     elif isinstance(prop.value, enum.Enum) or prop.type == 1:
                         self.assertIs(prop.value, entry[6])
