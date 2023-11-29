@@ -296,14 +296,15 @@ class FixedLengthProp(PropBase):
 
     @value.setter
     def value(self, value : Any) -> None:
-        if self.type == 0x0000:
+        # Validate the value and perform necessary conversions.
+        if self.type == 0x0000: # Unspecified.
             if not isinstance(value, bytes):
                 raise TypeError(':property value: MUST be bytes when type is 0x0000.')
             if len(value) != 8:
                 raise ValueError(':property value: MUST be 8 bytes when type is 0x0000.')
-        elif self.type == 0x0001:
+        elif self.type == 0x0001: # Null.
             raise TypeError(':property value: cannot be set when type is 0x0001.')
-        elif self.type in (0x0002, 0x0003, 0x0014):
+        elif self.type in (0x0002, 0x0003, 0x0014): # Ints.
             if not isinstance(value, int):
                 raise TypeError(f':property value: MUST be an int when type is 0x{self.type:04X}')
             if value < 0:
@@ -317,6 +318,40 @@ class FixedLengthProp(PropBase):
             elif self.type == 0x0014:
                 if value > 0xFFFF:
                     raise ValueError(':property value: MUST be less than 0x10000000000000000 when type is 0x0014.')
+        elif self.type == 0x0004 or self.type == 0x0005: # Float/Double.
+            if not isinstance(value, float):
+                try:
+                    value = float(value)
+                except Exception:
+                    raise TypeError(f':property value: MUST be float or convertable to float when type is 0x{self.type:04X}.')
+        elif self.type == 0x0006:
+            if not isinstance(value, decimal.Decimal):
+                try:
+                    value = decimal.Decimal(value)
+                except decimal.InvalidOperation:
+                    raise ValueError(':property value: MUST be Decimal or convertable to Decimal when type is 0x0006.')
+                except TypeError:
+                    raise TypeError(':property value: MUST be Decimal or convertable to Decimal when type is 0x0006.')
+            if (value * 10000) > 0xFFFFFFFFFFFFFFFF:
+                raise ValueError('Decimal value is too large (must be less than 0x10000000000000000 when multiplied by 10000).')
+        elif self.type == 0x0007 or self.type == 0x0040:
+            if not isinstance(value, datetime.datetime):
+                raise TypeError(f':property value: MUST be an instance of datetime when type is 0x{self.type:04X}.')
+        elif self.type == 0x000A:
+            if not isinstance(value, int):
+                raise TypeError(':property value: MUST be an int or instance of ErrorCodeType when type is 0x000A.')
+            if not isinstance(value, ErrorCodeType):
+                if value > 0xFFFFFFFF:
+                    raise ValueError(':property value: MUST be less than 0x100000000 when type is 0x000A and the value is not an instance of ErrorCodeType.')
+                # Convert only if possible.
+                try:
+                    value = ErrorCodeType(value)
+                except ValueError:
+                    # Ignore it if the conversion isn't possible.
+                    pass
+        elif self.type == 0x000B:
+            if not isinstance(value, bool):
+                raise TypeError(f':property value: MUST be bool when type is 0x{self.type:04X}.')
         # TODO
 
         self.__value = value
