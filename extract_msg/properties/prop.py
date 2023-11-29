@@ -28,6 +28,20 @@ from ..utils import filetimeToDatetime
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
+# Define default values to use when creating each prop type. Only define a value
+# if it would not be all null bytes.
+_DEFAULT_PROP_VALS : Dict[str, bytes] = {
+    '000D': b'\x00\x00\x00\x00\xFF\xFF\xFF\xFF\x00\x00\x00\x00',
+    '001E': b'\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00',
+    '001F': b'\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00',
+    '0048': b'\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00',
+    '0000': b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+    '0000': b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+    '0000': b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+    '0000': b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+    '0000': b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+}
+
 
 def createNewProp(name : str):
     """
@@ -43,7 +57,10 @@ def createNewProp(name : str):
         raise TypeError(':param name: MUST be a str.')
     if len(name) != 8:
         raise ValueError(':param name: MUST be 8 characters.')
-    return createProp(bytes.fromhex(name)[::-1] + b'\x00' * 12)
+
+    propVal = bytes.fromhex(name)[::-1]
+    propVal += _DEFAULT_PROP_VALS.get(name[:4], b'\x00' * 12)
+    return createProp(propVal)
 
 
 def createProp(data : bytes) -> PropBase:
@@ -207,7 +224,7 @@ class FixedLengthProp(PropBase):
             value = constants.st.ST_LE_I64.pack(int(value * 10000))
         elif self.type == 0x0007:
             value = constants.st.ST_LE_F64.pack(
-                (value - constants.PYTPFLOATINGTIME_START).total_seconds / 86400
+                (value - constants.PYTPFLOATINGTIME_START).total_seconds() / 86400
             )
         elif self.type == 0x000B:
             value = (b'\x01' + b'\x00' * 7) if value else (b'\x00' * 8)
@@ -327,28 +344,92 @@ class VariableLengthProp(PropBase):
         elif self.type in constants.MULTIPLE_16_BYTES_HEX:
             self.__realLength = self.__length // 16
         elif self.type == 0x000D:
-            self.__realLength = None
+            self.__realLength = 0xFFFFFFFF
+            # Check the value and log a warning if it is bad before fixing it.
+            if self.__length != 0xFFFFFFFF:
+                logger.warning(f'Property of type 0x000D found with length that was not 0xFFFFFFFF (got {self.__length:08X}). This will be corrected automatically.')
+                self.__length = 0xFFFFFFFF
         elif self.type == 0x0048:
             self.__realLength = 16
+            # Check the value and log a warning if it is bad before fixing it.
+            if self.__length != 0xFFFFFFFF:
+                logger.warning(f'Property of type 0x0048 found with length that was not 16 (got {self.__length}). This will be corrected automatically.')
+                self.__length = 16
+        elif self.type == 0x101E or self.type == 0x101F:
+            self.__realLength = self.__length // 4
+        elif self.type == 0x1102:
+            self.__realLength = self.__length // 8
         else:
+            if self.type in (0x00FB, 0x00FF, 0x00FE):
+                # None of these are properly implemented, but we don't want to
+                # actually raise an exception because of them. So just log the
+                # issue.
+                logger.error(f'Property type {self.type} has no documentation in [MS-OXMSG] but was found on this file. Please report this to the developer.')
             self.__realLength = self.__length
 
     def toBytes(self) -> bytes:
         ret = constants.st.ST_PROP_BASE.pack(self.type, self.propertyID, self.flags)
-        ret += constants.st.ST_PROP_VAR.pack()
+        ret += constants.st.ST_PROP_VAR.pack(self.__length, self.__reserved)
+        return ret
 
     @property
     def size(self) -> int:
         """
         The size of the data the property corresponds to.
 
-        For multiple properties, this is
+        For string streams, this is the number of characters contained. For
+        multiple properties, this is the number of entries.
+
+        When setting this, the underlying length field will be set which is a
+        manipulated value. For multiple properties of a fixed length, this will
+        be the size value multiplied by the length of the properties. For
+        multiple strings, this will be 4 times the size value. For multiple
+        binary, this will be 8 times the size value. For strings, this will be
+        the size plus 1 if non-unicode, otherwise the size plus 2. For binary,
+        this will be the size with no modification.
+
+        Size cannot be set for properties of type 0x000D and 0x0048.
+
+        :raises TypeError: Tried to set the size for a property that cannot have
+            the size changed.
+        :raises ValueError: The translated value for the size is too large when
+            setting.
         """
         return self.__realLength
 
     @size.setter
     def size(self, value : int) -> None:
-        pass #TODO
+        if not isinstance(value, int):
+            raise TypeError(':property size: MUST be an int.')
+        if value < 0:
+            raise ValueError(':property size: MUST be positive.')
+        if self.type == 0x000D or self.type == 0x0048:
+            raise TypeError(f':property size: cannot be set for 0x{self.type:04X}.')
+
+        # Convert the size to the actual length value.
+        if self.type == 0x001E:
+            length = value + 1
+        elif self.type == 0x001F:
+            length = value + 2
+        elif self.type in constants.MULTIPLE_2_BYTES_HEX:
+            length = value * 2
+        elif self.type in constants.MULTIPLE_4_BYTES_HEX:
+            length = value * 4
+        elif self.type in constants.MULTIPLE_8_BYTES_HEX:
+            length = value * 8
+        elif self.type in constants.MULTIPLE_16_BYTES_HEX:
+            length = value * 16
+        elif self.type == 0x101E or self.type == 0x101F:
+            length = value * 4
+        elif self.type == 0x1102:
+            length = value * 8
+
+        # Validate the range of the length value.
+        if length > 0xFFFFFFFF:
+            raise ValueError(f'Calculated length value is too large (max is 0xFFFFFFFF, got {length:08X}).')
+
+        self.__length = length
+        self.__realLength = value
 
     @property
     def reservedFlags(self) -> int:
