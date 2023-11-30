@@ -28,8 +28,10 @@ if TYPE_CHECKING:
 
 def _getMsgClassInfo(classType: str) -> Tuple[bool, Optional[str]]:
     """
-    Checks if the specified class type is recognized by the module. Usually used
-    for checking if a type is simply unsupported rather than unknown.
+    Checks if the specified class type is recognized by the module.
+
+    Usually used for checking if a type is simply unsupported rather than
+    unknown.
 
     Returns a tuple of two items. The first is whether it is known. If it is
     known and support is refused, the second item will be a string of the
@@ -65,8 +67,8 @@ def openMsg(path, **kwargs) -> MSGFile:
     it cannot identify what MSGFile derivitive to use. Otherwise, it will log
     the error and return a basic MSGFile instance. Default is True.
 
-    :raises UnsupportedMSGTypeError: if the type is recognized but not suppoted.
-    :raises UnrecognizedMSGTypeError: if the type is not recognized.
+    :raises UnsupportedMSGTypeError: The type is recognized but not suppoted.
+    :raises UnrecognizedMSGTypeError: The type is not recognized.
     """
     from .msg_classes import (
             AppointmentMeeting, Contact, Journal, MeetingCancellation,

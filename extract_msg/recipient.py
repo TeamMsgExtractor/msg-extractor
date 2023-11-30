@@ -79,9 +79,9 @@ class Recipient(Generic[_RT]):
 
     def existsTypedProperty(self, id, _type = None) -> Tuple[bool, int]:
         """
-        Determines if the stream with the provided id exists. The return of this
-        function is 2 values, the first being a boolean for if anything was
-        found, and the second being how many were found.
+        Determines if the stream with the provided id exists.
+
+        The return of this function is 2 values, the first being a boolean for if anything was found, and the second being how many were found.
 
         :raises ReferenceError: The associated MSGFile instance has been garbage
             collected.
@@ -256,7 +256,7 @@ class Recipient(Generic[_RT]):
         Lists the streams and or storages that exist in the attachment
         directory.
 
-        Returns the paths *excluding* the attachment directory, allowing the
+        :returns: The paths *excluding* the attachment directory, allowing the
         paths to be directly used for accessing a file.
         """
         if (msg := self.__msg()) is None:
@@ -266,95 +266,91 @@ class Recipient(Generic[_RT]):
 
     def slistDir(self, streams: bool = True, storages: bool = False) -> List[str]:
         """
-        Like listDir, except it returns the paths as strings.
+        Like :method listDir:, except it returns the paths as strings.
         """
         return ['/'.join(path) for path in self.listDir(streams, storages)]
 
     @functools.cached_property
     def account(self) -> Optional[str]:
         """
-        Returns the account of this recipient.
+        The account of this recipient.
         """
         return self.getStringStream('__substg1.0_3A00')
 
     @property
     def email(self) -> Optional[str]:
         """
-        Returns the recipient's email.
+        The recipient's email.
         """
         return self.__email
 
     @functools.cached_property
     def entryID(self) -> Optional[PermanentEntryID]:
         """
-        Returns the recipient's Entry ID.
+        The recipient's Entry ID.
         """
         return self.getStreamAs('__substg1.0_0FFF0102', PermanentEntryID)
 
     @property
     def formatted(self) -> str:
         """
-        Returns the formatted recipient string.
+        The formatted recipient string.
         """
         return self.__formatted
 
     @functools.cached_property
     def instanceKey(self) -> Optional[bytes]:
         """
-        Returns the instance key of this recipient.
+        The instance key of this recipient.
         """
         return self.getStream('__substg1.0_0FF60102')
 
     @property
     def name(self) -> Optional[str]:
         """
-        Returns the recipient's name.
+        The recipient's name.
         """
         return self.__name
 
     @property
     def props(self) -> PropertiesStore:
         """
-        Returns the Properties instance of the recipient.
+        The Properties instance of the recipient.
         """
         return self.__props
 
     @functools.cached_property
     def recordKey(self) -> Optional[bytes]:
         """
-        Returns the instance key of this recipient.
+        The record key of this recipient.
         """
         return self.getStream('__substg1.0_0FF90102')
 
     @functools.cached_property
     def searchKey(self) -> Optional[bytes]:
         """
-        Returns the search key of this recipient.
+        The search key of this recipient.
         """
         return self.getStream('__substg1.0_300B0102')
 
     @functools.cached_property
     def smtpAddress(self) -> Optional[str]:
         """
-        Returns the SMTP address of this recipient.
+        The SMTP address of this recipient.
         """
         return self.getStringStream('__substg1.0_39FE')
 
     @functools.cached_property
     def transmittableDisplayName(self) -> Optional[str]:
         """
-        Returns the transmittable display name of this recipient.
+        The transmittable display name of this recipient.
         """
         return self.getStringStream('__substg1.0_3A20')
 
     @property
     def type(self) -> _RT:
         """
-        Returns the recipient type. Type is:
-            * Sender if `type & 0xf == 0`
-            * To if `type & 0xf == 1`
-            * Cc if `type & 0xf == 2`
-            * Bcc if `type & 0xf == 3`
+        The recipient type.
         """
         return self.__type
 
