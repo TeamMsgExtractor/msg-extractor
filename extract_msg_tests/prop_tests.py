@@ -264,6 +264,138 @@ _propChecks = [
         16,
         0x67452301
     ),
+    (
+        'Multiple Int16',
+        b'\x02\x10\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        b'\x02\x10\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        VariableLengthProp,
+        '02011002',
+        0x1002,
+        PropertyFlags.MANDATORY,
+        8,
+        0x67452301
+    ),
+    (
+        'Multiple Int32',
+        b'\x03\x10\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        b'\x03\x10\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        VariableLengthProp,
+        '02011003',
+        0x1003,
+        PropertyFlags.MANDATORY,
+        4,
+        0x67452301
+    ),
+    (
+        'Multiple Float',
+        b'\x04\x10\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        b'\x04\x10\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        VariableLengthProp,
+        '02011004',
+        0x1004,
+        PropertyFlags.MANDATORY,
+        4,
+        0x67452301
+    ),
+    (
+        'Multiple Double',
+        b'\x05\x10\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        b'\x05\x10\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        VariableLengthProp,
+        '02011005',
+        0x1005,
+        PropertyFlags.MANDATORY,
+        2,
+        0x67452301
+    ),
+    (
+        'Multiple Currency',
+        b'\x06\x10\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        b'\x06\x10\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        VariableLengthProp,
+        '02011006',
+        0x1006,
+        PropertyFlags.MANDATORY,
+        2,
+        0x67452301
+    ),
+    (
+        'Multiple Floating Time',
+        b'\x07\x10\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        b'\x07\x10\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        VariableLengthProp,
+        '02011007',
+        0x1007,
+        PropertyFlags.MANDATORY,
+        2,
+        0x67452301
+    ),
+    (
+        'Multiple Int64',
+        b'\x14\x10\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        b'\x14\x10\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        VariableLengthProp,
+        '02011014',
+        0x1014,
+        PropertyFlags.MANDATORY,
+        2,
+        0x67452301
+    ),
+    (
+        'Multiple String8',
+        b'\x1E\x10\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        b'\x1E\x10\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        VariableLengthProp,
+        '0201101E',
+        0x101E,
+        PropertyFlags.MANDATORY,
+        4,
+        0x67452301
+    ),
+    (
+        'Multiple String',
+        b'\x1F\x10\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        b'\x1F\x10\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        VariableLengthProp,
+        '0201101F',
+        0x101F,
+        PropertyFlags.MANDATORY,
+        4,
+        0x67452301
+    ),
+    (
+        'Multiple Time',
+        b'\x40\x10\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        b'\x40\x10\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        VariableLengthProp,
+        '02011040',
+        0x1040,
+        PropertyFlags.MANDATORY,
+        2,
+        0x67452301
+    ),
+    (
+        'Multiple GUID',
+        b'\x48\x10\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        b'\x48\x10\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        VariableLengthProp,
+        '02011048',
+        0x1048,
+        PropertyFlags.MANDATORY,
+        1,
+        0x67452301
+    ),
+    (
+        'Multiple Binary',
+        b'\x02\x11\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        b'\x02\x11\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        VariableLengthProp,
+        '02011102',
+        0x1102,
+        PropertyFlags.MANDATORY,
+        2,
+        0x67452301
+    ),
 ]
 
 
