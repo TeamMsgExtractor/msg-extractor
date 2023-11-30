@@ -313,10 +313,10 @@ class FixedLengthProp(PropBase):
                 if value > 0xFFFF:
                     raise ValueError(':property value: MUST be less than 0x10000 when type is 0x0002.')
             elif self.type == 0x0003:
-                if value > 0xFFFF:
+                if value > 0xFFFFFFFF:
                     raise ValueError(':property value: MUST be less than 0x100000000 when type is 0x0003.')
             elif self.type == 0x0014:
-                if value > 0xFFFF:
+                if value > 0xFFFFFFFFFFFFFFFF:
                     raise ValueError(':property value: MUST be less than 0x10000000000000000 when type is 0x0014.')
         elif self.type == 0x0004 or self.type == 0x0005: # Float/Double.
             if not isinstance(value, float):
