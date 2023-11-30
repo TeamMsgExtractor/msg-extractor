@@ -26,6 +26,7 @@ from extract_msg.utils import fromTimeStamp
 # extras. If  the class is FixedLengthProp, extras will be a single item for
 # the value, otherwise it will be the values for size and reserved flags.
 _propChecks = [
+    # Fixed Length Props.
     (
         'Unspecified',
         b'\x00\x00\x01\x02\x01\x00\x00\x00\x01\x23\x45\x67\x89\xAB\xCD\xEF',
@@ -195,6 +196,73 @@ _propChecks = [
         0x0040,
         PropertyFlags.MANDATORY,
         NULL_DATE
+    ),
+    # Variable Length Props.
+    (
+        'Object',
+        b'\x0D\x00\x01\x02\x01\x00\x00\x00\xFF\xFF\xFF\xFF\x01\x23\x45\x67',
+        b'\x0D\x00\x01\x02\x01\x00\x00\x00\xFF\xFF\xFF\xFF\x01\x23\x45\x67',
+        VariableLengthProp,
+        '0201000D',
+        0x000D,
+        PropertyFlags.MANDATORY,
+        0xFFFFFFFF,
+        0x67452301
+    ),
+    (
+        'Object Warning',
+        b'\x0D\x00\x01\x02\x01\x00\x00\x00\x00\x00\x00\x00\x01\x23\x45\x67',
+        b'\x0D\x00\x01\x02\x01\x00\x00\x00\xFF\xFF\xFF\xFF\x01\x23\x45\x67',
+        VariableLengthProp,
+        '0201000D',
+        0x000D,
+        PropertyFlags.MANDATORY,
+        0xFFFFFFFF,
+        0x67452301
+    ),
+    (
+        'String8',
+        b'\x1E\x00\x01\x02\x01\x00\x00\x00\x08\x00\x00\x00\x01\x23\x45\x67',
+        b'\x1E\x00\x01\x02\x01\x00\x00\x00\x08\x00\x00\x00\x01\x23\x45\x67',
+        VariableLengthProp,
+        '0201001E',
+        0x001E,
+        PropertyFlags.MANDATORY,
+        7,
+        0x67452301
+    ),
+    (
+        'String',
+        b'\x1F\x00\x01\x02\x01\x00\x00\x00\x08\x00\x00\x00\x01\x23\x45\x67',
+        b'\x1F\x00\x01\x02\x01\x00\x00\x00\x08\x00\x00\x00\x01\x23\x45\x67',
+        VariableLengthProp,
+        '0201001F',
+        0x001F,
+        PropertyFlags.MANDATORY,
+        3,
+        0x67452301
+    ),
+    (
+        'GUID',
+        b'\x48\x00\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        b'\x48\x00\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        VariableLengthProp,
+        '02010048',
+        0x0048,
+        PropertyFlags.MANDATORY,
+        16,
+        0x67452301
+    ),
+    (
+        'GUID Warning',
+        b'\x48\x00\x01\x02\x01\x00\x00\x00\x08\x00\x00\x00\x01\x23\x45\x67',
+        b'\x48\x00\x01\x02\x01\x00\x00\x00\x10\x00\x00\x00\x01\x23\x45\x67',
+        VariableLengthProp,
+        '02010048',
+        0x0048,
+        PropertyFlags.MANDATORY,
+        16,
+        0x67452301
     ),
 ]
 
