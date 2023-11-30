@@ -29,6 +29,7 @@
 * Changed `extract_msg.constants.NULL_DATE` to be a subclass of `datetime.datetime` instead of just a fixed value. Functions that return null dates may end up returning distinct versions of `NullDate` (the newly created subclass), however all instances of `NullDate` will register as being equal to each other. Existing equality comparisons to the `NULL_DATE` constant will all function as intended, however `is` checks may fail for some null dates.
 * Changed currency type to return a `Decimal` instance for higher precision.
 * Made `FixedLengthProp` and `VariableLengthProp` writable. Only the property `flags` from `PropBase` is writable. This also includes the ability to convert them to bytes based on their value.
+* Fixed many issues in `VariableLengthProp` regarding it's calculation of sizes.
 
 **v0.46.2**
 * Adjusted typing information on regular expressions. They were using a subscript that was added in Python 3.9 (apparently that is something the type checker doesn't check for), which made the module incompatible with Python 3.8. If you are using Python 3.9 or higher a version check will switch to the more specific typing.

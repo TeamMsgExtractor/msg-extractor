@@ -379,12 +379,20 @@ class VariableLengthProp(PropBase):
                 logger.warning('Property of type 0x001F found with length that is not a multiple of 2. This will not be corrected but is likely an error. This may cause issues with reading this property in other programs.')
             self.__realLength = self.__length // 2 - 1
         elif self.type in constants.MULTIPLE_2_BYTES_HEX:
+            if self.__length & 1:
+                logger.warning(f'Property of type {self.type} found with length that is not a multiple of 2. This will not be corrected but is likely an error. This may cause issues with reading this property in other programs.')
             self.__realLength = self.__length // 2
         elif self.type in constants.MULTIPLE_4_BYTES_HEX:
+            if self.__length & 3:
+                logger.warning(f'Property of type {self.type} found with length that is not a multiple of 4. This will not be corrected but is likely an error. This may cause issues with reading this property in other programs.')
             self.__realLength = self.__length // 4
         elif self.type in constants.MULTIPLE_8_BYTES_HEX:
+            if self.__length & 7:
+                logger.warning(f'Property of type {self.type} found with length that is not a multiple of 8. This will not be corrected but is likely an error. This may cause issues with reading this property in other programs.')
             self.__realLength = self.__length // 8
         elif self.type in constants.MULTIPLE_16_BYTES_HEX:
+            if self.__length & 15:
+                logger.warning(f'Property of type {self.type} found with length that is not a multiple of 16. This will not be corrected but is likely an error. This may cause issues with reading this property in other programs.')
             self.__realLength = self.__length // 16
         elif self.type == 0x000D:
             self.__realLength = 0xFFFFFFFF
@@ -395,7 +403,7 @@ class VariableLengthProp(PropBase):
         elif self.type == 0x0048:
             self.__realLength = 16
             # Check the value and log a warning if it is bad before fixing it.
-            if self.__length != 0xFFFFFFFF:
+            if self.__length != 16:
                 logger.warning(f'Property of type 0x0048 found with length that was not 16 (got {self.__length}). This will be corrected automatically.')
                 self.__length = 16
         elif self.type == 0x101E or self.type == 0x101F:
