@@ -407,8 +407,12 @@ class VariableLengthProp(PropBase):
                 logger.warning(f'Property of type 0x0048 found with length that was not 16 (got {self.__length}). This will be corrected automatically.')
                 self.__length = 16
         elif self.type == 0x101E or self.type == 0x101F:
+            if self.__length & 3:
+                logger.warning(f'Property of type {self.type} found with length that is not a multiple of 4. This will not be corrected but is likely an error. This may cause issues with reading this property in other programs.')
             self.__realLength = self.__length // 4
         elif self.type == 0x1102:
+            if self.__length & 7:
+                logger.warning(f'Property of type {self.type} found with length that is not a multiple of 8. This will not be corrected but is likely an error. This may cause issues with reading this property in other programs.')
             self.__realLength = self.__length // 8
         else:
             if self.type in (0x00FB, 0x00FF, 0x00FE):
