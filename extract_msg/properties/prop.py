@@ -366,9 +366,18 @@ class VariableLengthProp(PropBase):
         super().__init__(data)
         self.__length, self.__reserved = constants.st.ST_PROP_VAR.unpack(data[8:])
         if self.type == 0x001E:
+            # Check that the value is valid.
+            if self.__length == 0:
+                logger.warning('Property of type 0x001E found with length that was not at least 1. This will be corrected automatically.')
+                self.__length = 1
             self.__realLength = self.__length - 1
         elif self.type == 0x001F:
-            self.__realLength = self.__length - 2
+            if self.__length == 0:
+                logger.warning('Property of type 0x001F found with length that was not at least 2. This will be corrected automatically.')
+                self.__length = 2
+            if self.__length & 1:
+                logger.warning('Property of type 0x001F found with length that is not a multiple of 2. This will not be corrected but is likely an error. This may cause issues with reading this property in other programs.')
+            self.__realLength = self.__length // 2 - 1
         elif self.type in constants.MULTIPLE_2_BYTES_HEX:
             self.__realLength = self.__length // 2
         elif self.type in constants.MULTIPLE_4_BYTES_HEX:
@@ -419,8 +428,9 @@ class VariableLengthProp(PropBase):
         be the size value multiplied by the length of the properties. For
         multiple strings, this will be 4 times the size value. For multiple
         binary, this will be 8 times the size value. For strings, this will be
-        the size plus 1 if non-unicode, otherwise the size plus 2. For binary,
-        this will be the size with no modification.
+        the number of characters plus 1 if non-unicode, otherwise the number of
+        characters plus 1, all multiplied by 2. For binary, this will be the
+        size with no modification.
 
         Size cannot be set for properties of type 0x000D and 0x0048.
 
@@ -444,7 +454,7 @@ class VariableLengthProp(PropBase):
         if self.type == 0x001E:
             length = value + 1
         elif self.type == 0x001F:
-            length = value + 2
+            length = (value + 1) * 2
         elif self.type in constants.MULTIPLE_2_BYTES_HEX:
             length = value * 2
         elif self.type in constants.MULTIPLE_4_BYTES_HEX:
