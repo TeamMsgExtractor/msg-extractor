@@ -300,7 +300,7 @@ class CalendarBase(MessageBase):
         A list of PidTagEntryId properties of Task objects related to the
         Calendar object that are set by a client.
         """
-        return self.getNamedAs('820C', ps.PSETID_APPOINTMENT, lambda x : list(EntryID.autoCreate(y) for y in x))
+        return self.getNamedAs('820C', ps.PSETID_APPOINTMENT, lambda x: list(EntryID.autoCreate(y) for y in x))
 
     @functools.cached_property
     def location(self) -> Optional[str]:

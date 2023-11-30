@@ -14,7 +14,7 @@ class ReportTag:
     A Report Tag structure, as defined in [MS-OXOMSG].
     """
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         self.__rawData = data
         reader = BytesReader(data)
 

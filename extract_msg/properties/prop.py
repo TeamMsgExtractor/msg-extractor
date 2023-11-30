@@ -30,7 +30,7 @@ logger.addHandler(logging.NullHandler())
 
 # Define default values to use when creating each prop type. Only define a value
 # if it would not be all null bytes.
-_DEFAULT_PROP_VALS : Dict[str, bytes] = {
+_DEFAULT_PROP_VALS: Dict[str, bytes] = {
     '000D': b'\x00\x00\x00\x00\xFF\xFF\xFF\xFF\x00\x00\x00\x00',
     '001E': b'\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00',
     '001F': b'\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00',
@@ -43,7 +43,7 @@ _DEFAULT_PROP_VALS : Dict[str, bytes] = {
 }
 
 
-def createNewProp(name : str):
+def createNewProp(name: str):
     """
     Creates a blank property using the specified name.
 
@@ -63,7 +63,7 @@ def createNewProp(name : str):
     return createProp(propVal)
 
 
-def createProp(data : bytes) -> PropBase:
+def createProp(data: bytes) -> PropBase:
     """
     Creates an instance of PropBase from the specified bytes.
 
@@ -84,7 +84,7 @@ class PropBase(abc.ABC):
     Base class for Prop instances.
     """
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         self.__name = data[3::-1].hex().upper()
         self.__type, self.__pID, flags = constants.st.ST_PROP_BASE.unpack(data[:8])
         self.__flags = PropertyFlags(flags)
@@ -106,7 +106,7 @@ class PropBase(abc.ABC):
         return self.__flags
 
     @flags.setter
-    def flags(self, value : PropertyFlags):
+    def flags(self, value: PropertyFlags):
         if not isinstance(value, PropertyFlags):
             raise TypeError(':property flags: MUST be an instance of PropertyFlags.')
 
@@ -142,11 +142,11 @@ class FixedLengthProp(PropBase):
     Currently a work in progress.
     """
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         super().__init__(data)
         self.__value = self._parseType(self.type, data[8:], data)
 
-    def _parseType(self, _type : int, stream : bytes, raw : bytes) -> Any:
+    def _parseType(self, _type: int, stream: bytes, raw: bytes) -> Any:
         """
         Converts the data in :param stream: to a much more accurate type,
         specified by :param _type:, if possible.
@@ -277,7 +277,7 @@ class FixedLengthProp(PropBase):
         return self.value
 
     @signedValue.setter
-    def signedValue(self, value : Any) -> None:
+    def signedValue(self, value: Any) -> None:
         if self.type == 0x0002:
             value = constants.st.ST_SBO_UI16.unpack(constants.st.ST_SBO_I16.pack(value))[0]
         if self.type == 0x0003:
@@ -295,7 +295,7 @@ class FixedLengthProp(PropBase):
         return self.__value
 
     @value.setter
-    def value(self, value : Any) -> None:
+    def value(self, value: Any) -> None:
         # Validate the value and perform necessary conversions.
         if self.type == 0x0000: # Unspecified.
             if not isinstance(value, bytes):
@@ -362,7 +362,7 @@ class VariableLengthProp(PropBase):
     Class to contain the data for a single variable length property.
     """
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         super().__init__(data)
         self.__length, self.__reserved = constants.st.ST_PROP_VAR.unpack(data[8:])
         if self.type == 0x001E:
@@ -454,7 +454,7 @@ class VariableLengthProp(PropBase):
         return self.__realLength
 
     @size.setter
-    def size(self, value : int) -> None:
+    def size(self, value: int) -> None:
         if not isinstance(value, int):
             raise TypeError(':property size: MUST be an int.')
         if value < 0:
@@ -495,7 +495,7 @@ class VariableLengthProp(PropBase):
         return self.__reserved
 
     @reservedFlags.setter
-    def reservedFlags(self, value : int) -> None:
+    def reservedFlags(self, value: int) -> None:
         if not isinstance(value, int):
             raise TypeError(':property reservedFlags: MUST be an int.')
         if value < 0:

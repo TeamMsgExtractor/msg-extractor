@@ -11,9 +11,9 @@ from .entry_id import EntryID
 
 
 class ContactLinkEntry:
-    entries : List[EntryID]
+    entries: List[EntryID]
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         # My experience with this data almost entirely doesn't match the
         # documentation, so I'm just going to do what I see and not what I'm
         # told.

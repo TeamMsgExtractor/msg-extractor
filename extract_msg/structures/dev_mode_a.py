@@ -23,9 +23,9 @@ class DevModeA:
     converting to bool. If no data is prodided, the fields are set to default
     values.
     """
-    PARSE_STRUCT : Final[struct.Struct] = struct.Struct('<32s32s4HI13h14xI4x4I16x')
+    PARSE_STRUCT: Final[struct.Struct] = struct.Struct('<32s32s4HI13h14xI4x4I16x')
 
-    def __init__(self, data : Optional[bytes] = None):
+    def __init__(self, data: Optional[bytes] = None):
         self.__valid = data is None
 
         # Set default values for fields that may not be initialized.
@@ -151,7 +151,7 @@ class DevModeA:
         return self.__collate
 
     @collate.setter
-    def collate(self, val : Optional[int]) -> None:
+    def collate(self, val: Optional[int]) -> None:
         if val is None:
             self.__collate = 0
             if DevModeFields.DM_COLLATE in self.__fields:
@@ -173,7 +173,7 @@ class DevModeA:
         return self.__color
 
     @color.setter
-    def color(self, val : Optional[int]) -> None:
+    def color(self, val: Optional[int]) -> None:
         if val is None:
             self.__color = 0
             if DevModeFields.DM_COLOR in self.__fields:
@@ -195,7 +195,7 @@ class DevModeA:
         return self.__copies
 
     @copies.setter
-    def copies(self, val : Optional[int]) -> None:
+    def copies(self, val: Optional[int]) -> None:
         if val is None:
             self.__copies = 0
             if DevModeFields.DM_COPIES in self.__fields:
@@ -217,7 +217,7 @@ class DevModeA:
         return self.__defaultSource
 
     @defaultSource.setter
-    def defaultSource(self, val : Optional[int]) -> None:
+    def defaultSource(self, val: Optional[int]) -> None:
         if val is None:
             self.__defaultSource = 0
             if DevModeFields.DM_DEFAULTSOURCE in self.__fields:
@@ -242,7 +242,7 @@ class DevModeA:
         return self.__deviceName
 
     @deviceName.setter
-    def deviceName(self, val : bytes) -> None:
+    def deviceName(self, val: bytes) -> None:
         if not isinstance(val, bytes):
             raise TypeError(':property deviceName: must be bytes.')
         if len(val) != 32:
@@ -255,7 +255,7 @@ class DevModeA:
         return self.__ditherType
 
     @ditherType.setter
-    def ditherType(self, val : Optional[int]) -> None:
+    def ditherType(self, val: Optional[int]) -> None:
         if val is None:
             self.__ditherType = 0
             if DevModeFields.DM_DITHERTYPE in self.__fields:
@@ -277,7 +277,7 @@ class DevModeA:
         return self.__driverExtra
 
     @driverExtra.setter
-    def driverExtra(self, val : int) -> None:
+    def driverExtra(self, val: int) -> None:
         if not isinstance(val, int):
             raise TypeError(':property driverExtra: must be an int.')
         if val < 0:
@@ -292,7 +292,7 @@ class DevModeA:
         return self.__driverVersion
 
     @driverVersion.setter
-    def driverVersion(self, val : int) -> None:
+    def driverVersion(self, val: int) -> None:
         if not isinstance(val, int):
             raise TypeError(':property driverVersion: must be an int or None.')
         if val < 0:
@@ -307,7 +307,7 @@ class DevModeA:
         return self.__duplex
 
     @duplex.setter
-    def duplex(self, val : Optional[int]) -> None:
+    def duplex(self, val: Optional[int]) -> None:
         if val is None:
             self.__duplex = 0
             if DevModeFields.DM_DUPLEX in self.__fields:
@@ -332,7 +332,7 @@ class DevModeA:
         return self.__formName
 
     @formName.setter
-    def formName(self, val : bytes) -> None:
+    def formName(self, val: bytes) -> None:
         if not isinstance(val, bytes):
             raise TypeError(':property formName: must be bytes.')
         if len(val) != 32:
@@ -345,7 +345,7 @@ class DevModeA:
         return self.__icmIntent
 
     @icmIntent.setter
-    def icmIntent(self, val : Optional[int]) -> None:
+    def icmIntent(self, val: Optional[int]) -> None:
         if val is None:
             self.__icmIntent = 0
             if DevModeFields.DM_ICMINTENT in self.__fields:
@@ -367,7 +367,7 @@ class DevModeA:
         return self.__icmMethod
 
     @icmMethod.setter
-    def icmMethod(self, val : Optional[int]) -> None:
+    def icmMethod(self, val: Optional[int]) -> None:
         if val is None:
             self.__icmMethod = 0
             if DevModeFields.DM_ICMMETHOD in self.__fields:
@@ -389,7 +389,7 @@ class DevModeA:
         return self.__mediaType
 
     @mediaType.setter
-    def mediaType(self, val : Optional[int]) -> None:
+    def mediaType(self, val: Optional[int]) -> None:
         if val is None:
             self.__mediaType = 0
             if DevModeFields.DM_MEDIATYPE in self.__fields:
@@ -411,7 +411,7 @@ class DevModeA:
         return self.__nup
 
     @nup.setter
-    def nup(self, val : Optional[int]) -> None:
+    def nup(self, val: Optional[int]) -> None:
         if val is None:
             self.__nup = 0
             if DevModeFields.DM_NUP in self.__fields:
@@ -433,7 +433,7 @@ class DevModeA:
         return self.__orientation
 
     @orientation.setter
-    def orientation(self, val : Optional[int]) -> None:
+    def orientation(self, val: Optional[int]) -> None:
         if val is None:
             self.__orientation = 0
             if DevModeFields.DM_ORIENTATION in self.__fields:
@@ -455,7 +455,7 @@ class DevModeA:
         return self.__paperLength
 
     @paperLength.setter
-    def paperLength(self, val : Optional[int]) -> None:
+    def paperLength(self, val: Optional[int]) -> None:
         if val is None:
             self.__paperLength = 0
             if DevModeFields.DM_PAPERLENGTH in self.__fields:
@@ -477,7 +477,7 @@ class DevModeA:
         return self.__paperSize
 
     @paperSize.setter
-    def paperSize(self, val : Optional[int]) -> None:
+    def paperSize(self, val: Optional[int]) -> None:
         if val is None:
             self.__paperSize = 0
             if DevModeFields.DM_PAPERSIZE in self.__fields:
@@ -499,7 +499,7 @@ class DevModeA:
         return self.__paperWidth
 
     @paperWidth.setter
-    def paperWidth(self, val : Optional[int]) -> None:
+    def paperWidth(self, val: Optional[int]) -> None:
         if val is None:
             self.__paperWidth = 0
             if DevModeFields.DM_PAPERWIDTH in self.__fields:
@@ -521,7 +521,7 @@ class DevModeA:
         return self.__printQuality
 
     @printQuality.setter
-    def printQuality(self, val : Optional[int]) -> None:
+    def printQuality(self, val: Optional[int]) -> None:
         if val is None:
             self.__printQuality = 0
             if DevModeFields.DM_PRINTQUALITY in self.__fields:
@@ -543,7 +543,7 @@ class DevModeA:
         return self.__scale
 
     @scale.setter
-    def scale(self, val : Optional[int]) -> None:
+    def scale(self, val: Optional[int]) -> None:
         if val is None:
             self.__scale = 0
             if DevModeFields.DM_SCALE in self.__fields:
@@ -565,7 +565,7 @@ class DevModeA:
         return self.__specVersion
 
     @specVersion.setter
-    def specVersion(self, val : int) -> None:
+    def specVersion(self, val: int) -> None:
         if not isinstance(val, int):
             raise TypeError(':property specVersion: must be an int.')
         if val < 0:
@@ -580,7 +580,7 @@ class DevModeA:
         return self.__ttOption
 
     @ttOption.setter
-    def ttOption(self, val : Optional[int]) -> None:
+    def ttOption(self, val: Optional[int]) -> None:
         if val is None:
             self.__ttOption = 0
             if DevModeFields.DM_TTOPTION in self.__fields:
@@ -602,7 +602,7 @@ class DevModeA:
         return self.__yResolution
 
     @yResolution.setter
-    def yResolution(self, val : Optional[int]) -> None:
+    def yResolution(self, val: Optional[int]) -> None:
         if val is None:
             self.__yResolution = 0
             if DevModeFields.DM_YRESOLUTION in self.__fields:

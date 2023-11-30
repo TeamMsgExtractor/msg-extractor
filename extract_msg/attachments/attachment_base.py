@@ -43,7 +43,7 @@ class AttachmentBase(abc.ABC):
     The base class for all standard Attachments used by the module.
     """
 
-    def __init__(self, msg : MSGFile, dir_ : str, propStore : PropertiesStore):
+    def __init__(self, msg: MSGFile, dir_: str, propStore: PropertiesStore):
         """
         :param msg: the Message instance that the attachment belongs to.
         :param dir_: the directory inside the msg file where the attachment is located.
@@ -56,7 +56,7 @@ class AttachmentBase(abc.ABC):
         self.__namedProperties = NamedProperties(msg.named, self)
         self.__treePath = msg.treePath + [weakref.ref(self)]
 
-    def _getTypedAs(self, _id : str, overrideClass = None, preserveNone : bool = True):
+    def _getTypedAs(self, _id: str, overrideClass = None, preserveNone: bool = True):
         """
         Like the other get as functions, but designed for when something
         could be multiple types (where only one will be present).
@@ -125,7 +125,7 @@ class AttachmentBase(abc.ABC):
 
         return True, ret
 
-    def _getTypedStream(self, filename : MSG_PATH, _type = None):
+    def _getTypedStream(self, filename: MSG_PATH, _type = None):
         """
         Gets the contents of the specified stream as the type that
         it is supposed to be.
@@ -195,7 +195,7 @@ class AttachmentBase(abc.ABC):
 
         return fullFilename
 
-    def exists(self, filename : MSG_PATH) -> bool:
+    def exists(self, filename: MSG_PATH) -> bool:
         """
         Checks if stream exists inside the attachment folder.
 
@@ -206,7 +206,7 @@ class AttachmentBase(abc.ABC):
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
         return msg.exists([self.__dir, msgPathToString(filename)])
 
-    def sExists(self, filename : MSG_PATH) -> bool:
+    def sExists(self, filename: MSG_PATH) -> bool:
         """
         Checks if the string stream exists inside the attachment folder.
 
@@ -242,7 +242,7 @@ class AttachmentBase(abc.ABC):
         that the files will have exactly the same filename.
         """
 
-    def getMultipleBinary(self, filename : MSG_PATH) -> Optional[List[bytes]]:
+    def getMultipleBinary(self, filename: MSG_PATH) -> Optional[List[bytes]]:
         """
         Gets a multiple binary property as a list of bytes objects.
 
@@ -257,7 +257,7 @@ class AttachmentBase(abc.ABC):
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
         return msg.getMultipleBinary([self.__dir, msgPathToString(filename)])
 
-    def getMultipleString(self, filename : MSG_PATH) -> Optional[List[str]]:
+    def getMultipleString(self, filename: MSG_PATH) -> Optional[List[str]]:
         """
         Gets a multiple string property as a list of str objects.
 
@@ -272,7 +272,7 @@ class AttachmentBase(abc.ABC):
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
         return msg.getMultipleString([self.__dir, msgPathToString(filename)])
 
-    def getNamedAs(self, propertyName : str, guid : str, overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
+    def getNamedAs(self, propertyName: str, guid: str, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the named property, setting the class if specified.
 
@@ -287,7 +287,7 @@ class AttachmentBase(abc.ABC):
             value = overrideClass(value)
         return value
 
-    def getNamedProp(self, propertyName : str, guid : str, default : _T = None) -> Union[Any, _T]:
+    def getNamedProp(self, propertyName: str, guid: str, default: _T = None) -> Union[Any, _T]:
         """
         instance.namedProperties.get((propertyName, guid), default)
 
@@ -295,7 +295,7 @@ class AttachmentBase(abc.ABC):
         """
         return self.namedProperties.get((propertyName, guid), default)
 
-    def getPropertyAs(self, propertyName : Union[int, str], overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
+    def getPropertyAs(self, propertyName: Union[int, str], overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the property, setting the class if found.
 
@@ -312,7 +312,7 @@ class AttachmentBase(abc.ABC):
 
         return value
 
-    def getPropertyVal(self, name : Union[int, str], default : _T = None) -> Union[Any, _T]:
+    def getPropertyVal(self, name: Union[int, str], default: _T = None) -> Union[Any, _T]:
         """
         instance.props.getValue(name, default)
 
@@ -320,7 +320,7 @@ class AttachmentBase(abc.ABC):
         """
         return self.props.getValue(name, default)
 
-    def getSingleOrMultipleBinary(self, filename : MSG_PATH) -> Optional[Union[List[bytes], bytes]]:
+    def getSingleOrMultipleBinary(self, filename: MSG_PATH) -> Optional[Union[List[bytes], bytes]]:
         """
         A combination of :method getStringStream: and
         :method getMultipleString:.
@@ -339,7 +339,7 @@ class AttachmentBase(abc.ABC):
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
         return msg.getSingleOrMultipleBinary([self.__dir, msgPathToString(filename)])
 
-    def getSingleOrMultipleString(self, filename : MSG_PATH) -> Optional[Union[List[str], str]]:
+    def getSingleOrMultipleString(self, filename: MSG_PATH) -> Optional[Union[List[str], str]]:
         """
         A combination of :method getStringStream: and
         :method getMultipleString:.
@@ -358,7 +358,7 @@ class AttachmentBase(abc.ABC):
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
         return msg.getSingleOrMultipleString([self.__dir, msgPathToString(filename)])
 
-    def getStream(self, filename : MSG_PATH) -> Optional[bytes]:
+    def getStream(self, filename: MSG_PATH) -> Optional[bytes]:
         """
         Gets a binary representation of the requested stream.
 
@@ -372,7 +372,7 @@ class AttachmentBase(abc.ABC):
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
         return msg.getStream([self.__dir, msgPathToString(filename)])
 
-    def getStreamAs(self, streamID : MSG_PATH, overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
+    def getStreamAs(self, streamID: MSG_PATH, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the specified stream, modifying it to the specified class if it
         is found.
@@ -390,7 +390,7 @@ class AttachmentBase(abc.ABC):
 
         return value
 
-    def getStringStream(self, filename : MSG_PATH) -> Optional[str]:
+    def getStringStream(self, filename: MSG_PATH) -> Optional[str]:
         """
         Gets a string representation of the requested stream.
 
@@ -408,7 +408,7 @@ class AttachmentBase(abc.ABC):
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
         return msg.getStringStream([self.__dir, msgPathToString(filename)])
 
-    def getStringStreamAs(self, streamID : MSG_PATH, overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
+    def getStringStreamAs(self, streamID: MSG_PATH, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the specified string stream, modifying it to the specified
         class if it is found.
@@ -426,7 +426,7 @@ class AttachmentBase(abc.ABC):
 
         return value
 
-    def listDir(self, streams : bool = True, storages : bool = False) -> List[List[str]]:
+    def listDir(self, streams: bool = True, storages: bool = False) -> List[List[str]]:
         """
         Lists the streams and/or storages that exist in the attachment
         directory.
@@ -439,7 +439,7 @@ class AttachmentBase(abc.ABC):
         return [path[1:] for path in msg.listDir(streams, storages, False)
                 if len(path) > 1 and path[0] == self.__dir]
 
-    def slistDir(self, streams : bool = True, storages : bool = False) -> List[str]:
+    def slistDir(self, streams: bool = True, storages: bool = False) -> List[str]:
         """
         Like listDir, except it returns the paths as strings.
         """

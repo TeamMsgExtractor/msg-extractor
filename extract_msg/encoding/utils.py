@@ -13,7 +13,7 @@ import codecs
 from typing import Dict, Tuple
 
 
-def createVBEncoding(codecName : str, decodingTable : Dict[int, str]) -> codecs.CodecInfo:
+def createVBEncoding(codecName: str, decodingTable: Dict[int, str]) -> codecs.CodecInfo:
     """
     Creates the classes for a variable byte encoding, returning the CodecInfo
     instance associated with it. Currently only supports encodings with up to 2
@@ -27,7 +27,7 @@ def createVBEncoding(codecName : str, decodingTable : Dict[int, str]) -> codecs.
     # last one introduced. Iterating in reverse means the lowest possible value
     # for a character will be the one used.
     encodingTable = {
-        value : bytes((key,)) if key < 256 else bytes((key >> 8, key & 0xFF))
+        value: bytes((key,)) if key < 256 else bytes((key >> 8, key & 0xFF))
         for key, value in reversed(decodingTable.items()) if value is not None
     }
 
@@ -65,7 +65,7 @@ def createVBEncoding(codecName : str, decodingTable : Dict[int, str]) -> codecs.
     )
 
 
-def createSBEncoding(codecName : str, decodingTable : Dict[int, str]) -> codecs.CodecInfo:
+def createSBEncoding(codecName: str, decodingTable: Dict[int, str]) -> codecs.CodecInfo:
     """
     Creates the classes for a single byte encoding, returning the CodecInfo
     instance associated with it. Currently only supports encodings with up to 2
@@ -79,7 +79,7 @@ def createSBEncoding(codecName : str, decodingTable : Dict[int, str]) -> codecs.
     # last one introduced. Iterating in reverse means the lowest possible value
     # for a character will be the one used.
     encodingTable = {
-        value : bytes((key,))
+        value: bytes((key,))
         for key, value in reversed(decodingTable.items()) if value is not None
     }
 
@@ -117,7 +117,7 @@ def createSBEncoding(codecName : str, decodingTable : Dict[int, str]) -> codecs.
     )
 
 
-def singleByteDecode(codecName : str, data, errors : str, decodeTable : Dict[int, str]) -> Tuple[str, int]:
+def singleByteDecode(codecName: str, data, errors: str, decodeTable: Dict[int, str]) -> Tuple[str, int]:
     """
     Function for decoding single-byte codecs.
 
@@ -158,7 +158,7 @@ def singleByteDecode(codecName : str, data, errors : str, decodeTable : Dict[int
     return (output, len(output))
 
 
-def singleByteEncode(codecName : str, data, errors : str, encodeTable : Dict[str, bytes]) -> Tuple[bytes, int]:
+def singleByteEncode(codecName: str, data, errors: str, encodeTable: Dict[str, bytes]) -> Tuple[bytes, int]:
     """
     Function for encoding variable-byte codecs that use one or two bytes per
     character.
@@ -196,7 +196,7 @@ def singleByteEncode(codecName : str, data, errors : str, encodeTable : Dict[str
 
 
 
-def variableByteDecode(codecName : str, data, errors : str, decodeTable : Dict[int, str]) -> Tuple[str, int]:
+def variableByteDecode(codecName: str, data, errors: str, decodeTable: Dict[int, str]) -> Tuple[str, int]:
     """
     Function for decoding variable-byte codecs that use one or two bytes per character.
 
@@ -287,7 +287,7 @@ def variableByteDecode(codecName : str, data, errors : str, decodeTable : Dict[i
     return (output, start)
 
 
-def variableByteEncode(codecName : str, data, errors : str, encodeTable : Dict[str, bytes]) -> Tuple[bytes, int]:
+def variableByteEncode(codecName: str, data, errors: str, encodeTable: Dict[str, bytes]) -> Tuple[bytes, int]:
     """
     Function for encoding variable-byte codecs that use one or two bytes per
     character.

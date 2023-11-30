@@ -30,17 +30,17 @@ class CustomAttachmentHandler(abc.ABC):
     special ways that are completely different from one another.
     """
 
-    def __init__(self, attachment : AttachmentBase):
+    def __init__(self, attachment: AttachmentBase):
         super().__init__()
         self.__att = attachment
 
-    def getStream(self, path : MSG_PATH) -> Optional[bytes]:
+    def getStream(self, path: MSG_PATH) -> Optional[bytes]:
         """
         Gets a stream from the custom data directory.
         """
         return self.attachment.getStream('__substg1.0_3701000D/' + msgPathToString(path))
 
-    def getStreamAs(self, streamID : MSG_PATH, overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
+    def getStreamAs(self, streamID: MSG_PATH, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the specified stream, modifying it to the specified class if it
         is found.
@@ -60,7 +60,7 @@ class CustomAttachmentHandler(abc.ABC):
 
     @classmethod
     @abc.abstractmethod
-    def isCorrectHandler(cls, attachment : AttachmentBase) -> bool:
+    def isCorrectHandler(cls, attachment: AttachmentBase) -> bool:
         """
         Checks if this is the correct handler for the attachment.
         """

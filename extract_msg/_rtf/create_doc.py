@@ -9,7 +9,7 @@ from .token import Token, TokenType
 
 
 
-def createDocument(tokens : Iterable[Token]) -> bytes:
+def createDocument(tokens: Iterable[Token]) -> bytes:
     """
     Combines the tokenized data into bytes and returns the document.
     """

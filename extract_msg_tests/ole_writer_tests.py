@@ -57,11 +57,11 @@ class OleWriterEditingTests(unittest.TestCase):
         with self.assertRaises(ValueError, msg = 'Path segments must not be greater than 31 characters.'):
             writer.addEntry('storage_1/12345678901234567890123456789012', b'')
 
-        # Attempt to use : in path.
+        # Attempt to use ":" in path.
         with self.assertRaises(ValueError, msg = 'Illegal character ("!" or ":") found in MSG path.'):
             writer.addEntry('::InternalName', b'')
 
-        # Attempt to use ! in path.
+        # Attempt to use "!" in path.
         with self.assertRaises(ValueError, msg = 'Illegal character ("!" or ":") found in MSG path.'):
             writer.addEntry('!bang', b'')
 

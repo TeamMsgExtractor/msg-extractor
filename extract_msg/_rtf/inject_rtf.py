@@ -47,7 +47,7 @@ _HEADER_SKIPPABLE = (
 )
 
 
-def _listInsertMult(dest : List[_T], source : Iterable[_T], index : int = -1):
+def _listInsertMult(dest: List[_T], source: Iterable[_T], index: int = -1):
     """
     Inserts into :param dest: all the items in :param source: at the index
     specified.
@@ -65,7 +65,7 @@ def _listInsertMult(dest : List[_T], source : Iterable[_T], index : int = -1):
             dest.insert(index + offset, item)
 
 
-def injectStartRTF(document : bytes, injectTokens : Union[bytes, List[Token]]) -> List[Token]:
+def injectStartRTF(document: bytes, injectTokens: Union[bytes, List[Token]]) -> List[Token]:
     """
     Injects the specified tokens into the document, returning a new copy of the
     document as a list of Tokens.
@@ -82,7 +82,7 @@ def injectStartRTF(document : bytes, injectTokens : Union[bytes, List[Token]]) -
     return injectStartRTFTokenized(tokenizeRTF(document), injectTokens)
 
 
-def injectStartRTFTokenized(document : List[Token], injectTokens : Union[bytes, Iterable[Token]]) -> List[Token]:
+def injectStartRTFTokenized(document: List[Token], injectTokens: Union[bytes, Iterable[Token]]) -> List[Token]:
     """
     Like :function injectStartRTF:, injects the specified tokens into the
     document, returning a reference to the document, except that it accepts a

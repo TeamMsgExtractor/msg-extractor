@@ -13,7 +13,7 @@ from ..enums import ADVF, DVAspect
 
 
 class TOCEntry:
-    def __init__(self, reader : Optional[Union[bytes, BytesReader]] = None):
+    def __init__(self, reader: Optional[Union[bytes, BytesReader]] = None):
         if reader is None:
             self.__clipFormat = ClipboardFormatOrAnsiString()
             self.__aspect = 0
@@ -65,7 +65,7 @@ class TOCEntry:
         return self.__advf
 
     @advf.setter
-    def advf(self, val : Union[int, ADVF]) -> None:
+    def advf(self, val: Union[int, ADVF]) -> None:
         if not isinstance(val, int):
             raise TypeError(':property advf: must be an int.')
         if val < 0:
@@ -88,7 +88,7 @@ class TOCEntry:
         return self.__aspect
 
     @aspect.setter
-    def aspect(self, val : Union[int, DVAspect]) -> None:
+    def aspect(self, val: Union[int, DVAspect]) -> None:
         if not isinstance(val, int):
             raise TypeError(':property aspect: must be an int.')
         if val < 0:
@@ -107,7 +107,7 @@ class TOCEntry:
         return self.__lindex
 
     @lindex.setter
-    def lindex(self, val : int) -> None:
+    def lindex(self, val: int) -> None:
         if not isinstance(val, int):
             raise TypeError(':property lindex: must be an int.')
         if val < 0:
@@ -126,7 +126,7 @@ class TOCEntry:
         return self.__tymed
 
     @tymed.setter
-    def tymed(self, val : int) -> None:
+    def tymed(self, val: int) -> None:
         if not isinstance(val, int):
             raise TypeError(':property lindex: must be an int.')
         if val < 0:

@@ -33,28 +33,28 @@ class DirectoryEntry:
     An internal representation of a stream or storage in the OleWriter.
     Originals should be inaccessible outside of the class.
     """
-    name : str = ''
-    rightChild : Optional[DirectoryEntry] = None
-    leftChild : Optional[DirectoryEntry] = None
-    childTreeRoot : Optional[DirectoryEntry] = None
-    stateBits : int = 0
-    creationTime : int = 0
-    modifiedTime : int = 0
-    type : DirectoryEntryType = DirectoryEntryType.UNALLOCATED
+    name: str = ''
+    rightChild: Optional[DirectoryEntry] = None
+    leftChild: Optional[DirectoryEntry] = None
+    childTreeRoot: Optional[DirectoryEntry] = None
+    stateBits: int = 0
+    creationTime: int = 0
+    modifiedTime: int = 0
+    type: DirectoryEntryType = DirectoryEntryType.UNALLOCATED
 
     # These get set after things have been sorted by the red black tree.
-    id : int = -1
+    id: int = -1
     # This is the ID for the left child. The terminology in the docs is really
     # annoying.
-    leftSiblingID : int = 0xFFFFFFFF
-    rightSiblingID : int = 0xFFFFFFFF
+    leftSiblingID: int = 0xFFFFFFFF
+    rightSiblingID: int = 0xFFFFFFFF
     # This is the ID for the root of the child tree, if any.
-    childID : int = 0xFFFFFFFF
-    startingSectorLocation : int = 0
-    color : Color = Color.BLACK
+    childID: int = 0xFFFFFFFF
+    startingSectorLocation: int = 0
+    color: Color = Color.BLACK
 
-    clsid : bytes = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
-    data : bytes = b''
+    clsid: bytes = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    data: bytes = b''
 
     def __bytes__(self) -> bytes:
         return self.toBytes()
@@ -96,7 +96,7 @@ class OleWriter:
     Takes data to write to a compound binary format file, as specified in
     [MS-CFB].
     """
-    def __init__(self, rootClsid : bytes = constants.DEFAULT_CLSID):
+    def __init__(self, rootClsid: bytes = constants.DEFAULT_CLSID):
         self.__rootEntry = DirectoryEntry()
         self.__rootEntry.name = "Root Entry"
         self.__rootEntry.type = DirectoryEntryType.ROOT_STORAGE
@@ -104,11 +104,11 @@ class OleWriter:
         # The root entry will always exist, so this must be at least 1.
         self.__dirEntryCount = 1
         self.__dirEntries = {}
-        self.__largeEntries : List[DirectoryEntry] = []
+        self.__largeEntries: List[DirectoryEntry] = []
         self.__largeEntrySectors = 0
         self.__numMinifatSectors = 0
 
-    def __getContainingStorage(self, path : List[str], entryExists : bool = True, create : bool = False) -> Dict:
+    def __getContainingStorage(self, path: List[str], entryExists: bool = True, create: bool = False) -> Dict:
         """
         Finds the storage dict internally where the entry specified by
         :param path: would be created. If :param create: is True, missing
@@ -161,7 +161,7 @@ class OleWriter:
 
         return _dir
 
-    def __getEntry(self, path : List[str]) -> DirectoryEntry:
+    def __getEntry(self, path: List[str]) -> DirectoryEntry:
         """
         Finds and returns an existing DirectoryEntry instance in the writer.
 
@@ -175,7 +175,7 @@ class OleWriter:
         else:
             return item
 
-    def __modifyEntry(self, entry : DirectoryEntry, **kwargs):
+    def __modifyEntry(self, entry: DirectoryEntry, **kwargs):
         """
         Edits the DirectoryEntry with the data provided. Common code used for
         :method addEntry: and :method editEntry:.
@@ -324,7 +324,7 @@ class OleWriter:
 
         return (numFat, numDifat, self.__numberOfSectors + numDifat + numFat)
 
-    def _treeSort(self, startingSector : int) -> List[DirectoryEntry]:
+    def _treeSort(self, startingSector: int) -> List[DirectoryEntry]:
         """
         Uses red-black trees to sort the internal data in preparation for
         writing the file, returning a list, in order, of the entries to write.
@@ -544,7 +544,7 @@ class OleWriter:
         # Finally, return the current sector index for use in other places.
         return numDifat + numFat
 
-    def _writeDirectoryEntries(self, f, startingSector : int) -> List[DirectoryEntry]:
+    def _writeDirectoryEntries(self, f, startingSector: int) -> List[DirectoryEntry]:
         """
         Writes out all the directory entries. Returns the list generated.
         """
@@ -556,7 +556,7 @@ class OleWriter:
 
         return entries
 
-    def _writeDirectoryEntry(self, f, entry : DirectoryEntry) -> None:
+    def _writeDirectoryEntry(self, f, entry: DirectoryEntry) -> None:
         """
         Writes the directory entry to the file f.
         """
@@ -572,7 +572,7 @@ class OleWriter:
             if len(x.data) & 511:
                 f.write(b'\x00' * (512 - (len(x.data) & 511)))
 
-    def _writeMini(self, f, entries : List[DirectoryEntry]) -> None:
+    def _writeMini(self, f, entries: List[DirectoryEntry]) -> None:
         """
         Writes the mini FAT followed by the full mini stream.
         """
@@ -602,7 +602,7 @@ class OleWriter:
         if self.__numMinifatSectors & 7:
             f.write((b'\x00' * 64) * (8 - (self.__numMinifatSectors & 7)))
 
-    def addEntry(self, path : MSG_PATH, data : Optional[Union[bytes, SupportsBytes]] = None, storage : bool = False, **kwargs) -> None:
+    def addEntry(self, path: MSG_PATH, data: Optional[Union[bytes, SupportsBytes]] = None, storage: bool = False, **kwargs) -> None:
         """
         Adds an entry to the OleWriter instance at the path specified, adding
         storages with default settings where necessary. If the entry is not a
@@ -644,7 +644,7 @@ class OleWriter:
         else:
             _dir[path[-1]] = entry
 
-    def addOleEntry(self, path : MSG_PATH, entry : OleDirectoryEntry, data : Optional[Union[bytes, SupportsBytes]] = None) -> None:
+    def addOleEntry(self, path: MSG_PATH, entry: OleDirectoryEntry, data: Optional[Union[bytes, SupportsBytes]] = None) -> None:
         """
         Uses the entry provided to add the data to the writer.
 
@@ -707,7 +707,7 @@ class OleWriter:
         # path does remember the case used.
         del _dir[dictGetCasedKey(_dir, path[-1])]
 
-    def editEntry(self, path : MSG_PATH, **kwargs) -> None:
+    def editEntry(self, path: MSG_PATH, **kwargs) -> None:
         """
         Used to edit values of an entry by setting the specific kwargs. Set a
         value to something other than None to set it.
@@ -738,7 +738,7 @@ class OleWriter:
         # Send it to be modified using the arguments given.
         self.__modifyEntry(entry, **kwargs)
 
-    def fromMsg(self, msg : MSGFile) -> None:
+    def fromMsg(self, msg: MSGFile) -> None:
         """
         Copies the streams and stream information necessary from the MSG file.
         """
@@ -777,7 +777,7 @@ class OleWriter:
             for x in gen:
                 self.addOleEntry(x, msg._getOleEntry(x, prefix = False), msg.getStream(x, prefix = False))
 
-    def fromOleFile(self, ole : OleFileIO, rootPath : MSG_PATH = []) -> None:
+    def fromOleFile(self, ole: OleFileIO, rootPath: MSG_PATH = []) -> None:
         """
         Copies all the streams from the proided OLE file into this writer.
 
@@ -834,7 +834,7 @@ class OleWriter:
 
             self.addOleEntry(x, entry, data)
 
-    def getEntry(self, path : MSG_PATH) -> DirectoryEntry:
+    def getEntry(self, path: MSG_PATH) -> DirectoryEntry:
         """
         Finds and returns a copy of an existing DirectoryEntry instance in the
         writer. Use this method to check the internal status of an entry.
@@ -844,7 +844,7 @@ class OleWriter:
         """
         return copy.copy(self.__getEntry(inputToMsgPath(path)))
 
-    def listItems(self, streams : bool = True, storages : bool = False) -> List[List[str]]:
+    def listItems(self, streams: bool = True, storages: bool = False) -> List[List[str]]:
         """
         Returns a list of the specified items currently in the writter.
 
@@ -874,7 +874,7 @@ class OleWriter:
         paths.sort()
         return paths
 
-    def renameEntry(self, path : MSG_PATH, newName : str) -> None:
+    def renameEntry(self, path: MSG_PATH, newName: str) -> None:
         """
         Changes the name of an entry, leaving it in it's current position.
 
@@ -982,7 +982,7 @@ class OleWriter:
 
 
 
-def _unClsid(clsid : str) -> bytes:
+def _unClsid(clsid: str) -> bytes:
     """
     Converts the clsid from olefile.olefile._clsid back to bytes.
     """

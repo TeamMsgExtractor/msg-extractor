@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from .msg_classes import MSGFile
 
 
-def _getMsgClassInfo(classType : str) -> Tuple[bool, Optional[str]]:
+def _getMsgClassInfo(classType: str) -> Tuple[bool, Optional[str]]:
     """
     Checks if the specified class type is recognized by the module. Usually used
     for checking if a type is simply unsupported rather than unknown.

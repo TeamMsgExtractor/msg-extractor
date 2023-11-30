@@ -15,7 +15,7 @@ class TimeZoneDefinition:
     Structure for PidLidAppointmentTimeZoneDefinitionRecur from [MS-OXOCAL].
     """
 
-    def __init__(self, data : Optional[bytes] = None):
+    def __init__(self, data: Optional[bytes] = None):
         if not data:
             self.__majorVersion = 2
             self.__minorVersion = 1
@@ -62,7 +62,7 @@ class TimeZoneDefinition:
         return self.__keyName
 
     @keyName.setter
-    def keyName(self, value : str) -> None:
+    def keyName(self, value: str) -> None:
         value = str(value)
         if len(value) > 260:
             raise ValueError('Key name must be a string less than 261 characters.')
@@ -77,7 +77,7 @@ class TimeZoneDefinition:
         return self.__majorVersion
 
     @majorVersion.setter
-    def majorVersion(self, value : int) -> None:
+    def majorVersion(self, value: int) -> None:
         if value > 255:
             raise ValueError('Major version cannot be greater than 255')
         if value < 0:
@@ -93,7 +93,7 @@ class TimeZoneDefinition:
         return self.__minorVersion
 
     @minorVersion.setter
-    def minorVersion(self, value : int) -> None:
+    def minorVersion(self, value: int) -> None:
         if value > 255:
             raise ValueError('Minor version cannot be greater than 255')
         if value < 0:

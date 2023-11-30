@@ -21,7 +21,7 @@ class NullDate(datetime.datetime):
         null date should convert back to.
     """
 
-    filetime : Optional[int] = None
+    filetime: Optional[int] = None
 
     def __eq__(self, other) -> bool:
         if isinstance(other, NullDate):

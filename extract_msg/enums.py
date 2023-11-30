@@ -302,7 +302,7 @@ class BodyTypes(enum.IntFlag):
     This is an IntFlag enum, so to check if a body was found use the in operator
     with the body you are checking. For example:
 
-    >>> rtfFound : bool = BodyTypes.RTF in msg.detectedBodies
+    >>> rtfFound: bool = BodyTypes.RTF in msg.detectedBodies
     """
     NONE = 0b000
     PLAIN = 0b001
@@ -589,7 +589,7 @@ class DVAspect(enum.IntEnum):
 
 class ElectronicAddressProperties(enum.IntEnum):
     @classmethod
-    def fromIter(cls, items : Iterable[int]) -> Set[ElectronicAddressProperties]:
+    def fromIter(cls, items: Iterable[int]) -> Set[ElectronicAddressProperties]:
         """
         Uses the iterable of ints to create a set of this enum.
         """
@@ -1302,7 +1302,7 @@ class Gender(enum.IntEnum):
 
 class IconIndex(enum.IntEnum):
     @classmethod
-    def tryMake(cls, value : int) -> Union[IconIndex, int]:
+    def tryMake(cls, value: int) -> Union[IconIndex, int]:
         """
         Try to make an instance, returning the value on failure.
         """
@@ -1640,7 +1640,7 @@ class RecurDOW(enum.IntEnum):
 
 class RecurEndType(enum.IntEnum):
     @classmethod
-    def fromInt(cls, value : int) -> RecurEndType:
+    def fromInt(cls, value: int) -> RecurEndType:
         """
         Some enum values CAN be created from more than one int, so handle that.
         """
@@ -1713,7 +1713,7 @@ class ResponseStatus(enum.IntEnum):
     """
 
     @classmethod
-    def fromIter(cls, items : Iterable[int]) -> List[ResponseStatus]:
+    def fromIter(cls, items: Iterable[int]) -> List[ResponseStatus]:
         """
         Uses the iterable of ints to create a list of this enum.
         """
@@ -1938,7 +1938,7 @@ class TaskRequestType(enum.IntEnum):
     """
 
     @classmethod
-    def fromClassType(cls, classType : str) -> TaskRequestType:
+    def fromClassType(cls, classType: str) -> TaskRequestType:
         """
         Convert a class type string into a TaskRequestType.
         """
@@ -2022,7 +2022,7 @@ class _EnumDeprecator:
     Special class for handling deprecated enums in a way that shouldn't break
     existing code, including code for checking `is` on a member of the enum.
     """
-    def __init__(self, oldClassName : str, newClass : Type[enum.Enum], nameConversion : Dict[str, Any] = {}, valueConversion : Dict = {}):
+    def __init__(self, oldClassName: str, newClass: Type[enum.Enum], nameConversion: Dict[str, Any] = {}, valueConversion: Dict = {}):
         """
         :param oldClassName: The name to use in the deprecation message.
         :param newClass: The new enum class to look for the value in.

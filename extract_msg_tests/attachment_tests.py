@@ -82,8 +82,8 @@ class AttachmentTests(unittest.TestCase):
                     att.getFilename()
 
 
-def _forceAttachmentType(attType : Type[_T]) -> Callable[[MSGFile, str], _T]:
-    def createAttachment(msg : MSGFile, dir_ : str) -> _T:
+def _forceAttachmentType(attType: Type[_T]) -> Callable[[MSGFile, str], _T]:
+    def createAttachment(msg: MSGFile, dir_: str) -> _T:
         propertiesStream = msg.getStream([dir_, '__properties_version1.0'])
         propStore = PropertiesStore(propertiesStream, enums.PropertiesType.ATTACHMENT)
         return attType(msg, dir_, propStore)

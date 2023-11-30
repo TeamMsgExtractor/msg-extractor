@@ -33,7 +33,7 @@ class PropertiesStore:
     Parser for msg properties files.
     """
 
-    def __init__(self, data : Optional[bytes], type_ : PropertiesType, writable : bool = False):
+    def __init__(self, data: Optional[bytes], type_: PropertiesType, writable: bool = False):
         """
         Reads a properties stream or creates a brand new PropertiesStore object.
 
@@ -51,10 +51,10 @@ class PropertiesStore:
         self.__type = type_
 
         # Setup early variables.
-        self.__props : Dict[str, PropBase] = {}
+        self.__props: Dict[str, PropBase] = {}
         # This maps short IDs to all properties that use that ID. More than one
         # property with the same ID but a different type may exist.
-        self.__idMapping : Dict[str, List[str]] = {}
+        self.__idMapping: Dict[str, List[str]] = {}
         self.__naid = None
         self.__nrid = None
         self.__ac = None
@@ -107,10 +107,10 @@ class PropertiesStore:
     def __bytes__(self) -> bytes:
         return self.toBytes()
 
-    def __contains__(self, key : Any) -> bool:
+    def __contains__(self, key: Any) -> bool:
         return self.__props.__contains__(key)
 
-    def __delitem__(self, key : str) -> None:
+    def __delitem__(self, key: str) -> None:
         """
         Removes an item using the del operator.
 
@@ -132,7 +132,7 @@ class PropertiesStore:
         if len(self.__idMapping[shortKey]) == 0:
             del self.__idMapping[shortKey]
 
-    def __getitem__(self, key : Union[str, int]) -> PropBase:
+    def __getitem__(self, key: Union[str, int]) -> PropBase:
         if (found := self._mapId(key)):
             return self.__props.__getitem__(found)
         raise KeyError(key)
@@ -149,7 +149,7 @@ class PropertiesStore:
     def __repr__(self) -> str:
         return self.__props.__repr__()
 
-    def _mapId(self, id_ : Union[int, str]) -> str:
+    def _mapId(self, id_: Union[int, str]) -> str:
         """
         Converts an input into an appropriate property ID.
 
@@ -185,7 +185,7 @@ class PropertiesStore:
 
         return self.__idMapping.get(id_, ('',))[0]
 
-    def addProperty(self, prop : PropBase, force : bool = False) -> None:
+    def addProperty(self, prop: PropBase, force: bool = False) -> None:
         """
         Adds the property if it does not exist.
 
@@ -205,7 +205,7 @@ class PropertiesStore:
         self.__props[prop.name.upper()] = prop
         self.__idMapping.setdefault(prop.name[:4], list()).append(prop.name.upper())
 
-    def get(self, name : Union[str, int], default : _T = None) -> Union[PropBase, _T]:
+    def get(self, name: Union[str, int], default: _T = None) -> Union[PropBase, _T]:
         """
         Retrieve the property of :param name:. Returns the value of
         :param default: if the property could not be found.
@@ -215,7 +215,7 @@ class PropertiesStore:
         else:
             return default
 
-    def getProperties(self, id_ : Union[str, int]) -> List[PropBase]:
+    def getProperties(self, id_: Union[str, int]) -> List[PropBase]:
         """
         Gets all properties with the specified ID.
 
@@ -235,7 +235,7 @@ class PropertiesStore:
 
         return [self[x] for x in self.__idMapping.get(id_, [])]
 
-    def getValue(self, name : Union[str, int], default : _T = None) -> Union[Any, _T]:
+    def getValue(self, name: Union[str, int], default: _T = None) -> Union[Any, _T]:
         """
         Attempts to get the first property
         """
@@ -281,7 +281,7 @@ class PropertiesStore:
         """
         pprint.pprint(sorted(self.__props.keys()))
 
-    def removeProperty(self, nameOrProp : Union[str, PropBase]) -> None:
+    def removeProperty(self, nameOrProp: Union[str, PropBase]) -> None:
         """
         Removes the property by name or by instance.
 
@@ -338,7 +338,7 @@ class PropertiesStore:
         return self.__ac
 
     @attachmentCount.setter
-    def attachmentCount(self, value : int) -> None:
+    def attachmentCount(self, value: int) -> None:
         if not self.__writable:
             raise NotWritableError('PropertiesStore object is not writable.')
 
@@ -391,7 +391,7 @@ class PropertiesStore:
         return self.__naid
 
     @nextAttachmentId.setter
-    def nextAttachmentId(self, value : int) -> None:
+    def nextAttachmentId(self, value: int) -> None:
         if not self.__writable:
             raise NotWritableError('PropertiesStore object is not writable.')
 
@@ -417,7 +417,7 @@ class PropertiesStore:
         return self.__nrid
 
     @nextRecipientId.setter
-    def nextRecipientId(self, value : int) -> None:
+    def nextRecipientId(self, value: int) -> None:
         if not self.__writable:
             raise NotWritableError('PropertiesStore object is not writable.')
 
@@ -449,7 +449,7 @@ class PropertiesStore:
         return self.__rc
 
     @recipientCount.setter
-    def recipientCount(self, value : int) -> None:
+    def recipientCount(self, value: int) -> None:
         if not self.__writable:
             raise NotWritableError('PropertiesStore object is not writable.')
 

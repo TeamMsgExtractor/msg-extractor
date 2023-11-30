@@ -12,14 +12,14 @@ class SystemTime:
     """
     A SYSTEMTIME struct, as defined in [MS-DTYP].
     """
-    def __init__(self, data : Optional[bytes] = None):
+    def __init__(self, data: Optional[bytes] = None):
         data = data or (b'\x00' * 16)
         self.unpack(data)
 
-    def __eq__(self, other : Any) -> bool:
+    def __eq__(self, other: Any) -> bool:
         return isinstance(other, SystemTime) and bytes(self) == bytes(other)
 
-    def __ne__(self, other : Any) -> bool:
+    def __ne__(self, other: Any) -> bool:
         return not self.__eq__(other)
 
     def __bytes__(self) -> bytes:
@@ -38,7 +38,7 @@ class SystemTime:
                                                self.__second,
                                                self.__milliseconds)
 
-    def unpack(self, data : bytes) -> None:
+    def unpack(self, data: bytes) -> None:
         """
         Fills out the fields of this instance by unpacking the bytes.
         """
@@ -57,7 +57,7 @@ class SystemTime:
         return self.__day
 
     @day.setter
-    def day(self, value : int) -> None:
+    def day(self, value: int) -> None:
         if value < 0:
             raise ValueError('Day must be positive.')
         if value > 0xFFFF:
@@ -70,7 +70,7 @@ class SystemTime:
         return self.__dayOfWeek
 
     @dayOfWeek.setter
-    def dayOfWeek(self, value : int) -> None:
+    def dayOfWeek(self, value: int) -> None:
         if value < 0:
             raise ValueError('Day of week must be positive.')
         if value > 0xFFFF:
@@ -83,7 +83,7 @@ class SystemTime:
         return self.__hour
 
     @hour.setter
-    def hour(self, value : int) -> None:
+    def hour(self, value: int) -> None:
         if value < 0:
             raise ValueError('Hour must be positive.')
         if value > 0xFFFF:
@@ -96,7 +96,7 @@ class SystemTime:
         return self.__milliseconds
 
     @milliseconds.setter
-    def milliseconds(self, value : int) -> None:
+    def milliseconds(self, value: int) -> None:
         if value < 0:
             raise ValueError('Milliseconds must be positive.')
         if value > 0xFFFF:
@@ -109,7 +109,7 @@ class SystemTime:
         return self.__minute
 
     @minute.setter
-    def minute(self, value : int) -> None:
+    def minute(self, value: int) -> None:
         if value < 0:
             raise ValueError('Minute must be positive.')
         if value > 0xFFFF:
@@ -122,7 +122,7 @@ class SystemTime:
         return self.__month
 
     @month.setter
-    def month(self, value : int) -> None:
+    def month(self, value: int) -> None:
         if value < 0:
             raise ValueError('Month must be positive.')
         if value > 0xFFFF:
@@ -135,7 +135,7 @@ class SystemTime:
         return self.__second
 
     @second.setter
-    def second(self, value : int) -> None:
+    def second(self, value: int) -> None:
         if value < 0:
             raise ValueError('Second must be positive.')
         if value > 0xFFFF:
@@ -148,7 +148,7 @@ class SystemTime:
         return self.__year
 
     @year.setter
-    def year(self, value : int) -> None:
+    def year(self, value: int) -> None:
         if value < 0:
             raise ValueError('Year must be positive.')
         if value > 0xFFFF:

@@ -81,7 +81,7 @@ class MessageBase(MSGFile):
         # if an error occurs.
         try:
             self.__headerInit = False
-            self.__recipientSeparator : str = kwargs.get('recipientSeparator', ';')
+            self.__recipientSeparator: str = kwargs.get('recipientSeparator', ';')
             self.__deencap = kwargs.get('deencapsulationFunc')
             self.header
 
@@ -99,7 +99,7 @@ class MessageBase(MSGFile):
                 pass
             raise
 
-    def _genRecipient(self, recipientStr : str, recipientType : RecipientType) -> Optional[str]:
+    def _genRecipient(self, recipientStr: str, recipientType: RecipientType) -> Optional[str]:
         """
         Returns the specified recipient field.
         """
@@ -191,7 +191,7 @@ class MessageBase(MSGFile):
 
         return ret
 
-    def deencapsulateBody(self, rtfBody : bytes, bodyType : DeencapType) -> Optional[Union[bytes, str]]:
+    def deencapsulateBody(self, rtfBody: bytes, bodyType: DeencapType) -> Optional[Union[bytes, str]]:
         """
         A function to deencapsulate the specified body from the rtfBody. Returns
         a string for plain text and bytes for HTML. If specified, uses the
@@ -245,7 +245,7 @@ class MessageBase(MSGFile):
         print('Body:')
         print(self.body)
 
-    def getInjectableHeader(self, prefix : str, joinStr : str, suffix : str, formatter : Callable[[str, str], str]) -> str:
+    def getInjectableHeader(self, prefix: str, joinStr: str, suffix: str, formatter: Callable[[str, str], str]) -> str:
         """
         Using the specified prefix, suffix, formatter, and join string,
         generates the injectable header. Prefix is placed at the beginning,
@@ -333,12 +333,12 @@ class MessageBase(MSGFile):
         prefix = ''
         suffix = crlf + '-----------------' + crlf + crlf
         joinStr = crlf
-        formatter = (lambda name, value : f'{name}: {value}')
+        formatter = (lambda name, value: f'{name}: {value}')
 
         header = self.getInjectableHeader(prefix, joinStr, suffix, formatter).encode('utf-8')
         return header + inputToBytes(self.body, 'utf-8')
 
-    def getSaveHtmlBody(self, preparedHtml : bool = False, charset : str = 'utf-8', **_) -> bytes:
+    def getSaveHtmlBody(self, preparedHtml: bool = False, charset: str = 'utf-8', **_) -> bytes:
         """
         Returns the HTML body that will be used in saving based on the
         arguments.
@@ -454,7 +454,7 @@ class MessageBase(MSGFile):
         # Inject the header into the data.
         return self.injectRtfHeader()
 
-    def injectHtmlHeader(self, prepared : bool = False) -> bytes:
+    def injectHtmlHeader(self, prepared: bool = False) -> bytes:
         """
         Returns the HTML body from the MSG file (will check that it has one) with
         the HTML header injected into it.
@@ -1177,7 +1177,7 @@ class MessageBase(MSGFile):
         prefix = '<div id="injectedHeader"><div><p class="MsoNormal">'
         suffix = '<o:p></o:p></p></div></div>'
         joinStr = '<br/>'
-        formatter = (lambda name, value : f'<b>{name}:</b>&nbsp;{inputToString(htmlSanitize(value), self.stringEncoding)}')
+        formatter = (lambda name, value: f'<b>{name}:</b>&nbsp;{inputToString(htmlSanitize(value), self.stringEncoding)}')
 
         return self.getInjectableHeader(prefix, joinStr, suffix, formatter)
 
@@ -1287,7 +1287,7 @@ class MessageBase(MSGFile):
         prefix = r'\htmlrtf {\htmlrtf0 {\*\htmltag96 <div>}{\*\htmltag96 <div>}{\*\htmltag64 <p class=MsoNormal>}'
         suffix = r'{\*\htmltag244 <o:p>}{\*\htmlrag252 </o:p>}\htmlrtf \par\par\htmlrtf0 {\*\htmltag72 </p>}{\*\htmltag104 </div>}{\*\htmltag104 </div>}\htmlrtf }\htmlrtf0 '
         joinStr = r'{\*\htmltag116 <br />}\htmlrtf \line\htmlrtf0 '
-        formatter = (lambda name, value : fr'\htmlrtf {{\b\htmlrtf0{{\*\htmltag84 <b>}}{name}: {{\*\htmltag92 </b>}}\htmlrtf \b0\htmlrtf0 {inputToString(rtfSanitizeHtml(value), self.stringEncoding)}\htmlrtf }}\htmlrtf0')
+        formatter = (lambda name, value: fr'\htmlrtf {{\b\htmlrtf0{{\*\htmltag84 <b>}}{name}: {{\*\htmltag92 </b>}}\htmlrtf \b0\htmlrtf0 {inputToString(rtfSanitizeHtml(value), self.stringEncoding)}\htmlrtf }}\htmlrtf0')
 
         return self.getInjectableHeader(prefix, joinStr, suffix, formatter).encode('utf-8')
 
@@ -1300,7 +1300,7 @@ class MessageBase(MSGFile):
         prefix = '{'
         suffix = '\\par\\par}'
         joinStr = '\\line'
-        formatter = (lambda name, value : fr'{{\b {name}: \b0 {inputToString(rtfSanitizePlain(value), self.stringEncoding)}}}')
+        formatter = (lambda name, value: fr'{{\b {name}: \b0 {inputToString(rtfSanitizePlain(value), self.stringEncoding)}}}')
 
         return self.getInjectableHeader(prefix, joinStr, suffix, formatter).encode('utf-8')
 

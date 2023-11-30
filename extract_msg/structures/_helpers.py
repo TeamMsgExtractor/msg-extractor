@@ -23,7 +23,7 @@ class BytesReader(io.BytesIO):
     stream.
     """
 
-    def __init__(self, *args, littleEndian : bool = True, **kwargs):
+    def __init__(self, *args, littleEndian: bool = True, **kwargs):
         super().__init__(*args, **kwargs)
         self.__le = bool(littleEndian)
         if self.__le:
@@ -49,7 +49,7 @@ class BytesReader(io.BytesIO):
             self.__float_t = constants.st.ST_BE_F32
             self.__double_t = constants.st.ST_BE_F64
 
-    def _readDecodedString(self, encoding : str, width : int = 1) -> str:
+    def _readDecodedString(self, encoding: str, width: int = 1) -> str:
         """
         Reads a null terminated string with the specified character width
         decoded using the specified encoding. If it cannot be read or cannot be
@@ -63,7 +63,7 @@ class BytesReader(io.BytesIO):
                 self.seek(position)
             raise
 
-    def assertNull(self, length : int, errorMsg : Optional[str] = None) -> bytes:
+    def assertNull(self, length: int, errorMsg: Optional[str] = None) -> bytes:
         """
         Reads the number of bytes specified and ensures they are all null.
 
@@ -93,7 +93,7 @@ class BytesReader(io.BytesIO):
 
         return valueRead
 
-    def assertRead(self, value : bytes, errorMsg : Optional[str] = None) -> bytes:
+    def assertRead(self, value: bytes, errorMsg: Optional[str] = None) -> bytes:
         """
         Reads the number of bytes and compares them to the value provided. If it
         does not match, throws a value error.
@@ -151,7 +151,7 @@ class BytesReader(io.BytesIO):
         else:
             raise IOError('Not enough bytes left in buffer.')
 
-    def readByteString(self, width : int = 1) -> bytes:
+    def readByteString(self, width: int = 1) -> bytes:
         """
         Reads a string of bytes until it finds the null character, returning
         everything before that and consuming the null. Unlike other string
@@ -182,7 +182,7 @@ class BytesReader(io.BytesIO):
                 # Otherwise add the character to our string.
                 string += nextChar
 
-    def readClass(self, _class : Type[_T]) -> _T:
+    def readClass(self, _class: Type[_T]) -> _T:
         """
         Takes anything with a __SIZE__ property and a call function that takes
         a single bytes argument and returns the result of that function.
@@ -249,7 +249,7 @@ class BytesReader(io.BytesIO):
         else:
             raise IOError('Not enough bytes left in buffer.')
 
-    def readStruct(self, _struct : Union[struct.Struct, Any]) -> Tuple[Any, ...]:
+    def readStruct(self, _struct: Union[struct.Struct, Any]) -> Tuple[Any, ...]:
         """
         Read enough bytes for a struct and unpack it, returning the tuple of
         values.
@@ -326,7 +326,7 @@ class BytesReader(io.BytesIO):
         """
         return self._readDecodedString('utf-32-le' if self.__le else 'utf-32-be', 4)
 
-    def tryReadBytes(self, size : int) -> bytes:
+    def tryReadBytes(self, size: int) -> bytes:
         """
         Tries to read the specified number of bytes, returning b'' if not
         possible. Will only change the position of the read pointer if reading

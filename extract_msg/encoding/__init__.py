@@ -239,7 +239,7 @@ _CODE_PAGES = {
 
 # Register new encodings.
 
-def lookupCodePage(id_ : int) -> str:
+def lookupCodePage(id_: int) -> str:
     """
     Converts an encoding id into it's name.
 

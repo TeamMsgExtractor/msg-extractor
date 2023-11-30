@@ -35,9 +35,9 @@ from ...exceptions import FeatureNotImplemented
 
 
 # Create a way to register handlers.
-_knownHandlers : List[Type[CustomAttachmentHandler]] = []
+_knownHandlers: List[Type[CustomAttachmentHandler]] = []
 
-def registerHandler(handler : Type[CustomAttachmentHandler]) -> None:
+def registerHandler(handler: Type[CustomAttachmentHandler]) -> None:
     """
     Registers the CustomAttachmentHandler subclass as a handler.
 
@@ -63,7 +63,7 @@ if TYPE_CHECKING:
 
 
 # Function designed to route to the correct handler.
-def getHandler(attachment : AttachmentBase) -> CustomAttachmentHandler:
+def getHandler(attachment: AttachmentBase) -> CustomAttachmentHandler:
     """
     Takes an attachment and uses it to find the correct handler.
 

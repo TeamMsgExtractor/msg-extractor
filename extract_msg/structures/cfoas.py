@@ -11,7 +11,7 @@ from ..enums import ClipboardFormat
 
 
 class ClipboardFormatOrAnsiString:
-    def __init__(self, reader : Optional[Union[bytes, BytesReader]] = None):
+    def __init__(self, reader: Optional[Union[bytes, BytesReader]] = None):
         if reader is None:
             self.__markerOrLength = 0
             self.__clipboardFormat = None
@@ -55,7 +55,7 @@ class ClipboardFormatOrAnsiString:
         return self.__ansiString
 
     @ansiString.setter
-    def ansiString(self, val : bytes) -> None:
+    def ansiString(self, val: bytes) -> None:
         if not val:
             raise ValueError('Cannot set :property ansiString: to None or empty bytes.')
 
@@ -72,7 +72,7 @@ class ClipboardFormatOrAnsiString:
         return self.__clipboardFormat
 
     @clipboardFormat.setter
-    def clipboardFormat(self, val : ClipboardFormat) -> None:
+    def clipboardFormat(self, val: ClipboardFormat) -> None:
         if not val:
             raise ValueError('Cannot set clipboard format to None.')
         if self.markerOrLength < 0xFFFFFFFE:
@@ -91,7 +91,7 @@ class ClipboardFormatOrAnsiString:
         return self.__markerOrLength
 
     @markerOrLength.setter
-    def markerOrLength(self, val : int) -> None:
+    def markerOrLength(self, val: int) -> None:
         if val < 0:
             raise ValueError(':property markerOrLength: must be a positive integer.')
         if val > 0xFFFFFFFF:

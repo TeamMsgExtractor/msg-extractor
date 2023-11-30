@@ -19,7 +19,7 @@ class OleStreamStruct:
     As such, only some of the fields are ever present.
     """
 
-    def __init__(self, data : Optional[bytes] = None):
+    def __init__(self, data: Optional[bytes] = None):
         """
         :raises TypeError: The data given is not for an embedded object.
         """
@@ -71,7 +71,7 @@ class OleStreamStruct:
         return self.__flags
 
     @flags.setter
-    def flags(self, value : int) -> None:
+    def flags(self, value: int) -> None:
         if not isinstance(value, int):
             raise TypeError(':property flags: MUST be an int.')
         if value != 0 and value != 0x1000:
@@ -90,7 +90,7 @@ class OleStreamStruct:
         return self.__linkUpdateOption
 
     @linkUpdateOption.setter
-    def linkUpdateOption(self, value : int) -> None:
+    def linkUpdateOption(self, value: int) -> None:
         if not isinstance(value, int):
             raise TypeError(':property linkUpdateOption: MUST be an int.')
         if value < 0:
@@ -108,7 +108,7 @@ class OleStreamStruct:
         return self.__rms
 
     @reservedMonikerStream.setter
-    def reservedMonikerStream(self, data : Optional[MonikerStream]) -> None:
+    def reservedMonikerStream(self, data: Optional[MonikerStream]) -> None:
         if data is not None and not isinstance(data, MonikerStream):
             raise TypeError('Reserved moniker stream must be a MonikerStream instance or None.')
 

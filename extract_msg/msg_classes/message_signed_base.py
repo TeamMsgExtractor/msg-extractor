@@ -28,7 +28,7 @@ class MessageSignedBase(MessageBase, Generic[_T]):
     Base class for Message like msg files.
     """
 
-    def __init__(self, path, signedAttachmentClass : Type[_T] = SignedAttachment, **kwargs):
+    def __init__(self, path, signedAttachmentClass: Type[_T] = SignedAttachment, **kwargs):
         """
         Supports all of the options from :method MessageBase.__init__: with some
         additional ones.

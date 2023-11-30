@@ -38,7 +38,7 @@ class Recipient(Generic[_RT]):
     Contains the data of one of the recipients in an MSG file.
     """
 
-    def __init__(self, _dir : str, msg : MSGFile, recipientTypeClass : Type[_RT]):
+    def __init__(self, _dir: str, msg: MSGFile, recipientTypeClass: Type[_RT]):
         self.__msg = weakref.ref(msg) # Allows calls to original msg file.
         self.__dir = _dir
         if not self.exists('__properties_version1.0'):
@@ -55,7 +55,7 @@ class Recipient(Generic[_RT]):
         self.__type = recipientTypeClass(0xF & self.__typeFlags)
         self.__formatted = f'{self.__name} <{self.__email}>'
 
-    def exists(self, filename : MSG_PATH) -> bool:
+    def exists(self, filename: MSG_PATH) -> bool:
         """
         Checks if stream exists inside the recipient folder.
 
@@ -66,7 +66,7 @@ class Recipient(Generic[_RT]):
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.exists([self.__dir, msgPathToString(filename)])
 
-    def sExists(self, filename : MSG_PATH) -> bool:
+    def sExists(self, filename: MSG_PATH) -> bool:
         """
         Checks if the string stream exists inside the recipient folder.
 
@@ -90,7 +90,7 @@ class Recipient(Generic[_RT]):
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.existsTypedProperty(id, self.__dir, _type, True, self.__props)
 
-    def getMultipleBinary(self, filename : MSG_PATH) -> Optional[List[bytes]]:
+    def getMultipleBinary(self, filename: MSG_PATH) -> Optional[List[bytes]]:
         """
         Gets a multiple binary property as a list of bytes objects.
 
@@ -105,7 +105,7 @@ class Recipient(Generic[_RT]):
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.getMultipleBinary([self.__dir, msgPathToString(filename)])
 
-    def getMultipleString(self, filename : MSG_PATH) -> Optional[List[str]]:
+    def getMultipleString(self, filename: MSG_PATH) -> Optional[List[str]]:
         """
         Gets a multiple string property as a list of str objects.
 
@@ -120,7 +120,7 @@ class Recipient(Generic[_RT]):
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.getMultipleString([self.__dir, msgPathToString(filename)])
 
-    def getPropertyAs(self, propertyName : Union[int, str], overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
+    def getPropertyAs(self, propertyName: Union[int, str], overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the property, setting the class if found.
 
@@ -137,7 +137,7 @@ class Recipient(Generic[_RT]):
 
         return value
 
-    def getPropertyVal(self, name : Union[int, str], default : _T = None) -> Union[Any, _T]:
+    def getPropertyVal(self, name: Union[int, str], default: _T = None) -> Union[Any, _T]:
         """
         instance.props.getValue(name, default)
 
@@ -145,7 +145,7 @@ class Recipient(Generic[_RT]):
         """
         return self.props.getValue(name, default)
 
-    def getSingleOrMultipleBinary(self, filename : MSG_PATH) -> Optional[Union[List[bytes], bytes]]:
+    def getSingleOrMultipleBinary(self, filename: MSG_PATH) -> Optional[Union[List[bytes], bytes]]:
         """
         A combination of :method getStringStream: and
         :method getMultipleString:.
@@ -164,7 +164,7 @@ class Recipient(Generic[_RT]):
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.getSingleOrMultipleBinary([self.__dir, msgPathToString(filename)])
 
-    def getSingleOrMultipleString(self, filename : MSG_PATH) -> Optional[Union[List[str], str]]:
+    def getSingleOrMultipleString(self, filename: MSG_PATH) -> Optional[Union[List[str], str]]:
         """
         A combination of :method getStringStream: and
         :method getMultipleString:.
@@ -183,7 +183,7 @@ class Recipient(Generic[_RT]):
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.getSingleOrMultipleString([self.__dir, msgPathToString(filename)])
 
-    def getStream(self, filename : MSG_PATH) -> Optional[bytes]:
+    def getStream(self, filename: MSG_PATH) -> Optional[bytes]:
         """
         Gets a binary representation of the requested stream.
 
@@ -197,7 +197,7 @@ class Recipient(Generic[_RT]):
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.getStream([self.__dir, msgPathToString(filename)])
 
-    def getStreamAs(self, streamID : MSG_PATH, overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
+    def getStreamAs(self, streamID: MSG_PATH, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the specified stream, modifying it to the specified class if it
         is found.
@@ -215,7 +215,7 @@ class Recipient(Generic[_RT]):
 
         return value
 
-    def getStringStream(self, filename : MSG_PATH) -> Optional[str]:
+    def getStringStream(self, filename: MSG_PATH) -> Optional[str]:
         """
         Gets a string representation of the requested stream.
 
@@ -233,7 +233,7 @@ class Recipient(Generic[_RT]):
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
         return msg.getStringStream([self.__dir, msgPathToString(filename)])
 
-    def getStringStreamAs(self, streamID : MSG_PATH, overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
+    def getStringStreamAs(self, streamID: MSG_PATH, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the specified string stream, modifying it to the specified
         class if it is found.
@@ -251,7 +251,7 @@ class Recipient(Generic[_RT]):
 
         return value
 
-    def listDir(self, streams : bool = True, storages : bool = False) -> List[List[str]]:
+    def listDir(self, streams: bool = True, storages: bool = False) -> List[List[str]]:
         """
         Lists the streams and or storages that exist in the attachment
         directory.
@@ -264,7 +264,7 @@ class Recipient(Generic[_RT]):
         return [path[1:] for path in msg.listDir(streams, storages, False)
                 if len(path) > 1 and path[0] == self.__dir]
 
-    def slistDir(self, streams : bool = True, storages : bool = False) -> List[str]:
+    def slistDir(self, streams: bool = True, storages: bool = False) -> List[str]:
         """
         Like listDir, except it returns the paths as strings.
         """

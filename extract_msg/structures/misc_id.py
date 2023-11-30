@@ -24,9 +24,9 @@ class FolderID:
     A Folder ID structure specified in [MS-OXCDATA].
     """
 
-    __SIZE__ : int = 16
+    __SIZE__: int = 16
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         self.__rawData = data
         self.__replicaID = constants.st.ST_LE_UI16.unpack(data[:2])[0]
         # This entry is 6 bytes, so we pull some shenanigans to unpack it.
@@ -59,7 +59,7 @@ class GlobalObjectID:
     A GlobalObjectID structure, as specified in [MS-OXOCAL].
     """
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         self.__rawData = data
         reader = BytesReader(data)
         expectedBytes = b'\x04\x00\x00\x00\x82\x00\xE0\x00\x74\xC5\xB7\x10\x1A\x82\xE0\x08'
@@ -135,9 +135,9 @@ class MessageID:
     A Message ID structure, as defined in [MS-OXCDATA].
     """
 
-    __SIZE__ : int = 8
+    __SIZE__: int = 8
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         self.__rawData = data
         self.__replicaID = constants.st.ST_LE_UI16.unpack(data[:2])[0]
         # This entry is 6 bytes, so we pull some shenanigans to unpack it.
@@ -176,7 +176,7 @@ class ServerID:
     """
     Class representing a PtypServerId.
     """
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         """
         :param data: The data to use to create the ServerID.
 

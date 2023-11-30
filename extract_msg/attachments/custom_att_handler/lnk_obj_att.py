@@ -32,7 +32,7 @@ class LinkedObjectAttachment(CustomAttachmentHandler):
     I've also only seen this on Journal objects thus far.
     """
 
-    def __init__(self, attachment : AttachmentBase):
+    def __init__(self, attachment: AttachmentBase):
         super().__init__(attachment)
         stream = attachment.getStream('__substg1.0_3701000D/\x03MailStream')
         if not stream:
@@ -41,7 +41,7 @@ class LinkedObjectAttachment(CustomAttachmentHandler):
             raise ValueError('MailStream is the wrong length.')
 
     @classmethod
-    def isCorrectHandler(cls, attachment : AttachmentBase) -> bool:
+    def isCorrectHandler(cls, attachment: AttachmentBase) -> bool:
         if attachment.clsid != '00020D09-0000-0000-C000-000000000046':
             return False
 

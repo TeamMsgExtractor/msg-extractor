@@ -8,7 +8,7 @@ from typing import final, Optional
 
 @final
 class MonikerStream:
-    def __init__(self, data : Optional[bytes] = None):
+    def __init__(self, data: Optional[bytes] = None):
         if data:
             self.__clsid = data[:16]
             self.__streamData = data[16:]
@@ -31,7 +31,7 @@ class MonikerStream:
         return self.__clsid
 
     @clsid.setter
-    def clsid(self, data : bytes) -> None:
+    def clsid(self, data: bytes) -> None:
         if not isinstance(data, bytes):
             raise TypeError('CLSID MUST be bytes.')
         if len(data) != 16:
@@ -47,7 +47,7 @@ class MonikerStream:
         return self.__streamData
 
     @streamData.setter
-    def streamData(self, data : bytes) -> None:
+    def streamData(self, data: bytes) -> None:
         if not isinstance(data, bytes):
             raise TypeError('Stream data MUST be bytes.')
 

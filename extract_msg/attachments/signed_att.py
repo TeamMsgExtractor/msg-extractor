@@ -30,7 +30,7 @@ logger.addHandler(logging.NullHandler())
 
 
 class SignedAttachment:
-    def __init__(self, msg, data : bytes, name : str, mimetype : str, node : email.message.Message):
+    def __init__(self, msg, data: bytes, name: str, mimetype: str, node: email.message.Message):
         """
         :param msg: The msg file this attachment is associated with.
         :param data: The bytes that compose this attachment.

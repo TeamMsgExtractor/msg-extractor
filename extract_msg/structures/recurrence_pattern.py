@@ -14,7 +14,7 @@ class RecurrencePattern:
     A RecurrencePattern structure, as specified in [MS-OXOCAL].
     """
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         self.__rawData = data
         reader = BytesReader(data)
         self.__readerVersion = reader.readUnsignedShort()

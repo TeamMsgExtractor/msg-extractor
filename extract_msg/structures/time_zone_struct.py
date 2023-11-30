@@ -14,7 +14,7 @@ class TimeZoneStruct:
     A TimeZoneStruct, as specified in [MS-OXOCAL].
     """
 
-    def __init__(self, data : Optional[bytes] = None):
+    def __init__(self, data: Optional[bytes] = None):
         if not data:
             self.__bias = 0
             self.__standardBias = 0

@@ -43,8 +43,8 @@ from ..properties.named import Named, NamedProperties
 from ..properties.properties_store import PropertiesStore
 from ..structures.contact_link_entry import ContactLinkEntry
 from ..utils import (
-        divide, guessEncoding, hasLen, inputToMsgPath, makeWeakRef,
-        msgPathToString, parseType, verifyPropertyId, verifyType
+        divide, guessEncoding, inputToMsgPath, makeWeakRef, msgPathToString,
+        parseType, verifyPropertyId, verifyType
     )
 
 
@@ -59,7 +59,7 @@ class MSGFile:
     Parser for .msg files.
     """
 
-    filename : Optional[str]
+    filename: Optional[str]
 
     def __init__(self, path, **kwargs):
         """
@@ -110,8 +110,8 @@ class MSGFile:
         specific exceptions was raised.
         """
         # Retrieve all the kwargs that we need.
-        self.__inscFeat : InsecureFeatures = kwargs.get('insecureFeatures', InsecureFeatures.NONE)
-        prefix : str = cast(str, kwargs.get('prefix', ''))
+        self.__inscFeat: InsecureFeatures = kwargs.get('insecureFeatures', InsecureFeatures.NONE)
+        prefix: str = cast(str, kwargs.get('prefix', ''))
         self.__parentMsg = makeWeakRef(cast(MSGFile, kwargs.get('parentMsg')))
         self.__treePath = kwargs.get('treePath', []) + [weakref.ref(self)]
         # Verify it is a valid class.
@@ -129,7 +129,7 @@ class MSGFile:
         self.__dateFormat = kwargs.get('dateFormat', DATE_FORMAT)
         self.__dtFormat = kwargs.get('datetimeFormat', DT_FORMAT)
 
-        self.__listDirRes : Dict[Tuple[bool, bool, bool], List[List[str]]] = {}
+        self.__listDirRes: Dict[Tuple[bool, bool, bool], List[List[str]]] = {}
 
         if self.__parentMsg:
             # We should be able to directly access the private variables of
@@ -203,7 +203,7 @@ class MSGFile:
                 filename = self.getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix = False)
             if filename:
                 self.filename = filename
-            elif hasLen(path):
+            elif hasattr(path, '__len__'):
                 if len(path) < 1536:
                     self.filename = str(path)
                 else:
@@ -235,7 +235,7 @@ class MSGFile:
     def __exit__(self, *_) -> None:
         self.close()
 
-    def _getOleEntry(self, filename : MSG_PATH, prefix : bool = True) -> olefile.olefile.OleDirectoryEntry:
+    def _getOleEntry(self, filename: MSG_PATH, prefix: bool = True) -> olefile.olefile.OleDirectoryEntry:
         """
         Finds the directory entry from the olefile for the stream or storage
         specified. Use '/' to get the root entry.
@@ -251,7 +251,7 @@ class MSGFile:
 
         return self.__ole.direntries[sid]
 
-    def _getTypedAs(self, _id : str, overrideClass = None, preserveNone : bool = True):
+    def _getTypedAs(self, _id: str, overrideClass = None, preserveNone: bool = True):
         """
         Like the other get as functions, but designed for when something
         could be multiple types (where only one will be present). This way you
@@ -273,7 +273,7 @@ class MSGFile:
 
         return value
 
-    def _getTypedData(self, _id : str, _type = None, prefix : bool = True):
+    def _getTypedData(self, _id: str, _type = None, prefix: bool = True):
         """
         Gets the data for the specified id as the type that it is supposed to
         be. :param id: MUST be a 4 digit hexadecimal string.
@@ -291,7 +291,7 @@ class MSGFile:
             found, result = self._getTypedProperty(_id, _type)
             return result if found else None
 
-    def _getTypedProperty(self, propertyID : str, _type = None) -> Tuple[bool, Optional[Any]]:
+    def _getTypedProperty(self, propertyID: str, _type = None) -> Tuple[bool, Optional[Any]]:
         """
         Gets the property with the specified id as the type that it is supposed
         to be. :param id: MUST be a 4 digit hexadecimal string.
@@ -312,7 +312,7 @@ class MSGFile:
 
         return True, ret
 
-    def _getTypedStream(self, filename : MSG_PATH, prefix : bool = True, _type : Optional[str] = None) -> Tuple[bool, Optional[Any]]:
+    def _getTypedStream(self, filename: MSG_PATH, prefix: bool = True, _type: Optional[str] = None) -> Tuple[bool, Optional[Any]]:
         """
         Gets the contents of the specified stream as the type that it is
         supposed to be.
@@ -338,7 +338,7 @@ class MSGFile:
                     continue
                 if len(contents) == 0:
                     return True, None # We found the file, but it was empty.
-                extras : List[bytes]= []
+                extras: List[bytes]= []
                 _type = x[-4:]
                 if x[-4] == '1': # It's a multiple
                     if _type in ('101F', '101E'):
@@ -364,7 +364,7 @@ class MSGFile:
                 return True, parseType(int(_type, 16), contents, self.stringEncoding, extras)
         return False, None # We didn't find the stream.
 
-    def _oleListDir(self, streams : bool = True, storages : bool = False) -> List[List[str]]:
+    def _oleListDir(self, streams: bool = True, storages: bool = False) -> List[List[str]]:
         """
         Calls :method OleFileIO.listdir: from the OleFileIO instance associated
         with this MSG file. Useful for if you need access to all the top level
@@ -393,21 +393,21 @@ class MSGFile:
                 print('Directory: ' + str(dir_[:-1]))
                 print(f'Contents: {self.getStream(dir_)}')
 
-    def exists(self, inp : MSG_PATH, prefix : bool = True) -> bool:
+    def exists(self, inp: MSG_PATH, prefix: bool = True) -> bool:
         """
         Checks if :param inp: exists in the msg file.
         """
         inp = self.fixPath(inp, prefix)
         return self.__ole.exists(inp)
 
-    def sExists(self, inp : MSG_PATH, prefix : bool = True) -> bool:
+    def sExists(self, inp: MSG_PATH, prefix: bool = True) -> bool:
         """
         Checks if string stream :param inp: exists in the msg file.
         """
         inp = self.fixPath(inp, prefix)
         return self.exists(inp + '001F') or self.exists(inp + '001E')
 
-    def existsTypedProperty(self, _id, location = None, _type = None, prefix : bool = True, propertiesInstance : Optional[PropertiesStore] = None) -> Tuple[bool, int]:
+    def existsTypedProperty(self, _id, location = None, _type = None, prefix: bool = True, propertiesInstance: Optional[PropertiesStore] = None) -> Tuple[bool, int]:
         """
         Determines if the stream with the provided id exists in the location
         specified. If no location is specified, the root directory is searched.
@@ -474,7 +474,7 @@ class MSGFile:
         self.export(out)
         return out.getvalue()
 
-    def fixPath(self, inp : MSG_PATH, prefix : bool = True) -> str:
+    def fixPath(self, inp: MSG_PATH, prefix: bool = True) -> str:
         """
         Changes paths so that they have the proper prefix (should :param prefix:
         be True) and are strings rather than lists or tuples.
@@ -484,7 +484,7 @@ class MSGFile:
             inp = self.__prefix + inp
         return inp
 
-    def getMultipleBinary(self, filename : MSG_PATH, prefix : bool = True) -> Optional[List[bytes]]:
+    def getMultipleBinary(self, filename: MSG_PATH, prefix: bool = True) -> Optional[List[bytes]]:
         """
         Gets a multiple binary property as a list of bytes objects.
 
@@ -512,7 +512,7 @@ class MSGFile:
                 return ret[:index]
             return ret
 
-    def getMultipleString(self, filename : MSG_PATH, prefix : bool = True) -> Optional[List[str]]:
+    def getMultipleString(self, filename: MSG_PATH, prefix: bool = True) -> Optional[List[str]]:
         """
         Gets a multiple string property as a list of str objects.
 
@@ -543,7 +543,7 @@ class MSGFile:
                 ret[index] = item.decode(self.stringEncoding)[:-1]
             return ret
 
-    def getNamedAs(self, propertyName : str, guid : str, overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
+    def getNamedAs(self, propertyName: str, guid: str, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the named property, setting the class if specified.
 
@@ -558,7 +558,7 @@ class MSGFile:
             value = overrideClass(value)
         return value
 
-    def getNamedProp(self, propertyName : str, guid : str, default : _T = None) -> Union[Any, _T]:
+    def getNamedProp(self, propertyName: str, guid: str, default: _T = None) -> Union[Any, _T]:
         """
         instance.namedProperties.get((propertyName, guid), default)
 
@@ -566,7 +566,7 @@ class MSGFile:
         """
         return self.namedProperties.get((propertyName, guid), default)
 
-    def getPropertyAs(self, propertyName : Union[int, str], overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
+    def getPropertyAs(self, propertyName: Union[int, str], overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the property, setting the class if found.
 
@@ -583,7 +583,7 @@ class MSGFile:
 
         return value
 
-    def getPropertyVal(self, name : Union[int, str], default : _T = None) -> Union[Any, _T]:
+    def getPropertyVal(self, name: Union[int, str], default: _T = None) -> Union[Any, _T]:
         """
         instance.props.getValue(name, default)
 
@@ -591,7 +591,7 @@ class MSGFile:
         """
         return self.props.getValue(name, default)
 
-    def getSingleOrMultipleBinary(self, filename : MSG_PATH, prefix : bool = True) -> Optional[Union[List[bytes], bytes]]:
+    def getSingleOrMultipleBinary(self, filename: MSG_PATH, prefix: bool = True) -> Optional[Union[List[bytes], bytes]]:
         """
         A combination of :method getStringStream: and
         :method getMultipleString:.
@@ -611,7 +611,7 @@ class MSGFile:
         # work.
         return self.getMultipleBinary(filename, False)
 
-    def getSingleOrMultipleString(self, filename : MSG_PATH, prefix : bool = True) -> Optional[Union[List[str], str]]:
+    def getSingleOrMultipleString(self, filename: MSG_PATH, prefix: bool = True) -> Optional[Union[List[str], str]]:
         """
         A combination of :method getStringStream: and
         :method getMultipleString:.
@@ -631,7 +631,7 @@ class MSGFile:
         # work.
         return self.getMultipleString(filename, False)
 
-    def getStream(self, filename : MSG_PATH, prefix : bool = True) -> Optional[bytes]:
+    def getStream(self, filename: MSG_PATH, prefix: bool = True) -> Optional[bytes]:
         """
         Gets a binary representation of the requested stream.
 
@@ -649,7 +649,7 @@ class MSGFile:
             logger.info(f'Stream "{filename}" was requested but could not be found. Returning `None`.')
             return None
 
-    def getStreamAs(self, streamID : MSG_PATH, overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
+    def getStreamAs(self, streamID: MSG_PATH, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the specified stream, modifying it to the specified class if it
         is found.
@@ -667,7 +667,7 @@ class MSGFile:
 
         return value
 
-    def getStringStream(self, filename : MSG_PATH, prefix : bool = True) -> Optional[str]:
+    def getStringStream(self, filename: MSG_PATH, prefix: bool = True) -> Optional[str]:
         """
         Gets a string representation of the requested stream.
 
@@ -689,7 +689,7 @@ class MSGFile:
 
         return None if tmp is None else tmp.decode(self.stringEncoding)
 
-    def getStringStreamAs(self, streamID : MSG_PATH, overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
+    def getStringStreamAs(self, streamID: MSG_PATH, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the specified string stream, modifying it to the specified
         class if it is found.
@@ -707,7 +707,7 @@ class MSGFile:
 
         return value
 
-    def listDir(self, streams : bool = True, storages : bool = False, includePrefix : bool = True) -> List[List[str]]:
+    def listDir(self, streams: bool = True, storages: bool = False, includePrefix: bool = True) -> List[List[str]]:
         """
         Replacement for OleFileIO.listdir that runs at the current prefix
         directory.
@@ -734,7 +734,7 @@ class MSGFile:
 
             return entries
 
-    def slistDir(self, streams : bool = True, storages : bool = False, includePrefix : bool = True) -> List[str]:
+    def slistDir(self, streams: bool = True, storages: bool = False, includePrefix: bool = True) -> List[str]:
         """
         Replacement for OleFileIO.listdir that runs at the current prefix
         directory. Returns a list of strings instead of lists.

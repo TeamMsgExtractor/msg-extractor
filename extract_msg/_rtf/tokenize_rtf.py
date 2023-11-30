@@ -51,7 +51,7 @@ _KNOWN_DESTINATIONS = (
 )
 
 
-def _finishTag(startText : bytes, reader : io.BytesIO) -> Tuple[bytes, Optional[bytes], Optional[int], bytes]:
+def _finishTag(startText: bytes, reader: io.BytesIO) -> Tuple[bytes, Optional[bytes], Optional[int], bytes]:
     """
     Finishes reading a tag, returning the needed parameters to make it a
     token.
@@ -101,7 +101,7 @@ def _finishTag(startText : bytes, reader : io.BytesIO) -> Tuple[bytes, Optional[
     return startText, name, param, nextChar
 
 
-def _readControl(startChar : bytes, reader : io.BytesIO) -> Tuple[Tuple[Token, ...], bytes]:
+def _readControl(startChar: bytes, reader: io.BytesIO) -> Tuple[Tuple[Token, ...], bytes]:
     """
     Attempts to read the next data as a control, returning as many tokens
     as necessary.
@@ -165,7 +165,7 @@ def _readControl(startChar : bytes, reader : io.BytesIO) -> Tuple[Tuple[Token, .
             return (Token(startChar, TokenType.SYMBOL),), reader.read(1)
 
 
-def _readText(startChar : bytes, reader : io.BytesIO) -> Tuple[Tuple[Token, ...], bytes]:
+def _readText(startChar: bytes, reader: io.BytesIO) -> Tuple[Tuple[Token, ...], bytes]:
     """
     Attempts to read the next data as text.
     """
@@ -184,7 +184,7 @@ def _readText(startChar : bytes, reader : io.BytesIO) -> Tuple[Tuple[Token, ...]
     return tuple(Token(x, TokenType.TEXT) for x in chars), nextChar
 
 
-def tokenizeRTF(data : bytes, validateStart : bool = True) -> List[Token]:
+def tokenizeRTF(data: bytes, validateStart: bool = True) -> List[Token]:
     """
     Reads in the bytes and sets the tokens list to the contents after
     tokenizing.

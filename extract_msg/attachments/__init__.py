@@ -48,7 +48,7 @@ _logger = _logging.getLogger(__name__)
 _logger.addHandler(_logging.NullHandler())
 
 
-def initStandardAttachment(msg : MSGFile, dir_ : str) -> AttachmentBase:
+def initStandardAttachment(msg: MSGFile, dir_: str) -> AttachmentBase:
     """
     Returns an instance of AttachmentBase for the attachment in the MSG file at
     the specified internal directory.

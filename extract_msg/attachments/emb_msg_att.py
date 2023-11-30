@@ -32,7 +32,7 @@ class EmbeddedMsgAttachment(AttachmentBase):
     The attachment entry for an Embedded MSG file.
     """
 
-    def __init__(self, msg : MSGFile, dir_ : str, propStore : PropertiesStore):
+    def __init__(self, msg: MSGFile, dir_: str, propStore: PropertiesStore):
         super().__init__(msg, dir_, propStore)
         self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
         self.__data = openMsg(self.msg.path, prefix = self.__prefix, parentMsg = self.msg, treePath = self.treePath, **self.msg.kwargs)

@@ -636,7 +636,7 @@ class Contact(MessageBase):
 
     @property
     def headerFormatProperties(self) -> HEADER_FORMAT_TYPE:
-        def strListToStr(inp : Optional[Union[str, List[str]]]):
+        def strListToStr(inp: Optional[Union[str, List[str]]]):
             """
             Small internal function for things that may return a string or list.
             """

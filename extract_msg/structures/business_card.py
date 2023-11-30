@@ -31,7 +31,7 @@ class BusinessCardDisplayDefinition:
     Contains information used to contruct a business card for a contact.
     """
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         reader = BytesReader(data)
         unpacked = constants.st.ST_BC_HEAD.unpack(reader.read(13))
         # Because doc says it must be ignored, we don't check the reserved here.
@@ -102,7 +102,7 @@ class BusinessCardDisplayDefinition:
         return self.__backgroundColor
 
     @backgroundColor.setter
-    def backgroundColor(self, value : Tuple[int, int, int]) -> None:
+    def backgroundColor(self, value: Tuple[int, int, int]) -> None:
         if not isinstance(value, tuple) or len(value) != 3:
             raise TypeError(':property backgroundColor: MUST be a tuple of 3 ints.')
         # Quickly try to pack the ints and raise a value error if that fails.
@@ -130,7 +130,7 @@ class BusinessCardDisplayDefinition:
         return self.__imageAlignment
 
     @imageAlignment.setter
-    def imageAlignment(self, value : BCImageAlignment) -> None:
+    def imageAlignment(self, value: BCImageAlignment) -> None:
         if not isinstance(value, BCImageAlignment):
             raise TypeError(':property imageAlignment: MUST be an instance of BCImageAlignment.')
 
@@ -147,7 +147,7 @@ class BusinessCardDisplayDefinition:
         return self.__imageArea
 
     @imageArea.setter
-    def imageArea(self, value : int) -> None:
+    def imageArea(self, value: int) -> None:
         if not isinstance(value, int):
             raise TypeError(':property imageArea: MUST be an int.')
         if value < 0:
@@ -168,7 +168,7 @@ class BusinessCardDisplayDefinition:
         return self.__imageSource
 
     @imageSource.setter
-    def imageSource(self, value : BCImageSource) -> None:
+    def imageSource(self, value: BCImageSource) -> None:
         if not isinstance(value, BCImageSource):
             raise TypeError(':property imageSource: MUST be an instance of BCImageSource.')
 
@@ -184,7 +184,7 @@ class BusinessCardDisplayDefinition:
         return self.__majorVersion
 
     @majorVersion.setter
-    def majorVersion(self, value : int) -> None:
+    def majorVersion(self, value: int) -> None:
         if not isinstance(value, int):
             raise TypeError(':property majorVersion: MUST be an int.')
         if value < 3:
@@ -204,7 +204,7 @@ class BusinessCardDisplayDefinition:
         return self.__minorVersion
 
     @minorVersion.setter
-    def minorVersion(self, value : int) -> None:
+    def minorVersion(self, value: int) -> None:
         if not isinstance(value, int):
             raise TypeError(':property minorVersion: MUST be an int.')
         if value < 0:
@@ -225,7 +225,7 @@ class BusinessCardDisplayDefinition:
         return self.__templateID
 
     @templateID.setter
-    def templateID(self, value : BCTemplateID):
+    def templateID(self, value: BCTemplateID):
         if not isinstance(value, BCTemplateID):
             raise TypeError(':property templateID: MUST be an instance of BCTemplateID.')
 
@@ -234,7 +234,7 @@ class BusinessCardDisplayDefinition:
 
 
 class FieldInfo:
-    def __init__(self, data : Optional[bytes] = None, extraInfo : Optional[bytes] = None):
+    def __init__(self, data: Optional[bytes] = None, extraInfo: Optional[bytes] = None):
         if not data:
             self.__textPropertyID = 0
             self.__textFormat = BCTextFormat.DEFAULT
@@ -257,7 +257,7 @@ class FieldInfo:
         self.__valueFontColor = unpacked[5:8]
         self.__labelFontColor = unpacked[8:11]
 
-    def toBytes(self, offset : int) -> bytes:
+    def toBytes(self, offset: int) -> bytes:
         """
         Converts to bytes using the offset into the ExtraInfo field.
 
@@ -290,7 +290,7 @@ class FieldInfo:
         return self.__fontSize
 
     @fontSize.setter
-    def fontSize(self, value : int) -> None:
+    def fontSize(self, value: int) -> None:
         if not isinstance(value, int):
             raise TypeError(':property fontSize: MUST be an int.')
 
@@ -310,7 +310,7 @@ class FieldInfo:
         return self.__labelFontColor
 
     @labelFontColor.setter
-    def labelFontColor(self, value : Tuple[int, int, int]) -> None:
+    def labelFontColor(self, value: Tuple[int, int, int]) -> None:
         if not isinstance(value, tuple) or len(value) != 3:
             raise TypeError(':property labelFontColor: MUST be a tuple of 3 ints.')
         # Quickly try to pack the ints and raise a value error if that fails.
@@ -329,7 +329,7 @@ class FieldInfo:
         return self.__labelFormat
 
     @labelFormat.setter
-    def labelFormat(self, value : BCLabelFormat) -> None:
+    def labelFormat(self, value: BCLabelFormat) -> None:
         if not isinstance(value, BCLabelFormat):
             raise TypeError(':property labelFormat: MUST be an instance of BCLabelFormat.')
         # Check mutually exclusive flags.
@@ -352,7 +352,7 @@ class FieldInfo:
         return self.__labelText
 
     @labelText.setter
-    def labelText(self, value : Optional[str]) -> None:
+    def labelText(self, value: Optional[str]) -> None:
         if not value:
             self.__labelText = None
         elif not isinstance(value, str):
@@ -368,7 +368,7 @@ class FieldInfo:
         return self.__textFormat
 
     @textFormat.setter
-    def textFormat(self, value : BCTextFormat) -> None:
+    def textFormat(self, value: BCTextFormat) -> None:
         if not isinstance(value, BCTextFormat):
             raise TypeError(':property textFormat: MUST be an instance of BCTextFormat.')
         # Check mutually exclusive flags.
@@ -390,7 +390,7 @@ class FieldInfo:
         return self.__textPropertyID
 
     @textPropertyID.setter
-    def textPropertyID(self, value : int) -> None:
+    def textPropertyID(self, value: int) -> None:
         if not isinstance(value, int):
             raise TypeError(':property textPropertyID: MUST be an int.')
         if value < 0:
@@ -410,7 +410,7 @@ class FieldInfo:
         return self.__valueFontColor
 
     @valueFontColor.setter
-    def valueFontColor(self, value : Tuple[int, int, int]) -> None:
+    def valueFontColor(self, value: Tuple[int, int, int]) -> None:
         if not isinstance(value, tuple) or len(value) != 3:
             raise TypeError(':property valueFontColor: MUST be a tuple of 3 ints.')
         # Quickly try to pack the ints and raise a value error if that fails.

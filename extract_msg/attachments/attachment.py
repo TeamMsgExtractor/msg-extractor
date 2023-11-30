@@ -35,7 +35,7 @@ class Attachment(AttachmentBase):
     A standard data attachment of an MSG file.
     """
 
-    def __init__(self, msg : MSGFile, dir_ : str, propStore : PropertiesStore):
+    def __init__(self, msg: MSGFile, dir_: str, propStore: PropertiesStore):
         """
         :param msg: The MSGFile instance that the attachment belongs to.
         :param dir_: The directory inside the MSG file where the attachment is
