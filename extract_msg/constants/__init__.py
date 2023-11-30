@@ -170,6 +170,7 @@ MULTIPLE_4_BYTES_HEX : Final[Tuple[int, ...]] = (
 # Multiple type properties that take up 8 bytes.
 MULTIPLE_8_BYTES : Final[Tuple[str, ...]] = (
     '1005',
+    '1006',
     '1007',
     '1014',
     '1040',
@@ -177,6 +178,7 @@ MULTIPLE_8_BYTES : Final[Tuple[str, ...]] = (
 
 MULTIPLE_8_BYTES_HEX : Final[Tuple[int, ...]] = (
     0x1005,
+    0x1006,
     0x1007,
     0x1014,
     0x1040,
