@@ -352,7 +352,6 @@ class FixedLengthProp(PropBase):
         elif self.type == 0x000B:
             if not isinstance(value, bool):
                 raise TypeError(f':property value: MUST be bool when type is 0x{self.type:04X}.')
-        # TODO
 
         self.__value = value
 
