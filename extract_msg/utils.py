@@ -890,7 +890,6 @@ def rtfSanitizePlain(inp: str) -> str:
             output += f"\\'{ord(char):02X}"
         else:
             # Handle Unicode characters.
-            # Handle Unicode characters.
             enc = char.encode('utf-16-le')
             output += ''.join(f'\\u{x}?' for x in struct.unpack(f'<{len(enc) // 2}h', enc))
 
@@ -978,10 +977,11 @@ def setupLogging(defaultPath = None, defaultLevel = logging.WARN, logfile = None
 
 def tryGetMimetype(att: AttachmentBase, mimetype: Union[str, None]) -> Union[str, None]:
     """
-    Uses an optional dependency to try and get the mimetype of an attachment. If
-    the mimetype has already been found, the optional dependency does not exist,
-    or an error occurs in the optional dependency, then the provided mimetype is
-    returned.
+    Uses an optional dependency to try and get the mimetype of an attachment.
+
+    If the mimetype has already been found, the optional dependency does not
+    exist, or an error occurs in the optional dependency, then the provided
+    mimetype is returned.
 
     :param att: The attachment to use for getting the mimetype.
     :param mimetype: The mimetype acquired directly from an attachment stream.
@@ -1023,11 +1023,13 @@ def unsignedToSignedInt(uInt: int) -> int:
 def unwrapMsg(msg: MSGFile) -> Dict[str, List]:
     """
     Takes a recursive message-attachment structure and unwraps it into a linear
-    dictionary for easy iteration. Dictionary contains 4 keys: "attachments" for
-    main message attachments, not including embedded MSG files, "embedded" for
-    attachments representing embedded MSG files, "msg" for all MSG files
-    (including the original in the first index), and "raw_attachments" for raw
-    attachments from signed messages.
+    dictionary for easy iteration.
+
+    Dictionary contains 4 keys: "attachments" for main message attachments, not
+    including embedded MSG files, "embedded" for attachments representing
+    embedded MSG files, "msg" for all MSG files (including the original in the
+    first index), and "raw_attachments" for raw attachments from signed
+    messages.
     """
     from .msg_classes import MessageSignedBase
 
@@ -1082,6 +1084,7 @@ def unwrapMsg(msg: MSGFile) -> Dict[str, List]:
 def unwrapMultipart(mp: Union[bytes, str, email.message.Message]) -> Dict:
     """
     Unwraps a recursive multipart structure into a dictionary of linear lists.
+
     Similar to unwrapMsg, but for multipart. Dictionary contains 3 keys:
     "attachments" which contains a list of dicts containing processed attachment
     data as well as the Message instance associated with it, "plain_body" which
@@ -1219,9 +1222,10 @@ def validateHtml(html: bytes) -> bool:
 
 def verifyPropertyId(id: str) -> None:
     """
-    Determines whether a property ID is valid for vertain functions. Property
-    IDs MUST be a 4 digit hexadecimal string. Property is valid if no exception
-    is raised.
+    Determines whether a property ID is valid for vertain functions.
+
+    Property IDs MUST be a 4 digit hexadecimal string. Property is valid if no
+    exception is raised.
 
     :raises InvaildPropertyIdError: if the it is not a 4 digit hexadecimal
         number.
@@ -1238,7 +1242,9 @@ def verifyPropertyId(id: str) -> None:
 
 def verifyType(_type: Optional[str]) -> None:
     """
-    Verifies that the type is valid. Raises an exception if it is not.
+    Verifies that the type is valid.
+
+    Raises an exception if it is not.
 
     :raises UnknownTypeError: if the type is not recognized.
     """
