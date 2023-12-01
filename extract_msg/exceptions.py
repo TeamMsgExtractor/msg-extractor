@@ -67,7 +67,7 @@ class DeencapNotEncapsulated(ExMsgBaseException):
 
 class DependencyError(ExMsgBaseException):
     """
-    An optional dependdency could not be found or was unable to be used as
+    An optional dependency could not be found or was unable to be used as
     expected.
     """
 
@@ -112,7 +112,9 @@ class SecurityError(ExMsgBaseException):
 class StandardViolationError(InvalidFileFormatError):
     """
     A critical violation of the MSG standards was detected and could not be
-    recovered from. Recoverable violations will result in log messages instead.
+    recovered from.
+
+    Recoverable violations will result in log messages instead.
 
     Any that could reasonably be skipped, although are likely to still cause
     errors down the line, can be suppressed.
@@ -121,6 +123,7 @@ class StandardViolationError(InvalidFileFormatError):
 class TZError(ExMsgBaseException):
     """
     Specifically not an OSError to avoid being caught by parts of the module.
+
     This error represents a fatal error in the datetime parsing as it usually
     means your installation of tzlocal or tzdata are broken. If you have
     received this error after using PyInstaller, you must include the resource

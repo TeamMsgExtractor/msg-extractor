@@ -257,7 +257,7 @@ class Recipient(Generic[_RT]):
         directory.
 
         :returns: The paths *excluding* the attachment directory, allowing the
-        paths to be directly used for accessing a file.
+            paths to be directly used for accessing a file.
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')

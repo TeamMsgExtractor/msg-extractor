@@ -31,6 +31,7 @@ if TYPE_CHECKING:
 class DirectoryEntry:
     """
     An internal representation of a stream or storage in the OleWriter.
+
     Originals should be inaccessible outside of the class.
     """
     name: str = ''
@@ -111,8 +112,7 @@ class OleWriter:
     def __getContainingStorage(self, path: List[str], entryExists: bool = True, create: bool = False) -> Dict:
         """
         Finds the storage dict internally where the entry specified by
-        :param path: would be created. If :param create: is True, missing
-        storages will be created with default settings.
+        :param path: would be created.
 
         :param entryExists: If True, throws an error when the requested entry
             does not yet exist.
@@ -177,8 +177,9 @@ class OleWriter:
 
     def __modifyEntry(self, entry: DirectoryEntry, **kwargs):
         """
-        Edits the DirectoryEntry with the data provided. Common code used for
-        :method addEntry: and :method editEntry:.
+        Edits the DirectoryEntry with the data provided.
+
+        Common code used for :method addEntry: and :method editEntry:.
 
         :raises TypeError: Attempted to modify the data of a storage.
         :raises ValueError: Some part of the data given to modify the various
@@ -225,7 +226,6 @@ class OleWriter:
             if not isinstance(stateBits, int) or stateBits < 0 or stateBits > 0xFFFFFFFF:
                 raise ValueError('State bits must be a positive 4 byte int.')
 
-
         # Now that all our checks have passed, let's set our data.
         if data is not None:
             entry.data = data
@@ -259,8 +259,9 @@ class OleWriter:
 
     def __walkEntries(self) -> Iterator[DirectoryEntry]:
         """
-        Returns a generator that will walk the entires recursively. Each item
-        returned by it will be a DirectoryEntry instance.
+        Returns a generator that will walk the entires recursively.
+
+        Each item returned by it will be a DirectoryEntry instance.
         """
         toProcess = [self.__dirEntries]
         yield self.__rootEntry
@@ -276,10 +277,6 @@ class OleWriter:
 
     @property
     def __numberOfSectors(self) -> int:
-        """
-        TODO: finish the calculation needed. For now this just notes how many
-        sectors are needed for the directory entries.
-        """
         return ceilDiv(self.__dirEntryCount, 4) + \
                self.__numMinifat + \
                ceilDiv(self.__numMinifat, 16) + \
@@ -314,8 +311,8 @@ class OleWriter:
         """
         # Right now we just use an annoying while loop to get the numbers.
         numDifat = 0
-        # All divisions are ceiling divisions, so we leave them as
-        numFat = ceilDiv(self.__numberOfSectors, 127) or 1
+        # All divisions are ceiling divisions,.
+        numFat = ceilDiv(self.__numberOfSectors or 1, 127)
         newNumFat = 1
         while numFat != newNumFat:
             numFat = newNumFat
@@ -414,8 +411,9 @@ class OleWriter:
 
     def _writeBeginning(self, f) -> int:
         """
-        Writes the beginning to the file :param f:. This includes the header,
-        DIFAT, and FAT blocks.
+        Writes the beginning to the file :param f:.
+
+        This includes the header, DIFAT, and FAT blocks.
 
         :returns: The current sector number after all the data is written.
         """

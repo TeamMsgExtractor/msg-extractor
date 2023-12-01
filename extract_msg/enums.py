@@ -1342,6 +1342,7 @@ class InsecureFeatures(enum.IntFlag):
     also not recommended to use these on files you do not trust.
 
     The following features are avilable:
+
     * NONE: No insecure features are allowed (default).
     * PIL_IMAGE_PARSING: Various operations requiring PIL or Pillow that will
       read image data from parts of the MSG file. These operations are usually

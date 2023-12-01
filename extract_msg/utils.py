@@ -901,15 +901,14 @@ def setupLogging(defaultPath = None, defaultLevel = logging.WARN, logfile = None
     """
     Setup logging configuration
 
-    Args:
     :param defaultPath: Default path to use for the logging configuration file.
     :param defaultLevel: Default logging level.
     :param env_key: Environment variable name to search for, for setting logfile
         path.
     :param enableFileLogging: Whether to use a file to log or not.
 
-    Returns:
-        bool: True if the configuration file was found and applied, False otherwise
+    :returns: True if the configuration file was found and applied, False
+        otherwise
     """
     shippedConfig = pathlib.Path(__file__).parent / 'data' / 'logging-config'
     if os.name == 'nt':

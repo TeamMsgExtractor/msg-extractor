@@ -48,7 +48,7 @@ class ODTStruct:
     @property
     def odtPersist1(self) -> ODTPersist1:
         """
-        Flags the specify information about the OLE object.
+        Flags that specify information about the OLE object.
         """
         return self.__persist1
 
@@ -62,7 +62,7 @@ class ODTStruct:
     @property
     def odtPersist2(self) -> ODTPersist2:
         """
-        Flags the specify additional information about the OLE object.
+        Flags that specify additional information about the OLE object.
         """
         return self.__persist2
 

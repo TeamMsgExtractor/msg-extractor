@@ -477,7 +477,7 @@ class AttachmentBase(abc.ABC):
         """
         The encoding information about the attachment object.
 
-        Will return b'*\\x86H\\x86\\xf7\\x14\\x03\\x0b\\x01' if encoded in
+        Will return b'\\x2A\\x86\\x48\\x86\\xf7\\x14\\x03\\x0b\\x01' if encoded in
         MacBinary format, otherwise it is unset.
         """
         return self.getStream('__substg1.0_37020102')
