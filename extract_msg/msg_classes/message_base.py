@@ -611,18 +611,19 @@ class MessageBase(MSGFile):
         The body and attachments are stored in a folder in the current running
         directory unless :param customPath: has been specified. The name of the
         folder will be determined by 3 factors.
-           * If :param customFilename: has been set, the value provided for that
-             will be used.
-           * If :param useMsgFilename: has been set, the name of the file used
-             to create the Message instance will be used.
-           * If the file name has not been provided or :param useMsgFilename:
-             has not been set, the name of the folder will be created using the
-             `defaultFolderName` property.
-           * :param maxNameLength: will force all file names to be shortened
-             to fit in the space (with the extension included in the length). If
-             a number is added to the directory that will not be included in the
-             length, so it is recommended to plan for up to 5 characters extra
-             to be a part of the name. Default is 256.
+
+        * If :param customFilename: has been set, the value provided for that
+          will be used.
+        * If :param useMsgFilename: has been set, the name of the file used
+          to create the Message instance will be used.
+        * If the file name has not been provided or :param useMsgFilename:
+          has not been set, the name of the folder will be created using the
+          `defaultFolderName` property.
+        * :param maxNameLength: will force all file names to be shortened
+          to fit in the space (with the extension included in the length). If
+          a number is added to the directory that will not be included in the
+          length, so it is recommended to plan for up to 5 characters extra
+          to be a part of the name. Default is 256.
 
         It should be noted that regardless of the value for maxNameLength, the
         name of the file containing the body will always have the name 'message'
@@ -631,19 +632,21 @@ class MessageBase(MSGFile):
         There are several parameters used to determine how the message will be
         saved. By default, the message will be saved as plain text. Setting one
         of the following parameters to True will change that:
-           * :param html: will output the message in HTML format.
-           * :param json: will output the message in JSON format.
-           * :param raw: will output the message in a raw format.
-           * :param rtf: will output the message in RTF format.
+
+        * :param html: will output the message in HTML format.
+        * :param json: will output the message in JSON format.
+        * :param raw: will output the message in a raw format.
+        * :param rtf: will output the message in RTF format.
 
         Usage of more than one formatting parameter will raise an exception.
 
         Using HTML or RTF will raise an exception if they could not be retrieved
         unless you have :param allowFallback: set to True. Fallback will go in
         this order, starting at the top most format that is set:
-           * HTML
-           * RTF
-           * Plain text
+
+        * HTML
+        * RTF
+        * Plain text
 
         If you want to save the contents into a ZipFile or similar object,
         either pass a path to where you want to create one or pass an instance
@@ -653,7 +656,7 @@ class MessageBase(MSGFile):
         :param attachmentsOnly: Turns off saving the body and only saves the
             attachments when set.
         :param saveHeader: Turns on saving the header as a separate file when
-        set.
+            set.
         :param skipAttachments: Turns off saving attachments.
         :param skipHidden: If True, skips attachments marked as hidden.
             (Default: False)
@@ -1068,12 +1071,14 @@ class MessageBase(MSGFile):
         Returns a dictionary of properties, in order, to be formatted into the
         header. Keys are the names to use in the header while the values are one
         of the following:
-        None: Signifies no data was found for the property and it should be
-            omitted from the header.
-        str: A string to be formatted into the header using the string encoding.
-        Tuple[Union[str, None], bool]: A string should be formatted into the
-            header. If the bool is True, then place an empty string if the value
-            is None, otherwise follow the same behavior as regular None.
+
+        * None: Signifies no data was found for the property and it should be
+          omitted from the header.
+        * str: A string to be formatted into the header using the string
+          encoding.
+        * Tuple[Union[str, None], bool]: A string should be formatted into the
+          header. If the bool is True, then place an empty string if the value
+          is None, otherwise follow the same behavior as regular None.
 
         Additional note: If the value is an empty string, it will be dropped as
         well by default.
