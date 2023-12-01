@@ -619,11 +619,11 @@ class MessageBase(MSGFile):
         * If the file name has not been provided or :param useMsgFilename:
           has not been set, the name of the folder will be created using the
           `defaultFolderName` property.
-        * :param maxNameLength: will force all file names to be shortened
-          to fit in the space (with the extension included in the length). If
-          a number is added to the directory that will not be included in the
-          length, so it is recommended to plan for up to 5 characters extra
-          to be a part of the name. Default is 256.
+        * Setting :param maxNameLength: will force all file names to be
+          shortened to fit in the space (with the extension included in the
+          length). If a number is added to the directory that will not be
+          included in the length, so it is recommended to plan for up to 5
+          characters extra to be a part of the name. Default is 256.
 
         It should be noted that regardless of the value for maxNameLength, the
         name of the file containing the body will always have the name 'message'
