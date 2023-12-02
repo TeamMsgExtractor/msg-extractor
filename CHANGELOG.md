@@ -1,6 +1,7 @@
 **v0.47.0**
 * Changed the public API for `PropertiesStore` to improve the quality of its code. The properties type is now mandatory, and the intelligence field (and the related enum) has been removed.
     * Additionally, the `toBytes` and `__bytes__` methods will both generate based on the contents of this class, allowing for new properties to be created and for existing properties to be modified or removed if the class is set to writable on creation.
+* Added new method `Named.getPropNameByStreamID`. This method takes the ID of a stream (or property stream entry) and returns the property name (as a tuple of the property name/ID and the property set) that is stored there. Returns `None` if the stream is not used to store a named property. This name can be directly used (if it is not `None`) to get the `NamedPropertyBase` instance associated. This method is most useful for people looking at the raw data of a stream and trying to figure out what named property it refers to.
 * Fixed mistake in struct definitions that caused a float to require 8 bytes to unpack.
 * Added tests for `extract_msg.properties.props`.
 * Added basic tests for `extract_msg.attachments`.
@@ -32,6 +33,7 @@
 * Fixed many issues in `VariableLengthProp` regarding it's calculation of sizes.
 * Removed `hasLen` function.
 * Changed style to remove space between variable name and colon that separates the type.
+* Corrected `InvaildPropertyIdError` to `InvalidPropertyIdError`.
 
 **v0.46.2**
 * Adjusted typing information on regular expressions. They were using a subscript that was added in Python 3.9 (apparently that is something the type checker doesn't check for), which made the module incompatible with Python 3.8. If you are using Python 3.9 or higher a version check will switch to the more specific typing.

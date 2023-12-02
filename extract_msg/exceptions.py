@@ -16,7 +16,7 @@ __all__ = [
     'ExecutableNotFound',
     'IncompatibleOptionsError',
     'InvalidFileFormatError',
-    'InvaildPropertyIdError',
+    'InvalidPropertyIdError',
     'StandardViolationError',
     'TZError',
     'UnknownCodepageError',
@@ -86,7 +86,7 @@ class InvalidFileFormatError(ExMsgBaseException):
     An Invalid File Format Error occurred.
     """
 
-class InvaildPropertyIdError(ExMsgBaseException):
+class InvalidPropertyIdError(ExMsgBaseException):
     """
     The provided property ID was invalid.
     """

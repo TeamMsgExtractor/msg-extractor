@@ -80,7 +80,7 @@ from . import constants
 from .enums import AttachmentType
 from .exceptions import (
         ConversionError, DependencyError, ExecutableNotFound,
-        IncompatibleOptionsError, InvaildPropertyIdError, TZError,
+        IncompatibleOptionsError, InvalidPropertyIdError, TZError,
         UnknownTypeError
     )
 
@@ -1226,17 +1226,17 @@ def verifyPropertyId(id: str) -> None:
     Property IDs MUST be a 4 digit hexadecimal string. Property is valid if no
     exception is raised.
 
-    :raises InvaildPropertyIdError: if the it is not a 4 digit hexadecimal
+    :raises InvalidPropertyIdError: if the it is not a 4 digit hexadecimal
         number.
     """
     if not isinstance(id, str):
-        raise InvaildPropertyIdError('ID was not a 4 digit hexadecimal string')
+        raise InvalidPropertyIdError('ID was not a 4 digit hexadecimal string')
     if len(id) != 4:
-        raise InvaildPropertyIdError('ID was not a 4 digit hexadecimal string')
+        raise InvalidPropertyIdError('ID was not a 4 digit hexadecimal string')
     try:
         int(id, 16)
     except ValueError:
-        raise InvaildPropertyIdError('ID was not a 4 digit hexadecimal string')
+        raise InvalidPropertyIdError('ID was not a 4 digit hexadecimal string')
 
 
 def verifyType(_type: Optional[str]) -> None:
