@@ -36,13 +36,6 @@ class Attachment(AttachmentBase):
     """
 
     def __init__(self, msg: MSGFile, dir_: str, propStore: PropertiesStore):
-        """
-        :param msg: The MSGFile instance that the attachment belongs to.
-        :param dir_: The directory inside the MSG file where the attachment is
-            located.
-        :param propStore: The PropertiesStore instance for the attachment to
-            use.
-        """
         super().__init__(msg, dir_, propStore)
         self.__data = self.getStream('__substg1.0_37010102')
 

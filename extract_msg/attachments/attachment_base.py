@@ -48,8 +48,7 @@ class AttachmentBase(abc.ABC):
         :param msg: the Message instance that the attachment belongs to.
         :param dir_: the directory inside the msg file where the attachment is
             located.
-        :param propStore: The PropertiesStore instance for the attachment. If
-            not provided, it will be found automatically.
+        :param propStore: The PropertiesStore instance for the attachment.
         """
         self.__msg = weakref.ref(msg)
         self.__dir = dir_
