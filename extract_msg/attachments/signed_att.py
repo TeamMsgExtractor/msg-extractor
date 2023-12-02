@@ -239,7 +239,4 @@ class SignedAttachment:
 
     @property
     def type(self) -> AttachmentType:
-        """
-        Returns an enum value that identifies the type of attachment.
-        """
         return AttachmentType.SIGNED if isinstance(self.__data, bytes) else AttachmentType.SIGNED_EMBEDDED

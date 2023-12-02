@@ -192,7 +192,4 @@ class Attachment(AttachmentBase):
 
     @property
     def type(self) -> AttachmentType:
-        """
-        Returns an enum value that identifies the type of attachment.
-        """
         return AttachmentType.DATA

@@ -19,7 +19,9 @@ class UnsupportedAttachment(AttachmentBase):
     def save(self, **kwargs) -> constants.SAVE_TYPE:
         """
         Raises a NotImplementedError unless :param skipNotImplemented: is set to
-        True. If it is, returns a value that indicates no data was saved.
+        True.
+
+        If it is, returns a value that indicates no data was saved.
         """
         if kwargs.get('skipNotImplemented', False):
             return (SaveType.NONE, None)
@@ -35,7 +37,4 @@ class UnsupportedAttachment(AttachmentBase):
 
     @property
     def type(self) -> AttachmentType:
-        """
-        Returns an enum value that identifies the type of attachment.
-        """
         return AttachmentType.UNSUPPORTED

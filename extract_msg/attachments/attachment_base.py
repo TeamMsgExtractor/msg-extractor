@@ -693,5 +693,5 @@ class AttachmentBase(abc.ABC):
     @abc.abstractmethod
     def type(self) -> AttachmentType:
         """
-        Returns an enum value that identifies the type of attachment.
+        An enum value that identifies the type of attachment.
         """

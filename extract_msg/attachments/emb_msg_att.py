@@ -131,7 +131,4 @@ class EmbeddedMsgAttachment(AttachmentBase):
 
     @property
     def type(self) -> AttachmentType:
-        """
-        Returns an enum value that identifies the type of attachment.
-        """
         return AttachmentType.MSG
