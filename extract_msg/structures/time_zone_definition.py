@@ -56,8 +56,10 @@ class TimeZoneDefinition:
     @property
     def keyName(self) -> str:
         """
-        The name of the associated time zone. Not localized but instead set to
-        the unique name of the desired time zone.
+        The name of the associated time zone.
+
+        Not localized but instead set to the unique name of the desired time
+        zone.
         """
         return self.__keyName
 
