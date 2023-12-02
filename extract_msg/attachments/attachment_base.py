@@ -46,7 +46,8 @@ class AttachmentBase(abc.ABC):
     def __init__(self, msg: MSGFile, dir_: str, propStore: PropertiesStore):
         """
         :param msg: the Message instance that the attachment belongs to.
-        :param dir_: the directory inside the msg file where the attachment is located.
+        :param dir_: the directory inside the msg file where the attachment is
+            located.
         :param propStore: The PropertiesStore instance for the attachment. If
             not provided, it will be found automatically.
         """
@@ -127,24 +128,21 @@ class AttachmentBase(abc.ABC):
 
     def _getTypedStream(self, filename: MSG_PATH, _type = None):
         """
-        Gets the contents of the specified stream as the type that
-        it is supposed to be.
+        Gets the contents of the specified stream as the type that it is
+        supposed to be.
 
-        Rather than the full filename, you should only feed this
-        function the filename sans the type. So if the full name
-        is "__substg1.0_001A001F", the filename this function
-        should receive should be "__substg1.0_001A".
+        Rather than the full filename, you should only feed this function the
+        filename sans the type. So if the full name is "__substg1.0_001A001F",
+        the filename this function should receive should be "__substg1.0_001A".
 
-        If you know for sure what type the stream is before hand,
-        you can specify it as being one of the strings in the
-        constant FIXED_LENGTH_PROPS_STRING or
-        VARIABLE_LENGTH_PROPS_STRING.
+        If you know for sure what type the stream is before hand, you can
+        specify it as being one of the strings in the constant
+        FIXED_LENGTH_PROPS_STRING or VARIABLE_LENGTH_PROPS_STRING.
 
-        If you have not specified the type, the type this function
-        returns in many cases cannot be predicted. As such, when
-        using this function it is best for you to check the type
-        that it returns. If the function returns None, that means
-        it could not find the stream specified.
+        If you have not specified the type, the type this function returns in
+        many cases cannot be predicted. As such, when using this function it is
+        best for you to check the type that it returns. If the function returns
+        None, that means it could not find the stream specified.
 
         :raises ReferenceError: The associated MSGFile instance has been garbage
             collected.
