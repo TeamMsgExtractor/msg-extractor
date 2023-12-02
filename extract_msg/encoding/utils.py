@@ -16,8 +16,9 @@ from typing import Dict, Tuple
 def createVBEncoding(codecName: str, decodingTable: Dict[int, str]) -> codecs.CodecInfo:
     """
     Creates the classes for a variable byte encoding, returning the CodecInfo
-    instance associated with it. Currently only supports encodings with up to 2
-    bytes per character.
+    instance associated with it.
+
+    Currently only supports encodings with up to 2 bytes per character.
 
     :param codecName: The name of the codec being created.
     :param decodingTable: The table to use for decoding data. Will be used to
@@ -68,8 +69,9 @@ def createVBEncoding(codecName: str, decodingTable: Dict[int, str]) -> codecs.Co
 def createSBEncoding(codecName: str, decodingTable: Dict[int, str]) -> codecs.CodecInfo:
     """
     Creates the classes for a single byte encoding, returning the CodecInfo
-    instance associated with it. Currently only supports encodings with up to 2
-    bytes per character.
+    instance associated with it.
+
+    Currently only supports encodings with up to 2 bytes per character.
 
     :param codecName: The name of the codec being created.
     :param decodingTable: The table to use for decoding data. Will be used to

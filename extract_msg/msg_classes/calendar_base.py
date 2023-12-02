@@ -83,9 +83,10 @@ class CalendarBase(MessageBase):
     @functools.cached_property
     def appointmentSequence(self) -> Optional[int]:
         """
-        Specified the sequence number of a Meeting object. A meeting object
-        begins with the sequence number set to 0 and is incremented each time
-        the organizer sends out a Meeting Update object.
+        Specified the sequence number of a Meeting object.
+
+        A meeting object begins with the sequence number set to 0 and is
+        incremented each time the organizer sends out a Meeting Update object.
         """
         return self.getNamedProp('8201', ps.PSETID_APPOINTMENT)
 
@@ -130,7 +131,9 @@ class CalendarBase(MessageBase):
     def appointmentTimeZoneDefinitionStartDisplay(self) -> Optional[TimeZoneDefinition]:
         """
         Specifies the time zone information for the appointmentStartWhole
-        property. Used to convert the start date and time to and from UTC.
+        property.
+
+        Used to convert the start date and time to and from UTC.
         """
         return self.getNamedAs('825E', ps.PSETID_APPOINTMENT, TimeZoneDefinition)
 
@@ -139,9 +142,8 @@ class CalendarBase(MessageBase):
         """
         A list of unsendable attendees.
 
-        I want to return the structure parsed, but my one example does not match
-        the specifications. If you have examples, let me know and I can ask you
-        to run a verification on it.
+        Currently the raw bytes for the structure, but will return a usable
+        class in the future.
         """
         return self.getNamedProp('825D', ps.PSETID_APPOINTMENT)
 
@@ -209,9 +211,11 @@ class CalendarBase(MessageBase):
     def clipEnd(self) -> Optional[datetime.datetime]:
         """
         For single-instance Calendar objects, the end date and time of the
-        event in UTC. For a recurring series, midnight in the user's machine
-        time zone, on the date of the last instance, then is persisted in UTC,
-        unless the recurring series has no end, in which case the value MUST be
+        event in UTC.
+
+        For a recurring series, midnight in the user's machine time zone, on
+        the date of the last instance, then is persisted in UTC, unless the
+        recurring series has no end, in which case the value MUST be
         "31 August 4500 11:49 PM".
 
         Honestly, not sure what this is. [MS-OXOCAL]: PidLidClipEnd.
@@ -222,8 +226,10 @@ class CalendarBase(MessageBase):
     def clipStart(self) -> Optional[datetime.datetime]:
         """
         For single-instance Calendar objects, the start date and time of the
-        event in UTC. For a recurring series, midnight in the user's machine
-        time zone, on the date of the first instance, then is persisted in UTC.
+        event in UTC.
+
+        For a recurring series, midnight in the user's machine time zone, on
+        the date of the first instance, then is persisted in UTC.
 
         Honestly, not sure what this is. [MS-OXOCAL]: PidLidClipStart.
         """
@@ -232,15 +238,18 @@ class CalendarBase(MessageBase):
     @functools.cached_property
     def commonEnd(self) -> Optional[datetime.datetime]:
         """
-        The end date and time of an event. MUST be equal to appointmentEndWhole.
+        The end date and time of an event.
+
+        MUST be equal to appointmentEndWhole.
         """
         return self.getNamedProp('8517', ps.PSETID_COMMON)
 
     @functools.cached_property
     def commonStart(self) -> Optional[datetime.datetime]:
         """
-        The start date and time of an event. MUST be equal to
-        appointmentStartWhole.
+        The start date and time of an event.
+
+        MUST be equal to appointmentStartWhole.
         """
         return self.getNamedProp('8516', ps.PSETID_COMMON)
 
@@ -275,8 +284,10 @@ class CalendarBase(MessageBase):
     @functools.cached_property
     def isException(self) -> bool:
         """
-        Whether the object represents an exception. False indicates that the
-        object represents a recurring series or a single-instance object.
+        Whether the object represents an exception.
+
+        False indicates that the object represents a recurring series or a
+        single-instance object.
         """
         return bool(self.getNamedProp('000A', ps.PSETID_MEETING))
 
@@ -312,7 +323,9 @@ class CalendarBase(MessageBase):
     @functools.cached_property
     def meetingDoNotForward(self) -> bool:
         """
-        Whether to allow the meeting to be forwarded. True disallows forwarding.
+        Whether to allow the meeting to be forwarded.
+
+        True disallows forwarding.
         """
         return bool(self.getNamedProp('DoNotForward', ps.PS_PUBLIC_STRINGS))
 
@@ -462,8 +475,9 @@ class CalendarBase(MessageBase):
     @functools.cached_property
     def timeZoneStruct(self) -> Optional[TimeZoneStruct]:
         """
-        Set on a recurring series to specify time zone information. Specifies
-        how to convert time fields between local time and UTC.
+        Set on a recurring series to specify time zone information.
+
+        Specifies how to convert time fields between local time and UTC.
         """
         return self.getNamedAs('8233', ps.PSETID_APPOINTMENT, TimeZoneStruct)
 

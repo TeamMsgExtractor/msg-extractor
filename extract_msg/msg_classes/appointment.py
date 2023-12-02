@@ -181,8 +181,9 @@ class AppointmentMeeting(Calendar):
     @functools.cached_property
     def isMeeting(self) -> bool:
         """
-        Attempts to determine if the object is a Meeting. True if meeting, False
-        if appointment.
+        Attempts to determine if the object is a Meeting.
+
+        True if meeting, False if appointment.
         """
         return bool(self.appointmentStateFlags) and (AppointmentStateFlag.MEETING in self.appointmentStateFlags)
 
