@@ -1470,7 +1470,7 @@ class NoteColor(enum.IntEnum):
 
 class ODTCf(enum.IntEnum):
     """
-    Values for the `cf` field of the ODT structure.
+    Values for the ``cf`` field of the ODT structure.
     """
     UNSPECIFIED = 0x0000
     RICH_TEXT_FORMAT = 0x0001
@@ -1541,7 +1541,7 @@ class OORBodyFormat(enum.IntEnum):
     HTML_ONLY = 0b0111
     TEXT_AND_HTML = 0b1011
     # This one isn't actually listed in the documentation, but I've seen it and
-    # this is my best guess for what a format of `0` is meant to mean. This will
+    # this is my best guess for what a format of 0 is meant to mean. This will
     # also prevent the code from failing on a 0 format.
     UNSPECIFIED = 0b0000
 
@@ -2021,7 +2021,7 @@ class WrappedType(enum.IntEnum):
 class _EnumDeprecator:
     """
     Special class for handling deprecated enums in a way that shouldn't break
-    existing code, including code for checking `is` on a member of the enum.
+    existing code, including code for checking ``is`` on a member of the enum.
     """
     def __init__(self, oldClassName: str, newClass: Type[enum.Enum], nameConversion: Dict[str, Any] = {}, valueConversion: Dict = {}):
         """
@@ -2032,7 +2032,7 @@ class _EnumDeprecator:
         :param valueConversion: A dictionary of old values to new values used
             when getting a value from the enum.
         """
-        self.__warnMessage = f'Enum `{oldClassName}` is deprecated and has been replaced with {newClass.__name__}. Please update your code.'
+        self.__warnMessage = f'Enum {oldClassName} is deprecated and has been replaced with {newClass.__name__}. Please update your code.'
         self.__new = newClass
         self.__nameConv = nameConversion
         self.__valConv = valueConversion

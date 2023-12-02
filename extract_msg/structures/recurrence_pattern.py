@@ -138,20 +138,20 @@ class RecurrencePattern:
         The specifics for the pattern type. Return is different depending on
         what type of pattern is being used.
 
-        RecurPatternType.DAY: No value is returned.
-        RecurPatternType.WEEK: A set of RecurPatternTypeSpecificWeekday bits.
-        RecurPatternType.MONTH: The day of the month on which the recurrence
-            falls.
-        RecurPatternType.MONTH_NTH: A tuple containing information from
-            [MS-OXOCAL] PatternTypeSpecific MonthNth.
-        RecurPatternType.MONTH_END: The day of the month on which the recurrence
-            falls.
-        RecurPatternType.HJ_MONTH: The day of the month on which the recurrence
-            falls.
-        RecurPatternType.HJ_MONTH_NTH: A tuple containing information from
-            [MS-OXOCAL] PatternTypeSpecific MonthNth.
-        RecurPatternType.HJ_MONTH_END: The day of the month on which the
-            recurrence falls.
+        * RecurPatternType.DAY: No value is returned.
+        * RecurPatternType.WEEK: A set of RecurPatternTypeSpecificWeekday bits.
+        * RecurPatternType.MONTH: The day of the month on which the recurrence
+          falls.
+        * RecurPatternType.MONTH_NTH: A tuple containing information from
+          [MS-OXOCAL] PatternTypeSpecific MonthNth.
+        * RecurPatternType.MONTH_END: The day of the month on which the
+          recurrence falls.
+        * RecurPatternType.HJ_MONTH: The day of the month on which the
+          recurrence falls.
+        * RecurPatternType.HJ_MONTH_NTH: A tuple containing information from
+          [MS-OXOCAL] PatternTypeSpecific MonthNth.
+        * RecurPatternType.HJ_MONTH_END: The day of the month on which the
+          recurrence falls.
         """
         return self.__patternTypeSpecific
 

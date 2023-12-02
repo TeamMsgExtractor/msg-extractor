@@ -349,7 +349,8 @@ class MessageBase(MSGFile):
             the Content-Type meta tag to insert. This exists to ensure that
             something parsing the html can properly determine the encoding (as
             not having this tag can cause errors in some programs). Set this to
-            `None` or an empty string to not insert the tag (Default: 'utf-8').
+            ``None`` or an empty string to not insert the tag (Default:
+            'utf-8').
         :param kwargs: Used to allow kwargs expansion in the save function.
             Arguments absorbed by this are simply ignored.
         """
@@ -617,8 +618,8 @@ class MessageBase(MSGFile):
         * If :param useMsgFilename: has been set, the name of the file used
           to create the Message instance will be used.
         * If the file name has not been provided or :param useMsgFilename:
-          has not been set, the name of the folder will be created using the
-          `defaultFolderName` property.
+          has not been set, the name of the folder will be created using
+          :property defaultFolderName:.
         * Setting :param maxNameLength: will force all file names to be
           shortened to fit in the space (with the extension included in the
           length). If a number is added to the directory that will not be
@@ -666,7 +667,8 @@ class MessageBase(MSGFile):
             the Content-Type meta tag to insert. This exists to ensure that
             something parsing the html can properly determine the encoding (as
             not having this tag can cause errors in some programs). Set this to
-            `None` or an empty string to not insert the tag (Default: 'utf-8').
+            ``None`` or an empty string to not insert the tag (Default:
+            'utf-8').
         :param kwargs: Used to allow kwargs expansion in the save function.
         :param preparedHtml: When set, prepares the HTML body for standalone
             usage, doing things like adding tags, injecting attachments, etc.
