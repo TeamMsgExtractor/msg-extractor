@@ -21,6 +21,11 @@ from ..structures.business_card import BusinessCardDisplayDefinition
 from ..structures.entry_id import EntryID
 
 
+# I would use TypeAlias, but my type checker *really* hates that.
+_EMAIL_DICT = Dict[str, Optional[Union[str, EntryID]]]
+_FAX_DICT = _EMAIL_DICT
+
+
 class Contact(MessageBase):
     """
     Class used for parsing contacts.
@@ -139,8 +144,9 @@ class Contact(MessageBase):
     @functools.cached_property
     def businessCardCardPicture(self) -> Optional[bytes]:
         """
-        The image to be used on a business card. Must be either a PNG file or a
-        JPEG file.
+        The image to be used on a business card.
+
+        Must be either a PNG file or a JPEG file.
         """
         return self.getNamedProp('8041', ps.PSETID_ADDRESS)
 
@@ -153,10 +159,11 @@ class Contact(MessageBase):
         return self.getNamedAs('8040', ps.PSETID_ADDRESS, BusinessCardDisplayDefinition)
 
     @functools.cached_property
-    def businessFax(self) -> Optional[Dict]:
+    def businessFax(self) -> Optional[_FAX_DICT]:
         """
-        Returns a dict of the data for the business fax. Returns None if no
-        fields are set.
+        Returns a dict of the data for the business fax.
+
+        Returns ``None`` if no fields are set.
 
         Keys are "address_type", "email_address", "number",
         "original_display_name", and "original_entry_id".
@@ -173,7 +180,9 @@ class Contact(MessageBase):
     @functools.cached_property
     def businessFaxAddressType(self) -> Optional[str]:
         """
-        The type of address for the fax. MUST be set to "FAX" if present.
+        The type of address for the fax.
+
+        MUST be set to "FAX" if present.
         """
         return self.getNamedProp('80C2', ps.PSETID_ADDRESS)
 
@@ -389,10 +398,11 @@ class Contact(MessageBase):
         return self.getStringStream('__substg1.0_3A45')
 
     @functools.cached_property
-    def email1(self) -> Optional[Dict]:
+    def email1(self) -> Optional[_EMAIL_DICT]:
         """
-        Returns a dict of the data for email 1. Returns None if no fields are
-        set.
+        Returns a dict of the data for email 1.
+
+        Returns ``None`` if no fields are set.
 
         Keys are "address_type", "display_name", "email_address",
         "original_display_name", and "original_entry_id".
@@ -443,7 +453,7 @@ class Contact(MessageBase):
         return self.getNamedAs('8085', ps.PSETID_ADDRESS, EntryID.autoCreate)
 
     @functools.cached_property
-    def email2(self) -> Optional[Dict]:
+    def email2(self) -> Optional[_EMAIL_DICT]:
         """
         Returns a dict of the data for email 2. Returns None if no fields are
         set.
@@ -494,7 +504,7 @@ class Contact(MessageBase):
         return self.getNamedAs('8095', ps.PSETID_ADDRESS, EntryID.autoCreate)
 
     @functools.cached_property
-    def email3(self) -> Optional[Dict]:
+    def email3(self) -> Optional[_EMAIL_DICT]:
         """
         Returns a dict of the data for email 3. Returns None if no fields are
         set.
@@ -545,18 +555,20 @@ class Contact(MessageBase):
         return self.getNamedAs('80A5', ps.PSETID_ADDRESS, EntryID.autoCreate)
 
     @functools.cached_property
-    def emails(self) -> Tuple[Union[Dict, None], Union[Dict, None], Union[Dict, None]]:
+    def emails(self) -> Tuple[Union[_EMAIL_DICT, None], Union[_EMAIL_DICT, None], Union[_EMAIL_DICT, None]]:
         """
-        Returns a tuple of all the email dicts. Value for an email will be None
-        if no fields were set.
+        Returns a tuple of all the email dicts.
+
+        Value for an email will be None if no fields were set.
         """
         return (self.email1, self.email2, self.email3)
 
     @functools.cached_property
-    def faxNumbers(self) -> Optional[Dict]:
+    def faxNumbers(self) -> Dict[str, Optional[_FAX_DICT]]:
         """
-        Returns a dictionary of the fax numbers. Entry will be None if no fields
-        were set.
+        Returns a dictionary of the fax numbers.
+
+        Entry will be None if no fields were set.
 
         Keys are "business", "home", and "primary".
         """
@@ -565,7 +577,6 @@ class Contact(MessageBase):
             'home': self.homeFax,
             'primary': self.primaryFax,
         }
-
 
     @functools.cached_property
     def fileUnder(self) -> Optional[str]:
@@ -768,7 +779,7 @@ class Contact(MessageBase):
         return self.getStringStream('__substg1.0_3A5D')
 
     @functools.cached_property
-    def homeFax(self) -> Optional[Dict]:
+    def homeFax(self) -> Optional[_FAX_DICT]:
         """
         Returns a dict of the data for the home fax. Returns None if no fields
         are set.
@@ -1107,7 +1118,7 @@ class Contact(MessageBase):
         return PostalAddressID(self.getNamedProp('8022', ps.PSETID_ADDRESS, 0))
 
     @functools.cached_property
-    def primaryFax(self) -> Optional[Dict]:
+    def primaryFax(self) -> Optional[_FAX_DICT]:
         """
         Returns a dict of the data for the primary fax. Returns None if no
         fields are set.
