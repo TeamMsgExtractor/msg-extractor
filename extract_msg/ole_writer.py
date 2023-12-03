@@ -111,7 +111,7 @@ class OleWriter:
 
     def __getContainingStorage(self, path: List[str], entryExists: bool = True, create: bool = False) -> Dict:
         """
-        Finds the storage dict internally where the entry specified by
+        Finds the storage ``dict`` internally where the entry specified by
         :param path: would be created.
 
         :param entryExists: If True, throws an error when the requested entry
@@ -124,7 +124,7 @@ class OleWriter:
         :raises ValueError: Tried to access an interal stream or tried to use
             both the create option and the entryExists option as True.
 
-        :returns: The storage dict that the entry is in.
+        :returns: The storage ``dict`` that the entry is in.
         """
         if not path:
             raise OSError('Path cannot be empty.')

@@ -1085,11 +1085,12 @@ def unwrapMultipart(mp: Union[bytes, str, email.message.Message]) -> Dict:
     Unwraps a recursive multipart structure into a dictionary of linear lists.
 
     Similar to unwrapMsg, but for multipart. Dictionary contains 3 keys:
-    "attachments" which contains a list of dicts containing processed attachment
-    data as well as the Message instance associated with it, "plain_body" which
-    contains the plain text body, and "html_body" which contains the HTML body.
+    "attachments" which contains a list of ``dict``s containing processed
+    attachment data as well as the Message instance associated with it,
+    "plain_body" which contains the plain text body, and "html_body" which
+    contains the HTML body.
 
-    For clarification, each instance of processed attachment data is a dict
+    For clarification, each instance of processed attachment data is a ``dict``
     with keys identical to the args used for the SignedAttachment constructor.
     This makes it easy to expand for use in constructing a SignedAttachment. The
     only argument missing is "msg" to ensure this function will not require one.
