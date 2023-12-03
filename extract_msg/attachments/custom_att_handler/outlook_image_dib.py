@@ -89,7 +89,7 @@ class OutlookImageDIB(CustomAttachmentHandler):
         """
         Generates the RTF to inject in place of the \\objattph tag.
 
-        If this function should do nothing, returns None.
+        If this function should do nothing, returns ``None``.
 
         :raises DependencyError: PIL or Pillow could not be found.
         """

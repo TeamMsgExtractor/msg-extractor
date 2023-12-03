@@ -635,8 +635,8 @@ class MSGFile:
         """
         Gets a binary representation of the requested stream.
 
-        This should ALWAYS return a bytes object if it was found, otherwise
-        returns None.
+        This should ALWAYS return a ``bytes`` object if it was found, otherwise
+        returns ``None``.
 
         :param prefix: Bool, whether to search for the entry at the root of the
             MSG file (False) or look in the current child MSG file (True).
@@ -926,7 +926,7 @@ class MSGFile:
     def importanceString(self) -> Union[str, None]:
         """
         Returns the string to use for saving. If the importance is medium then
-        it returns None. Mainly used for saving.
+        it returns ``None``. Mainly used for saving.
         """
         return {
             Importance.HIGH: 'High',
@@ -989,8 +989,8 @@ class MSGFile:
     @property
     def overrideEncoding(self) -> Optional[str]:
         """
-        Returns None is the encoding has not been overridden, otherwise returns
-        the encoding.
+        Returns ``None`` if the encoding has not been overridden, otherwise
+        returns the encoding.
         """
         return self.__overrideEncoding
 

@@ -184,7 +184,7 @@ class SignedAttachment:
         The class that the data type will use, if it can be retrieved.
 
         This is a safe way to do type checking on data before knowing if it will
-        raise an exception. Returns None if no data will be returns or if an
+        raise an exception. Returns ``None`` if no data will be returns or if an
         exception will be raised.
         """
         try:

@@ -187,8 +187,8 @@ class Recipient(Generic[_RT]):
         """
         Gets a binary representation of the requested stream.
 
-        This should ALWAYS return a bytes object if it was found, otherwise
-        returns None.
+        This should ALWAYS return a ``bytes`` object if it was found, otherwise
+        returns ``None``.
 
         :raises ReferenceError: The associated MSGFile instance has been garbage
             collected.

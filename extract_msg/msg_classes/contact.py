@@ -161,7 +161,7 @@ class Contact(MessageBase):
     @functools.cached_property
     def businessFax(self) -> Optional[_FAX_DICT]:
         """
-        Returns a dict of the data for the business fax.
+        Returns a ``dict`` of the data for the business fax.
 
         Returns ``None`` if no fields are set.
 
@@ -400,7 +400,7 @@ class Contact(MessageBase):
     @functools.cached_property
     def email1(self) -> Optional[_EMAIL_DICT]:
         """
-        Returns a dict of the data for email 1.
+        Returns a ``dict`` of the data for email 1.
 
         Returns ``None`` if no fields are set.
 
@@ -455,8 +455,9 @@ class Contact(MessageBase):
     @functools.cached_property
     def email2(self) -> Optional[_EMAIL_DICT]:
         """
-        Returns a dict of the data for email 2. Returns None if no fields are
-        set.
+        Returns a ``dict`` of the data for email 2.
+
+        Returns ``None`` if no fields are set.
         """
         data = {
             'address_type': self.email2AddressType,
@@ -491,8 +492,8 @@ class Contact(MessageBase):
     @functools.cached_property
     def email2OriginalDisplayName(self) -> Optional[str]:
         """
-        The second SMTP email address that corresponds to the second email address
-        for the contact.
+        The second SMTP email address that corresponds to the second email
+        address for the contact.
         """
         return self.getNamedProp('8094', ps.PSETID_ADDRESS)
 
@@ -506,8 +507,9 @@ class Contact(MessageBase):
     @functools.cached_property
     def email3(self) -> Optional[_EMAIL_DICT]:
         """
-        Returns a dict of the data for email 3. Returns None if no fields are
-        set.
+        Returns a ``dict`` of the data for email 3.
+
+        Returns ``None`` if no fields are set.
         """
         data = {
             'address_type': self.email3AddressType,
@@ -557,18 +559,18 @@ class Contact(MessageBase):
     @functools.cached_property
     def emails(self) -> Tuple[Union[_EMAIL_DICT, None], Union[_EMAIL_DICT, None], Union[_EMAIL_DICT, None]]:
         """
-        Returns a tuple of all the email dicts.
+        Returns a tuple of all the email ``dict``s.
 
-        Value for an email will be None if no fields were set.
+        Value for an email will be ``None`` if no fields were set.
         """
         return (self.email1, self.email2, self.email3)
 
     @functools.cached_property
     def faxNumbers(self) -> Dict[str, Optional[_FAX_DICT]]:
         """
-        Returns a dictionary of the fax numbers.
+        Returns a ``dict`` of the fax numbers.
 
-        Entry will be None if no fields were set.
+        Entry will be ``None`` if no fields were set.
 
         Keys are "business", "home", and "primary".
         """
@@ -619,8 +621,7 @@ class Contact(MessageBase):
     @functools.cached_property
     def generation(self) -> Optional[str]:
         """
-        A generational abbreviation that follows the full
-        name of the contact.
+        A generational abbreviation that follows the full name of the contact.
         """
         return self.getStringStream('__substg1.0_3A05')
 
@@ -781,8 +782,9 @@ class Contact(MessageBase):
     @functools.cached_property
     def homeFax(self) -> Optional[_FAX_DICT]:
         """
-        Returns a dict of the data for the home fax. Returns None if no fields
-        are set.
+        Returns a ``dict`` of the data for the home fax.
+
+        Returns ``None`` if no fields are set.
 
         Keys are "address_type", "email_address", "number",
         "original_display_name", and "original_entry_id".
@@ -899,8 +901,9 @@ class Contact(MessageBase):
     @functools.cached_property
     def location(self) -> Optional[str]:
         """
-        The location of the contact. For example, this could be the building or
-        office number of the contact.
+        The location of the contact.
+
+        For example, this could be the building or office number of the contact.
         """
         return self.getStringStream('__substg1.0_3A0D')
 
@@ -1120,8 +1123,9 @@ class Contact(MessageBase):
     @functools.cached_property
     def primaryFax(self) -> Optional[_FAX_DICT]:
         """
-        Returns a dict of the data for the primary fax. Returns None if no
-        fields are set.
+        Returns a ``dict`` of the data for the primary fax.
+
+        Returns ``None`` if no fields are set.
 
         Keys are "address_type", "email_address", "number",
         "original_display_name", and "original_entry_id".

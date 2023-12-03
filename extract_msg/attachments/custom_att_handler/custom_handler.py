@@ -70,7 +70,7 @@ class CustomAttachmentHandler(abc.ABC):
         """
         Generates the RTF to inject in place of the \\objattph tag.
 
-        If this function should do nothing, returns None.
+        If this function should do nothing, returns ``None``.
         """
 
     @property
@@ -86,7 +86,7 @@ class CustomAttachmentHandler(abc.ABC):
         """
         Gets the data for the attachment.
 
-        If an attachment should do nothing when saving, returns None.
+        If an attachment should do nothing when saving, returns ``None``.
         """
 
     @property
@@ -105,7 +105,7 @@ class CustomAttachmentHandler(abc.ABC):
         May return the same value as :property data:.
 
         If there is no object to represent the custom attachment, including
-        bytes, returns None.
+        ``bytes``, returns ``None``.
         """
 
     @functools.cached_property

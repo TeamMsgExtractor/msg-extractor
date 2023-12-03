@@ -359,8 +359,8 @@ class AttachmentBase(abc.ABC):
         """
         Gets a binary representation of the requested stream.
 
-        This should ALWAYS return a bytes object if it was found, otherwise
-        returns None.
+        This should ALWAYS return a ``bytes`` object if it was found, otherwise
+        returns ``None``.
 
         :raises ReferenceError: The associated MSGFile instance has been garbage
             collected.
@@ -530,7 +530,7 @@ class AttachmentBase(abc.ABC):
         """
         The attachment data, if any.
 
-        Returns None if there is no data to save.
+        Returns ``None`` if there is no data to save.
         """
 
     @functools.cached_property
@@ -539,8 +539,8 @@ class AttachmentBase(abc.ABC):
         The class that the data type will use, if it can be retrieved.
 
         This is a safe way to do type checking on data before knowing if it will
-        raise an exception. Returns None if no data will be returns or if an
-        exception will be raised.
+        raise an exception. Returns ``None`` if no data will be returned or if
+        an exception will be raised.
         """
         try:
             return None if self.data is None else self.data.__class__

@@ -193,10 +193,11 @@ class MessageBase(MSGFile):
 
     def deencapsulateBody(self, rtfBody: bytes, bodyType: DeencapType) -> Optional[Union[bytes, str]]:
         """
-        A function to deencapsulate the specified body from the rtfBody. Returns
-        a string for plain text and bytes for HTML. If specified, uses the
-        deencapsulation override function. Returns None if nothing could be
-        deencapsulated.
+        A function to deencapsulate the specified body from the RTF body.
+
+        Returns a string for plain text and bytes for HTML. If specified, uses
+        the deencapsulation override function. Returns ``None`` if nothing
+        could be deencapsulated.
 
         If you want to change the deencapsulation behaviour in a base class,
         simply override this function.
@@ -248,10 +249,11 @@ class MessageBase(MSGFile):
     def getInjectableHeader(self, prefix: str, joinStr: str, suffix: str, formatter: Callable[[str, str], str]) -> str:
         """
         Using the specified prefix, suffix, formatter, and join string,
-        generates the injectable header. Prefix is placed at the beginning,
-        followed by a series of format strings joined together with the join
-        string, with the suffix placed afterwards. Effectively makes this
-        structure:
+        generates the injectable header.
+
+        Prefix is placed at the beginning, followed by a series of format
+        strings joined together with the join string, with the suffix placed
+        afterwards. Effectively makes this structure:
         {prefix}{formatter()}{joinStr}{formatter()}{joinStr}...{formatter()}{suffix}
 
         Formatter be a function that takes first a name variable then a value
@@ -966,7 +968,7 @@ class MessageBase(MSGFile):
     def deencapsulatedRtf(self) -> Optional[RTFDE.DeEncapsulator]:
         """
         Returns the instance of the deencapsulated RTF body. If there is no RTF
-        body or the body is not encasulated, returns None.
+        body or the body is not encasulated, returns ``None``.
         """
         if self.rtfBody:
             # If there is an RTF body, we try to deencapsulate it.

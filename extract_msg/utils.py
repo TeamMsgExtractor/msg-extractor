@@ -531,7 +531,7 @@ def guessEncoding(msg: MSGFile) -> Optional[str]:
     """
     Analyzes the strings on an MSG file and attempts to form a consensus about the encoding based on the top-level strings.
 
-    Returns None if no consensus could be formed.
+    Returns ``None`` if no consensus could be formed.
 
     :raises DependencyError: chardet is not installed or could not be used
         properly.

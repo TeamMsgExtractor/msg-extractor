@@ -153,7 +153,7 @@ class CustomAttachment(AttachmentBase):
         """
         The attachment data, if any.
 
-        Returns None if there is no data to save.
+        Returns ``None`` if there is no data to save.
         """
         return self.__data
 
