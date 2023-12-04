@@ -388,7 +388,7 @@ class StringNamedProperty(NamedPropertyBase):
 
     @property
     def identifier(self) -> Tuple[str, str]:
-        return [self.name, self.guid]
+        return (self.name, self.guid)
 
     @property
     def name(self) -> str:
@@ -422,7 +422,7 @@ class NumericalNamedProperty(NamedPropertyBase):
 
     @property
     def identifier(self) -> Tuple[str, str]:
-        return [self.propertyID, self.guid]
+        return (self.propertyID, self.guid)
 
     @property
     def propertyID(self) -> str:
