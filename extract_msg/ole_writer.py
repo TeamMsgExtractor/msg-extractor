@@ -18,6 +18,7 @@ from typing import (
 from . import constants
 from .constants import MSG_PATH
 from .enums import Color, DirectoryEntryType
+from .exceptions import TooManySectorsError
 from .utils import ceilDiv, dictGetCasedKey, inputToMsgPath
 from olefile.olefile import OleDirectoryEntry, OleFileIO
 from red_black_dict_mod import RedBlackTree
@@ -203,6 +204,11 @@ class OleWriter:
                     data = bytes(data)
                 except Exception:
                     raise ValueError('Data must be a bytes instance or convertable to bytes if set.')
+            # Check the length of data. In future versions, this may be a
+            # different check which is done when swapping between version 3 and
+            # 4 of the compound file binary file format.
+            if len(data) > 0x80000000:
+                raise ValueError('Current version of extract_msg does not support streams greater than 2 GB in OLE files.')
 
         if clsid is not None:
             if not isinstance(clsid, bytes):
@@ -416,11 +422,24 @@ class OleWriter:
         This includes the header, DIFAT, and FAT blocks.
 
         :returns: The current sector number after all the data is written.
+
+        :raises TooMuchDataError: The number of sectors required for the file is
+            too large.
         """
         # Recalculate some things needed for saving.
         self.__recalculateSectors()
         # Since we are going to need these multiple times, get them now.
         numFat, numDifat, totalSectors = self._getFatSectors()
+
+        # Check to make sure there isn't too much data to write.
+        if totalSectors > 0xFFFFFFFB:
+            raise TooManySectorsError('Data in OleWriter requires too many sectors to write to a version 3 file.')
+
+        # The ministream *cannot* be greater than 2 GB, so check that before
+        # writing anything. A minifat sector is 64 bytes, so the maximum amount
+        # of them is 0x2000000.
+        if self.__numMinifatSectors > 0x2000000:
+            raise TooManySectorsError('Data is OleWriter requires too many MiniFAT sectors.')
 
         # Header signature.
         f.write(b'\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1')
@@ -623,6 +642,7 @@ class OleWriter:
 
         :raises OSError: A stream was found on the path before the end or an entry with the same name already exists.
         :raises ValueError: Attempts to access an internal item.
+        :raises ValueError: The data provided is too large.
         """
         path = inputToMsgPath(path)
         # First, find the current place in our dict to add the item.
@@ -649,6 +669,7 @@ class OleWriter:
         :raises OSError: Tried to add an entry to a path that has not yet
             been added, tried to add as a child of a stream, or tried to add an
             entry where one already exists under the same name.
+        :raises ValueError: The data provided is too large.
         """
         path = inputToMsgPath(path)
         # First, find the current place in our dict to add the item.
@@ -662,28 +683,32 @@ class OleWriter:
         newEntry = DirectoryEntry()
         if entry.entry_type == DirectoryEntryType.STORAGE:
             # Handle a storage entry.
-            # First add the dict to our tree of items.
-            _dir[path[-1]] = {'::DirectoryEntry': newEntry}
-
-            # Finally, setup the values for the stream.
+            # First, setup the values for the storage.
             newEntry.name = entry.name
             newEntry.type = DirectoryEntryType.STORAGE
             newEntry.clsid = _unClsid(entry.clsid)
             newEntry.stateBits = entry.dwUserFlags
             newEntry.creationTime = entry.createTime
             newEntry.modifiedTime = entry.modifyTime
+
+            # Finally add the dict to our tree of items.
+            _dir[path[-1]] = {'::DirectoryEntry': newEntry}
         else:
             # Handle a stream entry.
-            # First add the entry to out dict of entries.
-            _dir[path[-1]] = newEntry
+            # First, setup the values for the stream.
             newEntry.name = entry.name
             newEntry.type = DirectoryEntryType.STREAM
             newEntry.clsid = _unClsid(entry.clsid)
             newEntry.stateBits = entry.dwUserFlags
 
-            # Finally, handle the data.
+            # Next, handle the data.
             data = data or b''
             newEntry.data = bytes(data)
+            if len(newEntry.data) > 0x80000000:
+                raise ValueError('Current version of extract_msg does not support streams greater than 2 GB in OLE files.')
+
+            # Finally add the entry to out dict of entries.
+            _dir[path[-1]] = newEntry
 
         self.__dirEntryCount += 1
 
@@ -720,7 +745,6 @@ class OleWriter:
             of the entry. Not applicable to streams.
         :param stateBits: A 4 byte int. Sets the state bits, user-defined flags,
             of the entry. For a stream, this *SHOULD* be unset.
-
 
         To convert a 32 character hexadecial CLSID into the bytes for this
         function, the _unClsid function in the ole_writer submodule can be used.
@@ -953,6 +977,9 @@ class OleWriter:
         """
         Writes the data to the path specified. If :param path: has a write
         method it will use the object directly.
+
+        :raises TooManySectorsError: The number of sectors requires for a part
+            of writing is too large.
         """
         opened = False
 

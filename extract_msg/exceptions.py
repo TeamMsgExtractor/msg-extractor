@@ -42,6 +42,7 @@ class FeatureNotImplemented(ExMsgBaseException):
     The base class for a feature not yet being implemented in the module.
     """
 
+
 # More specific exceptions.
 
 
@@ -118,6 +119,11 @@ class StandardViolationError(InvalidFileFormatError):
 
     Any that could reasonably be skipped, although are likely to still cause
     errors down the line, can be suppressed.
+    """
+
+class TooManySectorsError(ExMsgBaseException):
+    """
+    Ole writer has too much data to write to the file.
     """
 
 class TZError(ExMsgBaseException):
