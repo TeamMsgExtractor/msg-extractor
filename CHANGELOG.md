@@ -34,6 +34,11 @@
 * Removed `hasLen` function.
 * Changed style to remove space between variable name and colon that separates the type.
 * Corrected `InvaildPropertyIdError` to `InvalidPropertyIdError`.
+* Updated to `olefile` version 0.47.
+* Updated `RTFDE` minimum version to 0.1.1.
+* Changed dependency named for `compressed-rtf` to remove minor typo (it *should* forward to the correct place regardless, but just to be safe).
+* Fixed issues with implementation of `OleWriter` when it comes to large sets of data. Most issues would fail silently and only be noticeable when trying to open the file. If your file is less than 2 GB, you would likely not have notices and issues at all. This includes adding a new exception that is throw from the `write` method, `TooManySectorsError`.
+* Fixed some issues with `OleWriter` that could cause entries to end up partially added if the data was an issue.
 
 **v0.46.2**
 * Adjusted typing information on regular expressions. They were using a subscript that was added in Python 3.9 (apparently that is something the type checker doesn't check for), which made the module incompatible with Python 3.8. If you are using Python 3.9 or higher a version check will switch to the more specific typing.
