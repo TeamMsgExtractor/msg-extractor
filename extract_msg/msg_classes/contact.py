@@ -559,7 +559,7 @@ class Contact(MessageBase):
     @functools.cached_property
     def emails(self) -> Tuple[Union[_EMAIL_DICT, None], Union[_EMAIL_DICT, None], Union[_EMAIL_DICT, None]]:
         """
-        Returns a tuple of all the email ``dict``s.
+        Returns a tuple of all the email ``dict``\\s.
 
         Value for an email will be ``None`` if no fields were set.
         """

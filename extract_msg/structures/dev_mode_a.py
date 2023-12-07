@@ -18,10 +18,11 @@ logger.addHandler(logging.NullHandler())
 
 class DevModeA:
     """
-    A DEVMODEA structure, as specified in [MS-OLEDS]. For the purposes of
-    parsing from bytes, if something goes wrong this will evaluate to False when
-    converting to bool. If no data is prodided, the fields are set to default
-    values.
+    A DEVMODEA structure, as specified in [MS-OLEDS].
+
+    For the purposes of parsing from bytes, if something goes wrong this will
+    evaluate to ``False`` when converting to ``bool``. If no data is prodided,
+    the fields are set to default values.
     """
     PARSE_STRUCT: Final[struct.Struct] = struct.Struct('<32s32s4HI13h14xI4x4I16x')
 

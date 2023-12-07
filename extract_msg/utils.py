@@ -533,7 +533,7 @@ def guessEncoding(msg: MSGFile) -> Optional[str]:
 
     Returns ``None`` if no consensus could be formed.
 
-    :raises DependencyError: chardet is not installed or could not be used
+    :raises DependencyError: ``chardet`` is not installed or could not be used
         properly.
     """
     try:
@@ -629,7 +629,7 @@ def inputToString(bytesInputVar: Optional[Union[str, bytes]], encoding: str) -> 
     """
     Converts the input into a string.
 
-    :raises ConversionError: if the input cannot be converted.
+    :raises ConversionError: The input cannot be converted.
     """
     if isinstance(bytesInputVar, str):
         return bytesInputVar
@@ -701,8 +701,8 @@ def parseType(_type: int, stream: Union[int, bytes], encoding: str, extras: Sequ
     :param extras: Used in the case of types like PtypMultipleString. For that
         example, extras should be a list of the bytes from rest of the streams.
 
-    :raises NotImplementedError: for types with no current support. Most of
-        these types have no documentation of existing in an MSG file.
+    :raises NotImplementedError: The type has no current support. Most of these
+        types have no documentation in [MS-OXMSG].
     """
     # WARNING Not done. Do not try to implement anywhere where it is not already implemented.
     value = stream
@@ -907,8 +907,8 @@ def setupLogging(defaultPath = None, defaultLevel = logging.WARN, logfile = None
         path.
     :param enableFileLogging: Whether to use a file to log or not.
 
-    :returns: True if the configuration file was found and applied, False
-        otherwise
+    :returns: ``True`` if the configuration file was found and applied,
+        ``False`` otherwise
     """
     shippedConfig = pathlib.Path(__file__).parent / 'data' / 'logging-config'
     if os.name == 'nt':
@@ -984,7 +984,8 @@ def tryGetMimetype(att: AttachmentBase, mimetype: Union[str, None]) -> Union[str
 
     :param att: The attachment to use for getting the mimetype.
     :param mimetype: The mimetype acquired directly from an attachment stream.
-        If this value evaluates to False, the function will try to determine it.
+        If this value evaluates to ``False``, the function will try to
+        determine it.
     """
     if mimetype:
         return mimetype
@@ -1084,22 +1085,22 @@ def unwrapMultipart(mp: Union[bytes, str, email.message.Message]) -> Dict:
     """
     Unwraps a recursive multipart structure into a dictionary of linear lists.
 
-    Similar to unwrapMsg, but for multipart. Dictionary contains 3 keys:
-    "attachments" which contains a list of ``dict``s containing processed
+    Similar to unwrapMsg, but for multipart. The dictionary contains 3 keys:
+    "attachments" which contains a list of ``dict``\\s containing processed
     attachment data as well as the Message instance associated with it,
     "plain_body" which contains the plain text body, and "html_body" which
     contains the HTML body.
 
     For clarification, each instance of processed attachment data is a ``dict``
-    with keys identical to the args used for the SignedAttachment constructor.
-    This makes it easy to expand for use in constructing a SignedAttachment. The
-    only argument missing is "msg" to ensure this function will not require one.
+    with keys identical to the args used for the ``SignedAttachment``
+    constructor. This makes it easy to expand for use in constructing a
+    ``SignedAttachment``. The only argument missing is "msg" to ensure this function will not require one.
 
     :param mp: The bytes that make up a multipart, the string that makes up a
-        multipart, or a Message instance from the email module created from the
-        multipart to unwrap. If providing a Message instance, prefer it to be an
-        instance of EmailMessage. If you are doing so, make sure it's policy is
-        default.
+        multipart, or a ``Message`` instance from the ``email`` module created
+        from the multipart data to unwrap. If providing a ``Message`` instance,
+        prefer it to be an instance of ``EmailMessage``. If you are doing so,
+        make sure it's policy is default.
     """
     # In the event we are generating it, these are the kwargs to use.
     genKwargs = {
@@ -1222,13 +1223,12 @@ def validateHtml(html: bytes) -> bool:
 
 def verifyPropertyId(id: str) -> None:
     """
-    Determines whether a property ID is valid for vertain functions.
+    Determines whether a property ID is valid for certain functions.
 
     Property IDs MUST be a 4 digit hexadecimal string. Property is valid if no
     exception is raised.
 
-    :raises InvalidPropertyIdError: if the it is not a 4 digit hexadecimal
-        number.
+    :raises InvalidPropertyIdError: The ID is not a 4 digit hexadecimal number.
     """
     if not isinstance(id, str):
         raise InvalidPropertyIdError('ID was not a 4 digit hexadecimal string')
@@ -1246,7 +1246,7 @@ def verifyType(_type: Optional[str]) -> None:
 
     Raises an exception if it is not.
 
-    :raises UnknownTypeError: if the type is not recognized.
+    :raises UnknownTypeError: The type is not recognized.
     """
     if _type is not None:
         if (_type not in constants.VARIABLE_LENGTH_PROPS_STRING) and (_type not in constants.FIXED_LENGTH_PROPS_STRING):

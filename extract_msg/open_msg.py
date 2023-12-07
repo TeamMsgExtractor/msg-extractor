@@ -57,15 +57,16 @@ def openMsg(path, **kwargs) -> MSGFile:
     """
     Function to automatically open an MSG file and detect what type it is.
 
-    Accepts all of the same arguments as the __init__ method for the class it
-    creates. Extra options will be ignored if the class doesn't know what to do
-    with them, but child instances may end up using them if they understand
-    them. See :method MSGFile.__init__: for a list of all globally recognized
+    Accepts all of the same arguments as the ``__init__`` method for the class
+    it creates. Extra options will be ignored if the class doesn't know what to
+    do with them, but child instances may end up using them if they understand
+    them. See ``MSGFile.__init__`` for a list of all globally recognized
     options.
 
-    If :param strict: is set to True, this function will raise an exception when
-    it cannot identify what MSGFile derivitive to use. Otherwise, it will log
-    the error and return a basic MSGFile instance. Default is True.
+    :param strict: If set to ``True``, this function will raise an exception
+        when it cannot identify what ``MSGFile`` derivitive to use. Otherwise,
+        it will log the error and return a basic ``MSGFile`` instance. Default
+        is ``True``.
 
     :raises UnsupportedMSGTypeError: The type is recognized but not suppoted.
     :raises UnrecognizedMSGTypeError: The type is not recognized.
@@ -185,8 +186,8 @@ def openMsgBulk(path, **kwargs) -> Union[List[MSGFile], Tuple[Exception, Union[s
     based on a wild card. Returns a list if successful, otherwise returns a
     tuple.
 
-    :param ignoreFailures: If this is True, will return a list of all successful
-        files, ignoring any failures. Otherwise, will close all that
+    :param ignoreFailures: If this is ``True``, will return a list of all
+        successful files, ignoring any failures. Otherwise, will close all that
         successfully opened, and return a tuple of the exception and the path of
         the file that failed.
     """

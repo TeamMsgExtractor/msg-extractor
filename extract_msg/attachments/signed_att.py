@@ -69,26 +69,18 @@ class SignedAttachment:
         The name of the file is determined by several factors. The first
         thing that is checked is if you have provided :param customFilename:
         to this function. If you have, that is the name that will be used.
-        If no custom name has been provided and :param contentId: is True,
-        the file will be saved using the content ID of the attachment. If
-        it is not found or :param contentId: is False, the long filename
-        will be used. If the long filename is not found, the short one will
-        be used. If after all of this a usable filename has not been found, a
-        random one will be used (accessible from `Attachment.randomFilename`).
-        After the name to use has been determined, it will then be shortened to
-        make sure that it is not more than the value of :param maxNameLength:.
+        Otherwise, the name from :attr:`name` will be used. After the name to
+        use has been determined, it will then be shortened to make sure that it
+        is not more than the value of :param maxNameLength:.
 
         To change the directory that the attachment is saved to, set the value
         of :param customPath: when calling this function. The default save
         directory is the working directory.
 
-        If you want to save the contents into a ZipFile or similar object,
+        If you want to save the contents into a ``ZipFile`` or similar object,
         either pass a path to where you want to create one or pass an instance
         to :param zip:. If :param zip: is an instance, :param customPath: will
         refer to a location inside the zip file.
-
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
         """
         # First check if we are skipping embedded messages and stop
         # *immediately* if we are.
@@ -210,10 +202,10 @@ class SignedAttachment:
     @property
     def msg(self) -> MSGFile:
         """
-        The MSGFile instance this attachment belongs to.
+        The ``MSGFile`` instance this attachment belongs to.
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')

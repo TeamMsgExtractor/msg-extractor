@@ -180,7 +180,7 @@ class ServerID:
         """
         :param data: The data to use to create the ServerID.
 
-        :raises TypeError: if the data is not a ServerID.
+        :raises TypeError: The data is not a ServerID.
         """
         # According to the docs, the first byte being a 1 means it follows this
         # structure. A value of 0 means it does not.

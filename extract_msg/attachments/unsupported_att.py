@@ -19,7 +19,7 @@ class UnsupportedAttachment(AttachmentBase):
     def save(self, **kwargs) -> constants.SAVE_TYPE:
         """
         Raises a NotImplementedError unless :param skipNotImplemented: is set to
-        True.
+        ``True``.
 
         If it is, returns a value that indicates no data was saved.
         """

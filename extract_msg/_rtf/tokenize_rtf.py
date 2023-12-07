@@ -191,8 +191,8 @@ def tokenizeRTF(data: bytes, validateStart: bool = True) -> List[Token]:
 
     If tokenizing fails, the current tokens list will not be changed.
 
-    :param validateStart: If False, does not check the first few tags. Useful
-        when tokenizing a snippet rather than a document.
+    :param validateStart: If ``False``, does not check the first few tags.
+        Useful when tokenizing a snippet rather than a document.
 
     :raises TypeError: The data is not recognized as RTF.
     :raises ValueError: An issue with basic parsing occured.

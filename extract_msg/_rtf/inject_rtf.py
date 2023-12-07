@@ -52,7 +52,8 @@ def _listInsertMult(dest: List[_T], source: Iterable[_T], index: int = -1):
     Inserts into :param dest: all the items in :param source: at the index
     specified.
 
-    :param dest: can be any mutable sequence with :method insert:, :method __len__:, and :method extend:.
+    :param dest: Any mutable sequence with methods ``insert``, ``__len__``, and
+        ``extend``.
 
     If :param index: is not specified, the default position is the end of the
     list. This is also where things will be inserted if index is greater than or
@@ -74,7 +75,7 @@ def injectStartRTF(document: bytes, injectTokens: Union[bytes, List[Token]]) -> 
 
     :param document: The bytes representing the RTF document.
     :param injectTokens: The tokens to inject into the document. Can either be
-        a list of Tokens or bytes to be tokenized.
+        a list of ``Token``\\s or ``bytes`` to be tokenized.
 
     :raises TypeError: The data is not recognized as RTF.
     :raises ValueError: An issue with basic parsing occured.
@@ -93,7 +94,7 @@ def injectStartRTFTokenized(document: List[Token], injectTokens: Union[bytes, It
     :param document: The list of tokens representing the RTF document. Will only
         be modified if the function is successful.
     :param injectTokens: The tokens to inject into the document. Can either be
-        a list of Tokens or bytes to be tokenized.
+        a list of ``Token``\\s or ``bytes`` to be tokenized.
 
     :raises TypeError: The data is not recognized as RTF.
     :raises ValueError: An issue with basic parsing occured.

@@ -286,7 +286,7 @@ class CalendarBase(MessageBase):
         """
         Whether the object represents an exception.
 
-        False indicates that the object represents a recurring series or a
+        ``False`` indicates that the object represents a recurring series or a
         single-instance object.
         """
         return bool(self.getNamedProp('000A', ps.PSETID_MEETING))

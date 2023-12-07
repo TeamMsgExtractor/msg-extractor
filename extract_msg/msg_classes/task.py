@@ -160,8 +160,8 @@ class Task(MessageBase):
         """
         Indicates whether a new recurring task remains to be generated.
 
-        Set to False on a new Task object and True when the client generates
-        the last recurring task.
+        Set to ``False`` on a new Task object and ``True`` when the client
+        generates the last recurring task.
         """
         return bool(self.getNamedProp('8109', constants.ps.PSETID_TASK))
 

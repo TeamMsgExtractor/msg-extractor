@@ -137,8 +137,8 @@ class Named:
         """
         Checks if stream exists inside the named properties folder.
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Named instance has been garbage collected.')
@@ -195,8 +195,8 @@ class Named:
         This should ALWAYS return a ``bytes`` object if it was found, otherwise
         returns ``None``.
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Named instance has been garbage collected.')
@@ -229,8 +229,8 @@ class Named:
         """
         Returns the Message instance the attachment belongs to.
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Named instance has been garbage collected.')

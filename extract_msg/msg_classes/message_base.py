@@ -54,12 +54,12 @@ logger.addHandler(logging.NullHandler())
 
 class MessageBase(MSGFile):
     """
-    Base class for Message like msg files.
+    Base class for Message-like MSG files.
     """
 
     def __init__(self, path, **kwargs):
         """
-        Supports all of the options from :method MSGFile.__init__: with some
+        Supports all of the options from :meth:`MSGFile.__init__` with some
         additional ones.
 
         :param recipientSeparator: Optional, separator string to use between
@@ -68,13 +68,13 @@ class MessageBase(MSGFile):
             that will override the way that HTML/text is deencapsulated from the
             RTF body. This function must take exactly 2 arguments, the first
             being the RTF body from the message and the second being an instance
-            of the enum DeencapType that will tell the function what type of
+            of the enum ``DeencapType`` that will tell the function what type of
             body is desired. The function should return a string for plain text
             and bytes for HTML. If any problems occur, the function *must*
-            either return None or raise one of the appropriate functions from
-            extract_msg.exceptions. All other exceptions must be handled
-            internally or they will not be caught. The original deencapsulation
-            method will not run if this is set.
+            either return ``None`` or raise one of the appropriate exceptions
+            from :mod:`extract_msg.exceptions`. All other exceptions must be
+            handled internally or they will not be caught. The original
+            deencapsulation method will not run if this is set.
         """
         super().__init__(path, **kwargs)
         # The rest needs to be in a try-except block to ensure the file closes
@@ -395,13 +395,13 @@ class MessageBase(MSGFile):
 
         :param wkPath: Used to manually specify the path of the wkhtmltopdf
             executable. If not specified, the function will try to find it.
-            Useful if wkhtmltopdf is not on the path. If :param pdf: is False,
-            this argument is ignored.
+            Useful if wkhtmltopdf is not on the path. If :param pdf: is
+            ``False``, this argument is ignored.
         :param wkOptions: Used to specify additional options to wkhtmltopdf.
             this must be a list or list-like object composed of strings and
             bytes.
         :param kwargs: Used to allow kwargs expansion in the save function.
-            Arguments absorbed by this are simply ignored.
+            Arguments absorbed by this are simply ignored, except for keyword arguments used by :py:meth:`getSaveHtmlBody`.
 
         :raises ExecutableNotFound: The wkhtmltopdf executable could not be
             found.
@@ -462,10 +462,10 @@ class MessageBase(MSGFile):
         Returns the HTML body from the MSG file (will check that it has one)
         with the HTML header injected into it.
 
-        :param prepared: Determines whether to be using the standard HTML (False) or
-            the prepared HTML (True) body (Default: False).
+        :param prepared: Determines whether to be using the standard HTML
+            (``False``) or the prepared HTML (``True``) body (Default: ``False``).
 
-        :raises AttributeError: if the correct HTML body cannot be acquired.
+        :raises AttributeError: The correct HTML body cannot be acquired.
         """
         if not self.htmlBody:
             raise AttributeError('Cannot inject the HTML header without an HTML body attribute.')
@@ -575,8 +575,8 @@ class MessageBase(MSGFile):
         Returns the RTF body from this MSG file (will check that it has one)
         with the RTF header injected into it.
 
-        :raises AttributeError: if the RTF body cannot be acquired.
-        :raises RuntimeError: if all injection attempts fail.
+        :raises AttributeError: The RTF body cannot be acquired.
+        :raises RuntimeError: All injection attempts failed.
         """
         if not self.rtfBody:
             raise AttributeError('Cannot inject the RTF header without an RTF body attribute.')
@@ -630,13 +630,12 @@ class MessageBase(MSGFile):
           included in the length, so it is recommended to plan for up to 5
           characters extra to be a part of the name. Default is 256.
 
-        It should be noted that regardless of the value for maxNameLength, the
-        name of the file containing the body will always have the name 'message'
-        followed by the full extension.
+        It should be noted that regardless of the value for
+        :param maxNameLength:, the name of the file containing the body will always have the name 'message' followed by the full extension.
 
         There are several parameters used to determine how the message will be
         saved. By default, the message will be saved as plain text. Setting one
-        of the following parameters to True will change that:
+        of the following parameters to ``True`` will change that:
 
         * :param html: will output the message in HTML format.
         * :param json: will output the message in JSON format.
@@ -646,14 +645,14 @@ class MessageBase(MSGFile):
         Usage of more than one formatting parameter will raise an exception.
 
         Using HTML or RTF will raise an exception if they could not be retrieved
-        unless you have :param allowFallback: set to True. Fallback will go in
-        this order, starting at the top most format that is set:
+        unless you have :param allowFallback: set to ``True``. Fallback will go
+        in this order, starting at the top most format that is set:
 
         * HTML
         * RTF
         * Plain text
 
-        If you want to save the contents into a ZipFile or similar object,
+        If you want to save the contents into a ``ZipFile`` or similar object,
         either pass a path to where you want to create one or pass an instance
         to :param zip:. If :param zip: is set, :param customPath: will refer to
         a location inside the zip file.
@@ -663,16 +662,16 @@ class MessageBase(MSGFile):
         :param saveHeader: Turns on saving the header as a separate file when
             set.
         :param skipAttachments: Turns off saving attachments.
-        :param skipHidden: If True, skips attachments marked as hidden.
-            (Default: False)
+        :param skipHidden: If ``True``, skips attachments marked as hidden.
+            (Default: ``False``)
         :param skipBodyNotFound: Suppresses errors if no valid body could be
             found, simply skipping the step of saving the body.
-        :param charset: If the html is being prepared, the charset to use for
+        :param charset: If the HTML is being prepared, the charset to use for
             the Content-Type meta tag to insert. This exists to ensure that
-            something parsing the html can properly determine the encoding (as
+            something parsing the HTML can properly determine the encoding (as
             not having this tag can cause errors in some programs). Set this to
             ``None`` or an empty string to not insert the tag (Default:
-            'utf-8').
+            ``'utf-8'``).
         :param kwargs: Used to allow kwargs expansion in the save function.
         :param preparedHtml: When set, prepares the HTML body for standalone
             usage, doing things like adding tags, injecting attachments, etc.
@@ -954,7 +953,7 @@ class MessageBase(MSGFile):
     @property
     def crlf(self) -> str:
         """
-        The value of self.__crlf, should you need it for whatever reason.
+        The value of ``self.__crlf``, should you need it for whatever reason.
         """
         return self._crlf
 
@@ -1083,13 +1082,14 @@ class MessageBase(MSGFile):
         Keys are the names to use in the header while the values are one of the
         following:
 
-        * None: Signifies no data was found for the property and it should be
-          omitted from the header.
-        * str: A string to be formatted into the header using the string
+        * ``None``: Signifies no data was found for the property and it should
+          be omitted from the header.
+        * ``str``: A string to be formatted into the header using the string
           encoding.
-        * Tuple[Union[str, None], bool]: A string should be formatted into the
-          header. If the bool is True, then place an empty string if the value
-          is None, otherwise follow the same behavior as regular None.
+        * ``Tuple[Union[str, None], bool]``: A string should be formatted into
+          the header. If the bool is ``True``, then place an empty string if
+          the first value is ``None``, otherwise follow the same behavior as
+          regular ``None``.
 
         Additional note: If the value is an empty string, it will be dropped as
         well by default.
@@ -1099,8 +1099,8 @@ class MessageBase(MSGFile):
         instance of the join string. If any member of a group is being printed,
         it will be spaced apart from the next group/item.
 
-        If you class should not do *any* header injection, return None from this
-        property.
+        If you class should not do *any* header injection, return ``None`` from
+        this property.
         """
         # Checking outlook printing, default behavior is to completely omit
         # *any* field that is not present. So while for extensability the
@@ -1137,7 +1137,7 @@ class MessageBase(MSGFile):
     @functools.cached_property
     def htmlBody(self) -> Optional[bytes]:
         """
-        The html body, if it exists.
+        The HTML body, if it exists.
         """
         if (htmlBody := self.getStream('__substg1.0_10130102')) is not None:
             pass
@@ -1188,7 +1188,7 @@ class MessageBase(MSGFile):
     @functools.cached_property
     def htmlInjectableHeader(self) -> str:
         """
-        The header that can be formatted and injected into the html body.
+        The header that can be formatted and injected into the HTML body.
         """
         prefix = '<div id="injectedHeader"><div><p class="MsoNormal">'
         suffix = '<o:p></o:p></p></div></div>'
@@ -1200,23 +1200,23 @@ class MessageBase(MSGFile):
     @functools.cached_property
     def inReplyTo(self) -> Optional[str]:
         """
-       The message id that this message is in reply to.
+        The message id that this message is in reply to.
         """
         return self.getStringStream('__substg1.0_1042')
 
     @functools.cached_property
     def isRead(self) -> bool:
         """
-        Returns if this email has been marked as read.
+        Whether this email has been marked as read.
         """
         return bool(self.getPropertyVal('0E070003', 0) & 1)
 
     @functools.cached_property
     def isSent(self) -> bool:
         """
-        Returns if this email has been marked as sent.
+        Whether this email has been marked as sent.
 
-        Assumes True if no flags are found.
+        Assumes ``True`` if no flags are found.
         """
         return not bool(self.getPropertyVal('0E070003', 0) & 8)
 
@@ -1269,8 +1269,8 @@ class MessageBase(MSGFile):
         """
         The class to use for a recipient's recipientType property.
 
-        The default is extract_msg.enums.RecipientType. If a subclass
-        attributes different meanings to the values, you can override this
+        The default is :class:`extract_msg.enums.RecipientType`. If a subclass's
+        attributes have different meanings to the values, you can override this
         property to return a valid enum.
         """
         return RecipientType
@@ -1357,6 +1357,6 @@ class MessageBase(MSGFile):
     @functools.cached_property
     def to(self) -> Optional[str]:
         """
-        The "to" field, if it exists.
+        The "To" field, if it exists.
         """
         return self._genRecipient('to', RecipientType.TO)

@@ -35,12 +35,13 @@ class PropertiesStore:
 
     def __init__(self, data: Optional[bytes], type_: PropertiesType, writable: bool = False):
         """
-        Reads a properties stream or creates a brand new PropertiesStore object.
+        Reads a properties stream or creates a brand new ``PropertiesStore``
+        object.
 
-        :param data: The bytes of the properties instance. Setting to None or
-            empty bytes will cause the properties instance to not be valid
-            *unless* writable is set to True. If that is the case, the instance
-            will be setup for creating a new properties stream.
+        :param data: The bytes of the properties instance. Setting to ``None``
+            or empty bytes will cause the properties instance to not be valid
+            *unless* writable is set to ``True``. If that is the case, the
+            instance will be setup for creating a new properties stream.
         :param type_: The type of properties stream this instance represents.
         :param writable: Whether this properties stream should accept
             modification.
@@ -190,9 +191,9 @@ class PropertiesStore:
         Adds the property if it does not exist.
 
         :param prop: The property to add.
-        :param force: If true, the writable property will be ignored. This will
-            not be reflected when converting to bytes if the instance is not
-            readable.
+        :param force: If ``True``, the writable property will be ignored. This
+            will not be reflected when converting to ``bytes`` if the instance
+            is not readable.
 
         :raises KeyError: A property already exists with the chosen name.
         :raises NotWritableError: The method was used on an unwritable instance.
@@ -207,8 +208,10 @@ class PropertiesStore:
 
     def get(self, name: Union[str, int], default: _T = None) -> Union[PropBase, _T]:
         """
-        Retrieve the property of :param name:. Returns the value of
-        :param default: if the property could not be found.
+        Retrieve the property of :param name:.
+
+        :returns: The property, or the value of :param default: if the property
+            could not be found.
         """
         if (name := self._mapId(name)):
             return self.__props.get(name, default)
@@ -328,10 +331,11 @@ class PropertiesStore:
     @property
     def attachmentCount(self) -> int:
         """
-        The number of Attachment objects for the MSGFile object.
+        The number of ``Attachment`` objects for the ``MSGFile`` object.
 
         :raises NotWritableError: The setter was used on an unwritable instance.
-        :raises TypeError: The instance is not for an MSGFile object.
+        :raises TypeError: The Properties instance is not for an ``MSGFile``
+            object.
         """
         if self.__ac is None:
             raise TypeError('Attachment properties do not contain an attachment count.')
@@ -373,7 +377,7 @@ class PropertiesStore:
         Whether the instance is in an invalid state.
 
         If the instance is not writable and was given no data, this will be
-        True.
+        ``True``.
         """
         return self.__isError
 
@@ -384,7 +388,8 @@ class PropertiesStore:
         created inside the .msg file.
 
         :raises NotWritableError: The setter was used on an unwritable instance.
-        :raises TypeError: The Properties instance is not for an MSGFile object.
+        :raises TypeError: The Properties instance is not for an ``MSGFile``
+            object.
         """
         if self.__naid is None:
             raise TypeError('Attachment properties do not contain a next attachment ID.')
@@ -410,7 +415,8 @@ class PropertiesStore:
         created inside the .msg file.
 
         :raises NotWritableError: The setter was used on an unwritable instance.
-        :raises TypeError: The Properties instance is not for an MSGFile object.
+        :raises TypeError: The Properties instance is not for an ``MSGFile``
+            object.
         """
         if self.__nrid is None:
             raise TypeError('Attachment properties do not contain a next recipient ID.')
@@ -439,10 +445,11 @@ class PropertiesStore:
     @property
     def recipientCount(self) -> int:
         """
-        The number of Recipient objects for the MSGFile object.
+        The number of ``Recipient`` objects for the ``MSGFile`` object.
 
         :raises NotWritableError: The setter was used on an unwritable instance.
-        :raises TypeError: The Properties instance is not for an MSGFile object.
+        :raises TypeError: The Properties instance is not for an ``MSGFile``
+            object.
         """
         if self.__rc is None:
             raise TypeError('Attachment properties do not contain a recipient count.')

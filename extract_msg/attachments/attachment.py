@@ -88,12 +88,12 @@ class Attachment(AttachmentBase):
         The name of the file is determined by several factors. The first
         thing that is checked is if you have provided :param customFilename:
         to this function. If you have, that is the name that will be used.
-        If no custom name has been provided and :param contentId: is True,
+        If no custom name has been provided and :param contentId: is ``True``,
         the file will be saved using the content ID of the attachment. If
-        it is not found or :param contentId: is False, the long filename
+        it is not found or :param contentId: is ``False``, the long filename
         will be used. If the long filename is not found, the short one will
         be used. If after all of this a usable filename has not been found, a
-        random one will be used (accessible from `Attachment.randomFilename`).
+        random one will be used (accessible from :meth:`randomFilename`).
         After the name to use has been determined, it will then be shortened to
         make sure that it is not more than the value of :param maxNameLength:.
 
@@ -101,16 +101,16 @@ class Attachment(AttachmentBase):
         of :param customPath: when calling this function. The default save
         directory is the working directory.
 
-        If you want to save the contents into a ZipFile or similar object,
+        If you want to save the contents into a ``ZipFile`` or similar object,
         either pass a path to where you want to create one or pass an instance
         to :param zip:. If :param zip: is an instance, :param customPath: will
         refer to a location inside the zip file.
 
-        :param extractEmbedded: If True, causes the attachment, should it be an
-            embedded MSG file, to save as a .msg file instead of calling it's
-            save function.
-        :param skipEmbedded: If True, skips saving this attachment if it is an
-            embedded MSG file.
+        :param extractEmbedded: If ``True``, causes the attachment, should it
+            be an embedded MSG file, to save as a .msg file instead of calling
+            it's save function.
+        :param skipEmbedded: If ``True``, skips saving this attachment if it is
+            an embedded MSG file.
         """
         # Get the filename to use.
         filename = self.getFilename(**kwargs)
@@ -175,7 +175,7 @@ class Attachment(AttachmentBase):
     @property
     def randomFilename(self) -> str:
         """
-        Returns the random filename to be used by this attachment.
+        The random filename to be used by this attachment.
         """
         try:
             return self.__randomName

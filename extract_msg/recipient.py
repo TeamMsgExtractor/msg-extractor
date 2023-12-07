@@ -59,8 +59,8 @@ class Recipient(Generic[_RT]):
         """
         Checks if stream exists inside the recipient folder.
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
@@ -70,8 +70,8 @@ class Recipient(Generic[_RT]):
         """
         Checks if the string stream exists inside the recipient folder.
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
@@ -83,8 +83,8 @@ class Recipient(Generic[_RT]):
 
         The return of this function is 2 values, the first being a boolean for if anything was found, and the second being how many were found.
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
@@ -94,12 +94,12 @@ class Recipient(Generic[_RT]):
         """
         Gets a multiple binary property as a list of bytes objects.
 
-        Like :method getStringStream:, the 4 character type suffix should be
+        Like :meth:`getStringStream`, the 4 character type suffix should be
         omitted. So if you want the stream "__substg1.0_00011102" then the
         filename would simply be "__substg1.0_0001".
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
@@ -109,12 +109,12 @@ class Recipient(Generic[_RT]):
         """
         Gets a multiple string property as a list of str objects.
 
-        Like :method getStringStream:, the 4 character type suffix should be
+        Like :meth:`getStringStream`, the 4 character type suffix should be
         omitted. So if you want the stream "__substg1.0_00011102" then the
         filename would simply be "__substg1.0_0001".
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
@@ -125,10 +125,11 @@ class Recipient(Generic[_RT]):
         Returns the property, setting the class if found.
 
         :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. If
-            the value is None, this function is not called. If you want it to
-            be called regardless, you should handle the data directly.
+            read. The data will be the first argument to the class's
+            ``__init__`` method or the function itself, if that is what is
+            provided. If the value is ``None``, this function is not called. If
+            you want it to be called regardless, you should handle the data
+            directly.
         """
         value = self.getPropertyVal(propertyName)
 
@@ -139,7 +140,7 @@ class Recipient(Generic[_RT]):
 
     def getPropertyVal(self, name: Union[int, str], default: _T = None) -> Union[Any, _T]:
         """
-        instance.props.getValue(name, default)
+        ``instance.props.getValue(name, default)``
 
         Can be overridden to create new behavior.
         """
@@ -147,18 +148,17 @@ class Recipient(Generic[_RT]):
 
     def getSingleOrMultipleBinary(self, filename: MSG_PATH) -> Optional[Union[List[bytes], bytes]]:
         """
-        A combination of :method getStringStream: and
-        :method getMultipleString:.
+        A combination of :meth:`getStringStream` and :meth:`getMultipleString`.
 
         Checks to see if a single binary stream exists to return, otherwise
         tries to return the multiple binary stream of the same ID.
 
-        Like :method getStringStream:, the 4 character type suffix should be
+        Like :meth:`getStringStream`, the 4 character type suffix should be
         omitted. So if you want the stream "__substg1.0_00010102" then the
         filename would simply be "__substg1.0_0001".
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
@@ -166,18 +166,17 @@ class Recipient(Generic[_RT]):
 
     def getSingleOrMultipleString(self, filename: MSG_PATH) -> Optional[Union[List[str], str]]:
         """
-        A combination of :method getStringStream: and
-        :method getMultipleString:.
+        A combination of :meth:`getStringStream` and :meth:`getMultipleString`.
 
         Checks to see if a single string stream exists to return, otherwise
         tries to return the multiple string stream of the same ID.
 
-        Like :method getStringStream:, the 4 character type suffix should be
+        Like :meth:`getStringStream`, the 4 character type suffix should be
         omitted. So if you want the stream "__substg1.0_0001001F" then the
         filename would simply be "__substg1.0_0001".
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
@@ -190,8 +189,8 @@ class Recipient(Generic[_RT]):
         This should ALWAYS return a ``bytes`` object if it was found, otherwise
         returns ``None``.
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
@@ -203,10 +202,11 @@ class Recipient(Generic[_RT]):
         is found.
 
         :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. If
-            the value is None, this function is not called. If you want it to
-            be called regardless, you should handle the data directly.
+            read. The data will be the first argument to the class's
+            ``__init__`` method or the function itself, if that is what is
+            provided. If the value is ``None``, this function is not called. If
+            you want it to be called regardless, you should handle the data
+            directly.
         """
         value = self.getStream(streamID)
 
@@ -226,8 +226,8 @@ class Recipient(Generic[_RT]):
         This should ALWAYS return a string if it was found, otherwise returns
         None.
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
@@ -239,10 +239,11 @@ class Recipient(Generic[_RT]):
         class if it is found.
 
         :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. If
-            the value is None, this function is not called. If you want it to
-            be called regardless, you should handle the data directly.
+            read. The data will be the first argument to the class's
+            ``__init__`` method or the function itself, if that is what is
+            provided. If the value is ``None``, this function is not called. If
+            you want it to be called regardless, you should handle the data
+            directly.
         """
         value = self.getStream(streamID)
 
@@ -253,10 +254,9 @@ class Recipient(Generic[_RT]):
 
     def listDir(self, streams: bool = True, storages: bool = False) -> List[List[str]]:
         """
-        Lists the streams and or storages that exist in the attachment
-        directory.
+        Lists the streams and or storages that exist in the recipient directory.
 
-        :returns: The paths *excluding* the attachment directory, allowing the
+        :returns: The paths *excluding* the recipient directory, allowing the
             paths to be directly used for accessing a file.
         """
         if (msg := self.__msg()) is None:
@@ -266,7 +266,7 @@ class Recipient(Generic[_RT]):
 
     def slistDir(self, streams: bool = True, storages: bool = False) -> List[str]:
         """
-        Like :method listDir:, except it returns the paths as strings.
+        Like :meth:`listDir`, except it returns the paths as strings.
         """
         return ['/'.join(path) for path in self.listDir(streams, storages)]
 

@@ -25,12 +25,12 @@ _T = TypeVar('_T')
 
 class MessageSignedBase(MessageBase, Generic[_T]):
     """
-    Base class for Message like msg files.
+    Base class for Message-like MSG files that are signed.
     """
 
     def __init__(self, path, signedAttachmentClass: Type[_T] = SignedAttachment, **kwargs):
         """
-        Supports all of the options from :method MessageBase.__init__: with some
+        Supports all of the options from :meth:`MessageBase.__init__` with some
         additional ones.
 
         :param signedAttachmentClass: optional, the class the object will use

@@ -14,7 +14,7 @@ from ..enums import AttachmentPermissionType, AttachmentType, SaveType
 
 class WebAttachment(AttachmentBase):
     """
-    An attachment that exists on the internet and not attached to the MSGFile
+    An attachment that exists on the internet and not attached to the MSG file
     directly.
     """
 

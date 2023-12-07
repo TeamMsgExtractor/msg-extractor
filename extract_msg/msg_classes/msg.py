@@ -70,8 +70,9 @@ class MSGFile:
             not set this unless you know what you are doing.
         :param initAttachment: Optional, the method used when creating an
             attachment for an MSG file. MUST be a function that takes 2
-            arguments (the MSGFile instance and the directory in the MSG file
-            where the attachment is) and returns an instance of AttachmentBase.
+            arguments (the ``MSGFile`` instance and the directory in the MSG
+            file where the attachment is) and returns an instance of
+            ``AttachmentBase``.
         :param delayAttachments: Optional, delays the initialization of
             attachments until the user attempts to retrieve them. Allows MSG
             files with bad attachments to be initialized so the other data can
@@ -79,32 +80,33 @@ class MSGFile:
         :param filename: Optional, the filename to be used by default when
             saving.
         :param errorBehavior: Optional, the behavior to use in the event of
-            certain types of errors. Uses the ErrorBehavior enum.
+            certain types of errors. Uses the ``ErrorBehavior`` enum.
         :param overrideEncoding: Optional, an encoding to use instead of the one
             specified by the msg file. If the value is "chardet" and you have
             the chardet module installed, an attempt will be made to
             auto-detect the encoding based on some of the string properties. Do
             not report encoding errors caused by this.
         :param treePath: Internal variable used for giving representation of the
-            path, as a tuple of objects, of the MSGFile. When passing, this is
-            the path to the parent object of this instance.
+            path, as a tuple of objects, of the ``MSGFile``. When passing, this
+            is the path to the parent object of this instance.
         :param insecureFeatures: Optional, an enum value that specifies if
             certain insecure features should be enabled. These features should
-            only be used on data that you trust. Uses the InsecureFeatures enum.
+            only be used on data that you trust. Uses the ``InsecureFeatures``
+            enum.
         :param dateFormat: Optional, the format string to use for dates.
         :param datetimeFormat: Optional, the format string to use for dates
             that include a time component.
 
-        :raises InvalidFileFormatError: If the file is not an OleFile or could
+        :raises InvalidFileFormatError: If the file is not an OLE file or could
             not be parsed as an MSG file.
         :raises StandardViolationError: If some part of the file badly violates
             the standard.
         :raises IOError: If there is an issue opening the MSG file.
         :raises NameError: If the encoding provided is not supported.
         :raises PrefixError: If the prefix is not a supported type.
-        :raises TypeError: If the parent is not an instance of MSGFile or a
+        :raises TypeError: If the parent is not an instance of ``MSGFile`` or a
             subclass.
-        :raises ValueError: If the attachment error behavior is not valid.
+        :raises ValueError: The path is invalid.
 
         It's recommended to check the error message to ensure you know why a
         specific exceptions was raised.
@@ -240,7 +242,7 @@ class MSGFile:
         Finds the directory entry from the olefile for the stream or storage
         specified.
 
-        Use '/' to get the root entry.
+        Use ``'/'`` to get the root entry.
         """
         sid = -1
         if filename == '/':
@@ -256,16 +258,18 @@ class MSGFile:
     def _getTypedAs(self, _id: str, overrideClass = None, preserveNone: bool = True):
         """
         Like the other get as functions, but designed for when something
-        could be multiple types (where only one will be present). This way you
-        have no need to set the type, it will be handled for you.
+        could be multiple types (where only one will be present).
+
+        This way you have no need to set the type, it will be handled for you.
 
         :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. By
-            default, this will be completely ignored if the value was not found.
-        :param preserveNone: If true (default), causes the function to ignore
-            :param overrideClass: when the value could not be found (is None).
-            If this is changed to False, then the value will be used regardless.
+            read. The data will be the first argument to the class's
+            ``__init__`` method or the function itself, if that is what is
+            provided. By default, this will be completely ignored if the value was not found.
+        :param preserveNone: If ``True`` (default), causes the function to
+            ignore :param overrideClass: when the value could not be found (is
+            ``None``). If this is changed to ``False``, then the value will be
+            used regardless.
         """
         value = self._getTypedData(_id)
         # Check if we should be overriding the data type for this instance.
@@ -283,8 +287,8 @@ class MSGFile:
         :param _id: MUST be a 4 digit hexadecimal string.
 
         If you know for sure what type the data is before hand, you can specify
-        it as being one of the strings in the constant FIXED_LENGTH_PROPS_STRING
-        or VARIABLE_LENGTH_PROPS_STRING.
+        it as being one of the strings in the constant
+        ``FIXED_LENGTH_PROPS_STRING`` or ``VARIABLE_LENGTH_PROPS_STRING``.
         """
         verifyPropertyId(_id)
         _id = _id.upper()
@@ -304,7 +308,7 @@ class MSGFile:
 
         If you know for sure what type the property is before hand, you can
         specify it as being one of the strings in the constant
-        FIXED_LENGTH_PROPS_STRING or VARIABLE_LENGTH_PROPS_STRING.
+        ``FIXED_LENGTH_PROPS_STRING`` or ``VARIABLE_LENGTH_PROPS_STRING``.
         """
         verifyPropertyId(propertyID)
         if _type:
@@ -329,7 +333,7 @@ class MSGFile:
 
         If you know for sure what type the stream is before hand, you can
         specify it as being one of the strings in the constant
-        FIXED_LENGTH_PROPS_STRING or VARIABLE_LENGTH_PROPS_STRING.
+        ``FIXED_LENGTH_PROPS_STRING`` or ``VARIABLE_LENGTH_PROPS_STRING``.
 
         If you have not specified the type, the type this function returns in
         many cases cannot be predicted. As such, when using this function it is
@@ -372,12 +376,12 @@ class MSGFile:
 
     def _oleListDir(self, streams: bool = True, storages: bool = False) -> List[List[str]]:
         """
-        Calls :method OleFileIO.listdir: from the OleFileIO instance associated
+        Calls :meth:`OleFileIO.listdir` from the OleFileIO instance associated
         with this MSG file. Useful for if you need access to all the top level
         streams if this is an embedded MSG file.
 
-        Returns a list of the streams and or storages depending on the arguments
-        given.
+        :returns: A list of the streams and or storages depending on the
+            arguments given.
         """
         return self.__ole.listdir(streams, storages)
 
@@ -421,8 +425,8 @@ class MSGFile:
         If no location is specified, the root directory is searched. The return of this function is 2 values, the first being a boolean for if anything
         was found, and the second being how many were found.
 
-        Because of how this function works, any folder that contains it's own
-        "__properties_version1.0" file should have this function called from
+        Because of how this method works, any folder that contains it's own
+        "__properties_version1.0" file should have this method called from
         it's class.
         """
         verifyPropertyId(_id)
@@ -459,10 +463,10 @@ class MSGFile:
         If this is an embedded MSG file, the embedded streams and directories will be added to it as if they were at the root, allowing you to save it as it's own MSG file.
 
         This function pulls directly from the source MSG file, so modifications
-        to the properties of of an MSGFile object (or one of it's subclasses)
-        will not be reflected in the saved file.
+        to the properties of of an ``MSGFile`` object (or one of it's
+        subclasses) will not be reflected in the saved file.
 
-        :param path: A path-like object (including strings and pathlib.Path
+        :param path: A path-like object (including strings and ``pathlib.Path``
             objects) or an IO device with a write method which accepts bytes.
         """
         from ..ole_writer import OleWriter
@@ -484,7 +488,7 @@ class MSGFile:
     def fixPath(self, inp: MSG_PATH, prefix: bool = True) -> str:
         """
         Changes paths so that they have the proper prefix (should :param prefix:
-        be True) and are strings rather than lists or tuples.
+        be ``True``) and are strings rather than lists or tuples.
         """
         inp = msgPathToString(inp)
         if prefix:
@@ -495,12 +499,13 @@ class MSGFile:
         """
         Gets a multiple binary property as a list of bytes objects.
 
-        Like :method getStringStream:, the 4 character type suffix should be
+        Like :py:meth:`getStringStream`, the 4 character type suffix should be
         omitted. So if you want the stream "__substg1.0_00011102" then the
         filename would simply be "__substg1.0_0001".
 
         :param prefix: Bool, whether to search for the entry at the root of the
-            MSG file (False) or look in the current child MSG file (True).
+            MSG file (``False``) or look in the current child MSG file
+            (``True``).
         """
         filename = self.fixPath(filename, prefix) + '1102'
         multStream = self.getStream(filename)
@@ -523,12 +528,13 @@ class MSGFile:
         """
         Gets a multiple string property as a list of str objects.
 
-        Like :method getStringStream:, the 4 character type suffix should be
+        Like :meth:`getStringStream`, the 4 character type suffix should be
         omitted. So if you want the stream "__substg1.0_00011102" then the
         filename would simply be "__substg1.0_0001".
 
         :param prefix: Bool, whether to search for the entry at the root of the
-            MSG file (False) or look in the current child MSG file (True).
+            MSG file (``False``) or look in the current child MSG file
+            (``True``).
         """
         filename = self.fixPath(filename, prefix) + '101F' if self.areStringsUnicode else '101E'
         multStream = self.getStream(filename)
@@ -555,10 +561,11 @@ class MSGFile:
         Returns the named property, setting the class if specified.
 
         :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. If
-            the value is None, this function is not called. If you want it to
-            be called regardless, you should handle the data directly.
+            read. The data will be the first argument to the class's
+            ``__init__`` method or the function itself, if that is what is
+            provided. If the value is ``None``, this function is not called. If
+            you want it to be called regardless, you should handle the data
+            directly.
         """
         value = self.getNamedProp(propertyName, guid)
         if value is not None:
@@ -578,10 +585,11 @@ class MSGFile:
         Returns the property, setting the class if found.
 
         :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. If
-            the value is None, this function is not called. If you want it to
-            be called regardless, you should handle the data directly.
+            read. The data will be the first argument to the class's
+            ``__init__`` method or the function itself, if that is what is
+            provided. If the value is ``None``, this function is not called. If
+            you want it to be called regardless, you should handle the data
+            directly.
         """
         value = self.getPropertyVal(propertyName)
 
@@ -600,12 +608,12 @@ class MSGFile:
 
     def getSingleOrMultipleBinary(self, filename: MSG_PATH, prefix: bool = True) -> Optional[Union[List[bytes], bytes]]:
         """
-        Combination of :method getStream: and :method getMultipleBinary:.
+        Combination of :meth:`getStream` and :meth:`getMultipleBinary`.
 
         Checks to see if a single binary stream exists to return, otherwise
         tries to return the multiple binary stream of the same ID.
 
-        Like :method getStringStream:, the 4 character type suffix should be
+        Like :meth:`getStringStream`, the 4 character type suffix should be
         omitted. So if you want the stream "__substg1.0_00010102" then the
         filename would simply be "__substg1.0_0001".
         """
@@ -619,12 +627,12 @@ class MSGFile:
 
     def getSingleOrMultipleString(self, filename: MSG_PATH, prefix: bool = True) -> Optional[Union[List[str], str]]:
         """
-        Combination of :method getStringStream: and :method getMultipleString:.
+        Combination of :meth:`getStringStream` and :meth:`getMultipleString`.
 
         Checks to see if a single string stream exists to return, otherwise
         tries to return the multiple string stream of the same ID.
 
-        Like :method getStringStream:, the 4 character type suffix should be
+        Like :meth:`getStringStream`, the 4 character type suffix should be
         omitted. So if you want the stream "__substg1.0_0001001F" then the
         filename would simply be "__substg1.0_0001".
         """
@@ -644,7 +652,8 @@ class MSGFile:
         returns ``None``.
 
         :param prefix: Bool, whether to search for the entry at the root of the
-            MSG file (False) or look in the current child MSG file (True).
+            MSG file (``False``) or look in the current child MSG file
+            (``True``).
         """
         filename = self.fixPath(filename, prefix)
         if self.exists(filename, False):
@@ -660,10 +669,11 @@ class MSGFile:
         is found.
 
         :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. If
-            the value is None, this function is not called. If you want it to
-            be called regardless, you should handle the data directly.
+            read. The data will be the first argument to the class's
+            ``__init__`` method or the function itself, if that is what is
+            provided. If the value is ``None``, this function is not called. If
+            you want it to be called regardless, you should handle the data
+            directly.
         """
         value = self.getStream(streamID)
 
@@ -681,10 +691,11 @@ class MSGFile:
         the filename this function should receive should be "__substg1.0_001A".
 
         This should ALWAYS return a string if it was found, otherwise returns
-        None.
+        ``None``.
 
         :param prefix: Bool, whether to search for the entry at the root of the
-            MSG file (False) or look in the current child MSG file (True).
+            MSG file (``False``) or look in the current child MSG file
+            (``True``).
         """
         filename = self.fixPath(filename, prefix)
         if self.areStringsUnicode:
@@ -700,10 +711,11 @@ class MSGFile:
         class if it is found.
 
         :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. If
-            the value is None, this function is not called. If you want it to
-            be called regardless, you should handle the data directly.
+            read. The data will be the first argument to the class's
+            ``__init__`` method or the function itself, if that is what is
+            provided. If the value is ``None``, this function is not called. If
+            you want it to be called regardless, you should handle the data
+            directly.
         """
         value = self.getStream(streamID)
 
@@ -714,11 +726,11 @@ class MSGFile:
 
     def listDir(self, streams: bool = True, storages: bool = False, includePrefix: bool = True) -> List[List[str]]:
         """
-        Replacement for OleFileIO.listdir that runs at the current prefix
+        Replacement for ``OleFileIO.listdir`` that runs at the current prefix
         directory.
 
-        :param includePrefix: If False, removes the part of the path that is the
-            prefix.
+        :param includePrefix: If ``False``, removes the part of the path that
+            is the prefix.
         """
         # Get the items from OleFileIO.
         try:
@@ -756,8 +768,8 @@ class MSGFile:
         """
         Saves only attachments in the same folder.
 
-        :params skipHidden: If True, skips attachments marked as hidden.
-            (Default: False)
+        :params skipHidden: If ``True``, skips attachments marked as hidden.
+            (Default: ``False``)
         """
         for attachment in self.attachments:
             if not (skipHidden and attachment.hidden):
@@ -976,7 +988,7 @@ class MSGFile:
 
         This is not usable to access the data of the properties directly.
 
-        :raises ReferenceError: The parent MSGFile instance has been garbage
+        :raises ReferenceError: The parent ``MSGFile`` instance has been garbage
             collected.
         """
         # Handle the parent msg file existing.

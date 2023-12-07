@@ -115,15 +115,16 @@ class OleWriter:
         Finds the storage ``dict`` internally where the entry specified by
         :param path: would be created.
 
-        :param entryExists: If True, throws an error when the requested entry
-            does not yet exist.
-        :param create: If True, creates missing storages with default settings.
+        :param entryExists: If ``True``, throws an error when the requested
+            entry does not yet exist.
+        :param create: If ``True``, creates missing storages with default
+            settings.
 
-        :raises OSError: If :param create: is False and the path could not be
-            found. Also raised if :param entryExists: is True and the requested
-            entry does not exist.
+        :raises OSError: If :param create: is ``False`` and the path could not
+            be found. Also raised if :param entryExists: is ``True`` and the
+            requested entry does not exist.
         :raises ValueError: Tried to access an interal stream or tried to use
-            both the create option and the entryExists option as True.
+            both the create option and the entryExists option is ``True``.
 
         :returns: The storage ``dict`` that the entry is in.
         """
@@ -164,7 +165,7 @@ class OleWriter:
 
     def __getEntry(self, path: List[str]) -> DirectoryEntry:
         """
-        Finds and returns an existing DirectoryEntry instance in the writer.
+        Finds and returns an existing ``DirectoryEntry`` instance in the writer.
 
         :raises OSError: If the entry does not exist.
         :raises ValueError: If access to an internal item is attempted.
@@ -180,7 +181,7 @@ class OleWriter:
         """
         Edits the DirectoryEntry with the data provided.
 
-        Common code used for :method addEntry: and :method editEntry:.
+        Common code used for :meth:`addEntry` and :meth:`editEntry`.
 
         :raises TypeError: Attempted to modify the data of a storage.
         :raises ValueError: Some part of the data given to modify the various
@@ -627,10 +628,10 @@ class OleWriter:
 
         :param path: The path to add the entry at. Must not contain a path part
             that is an already added stream.
-        :param data: The bytes for a stream or an object with the __bytes__
+        :param data: The bytes for a stream or an object with a ``__bytes__``
             method.
-        :param storage: If True, the entry to add is a storage. Otherwise, the
-            entry is a stream.
+        :param storage: If ``True``, the entry to add is a storage. Otherwise,
+            the entry is a stream.
         :param clsid: The CLSID for the stream/storage. Must a a bytes instance
             that is 16 bytes long.
         :param creationTime: An 8 byte filetime int. Sets the creation time of
@@ -640,7 +641,8 @@ class OleWriter:
         :param stateBits: A 4 byte int. Sets the state bits, user-defined flags,
             of the entry. For a stream, this *SHOULD* be unset.
 
-        :raises OSError: A stream was found on the path before the end or an entry with the same name already exists.
+        :raises OSError: A stream was found on the path before the end or an
+            entry with the same name already exists.
         :raises ValueError: Attempts to access an internal item.
         :raises ValueError: The data provided is too large.
         """
@@ -809,9 +811,9 @@ class OleWriter:
         modification of an embedded properties stream when extracting an
         embedded MSG file.
 
-        :param rootPath: A path (accepted by olefile.OleFileIO) to the directory
-            to use as the root of the file. If not provided, the file root will
-            be used.
+        :param rootPath: A path (accepted by ``olefile.OleFileIO``) to the
+            directory to use as the root of the file. If not provided, the file
+            root will be used.
 
         :raises OSError: If :param rootPath: does not exist in the file.
         """
@@ -858,7 +860,7 @@ class OleWriter:
 
     def getEntry(self, path: MSG_PATH) -> DirectoryEntry:
         """
-        Finds and returns a copy of an existing DirectoryEntry instance in the
+        Finds and returns a copy of an existing `DirectoryEntry` instance in the
         writer. Use this method to check the internal status of an entry.
 
         :raises OSError: If the entry does not exist.
@@ -870,8 +872,9 @@ class OleWriter:
         """
         Returns a list of the specified items currently in the writter.
 
-        :param streams: If True, includes the path for each stream in the list.
-        :param storages: If True, includes the path for each storage in the
+        :param streams: If ``True``, includes the path for each stream in the
+            list.
+        :param storages: If ``True``, includes the path for each storage in the
             list.
         """
         # We are actually abusing the walk function a bit here to life much
@@ -945,9 +948,9 @@ class OleWriter:
 
     def walk(self) -> Iterator[Tuple[List[str], List[str], List[str]]]:
         """
-        Functional equivelent to :function os.walk:, but for going over the file
-        structure of the OLE file to be written. Unlike :function os.walk:, it
-        takes no arguments.
+        Functional equivelent to ``os.walk``, but for going over the file
+        structure of the OLE file to be written. Unlike ``os.walk``, it takes
+        no arguments.
 
         :returns: A tuple of three lists. The first is the path, as a list of
             strings, for the directory (or an empty list for the root), the
@@ -975,8 +978,10 @@ class OleWriter:
 
     def write(self, path) -> None:
         """
-        Writes the data to the path specified. If :param path: has a write
-        method it will use the object directly.
+        Writes the data to the path specified.
+
+        If :param path: has a ``write`` method, the object will be used
+        directly.
 
         :raises TooManySectorsError: The number of sectors requires for a part
             of writing is too large.
@@ -1009,7 +1014,7 @@ class OleWriter:
 
 def _unClsid(clsid: str) -> bytes:
     """
-    Converts the clsid from olefile.olefile._clsid back to bytes.
+    Converts the clsid from ``olefile.olefile._clsid`` back to bytes.
     """
     if not clsid:
         return b''
