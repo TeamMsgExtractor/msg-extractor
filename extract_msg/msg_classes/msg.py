@@ -56,7 +56,7 @@ _T = TypeVar('_T')
 
 class MSGFile:
     """
-    Parser for .msg files.
+    Base handler for all .msg files.
     """
 
     filename: Optional[str]

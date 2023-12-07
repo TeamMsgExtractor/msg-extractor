@@ -101,7 +101,7 @@ class MessageBase(MSGFile):
 
     def _genRecipient(self, recipientStr: str, recipientType: RecipientType) -> Optional[str]:
         """
-        Returns the specified recipient field.
+        Method to generate the specified recipient field.
         """
         value = None
         # Check header first.
@@ -193,7 +193,7 @@ class MessageBase(MSGFile):
 
     def deencapsulateBody(self, rtfBody: bytes, bodyType: DeencapType) -> Optional[Union[bytes, str]]:
         """
-        A function to deencapsulate the specified body from the RTF body.
+        A method to deencapsulate the specified body from the RTF body.
 
         Returns a string for plain text and bytes for HTML. If specified, uses
         the deencapsulation override function. Returns ``None`` if nothing
@@ -326,7 +326,7 @@ class MessageBase(MSGFile):
         Returns the plain text body that will be used in saving based on the
         arguments.
 
-        :param kwargs: Used to allow kwargs expansion in the save function.
+        :param _: Used to allow kwargs expansion in the save function.
             Arguments absorbed by this are simply ignored.
         """
         # Get the type of line endings.
@@ -353,7 +353,7 @@ class MessageBase(MSGFile):
             not having this tag can cause errors in some programs). Set this to
             ``None`` or an empty string to not insert the tag (Default:
             'utf-8').
-        :param kwargs: Used to allow kwargs expansion in the save function.
+        :param _: Used to allow kwargs expansion in the save function.
             Arguments absorbed by this are simply ignored.
         """
         if self.htmlBody:
@@ -459,8 +459,8 @@ class MessageBase(MSGFile):
 
     def injectHtmlHeader(self, prepared: bool = False) -> bytes:
         """
-        Returns the HTML body from the MSG file (will check that it has one) with
-        the HTML header injected into it.
+        Returns the HTML body from the MSG file (will check that it has one)
+        with the HTML header injected into it.
 
         :param prepared: Determines whether to be using the standard HTML (False) or
             the prepared HTML (True) body (Default: False).
@@ -556,7 +556,8 @@ class MessageBase(MSGFile):
 
         def replace(bodyMarker):
             """
-            Internal function to replace the body tag with itself plus the header.
+            Internal function to replace the body tag with itself plus the
+            header.
             """
             # I recently had to change this and how it worked. Now we use a new
             # property of `MSGFile` that returns a special tuple of tuples to define
@@ -589,7 +590,8 @@ class MessageBase(MSGFile):
 
         def replace(bodyMarker):
             """
-            Internal function to replace the body tag with itself plus the header.
+            Internal function to replace the body tag with itself plus the
+            header.
             """
             return bodyMarker.group() + injectableHeader
 
@@ -910,14 +912,14 @@ class MessageBase(MSGFile):
     @functools.cached_property
     def bcc(self) -> Optional[str]:
         """
-        Returns the bcc field, if it exists.
+        The "Bcc" field, if it exists.
         """
         return self._genRecipient('bcc', RecipientType.BCC)
 
     @functools.cached_property
     def body(self) -> Optional[str]:
         """
-        Returns the message body, if it exists.
+        The message body, if it exists.
         """
         # If the body exists but is empty, that means it should be returned.
         if (body := self.getStringStream('__substg1.0_1000')) is not None:
@@ -938,37 +940,38 @@ class MessageBase(MSGFile):
     @functools.cached_property
     def cc(self) -> Optional[str]:
         """
-        Returns the cc field, if it exists.
+        The "Cc" field, if it exists.
         """
         return self._genRecipient('cc', RecipientType.CC)
 
     @functools.cached_property
     def compressedRtf(self) -> Optional[bytes]:
         """
-        Returns the compressed RTF stream, if it exists.
+        The compressed RTF stream, if it exists.
         """
         return self.getStream('__substg1.0_10090102')
 
     @property
     def crlf(self) -> str:
         """
-        Returns the value of self.__crlf, should you need it for whatever
-        reason.
+        The value of self.__crlf, should you need it for whatever reason.
         """
         return self._crlf
 
     @functools.cached_property
     def date(self) -> Optional[datetime.datetime]:
         """
-        Returns the send date, if it exists.
+        The send date, if it exists.
         """
         return self.props.date if self.isSent else None
 
     @functools.cached_property
     def deencapsulatedRtf(self) -> Optional[RTFDE.DeEncapsulator]:
         """
-        Returns the instance of the deencapsulated RTF body. If there is no RTF
-        body or the body is not encasulated, returns ``None``.
+        The instance of the deencapsulated RTF body.
+
+        If there is no RTF body or the body is not encasulated, returns
+        ``None``.
         """
         if self.rtfBody:
             # If there is an RTF body, we try to deencapsulate it.
@@ -1032,8 +1035,10 @@ class MessageBase(MSGFile):
     @functools.cached_property
     def header(self) -> email.message.Message:
         """
-        Returns the message header, if it exists. Otherwise it will generate
-        one.
+        The message header, if it exists.
+
+        If one does not exist as a stream, it will be generated from the other
+        properties.
         """
         headerText = self.headerText
         if headerText:
@@ -1060,7 +1065,7 @@ class MessageBase(MSGFile):
     @functools.cached_property
     def headerDict(self) -> Dict[str, Any]:
         """
-        Returns a dictionary of the entries in the header
+        A dictionary of the entries in the header
         """
         headerDict = {x: self.header[x] for x in self.header}
         try:
@@ -1073,8 +1078,10 @@ class MessageBase(MSGFile):
     def headerFormatProperties(self) -> constants.HEADER_FORMAT_TYPE:
         """
         Returns a dictionary of properties, in order, to be formatted into the
-        header. Keys are the names to use in the header while the values are one
-        of the following:
+        header.
+
+        Keys are the names to use in the header while the values are one of the
+        following:
 
         * None: Signifies no data was found for the property and it should be
           omitted from the header.
@@ -1130,7 +1137,7 @@ class MessageBase(MSGFile):
     @functools.cached_property
     def htmlBody(self) -> Optional[bytes]:
         """
-        Returns the html body, if it exists.
+        The html body, if it exists.
         """
         if (htmlBody := self.getStream('__substg1.0_10130102')) is not None:
             pass
@@ -1153,7 +1160,7 @@ class MessageBase(MSGFile):
     @functools.cached_property
     def htmlBodyPrepared(self) -> Optional[bytes]:
         """
-        Returns the HTML body that has (where possible) the embedded attachments
+        The HTML body that has (where possible) the embedded attachments
         inserted into the body.
         """
         # If we can't get an HTML body then we have nothing to do.
@@ -1193,7 +1200,7 @@ class MessageBase(MSGFile):
     @functools.cached_property
     def inReplyTo(self) -> Optional[str]:
         """
-        Returns the message id that this message is in reply to.
+       The message id that this message is in reply to.
         """
         return self.getStringStream('__substg1.0_1042')
 
@@ -1207,8 +1214,9 @@ class MessageBase(MSGFile):
     @functools.cached_property
     def isSent(self) -> bool:
         """
-        Returns if this email has been marked as sent. Assumes True if no flags
-        are found.
+        Returns if this email has been marked as sent.
+
+        Assumes True if no flags are found.
         """
         return not bool(self.getPropertyVal('0E070003', 0) & 8)
 
@@ -1227,7 +1235,7 @@ class MessageBase(MSGFile):
     @functools.cached_property
     def parsedDate(self) -> Optional[Tuple[int, int, int, int, int, int, int, int, int]]:
         """
-        Returns a 9 tuple of the parsed date from the header.
+        A 9 tuple of the parsed date from the header.
         """
         return email.utils.parsedate(self.header['Date'])
 
@@ -1245,7 +1253,7 @@ class MessageBase(MSGFile):
     @functools.cached_property
     def recipients(self) -> List[Recipient]:
         """
-        Returns a list of all recipients.
+        A list of all recipients.
         """
         recipientDirs = []
         prefixLen = self.prefixLen
@@ -1284,7 +1292,7 @@ class MessageBase(MSGFile):
     @functools.cached_property
     def rtfBody(self) -> Optional[bytes]:
         """
-        Returns the decompressed Rtf body from the message.
+        The decompressed Rtf body from the message.
         """
         return compressed_rtf.decompress(self.compressedRtf) if self.compressedRtf else None
 
@@ -1316,7 +1324,7 @@ class MessageBase(MSGFile):
     @functools.cached_property
     def sender(self) -> Optional[str]:
         """
-        Returns the message sender, if it exists.
+        The message sender, if it exists.
         """
         # Check header first
         if self.headerInit:
@@ -1342,13 +1350,13 @@ class MessageBase(MSGFile):
     @functools.cached_property
     def subject(self) -> Optional[str]:
         """
-        Returns the message subject, if it exists.
+        The message subject, if it exists.
         """
         return self.getStringStream('__substg1.0_0037')
 
     @functools.cached_property
     def to(self) -> Optional[str]:
         """
-        Returns the to field, if it exists.
+        The "to" field, if it exists.
         """
         return self._genRecipient('to', RecipientType.TO)
