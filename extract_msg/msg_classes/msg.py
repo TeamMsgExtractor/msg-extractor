@@ -238,7 +238,9 @@ class MSGFile:
     def _getOleEntry(self, filename: MSG_PATH, prefix: bool = True) -> olefile.olefile.OleDirectoryEntry:
         """
         Finds the directory entry from the olefile for the stream or storage
-        specified. Use '/' to get the root entry.
+        specified.
+
+        Use '/' to get the root entry.
         """
         sid = -1
         if filename == '/':
@@ -276,7 +278,9 @@ class MSGFile:
     def _getTypedData(self, _id: str, _type = None, prefix: bool = True):
         """
         Gets the data for the specified id as the type that it is supposed to
-        be. :param id: MUST be a 4 digit hexadecimal string.
+        be.
+
+        :param _id: MUST be a 4 digit hexadecimal string.
 
         If you know for sure what type the data is before hand, you can specify
         it as being one of the strings in the constant FIXED_LENGTH_PROPS_STRING
@@ -294,7 +298,9 @@ class MSGFile:
     def _getTypedProperty(self, propertyID: str, _type = None) -> Tuple[bool, Optional[Any]]:
         """
         Gets the property with the specified id as the type that it is supposed
-        to be. :param id: MUST be a 4 digit hexadecimal string.
+        to be.
+
+        :param propertyID: MUST be a 4 digit hexadecimal string.
 
         If you know for sure what type the property is before hand, you can
         specify it as being one of the strings in the constant
@@ -410,9 +416,10 @@ class MSGFile:
     def existsTypedProperty(self, _id, location = None, _type = None, prefix: bool = True, propertiesInstance: Optional[PropertiesStore] = None) -> Tuple[bool, int]:
         """
         Determines if the stream with the provided id exists in the location
-        specified. If no location is specified, the root directory is searched.
-        The return of this function is 2 values, the first being a boolean for
-        if anything was found, and the second being how many were found.
+        specified.
+
+        If no location is specified, the root directory is searched. The return of this function is 2 values, the first being a boolean for if anything
+        was found, and the second being how many were found.
 
         Because of how this function works, any folder that contains it's own
         "__properties_version1.0" file should have this function called from
@@ -447,9 +454,9 @@ class MSGFile:
     def export(self, path) -> None:
         """
         Exports the contents of this MSG file to a new MSG files specified by
-        the path given. If this is an embedded MSG file, the embedded streams
-        and directories will be added to it as if they were at the root,
-        allowing you to save it as it's own MSG file.
+        the path given.
+
+        If this is an embedded MSG file, the embedded streams and directories will be added to it as if they were at the root, allowing you to save it as it's own MSG file.
 
         This function pulls directly from the source MSG file, so modifications
         to the properties of of an MSGFile object (or one of it's subclasses)
@@ -593,8 +600,7 @@ class MSGFile:
 
     def getSingleOrMultipleBinary(self, filename: MSG_PATH, prefix: bool = True) -> Optional[Union[List[bytes], bytes]]:
         """
-        A combination of :method getStringStream: and
-        :method getMultipleString:.
+        Combination of :method getStream: and :method getMultipleBinary:.
 
         Checks to see if a single binary stream exists to return, otherwise
         tries to return the multiple binary stream of the same ID.
@@ -613,8 +619,7 @@ class MSGFile:
 
     def getSingleOrMultipleString(self, filename: MSG_PATH, prefix: bool = True) -> Optional[Union[List[str], str]]:
         """
-        A combination of :method getStringStream: and
-        :method getMultipleString:.
+        Combination of :method getStringStream: and :method getMultipleString:.
 
         Checks to see if a single string stream exists to return, otherwise
         tries to return the multiple string stream of the same ID.
