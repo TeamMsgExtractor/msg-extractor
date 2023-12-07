@@ -752,17 +752,16 @@ class MSGFile:
 
         raise NotImplementedError(f'Saving is not yet supported for the {self.__class__.__name__} class.')
 
-    def saveAttachments(self, **kwargs) -> None:
+    def saveAttachments(self, skipHidden: bool = False, **kwargs) -> None:
         """
         Saves only attachments in the same folder.
 
         :params skipHidden: If True, skips attachments marked as hidden.
             (Default: False)
         """
-        skipHidden = kwargs.get('skipHidden', False)
         for attachment in self.attachments:
             if not (skipHidden and attachment.hidden):
-                attachment.save(**kwargs)
+                attachment.save(skipHidden = skipHidden, **kwargs)
 
     def saveRaw(self, path) -> None:
         # Create a 'raw' folder.
