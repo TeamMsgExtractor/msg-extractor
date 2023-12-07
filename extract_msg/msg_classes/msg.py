@@ -797,14 +797,14 @@ class MSGFile:
     @functools.cached_property
     def areStringsUnicode(self) -> bool:
         """
-        Returns a boolean telling if the strings are Unicode encoded.
+        Whether the strings are Unicode encoded or not.
         """
         return (self.getPropertyVal('340D0003', 0) & 0x40000) != 0
 
     @functools.cached_property
     def attachments(self) -> Union[List[AttachmentBase], List[SignedAttachment]]:
         """
-        Returns a list of all attachments.
+        A list of all attachments.
         """
         # Get the attachments.
         attachmentDirs = []
@@ -824,14 +824,14 @@ class MSGFile:
     @property
     def attachmentsDelayed(self) -> bool:
         """
-        Returns True if the attachment initialization was delayed.
+        Returns ``True`` if the attachment initialization was delayed.
         """
         return self.__attachmentsDelayed
 
     @property
     def attachmentsReady(self) -> bool:
         """
-        Returns True if the attachments are ready to be used.
+        Returns ``True`` if the attachments are ready to be used.
         """
         return self.__attachmentsReady
 
@@ -867,8 +867,8 @@ class MSGFile:
     @functools.cached_property
     def contactLinkEntry(self) -> Optional[ContactLinkEntry]:
         """
-        Returns a class that contains the list of Address Book EntryIDs linked
-        to this Message object.
+        A class that contains the list of Address Book EntryIDs linked to this
+        Message object.
         """
         return self.getNamedAs('8585', ps.PSETID_COMMON, ContactLinkEntry)
 
@@ -898,24 +898,27 @@ class MSGFile:
     @property
     def dateFormat(self) -> str:
         """
-        The format string to use when converting dates to strings. This is used
-        for dates with no time component.
+        The format string to use when converting dates to strings.
+
+        This is used for dates with no time component.
         """
         return self.__dateFormat
 
     @property
     def datetimeFormat(self) -> str:
         """
-        The format string to use when converting datetimes to strings. This is
-        used for dates that have time components.
+        The format string to use when converting datetimes to strings.
+
+        This is used for dates that have time components.
         """
         return self.__dtFormat
 
     @property
     def errorBehavior(self) -> ErrorBehavior:
         """
-        The behavior to follow when certain errors occur. Will be an instance of
-        the ErrorBehavior enum.
+        The behavior to follow when certain errors occur.
+
+        Will be an instance of the ErrorBehavior enum.
         """
         return self.__errorBehavior
 
@@ -929,8 +932,10 @@ class MSGFile:
     @property
     def importanceString(self) -> Union[str, None]:
         """
-        Returns the string to use for saving. If the importance is medium then
-        it returns ``None``. Mainly used for saving.
+        The importance string to use for saving.
+
+        If the importance is medium then it returns ``None``. Mainly used for
+        saving.
         """
         return {
             Importance.HIGH: 'High',
@@ -942,8 +947,8 @@ class MSGFile:
     @property
     def initAttachmentFunc(self) -> Callable[[MSGFile, str], AttachmentBase]:
         """
-        Returns the method for initializing attachments being used, should you
-        need to use it externally for whatever reason.
+        The method for initializing attachments being used, should you need to
+        use it externally for whatever reason.
         """
         return self.__initAttachmentFunc
 
@@ -958,16 +963,18 @@ class MSGFile:
     @property
     def kwargs(self) -> Dict[str, Any]:
         """
-        The kwargs used to initialize this message, excluding the prefix. This
-        is used for initializing embedded msg files.
+        The kwargs used to initialize this message, excluding the prefix.
+
+        This is used for initializing embedded msg files.
         """
         return self.__kwargs
 
     @functools.cached_property
     def named(self) -> Named:
         """
-        The main named properties storage. This is not usable to access the data
-        of the properties directly.
+        The main named properties storage.
+
+        This is not usable to access the data of the properties directly.
 
         :raises ReferenceError: The parent MSGFile instance has been garbage
             collected.
@@ -993,38 +1000,43 @@ class MSGFile:
     @property
     def overrideEncoding(self) -> Optional[str]:
         """
-        Returns ``None`` if the encoding has not been overridden, otherwise
-        returns the encoding.
+        ``None`` if the encoding has not been overridden, otherwise the encoding
+        used for string streams.
         """
         return self.__overrideEncoding
 
     @property
     def path(self):
         """
-        Returns the message path if generated from a file, otherwise returns the
-        data used to generate the Message instance.
+        The message path if generated from a file, otherwise the data used to
+        generate the ``MSGFile`` instance.
         """
         return self.__path
 
     @property
     def prefix(self) -> str:
         """
-        Returns the prefix of the Message instance. Intended for developer use.
+        The prefix of the ``MSGFile`` instance.
+
+        Intended for developer use.
         """
         return self.__prefix
 
     @property
     def prefixLen(self) -> int:
         """
-        Returns the number of elements in the prefix.
+        The number of elements in the prefix.
+
+        Dividing by 2 will typically tell you how deeply nested the MSG file is.
         """
         return self.__prefixLen
 
     @property
     def prefixList(self) -> List[str]:
         """
-        Returns the prefix list of the Message instance. Intended for developer
-        use.
+        The prefix list of the Message instance.
+
+        Intended for developer use.
         """
         return copy.deepcopy(self.__prefixList)
 
@@ -1038,7 +1050,7 @@ class MSGFile:
     @functools.cached_property
     def props(self) -> PropertiesStore:
         """
-        Returns the Properties instance used by the MSGFile instance.
+        The ``PropertiesStore`` instance used by the ``MSGFile`` instance.
         """
         if not (stream := self.getStream('__properties_version1.0')):
             if ErrorBehavior.STANDARDS_VIOLATION in self.__errorBehavior:
@@ -1048,13 +1060,14 @@ class MSGFile:
                 # the handling of the above exception" stuff.
                 raise StandardViolationError('File does not contain a property stream.') from None
         return PropertiesStore(stream,
-                               PropertiesType.MESSAGE if self.prefix == '' else PropertiesType.MESSAGE_EMBED)
+                               PropertiesType.MESSAGE if not self.prefix else PropertiesType.MESSAGE_EMBED)
 
     @functools.cached_property
     def retentionDate(self) -> Optional[datetime.datetime]:
         """
         The date, in UTC, after which a Message Object is expired by the server.
-        If None, the Message object never expires.
+
+        If ``None``, the Message object never expires.
         """
         return self.getPropertyVal('301C0040')
 
@@ -1107,8 +1120,9 @@ class MSGFile:
     def treePath(self) -> List[weakref.ReferenceType[Any]]:
         """
         A path, as a list of weak reference to the instances needed to get to
-        this instance through the MSGFile-Attachment tree. These are weak
-        references to ensure the garbage collector doesn't see the references
-        back to higher objects.
+        this instance through the MSGFile-Attachment tree.
+
+        These are weak references to ensure the garbage collector doesn't see
+        the references back to higher objects.
         """
         return self.__treePath
