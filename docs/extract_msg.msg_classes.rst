@@ -4,162 +4,162 @@ extract\_msg.msg\_classes package
 Submodules
 ----------
 
-extract\_msg.msg\_classes.appointment.py module
------------------------------------------------
-
-.. automodule:: extract_msg.msg_classes.appointment.py
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-extract\_msg.msg\_classes.calendar.py module
+extract\_msg.msg\_classes.appointment module
 --------------------------------------------
 
-.. automodule:: extract_msg.msg_classes.calendar.py
+.. automodule:: extract_msg.msg_classes.appointment
    :members:
    :undoc-members:
    :show-inheritance:
 
-extract\_msg.msg\_classes.calendar\_base.py module
---------------------------------------------------
+extract\_msg.msg\_classes.calendar module
+-----------------------------------------
 
-.. automodule:: extract_msg.msg_classes.calendar_base.py
+.. automodule:: extract_msg.msg_classes.calendar
    :members:
    :undoc-members:
    :show-inheritance:
 
-extract\_msg.msg\_classes.contact.py module
--------------------------------------------
+extract\_msg.msg\_classes.calendar\_base module
+-----------------------------------------------
 
-.. automodule:: extract_msg.msg_classes.contact.py
+.. automodule:: extract_msg.msg_classes.calendar_base
    :members:
    :undoc-members:
    :show-inheritance:
 
-extract\_msg.msg\_classes.journal.py module
--------------------------------------------
+extract\_msg.msg\_classes.contact module
+----------------------------------------
 
-.. automodule:: extract_msg.msg_classes.journal.py
+.. automodule:: extract_msg.msg_classes.contact
    :members:
    :undoc-members:
    :show-inheritance:
 
-extract\_msg.msg\_classes.meeting\_cancellation.py module
----------------------------------------------------------
+extract\_msg.msg\_classes.journal module
+----------------------------------------
 
-.. automodule:: extract_msg.msg_classes.meeting_cancellation.py
+.. automodule:: extract_msg.msg_classes.journal
    :members:
    :undoc-members:
    :show-inheritance:
 
-extract\_msg.msg\_classes.meeting\_exception.py module
+extract\_msg.msg\_classes.meeting\_cancellation module
 ------------------------------------------------------
 
-.. automodule:: extract_msg.msg_classes.meeting_exception.py
+.. automodule:: extract_msg.msg_classes.meeting_cancellation
    :members:
    :undoc-members:
    :show-inheritance:
 
-extract\_msg.msg\_classes.meeting\_forward.py module
-----------------------------------------------------
-
-.. automodule:: extract_msg.msg_classes.meeting_forward.py
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-extract\_msg.msg\_classes.meeting\_related.py module
-----------------------------------------------------
-
-.. automodule:: extract_msg.msg_classes.meeting_related.py
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-extract\_msg.msg\_classes.meeting\_request.py module
-----------------------------------------------------
-
-.. automodule:: extract_msg.msg_classes.meeting_request.py
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-extract\_msg.msg\_classes.meeting\_response.py module
------------------------------------------------------
-
-.. automodule:: extract_msg.msg_classes.meeting_response.py
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-extract\_msg.msg\_classes.message.py module
--------------------------------------------
-
-.. automodule:: extract_msg.msg_classes.message.py
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-extract\_msg.msg\_classes.message\_base.py module
--------------------------------------------------
-
-.. automodule:: extract_msg.msg_classes.message_base.py
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-extract\_msg.msg\_classes.message\_signed.py module
+extract\_msg.msg\_classes.meeting\_exception module
 ---------------------------------------------------
 
-.. automodule:: extract_msg.msg_classes.message_signed.py
+.. automodule:: extract_msg.msg_classes.meeting_exception
    :members:
    :undoc-members:
    :show-inheritance:
 
-extract\_msg.msg\_classes.message\_signed\_base.py module
----------------------------------------------------------
-
-.. automodule:: extract_msg.msg_classes.message_signed_base.py
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-extract\_msg.msg\_classes.msg.py module
----------------------------------------
-
-.. automodule:: extract_msg.msg_classes.msg.py
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-extract\_msg.msg\_classes.post.py module
-----------------------------------------
-
-.. automodule:: extract_msg.msg_classes.post.py
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-extract\_msg.msg\_classes.sticky\_note.py module
-------------------------------------------------
-
-.. automodule:: extract_msg.msg_classes.sticky_note.py
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-extract\_msg.msg\_classes.task.py module
-----------------------------------------
-
-.. automodule:: extract_msg.msg_classes.task.py
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-extract\_msg.msg\_classes.task\_request.py module
+extract\_msg.msg\_classes.meeting\_forward module
 -------------------------------------------------
 
-.. automodule:: extract_msg.msg_classes.task_request.py
+.. automodule:: extract_msg.msg_classes.meeting_forward
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.msg\_classes.meeting\_related module
+-------------------------------------------------
+
+.. automodule:: extract_msg.msg_classes.meeting_related
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.msg\_classes.meeting\_request module
+-------------------------------------------------
+
+.. automodule:: extract_msg.msg_classes.meeting_request
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.msg\_classes.meeting\_response module
+--------------------------------------------------
+
+.. automodule:: extract_msg.msg_classes.meeting_response
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.msg\_classes.message module
+----------------------------------------
+
+.. automodule:: extract_msg.msg_classes.message
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.msg\_classes.message\_base module
+----------------------------------------------
+
+.. automodule:: extract_msg.msg_classes.message_base
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.msg\_classes.message\_signed module
+------------------------------------------------
+
+.. automodule:: extract_msg.msg_classes.message_signed
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.msg\_classes.message\_signed\_base module
+------------------------------------------------------
+
+.. automodule:: extract_msg.msg_classes.message_signed_base
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.msg\_classes.msg module
+------------------------------------
+
+.. automodule:: extract_msg.msg_classes.msg
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.msg\_classes.post module
+-------------------------------------
+
+.. automodule:: extract_msg.msg_classes.post
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.msg\_classes.sticky\_note module
+---------------------------------------------
+
+.. automodule:: extract_msg.msg_classes.sticky_note
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.msg\_classes.task module
+-------------------------------------
+
+.. automodule:: extract_msg.msg_classes.task
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+extract\_msg.msg\_classes.task\_request module
+----------------------------------------------
+
+.. automodule:: extract_msg.msg_classes.task_request
    :members:
    :undoc-members:
    :show-inheritance:
