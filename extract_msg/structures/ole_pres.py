@@ -21,7 +21,7 @@ class OLEPresentationStream:
     [MS-OLEDS] OLEPresentationStream.
     """
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         reader = BytesReader(data)
         acf = self.__ansiClipboardFormat = ClipboardFormatOrAnsiString(reader)
 
@@ -106,7 +106,7 @@ class OLEPresentationStream:
         return self.__advf
 
     @advf.setter
-    def _(self, val : Union[int, ADVF]) -> None:
+    def advf(self, val: Union[int, ADVF]) -> None:
         if not isinstance(val, int):
             raise TypeError(':property advf: must be an int.')
         if val < 0:
@@ -129,7 +129,7 @@ class OLEPresentationStream:
         return self.__aspect
 
     @aspect.setter
-    def _(self, val : Union[int, DVAspect]) -> None:
+    def aspect(self, val: Union[int, DVAspect]) -> None:
         if not isinstance(val, int):
             raise TypeError(':property aspect: must be an int.')
         if val < 0:
@@ -147,7 +147,7 @@ class OLEPresentationStream:
         return self.__data
 
     @data.setter
-    def _(self, val : bytes) -> None:
+    def data(self, val: bytes) -> None:
         if not isinstance(val, bytes):
             raise TypeError(':property data: must be bytes.')
         self.__data = val
@@ -160,7 +160,7 @@ class OLEPresentationStream:
         return self.__height
 
     @height.setter
-    def _(self, val : int) -> None:
+    def height(self, val: int) -> None:
         if not isinstance(val, int):
             raise TypeError(':property height: must be an int.')
         if val < 0:
@@ -178,7 +178,7 @@ class OLEPresentationStream:
         return self.__lindex
 
     @lindex.setter
-    def _(self, val : int) -> None:
+    def lindex(self, val: int) -> None:
         if not isinstance(val, int):
             raise TypeError(':property lindex: must be an int.')
         if val < 0:
@@ -197,7 +197,7 @@ class OLEPresentationStream:
         return self.__reserved1
 
     @reserved1.setter
-    def _(self, val : bytes) -> None:
+    def reserved1(self, val: bytes) -> None:
         if not isinstance(val, bytes):
             raise TypeError(':property reserved1: must by bytes.')
         if len(val) != 4:
@@ -221,7 +221,7 @@ class OLEPresentationStream:
         return self.__reserved2
 
     @reserved2.setter
-    def _(self, val : bytes) -> None:
+    def reserved2(self, val: bytes) -> None:
         if self.__ansiClipboardFormat.clipboardFormat is not ClipboardFormat.CF_METAFILEPICT:
             raise ValueError(':property reserved2: cannot be set if the clipboard format (from :property ansiClipboardFormat:) is not CF_METAFILEPICT.')
         if not isinstance(val, bytes):
@@ -236,7 +236,7 @@ class OLEPresentationStream:
         return self.__targetDevice
 
     @targetDevice.setter
-    def _(self, val : Optional[DVTargetDevice]) -> None:
+    def targetDevice(self, val: Optional[DVTargetDevice]) -> None:
         if val is not None and not isinstance(val, DVTargetDevice):
             raise TypeError(':property targetDevice: must be None or a DVTargetDevice.')
 
@@ -268,7 +268,7 @@ class OLEPresentationStream:
         return self.__tocSignature
 
     @tocSignature.setter
-    def _(self, val : int) -> None:
+    def tocSignature(self, val: int) -> None:
         if not isinstance(val, int):
             raise TypeError(':property tocSignature: must be an int.')
         if val < 0:
@@ -289,7 +289,7 @@ class OLEPresentationStream:
         return self.__width
 
     @width.setter
-    def _(self, val : int) -> None:
+    def width(self, val: int) -> None:
         if not isinstance(val, int):
             raise TypeError(':property width: must be an int.')
         if val < 0:

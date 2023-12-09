@@ -10,7 +10,7 @@ from ..enums import ODTCf, ODTPersist1, ODTPersist2
 
 @final
 class ODTStruct:
-    def __init__(self, data : Optional[bytes] = None):
+    def __init__(self, data: Optional[bytes] = None):
         if data:
             values = struct.unpack('<HH', data[:8])
             self.__cf = ODTCf(values[0])
@@ -39,7 +39,7 @@ class ODTStruct:
         return self.__cf
 
     @cf.setter
-    def _(self, value : ODTCf) -> None:
+    def cf(self, value: ODTCf) -> None:
         if not isinstance(value, ODTCf):
             raise TypeError(':property cf: MUST be of type ODTCf.')
 
@@ -48,12 +48,12 @@ class ODTStruct:
     @property
     def odtPersist1(self) -> ODTPersist1:
         """
-        Flags the specify information about the OLE object.
+        Flags that specify information about the OLE object.
         """
         return self.__persist1
 
     @odtPersist1.setter
-    def _(self, value : ODTPersist1) -> None:
+    def odtPersist1(self, value: ODTPersist1) -> None:
         if not isinstance(value, ODTPersist1):
             raise TypeError(':property odtPersist1: MUST be of type ODTPersist1.')
 
@@ -62,12 +62,12 @@ class ODTStruct:
     @property
     def odtPersist2(self) -> ODTPersist2:
         """
-        Flags the specify additional information about the OLE object.
+        Flags that specify additional information about the OLE object.
         """
         return self.__persist2
 
     @odtPersist2.setter
-    def _(self, value : ODTPersist2) -> None:
+    def odtPersist2(self, value: ODTPersist2) -> None:
         if not isinstance(value, ODTPersist2):
             raise TypeError(':property odtPersist2: MUST be of type ODTPersist2.')
 

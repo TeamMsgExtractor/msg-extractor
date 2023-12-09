@@ -2,7 +2,7 @@
 
 """
 extract_msg.exceptions
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 This module contains the set of extract_msg exceptions.
 """
 
@@ -16,7 +16,7 @@ __all__ = [
     'ExecutableNotFound',
     'IncompatibleOptionsError',
     'InvalidFileFormatError',
-    'InvaildPropertyIdError',
+    'InvalidPropertyIdError',
     'StandardViolationError',
     'TZError',
     'UnknownCodepageError',
@@ -41,6 +41,7 @@ class FeatureNotImplemented(ExMsgBaseException):
     """
     The base class for a feature not yet being implemented in the module.
     """
+
 
 # More specific exceptions.
 
@@ -67,7 +68,7 @@ class DeencapNotEncapsulated(ExMsgBaseException):
 
 class DependencyError(ExMsgBaseException):
     """
-    An optional dependdency could not be found or was unable to be used as
+    An optional dependency could not be found or was unable to be used as
     expected.
     """
 
@@ -86,15 +87,21 @@ class InvalidFileFormatError(ExMsgBaseException):
     An Invalid File Format Error occurred.
     """
 
-class InvaildPropertyIdError(ExMsgBaseException):
+class InvalidPropertyIdError(ExMsgBaseException):
     """
     The provided property ID was invalid.
     """
 
+class NotWritableError(ExMsgBaseException):
+    """
+    Modification was attempted on an instance that is not writable.
+    """
+
 class PrefixError(ExMsgBaseException):
     """
-    An issue was detected with the provided prefix. This should never occur if
-    you have no manually provided a prefix.
+    An issue was detected with the provided prefix.
+
+    This should never occur if you have no manually provided a prefix.
     """
 
 class SecurityError(ExMsgBaseException):
@@ -106,15 +113,23 @@ class SecurityError(ExMsgBaseException):
 class StandardViolationError(InvalidFileFormatError):
     """
     A critical violation of the MSG standards was detected and could not be
-    recovered from. Recoverable violations will result in log messages instead.
+    recovered from.
+
+    Recoverable violations will result in log messages instead.
 
     Any that could reasonably be skipped, although are likely to still cause
     errors down the line, can be suppressed.
     """
 
+class TooManySectorsError(ExMsgBaseException):
+    """
+    Ole writer has too much data to write to the file.
+    """
+
 class TZError(ExMsgBaseException):
     """
     Specifically not an OSError to avoid being caught by parts of the module.
+
     This error represents a fatal error in the datetime parsing as it usually
     means your installation of tzlocal or tzdata are broken. If you have
     received this error after using PyInstaller, you must include the resource
@@ -146,7 +161,7 @@ class UnsupportedMSGTypeError(FeatureNotImplemented):
 class UnrecognizedMSGTypeError(ExMsgBaseException):
     """
     An exception that is raised when the module cannot determine how to properly
-    open a specific class of msg file.
+    open a specific class of MSG file.
     """
 
 class WKError(DependencyError):

@@ -23,10 +23,10 @@ class TZRule:
     A TZRule structure, as defined in [MS-OXOCAL].
     """
 
-    __SIZE__ : int = 66
-    __struct : Final[Struct] = Struct('4B2H14x3i16s16s')
+    __SIZE__: int = 66
+    __struct: Final[Struct] = Struct('4B2H14x3i16s16s')
 
-    def __init__(self, data : Optional[bytes] = None):
+    def __init__(self, data: Optional[bytes] = None):
         if not data:
             self.__majorVersion = 2
             self.__minorVersion = 1

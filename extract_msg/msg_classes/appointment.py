@@ -114,8 +114,8 @@ class AppointmentMeeting(Calendar):
         to the value of the displayName property from the recipientRow structure
         that represents a Resource object.
 
-        A value of False indicates that the value of the location property is
-        not automatically set.
+        A value of ``False`` indicates that the value of the location property
+        is not automatically set.
         """
         return bool(self.getNamedProp('823A', ps.PSETID_APPOINTMENT))
 
@@ -181,8 +181,9 @@ class AppointmentMeeting(Calendar):
     @functools.cached_property
     def isMeeting(self) -> bool:
         """
-        Attempts to determine if the object is a Meeting. True if meeting, False
-        if appointment.
+        Attempts to determine if the object is a Meeting.
+
+        ``True`` if meeting, ``False`` if appointment.
         """
         return bool(self.appointmentStateFlags) and (AppointmentStateFlag.MEETING in self.appointmentStateFlags)
 

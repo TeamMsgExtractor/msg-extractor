@@ -14,7 +14,7 @@ class ReportTag:
     A Report Tag structure, as defined in [MS-OXOMSG].
     """
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         self.__rawData = data
         reader = BytesReader(data)
 
@@ -66,14 +66,18 @@ class ReportTag:
     @property
     def ansiText(self) -> Optional[bytes]:
         """
-        The subject of the original message. Set to None if not present.
+        The subject of the original message.
+
+        Set to None if not present.
         """
         return self.__ansiText
 
     @property
     def cookie(self) -> bytes:
         """
-        String used for validation. Set to b'PCDFEB09\x00'.
+        String used for validation.
+
+        Set to b'PCDFEB09\x00'.
         """
         return self.__cookie
 
@@ -115,7 +119,9 @@ class ReportTag:
     @property
     def version(self) -> int:
         """
-        The version used. If SearchFolderEntryID is present, this MUST be
-        0x00020001, otherwise it MUST be 0x00010001.
+        The version used.
+
+        If SearchFolderEntryID is present, this MUST be 0x00020001, otherwise
+        it MUST be 0x00010001.
         """
         return self.__version

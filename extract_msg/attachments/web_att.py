@@ -14,7 +14,7 @@ from ..enums import AttachmentPermissionType, AttachmentType, SaveType
 
 class WebAttachment(AttachmentBase):
     """
-    An attachment that exists on the internet and not attached to the MSGFile
+    An attachment that exists on the internet and not attached to the MSG file
     directly.
     """
 
@@ -24,7 +24,9 @@ class WebAttachment(AttachmentBase):
     def save(self, **kwargs) -> constants.SAVE_TYPE:
         """
         Raises a NotImplementedError unless :param skipNotImplemented: is set to
-        True. If it is, returns a value that indicates no data was saved.
+        True.
+
+        If it is, returns a value that indicates no data was saved.
         """
         if kwargs.get('skipNotImplemented', False):
             return (SaveType.NONE, None)
@@ -61,9 +63,6 @@ class WebAttachment(AttachmentBase):
 
     @property
     def type(self) -> AttachmentType:
-        """
-        Returns an enum value that identifies the type of attachment.
-        """
         return AttachmentType.WEB
 
     @property

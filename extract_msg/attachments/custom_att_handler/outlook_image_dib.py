@@ -29,7 +29,7 @@ class OutlookImageDIB(CustomAttachmentHandler):
     stored in a way special to Outlook.
     """
 
-    def __init__(self, attachment : AttachmentBase):
+    def __init__(self, attachment: AttachmentBase):
         super().__init__(attachment)
         # First we need to get the mailstream.
         stream = self.getStream('\x03MailStream')
@@ -71,7 +71,7 @@ class OutlookImageDIB(CustomAttachmentHandler):
         self.__ytwips = int(round(self.__y / 1.7639))
 
     @classmethod
-    def isCorrectHandler(cls, attachment : AttachmentBase) -> bool:
+    def isCorrectHandler(cls, attachment: AttachmentBase) -> bool:
         if attachment.clsid != '00000316-0000-0000-C000-000000000046':
             return False
 
@@ -89,7 +89,7 @@ class OutlookImageDIB(CustomAttachmentHandler):
         """
         Generates the RTF to inject in place of the \\objattph tag.
 
-        If this function should do nothing, returns None.
+        If this function should do nothing, returns ``None``.
 
         :raises DependencyError: PIL or Pillow could not be found.
         """

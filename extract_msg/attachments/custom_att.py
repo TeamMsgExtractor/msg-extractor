@@ -34,22 +34,21 @@ class CustomAttachment(AttachmentBase):
     The attachment entry for custom attachments.
     """
 
-    def __init__(self, msg : MSGFile, dir_ : str, propStore : PropertiesStore):
+    def __init__(self, msg: MSGFile, dir_: str, propStore: PropertiesStore):
         super().__init__(msg, dir_, propStore)
 
         self.__customHandler = getHandler(self)
         self.__data = self.__customHandler.data
 
-
     def getFilename(self, **kwargs) -> str:
         """
         Returns the filename to use for the attachment.
 
-        :param contentId:      Use the contentId, if available.
-        :param customFilename: A custom name to use for the file.
-
         If the filename starts with "UnknownFilename" then there is no guarantee
         that the files will have exactly the same filename.
+
+        :param contentId: Use the contentId, if available.
+        :param customFilename: A custom name to use for the file.
         """
         filename = None
         customFilename = kwargs.get('customFilename')
@@ -152,14 +151,16 @@ class CustomAttachment(AttachmentBase):
     @property
     def data(self) -> Optional[bytes]:
         """
-        The attachment data, if any. Returns None if there is no data to save.
+        The attachment data, if any.
+
+        Returns ``None`` if there is no data to save.
         """
         return self.__data
 
     @property
     def randomFilename(self) -> str:
         """
-        Returns the random filename to be used by this attachment.
+        The random filename to be used by this attachment.
         """
         try:
             return self.__randomName
@@ -169,7 +170,4 @@ class CustomAttachment(AttachmentBase):
 
     @property
     def type(self) -> AttachmentType:
-        """
-        Returns an enum value that identifies the type of attachment.
-        """
         return AttachmentType.CUSTOM

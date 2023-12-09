@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 __all__ = [
     'PropertiesStore',
 ]
@@ -13,7 +16,8 @@ from typing import (
     )
 
 from .. import constants
-from ..enums import Intelligence, PropertiesType
+from ..enums import PropertiesType
+from ..exceptions import NotWritableError
 from .prop import createProp, FixedLengthProp, PropBase
 from ..utils import divide
 
@@ -29,50 +33,63 @@ class PropertiesStore:
     Parser for msg properties files.
     """
 
-    def __init__(self, data : Optional[bytes] = b'', _type : Optional[PropertiesType] = None, skip : Optional[int] = None):
-        if not data:
-            # If data comes back false, make sure is is empty bytes.
-            data = b''
-        if not isinstance(data, bytes):
-            raise TypeError(':param data: MUST be bytes.')
-        self.__rawData = data
-        self.__len = len(data)
-        self.__props : Dict[str, PropBase] = {}
+    def __init__(self, data: Optional[bytes], type_: PropertiesType, writable: bool = False):
+        """
+        Reads a properties stream or creates a brand new ``PropertiesStore``
+        object.
+
+        :param data: The bytes of the properties instance. Setting to ``None``
+            or empty bytes will cause the properties instance to not be valid
+            *unless* writable is set to ``True``. If that is the case, the
+            instance will be setup for creating a new properties stream.
+        :param type_: The type of properties stream this instance represents.
+        :param writable: Whether this properties stream should accept
+            modification.
+        """
+        if not isinstance(type_, PropertiesType):
+            raise TypeError(':param type_: MUST be a value of PropertiesType.')
+
+        self.__type = type_
+
+        # Setup early variables.
+        self.__props: Dict[str, PropBase] = {}
         # This maps short IDs to all properties that use that ID. More than one
         # property with the same ID but a different type may exist.
-        self.__idMapping : Dict[str, List[str]] = {}
+        self.__idMapping: Dict[str, List[str]] = {}
         self.__naid = None
         self.__nrid = None
         self.__ac = None
         self.__rc = None
-        # Handle an empty properties stream.
-        if self.__len == 0:
-            self.__intel = Intelligence.ERROR
-            skip = 0
-        elif _type is not None:
-                _type = PropertiesType(_type)
-                self.__intel = Intelligence.SMART
-                if _type == PropertiesType.MESSAGE:
-                    skip = 32
-                    self.__nrid, self.__naid, self.__rc, self.__ac = constants.st.ST1.unpack(self.__rawData[:24])
-                elif _type == PropertiesType.MESSAGE_EMBED:
-                    skip = 24
-                    self.__nrid, self.__naid, self.__rc, self.__ac = constants.st.ST1.unpack(self.__rawData[:24])
-                else:
-                    skip = 8
+        self.__writable = writable
+        # Set this now and unset it if everything goes well.
+        self.__isError = True
+
+        # Check if data is None or empty bytes.
+        if not data:
+            # Two paths here. If writable, we are just meant to be creating a
+            # new storage for properties, so initialize and return. Otherwise,
+            # we're dealing with an error situation, but we want to silence it.
+            if writable:
+                self.__rawData = b''
+                if type_ is not PropertiesType.ATTACHMENT:
+                    self.__naid = 0
+                    self.__nrid = 0
+                    self.__ac = 0
+                    self.__rc = 0
+            return
+
+        if not isinstance(data, bytes):
+            raise TypeError(':param data: MUST be bytes or None.')
+        self.__rawData = data
+
+        if type_ == PropertiesType.MESSAGE:
+            skip = 32
+            self.__nrid, self.__naid, self.__rc, self.__ac = constants.st.ST_PROPSTORE_HEADER.unpack(data[:24])
+        elif type_ == PropertiesType.MESSAGE_EMBED:
+            skip = 24
+            self.__nrid, self.__naid, self.__rc, self.__ac = constants.st.ST_PROPSTORE_HEADER.unpack(data[:24])
         else:
-            self.__intel = Intelligence.DUMB
-            if skip is None:
-                # This section of the skip handling is not very good. While it
-                # does work, it is likely to create extra properties that are
-                # created from the properties file's header data. While that
-                # won't actually mess anything up, it is far from ideal.
-                # Basically, this is the dumb skip length calculation.
-                # Preferably, we want the type to have been specified so all of
-                # the additional fields will have been filled out.
-                #
-                # If the skip would end up at 0, set it to 32.
-                skip = (self.__len % 16) or 32
+            skip = 8
         streams = divide(self.__rawData[skip:], 16)
         for st in streams:
             if len(st) == 16:
@@ -86,15 +103,37 @@ class PropertiesStore:
                 self.__idMapping[id_].append(prop.name)
             else:
                 logger.warning(f'Found stream from divide that was not 16 bytes: {st}. Ignoring.')
-        self.__pl = len(self.__props)
+        self.__isError = False
 
     def __bytes__(self) -> bytes:
         return self.toBytes()
 
-    def __contains__(self, key) -> bool:
+    def __contains__(self, key: Any) -> bool:
         return self.__props.__contains__(key)
 
-    def __getitem__(self, key : Union[str, int]) -> PropBase:
+    def __delitem__(self, key: str) -> None:
+        """
+        Removes an item using the del operator.
+
+        :raises KeyError: The key was not found.
+        :raises TypeError: The key was not a string.
+        """
+
+        if not isinstance(key, str):
+            raise TypeError('Del operator can only remove a property by string.')
+
+        key = key.upper()
+
+        del self.__props[key]
+
+        # If the deletion was successful, we need to remove the related ID
+        # mapping.
+        shortKey = key[:4]
+        self.__idMapping[shortKey].remove(key)
+        if len(self.__idMapping[shortKey]) == 0:
+            del self.__idMapping[shortKey]
+
+    def __getitem__(self, key: Union[str, int]) -> PropBase:
         if (found := self._mapId(key)):
             return self.__props.__getitem__(found)
         raise KeyError(key)
@@ -106,12 +145,12 @@ class PropertiesStore:
         """
         Returns the number of properties.
         """
-        return self.__pl
+        return len(self.__props)
 
     def __repr__(self) -> str:
         return self.__props.__repr__()
 
-    def _mapId(self, id_ : Union[int, str]) -> str:
+    def _mapId(self, id_: Union[int, str]) -> str:
         """
         Converts an input into an appropriate property ID.
 
@@ -147,17 +186,39 @@ class PropertiesStore:
 
         return self.__idMapping.get(id_, ('',))[0]
 
-    def get(self, name : Union[str, int], default : _T = None) -> Union[PropBase, _T]:
+    def addProperty(self, prop: PropBase, force: bool = False) -> None:
         """
-        Retrieve the property of :param name:. Returns the value of
-        :param default: if the property could not be found.
+        Adds the property if it does not exist.
+
+        :param prop: The property to add.
+        :param force: If ``True``, the writable property will be ignored. This
+            will not be reflected when converting to ``bytes`` if the instance
+            is not readable.
+
+        :raises KeyError: A property already exists with the chosen name.
+        :raises NotWritableError: The method was used on an unwritable instance.
+        """
+        if not (force or self.__writable):
+            raise
+
+        if prop.name in self.__props:
+            raise KeyError('A property with that name already exists.')
+        self.__props[prop.name.upper()] = prop
+        self.__idMapping.setdefault(prop.name[:4], list()).append(prop.name.upper())
+
+    def get(self, name: Union[str, int], default: _T = None) -> Union[PropBase, _T]:
+        """
+        Retrieve the property of :param name:.
+
+        :returns: The property, or the value of :param default: if the property
+            could not be found.
         """
         if (name := self._mapId(name)):
             return self.__props.get(name, default)
         else:
             return default
 
-    def getProperties(self, id_ : Union[str, int]) -> List[PropBase]:
+    def getProperties(self, id_: Union[str, int]) -> List[PropBase]:
         """
         Gets all properties with the specified ID.
 
@@ -177,7 +238,7 @@ class PropertiesStore:
 
         return [self[x] for x in self.__idMapping.get(id_, [])]
 
-    def getValue(self, name : Union[str, int], default : _T = None) -> Union[Any, _T]:
+    def getValue(self, name: Union[str, int], default: _T = None) -> Union[Any, _T]:
         """
         Attempts to get the first property
         """
@@ -207,14 +268,58 @@ class PropertiesStore:
     def keys(self) -> Iterable[str]:
         return self.__props.keys()
 
+    def makeWritable(self) -> PropertiesStore:
+        """
+        Returns a copy of this PropertiesStore object that allows modification.
+
+        If the instance is already writable, this will return the object.
+        """
+        if self.__writable:
+            return self
+        return PropertiesStore(self.__rawData, self.__type, True)
+
     def pprintKeys(self) -> None:
         """
-        Uses the pprint function on a sorted list of keys.
+        Uses the pprint function on a sorted list of the keys.
         """
-        pprint.pprint(sorted(tuple(self.__props.keys())))
+        pprint.pprint(sorted(self.__props.keys()))
+
+    def removeProperty(self, nameOrProp: Union[str, PropBase]) -> None:
+        """
+        Removes the property by name or by instance.
+
+        Due to possible ambiguities, this function does *not* accept an int
+        argument nor will it be able to find a property based on the 4 character
+        hex ID.
+
+        :raises KeyError: The property was not found.
+        :raises NotWritableError: The instance is not writable.
+        :raises TypeError: The type for :param nameOrProp: was wrong.
+        """
+        if isinstance(nameOrProp, str):
+            del self[nameOrProp]
+        elif isinstance(nameOrProp, PropBase):
+            del self[nameOrProp.name]
+        else:
+            raise TypeError(f'Cannot remove property using type {type(nameOrProp)}.')
 
     def toBytes(self) -> bytes:
-        return self.__rawData
+        if self.__writable:
+            # The reserved field is present on all of them.
+            ret = b'\x00' * 8
+
+            # Add additional fields depending on type.
+            if self.__type is not PropertiesType.ATTACHMENT:
+                ret += constants.st.ST_PROPSTORE_HEADER.pack(self.__nrid, self.__naid, self.__rc, self.__ac)
+                if self.__type is PropertiesType.MESSAGE:
+                    ret += b'\x00' * 8
+
+            # Convert all the properties to bytes.
+            ret += b''.join(bytes(prop) for prop in self.__props.values())
+
+            return ret
+        else:
+            return self.__rawData
 
     def values(self) -> Iterable[PropBase]:
         return self.__props.values()
@@ -226,13 +331,28 @@ class PropertiesStore:
     @property
     def attachmentCount(self) -> int:
         """
-        The number of Attachment objects for the MSGFile object.
+        The number of Attachment objects for the ``MSGFile`` object.
 
-        :raises TypeError: The Properties instance is not for an MSGFile object.
+        :raises NotWritableError: The setter was used on an unwritable instance.
+        :raises TypeError: The Properties instance is not for an ``MSGFile``
+            object.
         """
         if self.__ac is None:
-            raise TypeError('Properties instance must be intelligent and of type MESSAGE to get attachment count.')
+            raise TypeError('Attachment properties do not contain an attachment count.')
         return self.__ac
+
+    @attachmentCount.setter
+    def attachmentCount(self, value: int) -> None:
+        if not self.__writable:
+            raise NotWritableError('PropertiesStore object is not writable.')
+
+        if not isinstance(value, int):
+            raise TypeError(':property attachmentCount: must be an int.')
+
+        if self.__ac is None:
+            raise TypeError('Attachment properties do not contain an attachment count.')
+
+        self.__ac = value
 
     @property
     def date(self) -> Optional[datetime.datetime]:
@@ -244,7 +364,7 @@ class PropertiesStore:
         except AttributeError:
             self.__date = None
             if '00390040' in self:
-                dateValue = self.get('00390040').value
+                dateValue = self.getValue('00390040')
                 # A date can be bytes if it fails to initialize, so we check it
                 # first.
                 if isinstance(dateValue, datetime.datetime):
@@ -252,11 +372,14 @@ class PropertiesStore:
             return self.__date
 
     @property
-    def intelligence(self) -> Intelligence:
+    def isError(self) -> bool:
         """
-        Returns the inteligence level of the Properties instance.
+        Whether the instance is in an invalid state.
+
+        If the instance is not writable and was given no data, this will be
+        ``True``.
         """
-        return self.__intel
+        return self.__isError
 
     @property
     def nextAttachmentId(self) -> int:
@@ -264,11 +387,26 @@ class PropertiesStore:
         The ID to use for naming the next Attachment object storage if one is
         created inside the .msg file.
 
-        :raises TypeError: The Properties instance is not for an MSGFile object.
+        :raises NotWritableError: The setter was used on an unwritable instance.
+        :raises TypeError: The Properties instance is not for an ``MSGFile``
+            object.
         """
         if self.__naid is None:
-            raise TypeError('Properties instance must be intelligent and of type MESSAGE to get next attachment id.')
+            raise TypeError('Attachment properties do not contain a next attachment ID.')
         return self.__naid
+
+    @nextAttachmentId.setter
+    def nextAttachmentId(self, value: int) -> None:
+        if not self.__writable:
+            raise NotWritableError('PropertiesStore object is not writable.')
+
+        if not isinstance(value, int):
+            raise TypeError(':property nextAttachmentId: must be an int.')
+
+        if self.__ac is None:
+            raise TypeError('Attachment properties do not contain a next attachment ID.')
+
+        self.__naid = value
 
     @property
     def nextRecipientId(self) -> int:
@@ -276,11 +414,26 @@ class PropertiesStore:
         The ID to use for naming the next Recipient object storage if one is
         created inside the .msg file.
 
-        :raises TypeError: The Properties instance is not for an MSGFile object.
+        :raises NotWritableError: The setter was used on an unwritable instance.
+        :raises TypeError: The Properties instance is not for an ``MSGFile``
+            object.
         """
         if self.__nrid is None:
-            raise TypeError('Properties instance must be intelligent and of type MESSAGE to get next recipient id.')
+            raise TypeError('Attachment properties do not contain a next recipient ID.')
         return self.__nrid
+
+    @nextRecipientId.setter
+    def nextRecipientId(self, value: int) -> None:
+        if not self.__writable:
+            raise NotWritableError('PropertiesStore object is not writable.')
+
+        if not isinstance(value, int):
+            raise TypeError(':property nextRecipientId: must be an int.')
+
+        if self.__ac is None:
+            raise TypeError('Attachment properties do not contain a next recipient ID.')
+
+        self.__nrid = value
 
     @property
     def props(self) -> Dict[str, PropBase]:
@@ -290,21 +443,34 @@ class PropertiesStore:
         return copy.deepcopy(self.__props)
 
     @property
-    def _propDict(self) -> Dict[str, PropBase]:
-        """
-        A direct reference to the underlying property dictionary. Used in one
-        place in the code, and not recommended to be used if you are not a
-        developer. Use `Properties.props` instead for a safe reference.
-        """
-        return self.__props
-
-    @property
     def recipientCount(self) -> int:
         """
-        The number of Recipient objects for the MSGFile object.
+        The number of Recipient objects for the ``MSGFile`` object.
 
-        :raises TypeError: The Properties instance is not for an MSGFile object.
+        :raises NotWritableError: The setter was used on an unwritable instance.
+        :raises TypeError: The Properties instance is not for an ``MSGFile``
+            object.
         """
         if self.__rc is None:
-            raise TypeError('Properties instance must be intelligent and of type MESSAGE to get recipient count.')
+            raise TypeError('Attachment properties do not contain a recipient count.')
         return self.__rc
+
+    @recipientCount.setter
+    def recipientCount(self, value: int) -> None:
+        if not self.__writable:
+            raise NotWritableError('PropertiesStore object is not writable.')
+
+        if not isinstance(value, int):
+            raise TypeError(':property recipientCount: must be an int.')
+
+        if self.__ac is None:
+            raise TypeError('Attachment properties do not contain a recipient count.')
+
+        self.__nrid = value
+
+    @property
+    def writable(self) -> bool:
+        """
+        Whether the instance accepts modification.
+        """
+        return self.__writable

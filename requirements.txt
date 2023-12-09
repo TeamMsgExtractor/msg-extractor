@@ -1,9 +1,11 @@
 
 # First level requirements
-olefile==0.46
+# Modules using == are *intentional* and must be checked manually before
+# upgrading.
+olefile==0.47
 tzlocal>=4.2,<6
-compressed_rtf>=1.0.6,<2
+compressed-rtf>=1.0.6,<2
 ebcdic>=1.1.1,<2
 beautifulsoup4>=4.11.1,<4.13
-RTFDE>=0.1.0,<0.2
+RTFDE>=0.1.1,<0.2
 red-black-tree-mod==1.20

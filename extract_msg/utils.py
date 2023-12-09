@@ -24,7 +24,6 @@ __all__ = [
     'fromTimeStamp',
     'getCommandArgs',
     'guessEncoding',
-    'hasLen',
     'htmlSanitize',
     'inputToBytes',
     'inputToMsgPath',
@@ -52,6 +51,7 @@ import argparse
 import collections
 import copy
 import datetime
+import decimal
 import email.header
 import email.message
 import email.policy
@@ -80,7 +80,7 @@ from . import constants
 from .enums import AttachmentType
 from .exceptions import (
         ConversionError, DependencyError, ExecutableNotFound,
-        IncompatibleOptionsError, InvaildPropertyIdError, TZError,
+        IncompatibleOptionsError, InvalidPropertyIdError, TZError,
         UnknownTypeError
     )
 
@@ -97,7 +97,7 @@ logging.addLevelName(5, 'DEVELOPER')
 _T = TypeVar('_T')
 
 
-def addNumToDir(dirName : pathlib.Path) -> Optional[pathlib.Path]:
+def addNumToDir(dirName: pathlib.Path) -> Optional[pathlib.Path]:
     """
     Attempt to create the directory with a '(n)' appended.
     """
@@ -111,7 +111,7 @@ def addNumToDir(dirName : pathlib.Path) -> Optional[pathlib.Path]:
     return None
 
 
-def addNumToZipDir(dirName : pathlib.Path, _zip) -> Optional[pathlib.Path]:
+def addNumToZipDir(dirName: pathlib.Path, _zip) -> Optional[pathlib.Path]:
     """
     Attempt to create the directory with a '(n)' appended.
     """
@@ -123,38 +123,40 @@ def addNumToZipDir(dirName : pathlib.Path, _zip) -> Optional[pathlib.Path]:
     return None
 
 
-def bitwiseAdjust(inp : int, mask : int) -> int:
+def bitwiseAdjust(inp: int, mask: int) -> int:
     """
     Uses a given mask to adjust the location of bits after an operation like
-    bitwise AND. This is useful for things like flags where you are trying to
-    get a small portion of a larger number. Say for example, you had the number
-    0xED (0b11101101) and you needed the adjusted result of the AND operation
-    with 0x70 (0b01110000). The result of the AND operation (0b01100000) and the
-    mask used to get it (0x70) are given to this function and the adjustment
-    will be done automatically.
+    bitwise AND.
+
+    This is useful for things like flags where you are trying to get a small
+    portion of a larger number. Say for example, you had the number 0xED
+    (0b11101101) and you needed the adjusted result of the AND operation with
+    0x70 (0b01110000). The result of the AND operation (0b01100000) and the mask
+    used to get it (0x70) are given to this function and the adjustment will be
+    done automatically.
 
     :param mask: MUST be greater than 0.
 
-    :raises ValueError: if the mask is not greater than 0.
+    :raises ValueError: The mask is not greater than 0.
     """
     if mask < 1:
         raise ValueError('Mask MUST be greater than 0')
     return inp >> bin(mask)[::-1].index('1')
 
 
-def bitwiseAdjustedAnd(inp : int, mask : int) -> int:
+def bitwiseAdjustedAnd(inp: int, mask: int) -> int:
     """
     Preforms the bitwise AND operation between :param inp: and :param mask: and
     adjusts the results based on the rules of the bitwiseAdjust function.
 
-    :raises ValueError: if the mask is not greater than 0.
+    :raises ValueError: The mask is not greater than 0.
     """
     if mask < 1:
         raise ValueError('Mask MUST be greater than 0')
     return (inp & mask) >> bin(mask)[::-1].index('1')
 
 
-def bytesToGuid(bytesInput : bytes) -> str:
+def bytesToGuid(bytesInput: bytes) -> str:
     """
     Converts a bytes instance to a GUID.
     """
@@ -162,9 +164,10 @@ def bytesToGuid(bytesInput : bytes) -> str:
     return f'{{{guidVals[0]:08X}-{guidVals[1]:04X}-{guidVals[2]:04X}-{guidVals[3][:2].hex().upper()}-{guidVals[3][2:].hex().upper()}}}'
 
 
-def ceilDiv(n : int, d : int) -> int:
+def ceilDiv(n: int, d: int) -> int:
     """
     Returns the int from the ceil division of n / d.
+
     ONLY use ints as inputs to this function.
 
     For ints, this is faster and more accurate for numbers
@@ -176,7 +179,9 @@ def ceilDiv(n : int, d : int) -> int:
 def cloneOleFile(sourcePath, outputPath) -> None:
     """
     Uses the OleWriter class to clone the specified OLE file into a new
-    location. Mainly designed for testing.
+    location.
+
+    Mainly designed for testing.
     """
     from .ole_writer import OleWriter
 
@@ -201,7 +206,7 @@ def createZipOpen(func) -> Callable:
     return _open
 
 
-def decodeRfc2047(encoded : str) -> str:
+def decodeRfc2047(encoded: str) -> str:
     """
     Decodes text encoded using the method specified in RFC 2047.
     """
@@ -219,7 +224,7 @@ def decodeRfc2047(encoded : str) -> str:
     )
 
 
-def dictGetCasedKey(_dict : Dict[str, Any], key : str) -> str:
+def dictGetCasedKey(_dict: Dict[str, Any], key: str) -> str:
     """
     Retrieves the key from the dictionary with the proper casing using a
     caseless key.
@@ -231,36 +236,42 @@ def dictGetCasedKey(_dict : Dict[str, Any], key : str) -> str:
         raise KeyError(key)
 
 
-def divide(string : AnyStr, length : int) -> List[AnyStr]:
+def divide(string: AnyStr, length: int) -> List[AnyStr]:
     """
-    Divides a string into multiple substrings of equal length. If there is not
-    enough for the last substring to be equal, it will simply use the rest of
-    the string. Can also be used for things like lists and tuples.
+    Divides a string into multiple substrings of equal length.
 
-    :param string: string to be divided.
-    :param length: length of each division.
+    If there is not enough for the last substring to be equal, it will simply
+    use the rest of the string. Can also be used for things like lists and
+    tuples.
+
+    :param string: The string to be divided.
+    :param length: The length of each division.
     :returns: list containing the divided strings.
 
     Example:
-    >>>> a = divide('Hello World!', 2)
-    >>>> print(a)
-    ['He', 'll', 'o ', 'Wo', 'rl', 'd!']
-    >>>> a = divide('Hello World!', 5)
-    >>>> print(a)
-    ['Hello', ' Worl', 'd!']
+
+    .. code-block:: python
+
+        >>> a = divide('Hello World!', 2)
+        >>> print(a)
+        ['He', 'll', 'o ', 'Wo', 'rl', 'd!']
+        >>> a = divide('Hello World!', 5)
+        >>> print(a)
+        ['Hello', ' Worl', 'd!']
     """
     return [string[length * x:length * (x + 1)] for x in range(ceilDiv(len(string), length))]
 
 
-def filetimeToDatetime(rawTime : int) -> datetime.datetime:
+def filetimeToDatetime(rawTime: int) -> datetime.datetime:
     """
-    Converts a filetime into a datetime.
+    Converts a filetime into a ``datetime``.
 
     Some values have specialized meanings, listed below:
-        915151392000000000: December 31, 4500, representing a null time. Returns
-            extract_msg.constants.NULL_DATE.
-        915046235400000000: 23:59 on August 31, 4500, representing a null time.
-            Returns extract_msg.constants.NULL_DATE.
+
+    * ``915151392000000000``: December 31, 4500, representing a null time.
+      Returns an instance of extract_msg.null_date.NullDate.
+    * ``915046235400000000``: 23:59 on August 31, 4500, representing a null
+      time. Returns extract_msg.constants.NULL_DATE.
     """
     try:
         if rawTime < 116444736000000000:
@@ -269,10 +280,14 @@ def filetimeToDatetime(rawTime : int) -> datetime.datetime:
             return olefile.olefile.filetime2datetime(rawTime)
         elif rawTime == 915151392000000000:
             # So this is actually a different null date, specifically
-            # supposed to be December 31, 4500, but it's weird that the
-            # same spec has 2 different ones, so we just return the same
-            # one for both.
-            return constants.NULL_DATE
+            # supposed to be December 31, 4500, but it's weird that the same
+            # spec has 2 different ones. It's "the last valid date." Checking
+            # the value of this though, it looks like it's actually one minute
+            # further in the future, according to the datetime module.
+            from .null_date import NullDate
+            date = NullDate(4500, 12, 31, 23, 59)
+            date.filetime = rawTime
+            return date
         elif rawTime == 915046235400000000:
             return constants.NULL_DATE
         else:
@@ -280,11 +295,11 @@ def filetimeToDatetime(rawTime : int) -> datetime.datetime:
     except TZError:
         # For TZError we just raise it again. It is a fatal error.
         raise
-    except Exception as e:
+    except Exception:
         raise ValueError(f'Timestamp value of {filetimeToUtc(rawTime)} caused an exception. This was probably caused by the time stamp being too far in the future.')
 
 
-def filetimeToUtc(inp : int) -> float:
+def filetimeToUtc(inp: int) -> float:
     """
     Converts a FILETIME into a unix timestamp.
     """
@@ -293,8 +308,10 @@ def filetimeToUtc(inp : int) -> float:
 
 def findWk(path = None):
     """
-    Attempt to find the path of the wkhtmltopdf executable. If :param path: is
-    provided, verifies that it is executable and returns the path if it is.
+    Attempt to find the path of the wkhtmltopdf executable.
+
+    :param path: If provided, the function will verify that it is executable
+        and returns the path if it is.
 
     :raises ExecutableNotFound: A valid executable could not be found.
     """
@@ -315,9 +332,9 @@ def findWk(path = None):
     raise ExecutableNotFound('Could not find wkhtmltopdf.')
 
 
-def fromTimeStamp(stamp : int) -> datetime.datetime:
+def fromTimeStamp(stamp: float) -> datetime.datetime:
     """
-    Returns a datetime from the UTC timestamp given the current timezone.
+    Returns a ``datetime`` from the UTC timestamp given the current timezone.
     """
     try:
         tz = tzlocal.get_localzone()
@@ -329,7 +346,7 @@ def fromTimeStamp(stamp : int) -> datetime.datetime:
     return datetime.datetime.fromtimestamp(stamp, tz)
 
 
-def getCommandArgs(args : Sequence[str]) -> argparse.Namespace:
+def getCommandArgs(args: Sequence[str]) -> argparse.Namespace:
     """
     Parse command-line arguments.
 
@@ -365,7 +382,7 @@ def getCommandArgs(args : Sequence[str]) -> argparse.Namespace:
                         help='Set the folder to use for the program output. (Default: Current directory)')
     # --use-filename
     parser.add_argument('--use-filename', dest='useFilename', action='store_true',
-                        help='Sets whether the name of each output is based on the msg filename.')
+                        help='Sets whether the name of each output is based on the MSG filename.')
     # --dump-stdout
     parser.add_argument('--dump-stdout', dest='dumpStdout', action='store_true',
                         help='Tells the program to dump the message body (plain text) to stdout. Overrides saving arguments.')
@@ -407,7 +424,7 @@ def getCommandArgs(args : Sequence[str]) -> argparse.Namespace:
                         help='Store the header in a separate file.')
     # --attachments-only
     outFormat.add_argument('--attachments-only', dest='attachmentsOnly', action='store_true',
-                           help='Specify to only save attachments from an msg file.')
+                           help='Specify to only save attachments from an MSG file.')
     # --skip-hidden
     parser.add_argument('--skip-hidden', dest='skipHidden', action='store_true',
                         help='Skips any attachment marked as hidden (usually ones embedded in the body).')
@@ -438,7 +455,7 @@ def getCommandArgs(args : Sequence[str]) -> argparse.Namespace:
     # --progress
     parser.add_argument('--progress', dest='progress', action='store_true',
                         help='Shows what file the program is currently working on during it\'s progress.')
-    # [msg files]
+    # [MSG files]
     parser.add_argument('msgs', metavar='msg', nargs='+',
                         help='An MSG file to be parsed.')
 
@@ -490,7 +507,7 @@ def getCommandArgs(args : Sequence[str]) -> argparse.Namespace:
             fileLists += glob.glob(path)
 
         if len(fileLists) == 0:
-            raise ValueError('Could not find any msg files using the specified wildcards.')
+            raise ValueError('Could not find any MSG files using the specified wildcards.')
         options.msgs = fileLists
 
     # Make it so outName can only be used on single files.
@@ -514,13 +531,13 @@ def getCommandArgs(args : Sequence[str]) -> argparse.Namespace:
     return options
 
 
-def guessEncoding(msg : MSGFile) -> Optional[str]:
+def guessEncoding(msg: MSGFile) -> Optional[str]:
     """
     Analyzes the strings on an MSG file and attempts to form a consensus about the encoding based on the top-level strings.
 
-    Returns None if no consensus could be formed.
+    Returns ``None`` if no consensus could be formed.
 
-    :raises DependencyError: chardet is not installed or could not be used
+    :raises DependencyError: ``chardet`` is not installed or could not be used
         properly.
     """
     try:
@@ -545,17 +562,12 @@ def guessEncoding(msg : MSGFile) -> Optional[str]:
         raise DependencyError(f'Failed to detect encoding: {e}')
 
 
-def hasLen(obj) -> bool:
+def htmlSanitize(inp: str) -> str:
     """
-    Checks if :param obj: has a __len__ attribute.
-    """
-    return hasattr(obj, '__len__')
+    Santizes the input for injection into an HTML string.
 
-
-def htmlSanitize(inp : str) -> str:
-    """
-    Santizes the input for injection into an HTML string. Converts characters
-    into forms that will not be misinterpreted, if necessary.
+    Converts charactersinto forms that will not be misinterpreted, if
+    necessary.
     """
     # First step, do a basic escape of the HTML.
     inp = htmlEscape(inp)
@@ -564,12 +576,12 @@ def htmlSanitize(inp : str) -> str:
     inp = inp.replace('\r\n', '\n').replace('\n', '<br/>')
 
     # Escape long sections of spaces to ensure they won't be ignored.
-    inp = constants.re.HTML_SAN_SPACE.sub((lambda spaces : '&nbsp;' * len(spaces.group(0))),inp)
+    inp = constants.re.HTML_SAN_SPACE.sub((lambda spaces: '&nbsp;' * len(spaces.group(0))),inp)
 
     return inp
 
 
-def inputToBytes(obj : Union[bytes, None, str, SupportsBytes], encoding : str) -> bytes:
+def inputToBytes(obj: Union[bytes, None, str, SupportsBytes], encoding: str) -> bytes:
     """
     Converts the input into bytes.
 
@@ -591,7 +603,7 @@ def inputToBytes(obj : Union[bytes, None, str, SupportsBytes], encoding : str) -
     raise ConversionError('Cannot convert to bytes.')
 
 
-def inputToMsgPath(inp : constants.MSG_PATH) -> List[str]:
+def inputToMsgPath(inp: constants.MSG_PATH) -> List[str]:
     """
     Converts the input into an msg path.
 
@@ -617,11 +629,11 @@ def inputToMsgPath(inp : constants.MSG_PATH) -> List[str]:
     return ret
 
 
-def inputToString(bytesInputVar : Optional[Union[str, bytes]], encoding : str) -> str:
+def inputToString(bytesInputVar: Optional[Union[str, bytes]], encoding: str) -> str:
     """
     Converts the input into a string.
 
-    :raises ConversionError: if the input cannot be converted.
+    :raises ConversionError: The input cannot be converted.
     """
     if isinstance(bytesInputVar, str):
         return bytesInputVar
@@ -633,8 +645,10 @@ def inputToString(bytesInputVar : Optional[Union[str, bytes]], encoding : str) -
         raise ConversionError('Cannot convert to str type.')
 
 
-def isEncapsulatedRtf(inp : bytes) -> bool:
+def isEncapsulatedRtf(inp: bytes) -> bool:
     """
+    Checks if the RTF data has encapsulated HTML.
+
     Currently the detection is made to be *extremly* basic, but this will work
     for now. In the future this will be fixed so that literal text in the body
     of a message won't cause false detection.
@@ -642,7 +656,7 @@ def isEncapsulatedRtf(inp : bytes) -> bool:
     return b'\\fromhtml' in inp
 
 
-def makeWeakRef(obj : Optional[_T]) -> Optional[weakref.ReferenceType[_T]]:
+def makeWeakRef(obj: Optional[_T]) -> Optional[weakref.ReferenceType[_T]]:
     """
     Attempts to return a weak reference to the object, returning None if not
     possible.
@@ -653,7 +667,7 @@ def makeWeakRef(obj : Optional[_T]) -> Optional[weakref.ReferenceType[_T]]:
         return weakref.ref(obj)
 
 
-def minutesToDurationStr(minutes : int) -> str:
+def minutesToDurationStr(minutes: int) -> str:
     """
     Converts the number of minutes into a duration string.
     """
@@ -669,7 +683,7 @@ def minutesToDurationStr(minutes : int) -> str:
         return f'{minutes // 60} hours {minutes % 60} minutes'
 
 
-def msgPathToString(inp : Union[str, Iterable[str]]) -> str:
+def msgPathToString(inp: Union[str, Iterable[str]]) -> str:
     """
     Converts an MSG path (one of the internal paths inside an MSG file) into a
     string.
@@ -680,19 +694,19 @@ def msgPathToString(inp : Union[str, Iterable[str]]) -> str:
     return inp
 
 
-def parseType(_type : int, stream : Union[int, bytes], encoding : str, extras : Sequence[bytes]):
+def parseType(_type: int, stream: Union[int, bytes], encoding: str, extras: Sequence[bytes]):
     """
     Converts the data in :param stream: to a much more accurate type, specified
     by :param _type:.
-    :param _type: the data's type.
-    :param stream: is the data to be converted.
-    :param encoding: is the encoding to be used for regular strings.
-    :param extras: is used in the case of types like PtypMultipleString.
-    For that example, extras should be a list of the bytes from rest of the
-    streams.
 
-    :raises NotImplementedError: for types with no current support. Most of
-        these types have no documentation of existing in an MSG file.
+    :param _type: The data's type.
+    :param stream: The data to be converted.
+    :param encoding: The encoding to be used for regular strings.
+    :param extras: Used in the case of types like PtypMultipleString. For that
+        example, extras should be a list of the bytes from rest of the streams.
+
+    :raises NotImplementedError: The type has no current support. Most of these
+        types have no documentation in [MS-OXMSG].
     """
     # WARNING Not done. Do not try to implement anywhere where it is not already implemented.
     value = stream
@@ -705,21 +719,21 @@ def parseType(_type : int, stream : Union[int, bytes], encoding : str, extras : 
             logger.warning('Property type is PtypNull, but is not equal to 0.')
         return None
     elif _type == 0x0002:  # PtypInteger16
-        return constants.st.STI16.unpack(value)[0]
+        return constants.st.ST_LE_UI16.unpack(value[:2])[0]
     elif _type == 0x0003:  # PtypInteger32
-        return constants.st.STI32.unpack(value)[0]
+        return constants.st.ST_LE_UI32.unpack(value[:4])[0]
     elif _type == 0x0004:  # PtypFloating32
-        return constants.st.STF32.unpack(value)[0]
+        return constants.st.ST_LE_F32.unpack(value[:4])[0]
     elif _type == 0x0005:  # PtypFloating64
-        return constants.st.STF64.unpack(value)[0]
+        return constants.st.ST_LE_F64.unpack(value)[0]
     elif _type == 0x0006:  # PtypCurrency
-        return (constants.st.STI64.unpack(value)[0]) / 10000.0
+        return decimal.Decimal((constants.st.ST_LE_I64.unpack(value))[0]) / 10000
     elif _type == 0x0007:  # PtypFloatingTime
-        value = constants.st.STF64.unpack(value)[0]
+        value = constants.st.ST_LE_F64.unpack(value)[0]
         return constants.PYTPFLOATINGTIME_START + datetime.timedelta(days = value)
     elif _type == 0x000A:  # PtypErrorCode
         from .enums import ErrorCode, ErrorCodeType
-        value = constants.st.STUI32.unpack(value)[0]
+        value = constants.st.ST_LE_UI32.unpack(value[:4])[0]
         try:
             value = ErrorCodeType(value)
         except ValueError:
@@ -733,7 +747,7 @@ def parseType(_type : int, stream : Union[int, bytes], encoding : str, extras : 
                 pass
         return value
     elif _type == 0x000B:  # PtypBoolean
-        return constants.st.ST_LE_UI64.unpack(value)[0] == 1
+        return constants.st.ST_LE_UI16.unpack(value[:2])[0] != 0
     elif _type == 0x000D:  # PtypObject/PtypEmbeddedTable
         # TODO parsing for this.
         # Wait, that's the extension for an attachment folder, so parsing this
@@ -741,7 +755,7 @@ def parseType(_type : int, stream : Union[int, bytes], encoding : str, extras : 
         # without support for this.
         raise NotImplementedError('Current version of extract-msg does not support the parsing of PtypObject/PtypEmbeddedTable in this function.')
     elif _type == 0x0014:  # PtypInteger64
-        return constants.st.STI64.unpack(value)[0]
+        return constants.st.ST_LE_UI64.unpack(value)[0]
     elif _type == 0x001E:  # PtypString8
         return value.decode(encoding)
     elif _type == 0x001F:  # PtypString
@@ -781,7 +795,7 @@ def parseType(_type : int, stream : Union[int, bytes], encoding : str, extras : 
             return ret
         elif _type == 0x1102: # PtypMultipleBinary
             ret = copy.deepcopy(extras)
-            lengths = tuple(constants.st.STUI32.unpack(stream[pos*8:(pos+1)*8])[0] for pos in range(len(stream) // 8))
+            lengths = tuple(constants.st.ST_LE_UI32.unpack(stream[pos*8:pos*8+4])[0] for pos in range(len(stream) // 8))
             lengthLengths = len(lengths)
             if lengthLengths > lengthExtras:
                 logger.warning(f'Error while parsing multiple type. Expected {lengthLengths} stream{"s" if lengthLengths != 1 else ""}, got {lengthExtras}. Ignoring.')
@@ -793,18 +807,18 @@ def parseType(_type : int, stream : Union[int, bytes], encoding : str, extras : 
             if stream != len(extras):
                 logger.warning(f'Error while parsing multiple type. Expected {stream} entr{"y" if stream == 1 else "ies"}, got {len(extras)}. Ignoring.')
             if _type == 0x1002: # PtypMultipleInteger16
-                return tuple(constants.st.STMI16.unpack(x)[0] for x in extras)
+                return tuple(constants.st.ST_LE_UI16.unpack(x)[0] for x in extras)
             if _type == 0x1003: # PtypMultipleInteger32
-                return tuple(constants.st.STMI32.unpack(x)[0] for x in extras)
+                return tuple(constants.st.ST_LE_UI32.unpack(x)[0] for x in extras)
             if _type == 0x1004: # PtypMultipleFloating32
-                return tuple(constants.st.STMF32.unpack(x)[0] for x in extras)
+                return tuple(constants.st.ST_LE_F32.unpack(x)[0] for x in extras)
             if _type == 0x1005: # PtypMultipleFloating64
-                return tuple(constants.st.STMF64.unpack(x)[0] for x in extras)
+                return tuple(constants.st.ST_LE_F64.unpack(x)[0] for x in extras)
             if _type == 0x1007: # PtypMultipleFloatingTime
-                values = tuple(constants.st.STMF64.unpack(x)[0] for x in extras)
+                values = (constants.st.ST_LE_F64.unpack(x)[0] for x in extras)
                 return tuple(constants.PYTPFLOATINGTIME_START + datetime.timedelta(days = amount) for amount in values)
             if _type == 0x1014: # PtypMultipleInteger64
-                return tuple(constants.st.STMI64.unpack(x)[0] for x in extras)
+                return tuple(constants.st.ST_LE_UI64.unpack(x)[0] for x in extras)
             if _type == 0x1040: # PtypMultipleTime
                 return tuple(filetimeToUtc(constants.st.ST_LE_UI64.unpack(x)[0]) for x in extras)
             if _type == 0x1048: # PtypMultipleGuid
@@ -814,7 +828,7 @@ def parseType(_type : int, stream : Union[int, bytes], encoding : str, extras : 
     return value
 
 
-def prepareFilename(filename : str) -> str:
+def prepareFilename(filename: str) -> str:
     """
     Adjusts :param filename: so that it can succesfully be used as an actual
     file name.
@@ -823,14 +837,14 @@ def prepareFilename(filename : str) -> str:
     return ''.join(i for i in filename if i not in r'\/:*?"<>|' + '\x00').strip()
 
 
-def roundUp(inp : int, mult : int) -> int:
+def roundUp(inp: int, mult: int) -> int:
     """
     Rounds :param inp: up to the nearest multiple of :param mult:.
     """
     return inp + (mult - inp) % mult
 
 
-def rtfSanitizeHtml(inp : str) -> str:
+def rtfSanitizeHtml(inp: str) -> str:
     """
     Sanitizes input to an RTF stream that has encapsulated HTML.
     """
@@ -862,7 +876,7 @@ def rtfSanitizeHtml(inp : str) -> str:
     return output
 
 
-def rtfSanitizePlain(inp : str) -> str:
+def rtfSanitizePlain(inp: str) -> str:
     """
     Sanitizes input to a plain RTF stream.
     """
@@ -880,27 +894,25 @@ def rtfSanitizePlain(inp : str) -> str:
             output += f"\\'{ord(char):02X}"
         else:
             # Handle Unicode characters.
-            # Handle Unicode characters.
             enc = char.encode('utf-16-le')
             output += ''.join(f'\\u{x}?' for x in struct.unpack(f'<{len(enc) // 2}h', enc))
 
     return output
 
 
-def setupLogging(defaultPath = None, defaultLevel = logging.WARN, logfile = None, enableFileLogging : bool = False,
+def setupLogging(defaultPath = None, defaultLevel = logging.WARN, logfile = None, enableFileLogging: bool = False,
                   env_key = 'EXTRACT_MSG_LOG_CFG') -> bool:
     """
     Setup logging configuration
 
-    Args:
     :param defaultPath: Default path to use for the logging configuration file.
     :param defaultLevel: Default logging level.
     :param env_key: Environment variable name to search for, for setting logfile
         path.
     :param enableFileLogging: Whether to use a file to log or not.
 
-    Returns:
-        bool: True if the configuration file was found and applied, False otherwise
+    :returns: ``True`` if the configuration file was found and applied,
+        ``False`` otherwise
     """
     shippedConfig = pathlib.Path(__file__).parent / 'data' / 'logging-config'
     if os.name == 'nt':
@@ -966,16 +978,18 @@ def setupLogging(defaultPath = None, defaultLevel = logging.WARN, logfile = None
     return True
 
 
-def tryGetMimetype(att : AttachmentBase, mimetype : Union[str, None]) -> Union[str, None]:
+def tryGetMimetype(att: AttachmentBase, mimetype: Union[str, None]) -> Union[str, None]:
     """
-    Uses an optional dependency to try and get the mimetype of an attachment. If
-    the mimetype has already been found, the optional dependency does not exist,
-    or an error occurs in the optional dependency, then the provided mimetype is
-    returned.
+    Uses an optional dependency to try and get the mimetype of an attachment.
+
+    If the mimetype has already been found, the optional dependency does not
+    exist, or an error occurs in the optional dependency, then the provided
+    mimetype is returned.
 
     :param att: The attachment to use for getting the mimetype.
     :param mimetype: The mimetype acquired directly from an attachment stream.
-        If this value evaluates to False, the function will try to determine it.
+        If this value evaluates to ``False``, the function will try to
+        determine it.
     """
     if mimetype:
         return mimetype
@@ -997,9 +1011,9 @@ def tryGetMimetype(att : AttachmentBase, mimetype : Union[str, None]) -> Union[s
     return mimetype
 
 
-def unsignedToSignedInt(uInt : int) -> int:
+def unsignedToSignedInt(uInt: int) -> int:
     """
-    Convert the bits of an unsigned int (32-bit) to an int.
+    Convert the bits of an unsigned int (32-bit) to a signed int.
 
     :raises ValueError: The number was not valid.
     """
@@ -1007,23 +1021,25 @@ def unsignedToSignedInt(uInt : int) -> int:
         raise ValueError('Value is too large.')
     if uInt < 0:
         raise ValueError('Value is already signed.')
-    return constants.st.STI32.unpack(constants.st.STUI32.pack(uInt))[0]
+    return constants.st.ST_SBO_I32.unpack(constants.st.ST_SBO_UI32.pack(uInt))[0]
 
 
-def unwrapMsg(msg : MSGFile) -> Dict[str, List]:
+def unwrapMsg(msg: MSGFile) -> Dict[str, List]:
     """
     Takes a recursive message-attachment structure and unwraps it into a linear
-    dictionary for easy iteration. Dictionary contains 4 keys: "attachments" for
-    main message attachments, not including embedded MSG files, "embedded" for
-    attachments representing embedded MSG files, "msg" for all MSG files
-    (including the original in the first index), and "raw_attachments" for raw
-    attachments from signed messages.
+    dictionary for easy iteration.
+
+    Dictionary contains 4 keys: "attachments" for main message attachments, not
+    including embedded MSG files, "embedded" for attachments representing
+    embedded MSG files, "msg" for all MSG files (including the original in the
+    first index), and "raw_attachments" for raw attachments from signed
+    messages.
     """
     from .msg_classes import MessageSignedBase
 
     # Here is where we store main attachments.
     attachments = []
-    # Here is where we are going to store embedded msg files.
+    # Here is where we are going to store embedded MSG files.
     msgFiles = [msg]
     # Here is where we store embedded attachments.
     embedded = []
@@ -1069,24 +1085,26 @@ def unwrapMsg(msg : MSGFile) -> Dict[str, List]:
     }
 
 
-def unwrapMultipart(mp : Union[bytes, str, email.message.Message]) -> Dict:
+def unwrapMultipart(mp: Union[bytes, str, email.message.Message]) -> Dict:
     """
     Unwraps a recursive multipart structure into a dictionary of linear lists.
-    Similar to unwrapMsg, but for multipart. Dictionary contains 3 keys:
-    "attachments" which contains a list of dicts containing processed attachment
-    data as well as the Message instance associated with it, "plain_body" which
-    contains the plain text body, and "html_body" which contains the HTML body.
 
-    For clarification, each instance of processed attachment data is a dict
-    with keys identical to the args used for the SignedAttachment constructor.
-    This makes it easy to expand for use in constructing a SignedAttachment. The
-    only argument missing is "msg" to ensure this function will not require one.
+    Similar to unwrapMsg, but for multipart. The dictionary contains 3 keys:
+    "attachments" which contains a list of ``dict``\\s containing processed
+    attachment data as well as the Message instance associated with it,
+    "plain_body" which contains the plain text body, and "html_body" which
+    contains the HTML body.
+
+    For clarification, each instance of processed attachment data is a ``dict``
+    with keys identical to the args used for the ``SignedAttachment``
+    constructor. This makes it easy to expand for use in constructing a
+    ``SignedAttachment``. The only argument missing is "msg" to ensure this function will not require one.
 
     :param mp: The bytes that make up a multipart, the string that makes up a
-        multipart, or a Message instance from the email module created from the
-        multipart to unwrap. If providing a Message instance, prefer it to be an
-        instance of EmailMessage. If you are doing so, make sure it's policy is
-        default.
+        multipart, or a ``Message`` instance from the ``email`` module created
+        from the multipart data to unwrap. If providing a ``Message`` instance,
+        prefer it to be an instance of ``EmailMessage``. If you are doing so,
+        make sure it's policy is default.
     """
     # In the event we are generating it, these are the kwargs to use.
     genKwargs = {
@@ -1196,10 +1214,12 @@ def unwrapMultipart(mp : Union[bytes, str, email.message.Message]) -> Dict:
     }
 
 
-def validateHtml(html : bytes) -> bool:
+def validateHtml(html: bytes) -> bool:
     """
-    Checks whether the HTML is considered valid. To be valid, the HTML must, at
-    minimum, contain an <html> tag, a <body> tag, and closing tags for each.
+    Checks whether the HTML is considered valid.
+
+    To be valid, the HTML must, at minimum, contain an ``<html>`` tag, a
+    ``<body>`` tag, and closing tags for each.
     """
     bs = bs4.BeautifulSoup(html, 'html.parser')
     if not bs.find('html') or not bs.find('body'):
@@ -1207,31 +1227,32 @@ def validateHtml(html : bytes) -> bool:
     return True
 
 
-def verifyPropertyId(id : str) -> None:
+def verifyPropertyId(id: str) -> None:
     """
-    Determines whether a property ID is valid for vertain functions. Property
-    IDs MUST be a 4 digit hexadecimal string. Property is valid if no exception
-    is raised.
+    Determines whether a property ID is valid for certain functions.
 
-    :raises InvaildPropertyIdError: if the it is not a 4 digit hexadecimal
-        number.
+    Property IDs MUST be a 4 digit hexadecimal string. Property is valid if no
+    exception is raised.
+
+    :raises InvalidPropertyIdError: The ID is not a 4 digit hexadecimal number.
     """
     if not isinstance(id, str):
-        raise InvaildPropertyIdError('ID was not a 4 digit hexadecimal string')
-    elif len(id) != 4:
-        raise InvaildPropertyIdError('ID was not a 4 digit hexadecimal string')
-    else:
-        try:
-            int(id, 16)
-        except ValueError:
-            raise InvaildPropertyIdError('ID was not a 4 digit hexadecimal string')
+        raise InvalidPropertyIdError('ID was not a 4 digit hexadecimal string')
+    if len(id) != 4:
+        raise InvalidPropertyIdError('ID was not a 4 digit hexadecimal string')
+    try:
+        int(id, 16)
+    except ValueError:
+        raise InvalidPropertyIdError('ID was not a 4 digit hexadecimal string')
 
 
-def verifyType(_type : Optional[str]) -> None:
+def verifyType(_type: Optional[str]) -> None:
     """
-    Verifies that the type is valid. Raises an exception if it is not.
+    Verifies that the type is valid.
 
-    :raises UnknownTypeError: if the type is not recognized.
+    Raises an exception if it is not.
+
+    :raises UnknownTypeError: The type is not recognized.
     """
     if _type is not None:
         if (_type not in constants.VARIABLE_LENGTH_PROPS_STRING) and (_type not in constants.FIXED_LENGTH_PROPS_STRING):

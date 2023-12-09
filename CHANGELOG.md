@@ -1,3 +1,51 @@
+**v0.47.0**
+* Changed the public API for `PropertiesStore` to improve the quality of its code. The properties type is now mandatory, and the intelligence field (and the related enum) has been removed.
+    * Additionally, the `toBytes` and `__bytes__` methods will both generate based on the contents of this class, allowing for new properties to be created and for existing properties to be modified or removed if the class is set to writable on creation.
+* Added new method `Named.getPropNameByStreamID`. This method takes the ID of a stream (or property stream entry) and returns the property name (as a tuple of the property name/ID and the property set) that is stored there. Returns `None` if the stream is not used to store a named property. This name can be directly used (if it is not `None`) to get the `NamedPropertyBase` instance associated. This method is most useful for people looking at the raw data of a stream and trying to figure out what named property it refers to.
+* Fixed mistake in struct definitions that caused a float to require 8 bytes to unpack.
+* Added tests for `extract_msg.properties.props`.
+* Added basic tests for `extract_msg.attachments`.
+* Added validation tests for the `enums` and `constants` submodule.
+* Removed unneeded structs.
+* Fixed an issue where `PtypGuid` was being parsed by the wrong property type. Despite having a fixed size, it is still a variable length property.
+* Fixed *all* of the setters not working. I didn't know they needed to use the same name as the getter, and I *swear* they were working at some point with the current setup. Some sources online suggested the original form should work, which is even stranger.
+* Unified all line endings to LF instead of a mix of CRLF and LF.
+* Changed enums `BCTextFormat` and `BCLabelFormat` to `IntFlag` enums. The values that exist are for the individual flags and not the groups of flags.
+* Made `FieldInfo` writable, however it can no longer be directly converted to bytes since it requires additional information outside of itself to convert to bytes. It still retains a `toBytes` method, however it requires an argument for the additional data.
+* Fixed `UnsupportedAttachment` inverting the `skipNotImplemented` keyword argument.
+* Fixed `DMPaperSize` not being a subclass of `Enum`.
+* Extended values for `DMPaperSize`.
+* Removed unneeded structs.
+* Fixed exports for `extract_msg.constants.st`.
+* Updated various parts of the documentation to improve it and make it more consistent.
+* Fixed `Recipient.existsTypedProperty` and `AttachmentBase.existsTypedProperty` having the wrong return type.
+* Removed "TODO" markers on `OleStreamStruct` and finalized it to only handle the OLEStream for embedded objects.
+* Fixed type annotations for `extract_msg.utils.fromTimeStamp`.
+* Added new function `extract_msg.properties.prop.createNewProp`. This function allows a new property to be created with default data based on the name. The name MUST be an 8 character hex string, the first 4 characters being the value for the property ID and the second 4 being the value for the type.
+* Fixed `VariableLengthProp.reservedFlags` returning the wrong type.
+* Adjusted many of the property structs to make it easier to use them for packing.
+* Renamed some of the property structs to be more informative.
+* Fixed `ServerID` using the wrong struct (would have thrown an exception for not having enough data).
+* Unified signing for integer properties. All integer properties are considered unsigned by default when read directly from the MSG file, however specific property accessors may convert to signed if the property is specifically intended to be so. This does not necessarily include properties that are *stored* as integers but have a value that is not an integer, like `PtypCurrency`.
+* Changed `extract_msg.constants.NULL_DATE` to be a subclass of `datetime.datetime` instead of just a fixed value. Functions that return null dates may end up returning distinct versions of `NullDate` (the newly created subclass), however all instances of `NullDate` will register as being equal to each other. Existing equality comparisons to the `NULL_DATE` constant will all function as intended, however `is` checks may fail for some null dates.
+* Changed currency type to return a `Decimal` instance for higher precision.
+* Made `FixedLengthProp` and `VariableLengthProp` writable. Only the property `flags` from `PropBase` is writable. This also includes the ability to convert them to bytes based on their value.
+* Fixed many issues in `VariableLengthProp` regarding it's calculation of sizes.
+* Removed `hasLen` function.
+* Changed style to remove space between variable name and colon that separates the type.
+* Corrected `InvaildPropertyIdError` to `InvalidPropertyIdError`.
+* Updated to `olefile` version 0.47.
+* Updated `RTFDE` minimum version to 0.1.1.
+* Changed dependency named for `compressed-rtf` to remove minor typo (it *should* forward to the correct place regardless, but just to be safe).
+* Fixed issues with implementation of `OleWriter` when it comes to large sets of data. Most issues would fail silently and only be noticeable when trying to open the file. If your file is less than 2 GB, you would likely not have notices and issues at all. This includes adding a new exception that is throw from the `write` method, `TooManySectorsError`.
+* Fixed some issues with `OleWriter` that could cause entries to end up partially added if the data was an issue.
+
+**v0.46.2**
+* Adjusted typing information on regular expressions. They were using a subscript that was added in Python 3.9 (apparently that is something the type checker doesn't check for), which made the module incompatible with Python 3.8. If you are using Python 3.9 or higher a version check will switch to the more specific typing.
+
+**v0.46.1**
+* [[TeamMsgExtractor #394](https://github.com/TeamMsgExtractor/msg-extractor/issues/394)] Fix typo in props that caused the wrong number of bytes to be given to a struct.
+
 **v0.46.0**
 * [[TeamMsgExtractor #95](https://github.com/TeamMsgExtractor/msg-extractor/issues/95)] Adjusted the `overrideEncoding` property of `MSGFile` to allow automatic encoding detection. Simply set the property to the string `"chardet"` and, assuming the `chardet` module is installed, it will analyze a number of the strings to try and form a consensus about the encoding. This will *ignore* the specified encoding *only if* if successfully detects. Otherwise it will log a warning and fall back to the default behavior.
 * [[TeamMsgExtractor #387](https://github.com/TeamMsgExtractor/msg-extractor/issues/387)] Changed `extract_msg.utils.decodeRfc2047` to not throw decoding errors if the content given is not ASCII.

@@ -20,9 +20,7 @@ class MeetingException(MeetingRelated):
 
     def save(self, **_) -> constants.SAVE_TYPE:
         """
-        Meeting Exceptions are hidden attachments with no save behaviors. As
-        such, for saving we literally just return the object and do nothing
-        else.
+        Meeting Exceptions are hidden attachments with no save behaviors.
 
         If you want something to happen for saving, you can call the save of a
         parent class or write your own code.
@@ -33,7 +31,9 @@ class MeetingException(MeetingRelated):
     def exceptionReplaceTime(self) -> Optional[datetime.datetime]:
         """
         The date and time within the recurrence pattern that the exception will
-        replace. The value is specified in UTC.
+        replace.
+
+        The value is specified in UTC.
         """
         return self.getNamedProp('8228', constants.ps.PSETID_APPOINTMENT)
 
@@ -41,8 +41,9 @@ class MeetingException(MeetingRelated):
     def fExceptionalBody(self) -> bool:
         """
         Indicates that the Exception Embedded Message object has a body that
-        differs from the Recurring Calendar object. If True, the Exception MUST
-        have a body.
+        differs from the Recurring Calendar object.
+
+        If ``True``, the Exception MUST have a body.
         """
         return bool(self.getNamedProp('8206', constants.ps.PSETID_APPOINTMENT))
 

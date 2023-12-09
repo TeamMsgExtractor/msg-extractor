@@ -45,7 +45,7 @@ class EntryID(abc.ABC):
     """
 
     @classmethod
-    def autoCreate(cls, data : Optional[bytes]) -> Optional[EntryID]:
+    def autoCreate(cls, data: Optional[bytes]) -> Optional[EntryID]:
         """
         Automatically determines the type of EntryID and returns an instance of
         the correct subclass. If the subclass cannot be determined, will return
@@ -93,7 +93,7 @@ class EntryID(abc.ABC):
 
         raise FeatureNotImplemented(f'UID for EntryID found in database, but no class was specified for it: {providerUID}')
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         self.__flags = data[:4]
         self.__providerUID = data[4:20]
         self.__rawData = data
@@ -152,7 +152,7 @@ class AddressBookEntryID(EntryID):
     An Address Book EntryID structure, as specified in [MS-OXCDATA].
     """
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         super().__init__(data)
         reader = BytesReader(data[20:])
         # Version *MUST* be 1.
@@ -198,7 +198,7 @@ class ContactAddressEntryID(EntryID):
     object.
     """
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         super().__init__(data)
         reader = BytesReader(data[20:])
         if (version := reader.readUnsignedInt()) != 3:
@@ -242,9 +242,9 @@ class FolderEntryID(EntryID):
     A Folder EntryID structure, as defined in [MS-OXCDATA].
     """
 
-    __SIZE__ : int = 46
+    __SIZE__: int = 46
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         super().__init__(data)
         reader = BytesReader(data[20:])
         self.__folderType = MessageType(reader.readUnsignedShort())
@@ -286,9 +286,9 @@ class MessageEntryID(EntryID):
     A Message EntryID structure, as defined in [MS-OXCDATA].
     """
 
-    __SIZE__ : int = 70
+    __SIZE__: int = 70
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         super().__init__(data)
         reader = BytesReader(data[20:])
         self.__messageType = MessageType(reader.readUnsignedShort())
@@ -353,7 +353,7 @@ class NNTPNewsgroupFolderEntryID(EntryID):
     A NNTP Newsgroup Folder EntryID structure, as defined in [MS-OXCDATA].
     """
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         super().__init__(data)
         reader = BytesReader(data[20:])
         self.__folderType = reader.readUnsignedShort()
@@ -387,7 +387,7 @@ class OneOffRecipient(EntryID):
     A One-Off EntryID structure, as specified in [MS-OXCDATA].
     """
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         super().__init__(data)
         # Create a reader to easily
         reader = BytesReader(data[20:])
@@ -498,10 +498,10 @@ class PermanentEntryID(EntryID):
     A Permanent EntryID structure, as defined in [MS-OXNSPI].
     """
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         super().__init__(data)
         reader = BytesReader(data)
-        unpacked = reader.readStruct(constants.st.STPEID)
+        unpacked = reader.readStruct(constants.st.ST_PEID)
         if unpacked[0] != 0:
             raise TypeError(f'Not a PermanentEntryID (expected 0, got {unpacked[0]}).')
         self.__displayTypeString = DisplayType(unpacked[2])
@@ -533,7 +533,7 @@ class PersonalDistributionListEntryID(EntryID):
     A Personal Distribution List EntryID structure, as defined in [MS-OXCDATA].
     """
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         super().__init__(data)
         reader = BytesReader(data[20:])
         if (arg := reader.readUnsignedInt()) != 3:
@@ -571,7 +571,7 @@ class StoreObjectEntryID(EntryID):
     A Store Object EntryID structure, as defined in [MS-OXCDATA].
     """
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         super().__init__(data)
         reader = BytesReader(data[20:])
 
@@ -654,7 +654,7 @@ class WrappedEntryID(EntryID):
     A WrappedEntryId structure, as specified in [MS-OXOCNTC].
     """
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         super().__init__(data)
         # Grab the type byte and parse it.
         self.__type = data[20]

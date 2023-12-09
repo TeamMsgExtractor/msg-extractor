@@ -48,7 +48,7 @@ _logger = _logging.getLogger(__name__)
 _logger.addHandler(_logging.NullHandler())
 
 
-def initStandardAttachment(msg : MSGFile, dir_ : str) -> AttachmentBase:
+def initStandardAttachment(msg: MSGFile, dir_: str) -> AttachmentBase:
     """
     Returns an instance of AttachmentBase for the attachment in the MSG file at
     the specified internal directory.
@@ -95,7 +95,7 @@ def initStandardAttachment(msg : MSGFile, dir_ : str) -> AttachmentBase:
                     # Can't autodetect it, so throw an error.
                     raise StandardViolationError(f'Attachment method missing on attachment {dir_}, and it could not be determined automatically.')
 
-                propStore._propDict['37050003'] = createProp(propData)
+                propStore.addProperty(createProp(propData), True)
 
         attMethod = propStore.getValue('37050003', 0) & 7
 

@@ -32,7 +32,7 @@ class EmbeddedMsgAttachment(AttachmentBase):
     The attachment entry for an Embedded MSG file.
     """
 
-    def __init__(self, msg : MSGFile, dir_ : str, propStore : PropertiesStore):
+    def __init__(self, msg: MSGFile, dir_: str, propStore: PropertiesStore):
         super().__init__(msg, dir_, propStore)
         self.__prefix = msg.prefixList + [dir_, '__substg1.0_3701000D']
         self.__data = openMsg(self.msg.path, prefix = self.__prefix, parentMsg = self.msg, treePath = self.treePath, **self.msg.kwargs)
@@ -41,7 +41,7 @@ class EmbeddedMsgAttachment(AttachmentBase):
         """
         Returns the filename to use for the attachment.
 
-        :param contentId:      Use the contentId, if available.
+        :param contentId: Use the contentId, if available.
         :param customFilename: A custom name to use for the file.
 
         If the filename starts with "UnknownFilename" then there is no guarantee
@@ -131,7 +131,4 @@ class EmbeddedMsgAttachment(AttachmentBase):
 
     @property
     def type(self) -> AttachmentType:
-        """
-        Returns an enum value that identifies the type of attachment.
-        """
         return AttachmentType.MSG
