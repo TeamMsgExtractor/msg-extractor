@@ -46,7 +46,7 @@ class AttachmentBase(abc.ABC):
     def __init__(self, msg: MSGFile, dir_: str, propStore: PropertiesStore):
         """
         :param msg: the Message instance that the attachment belongs to.
-        :param dir_: the directory inside the msg file where the attachment is
+        :param dir_: the directory inside the MSG file where the attachment is
             located.
         :param propStore: The PropertiesStore instance for the attachment.
         """
@@ -149,7 +149,7 @@ class AttachmentBase(abc.ABC):
             garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return msg._getTypedStream([self.__dir, msgPathToString(filename)], True, _type)
 
     def _handleFnc(self, _zip, filename, customPath, kwargs) -> pathlib.Path:
@@ -202,7 +202,7 @@ class AttachmentBase(abc.ABC):
             garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return msg.exists([self.__dir, msgPathToString(filename)])
 
     def sExists(self, filename: MSG_PATH) -> bool:
@@ -213,7 +213,7 @@ class AttachmentBase(abc.ABC):
             garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return msg.sExists([self.__dir, msgPathToString(filename)])
 
     def existsTypedProperty(self, id, _type = None) -> Tuple[bool, int]:
@@ -227,7 +227,7 @@ class AttachmentBase(abc.ABC):
             garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return msg.existsTypedProperty(id, self.__dir, _type, True, self.__props)
 
     @abc.abstractmethod
@@ -254,7 +254,7 @@ class AttachmentBase(abc.ABC):
             garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return msg.getMultipleBinary([self.__dir, msgPathToString(filename)])
 
     def getMultipleString(self, filename: MSG_PATH) -> Optional[List[str]]:
@@ -269,7 +269,7 @@ class AttachmentBase(abc.ABC):
             garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return msg.getMultipleString([self.__dir, msgPathToString(filename)])
 
     def getNamedAs(self, propertyName: str, guid: str, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
@@ -337,7 +337,7 @@ class AttachmentBase(abc.ABC):
             garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return msg.getSingleOrMultipleBinary([self.__dir, msgPathToString(filename)])
 
     def getSingleOrMultipleString(self, filename: MSG_PATH) -> Optional[Union[List[str], str]]:
@@ -355,7 +355,7 @@ class AttachmentBase(abc.ABC):
             garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return msg.getSingleOrMultipleString([self.__dir, msgPathToString(filename)])
 
     def getStream(self, filename: MSG_PATH) -> Optional[bytes]:
@@ -369,7 +369,7 @@ class AttachmentBase(abc.ABC):
             garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return msg.getStream([self.__dir, msgPathToString(filename)])
 
     def getStreamAs(self, streamID: MSG_PATH, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
@@ -406,7 +406,7 @@ class AttachmentBase(abc.ABC):
             garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return msg.getStringStream([self.__dir, msgPathToString(filename)])
 
     def getStringStreamAs(self, streamID: MSG_PATH, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
@@ -436,7 +436,7 @@ class AttachmentBase(abc.ABC):
         paths to be directly used for accessing a stream.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return [path[1:] for path in msg.listDir(streams, storages, False)
                 if len(path) > 1 and path[0] == self.__dir]
 
@@ -518,7 +518,7 @@ class AttachmentBase(abc.ABC):
         # If we found the right item, get the CLSID.
         if dataStream:
             if (msg := self.__msg()) is None:
-                raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+                raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
             clsid = msg._getOleEntry(dataStream).clsid or clsid
 
         return clsid
@@ -627,7 +627,7 @@ class AttachmentBase(abc.ABC):
             garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return msg
 
     @functools.cached_property

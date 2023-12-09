@@ -32,7 +32,7 @@ logger.addHandler(logging.NullHandler())
 class SignedAttachment:
     def __init__(self, msg, data: bytes, name: str, mimetype: str, node: email.message.Message):
         """
-        :param msg: The msg file this attachment is associated with.
+        :param msg: The MSGFile instance this attachment is associated with.
         :param data: The bytes that compose this attachment.
         :param name: The reported name of the attachment.
         :param mimetype: The reported mimetype of the attachment.
@@ -208,7 +208,7 @@ class SignedAttachment:
             garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return msg
 
     @property

@@ -63,7 +63,7 @@ class Recipient(Generic[_RT]):
             garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Recipient instance has been garbage collected.')
         return msg.exists([self.__dir, msgPathToString(filename)])
 
     def sExists(self, filename: MSG_PATH) -> bool:
@@ -74,7 +74,7 @@ class Recipient(Generic[_RT]):
             garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Recipient instance has been garbage collected.')
         return msg.sExists([self.__dir, msgPathToString(filename)])
 
     def existsTypedProperty(self, id, _type = None) -> Tuple[bool, int]:
@@ -87,7 +87,7 @@ class Recipient(Generic[_RT]):
             garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Recipient instance has been garbage collected.')
         return msg.existsTypedProperty(id, self.__dir, _type, True, self.__props)
 
     def getMultipleBinary(self, filename: MSG_PATH) -> Optional[List[bytes]]:
@@ -102,7 +102,7 @@ class Recipient(Generic[_RT]):
             garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Recipient instance has been garbage collected.')
         return msg.getMultipleBinary([self.__dir, msgPathToString(filename)])
 
     def getMultipleString(self, filename: MSG_PATH) -> Optional[List[str]]:
@@ -117,7 +117,7 @@ class Recipient(Generic[_RT]):
             garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Recipient instance has been garbage collected.')
         return msg.getMultipleString([self.__dir, msgPathToString(filename)])
 
     def getPropertyAs(self, propertyName: Union[int, str], overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
@@ -161,7 +161,7 @@ class Recipient(Generic[_RT]):
             garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Recipient instance has been garbage collected.')
         return msg.getSingleOrMultipleBinary([self.__dir, msgPathToString(filename)])
 
     def getSingleOrMultipleString(self, filename: MSG_PATH) -> Optional[Union[List[str], str]]:
@@ -179,7 +179,7 @@ class Recipient(Generic[_RT]):
             garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Recipient instance has been garbage collected.')
         return msg.getSingleOrMultipleString([self.__dir, msgPathToString(filename)])
 
     def getStream(self, filename: MSG_PATH) -> Optional[bytes]:
@@ -193,7 +193,7 @@ class Recipient(Generic[_RT]):
             garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Recipient instance has been garbage collected.')
         return msg.getStream([self.__dir, msgPathToString(filename)])
 
     def getStreamAs(self, streamID: MSG_PATH, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
@@ -230,7 +230,7 @@ class Recipient(Generic[_RT]):
             garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Recipient instance has been garbage collected.')
         return msg.getStringStream([self.__dir, msgPathToString(filename)])
 
     def getStringStreamAs(self, streamID: MSG_PATH, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
@@ -260,7 +260,7 @@ class Recipient(Generic[_RT]):
             paths to be directly used for accessing a file.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Recipient instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Recipient instance has been garbage collected.')
         return [path[1:] for path in msg.listDir(streams, storages, False)
                 if len(path) > 1 and path[0] == self.__dir]
 

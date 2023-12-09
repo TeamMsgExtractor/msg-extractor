@@ -141,7 +141,7 @@ class Named:
             garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Named instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Named instance has been garbage collected.')
         return msg.exists([self.__dir, msgPathToString(filename)], False)
 
     def get(self, propertyName: Tuple[str, str], default: _T = None) -> Union[NamedPropertyBase, _T]:
@@ -187,10 +187,9 @@ class Named:
 
         return self.__streamIDDict.get(streamID)
 
-
     def getStream(self, filename: constants.MSG_PATH) -> Optional[bytes]:
         """
-        Gets a binary representation of the requested filename.
+        Gets a binary representation of the requested stream.
 
         This should ALWAYS return a ``bytes`` object if it was found, otherwise
         returns ``None``.
@@ -199,7 +198,7 @@ class Named:
             garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Named instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Named instance has been garbage collected.')
         return msg.getStream([self.__dir, msgPathToString(filename)], False)
 
     def items(self) -> Iterable[Tuple[Tuple[str, str], NamedPropertyBase]]:
@@ -220,7 +219,7 @@ class Named:
     @property
     def dir(self):
         """
-        Returns the directory inside the msg file where the named properties are located.
+        Returns the directory inside the MSG file where the named properties are located.
         """
         return self.__dir
 
@@ -233,7 +232,7 @@ class Named:
             garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Named instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Named instance has been garbage collected.')
         return msg
 
     @property

@@ -34,11 +34,11 @@ class CustomAttachmentHandler(abc.ABC):
         super().__init__()
         self.__att = attachment
 
-    def getStream(self, path: MSG_PATH) -> Optional[bytes]:
+    def getStream(self, filename: MSG_PATH) -> Optional[bytes]:
         """
         Gets a stream from the custom data directory.
         """
-        return self.attachment.getStream('__substg1.0_3701000D/' + msgPathToString(path))
+        return self.attachment.getStream('__substg1.0_3701000D/' + msgPathToString(filename))
 
     def getStreamAs(self, streamID: MSG_PATH, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """

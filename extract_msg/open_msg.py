@@ -182,7 +182,7 @@ def openMsg(path, **kwargs) -> MSGFile:
 
 def openMsgBulk(path, **kwargs) -> Union[List[MSGFile], Tuple[Exception, Union[str, bytes]]]:
     """
-    Takes the same arguments as openMsg, but opens a collection of msg files
+    Takes the same arguments as openMsg, but opens a collection of MSG files
     based on a wild card. Returns a list if successful, otherwise returns a
     tuple.
 

@@ -20,7 +20,7 @@ from ..exceptions import UnknownCodepageError, UnsupportedEncodingError
 ### TODO:
 # Many of these code pages are not supported by Python. As such, we should
 # really implement them ourselves to make sure that if someone wants to use an
-# msg file with one of those encodings, they are able to. Perhaps we should
+# MSG file with one of those encodings, they are able to. Perhaps we should
 # create a seperate module for that?
 # Code pages that currently don't have a supported encoding will be preceded by
 # `# UNSUPPORTED`.

@@ -161,7 +161,7 @@ class UnsupportedMSGTypeError(FeatureNotImplemented):
 class UnrecognizedMSGTypeError(ExMsgBaseException):
     """
     An exception that is raised when the module cannot determine how to properly
-    open a specific class of msg file.
+    open a specific class of MSG file.
     """
 
 class WKError(DependencyError):

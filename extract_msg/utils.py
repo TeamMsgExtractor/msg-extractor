@@ -378,7 +378,7 @@ def getCommandArgs(args: Sequence[str]) -> argparse.Namespace:
                         help='Set the folder to use for the program output. (Default: Current directory)')
     # --use-filename
     parser.add_argument('--use-filename', dest='useFilename', action='store_true',
-                        help='Sets whether the name of each output is based on the msg filename.')
+                        help='Sets whether the name of each output is based on the MSG filename.')
     # --dump-stdout
     parser.add_argument('--dump-stdout', dest='dumpStdout', action='store_true',
                         help='Tells the program to dump the message body (plain text) to stdout. Overrides saving arguments.')
@@ -420,7 +420,7 @@ def getCommandArgs(args: Sequence[str]) -> argparse.Namespace:
                         help='Store the header in a separate file.')
     # --attachments-only
     outFormat.add_argument('--attachments-only', dest='attachmentsOnly', action='store_true',
-                           help='Specify to only save attachments from an msg file.')
+                           help='Specify to only save attachments from an MSG file.')
     # --skip-hidden
     parser.add_argument('--skip-hidden', dest='skipHidden', action='store_true',
                         help='Skips any attachment marked as hidden (usually ones embedded in the body).')
@@ -451,7 +451,7 @@ def getCommandArgs(args: Sequence[str]) -> argparse.Namespace:
     # --progress
     parser.add_argument('--progress', dest='progress', action='store_true',
                         help='Shows what file the program is currently working on during it\'s progress.')
-    # [msg files]
+    # [MSG files]
     parser.add_argument('msgs', metavar='msg', nargs='+',
                         help='An MSG file to be parsed.')
 
@@ -503,7 +503,7 @@ def getCommandArgs(args: Sequence[str]) -> argparse.Namespace:
             fileLists += glob.glob(path)
 
         if len(fileLists) == 0:
-            raise ValueError('Could not find any msg files using the specified wildcards.')
+            raise ValueError('Could not find any MSG files using the specified wildcards.')
         options.msgs = fileLists
 
     # Make it so outName can only be used on single files.
@@ -1035,7 +1035,7 @@ def unwrapMsg(msg: MSGFile) -> Dict[str, List]:
 
     # Here is where we store main attachments.
     attachments = []
-    # Here is where we are going to store embedded msg files.
+    # Here is where we are going to store embedded MSG files.
     msgFiles = [msg]
     # Here is where we store embedded attachments.
     embedded = []

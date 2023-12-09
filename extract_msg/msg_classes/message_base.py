@@ -818,7 +818,7 @@ class MessageBase(MSGFile):
                 path /= customFilename[:maxNameLength]
             elif useMsgFilename:
                 if not self.filename:
-                    raise ValueError(':param useMsgFilename: is only available if you are using an msg file on the disk or have provided a filename.')
+                    raise ValueError(':param useMsgFilename: is only available if you are using an MSG file on the disk or have provided a filename.')
                 # Get the actual name of the file.
                 filename = os.path.split(self.filename)[1]
                 # Remove the extensions.
