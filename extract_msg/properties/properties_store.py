@@ -331,7 +331,7 @@ class PropertiesStore:
     @property
     def attachmentCount(self) -> int:
         """
-        The number of ``Attachment`` objects for the ``MSGFile`` object.
+        The number of Attachment objects for the ``MSGFile`` object.
 
         :raises NotWritableError: The setter was used on an unwritable instance.
         :raises TypeError: The Properties instance is not for an ``MSGFile``
@@ -445,7 +445,7 @@ class PropertiesStore:
     @property
     def recipientCount(self) -> int:
         """
-        The number of ``Recipient`` objects for the ``MSGFile`` object.
+        The number of Recipient objects for the ``MSGFile`` object.
 
         :raises NotWritableError: The setter was used on an unwritable instance.
         :raises TypeError: The Properties instance is not for an ``MSGFile``
