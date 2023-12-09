@@ -351,8 +351,8 @@ class MessageBase(MSGFile):
             the Content-Type meta tag to insert. This exists to ensure that
             something parsing the html can properly determine the encoding (as
             not having this tag can cause errors in some programs). Set this to
-            ``None`` or an empty string to not insert the tag (Default:
-            'utf-8').
+            ``None`` or an empty string to not insert the tag. (Default:
+            'utf-8')
         :param _: Used to allow kwargs expansion in the save function.
             Arguments absorbed by this are simply ignored.
         """
@@ -463,7 +463,7 @@ class MessageBase(MSGFile):
         with the HTML header injected into it.
 
         :param prepared: Determines whether to be using the standard HTML
-            (``False``) or the prepared HTML (``True``) body (Default: ``False``).
+            (``False``) or the prepared HTML (``True``) body. (Default: ``False``)
 
         :raises AttributeError: The correct HTML body cannot be acquired.
         """

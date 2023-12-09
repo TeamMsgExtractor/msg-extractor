@@ -268,10 +268,10 @@ def filetimeToDatetime(rawTime: int) -> datetime.datetime:
 
     Some values have specialized meanings, listed below:
 
-    * 915151392000000000: December 31, 4500, representing a null time. Returns
-      an instance of extract_msg.null_date.NullDate.
-    * 915046235400000000: 23:59 on August 31, 4500, representing a null time.
-      Returns extract_msg.constants.NULL_DATE.
+    * ``915151392000000000``: December 31, 4500, representing a null time.
+      Returns an instance of extract_msg.null_date.NullDate.
+    * ``915046235400000000``: 23:59 on August 31, 4500, representing a null
+      time. Returns extract_msg.constants.NULL_DATE.
     """
     try:
         if rawTime < 116444736000000000:
@@ -1013,7 +1013,7 @@ def tryGetMimetype(att: AttachmentBase, mimetype: Union[str, None]) -> Union[str
 
 def unsignedToSignedInt(uInt: int) -> int:
     """
-    Convert the bits of an unsigned int (32-bit) to an int.
+    Convert the bits of an unsigned int (32-bit) to a signed int.
 
     :raises ValueError: The number was not valid.
     """
@@ -1216,8 +1216,10 @@ def unwrapMultipart(mp: Union[bytes, str, email.message.Message]) -> Dict:
 
 def validateHtml(html: bytes) -> bool:
     """
-    Checks whether the HTML is considered valid. To be valid, the HTML must, at
-    minimum, contain an <html> tag, a <body> tag, and closing tags for each.
+    Checks whether the HTML is considered valid.
+
+    To be valid, the HTML must, at minimum, contain an ``<html>`` tag, a
+    ``<body>`` tag, and closing tags for each.
     """
     bs = bs4.BeautifulSoup(html, 'html.parser')
     if not bs.find('html') or not bs.find('body'):

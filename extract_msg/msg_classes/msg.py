@@ -800,7 +800,7 @@ class MSGFile:
         """
         Saves only attachments in the same folder.
 
-        :params skipHidden: If ``True``, skips attachments marked as hidden.
+        :param skipHidden: If ``True``, skips attachments marked as hidden.
             (Default: ``False``)
         """
         for attachment in self.attachments:
