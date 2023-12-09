@@ -401,7 +401,7 @@ class MessageBase(MSGFile):
             this must be a list or list-like object composed of strings and
             bytes.
         :param kwargs: Used to allow kwargs expansion in the save function.
-            Arguments absorbed by this are simply ignored, except for keyword arguments used by :py:meth:`getSaveHtmlBody`.
+            Arguments absorbed by this are simply ignored, except for keyword arguments used by :meth:`getSaveHtmlBody`.
 
         :raises ExecutableNotFound: The wkhtmltopdf executable could not be
             found.

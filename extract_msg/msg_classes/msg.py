@@ -523,7 +523,7 @@ class MSGFile:
         """
         Gets a multiple binary property as a list of ``bytes`` objects.
 
-        Like :py:meth:`getStringStream`, the 4 character type suffix should be
+        Like :meth:`getStringStream`, the 4 character type suffix should be
         omitted. So if you want the stream "__substg1.0_00011102" then the
         filename would simply be "__substg1.0_0001".
 
