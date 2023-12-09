@@ -43,8 +43,8 @@ from ..properties.named import Named, NamedProperties
 from ..properties.properties_store import PropertiesStore
 from ..structures.contact_link_entry import ContactLinkEntry
 from ..utils import (
-        divide, guessEncoding, hasLen, inputToMsgPath, makeWeakRef,
-        msgPathToString, parseType, verifyPropertyId, verifyType
+        divide, guessEncoding, inputToMsgPath, makeWeakRef, msgPathToString,
+        parseType, verifyPropertyId, verifyType
     )
 
 
@@ -56,22 +56,24 @@ _T = TypeVar('_T')
 
 class MSGFile:
     """
-    Parser for .msg files.
+    Base handler for all .msg files.
     """
 
-    filename : Optional[str]
+    filename: Optional[str]
 
     def __init__(self, path, **kwargs):
         """
-        :param path: path to the msg file in the system or is the raw msg file.
-        :param prefix: Used for extracting embedded msg files inside the main
+        :param path: Path to the MSG file in the system or the bytes of the MSG
+            file.
+        :param prefix: Used for extracting embedded MSG files inside the main
             one. Do not set manually unless you know what you are doing.
         :param parentMsg: Used for synchronizing instances of shared objects. Do
             not set this unless you know what you are doing.
         :param initAttachment: Optional, the method used when creating an
             attachment for an MSG file. MUST be a function that takes 2
-            arguments (the MSGFile instance and the directory in the MSG file
-            where the attachment is) and returns an instance of AttachmentBase.
+            arguments (the ``MSGFile`` instance and the directory in the MSG
+            file where the attachment is) and returns an instance of
+            ``AttachmentBase``.
         :param delayAttachments: Optional, delays the initialization of
             attachments until the user attempts to retrieve them. Allows MSG
             files with bad attachments to be initialized so the other data can
@@ -79,39 +81,40 @@ class MSGFile:
         :param filename: Optional, the filename to be used by default when
             saving.
         :param errorBehavior: Optional, the behavior to use in the event of
-            certain types of errors. Uses the ErrorBehavior enum.
+            certain types of errors. Uses the ``ErrorBehavior`` enum.
         :param overrideEncoding: Optional, an encoding to use instead of the one
-            specified by the msg file. If the value is "chardet" and you have
+            specified by the MSG file. If the value is "chardet" and you have
             the chardet module installed, an attempt will be made to
             auto-detect the encoding based on some of the string properties. Do
             not report encoding errors caused by this.
         :param treePath: Internal variable used for giving representation of the
-            path, as a tuple of objects, of the MSGFile. When passing, this is
-            the path to the parent object of this instance.
+            path, as a tuple of objects, of the ``MSGFile``. When passing, this
+            is the path to the parent object of this instance.
         :param insecureFeatures: Optional, an enum value that specifies if
             certain insecure features should be enabled. These features should
-            only be used on data that you trust. Uses the InsecureFeatures enum.
+            only be used on data that you trust. Uses the ``InsecureFeatures``
+            enum.
         :param dateFormat: Optional, the format string to use for dates.
         :param datetimeFormat: Optional, the format string to use for dates
             that include a time component.
 
-        :raises InvalidFileFormatError: If the file is not an OleFile or could
+        :raises InvalidFileFormatError: The file is not an OLE file or could
             not be parsed as an MSG file.
-        :raises StandardViolationError: If some part of the file badly violates
-            the standard.
-        :raises IOError: If there is an issue opening the MSG file.
-        :raises NameError: If the encoding provided is not supported.
-        :raises PrefixError: If the prefix is not a supported type.
-        :raises TypeError: If the parent is not an instance of MSGFile or a
+        :raises StandardViolationError: Some part of the file badly violates the
+            standard.
+        :raises IOError: There is an issue opening the MSG file.
+        :raises NameError: The encoding provided is not supported.
+        :raises PrefixError: The prefix is not a supported type.
+        :raises TypeError: The parent is not an instance of ``MSGFile`` or a
             subclass.
-        :raises ValueError: If the attachment error behavior is not valid.
+        :raises ValueError: The path is invalid.
 
         It's recommended to check the error message to ensure you know why a
-        specific exceptions was raised.
+        specific exception was raised.
         """
         # Retrieve all the kwargs that we need.
-        self.__inscFeat : InsecureFeatures = kwargs.get('insecureFeatures', InsecureFeatures.NONE)
-        prefix : str = cast(str, kwargs.get('prefix', ''))
+        self.__inscFeat: InsecureFeatures = kwargs.get('insecureFeatures', InsecureFeatures.NONE)
+        prefix: str = cast(str, kwargs.get('prefix', ''))
         self.__parentMsg = makeWeakRef(cast(MSGFile, kwargs.get('parentMsg')))
         self.__treePath = kwargs.get('treePath', []) + [weakref.ref(self)]
         # Verify it is a valid class.
@@ -129,7 +132,7 @@ class MSGFile:
         self.__dateFormat = kwargs.get('dateFormat', DATE_FORMAT)
         self.__dtFormat = kwargs.get('datetimeFormat', DT_FORMAT)
 
-        self.__listDirRes : Dict[Tuple[bool, bool, bool], List[List[str]]] = {}
+        self.__listDirRes: Dict[Tuple[bool, bool, bool], List[List[str]]] = {}
 
         if self.__parentMsg:
             # We should be able to directly access the private variables of
@@ -203,7 +206,7 @@ class MSGFile:
                 filename = self.getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix = False)
             if filename:
                 self.filename = filename
-            elif hasLen(path):
+            elif hasattr(path, '__len__'):
                 if len(path) < 1536:
                     self.filename = str(path)
                 else:
@@ -235,10 +238,16 @@ class MSGFile:
     def __exit__(self, *_) -> None:
         self.close()
 
-    def _getOleEntry(self, filename : MSG_PATH, prefix : bool = True) -> olefile.olefile.OleDirectoryEntry:
+    def _getOleEntry(self, filename: MSG_PATH, prefix: bool = True) -> olefile.olefile.OleDirectoryEntry:
         """
-        Finds the directory entry from the olefile for the stream or storage
-        specified. Use '/' to get the root entry.
+        Finds the directory entry from the OLE file for the stream or storage
+        specified.
+
+        Use ``'/'`` to get the root entry.
+
+        :param prefix: Bool, whether to search for the entry at the root of the
+            MSG file (``False``) or look in the current child MSG file
+            (``True``). (Default: ``True``)
         """
         sid = -1
         if filename == '/':
@@ -251,19 +260,21 @@ class MSGFile:
 
         return self.__ole.direntries[sid]
 
-    def _getTypedAs(self, _id : str, overrideClass = None, preserveNone : bool = True):
+    def _getTypedAs(self, _id: str, overrideClass = None, preserveNone: bool = True):
         """
-        Like the other get as functions, but designed for when something
-        could be multiple types (where only one will be present). This way you
-        have no need to set the type, it will be handled for you.
+        Like the other "get as" functions, but designed for when something
+        could be multiple types (where only one will be present).
+
+        This way you have no need to set the type, it will be handled for you.
 
         :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. By
-            default, this will be completely ignored if the value was not found.
-        :param preserveNone: If true (default), causes the function to ignore
-            :param overrideClass: when the value could not be found (is None).
-            If this is changed to False, then the value will be used regardless.
+            read. The data will be the first argument to the class's
+            ``__init__`` method or the function itself, if that is what is
+            provided. By default, this will be completely ignored if the value was not found.
+        :param preserveNone: If ``True`` (default), causes the function to
+            ignore :param overrideClass: when the value could not be found (is
+            ``None``). If this is changed to ``False``, then the value will be
+            used regardless.
         """
         value = self._getTypedData(_id)
         # Check if we should be overriding the data type for this instance.
@@ -273,14 +284,19 @@ class MSGFile:
 
         return value
 
-    def _getTypedData(self, _id : str, _type = None, prefix : bool = True):
+    def _getTypedData(self, _id: str, _type = None, prefix: bool = True):
         """
         Gets the data for the specified id as the type that it is supposed to
-        be. :param id: MUST be a 4 digit hexadecimal string.
+        be.
+
+        :param _id: MUST be a 4 digit hexadecimal string.
+        :param prefix: Bool, whether to search for the entry at the root of the
+            MSG file (``False``) or look in the current child MSG file
+            (``True``). (Default: ``True``)
 
         If you know for sure what type the data is before hand, you can specify
-        it as being one of the strings in the constant FIXED_LENGTH_PROPS_STRING
-        or VARIABLE_LENGTH_PROPS_STRING.
+        it as being one of the strings in the constant
+        ``FIXED_LENGTH_PROPS_STRING`` or ``VARIABLE_LENGTH_PROPS_STRING``.
         """
         verifyPropertyId(_id)
         _id = _id.upper()
@@ -291,14 +307,16 @@ class MSGFile:
             found, result = self._getTypedProperty(_id, _type)
             return result if found else None
 
-    def _getTypedProperty(self, propertyID : str, _type = None) -> Tuple[bool, Optional[Any]]:
+    def _getTypedProperty(self, propertyID: str, _type = None) -> Tuple[bool, Optional[Any]]:
         """
         Gets the property with the specified id as the type that it is supposed
-        to be. :param id: MUST be a 4 digit hexadecimal string.
+        to be.
+
+        :param propertyID: MUST be a 4 digit hexadecimal string.
 
         If you know for sure what type the property is before hand, you can
         specify it as being one of the strings in the constant
-        FIXED_LENGTH_PROPS_STRING or VARIABLE_LENGTH_PROPS_STRING.
+        ``FIXED_LENGTH_PROPS_STRING`` or ``VARIABLE_LENGTH_PROPS_STRING``.
         """
         verifyPropertyId(propertyID)
         if _type:
@@ -312,7 +330,7 @@ class MSGFile:
 
         return True, ret
 
-    def _getTypedStream(self, filename : MSG_PATH, prefix : bool = True, _type : Optional[str] = None) -> Tuple[bool, Optional[Any]]:
+    def _getTypedStream(self, filename: MSG_PATH, prefix: bool = True, _type: Optional[str] = None) -> Tuple[bool, Optional[Any]]:
         """
         Gets the contents of the specified stream as the type that it is
         supposed to be.
@@ -323,12 +341,16 @@ class MSGFile:
 
         If you know for sure what type the stream is before hand, you can
         specify it as being one of the strings in the constant
-        FIXED_LENGTH_PROPS_STRING or VARIABLE_LENGTH_PROPS_STRING.
+        ``FIXED_LENGTH_PROPS_STRING`` or ``VARIABLE_LENGTH_PROPS_STRING``.
 
         If you have not specified the type, the type this function returns in
         many cases cannot be predicted. As such, when using this function it is
         best for you to check the type that it returns. If the function returns
         None, that means it could not find the stream specified.
+
+        :param prefix: Bool, whether to search for the entry at the root of the
+            MSG file (``False``) or look in the current child MSG file
+            (``True``). (Default: ``True``)
         """
         verifyType(_type)
         filename = self.fixPath(filename, prefix)
@@ -338,7 +360,7 @@ class MSGFile:
                     continue
                 if len(contents) == 0:
                     return True, None # We found the file, but it was empty.
-                extras : List[bytes]= []
+                extras: List[bytes]= []
                 _type = x[-4:]
                 if x[-4] == '1': # It's a multiple
                     if _type in ('101F', '101E'):
@@ -364,14 +386,14 @@ class MSGFile:
                 return True, parseType(int(_type, 16), contents, self.stringEncoding, extras)
         return False, None # We didn't find the stream.
 
-    def _oleListDir(self, streams : bool = True, storages : bool = False) -> List[List[str]]:
+    def _oleListDir(self, streams: bool = True, storages: bool = False) -> List[List[str]]:
         """
-        Calls :method OleFileIO.listdir: from the OleFileIO instance associated
+        Calls :meth:`OleFileIO.listdir` from the OleFileIO instance associated
         with this MSG file. Useful for if you need access to all the top level
         streams if this is an embedded MSG file.
 
-        Returns a list of the streams and or storages depending on the arguments
-        given.
+        :returns: A list of the streams and or storages depending on the
+            arguments given.
         """
         return self.__ole.listdir(streams, storages)
 
@@ -393,30 +415,43 @@ class MSGFile:
                 print('Directory: ' + str(dir_[:-1]))
                 print(f'Contents: {self.getStream(dir_)}')
 
-    def exists(self, inp : MSG_PATH, prefix : bool = True) -> bool:
+    def exists(self, filename: MSG_PATH, prefix: bool = True) -> bool:
         """
-        Checks if :param inp: exists in the msg file.
-        """
-        inp = self.fixPath(inp, prefix)
-        return self.__ole.exists(inp)
+        Checks if the stream exists in the MSG file.
 
-    def sExists(self, inp : MSG_PATH, prefix : bool = True) -> bool:
+        :param prefix: Bool, whether to search for the entry at the root of the
+            MSG file (``False``) or look in the current child MSG file
+            (``True``). (Default: ``True``)
         """
-        Checks if string stream :param inp: exists in the msg file.
-        """
-        inp = self.fixPath(inp, prefix)
-        return self.exists(inp + '001F') or self.exists(inp + '001E')
+        filename = self.fixPath(filename, prefix)
+        return self.__ole.exists(filename)
 
-    def existsTypedProperty(self, _id, location = None, _type = None, prefix : bool = True, propertiesInstance : Optional[PropertiesStore] = None) -> Tuple[bool, int]:
+    def sExists(self, filename: MSG_PATH, prefix: bool = True) -> bool:
+        """
+        Checks if string stream  exists in the MSG file.
+
+        :param prefix: Bool, whether to search for the entry at the root of the
+            MSG file (``False``) or look in the current child MSG file
+            (``True``). (Default: ``True``)
+        """
+        filename = self.fixPath(filename, prefix)
+        return self.exists(filename + '001F') or self.exists(filename + '001E')
+
+    def existsTypedProperty(self, _id: str, location = None, _type = None, prefix: bool = True, propertiesInstance: Optional[PropertiesStore] = None) -> Tuple[bool, int]:
         """
         Determines if the stream with the provided id exists in the location
-        specified. If no location is specified, the root directory is searched.
-        The return of this function is 2 values, the first being a boolean for
-        if anything was found, and the second being how many were found.
+        specified.
 
-        Because of how this function works, any folder that contains it's own
-        "__properties_version1.0" file should have this function called from
+        If no location is specified, the root directory is searched. The return of this function is 2 values, the first being a boolean for if anything
+        was found, and the second being how many were found.
+
+        Because of how this method works, any folder that contains it's own
+        "__properties_version1.0" file should have this method called from
         it's class.
+
+        :param prefix: Bool, whether to search for the entry at the root of the
+            MSG file (``False``) or look in the current child MSG file
+            (``True``). (Default: ``True``)
         """
         verifyPropertyId(_id)
         verifyType(_type)
@@ -447,15 +482,15 @@ class MSGFile:
     def export(self, path) -> None:
         """
         Exports the contents of this MSG file to a new MSG files specified by
-        the path given. If this is an embedded MSG file, the embedded streams
-        and directories will be added to it as if they were at the root,
-        allowing you to save it as it's own MSG file.
+        the path given.
+
+        If this is an embedded MSG file, the embedded streams and directories will be added to it as if they were at the root, allowing you to save it as it's own MSG file.
 
         This function pulls directly from the source MSG file, so modifications
-        to the properties of of an MSGFile object (or one of it's subclasses)
-        will not be reflected in the saved file.
+        to the properties of of an ``MSGFile`` object (or one of it's
+        subclasses) will not be reflected in the saved file.
 
-        :param path: A path-like object (including strings and pathlib.Path
+        :param path: A path-like object (including strings and ``pathlib.Path``
             objects) or an IO device with a write method which accepts bytes.
         """
         from ..ole_writer import OleWriter
@@ -474,26 +509,27 @@ class MSGFile:
         self.export(out)
         return out.getvalue()
 
-    def fixPath(self, inp : MSG_PATH, prefix : bool = True) -> str:
+    def fixPath(self, inp: MSG_PATH, prefix: bool = True) -> str:
         """
         Changes paths so that they have the proper prefix (should :param prefix:
-        be True) and are strings rather than lists or tuples.
+        be ``True``) and are strings rather than lists or tuples.
         """
         inp = msgPathToString(inp)
         if prefix:
             inp = self.__prefix + inp
         return inp
 
-    def getMultipleBinary(self, filename : MSG_PATH, prefix : bool = True) -> Optional[List[bytes]]:
+    def getMultipleBinary(self, filename: MSG_PATH, prefix: bool = True) -> Optional[List[bytes]]:
         """
-        Gets a multiple binary property as a list of bytes objects.
+        Gets a multiple binary property as a list of ``bytes`` objects.
 
-        Like :method getStringStream:, the 4 character type suffix should be
+        Like :meth:`getStringStream`, the 4 character type suffix should be
         omitted. So if you want the stream "__substg1.0_00011102" then the
         filename would simply be "__substg1.0_0001".
 
         :param prefix: Bool, whether to search for the entry at the root of the
-            MSG file (False) or look in the current child MSG file (True).
+            MSG file (``False``) or look in the current child MSG file
+            (``True``). (Default: ``True``)
         """
         filename = self.fixPath(filename, prefix) + '1102'
         multStream = self.getStream(filename)
@@ -512,16 +548,17 @@ class MSGFile:
                 return ret[:index]
             return ret
 
-    def getMultipleString(self, filename : MSG_PATH, prefix : bool = True) -> Optional[List[str]]:
+    def getMultipleString(self, filename: MSG_PATH, prefix: bool = True) -> Optional[List[str]]:
         """
-        Gets a multiple string property as a list of str objects.
+        Gets a multiple string property as a list of ``str`` objects.
 
-        Like :method getStringStream:, the 4 character type suffix should be
+        Like :meth:`getStringStream`, the 4 character type suffix should be
         omitted. So if you want the stream "__substg1.0_00011102" then the
         filename would simply be "__substg1.0_0001".
 
         :param prefix: Bool, whether to search for the entry at the root of the
-            MSG file (False) or look in the current child MSG file (True).
+            MSG file (``False``) or look in the current child MSG file
+            (``True``). (Default: ``True``)
         """
         filename = self.fixPath(filename, prefix) + '101F' if self.areStringsUnicode else '101E'
         multStream = self.getStream(filename)
@@ -543,22 +580,23 @@ class MSGFile:
                 ret[index] = item.decode(self.stringEncoding)[:-1]
             return ret
 
-    def getNamedAs(self, propertyName : str, guid : str, overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
+    def getNamedAs(self, propertyName: str, guid: str, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the named property, setting the class if specified.
 
         :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. If
-            the value is None, this function is not called. If you want it to
-            be called regardless, you should handle the data directly.
+            read. The data will be the first argument to the class's
+            ``__init__`` method or the function itself, if that is what is
+            provided. If the value is ``None``, this function is not called. If
+            you want it to be called regardless, you should handle the data
+            directly.
         """
         value = self.getNamedProp(propertyName, guid)
         if value is not None:
             value = overrideClass(value)
         return value
 
-    def getNamedProp(self, propertyName : str, guid : str, default : _T = None) -> Union[Any, _T]:
+    def getNamedProp(self, propertyName: str, guid: str, default: _T = None) -> Union[Any, _T]:
         """
         instance.namedProperties.get((propertyName, guid), default)
 
@@ -566,15 +604,16 @@ class MSGFile:
         """
         return self.namedProperties.get((propertyName, guid), default)
 
-    def getPropertyAs(self, propertyName : Union[int, str], overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
+    def getPropertyAs(self, propertyName: Union[int, str], overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the property, setting the class if found.
 
         :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. If
-            the value is None, this function is not called. If you want it to
-            be called regardless, you should handle the data directly.
+            read. The data will be the first argument to the class's
+            ``__init__`` method or the function itself, if that is what is
+            provided. If the value is ``None``, this function is not called. If
+            you want it to be called regardless, you should handle the data
+            directly.
         """
         value = self.getPropertyVal(propertyName)
 
@@ -583,7 +622,7 @@ class MSGFile:
 
         return value
 
-    def getPropertyVal(self, name : Union[int, str], default : _T = None) -> Union[Any, _T]:
+    def getPropertyVal(self, name: Union[int, str], default: _T = None) -> Union[Any, _T]:
         """
         instance.props.getValue(name, default)
 
@@ -591,17 +630,20 @@ class MSGFile:
         """
         return self.props.getValue(name, default)
 
-    def getSingleOrMultipleBinary(self, filename : MSG_PATH, prefix : bool = True) -> Optional[Union[List[bytes], bytes]]:
+    def getSingleOrMultipleBinary(self, filename: MSG_PATH, prefix: bool = True) -> Optional[Union[List[bytes], bytes]]:
         """
-        A combination of :method getStringStream: and
-        :method getMultipleString:.
+        Combination of :meth:`getStream` and :meth:`getMultipleBinary`.
 
         Checks to see if a single binary stream exists to return, otherwise
         tries to return the multiple binary stream of the same ID.
 
-        Like :method getStringStream:, the 4 character type suffix should be
+        Like :meth:`getStringStream`, the 4 character type suffix should be
         omitted. So if you want the stream "__substg1.0_00010102" then the
         filename would simply be "__substg1.0_0001".
+
+        :param prefix: Bool, whether to search for the entry at the root of the
+            MSG file (``False``) or look in the current child MSG file
+            (``True``). (Default: ``True``)
         """
         filename = self.fixPath(filename, prefix)
         # Check for a single binary stream first.
@@ -611,17 +653,20 @@ class MSGFile:
         # work.
         return self.getMultipleBinary(filename, False)
 
-    def getSingleOrMultipleString(self, filename : MSG_PATH, prefix : bool = True) -> Optional[Union[List[str], str]]:
+    def getSingleOrMultipleString(self, filename: MSG_PATH, prefix: bool = True) -> Optional[Union[List[str], str]]:
         """
-        A combination of :method getStringStream: and
-        :method getMultipleString:.
+        Combination of :meth:`getStringStream` and :meth:`getMultipleString`.
 
         Checks to see if a single string stream exists to return, otherwise
         tries to return the multiple string stream of the same ID.
 
-        Like :method getStringStream:, the 4 character type suffix should be
+        Like :meth:`getStringStream`, the 4 character type suffix should be
         omitted. So if you want the stream "__substg1.0_0001001F" then the
         filename would simply be "__substg1.0_0001".
+
+        :param prefix: Bool, whether to search for the entry at the root of the
+            MSG file (``False``) or look in the current child MSG file
+            (``True``). (Default: ``True``)
         """
         filename = self.fixPath(filename, prefix)
         # Check for a single stribng stream first.
@@ -631,15 +676,16 @@ class MSGFile:
         # work.
         return self.getMultipleString(filename, False)
 
-    def getStream(self, filename : MSG_PATH, prefix : bool = True) -> Optional[bytes]:
+    def getStream(self, filename: MSG_PATH, prefix: bool = True) -> Optional[bytes]:
         """
-        Gets a binary representation of the requested filename.
+        Gets a binary representation of the requested stream.
 
-        This should ALWAYS return a bytes object if it was found, otherwise
-        returns None.
+        This should ALWAYS return a ``bytes`` object if it was found, otherwise
+        returns ``None``.
 
         :param prefix: Bool, whether to search for the entry at the root of the
-            MSG file (False) or look in the current child MSG file (True).
+            MSG file (``False``) or look in the current child MSG file
+            (``True``). (Default: ``True``)
         """
         filename = self.fixPath(filename, prefix)
         if self.exists(filename, False):
@@ -649,16 +695,17 @@ class MSGFile:
             logger.info(f'Stream "{filename}" was requested but could not be found. Returning `None`.')
             return None
 
-    def getStreamAs(self, streamID : MSG_PATH, overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
+    def getStreamAs(self, streamID: MSG_PATH, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the specified stream, modifying it to the specified class if it
         is found.
 
         :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. If
-            the value is None, this function is not called. If you want it to
-            be called regardless, you should handle the data directly.
+            read. The data will be the first argument to the class's
+            ``__init__`` method or the function itself, if that is what is
+            provided. If the value is ``None``, this function is not called. If
+            you want it to be called regardless, you should handle the data
+            directly.
         """
         value = self.getStream(streamID)
 
@@ -667,19 +714,20 @@ class MSGFile:
 
         return value
 
-    def getStringStream(self, filename : MSG_PATH, prefix : bool = True) -> Optional[str]:
+    def getStringStream(self, filename: MSG_PATH, prefix: bool = True) -> Optional[str]:
         """
-        Gets a string representation of the requested filename.
+        Gets a string representation of the requested stream.
 
         Rather than the full filename, you should only feed this function the
         filename sans the type. So if the full name is "__substg1.0_001A001F",
         the filename this function should receive should be "__substg1.0_001A".
 
         This should ALWAYS return a string if it was found, otherwise returns
-        None.
+        ``None``.
 
         :param prefix: Bool, whether to search for the entry at the root of the
-            MSG file (False) or look in the current child MSG file (True).
+            MSG file (``False``) or look in the current child MSG file
+            (``True``). (Default: ``True``)
         """
         filename = self.fixPath(filename, prefix)
         if self.areStringsUnicode:
@@ -689,16 +737,17 @@ class MSGFile:
 
         return None if tmp is None else tmp.decode(self.stringEncoding)
 
-    def getStringStreamAs(self, streamID : MSG_PATH, overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
+    def getStringStreamAs(self, streamID: MSG_PATH, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the specified string stream, modifying it to the specified
         class if it is found.
 
         :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. If
-            the value is None, this function is not called. If you want it to
-            be called regardless, you should handle the data directly.
+            read. The data will be the first argument to the class's
+            ``__init__`` method or the function itself, if that is what is
+            provided. If the value is ``None``, this function is not called. If
+            you want it to be called regardless, you should handle the data
+            directly.
         """
         value = self.getStream(streamID)
 
@@ -707,13 +756,13 @@ class MSGFile:
 
         return value
 
-    def listDir(self, streams : bool = True, storages : bool = False, includePrefix : bool = True) -> List[List[str]]:
+    def listDir(self, streams: bool = True, storages: bool = False, includePrefix: bool = True) -> List[List[str]]:
         """
-        Replacement for OleFileIO.listdir that runs at the current prefix
+        Replacement for ``OleFileIO.listdir`` that runs at the current prefix
         directory.
 
-        :param includePrefix: If False, removes the part of the path that is the
-            prefix.
+        :param includePrefix: If ``False``, removes the part of the path that
+            is the prefix.
         """
         # Get the items from OleFileIO.
         try:
@@ -734,7 +783,7 @@ class MSGFile:
 
             return entries
 
-    def slistDir(self, streams : bool = True, storages : bool = False, includePrefix : bool = True) -> List[str]:
+    def slistDir(self, streams: bool = True, storages: bool = False, includePrefix: bool = True) -> List[str]:
         """
         Replacement for OleFileIO.listdir that runs at the current prefix
         directory. Returns a list of strings instead of lists.
@@ -747,17 +796,16 @@ class MSGFile:
 
         raise NotImplementedError(f'Saving is not yet supported for the {self.__class__.__name__} class.')
 
-    def saveAttachments(self, **kwargs) -> None:
+    def saveAttachments(self, skipHidden: bool = False, **kwargs) -> None:
         """
         Saves only attachments in the same folder.
 
-        :params skipHidden: If True, skips attachments marked as hidden.
-            (Default: False)
+        :param skipHidden: If ``True``, skips attachments marked as hidden.
+            (Default: ``False``)
         """
-        skipHidden = kwargs.get('skipHidden', False)
         for attachment in self.attachments:
             if not (skipHidden and attachment.hidden):
-                attachment.save(**kwargs)
+                attachment.save(skipHidden = skipHidden, **kwargs)
 
     def saveRaw(self, path) -> None:
         # Create a 'raw' folder.
@@ -793,14 +841,14 @@ class MSGFile:
     @functools.cached_property
     def areStringsUnicode(self) -> bool:
         """
-        Returns a boolean telling if the strings are Unicode encoded.
+        Whether the strings are Unicode encoded or not.
         """
         return (self.getPropertyVal('340D0003', 0) & 0x40000) != 0
 
     @functools.cached_property
     def attachments(self) -> Union[List[AttachmentBase], List[SignedAttachment]]:
         """
-        Returns a list of all attachments.
+        A list of all attachments.
         """
         # Get the attachments.
         attachmentDirs = []
@@ -820,14 +868,14 @@ class MSGFile:
     @property
     def attachmentsDelayed(self) -> bool:
         """
-        Returns True if the attachment initialization was delayed.
+        Returns ``True`` if the attachment initialization was delayed.
         """
         return self.__attachmentsDelayed
 
     @property
     def attachmentsReady(self) -> bool:
         """
-        Returns True if the attachments are ready to be used.
+        Returns ``True`` if the attachments are ready to be used.
         """
         return self.__attachmentsReady
 
@@ -863,8 +911,8 @@ class MSGFile:
     @functools.cached_property
     def contactLinkEntry(self) -> Optional[ContactLinkEntry]:
         """
-        Returns a class that contains the list of Address Book EntryIDs linked
-        to this Message object.
+        A class that contains the list of Address Book EntryIDs linked to this
+        Message object.
         """
         return self.getNamedAs('8585', ps.PSETID_COMMON, ContactLinkEntry)
 
@@ -894,39 +942,44 @@ class MSGFile:
     @property
     def dateFormat(self) -> str:
         """
-        The format string to use when converting dates to strings. This is used
-        for dates with no time component.
+        The format string to use when converting dates to strings.
+
+        This is used for dates with no time component.
         """
         return self.__dateFormat
 
     @property
     def datetimeFormat(self) -> str:
         """
-        The format string to use when converting datetimes to strings. This is
-        used for dates that have time components.
+        The format string to use when converting datetimes to strings.
+
+        This is used for dates that have time components.
         """
         return self.__dtFormat
 
     @property
     def errorBehavior(self) -> ErrorBehavior:
         """
-        The behavior to follow when certain errors occur. Will be an instance of
-        the ErrorBehavior enum.
+        The behavior to follow when certain errors occur.
+
+        Will be an instance of the ErrorBehavior enum.
         """
         return self.__errorBehavior
 
     @functools.cached_property
     def importance(self) -> Optional[Importance]:
         """
-        The specified importance of the msg file.
+        The specified importance of the MSG file.
         """
         return self.getPropertyAs('00170003', Importance)
 
     @property
     def importanceString(self) -> Union[str, None]:
         """
-        Returns the string to use for saving. If the importance is medium then
-        it returns None. Mainly used for saving.
+        The importance string to use for saving.
+
+        If the importance is medium then it returns ``None``. Mainly used for
+        saving.
         """
         return {
             Importance.HIGH: 'High',
@@ -938,8 +991,8 @@ class MSGFile:
     @property
     def initAttachmentFunc(self) -> Callable[[MSGFile, str], AttachmentBase]:
         """
-        Returns the method for initializing attachments being used, should you
-        need to use it externally for whatever reason.
+        The method for initializing attachments being used, should you need to
+        use it externally for whatever reason.
         """
         return self.__initAttachmentFunc
 
@@ -954,21 +1007,23 @@ class MSGFile:
     @property
     def kwargs(self) -> Dict[str, Any]:
         """
-        The kwargs used to initialize this message, excluding the prefix. This
-        is used for initializing embedded msg files.
+        The kwargs used to initialize this message, excluding the prefix.
+
+        This is used for initializing embedded MSG files.
         """
         return self.__kwargs
 
     @functools.cached_property
     def named(self) -> Named:
         """
-        The main named properties storage. This is not usable to access the data
-        of the properties directly.
+        The main named properties storage.
 
-        :raises ReferenceError: The parent MSGFile instance has been garbage
+        This is not usable to access the data of the properties directly.
+
+        :raises ReferenceError: The parent ``MSGFile`` instance has been garbage
             collected.
         """
-        # Handle the parent msg file existing.
+        # Handle the parent MSG file existing.
         if self.__parentMsg:
             # Try to get the named properties and use that for our main
             # instance.
@@ -989,52 +1044,57 @@ class MSGFile:
     @property
     def overrideEncoding(self) -> Optional[str]:
         """
-        Returns None is the encoding has not been overridden, otherwise returns
-        the encoding.
+        ``None`` if the encoding has not been overridden, otherwise the encoding
+        used for string streams.
         """
         return self.__overrideEncoding
 
     @property
     def path(self):
         """
-        Returns the message path if generated from a file, otherwise returns the
-        data used to generate the Message instance.
+        The message path if generated from a file, otherwise the data used to
+        generate the ``MSGFile`` instance.
         """
         return self.__path
 
     @property
     def prefix(self) -> str:
         """
-        Returns the prefix of the Message instance. Intended for developer use.
+        The prefix of the ``MSGFile`` instance.
+
+        Intended for developer use.
         """
         return self.__prefix
 
     @property
     def prefixLen(self) -> int:
         """
-        Returns the number of elements in the prefix.
+        The number of elements in the prefix.
+
+        Dividing by 2 will typically tell you how deeply nested the MSG file is.
         """
         return self.__prefixLen
 
     @property
     def prefixList(self) -> List[str]:
         """
-        Returns the prefix list of the Message instance. Intended for developer
-        use.
+        The prefix list of the Message instance.
+
+        Intended for developer use.
         """
         return copy.deepcopy(self.__prefixList)
 
     @functools.cached_property
     def priority(self) -> Optional[Priority]:
         """
-        The specified priority of the msg file.
+        The specified priority of the MSG file.
         """
         return self.getPropertyAs('00260003', Priority)
 
     @functools.cached_property
     def props(self) -> PropertiesStore:
         """
-        Returns the Properties instance used by the MSGFile instance.
+        The ``PropertiesStore`` instance used by the ``MSGFile`` instance.
         """
         if not (stream := self.getStream('__properties_version1.0')):
             if ErrorBehavior.STANDARDS_VIOLATION in self.__errorBehavior:
@@ -1044,13 +1104,14 @@ class MSGFile:
                 # the handling of the above exception" stuff.
                 raise StandardViolationError('File does not contain a property stream.') from None
         return PropertiesStore(stream,
-                               PropertiesType.MESSAGE if self.prefix == '' else PropertiesType.MESSAGE_EMBED)
+                               PropertiesType.MESSAGE if not self.prefix else PropertiesType.MESSAGE_EMBED)
 
     @functools.cached_property
     def retentionDate(self) -> Optional[datetime.datetime]:
         """
         The date, in UTC, after which a Message Object is expired by the server.
-        If None, the Message object never expires.
+
+        If ``None``, the Message object never expires.
         """
         return self.getPropertyVal('301C0040')
 
@@ -1065,7 +1126,7 @@ class MSGFile:
     @functools.cached_property
     def sensitivity(self) -> Optional[Sensitivity]:
         """
-        The specified sensitivity of the msg file.
+        The specified sensitivity of the MSG file.
         """
         return self.getPropertyAs('00360003', Sensitivity)
 
@@ -1103,8 +1164,9 @@ class MSGFile:
     def treePath(self) -> List[weakref.ReferenceType[Any]]:
         """
         A path, as a list of weak reference to the instances needed to get to
-        this instance through the MSGFile-Attachment tree. These are weak
-        references to ensure the garbage collector doesn't see the references
-        back to higher objects.
+        this instance through the MSGFile-Attachment tree.
+
+        These are weak references to ensure the garbage collector doesn't see
+        the references back to higher objects.
         """
         return self.__treePath

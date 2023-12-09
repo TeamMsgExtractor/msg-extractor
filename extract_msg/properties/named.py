@@ -23,7 +23,8 @@ from typing import (
 
 from .. import constants
 from ..enums import NamedPropertyType
-from ..utils import bytesToGuid, divide, msgPathToString
+from ..exceptions import InvalidPropertyIdError
+from ..utils import bytesToGuid, divide, msgPathToString, verifyPropertyId
 from compressed_rtf.crc32 import crc32
 
 
@@ -45,7 +46,7 @@ class Named:
 
     __dir = '__nameid_version1.0'
 
-    def __init__(self, msg : MSGFile):
+    def __init__(self, msg: MSGFile):
         self.__msg = weakref.ref(msg)
         # Get the basic streams. If all are emtpy, then nothing to do.
         guidStream = self.getStream('__substg1.0_00020102') or b''
@@ -54,15 +55,16 @@ class Named:
         self.entryStream = entryStream
         self.namesStream = self.getStream('__substg1.0_00040102') or b''
 
-        self.__propertiesDict : Dict[Tuple[str, str], NamedPropertyBase] = {}
-        self.__properties : List[NamedPropertyBase] = []
+        self.__propertiesDict: Dict[Tuple[str, str], NamedPropertyBase] = {}
+
+        self.__streamIDDict: Dict[str, Tuple[str, str]] = {}
 
         # Check that we even have any entries. If there are none, nothing to do.
         if entryStream:
             guids = tuple([None, constants.ps.PS_MAPI, constants.ps.PS_PUBLIC_STRINGS] + [bytesToGuid(x) for x in divide(guidStream, 16)])
-            entries : List[Dict[str, Any]]= []
+            entries: List[Dict[str, Any]]= []
             for rawStream in divide(entryStream, 8):
-                tmp = constants.st.STNP_ENT.unpack(rawStream)
+                tmp = constants.st.ST_NP_ENT.unpack(rawStream)
                 entry = {
                     'id': tmp[0],
                     'pid': tmp[2],
@@ -73,19 +75,20 @@ class Named:
                 entry['guid'] = guids[entry['guid_index']]
                 entries.append(entry)
 
-            self.entries = entries
+            properties: List[NamedPropertyBase] = []
 
             for entry in entries:
-                self.__properties.append(StringNamedProperty(entry, self.__getName(entry['id'])) if entry['pkind'] == NamedPropertyType.STRING_NAMED else NumericalNamedProperty(entry))
+                properties.append(StringNamedProperty(entry, self.__getName(entry['id'])) if entry['pkind'] == NamedPropertyType.STRING_NAMED else NumericalNamedProperty(entry))
 
-            for property in self.__properties:
-                name = property.name if isinstance(property, StringNamedProperty) else property.propertyID
-                self.__propertiesDict[(name, property.guid)] = property
+            for property in properties:
+                id_ = property.identifier
+                self.__propertiesDict[id_] = property
+                self.__streamIDDict[property.propertyStreamID] = id_
 
     def __contains__(self, key) -> bool:
         return key in self.__propertiesDict
 
-    def __getitem__(self, propertyName : Tuple[str, str]) -> NamedPropertyBase:
+    def __getitem__(self, propertyName: Tuple[str, str]) -> NamedPropertyBase:
         # Validate the key.
         if not hasattr(propertyName, '__len__') or len(propertyName) != 2:
             raise TypeError('Named property key must be a tuple of two strings.')
@@ -104,7 +107,7 @@ class Named:
     def __len__(self) -> int:
         return self.__propertiesDict.__len__()
 
-    def __getName(self, offset : int) -> str:
+    def __getName(self, offset: int) -> str:
         """
         Parses the offset into the named stream and returns the name found.
         """
@@ -120,7 +123,7 @@ class Named:
             raise ValueError('Failed to parse named property: offset was not in string stream.')
 
         # Get the length, in bytes, of the string.
-        length = constants.st.STNP_NAM.unpack(self.namesStream[offset:offset + 4])[0]
+        length = constants.st.ST_LE_I32.unpack(self.namesStream[offset:offset + 4])[0]
         offset += 4
 
         # Make sure the string can be read entirely. If it can't, something was
@@ -130,39 +133,72 @@ class Named:
 
         return self.namesStream[offset:offset + length].decode('utf-16-le')
 
-    def exists(self, filename : constants.MSG_PATH) -> bool:
+    def exists(self, filename: constants.MSG_PATH) -> bool:
         """
         Checks if stream exists inside the named properties folder.
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Named instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Named instance has been garbage collected.')
         return msg.exists([self.__dir, msgPathToString(filename)], False)
 
-    def get(self, propertyName : Tuple[str, str], default : _T = None) -> Union[NamedPropertyBase, _T]:
+    def get(self, propertyName: Tuple[str, str], default: _T = None) -> Union[NamedPropertyBase, _T]:
         """
-        Tries to get a named property based on its key. Returns :param default:
-        if not found. Key is a tuple of the name and the property set GUID.
+        Tries to get a named property based on its key.
+
+        Returns :param default: if not found. Key is a tuple of the name and
+        the property set GUID.
         """
         try:
             return self[propertyName]
         except KeyError:
             return default
 
-    def getStream(self, filename : constants.MSG_PATH) -> Optional[bytes]:
+    def getPropNameByStreamID(self, streamID: Union[int, str]) -> Optional[Tuple[str, str]]:
         """
-        Gets a binary representation of the requested filename.
+        Gets the name of a property (as a key for the internal dict) that is stored in the specified stream.
 
-        This should ALWAYS return a bytes object if it was found, otherwise
-        returns None.
+        Useful for determining if a stream/property stream entry is a named
+        property.
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        :param streamID: A 4 hex character identifier that will be checked. May
+            also be an integer that can convert to 4 hex characters.
+
+        :returns: The name, if the stream is a named property, otherwise
+            ``None``.
+
+        :raises InvalidPropertyIdError: The Stream ID is invalid.
+        :raises TypeError: The Stream ID is not a valid type.
+        """
+        if isinstance(streamID, int):
+            if streamID < 0x8000:
+                # Definitely doesn't refer to a name property, so just return
+                # None.
+                return None
+            if streamID > 0xFFFF:
+                raise InvalidPropertyIdError('Stream ID is out of range.')
+            streamID = f'{streamID:04X}'
+        elif isinstance(streamID, str):
+            verifyPropertyId(streamID)
+        else:
+            raise TypeError(':param streamID: MUST be an int or str.')
+
+        return self.__streamIDDict.get(streamID)
+
+    def getStream(self, filename: constants.MSG_PATH) -> Optional[bytes]:
+        """
+        Gets a binary representation of the requested stream.
+
+        This should ALWAYS return a ``bytes`` object if it was found, otherwise
+        returns ``None``.
+
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Named instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Named instance has been garbage collected.')
         return msg.getStream([self.__dir, msgPathToString(filename)], False)
 
     def items(self) -> Iterable[Tuple[Tuple[str, str], NamedPropertyBase]]:
@@ -183,7 +219,7 @@ class Named:
     @property
     def dir(self):
         """
-        Returns the directory inside the msg file where the named properties are located.
+        Returns the directory inside the MSG file where the named properties are located.
         """
         return self.__dir
 
@@ -192,11 +228,11 @@ class Named:
         """
         Returns the Message instance the attachment belongs to.
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Named instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Named instance has been garbage collected.')
         return msg
 
     @property
@@ -213,7 +249,7 @@ class NamedProperties:
     An instance that uses a Named instance and an extract-msg class to read the
     data of named properties.
     """
-    def __init__(self, named : Named, streamSource : Union[MSGFile, AttachmentBase]):
+    def __init__(self, named: Named, streamSource: Union[MSGFile, AttachmentBase]):
         """
         :param named: The Named instance to refer to for named properties
             entries.
@@ -223,7 +259,7 @@ class NamedProperties:
         self.__named = named
         self.__streamSource = weakref.ref(streamSource)
 
-    def __getitem__(self, item : Union[Tuple[str, str], NamedPropertyBase]):
+    def __getitem__(self, item: Union[Tuple[str, str], NamedPropertyBase]):
         """
         Get a named property using the [] operator. Item must be a named
         property instance or a tuple with 2 items: the name and the GUID string.
@@ -238,7 +274,7 @@ class NamedProperties:
         else:
             return source._getTypedData(self.__named[item].propertyStreamID)
 
-    def get(self, item : Union[Tuple[str, str], NamedPropertyBase], default : _T = None) -> Union[Any, _T]:
+    def get(self, item: Union[Tuple[str, str], NamedPropertyBase], default: _T = None) -> Union[Any, _T]:
         """
         Get a named property, returning the value of :param default: if not
         found. Item must be a tuple with 2 items: the name and the GUID string.
@@ -254,7 +290,7 @@ class NamedProperties:
 
 
 class NamedPropertyBase(abc.ABC):
-    def __init__(self, entry : Dict[str, Any]):
+    def __init__(self, entry: Dict[str, Any]):
         self.__entry = entry
         self.__guidIndex = entry['guid_index']
         self.__namedPropertyID = entry['pid']
@@ -274,6 +310,13 @@ class NamedPropertyBase(abc.ABC):
         The guid index of the property's property set.
         """
         return self.__guidIndex
+
+    @property
+    @abc.abstractmethod
+    def identifier(self) -> Tuple[str, str]:
+        """
+        An identifier that can be used to full identify the property.
+        """
 
     @property
     def namedPropertyID(self) -> int:
@@ -311,7 +354,7 @@ class NamedPropertyBase(abc.ABC):
 
 
 class StringNamedProperty(NamedPropertyBase):
-    def __init__(self, entry : Dict, name : str):
+    def __init__(self, entry: Dict, name: str):
         super().__init__(entry)
         self.__name = name
 
@@ -343,6 +386,10 @@ class StringNamedProperty(NamedPropertyBase):
             self.__streamID = 0x1000 + (crc32(name.encode('utf-16-le')) ^ (self.guidIndex << 1 | 1)) % 0x1F
 
     @property
+    def identifier(self) -> Tuple[str, str]:
+        return (self.name, self.guid)
+
+    @property
     def name(self) -> str:
         """
         The name of the property.
@@ -367,10 +414,14 @@ class StringNamedProperty(NamedPropertyBase):
 
 
 class NumericalNamedProperty(NamedPropertyBase):
-    def __init__(self, entry : Dict):
+    def __init__(self, entry: Dict):
         super().__init__(entry)
         self.__propertyID = f'{entry["id"]:04X}'
         self.__streamID = 0x1000 + (entry['id'] ^ (self.guidIndex << 1)) % 0x1F
+
+    @property
+    def identifier(self) -> Tuple[str, str]:
+        return (self.propertyID, self.guid)
 
     @property
     def propertyID(self) -> str:

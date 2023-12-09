@@ -43,12 +43,12 @@ class AttachmentBase(abc.ABC):
     The base class for all standard Attachments used by the module.
     """
 
-    def __init__(self, msg : MSGFile, dir_ : str, propStore : PropertiesStore):
+    def __init__(self, msg: MSGFile, dir_: str, propStore: PropertiesStore):
         """
         :param msg: the Message instance that the attachment belongs to.
-        :param dir_: the directory inside the msg file where the attachment is located.
-        :param propStore: The PropertiesStore instance for the attachment. If
-            not provided, it will be found automatically.
+        :param dir_: the directory inside the MSG file where the attachment is
+            located.
+        :param propStore: The PropertiesStore instance for the attachment.
         """
         self.__msg = weakref.ref(msg)
         self.__dir = dir_
@@ -56,19 +56,22 @@ class AttachmentBase(abc.ABC):
         self.__namedProperties = NamedProperties(msg.named, self)
         self.__treePath = msg.treePath + [weakref.ref(self)]
 
-    def _getTypedAs(self, _id : str, overrideClass = None, preserveNone : bool = True):
+    def _getTypedAs(self, _id: str, overrideClass = None, preserveNone: bool = True):
         """
         Like the other get as functions, but designed for when something
-        could be multiple types (where only one will be present). This way you
-        have no need to set the type, it will be handled for you.
+        could be multiple types (where only one will be present).
+
+        This way you have no need to set the type, it will be handled for you.
 
         :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. By
-            default, this will be completely ignored if the value was not found.
-        :param preserveNone: If true (default), causes the function to ignore
-            :param overrideClass: when the value could not be found (is None).
-            If this is changed to False, then the value will be used regardless.
+            read. The data will be the first argument to the class's
+            ``__init__`` method or the function itself, if that is what is
+            provided. By default, this will be completely ignored if the value
+            was not found.
+        :param preserveNone: If ``True`` (default), causes the function to
+            ignore :param overrideClass: when the value could not be found (is
+            ``None``). If this is changed to ``False``, then the value will be
+            used regardless.
         """
         value = self._getTypedData(_id)
         # Check if we should be overriding the data type for this instance.
@@ -80,17 +83,17 @@ class AttachmentBase(abc.ABC):
 
     def _getTypedData(self, id, _type = None):
         """
-        Gets the data for the specified id as the type that it is
-        supposed to be. :param id: MUST be a 4 digit hexadecimal
-        string.
+        Gets the data for the specified id as the type that it is supposed to
+        be.
 
-        If you know for sure what type the data is before hand,
-        you can specify it as being one of the strings in the
-        constant FIXED_LENGTH_PROPS_STRING or
-        VARIABLE_LENGTH_PROPS_STRING.
+        :param id: MUST be a 4 digit hexadecimal string.
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        If you know for sure what type the data is before hand, you can specify
+        it as being one of the strings in the constant
+        ``FIXED_LENGTH_PROPS_STRING`` or ``VARIABLE_LENGTH_PROPS_STRING``.
+
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         verifyPropertyId(id)
         id = id.upper()
@@ -103,14 +106,14 @@ class AttachmentBase(abc.ABC):
 
     def _getTypedProperty(self, propertyID, _type = None) -> Tuple[bool, Optional[object]]:
         """
-        Gets the property with the specified id as the type that it
-        is supposed to be. :param id: MUST be a 4 digit hexadecimal
-        string.
+        Gets the property with the specified id as the type that it is supposed
+        to be.
 
-        If you know for sure what type the property is before hand,
-        you can specify it as being one of the strings in the
-        constant FIXED_LENGTH_PROPS_STRING or
-        VARIABLE_LENGTH_PROPS_STRING.
+        :param id: MUST be a 4 digit hexadecimal string.
+
+        If you know for sure what type the property is before hand, you can
+        specify it as being one of the strings in the constant
+        ``FIXED_LENGTH_PROPS_STRING`` or ``VARIABLE_LENGTH_PROPS_STRING``.
         """
         verifyPropertyId(propertyID)
         if _type:
@@ -124,32 +127,29 @@ class AttachmentBase(abc.ABC):
 
         return True, ret
 
-    def _getTypedStream(self, filename : MSG_PATH, _type = None):
+    def _getTypedStream(self, filename: MSG_PATH, _type = None):
         """
-        Gets the contents of the specified stream as the type that
-        it is supposed to be.
+        Gets the contents of the specified stream as the type that it is
+        supposed to be.
 
-        Rather than the full filename, you should only feed this
-        function the filename sans the type. So if the full name
-        is "__substg1.0_001A001F", the filename this function
-        should receive should be "__substg1.0_001A".
+        Rather than the full filename, you should only feed this function the
+        filename sans the type. So if the full name is "__substg1.0_001A001F",
+        the filename this function should receive should be "__substg1.0_001A".
 
-        If you know for sure what type the stream is before hand,
-        you can specify it as being one of the strings in the
-        constant FIXED_LENGTH_PROPS_STRING or
-        VARIABLE_LENGTH_PROPS_STRING.
+        If you know for sure what type the stream is before hand, you can
+        specify it as being one of the strings in the constant
+        ``FIXED_LENGTH_PROPS_STRING`` or ``VARIABLE_LENGTH_PROPS_STRING``.
 
-        If you have not specified the type, the type this function
-        returns in many cases cannot be predicted. As such, when
-        using this function it is best for you to check the type
-        that it returns. If the function returns None, that means
-        it could not find the stream specified.
+        If you have not specified the type, the type this method returns in many
+        cases cannot be predicted. As such, when using this method it is best
+        for you to check the type that it returns. If the function returns
+        ``None``, that means it could not find the stream specified.
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return msg._getTypedStream([self.__dir, msgPathToString(filename)], True, _type)
 
     def _handleFnc(self, _zip, filename, customPath, kwargs) -> pathlib.Path:
@@ -160,7 +160,7 @@ class AttachmentBase(abc.ABC):
         when a file with the same name already exists. This is mainly because
         any save function that uses files will need to do this functionality.
 
-        :returns: A pathlib.Path object to where the file should be saved.
+        :returns: A ``pathlib.Path`` object to where the file should be saved.
         """
         fullFilename = customPath / filename
 
@@ -194,39 +194,40 @@ class AttachmentBase(abc.ABC):
 
         return fullFilename
 
-    def exists(self, filename : MSG_PATH) -> bool:
+    def exists(self, filename: MSG_PATH) -> bool:
         """
         Checks if stream exists inside the attachment folder.
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return msg.exists([self.__dir, msgPathToString(filename)])
 
-    def sExists(self, filename : MSG_PATH) -> bool:
+    def sExists(self, filename: MSG_PATH) -> bool:
         """
         Checks if the string stream exists inside the attachment folder.
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return msg.sExists([self.__dir, msgPathToString(filename)])
 
-    def existsTypedProperty(self, id, _type = None) -> bool:
+    def existsTypedProperty(self, id, _type = None) -> Tuple[bool, int]:
         """
-        Determines if the stream with the provided id exists. The return of this
-        function is 2 values, the first being a boolean for if anything was
-        found, and the second being how many were found.
+        Determines if the stream with the provided id exists.
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        The return of this function is 2 values, the first being a ``bool`` for
+        if anything was found, and the second being how many were found.
+
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return msg.existsTypedProperty(id, self.__dir, _type, True, self.__props)
 
     @abc.abstractmethod
@@ -234,75 +235,77 @@ class AttachmentBase(abc.ABC):
         """
         Returns the filename to use for the attachment.
 
-        :param contentId:      Use the contentId, if available.
+        :param contentId: Use the contentId, if available.
         :param customFilename: A custom name to use for the file.
 
         If the filename starts with "UnknownFilename" then there is no guarantee
         that the files will have exactly the same filename.
         """
 
-    def getMultipleBinary(self, filename : MSG_PATH) -> Optional[List[bytes]]:
+    def getMultipleBinary(self, filename: MSG_PATH) -> Optional[List[bytes]]:
         """
-        Gets a multiple binary property as a list of bytes objects.
+        Gets a multiple binary property as a list of ``bytes`` objects.
 
-        Like :method getStringStream:, the 4 character type suffix should be
+        Like :meth:`getStringStream`, the 4 character type suffix should be
         omitted. So if you want the stream "__substg1.0_00011102" then the
         filename would simply be "__substg1.0_0001".
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return msg.getMultipleBinary([self.__dir, msgPathToString(filename)])
 
-    def getMultipleString(self, filename : MSG_PATH) -> Optional[List[str]]:
+    def getMultipleString(self, filename: MSG_PATH) -> Optional[List[str]]:
         """
-        Gets a multiple string property as a list of str objects.
+        Gets a multiple string property as a list of ``str`` objects.
 
-        Like :method getStringStream:, the 4 character type suffix should be
+        Like :meth:`getStringStream`, the 4 character type suffix should be
         omitted. So if you want the stream "__substg1.0_00011102" then the
         filename would simply be "__substg1.0_0001".
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return msg.getMultipleString([self.__dir, msgPathToString(filename)])
 
-    def getNamedAs(self, propertyName : str, guid : str, overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
+    def getNamedAs(self, propertyName: str, guid: str, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the named property, setting the class if specified.
 
         :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. If
-            the value is None, this function is not called. If you want it to
-            be called regardless, you should handle the data directly.
+            read. The data will be the first argument to the class's
+            ``__init__`` method or the function itself, if that is what is
+            provided. If the value is ``None``, this function is not called. If
+            you want it to be called regardless, you should handle the data
+            directly.
         """
         value = self.getNamedProp(propertyName, guid)
         if value is not None:
             value = overrideClass(value)
         return value
 
-    def getNamedProp(self, propertyName : str, guid : str, default : _T = None) -> Union[Any, _T]:
+    def getNamedProp(self, propertyName: str, guid: str, default: _T = None) -> Union[Any, _T]:
         """
         instance.namedProperties.get((propertyName, guid), default)
 
-        Can be override to create new behavior.
+        Can be overriden to create new behavior.
         """
         return self.namedProperties.get((propertyName, guid), default)
 
-    def getPropertyAs(self, propertyName : Union[int, str], overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
+    def getPropertyAs(self, propertyName: Union[int, str], overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the property, setting the class if found.
 
         :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. If
-            the value is None, this function is not called. If you want it to
-            be called regardless, you should handle the data directly.
+            read. The data will be the first argument to the class's
+            ``__init__`` method or the function itself, if that is what is
+            provided. If the value is ``None``, this function is not called. If
+            you want it to be called regardless, you should handle the data
+            directly.
         """
         value = self.getPropertyVal(propertyName)
 
@@ -311,7 +314,7 @@ class AttachmentBase(abc.ABC):
 
         return value
 
-    def getPropertyVal(self, name : Union[int, str], default : _T = None) -> Union[Any, _T]:
+    def getPropertyVal(self, name: Union[int, str], default: _T = None) -> Union[Any, _T]:
         """
         instance.props.getValue(name, default)
 
@@ -319,68 +322,67 @@ class AttachmentBase(abc.ABC):
         """
         return self.props.getValue(name, default)
 
-    def getSingleOrMultipleBinary(self, filename : MSG_PATH) -> Optional[Union[List[bytes], bytes]]:
+    def getSingleOrMultipleBinary(self, filename: MSG_PATH) -> Optional[Union[List[bytes], bytes]]:
         """
-        A combination of :method getStringStream: and
-        :method getMultipleString:.
+        A combination of :meth:`getStringStream` and :meth:`getMultipleString`.
 
         Checks to see if a single binary stream exists to return, otherwise
         tries to return the multiple binary stream of the same ID.
 
-        Like :method getStringStream:, the 4 character type suffix should be
+        Like :meth:`getStringStream`, the 4 character type suffix should be
         omitted. So if you want the stream "__substg1.0_00010102" then the
         filename would simply be "__substg1.0_0001".
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return msg.getSingleOrMultipleBinary([self.__dir, msgPathToString(filename)])
 
-    def getSingleOrMultipleString(self, filename : MSG_PATH) -> Optional[Union[List[str], str]]:
+    def getSingleOrMultipleString(self, filename: MSG_PATH) -> Optional[Union[List[str], str]]:
         """
-        A combination of :method getStringStream: and
-        :method getMultipleString:.
+        A combination of :meth:`getStringStream` and :meth:`getMultipleString`.
 
         Checks to see if a single string stream exists to return, otherwise
         tries to return the multiple string stream of the same ID.
 
-        Like :method getStringStream:, the 4 character type suffix should be
+        Like :meth:`getStringStream`, the 4 character type suffix should be
         omitted. So if you want the stream "__substg1.0_0001001F" then the
         filename would simply be "__substg1.0_0001".
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return msg.getSingleOrMultipleString([self.__dir, msgPathToString(filename)])
 
-    def getStream(self, filename : MSG_PATH) -> Optional[bytes]:
+    def getStream(self, filename: MSG_PATH) -> Optional[bytes]:
         """
-        Gets a binary representation of the requested filename.
+        Gets a binary representation of the requested stream.
 
-        This should ALWAYS return a bytes object if it was found, otherwise
-        returns None.
+        This should ALWAYS return a ``bytes`` object if it was found, otherwise
+        returns ``None``.
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return msg.getStream([self.__dir, msgPathToString(filename)])
 
-    def getStreamAs(self, streamID : MSG_PATH, overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
+    def getStreamAs(self, streamID: MSG_PATH, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the specified stream, modifying it to the specified class if it
         is found.
 
         :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. If
-            the value is None, this function is not called. If you want it to
-            be called regardless, you should handle the data directly.
+            read. The data will be the first argument to the class's
+            ``__init__`` method or the function itself, if that is what is
+            provided. If the value is ``None``, this function is not called. If
+            you want it to be called regardless, you should handle the data
+            directly.
         """
         value = self.getStream(streamID)
 
@@ -389,22 +391,25 @@ class AttachmentBase(abc.ABC):
 
         return value
 
-    def getStringStream(self, filename : MSG_PATH) -> Optional[str]:
+    def getStringStream(self, filename: MSG_PATH) -> Optional[str]:
         """
-        Gets a string representation of the requested filename.
-        Checks for both ASCII and Unicode representations and returns
-        a value if possible.  If there are both ASCII and Unicode
-        versions, then :param prefer: specifies which will be
-        returned.
+        Gets a string representation of the requested stream.
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        Rather than the full filename, you should only feed this function the
+        filename sans the type. So if the full name is "__substg1.0_001A001F",
+        the filename this function should receive should be "__substg1.0_001A".
+
+        This should ALWAYS return a string if it was found, otherwise returns
+        None.
+
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return msg.getStringStream([self.__dir, msgPathToString(filename)])
 
-    def getStringStreamAs(self, streamID : MSG_PATH, overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
+    def getStringStreamAs(self, streamID: MSG_PATH, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the specified string stream, modifying it to the specified
         class if it is found.
@@ -422,48 +427,46 @@ class AttachmentBase(abc.ABC):
 
         return value
 
-    def listDir(self, streams : bool = True, storages : bool = False) -> List[List[str]]:
+    def listDir(self, streams: bool = True, storages: bool = False) -> List[List[str]]:
         """
-        Lists the streams and or storages that exist in the attachment
+        Lists the streams and/or storages that exist in the attachment
         directory.
 
         Returns the paths *excluding* the attachment directory, allowing the
-        paths to be directly used for accessing a file.
+        paths to be directly used for accessing a stream.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return [path[1:] for path in msg.listDir(streams, storages, False)
                 if len(path) > 1 and path[0] == self.__dir]
 
-    def slistDir(self, streams : bool = True, storages : bool = False) -> List[str]:
+    def slistDir(self, streams: bool = True, storages: bool = False) -> List[str]:
         """
         Like listDir, except it returns the paths as strings.
         """
         return ['/'.join(path) for path in self.listDir(streams, storages)]
-
 
     @abc.abstractmethod
     def save(self, **kwargs) -> SAVE_TYPE:
         """
         Saves the attachment data.
 
-        The name of the file is determined by the logic of the getFilename
-        function. If you are a developer, ensure that you use this behavior.
+        The name of the file is determined by the logic of :meth:`getFilename`.
+        If you are a developer, ensure that you use this behavior.
 
         To change the directory that the attachment is saved to, set the value
         of :param customPath: when calling this function. The default save
         directory is the working directory.
 
-        If you want to save the contents into a ZipFile or similar object,
+        If you want to save the contents into a ``ZipFile`` or similar object,
         either pass a path to where you want to create one or pass an instance
         to :param zip:. If :param zip: is an instance, :param customPath: will
         refer to a location inside the zip file.
 
-        :param extractEmbedded: If True, causes the attachment, should it be an
-            embedded MSG file, to save as a .msg file instead of calling it's
-            save function.
-        :param skipEmbedded: If True, skips saving this attachment if it is an
-            embedded MSG file.
+        :param extractEmbedded: If ``True``, causes the attachment, should it
+            be an embedded MSG file, to save as a .msg file instead of calling its save function.
+        :param skipEmbedded: If ``True``, skips saving this attachment if it is
+            an embedded MSG file.
 
         :returns: A tuple that specifies how the data was saved. The value of
             the first item specifies what the second value will be.
@@ -472,20 +475,22 @@ class AttachmentBase(abc.ABC):
     @functools.cached_property
     def attachmentEncoding(self) -> Optional[bytes]:
         """
-        The encoding information about the attachment object. Will return
-        b'*\\x86H\\x86\\xf7\\x14\\x03\\x0b\\x01' if encoded in MacBinary format,
-        otherwise it is unset.
+        The encoding information about the attachment object.
+
+        Will return ``b'\\x2A\\x86\\x48\\x86\\xf7\\x14\\x03\\x0b\\x01'`` if
+        encoded in MacBinary format, otherwise it is unset.
         """
         return self.getStream('__substg1.0_37020102')
 
     @functools.cached_property
     def additionalInformation(self) -> Optional[str]:
         """
-        The additional information about the attachment. This property MUST be
-        an empty string if attachmentEncoding is not set. Otherwise it MUST be
-        set to a string of the format ":CREA:TYPE" where ":CREA" is the
-        four-letter Macintosh file creator code and ":TYPE" is a four-letter
-        Macintosh type code.
+        The additional information about the attachment.
+
+        This property MUST be an empty string if attachmentEncoding is not set.
+        Otherwise it MUST be set to a string of the format ":CREA:TYPE" where
+        ":CREA" is the four-letter Macintosh file creator code and ":TYPE" is a
+        four-letter Macintosh type code.
         """
         return self.getStringStream('__substg1.0_370F')
 
@@ -513,7 +518,7 @@ class AttachmentBase(abc.ABC):
         # If we found the right item, get the CLSID.
         if dataStream:
             if (msg := self.__msg()) is None:
-                raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+                raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
             clsid = msg._getOleEntry(dataStream).clsid or clsid
 
         return clsid
@@ -526,7 +531,9 @@ class AttachmentBase(abc.ABC):
     @abc.abstractmethod
     def data(self) -> Optional[object]:
         """
-        The attachment data, if any. Returns None if there is no data to save.
+        The attachment data, if any.
+
+        Returns ``None`` if there is no data to save.
         """
 
     @functools.cached_property
@@ -535,8 +542,8 @@ class AttachmentBase(abc.ABC):
         The class that the data type will use, if it can be retrieved.
 
         This is a safe way to do type checking on data before knowing if it will
-        raise an exception. Returns None if no data will be returns or if an
-        exception will be raised.
+        raise an exception. Returns ``None`` if no data will be returned or if
+        an exception will be raised.
         """
         try:
             return None if self.data is None else self.data.__class__
@@ -614,19 +621,21 @@ class AttachmentBase(abc.ABC):
     @property
     def msg(self) -> MSGFile:
         """
-        Returns the Message instance the attachment belongs to.
+        Returns the ``MSGFile`` instance the attachment belongs to.
 
-        :raises ReferenceError: The associated MSGFile instance has been garbage
-            collected.
+        :raises ReferenceError: The associated ``MSGFile`` instance has been
+            garbage collected.
         """
         if (msg := self.__msg()) is None:
-            raise ReferenceError('The msg file for this Attachment instance has been garbage collected.')
+            raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return msg
 
     @functools.cached_property
     def name(self) -> Optional[str]:
         """
-        The best name available for the file. Uses long filename before short.
+        The best name available for the file.
+
+        Uses long filename before short.
         """
         if self.type is AttachmentType.MSG:
             if self.displayName:
@@ -659,15 +668,16 @@ class AttachmentBase(abc.ABC):
     def renderingPosition(self) -> Optional[int]:
         """
         The offset, in rendered characters, to use when rendering the attachment
-        within the main message text. A value of 0xFFFFFFFF indicates a hidden
-        attachment that is not to be rendered.
+        within the main message text.
+
+        A value of 0xFFFFFFFF indicates a hidden attachment that is not to be rendered.
         """
         return self.getPropertyVal('370B0003')
 
     @property
     def shortFilename(self) -> Optional[str]:
         """
-        Returns the short file name of the attachment, if it exists.
+        The short file name of the attachment, if it exists.
         """
         return self.getStringStream('__substg1.0_3704')
 
@@ -683,5 +693,5 @@ class AttachmentBase(abc.ABC):
     @abc.abstractmethod
     def type(self) -> AttachmentType:
         """
-        Returns an enum value that identifies the type of attachment.
+        An enum value that identifies the type of attachment.
         """

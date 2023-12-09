@@ -18,6 +18,7 @@ from typing import (
 from . import constants
 from .constants import MSG_PATH
 from .enums import Color, DirectoryEntryType
+from .exceptions import TooManySectorsError
 from .utils import ceilDiv, dictGetCasedKey, inputToMsgPath
 from olefile.olefile import OleDirectoryEntry, OleFileIO
 from red_black_dict_mod import RedBlackTree
@@ -31,30 +32,31 @@ if TYPE_CHECKING:
 class DirectoryEntry:
     """
     An internal representation of a stream or storage in the OleWriter.
+
     Originals should be inaccessible outside of the class.
     """
-    name : str = ''
-    rightChild : Optional[DirectoryEntry] = None
-    leftChild : Optional[DirectoryEntry] = None
-    childTreeRoot : Optional[DirectoryEntry] = None
-    stateBits : int = 0
-    creationTime : int = 0
-    modifiedTime : int = 0
-    type : DirectoryEntryType = DirectoryEntryType.UNALLOCATED
+    name: str = ''
+    rightChild: Optional[DirectoryEntry] = None
+    leftChild: Optional[DirectoryEntry] = None
+    childTreeRoot: Optional[DirectoryEntry] = None
+    stateBits: int = 0
+    creationTime: int = 0
+    modifiedTime: int = 0
+    type: DirectoryEntryType = DirectoryEntryType.UNALLOCATED
 
     # These get set after things have been sorted by the red black tree.
-    id : int = -1
+    id: int = -1
     # This is the ID for the left child. The terminology in the docs is really
     # annoying.
-    leftSiblingID : int = 0xFFFFFFFF
-    rightSiblingID : int = 0xFFFFFFFF
+    leftSiblingID: int = 0xFFFFFFFF
+    rightSiblingID: int = 0xFFFFFFFF
     # This is the ID for the root of the child tree, if any.
-    childID : int = 0xFFFFFFFF
-    startingSectorLocation : int = 0
-    color : Color = Color.BLACK
+    childID: int = 0xFFFFFFFF
+    startingSectorLocation: int = 0
+    color: Color = Color.BLACK
 
-    clsid : bytes = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
-    data : bytes = b''
+    clsid: bytes = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    data: bytes = b''
 
     def __bytes__(self) -> bytes:
         return self.toBytes()
@@ -96,7 +98,7 @@ class OleWriter:
     Takes data to write to a compound binary format file, as specified in
     [MS-CFB].
     """
-    def __init__(self, rootClsid : bytes = constants.DEFAULT_CLSID):
+    def __init__(self, rootClsid: bytes = constants.DEFAULT_CLSID):
         self.__rootEntry = DirectoryEntry()
         self.__rootEntry.name = "Root Entry"
         self.__rootEntry.type = DirectoryEntryType.ROOT_STORAGE
@@ -104,27 +106,27 @@ class OleWriter:
         # The root entry will always exist, so this must be at least 1.
         self.__dirEntryCount = 1
         self.__dirEntries = {}
-        self.__largeEntries : List[DirectoryEntry] = []
+        self.__largeEntries: List[DirectoryEntry] = []
         self.__largeEntrySectors = 0
         self.__numMinifatSectors = 0
 
-    def __getContainingStorage(self, path : List[str], entryExists : bool = True, create : bool = False) -> Dict:
+    def __getContainingStorage(self, path: List[str], entryExists: bool = True, create: bool = False) -> Dict:
         """
-        Finds the storage dict internally where the entry specified by
-        :param path: would be created. If :param create: is True, missing
-        storages will be created with default settings.
+        Finds the storage ``dict`` internally where the entry specified by
+        :param path: would be created.
 
-        :param entryExists: If True, throws an error when the requested entry
-            does not yet exist.
-        :param create: If True, creates missing storages with default settings.
+        :param entryExists: If ``True``, throws an error when the requested
+            entry does not yet exist.
+        :param create: If ``True``, creates missing storages with default
+            settings.
 
-        :raises OSError: If :param create: is False and the path could not be
-            found. Also raised if :param entryExists: is True and the requested
-            entry does not exist.
+        :raises OSError: If :param create: is ``False`` and the path could not
+            be found. Also raised if :param entryExists: is ``True`` and the
+            requested entry does not exist.
         :raises ValueError: Tried to access an interal stream or tried to use
-            both the create option and the entryExists option as True.
+            both the create option and the entryExists option is ``True``.
 
-        :returns: The storage dict that the entry is in.
+        :returns: The storage ``dict`` that the entry is in.
         """
         if not path:
             raise OSError('Path cannot be empty.')
@@ -161,9 +163,9 @@ class OleWriter:
 
         return _dir
 
-    def __getEntry(self, path : List[str]) -> DirectoryEntry:
+    def __getEntry(self, path: List[str]) -> DirectoryEntry:
         """
-        Finds and returns an existing DirectoryEntry instance in the writer.
+        Finds and returns an existing ``DirectoryEntry`` instance in the writer.
 
         :raises OSError: If the entry does not exist.
         :raises ValueError: If access to an internal item is attempted.
@@ -175,10 +177,11 @@ class OleWriter:
         else:
             return item
 
-    def __modifyEntry(self, entry : DirectoryEntry, **kwargs):
+    def __modifyEntry(self, entry: DirectoryEntry, **kwargs):
         """
-        Edits the DirectoryEntry with the data provided. Common code used for
-        :method addEntry: and :method editEntry:.
+        Edits the DirectoryEntry with the data provided.
+
+        Common code used for :meth:`addEntry` and :meth:`editEntry`.
 
         :raises TypeError: Attempted to modify the data of a storage.
         :raises ValueError: Some part of the data given to modify the various
@@ -202,6 +205,11 @@ class OleWriter:
                     data = bytes(data)
                 except Exception:
                     raise ValueError('Data must be a bytes instance or convertable to bytes if set.')
+            # Check the length of data. In future versions, this may be a
+            # different check which is done when swapping between version 3 and
+            # 4 of the compound file binary file format.
+            if len(data) > 0x80000000:
+                raise ValueError('Current version of extract_msg does not support streams greater than 2 GB in OLE files.')
 
         if clsid is not None:
             if not isinstance(clsid, bytes):
@@ -224,7 +232,6 @@ class OleWriter:
         if stateBits is not None:
             if not isinstance(stateBits, int) or stateBits < 0 or stateBits > 0xFFFFFFFF:
                 raise ValueError('State bits must be a positive 4 byte int.')
-
 
         # Now that all our checks have passed, let's set our data.
         if data is not None:
@@ -259,8 +266,9 @@ class OleWriter:
 
     def __walkEntries(self) -> Iterator[DirectoryEntry]:
         """
-        Returns a generator that will walk the entires recursively. Each item
-        returned by it will be a DirectoryEntry instance.
+        Returns a generator that will walk the entires recursively.
+
+        Each item returned by it will be a DirectoryEntry instance.
         """
         toProcess = [self.__dirEntries]
         yield self.__rootEntry
@@ -276,10 +284,6 @@ class OleWriter:
 
     @property
     def __numberOfSectors(self) -> int:
-        """
-        TODO: finish the calculation needed. For now this just notes how many
-        sectors are needed for the directory entries.
-        """
         return ceilDiv(self.__dirEntryCount, 4) + \
                self.__numMinifat + \
                ceilDiv(self.__numMinifat, 16) + \
@@ -314,8 +318,8 @@ class OleWriter:
         """
         # Right now we just use an annoying while loop to get the numbers.
         numDifat = 0
-        # All divisions are ceiling divisions, so we leave them as
-        numFat = ceilDiv(self.__numberOfSectors, 127) or 1
+        # All divisions are ceiling divisions,.
+        numFat = ceilDiv(self.__numberOfSectors or 1, 127)
         newNumFat = 1
         while numFat != newNumFat:
             numFat = newNumFat
@@ -324,7 +328,7 @@ class OleWriter:
 
         return (numFat, numDifat, self.__numberOfSectors + numDifat + numFat)
 
-    def _treeSort(self, startingSector : int) -> List[DirectoryEntry]:
+    def _treeSort(self, startingSector: int) -> List[DirectoryEntry]:
         """
         Uses red-black trees to sort the internal data in preparation for
         writing the file, returning a list, in order, of the entries to write.
@@ -414,15 +418,29 @@ class OleWriter:
 
     def _writeBeginning(self, f) -> int:
         """
-        Writes the beginning to the file :param f:. This includes the header,
-        DIFAT, and FAT blocks.
+        Writes the beginning to the file :param f:.
+
+        This includes the header, DIFAT, and FAT blocks.
 
         :returns: The current sector number after all the data is written.
+
+        :raises TooMuchDataError: The number of sectors required for the file is
+            too large.
         """
         # Recalculate some things needed for saving.
         self.__recalculateSectors()
         # Since we are going to need these multiple times, get them now.
         numFat, numDifat, totalSectors = self._getFatSectors()
+
+        # Check to make sure there isn't too much data to write.
+        if totalSectors > 0xFFFFFFFB:
+            raise TooManySectorsError('Data in OleWriter requires too many sectors to write to a version 3 file.')
+
+        # The ministream *cannot* be greater than 2 GB, so check that before
+        # writing anything. A minifat sector is 64 bytes, so the maximum amount
+        # of them is 0x2000000.
+        if self.__numMinifatSectors > 0x2000000:
+            raise TooManySectorsError('Data is OleWriter requires too many MiniFAT sectors.')
 
         # Header signature.
         f.write(b'\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1')
@@ -544,7 +562,7 @@ class OleWriter:
         # Finally, return the current sector index for use in other places.
         return numDifat + numFat
 
-    def _writeDirectoryEntries(self, f, startingSector : int) -> List[DirectoryEntry]:
+    def _writeDirectoryEntries(self, f, startingSector: int) -> List[DirectoryEntry]:
         """
         Writes out all the directory entries. Returns the list generated.
         """
@@ -556,7 +574,7 @@ class OleWriter:
 
         return entries
 
-    def _writeDirectoryEntry(self, f, entry : DirectoryEntry) -> None:
+    def _writeDirectoryEntry(self, f, entry: DirectoryEntry) -> None:
         """
         Writes the directory entry to the file f.
         """
@@ -572,7 +590,7 @@ class OleWriter:
             if len(x.data) & 511:
                 f.write(b'\x00' * (512 - (len(x.data) & 511)))
 
-    def _writeMini(self, f, entries : List[DirectoryEntry]) -> None:
+    def _writeMini(self, f, entries: List[DirectoryEntry]) -> None:
         """
         Writes the mini FAT followed by the full mini stream.
         """
@@ -602,7 +620,7 @@ class OleWriter:
         if self.__numMinifatSectors & 7:
             f.write((b'\x00' * 64) * (8 - (self.__numMinifatSectors & 7)))
 
-    def addEntry(self, path : MSG_PATH, data : Optional[Union[bytes, SupportsBytes]] = None, storage : bool = False, **kwargs) -> None:
+    def addEntry(self, path: MSG_PATH, data: Optional[Union[bytes, SupportsBytes]] = None, storage: bool = False, **kwargs) -> None:
         """
         Adds an entry to the OleWriter instance at the path specified, adding
         storages with default settings where necessary. If the entry is not a
@@ -610,10 +628,10 @@ class OleWriter:
 
         :param path: The path to add the entry at. Must not contain a path part
             that is an already added stream.
-        :param data: The bytes for a stream or an object with the __bytes__
+        :param data: The bytes for a stream or an object with a ``__bytes__``
             method.
-        :param storage: If True, the entry to add is a storage. Otherwise, the
-            entry is a stream.
+        :param storage: If ``True``, the entry to add is a storage. Otherwise,
+            the entry is a stream.
         :param clsid: The CLSID for the stream/storage. Must a a bytes instance
             that is 16 bytes long.
         :param creationTime: An 8 byte filetime int. Sets the creation time of
@@ -623,8 +641,10 @@ class OleWriter:
         :param stateBits: A 4 byte int. Sets the state bits, user-defined flags,
             of the entry. For a stream, this *SHOULD* be unset.
 
-        :raises OSError: A stream was found on the path before the end or an entry with the same name already exists.
+        :raises OSError: A stream was found on the path before the end or an
+            entry with the same name already exists.
         :raises ValueError: Attempts to access an internal item.
+        :raises ValueError: The data provided is too large.
         """
         path = inputToMsgPath(path)
         # First, find the current place in our dict to add the item.
@@ -644,13 +664,14 @@ class OleWriter:
         else:
             _dir[path[-1]] = entry
 
-    def addOleEntry(self, path : MSG_PATH, entry : OleDirectoryEntry, data : Optional[Union[bytes, SupportsBytes]] = None) -> None:
+    def addOleEntry(self, path: MSG_PATH, entry: OleDirectoryEntry, data: Optional[Union[bytes, SupportsBytes]] = None) -> None:
         """
         Uses the entry provided to add the data to the writer.
 
         :raises OSError: Tried to add an entry to a path that has not yet
             been added, tried to add as a child of a stream, or tried to add an
             entry where one already exists under the same name.
+        :raises ValueError: The data provided is too large.
         """
         path = inputToMsgPath(path)
         # First, find the current place in our dict to add the item.
@@ -664,28 +685,32 @@ class OleWriter:
         newEntry = DirectoryEntry()
         if entry.entry_type == DirectoryEntryType.STORAGE:
             # Handle a storage entry.
-            # First add the dict to our tree of items.
-            _dir[path[-1]] = {'::DirectoryEntry': newEntry}
-
-            # Finally, setup the values for the stream.
+            # First, setup the values for the storage.
             newEntry.name = entry.name
             newEntry.type = DirectoryEntryType.STORAGE
             newEntry.clsid = _unClsid(entry.clsid)
             newEntry.stateBits = entry.dwUserFlags
             newEntry.creationTime = entry.createTime
             newEntry.modifiedTime = entry.modifyTime
+
+            # Finally add the dict to our tree of items.
+            _dir[path[-1]] = {'::DirectoryEntry': newEntry}
         else:
             # Handle a stream entry.
-            # First add the entry to out dict of entries.
-            _dir[path[-1]] = newEntry
+            # First, setup the values for the stream.
             newEntry.name = entry.name
             newEntry.type = DirectoryEntryType.STREAM
             newEntry.clsid = _unClsid(entry.clsid)
             newEntry.stateBits = entry.dwUserFlags
 
-            # Finally, handle the data.
+            # Next, handle the data.
             data = data or b''
             newEntry.data = bytes(data)
+            if len(newEntry.data) > 0x80000000:
+                raise ValueError('Current version of extract_msg does not support streams greater than 2 GB in OLE files.')
+
+            # Finally add the entry to out dict of entries.
+            _dir[path[-1]] = newEntry
 
         self.__dirEntryCount += 1
 
@@ -707,7 +732,7 @@ class OleWriter:
         # path does remember the case used.
         del _dir[dictGetCasedKey(_dir, path[-1])]
 
-    def editEntry(self, path : MSG_PATH, **kwargs) -> None:
+    def editEntry(self, path: MSG_PATH, **kwargs) -> None:
         """
         Used to edit values of an entry by setting the specific kwargs. Set a
         value to something other than None to set it.
@@ -723,7 +748,6 @@ class OleWriter:
         :param stateBits: A 4 byte int. Sets the state bits, user-defined flags,
             of the entry. For a stream, this *SHOULD* be unset.
 
-
         To convert a 32 character hexadecial CLSID into the bytes for this
         function, the _unClsid function in the ole_writer submodule can be used.
 
@@ -738,7 +762,7 @@ class OleWriter:
         # Send it to be modified using the arguments given.
         self.__modifyEntry(entry, **kwargs)
 
-    def fromMsg(self, msg : MSGFile) -> None:
+    def fromMsg(self, msg: MSGFile) -> None:
         """
         Copies the streams and stream information necessary from the MSG file.
         """
@@ -777,7 +801,7 @@ class OleWriter:
             for x in gen:
                 self.addOleEntry(x, msg._getOleEntry(x, prefix = False), msg.getStream(x, prefix = False))
 
-    def fromOleFile(self, ole : OleFileIO, rootPath : MSG_PATH = []) -> None:
+    def fromOleFile(self, ole: OleFileIO, rootPath: MSG_PATH = []) -> None:
         """
         Copies all the streams from the proided OLE file into this writer.
 
@@ -787,9 +811,9 @@ class OleWriter:
         modification of an embedded properties stream when extracting an
         embedded MSG file.
 
-        :param rootPath: A path (accepted by olefile.OleFileIO) to the directory
-            to use as the root of the file. If not provided, the file root will
-            be used.
+        :param rootPath: A path (accepted by ``olefile.OleFileIO``) to the
+            directory to use as the root of the file. If not provided, the file
+            root will be used.
 
         :raises OSError: If :param rootPath: does not exist in the file.
         """
@@ -834,9 +858,9 @@ class OleWriter:
 
             self.addOleEntry(x, entry, data)
 
-    def getEntry(self, path : MSG_PATH) -> DirectoryEntry:
+    def getEntry(self, path: MSG_PATH) -> DirectoryEntry:
         """
-        Finds and returns a copy of an existing DirectoryEntry instance in the
+        Finds and returns a copy of an existing `DirectoryEntry` instance in the
         writer. Use this method to check the internal status of an entry.
 
         :raises OSError: If the entry does not exist.
@@ -844,12 +868,13 @@ class OleWriter:
         """
         return copy.copy(self.__getEntry(inputToMsgPath(path)))
 
-    def listItems(self, streams : bool = True, storages : bool = False) -> List[List[str]]:
+    def listItems(self, streams: bool = True, storages: bool = False) -> List[List[str]]:
         """
         Returns a list of the specified items currently in the writter.
 
-        :param streams: If True, includes the path for each stream in the list.
-        :param storages: If True, includes the path for each storage in the
+        :param streams: If ``True``, includes the path for each stream in the
+            list.
+        :param storages: If ``True``, includes the path for each storage in the
             list.
         """
         # We are actually abusing the walk function a bit here to life much
@@ -874,7 +899,7 @@ class OleWriter:
         paths.sort()
         return paths
 
-    def renameEntry(self, path : MSG_PATH, newName : str) -> None:
+    def renameEntry(self, path: MSG_PATH, newName: str) -> None:
         """
         Changes the name of an entry, leaving it in it's current position.
 
@@ -923,9 +948,9 @@ class OleWriter:
 
     def walk(self) -> Iterator[Tuple[List[str], List[str], List[str]]]:
         """
-        Functional equivelent to :function os.walk:, but for going over the file
-        structure of the OLE file to be written. Unlike :function os.walk:, it
-        takes no arguments.
+        Functional equivelent to ``os.walk``, but for going over the file
+        structure of the OLE file to be written. Unlike ``os.walk``, it takes
+        no arguments.
 
         :returns: A tuple of three lists. The first is the path, as a list of
             strings, for the directory (or an empty list for the root), the
@@ -953,8 +978,13 @@ class OleWriter:
 
     def write(self, path) -> None:
         """
-        Writes the data to the path specified. If :param path: has a write
-        method it will use the object directly.
+        Writes the data to the path specified.
+
+        If :param path: has a ``write`` method, the object will be used
+        directly.
+
+        :raises TooManySectorsError: The number of sectors requires for a part
+            of writing is too large.
         """
         opened = False
 
@@ -982,9 +1012,9 @@ class OleWriter:
 
 
 
-def _unClsid(clsid : str) -> bytes:
+def _unClsid(clsid: str) -> bytes:
     """
-    Converts the clsid from olefile.olefile._clsid back to bytes.
+    Converts the clsid from ``olefile.olefile._clsid`` back to bytes.
     """
     if not clsid:
         return b''

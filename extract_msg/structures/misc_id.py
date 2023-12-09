@@ -24,11 +24,11 @@ class FolderID:
     A Folder ID structure specified in [MS-OXCDATA].
     """
 
-    __SIZE__ : int = 16
+    __SIZE__: int = 16
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         self.__rawData = data
-        self.__replicaID = constants.st.ST_DATA_UI16.unpack(data[:2])[0]
+        self.__replicaID = constants.st.ST_LE_UI16.unpack(data[:2])[0]
         # This entry is 6 bytes, so we pull some shenanigans to unpack it.
         self.__globalCounter = constants.st.ST_LE_UI64.unpack(data[2:8] + b'\x00\x00')[0]
 
@@ -59,7 +59,7 @@ class GlobalObjectID:
     A GlobalObjectID structure, as specified in [MS-OXOCAL].
     """
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         self.__rawData = data
         reader = BytesReader(data)
         expectedBytes = b'\x04\x00\x00\x00\x82\x00\xE0\x00\x74\xC5\xB7\x10\x1A\x82\xE0\x08'
@@ -135,9 +135,9 @@ class MessageID:
     A Message ID structure, as defined in [MS-OXCDATA].
     """
 
-    __SIZE__ : int = 8
+    __SIZE__: int = 8
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         self.__rawData = data
         self.__replicaID = constants.st.ST_LE_UI16.unpack(data[:2])[0]
         # This entry is 6 bytes, so we pull some shenanigans to unpack it.
@@ -176,11 +176,11 @@ class ServerID:
     """
     Class representing a PtypServerId.
     """
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         """
         :param data: The data to use to create the ServerID.
 
-        :raises TypeError: if the data is not a ServerID.
+        :raises TypeError: The data is not a ServerID.
         """
         # According to the docs, the first byte being a 1 means it follows this
         # structure. A value of 0 means it does not.
@@ -189,7 +189,7 @@ class ServerID:
         self.__rawData = data
         self.__folderID = FolderID(data[1:9])
         self.__messageID = MessageID(data[9:17])
-        self.__instance = constants.st.STUI32.unpack(data[17:21])[0]
+        self.__instance = constants.st.ST_LE_UI32.unpack(data[17:21])[0]
 
     def __bytes__(self) -> bytes:
         return self.toBytes()

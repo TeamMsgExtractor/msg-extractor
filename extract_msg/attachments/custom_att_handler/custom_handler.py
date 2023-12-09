@@ -30,17 +30,17 @@ class CustomAttachmentHandler(abc.ABC):
     special ways that are completely different from one another.
     """
 
-    def __init__(self, attachment : AttachmentBase):
+    def __init__(self, attachment: AttachmentBase):
         super().__init__()
         self.__att = attachment
 
-    def getStream(self, path : MSG_PATH) -> Optional[bytes]:
+    def getStream(self, filename: MSG_PATH) -> Optional[bytes]:
         """
         Gets a stream from the custom data directory.
         """
-        return self.attachment.getStream('__substg1.0_3701000D/' + msgPathToString(path))
+        return self.attachment.getStream('__substg1.0_3701000D/' + msgPathToString(filename))
 
-    def getStreamAs(self, streamID : MSG_PATH, overrideClass : OVERRIDE_CLASS[_T]) -> Optional[_T]:
+    def getStreamAs(self, streamID: MSG_PATH, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
         Returns the specified stream, modifying it to the specified class if it
         is found.
@@ -60,7 +60,7 @@ class CustomAttachmentHandler(abc.ABC):
 
     @classmethod
     @abc.abstractmethod
-    def isCorrectHandler(cls, attachment : AttachmentBase) -> bool:
+    def isCorrectHandler(cls, attachment: AttachmentBase) -> bool:
         """
         Checks if this is the correct handler for the attachment.
         """
@@ -70,7 +70,7 @@ class CustomAttachmentHandler(abc.ABC):
         """
         Generates the RTF to inject in place of the \\objattph tag.
 
-        If this function should do nothing, returns None.
+        If this function should do nothing, returns ``None``.
         """
 
     @property
@@ -86,7 +86,7 @@ class CustomAttachmentHandler(abc.ABC):
         """
         Gets the data for the attachment.
 
-        If an attachment should do nothing when saving, returns None.
+        If an attachment should do nothing when saving, returns ``None``.
         """
 
     @property
@@ -100,11 +100,12 @@ class CustomAttachmentHandler(abc.ABC):
     @abc.abstractmethod
     def obj(self) -> Optional[object]:
         """
-        Returns an object representing the data. May return the same as
-        :property data:.
+        Returns an object representing the data.
+
+        May return the same value as :property data:.
 
         If there is no object to represent the custom attachment, including
-        bytes, returns None.
+        ``bytes``, returns ``None``.
         """
 
     @functools.cached_property

@@ -14,7 +14,7 @@ class RecurrencePattern:
     A RecurrencePattern structure, as specified in [MS-OXOCAL].
     """
 
-    def __init__(self, data : bytes):
+    def __init__(self, data: bytes):
         self.__rawData = data
         reader = BytesReader(data)
         self.__readerVersion = reader.readUnsignedShort()
@@ -77,12 +77,13 @@ class RecurrencePattern:
     @property
     def endDate(self) -> int:
         """
-        An integer that specifies the ending date for the recurrence. The value
-        is the number of minutes between midnight, January 1, 1601, and midnight
-        of the date of the last occurrence. When the value of the endType field
-        is END_AFTER_N_OCCURRENCES, this value is calculated based on the number
-        of occurrences. If the recurrence does not have an end date, the value
-        of the endDate field MUST be set to 0x5AE980DF.
+        An integer that specifies the ending date for the recurrence.
+
+        The value is the number of minutes between midnight, January 1, 1601,
+        and midnight of the date of the last occurrence. When the value of the
+        endType field is END_AFTER_N_OCCURRENCES, this value is calculated
+        based on the number of occurrences. If the recurrence does not have an
+        end date, the value of the endDate field MUST be set to 0x5AE980DF.
         """
         return self.__endDate
 
@@ -135,23 +136,24 @@ class RecurrencePattern:
     @property
     def patternTypeSpecific(self) -> Any:
         """
-        The specifics for the pattern type. Return is different depending on
-        what type of pattern is being used.
+        The specifics for the pattern type.
 
-        RecurPatternType.DAY: No value is returned.
-        RecurPatternType.WEEK: A set of RecurPatternTypeSpecificWeekday bits.
-        RecurPatternType.MONTH: The day of the month on which the recurrence
-            falls.
-        RecurPatternType.MONTH_NTH: A tuple containing information from
-            [MS-OXOCAL] PatternTypeSpecific MonthNth.
-        RecurPatternType.MONTH_END: The day of the month on which the recurrence
-            falls.
-        RecurPatternType.HJ_MONTH: The day of the month on which the recurrence
-            falls.
-        RecurPatternType.HJ_MONTH_NTH: A tuple containing information from
-            [MS-OXOCAL] PatternTypeSpecific MonthNth.
-        RecurPatternType.HJ_MONTH_END: The day of the month on which the
-            recurrence falls.
+        Return is different depending on what type of pattern is being used.
+
+        * RecurPatternType.DAY: No value is returned.
+        * RecurPatternType.WEEK: A set of RecurPatternTypeSpecificWeekday bits.
+        * RecurPatternType.MONTH: The day of the month on which the recurrence
+          falls.
+        * RecurPatternType.MONTH_NTH: A tuple containing information from
+          [MS-OXOCAL] PatternTypeSpecific MonthNth.
+        * RecurPatternType.MONTH_END: The day of the month on which the
+          recurrence falls.
+        * RecurPatternType.HJ_MONTH: The day of the month on which the
+          recurrence falls.
+        * RecurPatternType.HJ_MONTH_NTH: A tuple containing information from
+          [MS-OXOCAL] PatternTypeSpecific MonthNth.
+        * RecurPatternType.HJ_MONTH_END: The day of the month on which the
+          recurrence falls.
         """
         return self.__patternTypeSpecific
 
@@ -159,10 +161,11 @@ class RecurrencePattern:
     def period(self) -> int:
         """
         An integer that specifies the interval at which the meeting pattern
-        specified in PatternTypeSpecific field repeats. The Period value MUST be
-        between 1 and the maximum recurrence interval, which is 999 days for
-        daily recurrences, 99 weeks for weekly recurrences, and 99 months for
-        monthly recurrences.
+        specified in PatternTypeSpecific field repeats.
+
+        The Period value MUST be between 1 and the maximum recurrence interval,
+        which is 999 days for daily recurrences, 99 weeks for weekly
+        recurrences, and 99 months for monthly recurrences.
         """
         return self.__period
 
@@ -184,9 +187,10 @@ class RecurrencePattern:
     @property
     def startDate(self) -> int:
         """
-        An integer that specifies the date of the first occurrence. The value is
-        the number of minutes between midnight, January 1, 1601, and midnight of
-        the date of the first occurrence.
+        An integer that specifies the date of the first occurrence.
+
+        The value is the number of minutes between midnight, January 1, 1601,
+        and midnight of the date of the first occurrence.
         """
         return self.__startDate
 

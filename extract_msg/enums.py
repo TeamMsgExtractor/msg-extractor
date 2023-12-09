@@ -37,7 +37,6 @@ __all__ = [
     'IconIndex',
     'Importance',
     'InsecureFeatures',
-    'Intelligence',
     'LogFlags',
     'MacintoshEncoding',
     'MeetingObjectChange',
@@ -92,8 +91,9 @@ from typing import Any, Dict, Iterable, List, Set, Type, Union
 
 class AddressBookType(enum.IntEnum):
     """
-    The type of object that an address book entry ID represents. MUST be one of
-    these or it is invalid.
+    The type of object that an address book entry ID represents.
+
+    MUST be one of these or it is invalid.
     """
     LOCAL_MAIL_USER = 0x000
     DISTRIBUTION_LIST = 0x001
@@ -124,12 +124,12 @@ class AppointmentAuxilaryFlag(enum.IntFlag):
     """
     Describes the auxilary state of the object.
 
-    COPIED: The Calendar object was copied from another Calendar folder.
-    FORCE_MEETING_RESPONSE: The client of server can require that a Meeting
-        Response object be sent to the organizer when a response is chosen.
-    FORWARDED: The object was forwarded by the organizer or another recipient.
-    REPAIR_UPDATE_MESSAGE: The meeting request is a Repair Update Message sent
-        from a server-side calendar repair system.
+    * COPIED: The Calendar object was copied from another Calendar folder.
+    * FORCE_MEETING_RESPONSE: The client of server can require that a Meeting
+      Response object be sent to the organizer when a response is chosen.
+    * FORWARDED: The object was forwarded by the organizer or another recipient.
+    * REPAIR_UPDATE_MESSAGE: The meeting request is a Repair Update Message sent
+      from a server-side calendar repair system.
     """
     COPIED = 0b1
     FORCE_MEETING_RESPONSE = 0b10
@@ -155,9 +155,11 @@ class AppointmentColor(enum.IntEnum):
 
 class AppointmentStateFlag(enum.IntFlag):
     """
-    MEETING: The object is a Meeting object or meeting-related object.
-    RECEIVED: The represented object was received from someone else.
-    CANCELED: The Meeting object that is represented has been canceled.
+    The appointment start of the object.
+
+    * MEETING: The object is a Meeting object or meeting-related object.
+    * RECEIVED: The represented object was received from someone else.
+    * CANCELED: The Meeting object that is represented has been canceled.
     """
     MEETING = 0b1
     RECEIVED = 0b10
@@ -179,15 +181,14 @@ class AttachmentType(enum.IntEnum):
     """
     The type represented by the attachment.
 
-    DATA: An attachment stored as plain bytes in the MSG file.
-    MSG: A normally embedded MSG file.
-    WEB: An attachment referencing a resource on the web.
-    SIGNED: An attachment of a signed message that is *not* an MSG file.
-    SIGNED_EMBEDDED: An MSG file embedded in a signed message.
-
-    BROKEN: An attachment with a critical issue.
-    UNSUPPORTED: An attachment that does not match any supported types.
-    UNKNOWN: The attachment type could not be determined.
+    * DATA: An attachment stored as plain bytes in the MSG file.
+    * MSG: A normally embedded MSG file.
+    * WEB: An attachment referencing a resource on the web.
+    * SIGNED: An attachment of a signed message that is *not* an MSG file.
+    * SIGNED_EMBEDDED: An MSG file embedded in a signed message.
+    * BROKEN: An attachment with a critical issue.
+    * UNSUPPORTED: An attachment that does not match any supported types.
+    * UNKNOWN: The attachment type could not be determined.
     """
     DATA = 0
     MSG = 1
@@ -222,18 +223,20 @@ class BCImageSource(enum.IntEnum):
 
 
 
-class BCLabelFormat(enum.IntEnum):
+class BCLabelFormat(enum.IntFlag):
     """
-    The format for a label of a business card. Left of the underscore represents
-    the alignment, right indicates reading order.
-    A
+    The format for a label of a business card.
+
+    If the bit for ``RIGHT_TO_LEFT`` is not set, the is left to
+    right.
+
+    ALIGN_LEFT and ALIGN_RIGHT are mutually exclusive.
     """
+    # Define normal values.
     NO_LABEL = 0b000
-    RIGHT_LTR = 0b001
-    LEFT_LTR = 0b010
-    UNKNOWN = 0b100
-    RIGHT_RTL = 0b101
-    LEFT_RTL = 0b110
+    ALIGN_RIGHT = 0b001
+    ALIGN_LEFT = 0b010
+    RIGHT_TO_LEFT = 0b100
 
 
 
@@ -241,23 +244,23 @@ class BCTemplateID(enum.IntEnum):
     """
     The template ID for a business card.
 
-    IM_ALIGN_LEFT: The image area will be left aligned, stretching the full
-        height of the card vertically; text fields will appear to the right of
-        the image area.
-    IM_ALIGN_RIGHT: The image area will be right aligned, stretching the full
-        height of the card vertically; text fields will appear to the left of
-        the image area.
-    IM_ALIGN_TOP: The image area will be aligned to the top, stretching the full
-        width of the card horizontally; text fields will appear under the image
-        area.
-    IM_ALIGN_BOTTOM: The image area will be aligned to the bottom, stretching
-        the full width of the card horizontally; text fields will appear above
-        the image area.
-    NO_IMAGE: No image area is included in the card, only text fields are
-        included.
-    BACKGROUND: The image area will be used as a background for the card,
-        stretching the full height and width of the card. Text fields are
-        displayed on top of the image area.
+    * IM_ALIGN_LEFT: The image area will be left aligned, stretching the full
+      height of the card vertically; text fields will appear to the right of
+      the image area.
+    * IM_ALIGN_RIGHT: The image area will be right aligned, stretching the full
+      height of the card vertically; text fields will appear to the left of
+      the image area.
+    * IM_ALIGN_TOP: The image area will be aligned to the top, stretching the
+      full width of the card horizontally; text fields will appear under the
+      image area.
+    * IM_ALIGN_BOTTOM: The image area will be aligned to the bottom, stretching
+      the full width of the card horizontally; text fields will appear above
+      the image area.
+    * NO_IMAGE: No image area is included in the card, only text fields are
+      included.
+    * BACKGROUND: The image area will be used as a background for the card,
+      stretching the full height and width of the card. Text fields are
+      displayed on top of the image area.
     """
     IM_ALIGN_LEFT = 0x00
     IM_ALIGN_RIGHT = 0x01
@@ -268,79 +271,40 @@ class BCTemplateID(enum.IntEnum):
 
 
 
-class BCTextFormat(enum.IntEnum):
+class BCTextFormat(enum.IntFlag):
     """
-    Converts the bits of the text format to an understandable enum value.
+    The alignment and formatting for the text field.
 
-    Right value is the alignment, with left is the flags. The following flags
-    exist and will be in the following order if present:
-        U: Underline.
-        I: Italics.
-        B: Bold.
-        M: The text is multiline.
+    If none of the bits are set, the text field is displayed as a single line,
+    left-aligned.
+
+    RIGHT and CENTER are mutually exclusive.
     """
-    LEFT = 0b00000000
-    LEFT_M = 0b00000001
-    LEFT_B = 0b00000010
-    LEFT_BM = 0b00000011
-    LEFT_I = 0b00000100
-    LEFT_IM = 0b00000101
-    LEFT_IB = 0b00000110
-    LEFT_IBM = 0b00000111
-    LEFT_U = 0b00001000
-    LEFT_UM = 0b00001001
-    LEFT_UB = 0b00001010
-    LEFT_UBM = 0b00001011
-    LEFT_UI = 0b00001100
-    LEFT_UIM = 0b00001101
-    LEFT_UIB = 0b00001110
-    LEFT_UIBM = 0b00001111
-    CENTER = 0b00100000
-    CENTER_M = 0b00100001
-    CENTER_B = 0b00100010
-    CENTER_BM = 0b00100011
-    CENTER_I = 0b00100100
-    CENTER_IM = 0b00100101
-    CENTER_IB = 0b00100110
-    CENTER_IBM = 0b00100111
-    CENTER_U = 0b00101000
-    CENTER_UM = 0b00101001
-    CENTER_UB = 0b00101010
-    CENTER_UBM = 0b00101011
-    CENTER_UI = 0b00101100
-    CENTER_UIM = 0b00101101
-    CENTER_UIB = 0b00101110
-    CENTER_UIBM = 0b00101111
-    RIGHT = 0b00010000
-    RIGHT_M = 0b00010001
-    RIGHT_B = 0b00010010
-    RIGHT_BM = 0b00010011
-    RIGHT_I = 0b00010100
-    RIGHT_IM = 0b00010101
-    RIGHT_IB = 0b00010110
-    RIGHT_IBM = 0b00010111
-    RIGHT_U = 0b00011000
-    RIGHT_UM = 0b00011001
-    RIGHT_UB = 0b00011010
-    RIGHT_UBM = 0b00011011
-    RIGHT_UI = 0b00011100
-    RIGHT_UIM = 0b00011101
-    RIGHT_UIB = 0b00011110
-    RIGHT_UIBM = 0b00011111
+    DEFAULT = 0b000000
+    MULTILINE = 0b000001
+    BOLD = 0b000010
+    ITALIC = 0b000100
+    UNDERLINE = 0b001000
+    RIGHT = 0b010000
+    CENTER = 0b100000
 
 
 
 class BodyTypes(enum.IntFlag):
     """
-    Enum representing the types of bodies found in a message. This does not
-    include bodies generated from other sources, and so is a good detection
-    method for generated bodies (if you check a body and it is not null, but it
-    is not listed in the enum, then it was generated from another body).
+    Enum representing the types of bodies found in a message.
+
+    This does not include bodies generated from other sources, and so is a good
+    detection method for generated bodies (if you check a body and it is not
+    null, but it is not listed in the enum, then it was generated from another
+    body).
 
     This is an IntFlag enum, so to check if a body was found use the in operator
     with the body you are checking. For example:
 
-    >>> rtfFound = BodyTypes.RTF msg.detectedBodies
+    .. code-block:: python
+
+        >>> rtfFound: bool = BodyTypes.RTF in msg.detectedBodies
     """
     NONE = 0b000
     PLAIN = 0b001
@@ -354,12 +318,12 @@ class BusyStatus(enum.IntEnum):
     """
     The availability of a use for the event described by the object.
 
-    OL_FREE: The user is available.
-    OL_TENTATIVE: The user has a tentative event scheduled.
-    OL_BUSY: The user is busy.
-    OL_OUT_OF_OFFICE: The user is Out of Office.
-    OL_WORKING_ELSEWHERE: The user is working from a location other than the
-        office.
+    * OL_FREE: The user is available.
+    * OL_TENTATIVE: The user has a tentative event scheduled.
+    * OL_BUSY: The user is busy.
+    * OL_OUT_OF_OFFICE: The user is Out of Office.
+    * OL_WORKING_ELSEWHERE: The user is working from a location other than the
+      office.
     """
     OL_FREE = 0x00000000
     OL_TENTATIVE = 0x00000001
@@ -373,24 +337,24 @@ class ClientIntentFlag(enum.IntFlag):
     """
     An action a user has taken on a Meeting object.
 
-    MANAGER: The user is the owner of the Meeting object's Calendar folder. If
-        set, DELEGATE SHOULD NOT be set.
-    DELEGATE: The user is a delegate acting on a Meeting object in a delegator's
-        Calendar folder. If set, MANAGER SHOULD NOT be set.
-    DELETED_WITH_NO_RESPONSE: The user deleted the Meeting object with no
-        response sent to the organizer.
-    DELETED_EXCEPTION_WITH_NO_RESPONSE: The user deleted an exception to a
-        recurring series with no response sent to the organizer.
-    RESPONDED_TENTATIVE: The user tentatively accepted the meeting request.
-    RESPONSED_ACCEPT: The user accepted the meeting request.
-    RESPONDED_DECLINE: The user declined the meeting request.
-    MODIFIED_START_TIME: The user modified the start time.
-    MODIFIED_END_TIME: The user modified the end time.
-    MODIFIED_LOCATION: The user changed the location of the meeting.
-    RESPONDED_EXCEPTION_DECLINE: The user declined an exception to a recurring
-        series.
-    CANCELED: The user canceled a meeting request.
-    EXCEPTION_CANCELED: The user canceled an exception to a recurring series.
+    * MANAGER: The user is the owner of the Meeting object's Calendar folder. If
+      set, DELEGATE SHOULD NOT be set.
+    * DELEGATE: The user is a delegate acting on a Meeting object in a
+      delegator's Calendar folder. If set, MANAGER SHOULD NOT be set.
+    * DELETED_WITH_NO_RESPONSE: The user deleted the Meeting object with no
+      response sent to the organizer.
+    * DELETED_EXCEPTION_WITH_NO_RESPONSE: The user deleted an exception to a
+      recurring series with no response sent to the organizer.
+    * RESPONDED_TENTATIVE: The user tentatively accepted the meeting request.
+    * RESPONSED_ACCEPT: The user accepted the meeting request.
+    * RESPONDED_DECLINE: The user declined the meeting request.
+    * MODIFIED_START_TIME: The user modified the start time.
+    * MODIFIED_END_TIME: The user modified the end time.
+    * MODIFIED_LOCATION: The user changed the location of the meeting.
+    * RESPONDED_EXCEPTION_DECLINE: The user declined an exception to a recurring
+      series.
+    * CANCELED: The user canceled a meeting request.
+    * EXCEPTION_CANCELED: The user canceled an exception to a recurring series.
     """
     MANAGER = 0b1
     DELEGATE = 0b10
@@ -439,11 +403,11 @@ class ContactLinkState(enum.IntEnum):
     """
     Values for PidLidContactLinkGlobalAddressListLinkState.
 
-    DUPLICATE_NOT_LINKED: The duplicate contact is not linked to the GAL contact
-        or the GAL contact is not downloaded.
-    DUPLICATE_LINKED: The duplicate contact is linked to the GAL contact.
-    DUPLICATE_CANNOT_LINK: The duplicate contact cannot be automatically linked
-        to the GAL contact.
+    * DUPLICATE_NOT_LINKED: The duplicate contact is not linked to the GAL
+      contact or the GAL contact is not downloaded.
+    * DUPLICATE_LINKED: The duplicate contact is linked to the GAL contact.
+    * DUPLICATE_CANNOT_LINK: The duplicate contact cannot be automatically
+      linked to the GAL contact.
     """
     DUPLICATE_NOT_LINKED = 0
     DUPLICATE_LINKED = 1
@@ -508,38 +472,115 @@ class DisplayType(enum.IntEnum):
 
 
 
-class DMPaperSize:
+class DMPaperSize(enum.IntEnum):
+    """
+    The size of the output media for printers.
+
+    Value *SHOULD* be one of these, however it MAY be a device-specific value
+    that is greater than or equal to 0x0100.
+    """
     DMPAPER_LETTER = 0x0001
+    DMPAPER_LETTERSMALL = 0x0002
+    DMPAPER_TABLOID = 0x0003
+    DMPAPER_LEDGER = 0x0004
     DMPAPER_LEGAL = 0x0005
+    DMPAPER_STATEMENT = 0x0006
+    DMPAPER_EXECUTIVE = 0x0007
     DMPAPER_A3 = 0x0008
     DMPAPER_A4 = 0x0009
     DMPAPER_A4SMALL = 0x000A
     DMPAPER_A5 = 0x000B
     DMPAPER_B4 = 0x000C
     DMPAPER_B5 = 0x000D
+    DMPAPER_FOLIO = 0x000E
+    DMPAPER_QUARTO = 0x000F
     DMPAPER_10X14 = 0x0010
     DMPAPER_11X17 = 0x0011
+    DMPAPER_NOTE = 0x0012
+    DMPAPER_ENV_9 = 0x0013
+    DMPAPER_ENV_10 = 0x0014
+    DMPAPER_ENV_11 = 0x0015
+    DMPAPER_ENV_12 = 0x0016
+    DMPAPER_ENV_14 = 0x0017
     DMPAPER_CSHEET = 0x0018
+    DMPAPER_DSHEET = 0x0019
+    DMPAPER_ESHEET = 0x001A
+    DMPAPER_ENV_DL = 0x001B
+    DMPAPER_ENV_C5 = 0x001C
+    DMPAPER_ENV_C3 = 0x001D
+    DMPAPER_ENV_C4 = 0x001E
+    DMPAPER_ENV_C6 = 0x001F
+    DMPAPER_ENV_C65 = 0x0020
+    DMPAPER_ENV_B4 = 0x0021
+    DMPAPER_ENV_B5 = 0x0022
+    DMPAPER_ENV_B6 = 0x0023
+    DMPAPER_ENV_ITALY = 0x0024
+    DMPAPER_ENV_MONARCH = 0x0025
+    DMPAPER_ENV_PERSONAL = 0x0026
+    DMPAPER_FANFOLD_US = 0x0027
+    DMPAPER_FANFOLD_STD_GERMAN = 0x0028
+    DMPAPER_FANFOLD_LGL_GERMAN = 0x0029
     DMPAPER_DBL_JAPANESE_POSTCARD = 0x0045
     DMPAPER_A6 = 0x0046
+    DMPAPER_JENV_KAKU2 = 0x0047
+    DMPAPER_JENV_KAKU3 = 0x0048
+    DMPAPER_JENV_CHOU3 = 0x0049
+    DMPAPER_JENV_CHOU4 = 0x004A
+    DMPAPER_LETTER_ROTATED = 0x004B
     DMPAPER_A3_ROTATED = 0x004C
     DMPAPER_A4_ROTATED = 0x004D
     DMPAPER_A5_ROTATED = 0x004E
     DMPAPER_B4_JIS_ROTATED = 0x004F
     DMPAPER_B5_JIS_ROTATED = 0x0050
+    DMPAPER_JAPANESE_POSTCARD_ROTATED = 0x0051
+    DMPAPER_DBL_JAPANESE_POSTCARD_ROTATED = 0x0052
     DMPAPER_A6_ROTATED = 0x0053
+    DMPAPER_JENV_KAKU2_ROTATED = 0x0054
+    DMPAPER_JENV_KAKU3_ROTATED = 0x0055
+    DMPAPER_JENV_CHOU3_ROTATED = 0x0056
+    DMPAPER_JENV_CHOU4_ROTATED = 0x0057
     DMPAPER_B6_JIS = 0x0058
     DMPAPER_B6_JIS_ROTATED = 0x0059
     DMPAPER_12X11 = 0x005A
+    DMPAPER_JENV_YOU4 = 0x005B
+    DMPAPER_JENV_YOU4_ROTATED = 0x005C
+    DMPAPER_P16K = 0x005D
+    DMPAPER_P32K = 0x005E
+    DMPAPER_P32KBIG = 0x005F
+    DMPAPER_PENV_1 = 0x0060
+    DMPAPER_PENV_2 = 0x0061
+    DMPAPER_PENV_3 = 0x0062
+    DMPAPER_PENV_4 = 0x0063
+    DMPAPER_PENV_5 = 0x0064
+    DMPAPER_PENV_6 = 0x0065
+    DMPAPER_PENV_7 = 0x0066
+    DMPAPER_PENV_8 = 0x0067
+    DMPAPER_PENV_9 = 0x0068
+    DMPAPER_PENV_10 = 0x0069
+    DMPAPER_P16K_ROTATED = 0x006A
+    DMPAPER_P32K_ROTATED = 0x006B
+    DMPAPER_P32KBIG_ROTATED = 0x006C
+    DMPAPER_PENV_1_ROTATED = 0x006D
+    DMPAPER_PENV_2_ROTATED = 0x006E
+    DMPAPER_PENV_3_ROTATED = 0x006F
+    DMPAPER_PENV_4_ROTATED = 0x0070
+    DMPAPER_PENV_5_ROTATED = 0x0071
+    DMPAPER_PENV_6_ROTATED = 0x0072
+    DMPAPER_PENV_7_ROTATED = 0x0073
+    DMPAPER_PENV_8_ROTATED = 0x0074
+    DMPAPER_PENV_9_ROTATED = 0x0075
+    DMPAPER_PENV_10_ROTATED = 0x0076
     # TODO
 
 
 
 class DVAspect(enum.IntEnum):
     """
-    Part of the extra data for Outlook signatures. Different sources seem to
-    disagree on the meanings, so I'm sticking to the meanings in the official
-    Microsoft documentation of the DVASPECT enumeration.
+    Part of the extra data for Outlook signatures.
+
+    Different sources seem to disagree on the meanings, so I'm sticking to the
+    meanings in the official Microsoft documentation of the DVASPECT
+    enumeration.
     """
     CONTENT = 1
     THUMBNAIL = 2
@@ -550,7 +591,7 @@ class DVAspect(enum.IntEnum):
 
 class ElectronicAddressProperties(enum.IntEnum):
     @classmethod
-    def fromIter(cls, items : Iterable[int]) -> Set[ElectronicAddressProperties]:
+    def fromIter(cls, items: Iterable[int]) -> Set[ElectronicAddressProperties]:
         """
         Uses the iterable of ints to create a set of this enum.
         """
@@ -592,8 +633,9 @@ class EntryIDType(enum.Enum):
 
 class EntryIDTypeHex(enum.Enum):
     """
-    Converts a UID to the type of Entry ID structure. Uses a hex string instead
-    of bytes for the value.
+    Converts a UID to the type of Entry ID structure.
+
+    Uses a hex string instead of bytes for the value.
     """
     def toRaw(self):
         """
@@ -615,22 +657,24 @@ class EntryIDTypeHex(enum.Enum):
 class ErrorBehavior(enum.IntFlag):
     """
     The behavior to follow when handling an error in an MSG file and it's
-    attachments. Specifying an option indicates the behavior for the situation
-    is to log a message, if anything, instead of raising an exception. This is
-    an int flag enum, so the options you want will be ORed with each other.
+    attachments.
 
-    THROW: Throw the exception regardless of type.
-    ATTACH_NOT_IMPLEMENTED: Silence the exception for NotImplementedError.
-    ATTACH_BROKEN: Silence the exception for broken attachments.
-    ATTACH_SUPPRESS_ALL: Silence the exception for NotImplementedError and for
-        broken attachments.
-    RTFDE_MALFORMED: Silences errors about malformed RTF data.
-    RTFDE_UNKNOWN_ERROR: Silences errors from RTFDE that are not normal.
-    RTFDE: Silences all errors from RTFDE.
-    STANDARDS_VIOLATION: Silences StandardViolationError where acceptable.
-    OLE_DEFECT_INCORRECT: Silences defects of type DEFECT_INCORRECT that are
-        enabled by default. This can lead to strange bugs.
-    SUPPRESS_ALL: Silences all of the above.
+    Specifying an option indicates the behavior for the situation is to log a
+    message, if anything, instead of raising an exception. This is an int flag
+    enum, so the options you want will be ORed with each other.
+
+    * THROW: Throw the exception regardless of type.
+    * ATTACH_NOT_IMPLEMENTED: Silence the exception for NotImplementedError.
+    * ATTACH_BROKEN: Silence the exception for broken attachments.
+    * ATTACH_SUPPRESS_ALL: Silence the exception for NotImplementedError and for
+      broken attachments.
+    * RTFDE_MALFORMED: Silences errors about malformed RTF data.
+    * RTFDE_UNKNOWN_ERROR: Silences errors from RTFDE that are not normal.
+    * RTFDE: Silences all errors from RTFDE.
+    * STANDARDS_VIOLATION: Silences StandardViolationError where acceptable.
+    * OLE_DEFECT_INCORRECT: Silences defects of type DEFECT_INCORRECT that are
+      enabled by default. This can lead to strange bugs.
+    * SUPPRESS_ALL: Silences all of the above.
     """
     THROW = 0b000000
     # Attachments.
@@ -1260,7 +1304,7 @@ class Gender(enum.IntEnum):
 
 class IconIndex(enum.IntEnum):
     @classmethod
-    def tryMake(cls, value : int) -> Union[IconIndex, int]:
+    def tryMake(cls, value: int) -> Union[IconIndex, int]:
         """
         Try to make an instance, returning the value on failure.
         """
@@ -1300,24 +1344,18 @@ class InsecureFeatures(enum.IntFlag):
     also not recommended to use these on files you do not trust.
 
     The following features are avilable:
-    NONE: No insecure features are allowed (default).
-    PIL_IMAGE_PARSING: Various operations requiring PIL or Pillow that will read
-        image data from parts of the MSG file. These operations are usually
-        constructing new images or are converting from one format to another.
-        This may expose you to security issues from those libraries.
 
-    ALL: All of the previously listed features will be enabled for the MSG file.
+    * NONE: No insecure features are allowed (default).
+    * PIL_IMAGE_PARSING: Various operations requiring PIL or Pillow that will
+      read image data from parts of the MSG file. These operations are usually
+      constructing new images or are converting from one format to another.
+      This may expose you to security issues from those libraries.
+    * ALL: All of the previously listed features will be enabled for the MSG
+      file.
     """
     NONE = 0b0000
     PIL_IMAGE_PARSING = 0b0001
     ALL = 0b1111
-
-
-
-class Intelligence(enum.IntEnum):
-    ERROR = -1
-    DUMB = 0
-    SMART = 1
 
 
 
@@ -1342,16 +1380,16 @@ class MeetingObjectChange(enum.IntFlag):
     """
     Indicates a property that has changed on a meeting object.
 
-    START: The start has changed.
-    END: The end has changed.
-    RECUR: The recurrence pattern has changed.
-    LOCATION: The location has changed.
-    SUBJECT: The subject has changed.
-    REQUIRED_ATTENDEE: One or more required attendees were added.
-    OPTIONAL_ATTENDEE: One or more optional attendees were added.
-    BODY: The body was modified.
-    RESPONSE: The responseRequested or replyRequested property has changed.
-    ALLOW_PROPOSE: The appointmentNotAllowPropose property has changed.
+    * START: The start has changed.
+    * END: The end has changed.
+    * RECUR: The recurrence pattern has changed.
+    * LOCATION: The location has changed.
+    * SUBJECT: The subject has changed.
+    * REQUIRED_ATTENDEE: One or more required attendees were added.
+    * OPTIONAL_ATTENDEE: One or more optional attendees were added.
+    * BODY: The body was modified.
+    * RESPONSE: The responseRequested or replyRequested property has changed.
+    * ALLOW_PROPOSE: The appointmentNotAllowPropose property has changed.
     """
     START = 0b1
     END = 0b10
@@ -1379,17 +1417,17 @@ class MeetingType(enum.IntEnum):
     """
     The type of Meeting Request object of Meeting Update object.
 
-    EMPTY: Unspecified.
-    REQUEST: The meeting request is the initial request.
-    FULL: Attendees were added, the meeting was cancelled and the organizer is
-        uncancelling it, and or the start, end, or recurrance property was
-        changed.
-    INFO: An informational update was made to the meeting and it is not one of
-        the conditions for FULL.
-    OUT_OF_DATE: A newer Meeting Request object or MeetingUpdate object was
-        received after this one.
-    DELEGATOR_COPY: Set on the delegator's copy when a delegate will handle
-        meeting-related objects.
+    * EMPTY: Unspecified.
+    * REQUEST: The meeting request is the initial request.
+    * FULL: Attendees were added, the meeting was cancelled and the organizer is
+      uncancelling it, and or the start, end, or recurrance property was
+      changed.
+    * INFO: An informational update was made to the meeting and it is not one of
+      the conditions for FULL.
+    * OUT_OF_DATE: A newer Meeting Request object or MeetingUpdate object was
+      received after this one.
+    * DELEGATOR_COPY: Set on the delegator's copy when a delegate will handle
+      meeting-related objects.
     """
     EMPTY = 0x00000000
     REQUEST = 0x00000001
@@ -1434,7 +1472,7 @@ class NoteColor(enum.IntEnum):
 
 class ODTCf(enum.IntEnum):
     """
-    Values for the `cf` field of the ODT structure.
+    Values for the ``cf`` field of the ODT structure.
     """
     UNSPECIFIED = 0x0000
     RICH_TEXT_FORMAT = 0x0001
@@ -1505,7 +1543,7 @@ class OORBodyFormat(enum.IntEnum):
     HTML_ONLY = 0b0111
     TEXT_AND_HTML = 0b1011
     # This one isn't actually listed in the documentation, but I've seen it and
-    # this is my best guess for what a format of `0` is meant to mean. This will
+    # this is my best guess for what a format of 0 is meant to mean. This will
     # also prevent the code from failing on a 0 format.
     UNSPECIFIED = 0b0000
 
@@ -1605,7 +1643,7 @@ class RecurDOW(enum.IntEnum):
 
 class RecurEndType(enum.IntEnum):
     @classmethod
-    def fromInt(cls, value : int) -> RecurEndType:
+    def fromInt(cls, value: int) -> RecurEndType:
         """
         Some enum values CAN be created from more than one int, so handle that.
         """
@@ -1669,16 +1707,16 @@ class ResponseStatus(enum.IntEnum):
     """
     The response status of an attendee.
 
-    NONE: No response is required for this object.
-    ORGANIZED: This Meeting object belongs to the organizer.
-    TENTATIVE: The attendee has tentatively accepted.
-    ACCEPTED: The attendee has accepted.
-    DECLINED: The attendee has declined.
-    NOT_RESPONDED: The attendee has not yet responded.
+    * NONE: No response is required for this object.
+    * ORGANIZED: This Meeting object belongs to the organizer.
+    * TENTATIVE: The attendee has tentatively accepted.
+    * ACCEPTED: The attendee has accepted.
+    * DECLINED: The attendee has declined.
+    * NOT_RESPONDED: The attendee has not yet responded.
     """
 
     @classmethod
-    def fromIter(cls, items : Iterable[int]) -> List[ResponseStatus]:
+    def fromIter(cls, items: Iterable[int]) -> List[ResponseStatus]:
         """
         Uses the iterable of ints to create a list of this enum.
         """
@@ -1739,19 +1777,20 @@ class RuleActionType(enum.IntEnum):
 
 class SaveType(enum.IntEnum):
     """
-    Specifies the way that a function saved the data. Used to determine how the
-    return value from a save function should be read.
+    Specifies the way that a function saved the data.
 
-    CUSTOM: An unlisted save method was used, and the second value is
-        unspecified.
-    NONE: No data was saved, and the second tuple value should be None.
-    FILE: A single file was save, and the location is the second value.
-    FILES: Multiple files were created, and the second value is a list of the
-        locations.
-    FOLDER: A folder was created to store data, and the location is the second
-        value.
-    FOLDERS: Multiple folders were created to store data, and the second value
-        is a list of the locations.
+    Used to determine how the return value from a save function should be read.
+
+    * CUSTOM: An unlisted save method was used, and the second value is
+      unspecified.
+    * NONE: No data was saved, and the second tuple value should be None.
+    * FILE: A single file was save, and the location is the second value.
+    * FILES: Multiple files were created, and the second value is a list of the
+      locations.
+    * FOLDER: A folder was created to store data, and the location is the second
+      value.
+    * FOLDERS: Multiple folders were created to store data, and the second value
+      is a list of the locations.
     """
     CUSTOM = -1
     NONE = 0
@@ -1789,26 +1828,26 @@ class SideEffect(enum.IntFlag):
     A flag for how a Message object is handled by the client in relation to
     certain user interface actions.
 
-    OPEN_TO_DELETE: The client opens the Message object when deleting.
-    NO_FRAME: No UI is associated with the Message object.
-    COERCE_TO_INDEX: The client moves the Message object to the Inbox folder
-        when moving or copying to a Folder object with the PidTagContainerClass
-        property set to "IPF.Note".
-    OPEN_TO_COPY: The client opens the Message object when copying to another
-        folder.
-    OPEN_TO_MOVE: The client opens the Message object when moving to another
-        folder.
-    OPEN_FOR_CTX_MENU: The client opens the Message object when displaying
-        context-sensitive commands, such as a context menu, to the end user.
-    CANNOT_UNDO_DELETE: The client cannot undo a delete operation. Must not be
-        set unless the OPEN_TO_DELETE flag is set.
-    CANNOT_UNDO_COPY: The client cannot undo a copy operation. Must not be set
-        unless the OPEN_TO_COPY flag is set.
-    CANNOT_UNDO_MOVE: The client cannot undo a move operation. Must not be set
-        unless the OPEN_TO_MOVE flag is set.
-    HAS_SCRIPT: The Message object contains end-user script.
-    OPEN_TO_PERM_DELETE: The client opens the Message object to permanently
-        delete it.
+    * OPEN_TO_DELETE: The client opens the Message object when deleting.
+    * NO_FRAME: No UI is associated with the Message object.
+    * COERCE_TO_INDEX: The client moves the Message object to the Inbox folder
+      when moving or copying to a Folder object with the PidTagContainerClass
+      property set to "IPF.Note".
+    * OPEN_TO_COPY: The client opens the Message object when copying to another
+      folder.
+    * OPEN_TO_MOVE: The client opens the Message object when moving to another
+      folder.
+    * OPEN_FOR_CTX_MENU: The client opens the Message object when displaying
+      context-sensitive commands, such as a context menu, to the end user.
+    * CANNOT_UNDO_DELETE: The client cannot undo a delete operation. Must not be
+      set unless the OPEN_TO_DELETE flag is set.
+    * CANNOT_UNDO_COPY: The client cannot undo a copy operation. Must not be set
+      unless the OPEN_TO_COPY flag is set.
+    * CANNOT_UNDO_MOVE: The client cannot undo a move operation. Must not be set
+      unless the OPEN_TO_MOVE flag is set.
+    * HAS_SCRIPT: The Message object contains end-user script.
+    * OPEN_TO_PERM_DELETE: The client opens the Message object to permanently
+      delete it.
     """
     OPEN_TO_DELETE = 0b1
     NO_FRAME = 0b1000
@@ -1852,13 +1891,13 @@ class TaskMode(enum.IntEnum):
     """
     The mode of the Task object used in task communication (PidLidTaskMode).
 
-    UNASSIGNED: The Task object is not assigned.
-    EMBEDDED_REQUEST: The Task object is embedded in a task request.
-    ACCEPTED: The Task object has been accepted by the task assignee.
-    REJECTED: The Task object was rejected by the task assignee.
-    EMBEDDED_UPDATE: The Task object is embedded in a task update.
-    SELF_ASSIGNED: The Task object was assigned to the task assigner
-        (self-delegation).
+    * UNASSIGNED: The Task object is not assigned.
+    * EMBEDDED_REQUEST: The Task object is embedded in a task request.
+    * ACCEPTED: The Task object has been accepted by the task assignee.
+    * REJECTED: The Task object was rejected by the task assignee.
+    * EMBEDDED_UPDATE: The Task object is embedded in a task update.
+    * SELF_ASSIGNED: The Task object was assigned to the task assigner
+      (self-delegation).
     """
     UNASSIGNED = 0
     EMBEDDED_REQUEST = 1
@@ -1879,11 +1918,11 @@ class TaskOwnership(enum.IntEnum):
     """
     The role of the current user relative to the Task object.
 
-    NOT_ASSIGNED: The Task object is not assigned.
-    ASSIGNERS_COPY: The Task object is the task assigner's copy of the Task
-        object.
-    ASSIGNEES_COPY: The Task object is the task assignee's copy of the Task
-        object.
+    * NOT_ASSIGNED: The Task object is not assigned.
+    * ASSIGNERS_COPY: The Task object is the task assigner's copy of the Task
+      object.
+    * ASSIGNEES_COPY: The Task object is the task assignee's copy of the Task
+      object.
     """
     NOT_ASSIGNED = 0x00000000
     ASSIGNERS_COPY = 0x00000001
@@ -1895,13 +1934,14 @@ class TaskRequestType(enum.IntEnum):
     """
     The type of task request.
 
-    REQUEST: A plain request.
-    ACCEPT: Task has been accepted.
-    DECLINE: Task has been declined.
-    UPDATE: Task has been updated.
+    * REQUEST: A plain request.
+    * ACCEPT: Task has been accepted.
+    * DECLINE: Task has been declined.
+    * UPDATE: Task has been updated.
     """
+
     @classmethod
-    def fromClassType(cls, classType : str) -> TaskRequestType:
+    def fromClassType(cls, classType: str) -> TaskRequestType:
         """
         Convert a class type string into a TaskRequestType.
         """
@@ -1923,16 +1963,18 @@ class TaskRequestType(enum.IntEnum):
 
 class TaskState(enum.IntEnum):
     """
-    NOT_ASSIGNED: The Task object is not assigned.
-    ASSIGNEES_COPY_ACCEPTED: The Task object is the task assignee's copy of an
-        assigned Task object.
-    ASSIGNERS_COPY_ACCEPTED: The Task object is the task assigner's copy of an
-        assigned Task object.
-    ASSIGNERS_COPY_REJECTED: The Task object is the task assigner's copy of a
-        rejected Task object.
-    EMBEDDED_REJECTION: This Task object was created to correspond to a Task
-        object that was embedded in a task rejection but could not be found
-        locally.
+    TaskState.
+
+    * NOT_ASSIGNED: The Task object is not assigned.
+    * ASSIGNEES_COPY_ACCEPTED: The Task object is the task assignee's copy of an
+      assigned Task object.
+    * ASSIGNERS_COPY_ACCEPTED: The Task object is the task assigner's copy of an
+      assigned Task object.
+    * ASSIGNERS_COPY_REJECTED: The Task object is the task assigner's copy of a
+      rejected Task object.
+    * EMBEDDED_REJECTION: This Task object was created to correspond to a Task
+      object that was embedded in a task rejection but could not be found
+      locally.
     """
     NOT_ASSIGNED = 0x00000001
     ASSIGNEES_COPY_ACCEPTED = 0x00000002
@@ -1946,11 +1988,11 @@ class TaskStatus(enum.IntEnum):
     """
     The status of a task object (PidLidTaskStatus).
 
-    NOT_STARTED: The user has not started the task.
-    IN_PROGRESS: The users's work on the Task object is in progress.
-    COMPLETE: The user's work on the Task object is complete.
-    WAITING_ON_OTHER: The user is waiting on somebody else.
-    DEFERRED: The user has deferred work on the Task object.
+    * NOT_STARTED: The user has not started the task.
+    * IN_PROGRESS: The users's work on the Task object is in progress.
+    * COMPLETE: The user's work on the Task object is complete.
+    * WAITING_ON_OTHER: The user is waiting on somebody else.
+    * DEFERRED: The user has deferred work on the Task object.
     """
     NOT_STARTED = 0x00000000
     IN_PROGRESS = 0x00000001
@@ -1964,8 +2006,8 @@ class TZFlag(enum.IntFlag):
     """
     Flags for a TZRule object as defined in [MS-OXOCAL].
 
-    RECUR_CURRENT_TZREG: The rule is associated with a recurring series.
-    EFFECTIVE_TZREG: The rule is the effective rule.
+    * RECUR_CURRENT_TZREG: The rule is associated with a recurring series.
+    * EFFECTIVE_TZREG: The rule is the effective rule.
     """
     RECUR_CURRENT_TZREG = 0b1
     EFFECTIVE_TZREG = 0b10
@@ -1981,9 +2023,9 @@ class WrappedType(enum.IntEnum):
 class _EnumDeprecator:
     """
     Special class for handling deprecated enums in a way that shouldn't break
-    existing code, including code for checking `is` on a member of the enum.
+    existing code, including code for checking ``is`` on a member of the enum.
     """
-    def __init__(self, oldClassName : str, newClass : Type[enum.Enum], nameConversion : Dict[str, Any] = {}, valueConversion : Dict = {}):
+    def __init__(self, oldClassName: str, newClass: Type[enum.Enum], nameConversion: Dict[str, Any] = {}, valueConversion: Dict = {}):
         """
         :param oldClassName: The name to use in the deprecation message.
         :param newClass: The new enum class to look for the value in.
@@ -1992,7 +2034,7 @@ class _EnumDeprecator:
         :param valueConversion: A dictionary of old values to new values used
             when getting a value from the enum.
         """
-        self.__warnMessage = f'Enum `{oldClassName}` is deprecated and has been replaced with {newClass.__name__}. Please update your code.'
+        self.__warnMessage = f'Enum {oldClassName} is deprecated and has been replaced with {newClass.__name__}. Please update your code.'
         self.__new = newClass
         self.__nameConv = nameConversion
         self.__valConv = valueConversion

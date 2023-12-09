@@ -25,12 +25,12 @@ _T = TypeVar('_T')
 
 class MessageSignedBase(MessageBase, Generic[_T]):
     """
-    Base class for Message like msg files.
+    Base class for Message-like MSG files that are signed.
     """
 
-    def __init__(self, path, signedAttachmentClass : Type[_T] = SignedAttachment, **kwargs):
+    def __init__(self, path, signedAttachmentClass: Type[_T] = SignedAttachment, **kwargs):
         """
-        Supports all of the options from :method MessageBase.__init__: with some
+        Supports all of the options from :meth:`MessageBase.__init__` with some
         additional ones.
 
         :param signedAttachmentClass: optional, the class the object will use
@@ -42,7 +42,7 @@ class MessageSignedBase(MessageBase, Generic[_T]):
     @functools.cached_property
     def attachments(self) -> List[_T]:
         """
-        Returns a list of all attachments.
+        A list of all attachments.
 
         :raises StandardViolationError: The standard for signed messages was
             blatantly violated.
@@ -75,7 +75,7 @@ class MessageSignedBase(MessageBase, Generic[_T]):
     @functools.cached_property
     def body(self) -> Optional[str]:
         """
-        Returns the message body, if it exists.
+        The message body, if it exists.
         """
         if (body := self.getStringStream('__substg1.0_1000')) is not None:
             pass
@@ -97,7 +97,7 @@ class MessageSignedBase(MessageBase, Generic[_T]):
     @functools.cached_property
     def htmlBody(self) -> Optional[bytes]:
         """
-        Returns the html body, if it exists.
+        The html body, if it exists.
         """
         if (htmlBody := self.getStream('__substg1.0_10130102')) is not None:
             pass
@@ -133,7 +133,7 @@ class MessageSignedBase(MessageBase, Generic[_T]):
     @functools.cached_property
     def signedBody(self) -> Optional[str]:
         """
-        Returns the body from the signed message if it exists.
+        The body from the signed message if it exists.
         """
         self.attachments
         return self._signedBody
@@ -141,7 +141,7 @@ class MessageSignedBase(MessageBase, Generic[_T]):
     @functools.cached_property
     def signedHtmlBody(self) -> Optional[bytes]:
         """
-        Returns the HTML body from the signed message if it exists.
+        The HTML body from the signed message if it exists.
         """
         self.attachments
         return self._signedHtmlBody

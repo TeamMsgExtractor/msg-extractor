@@ -14,6 +14,7 @@ class StickyNote(MessageBase):
     """
     A sticky note.
     """
+
     def getJson(self) -> str:
         return json.dumps({
             'subject': self.subject,

@@ -26,10 +26,12 @@ if TYPE_CHECKING:
     from .msg_classes import MSGFile
 
 
-def _getMsgClassInfo(classType : str) -> Tuple[bool, Optional[str]]:
+def _getMsgClassInfo(classType: str) -> Tuple[bool, Optional[str]]:
     """
-    Checks if the specified class type is recognized by the module. Usually used
-    for checking if a type is simply unsupported rather than unknown.
+    Checks if the specified class type is recognized by the module.
+
+    Usually used for checking if a type is simply unsupported rather than
+    unknown.
 
     Returns a tuple of two items. The first is whether it is known. If it is
     known and support is refused, the second item will be a string of the
@@ -55,18 +57,19 @@ def openMsg(path, **kwargs) -> MSGFile:
     """
     Function to automatically open an MSG file and detect what type it is.
 
-    Accepts all of the same arguments as the __init__ method for the class it
-    creates. Extra options will be ignored if the class doesn't know what to do
-    with them, but child instances may end up using them if they understand
-    them. See :method MSGFile.__init__: for a list of all globally recognized
+    Accepts all of the same arguments as the ``__init__`` method for the class
+    it creates. Extra options will be ignored if the class doesn't know what to
+    do with them, but child instances may end up using them if they understand
+    them. See ``MSGFile.__init__`` for a list of all globally recognized
     options.
 
-    If :param strict: is set to True, this function will raise an exception when
-    it cannot identify what MSGFile derivitive to use. Otherwise, it will log
-    the error and return a basic MSGFile instance. Default is True.
+    :param strict: If set to ``True``, this function will raise an exception
+        when it cannot identify what ``MSGFile`` derivitive to use. Otherwise,
+        it will log the error and return a basic ``MSGFile`` instance. Default
+        is ``True``.
 
-    :raises UnsupportedMSGTypeError: if the type is recognized but not suppoted.
-    :raises UnrecognizedMSGTypeError: if the type is not recognized.
+    :raises UnsupportedMSGTypeError: The type is recognized but not suppoted.
+    :raises UnrecognizedMSGTypeError: The type is not recognized.
     """
     from .msg_classes import (
             AppointmentMeeting, Contact, Journal, MeetingCancellation,
@@ -179,12 +182,12 @@ def openMsg(path, **kwargs) -> MSGFile:
 
 def openMsgBulk(path, **kwargs) -> Union[List[MSGFile], Tuple[Exception, Union[str, bytes]]]:
     """
-    Takes the same arguments as openMsg, but opens a collection of msg files
+    Takes the same arguments as openMsg, but opens a collection of MSG files
     based on a wild card. Returns a list if successful, otherwise returns a
     tuple.
 
-    :param ignoreFailures: If this is True, will return a list of all successful
-        files, ignoring any failures. Otherwise, will close all that
+    :param ignoreFailures: If this is ``True``, will return a list of all
+        successful files, ignoring any failures. Otherwise, will close all that
         successfully opened, and return a tuple of the exception and the path of
         the file that failed.
     """

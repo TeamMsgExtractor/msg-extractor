@@ -85,8 +85,9 @@ class Task(MessageBase):
     @functools.cached_property
     def percentComplete(self) -> float:
         """
-        Indicates whether a time-flagged Message object is complete. Returns a
-        percentage in decimal form. 1.0 indicates it is complete.
+        Indicates whether a time-flagged Message object is complete.
+
+        :returns: A percentage in decimal form. 1.0 indicates it is complete.
         """
         return self.getNamedProp('8102', constants.ps.PSETID_TASK, 0.0)
 
@@ -101,7 +102,9 @@ class Task(MessageBase):
     def taskAccepted(self) -> bool:
         """
         Indicates whether a task assignee has replied to a tesk request for this
-        task object. Does not indicate if it was accepted or rejected.
+        task object.
+
+        Does not indicate if it was accepted or rejected.
         """
         return bool(self.getNamedProp('8108', constants.ps.PSETID_TASK))
 
@@ -123,8 +126,9 @@ class Task(MessageBase):
     @functools.cached_property
     def taskAssigners(self) -> Optional[bytes]:
         """
-        A stack of entries, each representing a task assigner. The most recent
-        task assigner (that is, the top) appears at the bottom.
+        A stack of entries, each representing a task assigner.
+
+        The most recent task assigner (that is, the top) appears at the bottom.
 
         The documentation on this is weird, so I don't know how to parse it.
         """
@@ -154,9 +158,10 @@ class Task(MessageBase):
     @functools.cached_property
     def taskDeadOccurrence(self) -> bool:
         """
-        Indicates whether a new recurring task remains to be generated. Set to
-        False on a new Task object and True when the client generates the last
-        recurring task.
+        Indicates whether a new recurring task remains to be generated.
+
+        Set to ``False`` on a new Task object and ``True`` when the client
+        generates the last recurring task.
         """
         return bool(self.getNamedProp('8109', constants.ps.PSETID_TASK))
 
@@ -239,7 +244,9 @@ class Task(MessageBase):
     @functools.cached_property
     def taskMode(self) -> Optional[TaskMode]:
         """
-        Used in a task communication. Should be 0 (UNASSIGNED) on task objects.
+        Used in a task communication.
+
+        Should be 0 (UNASSIGNED) on task objects.
         """
         return self.getNamedAs('8518', constants.ps.PSETID_COMMON, TaskMode)
 

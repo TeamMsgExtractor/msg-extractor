@@ -10,8 +10,9 @@ from ..enums import AttachmentType, SaveType
 
 class BrokenAttachment(AttachmentBase):
     """
-    An attachment that has suffered a fatal error. Will not generate from a
-    NotImplementedError exception.
+    An attachment that has suffered a fatal error.
+
+    Will not generate from a NotImplementedError exception.
     """
 
     def getFilename(self, **_) -> str:
@@ -20,7 +21,9 @@ class BrokenAttachment(AttachmentBase):
     def save(self, **kwargs) -> constants.SAVE_TYPE:
         """
         Raises a NotImplementedError unless :param skipNotImplemented: is set to
-        True. If it is, returns a value that indicates no data was saved.
+        True.
+
+        If it is, returns a value that indicates no data was saved.
         """
         if kwargs.get('skipNotImplemented', False):
             return (SaveType.NONE, None)
@@ -36,7 +39,4 @@ class BrokenAttachment(AttachmentBase):
 
     @property
     def type(self) -> AttachmentType:
-        """
-        Returns an enum value that identifies the type of attachment.
-        """
         return AttachmentType.BROKEN
