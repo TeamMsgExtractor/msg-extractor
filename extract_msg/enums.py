@@ -302,7 +302,9 @@ class BodyTypes(enum.IntFlag):
     This is an IntFlag enum, so to check if a body was found use the in operator
     with the body you are checking. For example:
 
-    >>> rtfFound: bool = BodyTypes.RTF in msg.detectedBodies
+    .. code-block:: python
+
+        >>> rtfFound: bool = BodyTypes.RTF in msg.detectedBodies
     """
     NONE = 0b000
     PLAIN = 0b001

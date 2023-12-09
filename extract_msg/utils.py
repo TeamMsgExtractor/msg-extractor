@@ -249,25 +249,29 @@ def divide(string: AnyStr, length: int) -> List[AnyStr]:
     :returns: list containing the divided strings.
 
     Example:
-    >>> a = divide('Hello World!', 2)
-    >>> print(a)
-    ['He', 'll', 'o ', 'Wo', 'rl', 'd!']
-    >>> a = divide('Hello World!', 5)
-    >>> print(a)
-    ['Hello', ' Worl', 'd!']
+
+    .. code-block:: python
+
+        >>> a = divide('Hello World!', 2)
+        >>> print(a)
+        ['He', 'll', 'o ', 'Wo', 'rl', 'd!']
+        >>> a = divide('Hello World!', 5)
+        >>> print(a)
+        ['Hello', ' Worl', 'd!']
     """
     return [string[length * x:length * (x + 1)] for x in range(ceilDiv(len(string), length))]
 
 
 def filetimeToDatetime(rawTime: int) -> datetime.datetime:
     """
-    Converts a filetime into a datetime.
+    Converts a filetime into a ``datetime``.
 
     Some values have specialized meanings, listed below:
-        915151392000000000: December 31, 4500, representing a null time. Returns
-            an instance of extract_msg.null_date.NullDate.
-        915046235400000000: 23:59 on August 31, 4500, representing a null time.
-            Returns extract_msg.constants.NULL_DATE.
+
+    * 915151392000000000: December 31, 4500, representing a null time. Returns
+      an instance of extract_msg.null_date.NullDate.
+    * 915046235400000000: 23:59 on August 31, 4500, representing a null time.
+      Returns extract_msg.constants.NULL_DATE.
     """
     try:
         if rawTime < 116444736000000000:
@@ -330,7 +334,7 @@ def findWk(path = None):
 
 def fromTimeStamp(stamp: float) -> datetime.datetime:
     """
-    Returns a datetime from the UTC timestamp given the current timezone.
+    Returns a ``datetime`` from the UTC timestamp given the current timezone.
     """
     try:
         tz = tzlocal.get_localzone()
