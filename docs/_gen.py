@@ -15,8 +15,8 @@ class Package(NamedTuple):
     """
     A class representing one of the subpackages of a module.
     """
-    modules: List[str]
-    packages: List[str]
+    modules : List[str]
+    packages : List[str]
 
 
 
