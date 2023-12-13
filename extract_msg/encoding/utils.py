@@ -202,7 +202,7 @@ def variableByteDecode(codecName: str, data, errors: str, decodeTable: Dict[int,
     """
     Function for decoding variable-byte codecs that use one or two bytes per character.
 
-    Checks if a character is less than 0x80, mapping it directly if so.
+    Checks if a character is less than ``0x80``, mapping it directly if so.
     Otherwise, it reads the next byte and combines the two before looking up the
     new value.
 

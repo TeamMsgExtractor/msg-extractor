@@ -47,8 +47,8 @@ class ClipboardFormatOrAnsiString:
     def ansiString(self) -> Optional[bytes]:
         """
         The null-terminated ANSI string, as bytes, of the name of a registered
-        clipboard format. Only set if markerOrLength is not 0x00000000,
-        0xFFFFFFFE, or 0xFFFFFFFF.
+        clipboard format. Only set if markerOrLength is not ``0x00000000``,
+        ``0xFFFFFFFE``, or ``0xFFFFFFFF``.
 
         Setting this will modify the markerOrLength field automatically.
         """
@@ -66,8 +66,8 @@ class ClipboardFormatOrAnsiString:
         """
         The clipboard format, if any.
 
-        To set this, make sure that :property markerOrLength: is 0xFFFFFFFE or
-        0xFFFFFFFF *before* setting.
+        To set this, make sure that :property markerOrLength: is ``0xFFFFFFFE``
+        or ``0xFFFFFFFF`` *before* setting.
         """
         return self.__clipboardFormat
 

@@ -365,7 +365,7 @@ class NNTPNewsgroupFolderEntryID(EntryID):
     @property
     def folderType(self) -> int:
         """
-        The type of folder. MUST be 0x000C.
+        The type of folder. MUST be ``0x000C``.
         """
         return self.__folderType
 
