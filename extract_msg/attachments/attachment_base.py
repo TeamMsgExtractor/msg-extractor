@@ -671,7 +671,8 @@ class AttachmentBase(abc.ABC):
         The offset, in rendered characters, to use when rendering the attachment
         within the main message text.
 
-        A value of 0xFFFFFFFF indicates a hidden attachment that is not to be rendered.
+        A value of ``0xFFFFFFFF`` indicates a hidden attachment that is not to
+        be rendered.
         """
         return self.getPropertyVal('370B0003')
 

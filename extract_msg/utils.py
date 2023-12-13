@@ -129,11 +129,11 @@ def bitwiseAdjust(inp: int, mask: int) -> int:
     bitwise AND.
 
     This is useful for things like flags where you are trying to get a small
-    portion of a larger number. Say for example, you had the number 0xED
-    (0b11101101) and you needed the adjusted result of the AND operation with
-    0x70 (0b01110000). The result of the AND operation (0b01100000) and the mask
-    used to get it (0x70) are given to this function and the adjustment will be
-    done automatically.
+    portion of a larger number. Say for example, you had the number ``0xED``
+    (``0b11101101``) and you needed the adjusted result of the AND operation
+    with ``0x70`` (``0b01110000``). The result of the AND operation
+    (``0b01100000``) and the mask used to get it (``0x70``) are given to this
+    function and the adjustment will be done automatically.
 
     :param mask: MUST be greater than 0.
 
@@ -147,7 +147,7 @@ def bitwiseAdjust(inp: int, mask: int) -> int:
 def bitwiseAdjustedAnd(inp: int, mask: int) -> int:
     """
     Preforms the bitwise AND operation between :param inp: and :param mask: and
-    adjusts the results based on the rules of the bitwiseAdjust function.
+    adjusts the results based on the rules of :func:`bitwiseAdjust`.
 
     :raises ValueError: The mask is not greater than 0.
     """
@@ -166,19 +166,19 @@ def bytesToGuid(bytesInput: bytes) -> str:
 
 def ceilDiv(n: int, d: int) -> int:
     """
-    Returns the int from the ceil division of n / d.
+    Returns the ``int`` from the ceiling division of n / d.
 
-    ONLY use ints as inputs to this function.
+    ONLY use ``int``\\s as inputs to this function.
 
-    For ints, this is faster and more accurate for numbers
-    outside the precision range of float.
+    For ``int``\\s, this is faster and more accurate for numbers outside the
+    precision range of ``float``.
     """
     return -(n // -d)
 
 
 def cloneOleFile(sourcePath, outputPath) -> None:
     """
-    Uses the OleWriter class to clone the specified OLE file into a new
+    Uses the ``OleWriter`` class to clone the specified OLE file into a new
     location.
 
     Mainly designed for testing.
