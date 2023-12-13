@@ -4,26 +4,26 @@ extract\_msg.properties package
 Submodules
 ----------
 
-extract\_msg.properties.named.py module
----------------------------------------
+extract\_msg.properties.named module
+------------------------------------
 
-.. automodule:: extract_msg.properties.named.py
+.. automodule:: extract_msg.properties.named
    :members:
    :undoc-members:
    :show-inheritance:
 
-extract\_msg.properties.prop.py module
---------------------------------------
+extract\_msg.properties.prop module
+-----------------------------------
 
-.. automodule:: extract_msg.properties.prop.py
+.. automodule:: extract_msg.properties.prop
    :members:
    :undoc-members:
    :show-inheritance:
 
-extract\_msg.properties.properties\_store.py module
----------------------------------------------------
+extract\_msg.properties.properties\_store module
+------------------------------------------------
 
-.. automodule:: extract_msg.properties.properties_store.py
+.. automodule:: extract_msg.properties.properties_store
    :members:
    :undoc-members:
    :show-inheritance:

@@ -11,6 +11,7 @@ Welcome to extract-msg's documentation!
    :caption: Contents:
 
    modules
+   type_support
 
 Indices and tables
 ==================

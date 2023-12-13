@@ -4,26 +4,26 @@ extract\_msg.constants package
 Submodules
 ----------
 
-extract\_msg.constants.ps.py module
------------------------------------
+extract\_msg.constants.ps module
+--------------------------------
 
-.. automodule:: extract_msg.constants.ps.py
+.. automodule:: extract_msg.constants.ps
    :members:
    :undoc-members:
    :show-inheritance:
 
-extract\_msg.constants.re.py module
------------------------------------
+extract\_msg.constants.re module
+--------------------------------
 
-.. automodule:: extract_msg.constants.re.py
+.. automodule:: extract_msg.constants.re
    :members:
    :undoc-members:
    :show-inheritance:
 
-extract\_msg.constants.st.py module
------------------------------------
+extract\_msg.constants.st module
+--------------------------------
 
-.. automodule:: extract_msg.constants.st.py
+.. automodule:: extract_msg.constants.st
    :members:
    :undoc-members:
    :show-inheritance:
