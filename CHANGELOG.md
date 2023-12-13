@@ -1,3 +1,6 @@
+**v0.47.1**
+* Minor docstring updates.
+
 **v0.47.0**
 * Changed the public API for `PropertiesStore` to improve the quality of its code. The properties type is now mandatory, and the intelligence field (and the related enum) has been removed.
     * Additionally, the `toBytes` and `__bytes__` methods will both generate based on the contents of this class, allowing for new properties to be created and for existing properties to be modified or removed if the class is set to writable on creation.

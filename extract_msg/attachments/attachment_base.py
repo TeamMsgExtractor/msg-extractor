@@ -290,7 +290,7 @@ class AttachmentBase(abc.ABC):
 
     def getNamedProp(self, propertyName: str, guid: str, default: _T = None) -> Union[Any, _T]:
         """
-        instance.namedProperties.get((propertyName, guid), default)
+        ``instance.namedProperties.get((propertyName, guid), default)``
 
         Can be overriden to create new behavior.
         """
@@ -400,7 +400,7 @@ class AttachmentBase(abc.ABC):
         the filename this function should receive should be "__substg1.0_001A".
 
         This should ALWAYS return a string if it was found, otherwise returns
-        None.
+        ``None``.
 
         :raises ReferenceError: The associated ``MSGFile`` instance has been
             garbage collected.
@@ -415,10 +415,11 @@ class AttachmentBase(abc.ABC):
         class if it is found.
 
         :param overrideClass: Class/function to use to morph the data that was
-            read. The data will be the first argument to the class's __init__
-            function or the function itself, if that is what is provided. If
-            the value is None, this function is not called. If you want it to
-            be called regardless, you should handle the data directly.
+            read. The data will be the first argument to the class's
+            ``__init__`` method or the function itself, if that is what is
+            provided. If the value is ``None``, this function is not called. If
+            you want it to be called regardless, you should handle the data
+            directly.
         """
         value = self.getStream(streamID)
 
