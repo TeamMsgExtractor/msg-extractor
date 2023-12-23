@@ -110,6 +110,9 @@ class OleWriter:
         self.__largeEntrySectors = 0
         self.__numMinifatSectors = 0
 
+        # In a future version, this will be setable as an optional argument.
+        self.__version = 3
+
     def __getContainingStorage(self, path: List[str], entryExists: bool = True, create: bool = False) -> Dict:
         """
         Finds the storage ``dict`` internally where the entry specified by
@@ -262,7 +265,7 @@ class OleWriter:
                     self.__numMinifatSectors += ceilDiv(len(entry.data), 64)
                 else:
                     self.__largeEntries.append(entry)
-                    self.__largeEntrySectors += ceilDiv(len(entry.data), 512)
+                    self.__largeEntrySectors += ceilDiv(len(entry.data), self.__sectorSize)
 
     def __walkEntries(self) -> Iterator[DirectoryEntry]:
         """
@@ -283,7 +286,34 @@ class OleWriter:
                         yield item
 
     @property
+    def __dirEntsPerSector(self) -> int:
+        """
+        The number of Directory Entries that can fit in a sector.
+        """
+        return self.__sectorSize // 128
+
+    @property
+    def __linksPerSector(self) -> int:
+        """
+        The number of links per FAT/DIFAT sector.
+        """
+        self.__sectorSize // 4
+
+    @property
+    def __miniSectorsPerSector(self) -> int:
+        """
+        The number of mini sectors that a regular sector will hold.
+        """
+        return self.__sectorSize // 64
+
+    @property
     def __numberOfSectors(self) -> int:
+        # Most of this should be pretty self evident, but line by line the
+        # calculation is as such:
+        # 1. How many sectors are needed for the directory entries.
+        # 2. How many FAT sectors are needed for the MiniStream.
+        # 3. How many sectors are needed for the MiniFat (ceil divide #2 by 16).
+        # 4. The number of FAT sectors needed to store the larger data.
         return ceilDiv(self.__dirEntryCount, 4) + \
                self.__numMinifat + \
                ceilDiv(self.__numMinifat, 16) + \
@@ -292,9 +322,17 @@ class OleWriter:
     @property
     def __numMinifat(self) -> int:
         """
-        The number of FAT sectors needed to store the mini FAT.
+        The number of FAT sectors needed to store the mini stream.
         """
-        return ceilDiv(self.__numMinifatSectors, 8)
+        return ceilDiv(64 * self.__numMinifatSectors, self.__sectorSize)
+
+    @property
+    def __sectorSize(self) -> int:
+        """
+        The size of each sector, in bytes.
+        """
+        # Specifically ignore that part of the code is unreachable.
+        return 512 is self.__version == 3 else 4096 # type: ignore
 
     def _cleanupEntries(self) -> None:
         """
@@ -319,12 +357,12 @@ class OleWriter:
         # Right now we just use an annoying while loop to get the numbers.
         numDifat = 0
         # All divisions are ceiling divisions,.
-        numFat = ceilDiv(self.__numberOfSectors or 1, 127)
+        numFat = ceilDiv(self.__numberOfSectors or 1, self.__linksPerSector - 1)
         newNumFat = 1
         while numFat != newNumFat:
             numFat = newNumFat
-            numDifat = ceilDiv(max(numFat - 109, 0), 127)
-            newNumFat = ceilDiv(self.__numberOfSectors + numDifat, 127)
+            numDifat = ceilDiv(max(numFat - 109, 0), self.__linksPerSector - 1)
+            newNumFat = ceilDiv(self.__numberOfSectors + numDifat, self.__linksPerSector - 1)
 
         return (numFat, numDifat, self.__numberOfSectors + numDifat + numFat)
 
@@ -337,7 +375,7 @@ class OleWriter:
         root = copy.copy(self.__rootEntry)
 
         # Add the location of the start of the mini stream.
-        root.startingSectorLocation = (startingSector + ceilDiv(self.__dirEntryCount, 4) + ceilDiv(self.__numMinifatSectors, 128)) if self.__numMinifat > 0 else 0xFFFFFFFE
+        root.startingSectorLocation = (startingSector + ceilDiv(self.__dirEntryCount, 4) + ceilDiv(self.__numMinifatSectors, self.__linksPerSector)) if self.__numMinifat > 0 else 0xFFFFFFFE
         root.streamSize = self.__numMinifatSectors * 64
         root.childTreeRoot = None
         root.childID = 0xFFFFFFFF
@@ -448,12 +486,13 @@ class OleWriter:
         f.write(b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
         # Minor version.
         f.write(b'\x3E\x00')
-        # Major version. For now, we only support version 3.
-        f.write(b'\x03\x00')
+        # Major version. For now, we only support version 3, but support for
+        # version 4 is planned.
+        f.write(b'\x03\x00' if self.__version == 3 else b'\x04\x00')
         # Byte order. Specifies that it is little endian.
         f.write(b'\xFE\xFF')
         # Sector shift.
-        f.write(b'\x09\x00')
+        f.write(b'\x09\x00' if self.__version == 3 else b'\x0C\x00')
         # Mini sector shift.
         f.write(b'\x06\x00')
         # Reserved.
@@ -472,7 +511,7 @@ class OleWriter:
         # First mini FAT sector location.
         f.write(constants.st.ST_LE_UI32.pack((numFat + numDifat + ceilDiv(self.__dirEntryCount, 4)) if self.__numMinifat > 0 else 0xFFFFFFFE))
         # Number of mini FAT sectors.
-        f.write(constants.st.ST_LE_UI32.pack(ceilDiv(self.__numMinifatSectors, 128)))
+        f.write(constants.st.ST_LE_UI32.pack(ceilDiv(self.__numMinifatSectors, self.__linksPerSector)))
         # First DIFAT sector location. If there are none, set to 0xFFFFFFFE (End
         # of chain).
         f.write(constants.st.ST_LE_UI32.pack(0 if numDifat else 0xFFFFFFFE))
@@ -485,16 +524,20 @@ class OleWriter:
 
         # Write the DIFAT sectors.
         for x in range(numFat):
+            # Quickly check if we have hit 109. If we have, and we are writing
+            # a version 4 file, we need to pad a bunch of null bytes.
+            if x == 109 and self.__version == 4:
+                f.write(b'\x00' * 3584)
             # This kind of sucks to code, ngl.
-            if x > 109 and (x - 109) % 127 == 0:
+            if x > 109 and (x - 109) % (self.__linksPerSector - 1) == 0:
                 # If we are at the end of a DIFAT sector, write the jump.
-                f.write(constants.st.ST_LE_UI32.pack((x - 109) // 127))
+                f.write(constants.st.ST_LE_UI32.pack((x - 109) // (self.__linksPerSector - 1)))
             # Write the next FAT sector location.
             f.write(constants.st.ST_LE_UI32.pack(x + numDifat))
 
         # Finally, fill out the last DIFAT sector with null entries.
         if numFat > 109:
-            f.write(b'\xFF\xFF\xFF\xFF' * (127 - ((numFat - 109) % 127)))
+            f.write(b'\xFF\xFF\xFF\xFF' * ((self.__linksPerSector - 1) - ((numFat - 109) % (self.__linksPerSector - 1))))
             # Finally, make sure to write the end of chain marker for the DIFAT.
             f.write(b'\xFE\xFF\xFF\xFF')
         else:
@@ -511,13 +554,13 @@ class OleWriter:
         offset = numDifat + numFat
 
         # Fill in the values for the directory stream.
-        for x in range(offset + 1, offset + ceilDiv(self.__dirEntryCount, 4)):
+        for x in range(offset + 1, offset + ceilDiv(self.__dirEntryCount, self.__dirEntsPerSector)):
             f.write(constants.st.ST_LE_UI32.pack(x))
 
         # Write the end of chain marker.
         f.write(b'\xFE\xFF\xFF\xFF')
 
-        offset += ceilDiv(self.__dirEntryCount, 4)
+        offset += ceilDiv(self.__dirEntryCount, self.__dirEntsPerSector)
 
         # Check if we have minifat *at all* first.
         if self.__numMinifatSectors > 0:
@@ -544,7 +587,7 @@ class OleWriter:
         # to that list if the size was more than 4096. The order in the list is
         # how they will eventually be stored into the file correctly.
         for entry in self.__largeEntries:
-            size = ceilDiv(len(entry.data), 512)
+            size = ceilDiv(len(entry.data), self.__sectorSize)
             entry.startingSectorLocation = offset
             for x in range(offset + 1, offset + size):
                 f.write(constants.st.ST_LE_UI32.pack(x))
@@ -555,9 +598,9 @@ class OleWriter:
             offset += size
 
         # Finally, fill fat with markers to specify no block exists.
-        freeSectors = totalSectors & 0x7F
+        freeSectors = totalSectors & (self.__linksPerSector - 1)
         if freeSectors:
-            f.write(b'\xFF\xFF\xFF\xFF' * (128 - freeSectors))
+            f.write(b'\xFF\xFF\xFF\xFF' * (self.__linksPerSector - freeSectors))
 
         # Finally, return the current sector index for use in other places.
         return numDifat + numFat
@@ -587,8 +630,8 @@ class OleWriter:
         """
         for x in self.__largeEntries:
             f.write(x.data)
-            if len(x.data) & 511:
-                f.write(b'\x00' * (512 - (len(x.data) & 511)))
+            if len(x.data) & (self.__sectorSize - 1):
+                f.write(b'\x00' * (self.__sectorSize - (len(x.data) & (self.__sectorSize - 1))))
 
     def _writeMini(self, f, entries: List[DirectoryEntry]) -> None:
         """
@@ -606,8 +649,8 @@ class OleWriter:
                 currentSector += size
 
         # Finally, write the remaining slots.
-        if currentSector & 127:
-            f.write(b'\xFF\xFF\xFF\xFF' * (128 - (currentSector & 127)))
+        if currentSector & (self.__linksPerSector - 1):
+            f.write(b'\xFF\xFF\xFF\xFF' * (self.__linksPerSector - (currentSector & (self.__linksPerSector - 1))))
 
         # Write the mini stream.
         for x in entries:
@@ -617,8 +660,8 @@ class OleWriter:
                     f.write(b'\x00' * (64 - (len(x.data) & 63)))
 
         # Pad the final mini stream block.
-        if self.__numMinifatSectors & 7:
-            f.write((b'\x00' * 64) * (8 - (self.__numMinifatSectors & 7)))
+        if self.__numMinifatSectors & (self.__miniSectorsPerSector - 1):
+            f.write((b'\x00' * 64) * (self.__miniSectorsPerSector - (self.__numMinifatSectors & (self.__miniSectorsPerSector - 1))))
 
     def addEntry(self, path: MSG_PATH, data: Optional[Union[bytes, SupportsBytes]] = None, storage: bool = False, **kwargs) -> None:
         """
@@ -982,6 +1025,8 @@ class OleWriter:
 
         If :param path: has a ``write`` method, the object will be used
         directly.
+
+        If a failure occurs, the file or IO device may have been modified.
 
         :raises TooManySectorsError: The number of sectors requires for a part
             of writing is too large.
