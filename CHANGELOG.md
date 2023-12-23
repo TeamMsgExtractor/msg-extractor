@@ -1,5 +1,7 @@
 **v0.47.1**
 * Minor docstring updates.
+* Minor adjustments to `OleWriter` to prepare the code for being able to write version 4 files. Version 3 files are currently the only one's supported, but much of the code had hard-coded values that could be replaced with variables and small conditionals. This will have very little performance impact, and should not be noticeable.
+* Improved comments on `OleWriter` to make private sections more understandable.
 
 **v0.47.0**
 * Changed the public API for `PropertiesStore` to improve the quality of its code. The properties type is now mandatory, and the intelligence field (and the related enum) has been removed.

@@ -297,7 +297,7 @@ class OleWriter:
         """
         The number of links per FAT/DIFAT sector.
         """
-        self.__sectorSize // 4
+        return self.__sectorSize // 4
 
     @property
     def __miniSectorsPerSector(self) -> int:
@@ -331,8 +331,7 @@ class OleWriter:
         """
         The size of each sector, in bytes.
         """
-        # Specifically ignore that part of the code is unreachable.
-        return 512 is self.__version == 3 else 4096 # type: ignore
+        return 512 if self.__version == 3 else 4096
 
     def _cleanupEntries(self) -> None:
         """
