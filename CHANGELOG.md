@@ -1,5 +1,6 @@
 **v0.48.0**
 * Adjusted error handling for named properties to handle critical streams being missing and to allow suppression of those errors.
+* Adjusted error handling for named properties to allow silencing of errors caused by invalid references to the name stream. If `ErrorBehavior.NAMED_NAME_STREAM` is provided to the `MSGFile` instance, a warning will be logged and that entry will simply be dropped.
 * Minor docstring updates.
 * Minor adjustments to `OleWriter` to prepare the code for being able to write version 4 files. Version 3 files are currently the only one's supported, but much of the code had hard-coded values that could be replaced with variables and small conditionals. This will have very little performance impact, and should not be noticeable.
 * Improved comments on `OleWriter` to make private sections more understandable.

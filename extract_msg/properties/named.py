@@ -100,7 +100,20 @@ class Named:
             properties: List[NamedPropertyBase] = []
 
             for entry in entries:
-                properties.append(StringNamedProperty(entry, self.__getName(entry['id'])) if entry['pkind'] == NamedPropertyType.STRING_NAMED else NumericalNamedProperty(entry))
+                if entry['pkind'] == NamedPropertyType.STRING_NAMED:
+                    name = None
+                    try:
+                        name = self.__getName(entry['id'])
+                    except ValueError as e:
+                        if ErrorBehavior.NAMED_NAME_STREAM in msg.errorBehavior:
+                            logger.warning(f'Dropping named property because it failed to acquire name from name stream: {e}')
+                        else:
+                            raise
+
+                    if name:
+                        properties.append(StringNamedProperty(entry, name))
+                else:
+                    properties.append(NumericalNamedProperty(entry))
 
             for property in properties:
                 id_ = property.identifier

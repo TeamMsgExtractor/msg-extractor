@@ -674,6 +674,9 @@ class ErrorBehavior(enum.IntFlag):
     * STANDARDS_VIOLATION: Silences StandardViolationError where acceptable.
     * OLE_DEFECT_INCORRECT: Silences defects of type DEFECT_INCORRECT that are
       enabled by default. This can lead to strange bugs.
+    * NAMED_NAME_STREAM: Silences errors caused by invalid indexes into the
+      name stream for named properties. Any properties with an invalid name will
+      simply be dropped.
     * SUPPRESS_ALL: Silences all of the above.
     """
     THROW = 0b000000
@@ -688,8 +691,10 @@ class ErrorBehavior(enum.IntFlag):
     # General.
     STANDARDS_VIOLATION = 0b010000
     OLE_DEFECT_INCORRECT = 0b100000
+    # Named Properties
+    NAMED_NAME_STREAM = 0b1000000
 
-    SUPPRESS_ALL = 0b111111
+    SUPPRESS_ALL = 0b1111111
 
 
 
