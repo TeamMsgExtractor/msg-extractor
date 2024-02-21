@@ -74,24 +74,14 @@ class MessageSignedBase(MessageBase, Generic[_T]):
 
         # Check the mimetype *directly*. Detection of mimetype through data is
         # unacceptable for this check.
-        temp = atts[0].getStringStream('__substg1.0_370E')
-        if temp != 'multipart/signed':
-            # While this *is* a violation, we are considering it a warning,
-            # however it will give context if an error occurs later on about
-            # the data being messed up.
-            logger.warning(f'Standards Violation: Signed attachment *must* have mimetype set to "multipart/signed" (got "{temp or ""}").')
-            # We won't do much analyzing here, but we want to see if the
-            # mimetype module, should it be present, can at least detect the
-            # data as being multipart. If it is and the next parts fail, then
-            # something weird likely happened, otherwise we have a good
-            # indication of what actually happened.
-            if not temp:
-                if atts[0].mimetype:
-                    # No mimetype listed, but mimetype was detected. Check if it
-                    # at least *starts* with "multipart/" and call it good
-                    # enough if it does.
-                    if not atts[0].mimetype.startswith('multipart/'):
-                        logger.warning(f'Standards Violation: Signed attachment had not set mimetype, and detected mimetype is not multipart (got {atts[0].mimetype}).')
+        #temp = atts[0].getStringStream('__substg1.0_370E')
+        #if temp == 'multipart/signed':
+            ## Do nothing, but this is how we detect that it is clear signed.
+            #pass
+        #else:
+            ## Do nothing, but this is how we detect that it is *not* clear
+            # signed.
+            #pass
 
         # We need to unwrap the multipart stream.
         unwrapped = unwrapMultipart(atts[0].data)
