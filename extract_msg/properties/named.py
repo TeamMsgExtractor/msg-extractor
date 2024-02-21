@@ -75,7 +75,7 @@ class Named:
 
         if self.namesStream is None:
             if ErrorBehavior.STANDARDS_VIOLATION in msg.errorBehavior:
-                logger.warning('Standards Violation: Guid stream missing from named properties. Will not parse named properties.')
+                logger.error('Standards Violation: Guid stream missing from named properties. Will not parse named properties.')
                 # Return immediately since the entry stream will likely fail.
                 return
             else:
@@ -106,7 +106,7 @@ class Named:
                         name = self.__getName(entry['id'])
                     except ValueError as e:
                         if ErrorBehavior.NAMED_NAME_STREAM in msg.errorBehavior:
-                            logger.warning(f'Dropping named property because it failed to acquire name from name stream: {e}')
+                            logger.error(f'Dropping named property because it failed to acquire name from name stream: {e}')
                         else:
                             raise
 
