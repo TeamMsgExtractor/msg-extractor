@@ -1,9 +1,11 @@
 **v0.48.0**
 * Adjusted error handling for named properties to handle critical streams being missing and to allow suppression of those errors.
 * Adjusted error handling for named properties to allow silencing of errors caused by invalid references to the name stream. If `ErrorBehavior.NAMED_NAME_STREAM` is provided to the `MSGFile` instance, a warning will be logged and that entry will simply be dropped.
+* Adjusted error handling for signed messages to better check for issues with the signed attachment. This should make errors from violating the standard much easier to understand. These errors can be ignored, but the attachment will *not* be parsed as a signed attachment.
 * Minor docstring updates.
 * Minor adjustments to `OleWriter` to prepare the code for being able to write version 4 files. Version 3 files are currently the only one's supported, but much of the code had hard-coded values that could be replaced with variables and small conditionals. This will have very little performance impact, and should not be noticeable.
 * Improved comments on `OleWriter` to make private sections more understandable.
+* Changed `MessageSignedBase._rawAttachments` to `MessageSignedBase.rawAttachments` to provide non-private access in a reliable way.
 
 **v0.47.0**
 * Changed the public API for `PropertiesStore` to improve the quality of its code. The properties type is now mandatory, and the intelligence field (and the related enum) has been removed.

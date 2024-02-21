@@ -11,7 +11,7 @@ import re
 from typing import Generic, List, Optional, Type, TypeVar
 
 from ..attachments import AttachmentBase, SignedAttachment
-from ..enums import DeencapType, ErrorBehavior
+from ..enums import AttachmentType, DeencapType, ErrorBehavior
 from ..exceptions import StandardViolationError
 from .message_base import MessageBase
 from ..utils import inputToBytes, inputToString, unwrapMultipart
@@ -47,20 +47,51 @@ class MessageSignedBase(MessageBase, Generic[_T]):
         :raises StandardViolationError: The standard for signed messages was
             blatantly violated.
         """
-        atts = self._rawAttachments
+        # Set these to None to make error handling easier.
+        self._signedBody = None
+        self._signedHtmlBody = None
+
+        atts = self.rawAttachments
 
         if len(atts) != 1:
             if ErrorBehavior.STANDARDS_VIOLATION in self.errorBehavior:
                 if len(atts) == 0:
-                    logger.error('Signed message has no attachments, a violation of the standard.')
-                    self._sAttachments = []
-                    self._signedBody = None
-                    self._signedHtmlBody = None
+                    logger.error('Standards Violation: Signed message has no attachments.')
                     return []
-                # If there is at least one attachment, just try to use the
-                # first.
+                # If there is at least one attachment, log an error about it
+                # and then try to use the first one.
+                logger.error('Standards Violation: Signed message has more than one attachment. Attempting to use first one.')
             else:
                 raise StandardViolationError('Signed messages without exactly 1 (regular) attachment constitute a violation of the standard.')
+
+        # If we are here, validate that the found attachment is acceptable.
+        if atts[0].type is not AttachmentType.DATA:
+            # This is unacceptable and the attachment cannot be used.
+            if ErrorBehavior.STANDARDS_VIOLATION in self.errorBehavior:
+                logger.error('Standards Violation: Attachment on signed message is unacceptable (not binary).')
+                return []
+            raise StandardViolationError('Signed messages *must* have a binary attachment. Signed attachments cannot be parsed otherwise.')
+
+        # Check the mimetype *directly*. Detection of mimetype through data is
+        # unacceptable for this check.
+        temp = atts[0].getStringStream('__substg1.0_370E')
+        if temp != 'multipart/signed':
+            # While this *is* a violation, we are considering it a warning,
+            # however it will give context if an error occurs later on about
+            # the data being messed up.
+            logger.warning(f'Standards Violation: Signed attachment *must* have mimetype set to "multipart/signed" (got "{temp or ""}").')
+            # We won't do much analyzing here, but we want to see if the
+            # mimetype module, should it be present, can at least detect the
+            # data as being multipart. If it is and the next parts fail, then
+            # something weird likely happened, otherwise we have a good
+            # indication of what actually happened.
+            if not temp:
+                if atts[0].mimetype:
+                    # No mimetype listed, but mimetype was detected. Check if it
+                    # at least *starts* with "multipart/" and call it good
+                    # enough if it does.
+                    if not atts[0].mimetype.startswith('multipart/'):
+                        logger.warning(f'Standards Violation: Signed attachment had not set mimetype, and detected mimetype is not multipart (got {atts[0].mimetype}).')
 
         # We need to unwrap the multipart stream.
         unwrapped = unwrapMultipart(atts[0].data)
@@ -117,7 +148,7 @@ class MessageSignedBase(MessageBase, Generic[_T]):
         return htmlBody
 
     @functools.cached_property
-    def _rawAttachments(self) -> List[AttachmentBase]:
+    def rawAttachments(self) -> List[AttachmentBase]:
         """
         A property to allow access to the non-signed attachments.
         """
