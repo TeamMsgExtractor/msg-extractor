@@ -22,8 +22,8 @@ from typing import (
     )
 
 from .. import constants
-from ..enums import NamedPropertyType
-from ..exceptions import InvalidPropertyIdError
+from ..enums import ErrorBehavior, NamedPropertyType
+from ..exceptions import InvalidPropertyIdError, StandardViolationError
 from ..utils import bytesToGuid, divide, msgPathToString, verifyPropertyId
 from compressed_rtf.crc32 import crc32
 
@@ -49,15 +49,37 @@ class Named:
     def __init__(self, msg: MSGFile):
         self.__msg = weakref.ref(msg)
         # Get the basic streams. If all are emtpy, then nothing to do.
-        guidStream = self.getStream('__substg1.0_00020102') or b''
-        entryStream = self.getStream('__substg1.0_00030102') or b''
+        guidStream = self.getStream('__substg1.0_00020102')
+        entryStream = self.getStream('__substg1.0_00030102')
         self.guidStream = guidStream
         self.entryStream = entryStream
-        self.namesStream = self.getStream('__substg1.0_00040102') or b''
+        self.namesStream = self.getStream('__substg1.0_00040102')
 
         self.__propertiesDict: Dict[Tuple[str, str], NamedPropertyBase] = {}
 
         self.__streamIDDict: Dict[str, Tuple[str, str]] = {}
+
+        if guidStream is None:
+            if ErrorBehavior.STANDARDS_VIOLATION in msg.errorBehavior:
+                logger.warning('Standards Violation: Guid stream missing from named properties.')
+                guidStream = b''
+            else:
+                raise StandardViolationError('Guid stream missing from named properties.')
+
+        if entryStream is None:
+            if ErrorBehavior.STANDARDS_VIOLATION in msg.errorBehavior:
+                logger.warning('Standards Violation: Entry stream missing from named properties.')
+                entryStream = b''
+            else:
+                raise StandardViolationError('Entry stream missing from named properties.')
+
+        if self.namesStream is None:
+            if ErrorBehavior.STANDARDS_VIOLATION in msg.errorBehavior:
+                logger.error('Standards Violation: Guid stream missing from named properties. Will not parse named properties.')
+                # Return immediately since the entry stream will likely fail.
+                return
+            else:
+                raise StandardViolationError('Guid stream missing from named properties.')
 
         # Check that we even have any entries. If there are none, nothing to do.
         if entryStream:
@@ -78,7 +100,20 @@ class Named:
             properties: List[NamedPropertyBase] = []
 
             for entry in entries:
-                properties.append(StringNamedProperty(entry, self.__getName(entry['id'])) if entry['pkind'] == NamedPropertyType.STRING_NAMED else NumericalNamedProperty(entry))
+                if entry['pkind'] == NamedPropertyType.STRING_NAMED:
+                    name = None
+                    try:
+                        name = self.__getName(entry['id'])
+                    except ValueError as e:
+                        if ErrorBehavior.NAMED_NAME_STREAM in msg.errorBehavior:
+                            logger.error(f'Dropping named property because it failed to acquire name from name stream: {e}')
+                        else:
+                            raise
+
+                    if name:
+                        properties.append(StringNamedProperty(entry, name))
+                else:
+                    properties.append(NumericalNamedProperty(entry))
 
             for property in properties:
                 id_ = property.identifier

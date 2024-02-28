@@ -59,8 +59,8 @@ class OleStreamStruct:
         """
         The flags for the OLEStream.
 
-        The bit with mask 0x00001000 is an implementation-specific hint
-        supplied by the application or bby a higher-level protocol that creates
+        The bit with mask ``0x00001000`` is an implementation-specific hint
+        supplied by the application or by a higher-level protocol that creates
         the data structure. It MAY be ignored on processing. A server
         implementation which does not ignore this bit MAY cache the storage
         when the bit is set.

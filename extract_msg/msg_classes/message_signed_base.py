@@ -11,7 +11,7 @@ import re
 from typing import Generic, List, Optional, Type, TypeVar
 
 from ..attachments import AttachmentBase, SignedAttachment
-from ..enums import DeencapType, ErrorBehavior
+from ..enums import AttachmentType, DeencapType, ErrorBehavior
 from ..exceptions import StandardViolationError
 from .message_base import MessageBase
 from ..utils import inputToBytes, inputToString, unwrapMultipart
@@ -47,20 +47,41 @@ class MessageSignedBase(MessageBase, Generic[_T]):
         :raises StandardViolationError: The standard for signed messages was
             blatantly violated.
         """
-        atts = self._rawAttachments
+        # Set these to None to make error handling easier.
+        self._signedBody = None
+        self._signedHtmlBody = None
+
+        atts = self.rawAttachments
 
         if len(atts) != 1:
             if ErrorBehavior.STANDARDS_VIOLATION in self.errorBehavior:
                 if len(atts) == 0:
-                    logger.error('Signed message has no attachments, a violation of the standard.')
-                    self._sAttachments = []
-                    self._signedBody = None
-                    self._signedHtmlBody = None
+                    logger.error('Standards Violation: Signed message has no attachments.')
                     return []
-                # If there is at least one attachment, just try to use the
-                # first.
+                # If there is at least one attachment, log an error about it
+                # and then try to use the first one.
+                logger.error('Standards Violation: Signed message has more than one attachment. Attempting to use first one.')
             else:
                 raise StandardViolationError('Signed messages without exactly 1 (regular) attachment constitute a violation of the standard.')
+
+        # If we are here, validate that the found attachment is acceptable.
+        if atts[0].type is not AttachmentType.DATA:
+            # This is unacceptable and the attachment cannot be used.
+            if ErrorBehavior.STANDARDS_VIOLATION in self.errorBehavior:
+                logger.error('Standards Violation: Attachment on signed message is unacceptable (not binary).')
+                return []
+            raise StandardViolationError('Signed messages *must* have a binary attachment. Signed attachments cannot be parsed otherwise.')
+
+        # Check the mimetype *directly*. Detection of mimetype through data is
+        # unacceptable for this check.
+        #temp = atts[0].getStringStream('__substg1.0_370E')
+        #if temp == 'multipart/signed':
+            ## Do nothing, but this is how we detect that it is clear signed.
+            #pass
+        #else:
+            ## Do nothing, but this is how we detect that it is *not* clear
+            # signed.
+            #pass
 
         # We need to unwrap the multipart stream.
         unwrapped = unwrapMultipart(atts[0].data)
@@ -117,7 +138,7 @@ class MessageSignedBase(MessageBase, Generic[_T]):
         return htmlBody
 
     @functools.cached_property
-    def _rawAttachments(self) -> List[AttachmentBase]:
+    def rawAttachments(self) -> List[AttachmentBase]:
         """
         A property to allow access to the non-signed attachments.
         """

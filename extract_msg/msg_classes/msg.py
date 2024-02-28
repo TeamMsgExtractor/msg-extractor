@@ -83,8 +83,8 @@ class MSGFile:
         :param errorBehavior: Optional, the behavior to use in the event of
             certain types of errors. Uses the ``ErrorBehavior`` enum.
         :param overrideEncoding: Optional, an encoding to use instead of the one
-            specified by the MSG file. If the value is "chardet" and you have
-            the chardet module installed, an attempt will be made to
+            specified by the MSG file. If the value is ``"chardet"`` and you
+            have the ``chardet`` module installed, an attempt will be made to
             auto-detect the encoding based on some of the string properties. Do
             not report encoding errors caused by this.
         :param treePath: Internal variable used for giving representation of the

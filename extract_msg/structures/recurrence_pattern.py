@@ -81,9 +81,9 @@ class RecurrencePattern:
 
         The value is the number of minutes between midnight, January 1, 1601,
         and midnight of the date of the last occurrence. When the value of the
-        endType field is END_AFTER_N_OCCURRENCES, this value is calculated
+        endType field is ``END_AFTER_N_OCCURRENCES``, this value is calculated
         based on the number of occurrences. If the recurrence does not have an
-        end date, the value of the endDate field MUST be set to 0x5AE980DF.
+        end date, the value of the endDate field MUST be set to ``0x5AE980DF``.
         """
         return self.__endDate
 

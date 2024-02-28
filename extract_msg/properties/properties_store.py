@@ -157,7 +157,7 @@ class PropertiesStore:
         This is a complex function, allowing the user to specify an int or
         string. If the input is a string that is not 4 characters, it is
         returned. Otherwise, a series of checks will be
-        performed. If the input is an int that is less than 0x10000, it is
+        performed. If the input is an int that is less than ``0x10000``, it is
         considered a property ID without a type and converted to a 4 character
         hexadecimal string. Otherwise, it is converted to an 8 character
         hexadecimal string and returned.

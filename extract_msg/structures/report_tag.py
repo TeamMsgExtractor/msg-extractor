@@ -77,7 +77,7 @@ class ReportTag:
         """
         String used for validation.
 
-        Set to b'PCDFEB09\x00'.
+        Set to ``b'PCDFEB09\x00'``.
         """
         return self.__cookie
 
@@ -121,7 +121,7 @@ class ReportTag:
         """
         The version used.
 
-        If SearchFolderEntryID is present, this MUST be 0x00020001, otherwise
-        it MUST be 0x00010001.
+        If SearchFolderEntryID is present, this MUST be ``0x00020001``,
+        otherwise it MUST be ``0x00010001``.
         """
         return self.__version

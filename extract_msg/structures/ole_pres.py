@@ -209,7 +209,7 @@ class OLEPresentationStream:
     def reserved2(self) -> Optional[bytes]:
         """
         Optional additional data that is only set if the clipboard format of
-        :property ansiClipboardFormat: is CF_METAFILEPICT.
+        :property ansiClipboardFormat: is ``CF_METAFILEPICT``.
 
         Getting this will automatically correct the value retrieved based on
         the clipboard format, but will *not* modify the underlying data.
@@ -246,9 +246,11 @@ class OLEPresentationStream:
     def tocEntries(self) -> List[TOCEntry]:
         """
         A list of TOCEntry structures. If :property tocSignature: is not set to
-        0x494E414E, accessing this value will clear the list.
+        ``0x494E414E``, accessing this value will clear the list.
 
-        :returns: A direct reference to the list, allowing for modification. This class WILL NOT change this reference over the lifetime of the object.
+        :returns: A direct reference to the list, allowing for modification.
+            This class WILL NOT change this reference over the lifetime of the
+            object.
         """
         if self.__tocSignature != 0x494E414E:
             self.__tocEntries.clear()
@@ -257,12 +259,10 @@ class OLEPresentationStream:
     @property
     def tocSignature(self) -> int:
         """
-        If this field does not contain 0x494E414E, then :property tocEntries:
-        MUST be empty. Modifications to the list will be lost when it is next
-        retrieved, meaning changes while this property is not 0x494E414E WILL be
-        lost.
+        If this field does not contain ``0x494E414E``, then
+        :property tocEntries: MUST be empty. Modifications to the list will be lost when it is next retrieved, meaning changes while this property is not ``0x494E414E`` WILL be lost.
 
-        Setting this to a value other than 0x494E414E will clear the list
+        Setting this to a value other than ``0x494E414E`` will clear the list
         immediately.
         """
         return self.__tocSignature
