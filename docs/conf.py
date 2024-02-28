@@ -12,7 +12,7 @@ import sys
 sys.path.insert(0, os.path.abspath('..'))
 
 __author__ = 'Destiny Peterson & Matthew Walker'
-__version__ = '0.46.0'
+__version__ = '0.47.0'
 __year__ = '2023'
 
 
@@ -27,10 +27,16 @@ release = __version__
 extensions = ['sphinx.ext.todo', 'sphinx.ext.viewcode', 'sphinx.ext.autodoc']
 
 templates_path = ['_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '_autogen.txt']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
+html_style = 'css/override.css'
+
+# -- Options for autodoc -----------------------------------------------------
+
+autoclass_content = 'both'
+autodoc_member_order = 'bysource'

@@ -1,0 +1,19 @@
+extract\_msg.properties Package
+===============================
+
+Subpackages/Submodules
+----------------------
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+   
+   *
+
+Package contents
+----------------
+
+.. automodule:: extract_msg.properties
+   :members:
+   :undoc-members:
+   :show-inheritance:
