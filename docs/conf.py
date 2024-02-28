@@ -12,8 +12,8 @@ import sys
 sys.path.insert(0, os.path.abspath('..'))
 
 __author__ = 'Destiny Peterson & Matthew Walker'
-__version__ = '0.47.0'
-__year__ = '2023'
+__version__ = '0.48.0'
+__year__ = '2024'
 
 
 project = 'extract-msg Documentation'
