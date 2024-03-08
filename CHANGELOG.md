@@ -1,3 +1,6 @@
+**v0.48.1**
+* Added an option (`-s`, `--stdin`) to the command line to take an MSG file from stdin. This allows the user to pipe the msg data from another program directly instead of having to write a middleman that uses the extract-msg library directly or having to write the file to the disk first.
+
 **v0.48.0**
 * Adjusted error handling for named properties to handle critical streams being missing and to allow suppression of those errors.
 * Adjusted error handling for named properties to allow silencing of errors caused by invalid references to the name stream. If `ErrorBehavior.NAMED_NAME_STREAM` is provided to the `MSGFile` instance, a warning will be logged and that entry will simply be dropped.

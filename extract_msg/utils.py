@@ -63,6 +63,7 @@ import os
 import pathlib
 import shutil
 import struct
+import sys
 import weakref
 import zipfile
 
@@ -359,6 +360,7 @@ def getCommandArgs(args: Sequence[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description = constants.MAINDOC, prog = 'extract_msg')
     outFormat = parser.add_mutually_exclusive_group()
     inputFormat = parser.add_mutually_exclusive_group()
+    inputType = parser.add_mutually_exclusive_group(required = True)
     # --use-content-id, --cid
     parser.add_argument('--use-content-id', '--cid', dest='cid', action='store_true',
                         help='Save attachments by their Content ID, if they have one. Useful when working with the HTML body.')
@@ -368,7 +370,7 @@ def getCommandArgs(args: Sequence[str]) -> argparse.Namespace:
     # --file-logging
     parser.add_argument('--file-logging', dest='fileLogging', action='store_true',
                         help='Enables file logging. Implies --verbose level 1.')
-    # --verbose
+    # -v, --verbose
     parser.add_argument('-v', '--verbose', dest='verbose', action='count', default=0,
                         help='Turns on console logging. Specify more than once for higher verbosity.')
     # --log PATH
@@ -455,11 +457,18 @@ def getCommandArgs(args: Sequence[str]) -> argparse.Namespace:
     # --progress
     parser.add_argument('--progress', dest='progress', action='store_true',
                         help='Shows what file the program is currently working on during it\'s progress.')
+    # -s, --stdout
+    inputType.add_argument('-s', '--stdin', dest='stdin', action='store_true',
+                        help='Read file from stdin (only works with one file at a time).')
     # [MSG files]
-    parser.add_argument('msgs', metavar='msg', nargs='+',
+    inputType.add_argument('msgs', metavar='msg', nargs='*', default=[],
                         help='An MSG file to be parsed.')
 
     options = parser.parse_args(args)
+
+    if options.stdin:
+        # Read the MSG file from stdin and shove it into the msgs list.
+        options.msgs.append(sys.stdin.buffer.read())
 
     if options.outName and options.noFolders:
         raise IncompatibleOptionsError('--out-name is not compatible with --no-folders.')
@@ -502,6 +511,8 @@ def getCommandArgs(args: Sequence[str]) -> argparse.Namespace:
     if options.glob:
         if options.outName:
             raise IncompatibleOptionsError('--out-name is not supported when using wildcards.')
+        if options.stdin:
+            raise IncompatibleOptionsError('--stdin is not supported with using wildcards.')
         fileLists = []
         for path in options.msgs:
             fileLists += glob.glob(path)
