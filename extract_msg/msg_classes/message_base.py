@@ -181,7 +181,7 @@ class MessageBase(MSGFile):
                     filename = att.getFilename()
                     if filename.lower().endswith('.msg'):
                         filename = filename[:-4] + '.eml'
-                    ret.add_attachment(
+                    msgMain.add_attachment(
                                         att.data.asEmailMessage(),
                                         filename = filename,
                                         cid = att.contentId)
@@ -205,7 +205,7 @@ class MessageBase(MSGFile):
                                            cid = att.contentId)
                     # This is just a very basic check.
                     attachment['Content-Disposition'] = f'{"inline" if att.hidden else "attachment"}; filename="{att.getFilename()}"'
-                    ret.attach(attachment)
+                    msgMain.attach(attachment)
 
         return ret
 
