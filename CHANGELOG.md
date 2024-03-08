@@ -2,6 +2,8 @@
 * Added an option (`-s`, `--stdin`) to the command line to take an MSG file from stdin. This allows the user to pipe the msg data from another program directly instead of having to write a middleman that uses the extract-msg library directly or having to write the file to the disk first.
 * Changed main function to allow for manual argument list to be passed to it.
 * Added attributes at attachment base for creation and modification time. These can be accessed through `createdAt` ir `creationTime` and `lastModificationTime` or `modifiedAt`.
+* Changed OleWriter tests to output the name of the test file being done if an error occurs.
+* Added tests for some command line stuff.
 
 **v0.48.0**
 * Adjusted error handling for named properties to handle critical streams being missing and to allow suppression of those errors.
