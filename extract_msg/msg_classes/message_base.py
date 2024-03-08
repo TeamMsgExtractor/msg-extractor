@@ -25,6 +25,8 @@ import RTFDE.exceptions
 
 from email import policy
 from email.message import EmailMessage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from email.parser import HeaderParser
 from typing import Any, Callable, cast, Dict, List, Optional, Tuple, Type, Union
 
@@ -155,9 +157,12 @@ class MessageBase(MSGFile):
                 ret[key] = value.replace('\r\n', '').replace('\n', '')
 
         # Attach the body to the EmailMessage instance.
+        bodyParts = MIMEMultipart('alternative')
+        ret.attach(bodyParts)
         if self.htmlBody:
-            ret.set_content(self.body, subtype = 'html', cte = 'quoted-printable')
-        elif self.body:
+            bodyParts.attach(MIMEText(self.htmlBody.decode('utf-8'), 'html'))
+        if self.body:
+            bodyParts.attach(MIMEText(self.body, 'plain'))
             ret.set_content(self.body, cte = 'quoted-printable')
 
         # Process attachments.
