@@ -168,10 +168,10 @@ class MessageBase(MSGFile):
         c = Charset('utf-8')
         c.body_encoding = QP
 
-        if self.htmlBody:
-            bodyParts.attach(MIMEText(self.htmlBody.decode('utf-8'), 'html', c))
         if self.body:
             bodyParts.attach(MIMEText(self.body, 'plain', c))
+        if self.htmlBody:
+            bodyParts.attach(MIMEText(self.htmlBody.decode('utf-8'), 'html', c))
 
         # Process attachments.
         for att in self.attachments:
