@@ -12,7 +12,7 @@ import sys
 sys.path.insert(0, os.path.abspath('..'))
 
 __author__ = 'Destiny Peterson & Matthew Walker'
-__version__ = '0.48.0'
+__version__ = '0.48.1'
 __year__ = '2024'
 
 
