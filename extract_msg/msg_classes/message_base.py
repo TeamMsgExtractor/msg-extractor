@@ -151,7 +151,8 @@ class MessageBase(MSGFile):
 
         # Copy the headers.
         for key, value in self.header.items():
-            ret[key] = value
+            if key.lower() != 'content-type':
+                ret[key] = value.replace('\r\n', '').replace('\n', '')
 
         # Attach the body to the EmailMessage instance.
         if self.htmlBody:
