@@ -473,7 +473,7 @@ class AttachmentBase(abc.ABC):
             the first item specifies what the second value will be.
         """
 
-    @functools.cached_property
+    @cached_property
     def attachmentEncoding(self) -> Optional[bytes]:
         """
         The encoding information about the attachment object.
@@ -483,7 +483,7 @@ class AttachmentBase(abc.ABC):
         """
         return self.getStream('__substg1.0_37020102')
 
-    @functools.cached_property
+    @cached_property
     def additionalInformation(self) -> Optional[str]:
         """
         The additional information about the attachment.
@@ -495,7 +495,7 @@ class AttachmentBase(abc.ABC):
         """
         return self.getStringStream('__substg1.0_370F')
 
-    @functools.cached_property
+    @cached_property
     def cid(self) -> Optional[str]:
         """
         Returns the Content ID of the attachment, if it exists.
@@ -526,7 +526,24 @@ class AttachmentBase(abc.ABC):
 
     @property
     def contentId(self) -> Optional[str]:
+        """
+        Alias of :attr:`cid`.
+        """
         return self.cid
+
+    @property
+    def createdAt(self) -> Optional[datetime.datetime]:
+        """
+        Alias of :attr:`creationTime`.
+        """
+        return self.creationTime
+
+    @cached_property
+    def creationTime(self) -> Optional[datetime.datetime]:
+        """
+        The time the attachment was created.
+        """
+        return self.getPropertyVal('30070040')
 
     @property
     @abc.abstractmethod
@@ -537,7 +554,7 @@ class AttachmentBase(abc.ABC):
         Returns ``None`` if there is no data to save.
         """
 
-    @functools.cached_property
+    @cached_property
     def dataType(self) -> Optional[Type[object]]:
         """
         The class that the data type will use, if it can be retrieved.
@@ -560,14 +577,14 @@ class AttachmentBase(abc.ABC):
         """
         return self.__dir
 
-    @functools.cached_property
+    @cached_property
     def displayName(self) -> Optional[str]:
         """
         Returns the display name of the folder.
         """
         return self.getStringStream('__substg1.0_3001')
 
-    @functools.cached_property
+    @cached_property
     def exceptionReplaceTime(self) -> Optional[datetime.datetime]:
         """
         The original date and time at which the instance in the recurrence
@@ -577,47 +594,61 @@ class AttachmentBase(abc.ABC):
         """
         return self.getPropertyVal('7FF90040')
 
-    @functools.cached_property
+    @cached_property
     def extension(self) -> Optional[str]:
         """
         The reported extension for the file.
         """
         return self.getStringStream('__substg1.0_3703')
 
-    @functools.cached_property
+    @cached_property
     def hidden(self) -> bool:
         """
         Indicates whether an Attachment object is hidden from the end user.
         """
         return bool(self.getPropertyVal('7FFE000B'))
 
-    @functools.cached_property
+    @cached_property
     def isAttachmentContactPhoto(self) -> bool:
         """
         Whether the attachment is a contact photo for a Contact object.
         """
         return bool(self.getPropertyVal('7FFF000B'))
 
-    @functools.cached_property
+    @cached_property
+    def lastModificationTime(self) -> Optional[datetime.datetime]:
+        """
+        The last time the attachment was modified.
+        """
+        return self.getPropertyVal('30080040')
+
+    @cached_property
     def longFilename(self) -> Optional[str]:
         """
         Returns the long file name of the attachment, if it exists.
         """
         return self.getStringStream('__substg1.0_3707')
 
-    @functools.cached_property
+    @cached_property
     def longPathname(self) -> Optional[str]:
         """
         The fully qualified path and file name with extension.
         """
         return self.getStringStream('__substg1.0_370D')
 
-    @functools.cached_property
+    @cached_property
     def mimetype(self) -> Optional[str]:
         """
         The content-type mime header of the attachment, if specified.
         """
         return tryGetMimetype(self, self.getStringStream('__substg1.0_370E'))
+
+    @property
+    def modifiedAt(self) -> Optional[datetime.datetime]:
+        """
+        Alias of :attr:`lastModificationTime`.
+        """
+        return self.lastModificationTime
 
     @property
     def msg(self) -> MSGFile:
@@ -631,7 +662,7 @@ class AttachmentBase(abc.ABC):
             raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return msg
 
-    @functools.cached_property
+    @cached_property
     def name(self) -> Optional[str]:
         """
         The best name available for the file.
@@ -650,7 +681,7 @@ class AttachmentBase(abc.ABC):
         """
         return self.__namedProperties
 
-    @functools.cached_property
+    @cached_property
     def payloadClass(self) -> Optional[str]:
         """
         The class name of an object that can display the contents of the
@@ -665,7 +696,7 @@ class AttachmentBase(abc.ABC):
         """
         return self.__props
 
-    @functools.cached_property
+    @cached_property
     def renderingPosition(self) -> Optional[int]:
         """
         The offset, in rendered characters, to use when rendering the attachment
@@ -676,7 +707,7 @@ class AttachmentBase(abc.ABC):
         """
         return self.getPropertyVal('370B0003')
 
-    @property
+    @cached_property
     def shortFilename(self) -> Optional[str]:
         """
         The short file name of the attachment, if it exists.
