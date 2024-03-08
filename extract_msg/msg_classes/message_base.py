@@ -24,6 +24,7 @@ import RTFDE
 import RTFDE.exceptions
 
 from email import policy
+from email.charset import Charset, QP
 from email.message import EmailMessage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -156,14 +157,21 @@ class MessageBase(MSGFile):
             if key.lower() != 'content-type':
                 ret[key] = value.replace('\r\n', '').replace('\n', '')
 
+        ret['Content-Type'] = 'multipart/mixed'
+
         # Attach the body to the EmailMessage instance.
+        msgMain = MIMEMultipart('related')
+        ret.attach(msgMain)
         bodyParts = MIMEMultipart('alternative')
-        ret.attach(bodyParts)
+        msgMain.attach(bodyParts)
+
+        c = Charset('utf-8')
+        c.body_encoding = QP
+
         if self.htmlBody:
-            bodyParts.attach(MIMEText(self.htmlBody.decode('utf-8'), 'html'))
+            bodyParts.attach(MIMEText(self.htmlBody.decode('utf-8'), 'html', c))
         if self.body:
-            bodyParts.attach(MIMEText(self.body, 'plain'))
-            ret.set_content(self.body, cte = 'quoted-printable')
+            bodyParts.attach(MIMEText(self.body, 'plain', c))
 
         # Process attachments.
         for att in self.attachments:
