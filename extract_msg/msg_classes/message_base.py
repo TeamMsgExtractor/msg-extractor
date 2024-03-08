@@ -197,11 +197,15 @@ class MessageBase(MSGFile):
                         raise ConversionError(f'Could not find a suitable method to attach attachment data type "{att.dataType}".')
                     mime = att.mimetype or 'application/octet-stream'
                     mainType, subType = mime.split('/')[0], mime.split('/')[-1]
-                    ret.add_attachment(data,
-                                       maintype = mainType,
-                                       subtype = subType,
-                                       filename = att.getFilename(),
-                                       cid = att.contentId)
+                    # Need to do this manually instead of using add_attachment.
+                    attachment = EmailMessage()
+                    attachment.set_content(data,
+                                           maintype = mainType,
+                                           subtype = subType,
+                                           cid = att.contentId)
+                    # This is just a very basic check.
+                    attachment['Content-Disposition'] = f'{"inline" if att.hidden else "attachment"}; filename="{att.getFilename()}"'
+                    ret.attach(attachment)
 
         return ret
 
