@@ -10,12 +10,13 @@ import zipfile
 
 from extract_msg import __doc__, openMsg, utils
 from extract_msg.enums import ErrorBehavior
+from typing import List
 
 
-def main() -> None:
+def main(argv : List[str]) -> None:
     # Setup logging to stdout, indicate running from cli
     CLI_LOGGING = 'extract_msg_cli'
-    args = utils.getCommandArgs(sys.argv[1:])
+    args = utils.getCommandArgs(argv[1:])
 
     # Determine where to save the files to.
     currentDir = os.getcwd() # Store this in case the path changes.
@@ -111,4 +112,4 @@ def main() -> None:
         _zip.close()
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)

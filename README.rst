@@ -61,7 +61,7 @@ refer to the usage information provided from the program's help dialog:
 
      usage: extract_msg [-h] [--use-content-id] [--json] [--file-logging] [-v] [--log LOG] [--config CONFIGPATH] [--out OUTPATH] [--use-filename] [--dump-stdout] [--html] [--pdf] [--wk-path WKPATH] [--wk-options [WKOPTIONS ...]]
                         [--prepared-html] [--charset CHARSET] [--raw] [--rtf] [--allow-fallback] [--skip-body-not-found] [--zip ZIP] [--save-header] [--attachments-only] [--skip-hidden] [--no-folders] [--skip-embedded] [--extract-embedded]
-                        [--overwrite-existing] [--skip-not-implemented] [--out-name OUTNAME | --glob] [--ignore-rtfde] [--progress]
+                        [--overwrite-existing] [--skip-not-implemented] [--out-name OUTNAME | --glob] [--ignore-rtfde] [--progress] [-s]
                         msg [msg ...]
 
      extract_msg: Extracts emails and attachments saved in Microsoft Outlook's .msg files. https://github.com/TeamMsgExtractor/msg-extractor
@@ -107,6 +107,7 @@ refer to the usage information provided from the program's help dialog:
        --glob, --wildcard    Interpret all paths as having wildcards. Incompatible with --out-name.
        --ignore-rtfde        Ignores all errors thrown from RTFDE when trying to save. Useful for allowing fallback to continue when an exception happens.
        --progress            Shows what file the program is currently working on during it's progress.
+       -s, --stdin           Read file from stdin (only works with one file at a time).
 
 **To use this in your own script**, start by using:
 
@@ -259,8 +260,8 @@ your access to the newest major version of extract-msg.
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
 
-.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.48.0-blue.svg
-   :target: https://pypi.org/project/extract-msg/0.48.0/
+.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.48.1-blue.svg
+   :target: https://pypi.org/project/extract-msg/0.48.1/
 
 .. |PyPI2| image:: https://img.shields.io/badge/python-3.8+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-3810/
