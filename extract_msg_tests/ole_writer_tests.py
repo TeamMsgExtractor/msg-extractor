@@ -147,9 +147,11 @@ class OleWriterExportTests(unittest.TestCase):
             with open(exportResultFile, 'rb') as f:
                 exportResult = f.read()
 
-            # We use two assertions to give better error messages.
-            self.assertCountEqual(exportResult, exportedBytes, 'Exported data is wrong size.')
-            self.assertEqual(exportedBytes, exportResult, 'Exported data is incorrect.')
+            # Use a subtest to print the file name.
+            with self.subTest(str(testFileDir / exportResultFile.name)):
+                # We use two assertions to give better error messages.
+                self.assertCountEqual(exportResult, exportedBytes, 'Exported data is wrong size.')
+                self.assertEqual(exportedBytes, exportResult, 'Exported data is incorrect.')
 
     @unittest.skipIf(USER_TEST_DIR is None, 'User test files not defined.')
     @unittest.skipIf(USER_TEST_DIR is not None and not (USER_TEST_DIR / 'export-results').exists(), 'User export tests not defined.')
