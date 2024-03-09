@@ -205,6 +205,8 @@ class MessageBase(MSGFile):
                                            cid = att.contentId)
                     # This is just a very basic check.
                     attachment['Content-Disposition'] = f'{"inline" if att.hidden else "attachment"}; filename="{att.getFilename()}"'
+
+                    # Add the attachment.
                     msgMain.attach(attachment)
 
         return ret

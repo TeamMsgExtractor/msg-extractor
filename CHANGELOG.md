@@ -1,5 +1,5 @@
 **v0.48.2**
-* Fixed bugs with `MessageBase.asEmailMessage()`.
+* Fixed bugs with `MessageBase.asEmailMessage()`. Numerous improvements to how it handles the data.
 
 **v0.48.1**
 * Added an option (`-s`, `--stdin`) to the command line to take an MSG file from stdin. This allows the user to pipe the MSG data from another program directly instead of having to write a middleman that uses the `extract-msg` library directly or having to write the file to the disk first.
