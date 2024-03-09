@@ -7,12 +7,19 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 import os
+import re
 import sys
 
 sys.path.insert(0, os.path.abspath('..'))
 
+version_re = re.compile("__version__ = '(?P<version>[0-9\\.]*)'")
+with open('../extract_msg/__init__.py', 'r') as stream:
+    contents = stream.read()
+match = version_re.search(contents)
+__version__ = match.groupdict()['version']
+
+
 __author__ = 'Destiny Peterson & Matthew Walker'
-__version__ = '0.48.1'
 __year__ = '2024'
 
 
