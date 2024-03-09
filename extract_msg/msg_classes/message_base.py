@@ -24,7 +24,10 @@ import RTFDE
 import RTFDE.exceptions
 
 from email import policy
+from email.charset import Charset, QP
 from email.message import EmailMessage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from email.parser import HeaderParser
 from typing import Any, Callable, cast, Dict, List, Optional, Tuple, Type, Union
 
@@ -151,13 +154,24 @@ class MessageBase(MSGFile):
 
         # Copy the headers.
         for key, value in self.header.items():
-            ret[key] = value
+            if key.lower() != 'content-type':
+                ret[key] = value.replace('\r\n', '').replace('\n', '')
+
+        ret['Content-Type'] = 'multipart/mixed'
 
         # Attach the body to the EmailMessage instance.
+        msgMain = MIMEMultipart('related')
+        ret.attach(msgMain)
+        bodyParts = MIMEMultipart('alternative')
+        msgMain.attach(bodyParts)
+
+        c = Charset('utf-8')
+        c.body_encoding = QP
+
+        if self.body:
+            bodyParts.attach(MIMEText(self.body, 'plain', c))
         if self.htmlBody:
-            ret.set_content(self.body, subtype = 'html', cte = 'quoted-printable')
-        elif self.body:
-            ret.set_content(self.body, cte = 'quoted-printable')
+            bodyParts.attach(MIMEText(self.htmlBody.decode('utf-8'), 'html', c))
 
         # Process attachments.
         for att in self.attachments:
@@ -167,7 +181,7 @@ class MessageBase(MSGFile):
                     filename = att.getFilename()
                     if filename.lower().endswith('.msg'):
                         filename = filename[:-4] + '.eml'
-                    ret.add_attachment(
+                    msgMain.add_attachment(
                                         att.data.asEmailMessage(),
                                         filename = filename,
                                         cid = att.contentId)
@@ -183,11 +197,17 @@ class MessageBase(MSGFile):
                         raise ConversionError(f'Could not find a suitable method to attach attachment data type "{att.dataType}".')
                     mime = att.mimetype or 'application/octet-stream'
                     mainType, subType = mime.split('/')[0], mime.split('/')[-1]
-                    ret.add_attachment(data,
-                                       maintype = mainType,
-                                       subtype = subType,
-                                       filename = att.getFilename(),
-                                       cid = att.contentId)
+                    # Need to do this manually instead of using add_attachment.
+                    attachment = EmailMessage()
+                    attachment.set_content(data,
+                                           maintype = mainType,
+                                           subtype = subType,
+                                           cid = att.contentId)
+                    # This is just a very basic check.
+                    attachment['Content-Disposition'] = f'{"inline" if att.hidden else "attachment"}; filename="{att.getFilename()}"'
+
+                    # Add the attachment.
+                    msgMain.attach(attachment)
 
         return ret
 
