@@ -1,3 +1,7 @@
+**v0.48.3**
+* [[TeamMsgExtractor #409](https://github.com/TeamMsgExtractor/msg-extractor/issues/409)] Added missing private method to `SignedAttachment`.
+* Fixed some missing typing information.
+
 **v0.48.2**
 * Fixed bugs with `MessageBase.asEmailMessage()`. Numerous improvements to how it handles the data.
 
