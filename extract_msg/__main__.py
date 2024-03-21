@@ -13,7 +13,7 @@ from extract_msg.enums import ErrorBehavior
 from typing import List
 
 
-def main(argv : List[str]) -> None:
+def main(argv: List[str] = sys.argv) -> None:
     # Setup logging to stdout, indicate running from cli
     CLI_LOGGING = 'extract_msg_cli'
     args = utils.getCommandArgs(argv[1:])
