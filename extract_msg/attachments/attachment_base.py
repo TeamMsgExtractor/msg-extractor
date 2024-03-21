@@ -152,7 +152,7 @@ class AttachmentBase(abc.ABC):
             raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
         return msg._getTypedStream([self.__dir, msgPathToString(filename)], True, _type)
 
-    def _handleFnc(self, _zip, filename, customPath, kwargs) -> pathlib.Path:
+    def _handleFnc(self, _zip, filename, customPath: pathlib.Path, kwargs) -> pathlib.Path:
         """
         "Handle Filename Conflict"
 
