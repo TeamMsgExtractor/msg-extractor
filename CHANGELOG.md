@@ -1,3 +1,6 @@
+**v0.48.4**
+* [[TeamMsgExtractor #411](https://github.com/TeamMsgExtractor/msg-extractor/issues/411)] Fix console script throwing error due to changed console args not defaulting.
+
 **v0.48.3**
 * [[TeamMsgExtractor #409](https://github.com/TeamMsgExtractor/msg-extractor/issues/409)] Added missing private method to `SignedAttachment`.
 * Fixed some missing typing information.
