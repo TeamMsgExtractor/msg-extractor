@@ -1,3 +1,6 @@
+**v0.48.5**
+* [[TeamMsgExtractor #414](https://github.com/TeamMsgExtractor/msg-extractor/issues/414)] Fixed typo in `message_signed_base.py`.
+
 **v0.48.4**
 * [[TeamMsgExtractor #411](https://github.com/TeamMsgExtractor/msg-extractor/issues/411)] Fix console script throwing error due to changed console args not defaulting.
 
