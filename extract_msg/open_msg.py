@@ -89,6 +89,14 @@ def openMsg(path, **kwargs) -> MSGFile:
 
     msg = MSGFile(path, **kwargs)
 
+    # Protect against corrupt MSG files.
+    try:
+        ct = msg.classType
+    except:
+        # All exceptions here mean we NEED to close the handle.
+        msg.close()
+        raise
+
     # Restore the option in the kwargs so we don't have to worry about it.
     kwargs['delayAttachments'] = delayAttachments
 
@@ -99,14 +107,14 @@ def openMsg(path, **kwargs) -> MSGFile:
     # other file types (like doc, ppt, etc.) might open but not return a class
     # type. If the stream is not found, classType returns None, which has no
     # lower function. So let's make sure we got a good return first.
-    if not msg.classType:
+    if not cy:
         if kwargs.get('strict', True):
             raise InvalidFileFormatError('File was confirmed to be an olefile, but was not an MSG file.')
         else:
             # If strict mode is off, we'll just return an MSGFile anyways.
             logger.critical('Received file that was an olefile but was not an MSG file. Returning MSGFile anyways because strict mode is off.')
             return msg
-    classType = msg.classType.lower()
+    classType = ct.lower()
     # Put the message class first as it is most common.
     if classType.startswith('ipm.note') or classType.startswith('report'):
         msg.close()
@@ -159,7 +167,6 @@ def openMsg(path, **kwargs) -> MSGFile:
         return msg
     elif kwargs.get('strict', True):
         # Because we are closing it, we need to store it in a variable first.
-        ct = msg.classType
         msg.close()
         # Now we need to figure out exactly what we are going to be reporting to
         # the user.

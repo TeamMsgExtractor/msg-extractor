@@ -1,3 +1,6 @@
+**v0.48.6**
+* [[TeamMsgExtractor #417](https://github.com/TeamMsgExtractor/msg-extractor/issues/417)] Fixed issues with `openMsg` where some corrupted MSG files could end up throwing an uncaught exception and leaving the file handle open.
+
 **v0.48.5**
 * [[TeamMsgExtractor #414](https://github.com/TeamMsgExtractor/msg-extractor/issues/414)] Fixed typo in `message_signed_base.py`.
 
