@@ -1,3 +1,7 @@
+**v0.49.0**
+* Changed tolerance of bitmap custom attachment handler to allow for attachments with only a CONTENT stream. This change was made after seeing an example of a file that only had a CONTENT stream and no other streams for the custom data. The code now also tries to create default values for things previously determined from those other streams.
+* Fixed an issue in `tryGetMimetype` were the code didn't properly check if the data type was bytes (it only checked if it had a type).
+
 **v0.48.7**
 * [[TeamMsgExtractor #420](https://github.com/TeamMsgExtractor/msg-extractor/issues/420)] Fixed typo introduced in last version.
 

@@ -1006,7 +1006,7 @@ def tryGetMimetype(att: AttachmentBase, mimetype: Union[str, None]) -> Union[str
         return mimetype
 
     # We only try anything if the data is bytes.
-    if att.dataType:
+    if att.dataType is bytes:
         # Try to import our dependency module to use it.
         try:
             import magic # pyright: ignore

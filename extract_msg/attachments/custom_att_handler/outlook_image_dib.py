@@ -31,44 +31,57 @@ class OutlookImageDIB(CustomAttachmentHandler):
 
     def __init__(self, attachment: AttachmentBase):
         super().__init__(attachment)
-        # First we need to get the mailstream.
-        stream = self.getStream('\x03MailStream')
-        if not stream:
-            raise ValueError('MailStream could not be found.')
-        if len(stream) != 12:
-            raise ValueError('MailStream is the wrong length.')
-        # Next get the bitmap data.
+        # First, get the mandatory bitmap data.
         self.__data = self.getStream('CONTENTS')
         if not self.__data:
             raise ValueError('Bitmap data could not be read for Outlook signature.')
-        # Get the OLE data.
-        oleStream = self.getStream('\x01Ole')
-        if not oleStream:
-            raise ValueError('OLE stream could not be found.')
 
-        # While I have only seen this stream be one length, it could in theory
-        # be more than one length. So long as it is *at least* 20 bytes, we
-        # call it valid.
-        if len(oleStream) < 20:
-            raise ValueError('OLE stream is too short.')
+        # Next we need to get the mailstream.
+        stream = self.getStream('\x03MailStream')
+        if stream:
+            if len(stream) != 12:
+                raise ValueError('MailStream is the wrong length.')
+            
+            # Unpack the mailstream.
+            vals = _ST_MAILSTREAM.unpack(stream)
+            self.__dvaspect = DVAspect(vals[0])
+            self.__x = vals[1]
+            self.__y = vals[2]
+        else:
+            #raise ValueError('MailStream could not be found.')
+            # Create default values.
+            self.__dvaspect = DVAspect.CONTENT
+            # TODO figure out what the default values for these should actually 
+            # be.
+            self.__x = 0
+            self.__y = 0
 
-        # Unpack and verify the OLE stream.
-        vals = _ST_OLE.unpack(oleStream[:20])
-        # Check the version magic.
-        if vals[0] != 0x2000001:
-            raise ValueError('OLE stream has wrong version magic.')
-        # Check the reserved bytes.
-        if vals[3] != 0:
-            raise ValueError('OLE stream has non-zero reserved int.')
-
-        # Unpack the mailstream and create the HTML tag.
-        vals = _ST_MAILSTREAM.unpack(stream)
-        self.__dvaspect = DVAspect(vals[0])
-        self.__x = vals[1]
-        self.__y = vals[2]
+        # This is done regardless of default values or not.
         # Convert to twips for RTF.
         self.__xtwips = int(round(self.__x / 1.7639))
         self.__ytwips = int(round(self.__y / 1.7639))
+
+        # Get the OLE data.
+        oleStream = self.getStream('\x01Ole')
+        if oleStream:
+            # While I have only seen this stream be one length, it could in 
+            # theory be more than one length. So long as it is *at least* 20 
+            # bytes, we call it valid.
+            if len(oleStream) < 20:
+                raise ValueError('OLE stream is too short.')
+            # Unpack and verify the OLE stream.
+            vals = _ST_OLE.unpack(oleStream[:20])
+            # Check the version magic.
+            if vals[0] != 0x2000001:
+                raise ValueError('OLE stream has wrong version magic.')
+            # Check the reserved bytes.
+            if vals[3] != 0:
+                raise ValueError('OLE stream has non-zero reserved int.')
+        else:
+            #raise ValueError('OLE stream could not be found.')
+            # If the stream is there we validate it, so here we just leave it 
+            # alone since nothing is actually stored.
+            pass
 
     @classmethod
     def isCorrectHandler(cls, attachment: AttachmentBase) -> bool:
@@ -78,10 +91,12 @@ class OutlookImageDIB(CustomAttachmentHandler):
         # Check for the required streams.
         if not attachment.exists('__substg1.0_3701000D/CONTENTS'):
             return False
-        if not attachment.exists('__substg1.0_3701000D/\x01Ole'):
-            return False
-        if not attachment.exists('__substg1.0_3701000D/\x03MailStream'):
-            return False
+        # These streams were previously considered mandatory, but are now 
+        # tentatively optional.
+        #if not attachment.exists('__substg1.0_3701000D/\x01Ole'):
+        #    return False
+        #if not attachment.exists('__substg1.0_3701000D/\x03MailStream'):
+        #    return False
 
         return True
 
