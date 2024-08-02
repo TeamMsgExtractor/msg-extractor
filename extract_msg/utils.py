@@ -291,6 +291,13 @@ def filetimeToDatetime(rawTime: int) -> datetime.datetime:
             return date
         elif rawTime == 915046235400000000:
             return constants.NULL_DATE
+        elif rawTime > 915000000000000000:
+            # Just make null dates from all of these time stamps.
+            from .null_date import NullDate
+            date = NullDate(1970, 1, 1, 1)
+            date += datetime.timedelta(seconds = filetimeToUtc(rawTime))
+
+            return date
         else:
             return fromTimeStamp(filetimeToUtc(rawTime))
     except TZError:
