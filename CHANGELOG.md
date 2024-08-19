@@ -1,4 +1,6 @@
 **v0.49.0**
+* [[TeamMsgExtractor #427](https://github.com/TeamMsgExtractor/msg-extractor/issues/427)] Adjusted code for converting time stamps to create null dates for any time stamp beyond a certain point. The point was determined to be close to the existing null dates.
+* [[TeamMsgExtractor #425](https://github.com/TeamMsgExtractor/msg-extractor/issues/425)] Added basic support for custom attachments that are Windows Metafiles.
 * Changed tolerance of bitmap custom attachment handler to allow for attachments with only a CONTENT stream. This change was made after seeing an example of a file that only had a CONTENT stream and no other streams for the custom data. The code now also tries to create default values for things previously determined from those other streams.
 * Fixed an issue in `tryGetMimetype` were the code didn't properly check if the data type was bytes (it only checked if it had a type).
 
