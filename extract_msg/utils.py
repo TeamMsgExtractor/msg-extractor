@@ -296,6 +296,7 @@ def filetimeToDatetime(rawTime: int) -> datetime.datetime:
             from .null_date import NullDate
             date = NullDate(1970, 1, 1, 1)
             date += datetime.timedelta(seconds = filetimeToUtc(rawTime))
+            date.filetime = rawTime
 
             return date
         else:
@@ -304,7 +305,7 @@ def filetimeToDatetime(rawTime: int) -> datetime.datetime:
         # For TZError we just raise it again. It is a fatal error.
         raise
     except Exception:
-        raise ValueError(f'Timestamp value of {filetimeToUtc(rawTime)} caused an exception. This was probably caused by the time stamp being too far in the future.')
+        raise ValueError(f'Timestamp value of {filetimeToUtc(rawTime)} (raw: {rawTime}) caused an exception. This was probably caused by the time stamp being too far in the future.')
 
 
 def filetimeToUtc(inp: int) -> float:
