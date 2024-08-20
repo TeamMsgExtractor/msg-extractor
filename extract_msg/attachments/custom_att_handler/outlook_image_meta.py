@@ -147,7 +147,7 @@ class OutlookImageMetafile(CustomAttachmentHandler):
         # on the number.
         if not (name := self.attachment.name):
             name = f'attachment {int(self.attachment.dir[-8:], 16)}'
-        return name + '.bmp'
+        return name + '.wmf'
 
     @property
     def obj(self) -> bytes:
