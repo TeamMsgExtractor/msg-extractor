@@ -3,7 +3,6 @@ __all__ = [
 ]
 
 
-import pathlib
 import subprocess
 import sys
 import unittest
