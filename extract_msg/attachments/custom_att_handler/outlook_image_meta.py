@@ -2,7 +2,7 @@ from __future__ import annotations
 
 
 __all__ = [
-    'OutlookImageDIB',
+    'OutlookImageMetafile',
 ]
 
 
@@ -23,7 +23,7 @@ _ST_OLE = struct.Struct('<IIIII')
 _ST_MAILSTREAM = struct.Struct('<III')
 
 
-class OutlookImageDIB(CustomAttachmentHandler):
+class OutlookImageMetafile(CustomAttachmentHandler):
     """
     Custom handler for a special attachment type, a Device Independent Bitmap
     stored in a way special to Outlook.
@@ -41,7 +41,7 @@ class OutlookImageDIB(CustomAttachmentHandler):
         if stream:
             if len(stream) != 12:
                 raise ValueError('MailStream is the wrong length.')
-            
+
             # Unpack the mailstream.
             vals = _ST_MAILSTREAM.unpack(stream)
             self.__dvaspect = DVAspect(vals[0])
@@ -51,7 +51,7 @@ class OutlookImageDIB(CustomAttachmentHandler):
             #raise ValueError('MailStream could not be found.')
             # Create default values.
             self.__dvaspect = DVAspect.CONTENT
-            # TODO figure out what the default values for these should actually 
+            # TODO figure out what the default values for these should actually
             # be.
             self.__x = 0
             self.__y = 0
@@ -87,13 +87,13 @@ class OutlookImageDIB(CustomAttachmentHandler):
 
     @classmethod
     def isCorrectHandler(cls, attachment: AttachmentBase) -> bool:
-        if attachment.clsid != '00000316-0000-0000-C000-000000000046':
+        if attachment.clsid != '00000315-0000-0000-C000-000000000046':
             return False
 
         # Check for the required streams.
         if not attachment.exists('__substg1.0_3701000D/CONTENTS'):
             return False
-        # These streams were previously considered mandatory, but are now 
+        # These streams were previously considered mandatory, but are now
         # tentatively optional.
         #if not attachment.exists('__substg1.0_3701000D/\x01Ole'):
         #    return False
@@ -147,7 +147,7 @@ class OutlookImageDIB(CustomAttachmentHandler):
         # on the number.
         if not (name := self.attachment.name):
             name = f'attachment {int(self.attachment.dir[-8:], 16)}'
-        return name + '.bmp'
+        return name + '.wmf'
 
     @property
     def obj(self) -> bytes:
@@ -155,4 +155,4 @@ class OutlookImageDIB(CustomAttachmentHandler):
 
 
 
-registerHandler(OutlookImageDIB)
+registerHandler(OutlookImageMetafile)
