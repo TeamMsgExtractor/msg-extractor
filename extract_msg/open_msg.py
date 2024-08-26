@@ -107,7 +107,7 @@ def openMsg(path, **kwargs) -> MSGFile:
     # other file types (like doc, ppt, etc.) might open but not return a class
     # type. If the stream is not found, classType returns None, which has no
     # lower function. So let's make sure we got a good return first.
-    if not cy:
+    if not ct:
         if kwargs.get('strict', True):
             raise InvalidFileFormatError('File was confirmed to be an olefile, but was not an MSG file.')
         else:

@@ -666,8 +666,10 @@ class ErrorBehavior(enum.IntFlag):
     * THROW: Throw the exception regardless of type.
     * ATTACH_NOT_IMPLEMENTED: Silence the exception for NotImplementedError.
     * ATTACH_BROKEN: Silence the exception for broken attachments.
-    * ATTACH_SUPPRESS_ALL: Silence the exception for NotImplementedError and for
-      broken attachments.
+    * CUSTOM_ATTACH_TOLERANT: Makes custom attachments more tolerant for 
+      data that is validated but not used.
+    * ATTACH_SUPPRESS_ALL: Silence the exception for NotImplementedError, for
+      broken attachments, and for custom attachment issues.
     * RTFDE_MALFORMED: Silences errors about malformed RTF data.
     * RTFDE_UNKNOWN_ERROR: Silences errors from RTFDE that are not normal.
     * RTFDE: Silences all errors from RTFDE.
@@ -679,22 +681,23 @@ class ErrorBehavior(enum.IntFlag):
       simply be dropped.
     * SUPPRESS_ALL: Silences all of the above.
     """
-    THROW = 0b000000
+    THROW = 0b00000000
     # Attachments.
-    ATTACH_NOT_IMPLEMENTED = 0b000001
-    ATTACH_BROKEN = 0b000010
-    ATTACH_SUPPRESS_ALL = 0b000011
+    ATTACH_NOT_IMPLEMENTED = 0b00000001
+    ATTACH_BROKEN = 0b00000010
+    CUSTOM_ATTACH_TOLERANT = 0b00000100
+    ATTACH_SUPPRESS_ALL = 0b00000111
     # RTFDE.
-    RTFDE_MALFORMED = 0b000100
-    RTFDE_UNKNOWN_ERROR = 0b001000
-    RTFDE = 0b001100
+    RTFDE_MALFORMED = 0b00001000
+    RTFDE_UNKNOWN_ERROR = 0b00010000
+    RTFDE = 0b00011000
     # General.
-    STANDARDS_VIOLATION = 0b010000
-    OLE_DEFECT_INCORRECT = 0b100000
-    # Named Properties
-    NAMED_NAME_STREAM = 0b1000000
+    STANDARDS_VIOLATION = 0b00100000
+    OLE_DEFECT_INCORRECT = 0b01000000
+    # Named Properties.
+    NAMED_NAME_STREAM = 0b10000000
 
-    SUPPRESS_ALL = 0b1111111
+    SUPPRESS_ALL = 0b111111111111
 
 
 
