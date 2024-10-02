@@ -1,3 +1,6 @@
+**v0.50.0**
+* [[TeamMsgExtractor #432](https://github.com/TeamMsgExtractor/msg-extractor/issues/432)] Adjust html header code to replace non-ascii characters with escaped versions.
+
 **v0.49.0**
 * [[TeamMsgExtractor #427](https://github.com/TeamMsgExtractor/msg-extractor/issues/427)] Adjusted code for converting time stamps to create null dates for any time stamp beyond a certain point. The point was determined to be close to the existing null dates.
 * [[TeamMsgExtractor #425](https://github.com/TeamMsgExtractor/msg-extractor/issues/425)] Added basic support for custom attachments that are Windows Metafiles.
