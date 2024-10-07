@@ -1,5 +1,6 @@
 **v0.50.0**
-* [[TeamMsgExtractor #432](https://github.com/TeamMsgExtractor/msg-extractor/issues/432)] Adjust html header code to replace non-ascii characters with escaped versions.
+* [[TeamMsgExtractor #432](https://github.com/TeamMsgExtractor/msg-extractor/issues/432)] Adjust html header code to replace non-ascii characters with escaped versions. Also adujusted plain text to html conversion to ensure non-ascii character from the body are encoded to escpaed values to be safe.
+* Made some corrections to `NullDate`.
 
 **v0.49.0**
 * [[TeamMsgExtractor #427](https://github.com/TeamMsgExtractor/msg-extractor/issues/427)] Adjusted code for converting time stamps to create null dates for any time stamp beyond a certain point. The point was determined to be close to the existing null dates.

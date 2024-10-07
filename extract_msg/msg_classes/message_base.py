@@ -1163,14 +1163,14 @@ class MessageBase(MSGFile):
             pass
         elif self.rtfBody:
             logger.info('HTML body was not found, attempting to generate from RTF.')
-            htmlBody = self.deencapsulateBody(self.rtfBody, DeencapType.HTML)
+            htmlBody = cast(bytes, self.deencapsulateBody(self.rtfBody, DeencapType.HTML))
         # This is it's own if statement so we can ensure it will generate
         # even if there is an rtfBody, in the event it doesn't have HTML.
         if not htmlBody and self.body:
             # Convert the plain text body to html.
             logger.info('HTML body was not found, attempting to generate from plain text body.')
             correctedBody = html.escape(self.body).replace('\r', '').replace('\n', '<br />')
-            htmlBody = f'<html><body>{correctedBody}</body></head>'.encode('utf-8')
+            htmlBody = f'<html><body>{correctedBody}</body></head>'.encode('ascii', 'xmlreplace')
 
         if not htmlBody:
             logger.info('HTML body could not be found nor generated.')
@@ -1213,7 +1213,7 @@ class MessageBase(MSGFile):
         prefix = '<div id="injectedHeader"><div><p class="MsoNormal">'
         suffix = '<o:p></o:p></p></div></div>'
         joinStr = '<br/>'
-        formatter = (lambda name, value: f'<b>{name}:</b>&nbsp;{inputToString(htmlSanitize(value), self.stringEncoding).encode("ascii", "xmlcharrefreplace").decode()}')
+        formatter = (lambda name, value: f'<b>{name}:</b>&nbsp;{inputToString(htmlSanitize(value), self.stringEncoding).encode('ascii', 'xmlcharrefreplace').decode()}')
 
         return self.getInjectableHeader(prefix, joinStr, suffix, formatter)
 
