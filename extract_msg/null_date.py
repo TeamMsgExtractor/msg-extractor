@@ -26,9 +26,9 @@ class NullDate(datetime.datetime):
     def __eq__(self, other) -> bool:
         if isinstance(other, NullDate):
             return True
-        return super.__eq__(self, other)
+        return super().__eq__(other)
 
     def __ne__(self, other) -> bool:
         if isinstance(other, NullDate):
             return False
-        return super.__eq__(self, other)
+        return super().__eq__(other)
