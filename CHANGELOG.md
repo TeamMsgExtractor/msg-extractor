@@ -1,4 +1,4 @@
-**v0.50.0**
+**v0.50.1**
 * [[TeamMsgExtractor #434](https://github.com/TeamMsgExtractor/msg-extractor/issues/434)] Fix bug introduced in previous version.
 
 **v0.50.0**
