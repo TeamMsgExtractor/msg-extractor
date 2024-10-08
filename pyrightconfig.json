@@ -1,0 +1,7 @@
+{
+    "pythonVersion": "3.8",
+    "pythonPlatform": "All",
+    "reportUnnecessaryIsInstance": "information",
+    "reportConstantRedefinition": "error",
+    "reportDeprecated": "warning"
+}

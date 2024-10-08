@@ -1,0 +1,80 @@
+Here are my current notes:
+Image:
+For the image, it scales the image to the right size, then aligns it,
+using a border of 9 pixels from the edge of the card. 50% would be 132
+pixels (calculating the square root of half the card size, that is
+pretty close. Square root is ~137 pixels). Multiply the percentage
+integer by 264 and divide by 100 and we will call it good enough.
+
+The scale defined for an image is actually for the area it will be occupying,
+not the image itself. 50% means that 50% of the image area is being used.
+Here is a full list of how the options behave:
+    Image left: Image area is left %. Right border is 6-7 pixels.
+        Fit to Edge: Scales it vertically to match
+        Top Left: Scales horizontally to match. Places in top left.
+        Top Center: Scales horizontally to match. Places in top center.
+        Top Right: Scales horizontally to match. Places in top right.
+        Center Left: Scales horizontally to match. Places in center left.
+        Center: Scales horizontally to match. Places in center.
+        Center Right: Scales horizontally to match. Places in center right.
+        Bottom Left: Scales horizontally to match. Places in bottom left.
+        Bottom Center: Scales horizontally to match. Places in bottom center.
+        Bottom Right: Scales horizontally to match. Places in bottom right.
+    Image Right: Image area is right %. Left border is 6-7 pixels.
+        Fit to Edge: Scales it vertically to match
+        Top Left:
+        Top Center:
+        Top Right:
+        Center Left:
+        Center:
+        Center Right:
+        Bottom Left:
+        Bottom Center:
+        Bottom Right:
+    Image Top: Image area is top %. Bottom border is 6-7 pixels. Top border is none.
+        Fit to Edge: Scales it horizontally to match.
+        Top Left:
+        Top Center:
+        Top Right:
+        Center Left:
+        Center:
+        Center Right:
+        Bottom Left:
+        Bottom Center:
+        Bottom Right:
+    Image Bottom: Image area is bottom %. Top border is 6-7 pixels. Bottom border is 9 pixels.
+        Fit to Edge: Scales it horizontally to match.
+        Top Left:
+        Top Center:
+        Top Right:
+        Center Left:
+        Center:
+        Center Right:
+        Bottom Left:
+        Bottom Center:
+        Bottom Right:
+    Text Only: No image.
+    Background Image:
+        Fit to Edge: Scales it horizontally to match.
+        Top Left: Seems to want to scale it to leave 8 pixel border, but may not. Places to left.
+        Top Center: Seems to want to scale it to leave 8 pixel border, but may not. Places in center.
+        Top Right: Seems to want to scale it to leave 8 pixel border, but may not. Places to right.
+        Center Left: Same as top left.
+        Center: Same as top center.
+        Center Right: Same as top right.
+        Bottom Left: Same as top left.
+        Bottom Center: Same as top center.
+        Bottom Right: Same as top right.
+
+
+Text:
+For the text, the "align" is 8 blank pixels on the side you are aligning to. So
+the edge of the text will be 8 pixels away from the edge of the canvas. The top
+line of text is 10 pixels down from the top, however the way it aligns text from
+the top is unclear. More research needed. If the line is going to go off the
+page, it does truncate with a "..." and will go all the way to the very edge.
+Text on a line below existing rendered line will not be rendered if it does not
+entirely fit on the page vertically.
+
+Additionally, font size may slightly increase distance to border. However, it
+never goes below 8.

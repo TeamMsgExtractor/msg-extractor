@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: latin-1 -*-
 # Date Format: YYYY-MM-DD
 
@@ -6,12 +6,12 @@
 extract_msg:
     Extracts emails and attachments saved in Microsoft Outlook's .msg files.
 
-https://github.com/mattgwwalker/msg-extractor
+https://github.com/TeamMsgExtractor/msg-extractor
 """
 
-# --- LICENSE.txt -----------------------------------------------------------------
+# --- LICENSE.txt --------------------------------------------------------------
 #
-#    Copyright 2013 Matthew Walker
+#    Copyright 2013-2023 Matthew Walker and Destiny Peterson
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,20 +27,45 @@ https://github.com/mattgwwalker/msg-extractor
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 __author__ = 'Destiny Peterson & Matthew Walker'
-__date__ = '2021-07-13'
-__version__ = '0.29.0'
+__date__ = '2024-10-08'
+__version__ = '0.50.1'
 
-import logging
+__all__ = [
+    # Modules:
+    'attachments',
+    'constants',
+    'enums',
+    'exceptions',
+    'msg_classes',
+    'null_date',
+    'properties',
+    'structures',
 
-from . import constants
-from .appointment import Appointment
-from .attachment import Attachment
-from .contact import Contact
-from .exceptions import UnrecognizedMSGTypeError
-from .message import Message
-from .message_base import MessageBase
-from .msg import MSGFile
-from .prop import createProp
-from .properties import Properties
+    # Classes:
+    'Attachment',
+    'AttachmentBase',
+    'Message',
+    'MSGFile',
+    'Named',
+    'NamedProperties',
+    'OleWriter',
+    'PropertiesStore',
+    'Recipient',
+    'SignedAttachment',
+
+    # Functions:
+    'openMsg',
+    'openMsgBulk',
+]
+
+
+# Ensure these are imported before anything else.
+from . import constants, enums, exceptions
+
+from . import attachments, msg_classes, null_date, properties, structures
+from .attachments import Attachment, AttachmentBase, SignedAttachment
+from .msg_classes import Message, MSGFile
+from .ole_writer import OleWriter
+from .open_msg import openMsg, openMsgBulk
+from .properties import Named, NamedProperties, PropertiesStore
 from .recipient import Recipient
-from .utils import openMsg, properHex

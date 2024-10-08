@@ -1,10 +1,13 @@
 # Mac
 .DS_Store
 
-# PyCharm crud
+# PyCharm stuff
 /extract_msg/.idea
 
-# build files and folders
+# VS Code stuff.
+/.vscode/
+
+# Build files and folders
 /build/
 *.egg-info/
 /dist/
@@ -19,7 +22,6 @@
 __pycache__/
 
 # Ignore new .msg files added from testing
-
 /example-msg-files/expected-outputs/
 /example-msg-files/*.msg
 
@@ -42,3 +44,6 @@ logging.json
 upload.bat
 upload.sh
 venv
+
+# Sphinx documentation
+docs/_build/

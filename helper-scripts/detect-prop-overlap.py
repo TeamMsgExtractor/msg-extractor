@@ -1,0 +1,58 @@
+#! /usr/bin/env python3
+import glob
+import re
+import sys
+
+
+def main(args):
+    """
+    Checks the specified file(s) for overlapping properties. Properties are
+    overlapping if they share the same variable name or come from the same
+    property. This may be intentional for some properties.
+    """
+    raise Exception('This script needs to be rewritten for the new property system.')
+    if len(args) < 2:
+        print('Please specify a file to read.')
+        sys.exit(1)
+
+    pattern = re.compile(r"(?<=self._get)((Named)|(Property)|(Typed)|(Stream))As\('(.*?)'")
+
+    for patt in args[1:]:
+        for name in glob.glob(patt):
+            with open(name, 'r', encoding = 'utf-8') as f:
+                data = f.read()
+
+            #names = tuple(sorted(x.group(5) for x in pattern.finditer(data)))
+            ids = tuple(sorted(x.group(6) for x in pattern.finditer(data)))
+
+            #duplicateNamesFound = len(names) != len(list(set(names)))
+            duplicateIdsFound = len(ids) != len(list(set(names)))
+
+            print(name)
+
+            if False:#duplicateNamesFound:
+                print('\tVariable Names:')
+                counts = {x: 0 for x in names}
+                for x in names:
+                    counts[x] += 1
+                for x in counts:
+                    if counts[x] > 1:
+                        print(f'\t\t{x}')
+
+            if duplicateIdsFound:
+                print('\tIDs:')
+                counts = {x: 0 for x in ids}
+                for x in ids:
+                    counts[x] += 1
+                for x in counts:
+                    if counts[x] > 1:
+                        print(f'\t\t{x}')
+
+            if not duplicateIdsFound:# and not duplicateNamesFound:
+                print('\tNo duplicates detected.')
+
+            print()
+
+
+if __name__ == '__main__':
+    main(sys.argv)
