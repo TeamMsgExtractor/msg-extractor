@@ -1,5 +1,8 @@
 **v0.50.0**
-* [[TeamMsgExtractor #432](https://github.com/TeamMsgExtractor/msg-extractor/issues/432)] Adjust html header code to replace non-ascii characters with escaped versions. Also adujusted plain text to html conversion to ensure non-ascii character from the body are encoded to escpaed values to be safe.
+* [[TeamMsgExtractor #434](https://github.com/TeamMsgExtractor/msg-extractor/issues/434)] Fix bug introduced in previous version.
+
+**v0.50.0**
+* [[TeamMsgExtractor #432](https://github.com/TeamMsgExtractor/msg-extractor/issues/432)] Adjust html header code to replace non-ascii characters with escaped versions. Also adjusted plain text to html conversion to ensure non-ascii character from the body are encoded to escaped values to be safe.
 * Made some corrections to `NullDate`.
 
 **v0.49.0**
