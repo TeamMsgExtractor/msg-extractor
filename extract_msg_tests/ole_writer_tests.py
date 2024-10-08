@@ -34,7 +34,8 @@ class OleWriterEditingTests(unittest.TestCase):
         Initial test to check that the setup does not throw exceptions.
         """
         self._setupWriter()
-
+        raise Exception()
+    
     def testAddEntryManual(self):
         """
         Tests the `addEntry` method.
