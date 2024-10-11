@@ -116,7 +116,7 @@ def openMsg(path, **kwargs) -> MSGFile:
             return msg
     classType = ct.lower()
     # Put the message class first as it is most common.
-    if classType.startswith('ipm.note') or classType.startswith('report'):
+    if classType.startswith('ipm.note') or classType.startswith('report') or classType.startswith('ipm.skypeteams.message'):
         msg.close()
         if classType.endswith('smime.multipartsigned') or classType.endswith('smime'):
             return MessageSigned(path, **kwargs)
