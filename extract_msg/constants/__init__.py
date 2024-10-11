@@ -222,6 +222,7 @@ KNOWN_CLASS_TYPES: Final[Tuple[str, ...]] = (
     'ipm.report',
     'ipm.resend',
     'ipm.schedule',
+    'ipm.skypeteams.message'
     'ipm.task',
     'ipm.taskrequest',
     'report',
