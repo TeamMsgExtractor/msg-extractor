@@ -1,3 +1,6 @@
+**v0.51.0**
+* [[TeamMsgExtractor #401](https://github.com/TeamMsgExtractor/msg-extractor/issues/401)] Add support for MSG class type "IPM.SkypeTeams.Message".
+
 **v0.50.1**
 * [[TeamMsgExtractor #434](https://github.com/TeamMsgExtractor/msg-extractor/issues/434)] Fix bug introduced in previous version.
 
