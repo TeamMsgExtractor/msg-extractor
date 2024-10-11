@@ -230,7 +230,7 @@ Here is a list of things that are currently on our todo list:
 Credits
 -------
 
-`Destiny Peterson (The Elemental of Destruction)`_ - Co-owner, principle programmer, knows more about msg files than anyone probably should.
+`Destiny Peterson`_ - Co-owner, principle programmer, knows more about msg files than anyone probably should.
 
 `Matthew Walker`_ - Original developer and co-owner.
 
