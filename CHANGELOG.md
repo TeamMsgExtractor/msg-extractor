@@ -1,5 +1,5 @@
 **v0.51.1**
-* Add class type added ion last version to known class types.
+* Add class type added in last version to known class types.
 
 **v0.51.0**
 * [[TeamMsgExtractor #401](https://github.com/TeamMsgExtractor/msg-extractor/issues/401)] Add basic support for MSG class type `IPM.SkypeTeams.Message`.
