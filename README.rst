@@ -260,8 +260,8 @@ your access to the newest major version of extract-msg.
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
 
-.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.50.1-blue.svg
-   :target: https://pypi.org/project/extract-msg/0.50.1/
+.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.51.0-blue.svg
+   :target: https://pypi.org/project/extract-msg/0.51.0 /
 
 .. |PyPI2| image:: https://img.shields.io/badge/python-3.8+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-3810/
@@ -271,7 +271,7 @@ your access to the newest major version of extract-msg.
     :alt: Documentation Status
 
 .. _Matthew Walker: https://github.com/mattgwwalker
-.. _Destiny Peterson (The Elemental of Destruction): https://github.com/TheElementalOfDestruction
+.. _Destiny Peterson: https://github.com/TheElementalOfDestruction
 .. _JP Bourget: https://github.com/punkrokk
 .. _Philippe Lagadec: https://github.com/decalage2
 .. _Dean Malmgren: https://github.com/deanmalmgren
