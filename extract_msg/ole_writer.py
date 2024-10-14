@@ -18,7 +18,7 @@ from typing import (
 from . import constants
 from .constants import MSG_PATH
 from .enums import Color, DirectoryEntryType
-from .exceptions import TooManySectorsError
+from .exceptions import StandardViolationError, TooManySectorsError
 from .utils import ceilDiv, dictGetCasedKey, inputToMsgPath
 from olefile.olefile import OleDirectoryEntry, OleFileIO
 from red_black_dict_mod import RedBlackTree
@@ -804,9 +804,12 @@ class OleWriter:
         # Send it to be modified using the arguments given.
         self.__modifyEntry(entry, **kwargs)
 
-    def fromMsg(self, msg: MSGFile) -> None:
+    def fromMsg(self, msg: MSGFile, allowBadEmbed: bool = False) -> None:
         """
         Copies the streams and stream information necessary from the MSG file.
+
+        :param allowBadEmbed: If true, attempts to skip steps that will fail if 
+            the embedded msg file violates standards.
         """
         # Get the root OLE entry's CLSID.
         self.__rootEntry.clsid = _unClsid(msg._getOleEntry('/').clsid)
@@ -834,7 +837,14 @@ class OleWriter:
             # Get the entry for the named properties directory and add it
             # immediately if it exists. If it doesn't exist, this whole
             # section will be skipped.
-            self.addOleEntry('__nameid_version1.0', msg._getOleEntry('__nameid_version1.0', False), None)
+            try:
+                self.addOleEntry('__nameid_version1.0', msg._getOleEntry('__nameid_version1.0', False), None)
+            except OSError as e:
+                if str(e).startswith('Cannot add an entry'):
+                    if allowBadEmbed:
+                        return
+                    raise StandardViolationError('Embedded msg file attempted to be extracted that contains it\'s own named streams.')
+                raise
 
             # Now that we know it exists, grab all the file inside and copy
             # them to our root.
