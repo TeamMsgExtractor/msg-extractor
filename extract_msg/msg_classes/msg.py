@@ -843,7 +843,16 @@ class MSGFile:
         """
         Whether the strings are Unicode encoded or not.
         """
-        return (self.getPropertyVal('340D0003', 0) & 0x40000) != 0
+        val = self.getPropertyVal('340D0003', None)
+        if val is None:
+            # Try to get this value from the parent.
+            if self.prefix:
+                if self.__parentMsg and (msg := self.__parentMsg()) is not None:
+                    return msg.areStringsUnicode
+
+            # Final attempt: check the actual streams.
+            return any(x[-1].upper().endswith('001F') for x in self.listDir())
+        return (val & 0x40000) != 0
 
     @functools.cached_property
     def attachments(self) -> Union[List[AttachmentBase], List[SignedAttachment]]:
