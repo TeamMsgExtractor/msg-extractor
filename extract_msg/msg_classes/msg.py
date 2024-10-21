@@ -479,7 +479,7 @@ class MSGFile:
                     foundNumber += 1
         return (foundNumber > 0), foundNumber
 
-    def export(self, path) -> None:
+    def export(self, path, allowBadEmbed: bool = False) -> None:
         """
         Exports the contents of this MSG file to a new MSG files specified by
         the path given.
@@ -498,10 +498,10 @@ class MSGFile:
         # Create an instance of the class used for writing a new OLE file.
         writer = OleWriter()
         # Add all file and directory entries to it. If this
-        writer.fromMsg(self)
+        writer.fromMsg(self, allowBadEmbed = allowBadEmbed)
         writer.write(path)
 
-    def exportBytes(self) -> bytes:
+    def exportBytes(self, allowBadEmbed: bool = False) -> bytes:
         """
         Saves a new copy of the MSG file, returning the bytes.
         """
