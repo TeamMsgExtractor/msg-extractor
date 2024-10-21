@@ -809,7 +809,7 @@ class OleWriter:
         Copies the streams and stream information necessary from the MSG file.
 
         :param allowBadEmbed: If true, attempts to skip steps that will fail if 
-            the embedded msg file violates standards.
+            the embedded msg file violates standards. It will also attempt to repair the data to try to ensure it can open in Outlook.
         """
         # Get the root OLE entry's CLSID.
         self.__rootEntry.clsid = _unClsid(msg._getOleEntry('/').clsid)
@@ -828,7 +828,17 @@ class OleWriter:
             # specific place. So let's check if we are doing the properties
             # stream and then if we are embedded.
             if x[0] == '__properties_version1.0' and msg.prefixLen > 0:
-                data = data[:24] + b'\x00\x00\x00\x00\x00\x00\x00\x00' + data[24:]
+                if len(data) % 16 != 0:
+                    data = data[:24] + b'\x00\x00\x00\x00\x00\x00\x00\x00' + data[24:]
+                elif not allowBadEmbed:
+                    # If we are not allowing bad data, throw an error.
+                    raise StandardViolationError('Embedded msg file attempted to be extracted that contains a top level properties stream.')
+                if allowBadEmbed:
+                    # See if we need to fix the properties stream at all.
+                    if msg.getPropertyVal('340D0003') is None:
+                        if msg.areStringsUnicode:
+                            # We need to add a property to allow this file to open:
+                                data += b'\x03\x00\x0D\x34\x02\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00'
             self.addOleEntry(x, entry, data)
 
         # Now check if it is an embedded file. If so, we need to copy the named
