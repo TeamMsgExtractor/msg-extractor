@@ -843,7 +843,7 @@ class MSGFile:
         """
         Whether the strings are Unicode encoded or not.
         """
-        val = self.getPropertyVal('340D0003', None)
+        val = self.getPropertyVal('340D0003')
         if val is None:
             # Try to get this value from the parent.
             if self.prefix:
