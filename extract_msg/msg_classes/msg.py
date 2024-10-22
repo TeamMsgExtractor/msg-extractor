@@ -492,6 +492,8 @@ class MSGFile:
 
         :param path: A path-like object (including strings and ``pathlib.Path``
             objects) or an IO device with a write method which accepts bytes.
+        :param allowBadEmbed: If True, attempts to skip steps that will fail if 
+            the embedded MSG file violates standards. It will also attempt to repair the data to try to ensure it can open in Outlook.
         """
         from ..ole_writer import OleWriter
 
@@ -504,9 +506,12 @@ class MSGFile:
     def exportBytes(self, allowBadEmbed: bool = False) -> bytes:
         """
         Saves a new copy of the MSG file, returning the bytes.
+
+        :param allowBadEmbed: If True, attempts to skip steps that will fail if 
+            the embedded MSG file violates standards. It will also attempt to repair the data to try to ensure it can open in Outlook.
         """
         out = io.BytesIO()
-        self.export(out)
+        self.export(out, allowBadEmbed)
         return out.getvalue()
 
     def fixPath(self, inp: MSG_PATH, prefix: bool = True) -> str:

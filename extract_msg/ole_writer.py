@@ -808,8 +808,11 @@ class OleWriter:
         """
         Copies the streams and stream information necessary from the MSG file.
 
-        :param allowBadEmbed: If true, attempts to skip steps that will fail if 
-            the embedded msg file violates standards. It will also attempt to repair the data to try to ensure it can open in Outlook.
+        :param allowBadEmbed: If True, attempts to skip steps that will fail if 
+            the embedded MSG file violates standards. It will also attempt to repair the data to try to ensure it can open in Outlook.
+
+        :raises StandardViolationError: Something about the embedded data has a
+            fundemental issue that violates the standard.
         """
         # Get the root OLE entry's CLSID.
         self.__rootEntry.clsid = _unClsid(msg._getOleEntry('/').clsid)
