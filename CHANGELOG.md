@@ -1,3 +1,9 @@
+**v0.52.0**
+* [[TeamMsgExtractor #444](https://github.com/TeamMsgExtractor/msg-extractor/issues/444)] Fix typo in string that prevented HTML body from generating from the plain text body properly.
+* Adjusted the behavior of `MSGFile.areStringsUnicode` to prioritize the property specified by the parent MSG files for MSG files that are embedded. Additionally, added a fallback to rely on whether or not there is a stream using the `001F` type to determine the property value if it is entirely missing.
+* Adjusted `OleWriter.fromMsg()` and `MSGFile.export()` to add the argument `allowBadEmbed` which helps to correct a few different issues that may appear in embedded MSG files. These corrections allow the extracte file to still be extracted and to open properly in Outlook.
+* In addition to the above, the errors that some of those corrections will surpress are now significantly more informative about what went wrong.
+
 **v0.51.1**
 * Add class type added in last version to known class types.
 
