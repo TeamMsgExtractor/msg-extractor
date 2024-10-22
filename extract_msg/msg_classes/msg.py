@@ -479,7 +479,7 @@ class MSGFile:
                     foundNumber += 1
         return (foundNumber > 0), foundNumber
 
-    def export(self, path) -> None:
+    def export(self, path, allowBadEmbed: bool = False) -> None:
         """
         Exports the contents of this MSG file to a new MSG files specified by
         the path given.
@@ -492,21 +492,26 @@ class MSGFile:
 
         :param path: A path-like object (including strings and ``pathlib.Path``
             objects) or an IO device with a write method which accepts bytes.
+        :param allowBadEmbed: If True, attempts to skip steps that will fail if 
+            the embedded MSG file violates standards. It will also attempt to repair the data to try to ensure it can open in Outlook.
         """
         from ..ole_writer import OleWriter
 
         # Create an instance of the class used for writing a new OLE file.
         writer = OleWriter()
         # Add all file and directory entries to it. If this
-        writer.fromMsg(self)
+        writer.fromMsg(self, allowBadEmbed = allowBadEmbed)
         writer.write(path)
 
-    def exportBytes(self) -> bytes:
+    def exportBytes(self, allowBadEmbed: bool = False) -> bytes:
         """
         Saves a new copy of the MSG file, returning the bytes.
+
+        :param allowBadEmbed: If True, attempts to skip steps that will fail if 
+            the embedded MSG file violates standards. It will also attempt to repair the data to try to ensure it can open in Outlook.
         """
         out = io.BytesIO()
-        self.export(out)
+        self.export(out, allowBadEmbed)
         return out.getvalue()
 
     def fixPath(self, inp: MSG_PATH, prefix: bool = True) -> str:
@@ -843,7 +848,16 @@ class MSGFile:
         """
         Whether the strings are Unicode encoded or not.
         """
-        return (self.getPropertyVal('340D0003', 0) & 0x40000) != 0
+        val = self.getPropertyVal('340D0003')
+        if val is None:
+            # Try to get this value from the parent.
+            if self.prefix:
+                if self.__parentMsg and (msg := self.__parentMsg()) is not None:
+                    return msg.areStringsUnicode
+
+            # Final attempt: check the actual streams.
+            return any(x[-1].upper().endswith('001F') for x in self.listDir())
+        return (val & 0x40000) != 0
 
     @functools.cached_property
     def attachments(self) -> Union[List[AttachmentBase], List[SignedAttachment]]:

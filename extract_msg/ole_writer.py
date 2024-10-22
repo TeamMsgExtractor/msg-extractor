@@ -18,7 +18,7 @@ from typing import (
 from . import constants
 from .constants import MSG_PATH
 from .enums import Color, DirectoryEntryType
-from .exceptions import TooManySectorsError
+from .exceptions import StandardViolationError, TooManySectorsError
 from .utils import ceilDiv, dictGetCasedKey, inputToMsgPath
 from olefile.olefile import OleDirectoryEntry, OleFileIO
 from red_black_dict_mod import RedBlackTree
@@ -804,9 +804,15 @@ class OleWriter:
         # Send it to be modified using the arguments given.
         self.__modifyEntry(entry, **kwargs)
 
-    def fromMsg(self, msg: MSGFile) -> None:
+    def fromMsg(self, msg: MSGFile, allowBadEmbed: bool = False) -> None:
         """
         Copies the streams and stream information necessary from the MSG file.
+
+        :param allowBadEmbed: If True, attempts to skip steps that will fail if 
+            the embedded MSG file violates standards. It will also attempt to repair the data to try to ensure it can open in Outlook.
+
+        :raises StandardViolationError: Something about the embedded data has a
+            fundemental issue that violates the standard.
         """
         # Get the root OLE entry's CLSID.
         self.__rootEntry.clsid = _unClsid(msg._getOleEntry('/').clsid)
@@ -825,7 +831,17 @@ class OleWriter:
             # specific place. So let's check if we are doing the properties
             # stream and then if we are embedded.
             if x[0] == '__properties_version1.0' and msg.prefixLen > 0:
-                data = data[:24] + b'\x00\x00\x00\x00\x00\x00\x00\x00' + data[24:]
+                if len(data) % 16 != 0:
+                    data = data[:24] + b'\x00\x00\x00\x00\x00\x00\x00\x00' + data[24:]
+                elif not allowBadEmbed:
+                    # If we are not allowing bad data, throw an error.
+                    raise StandardViolationError('Embedded msg file attempted to be extracted that contains a top level properties stream.')
+                if allowBadEmbed:
+                    # See if we need to fix the properties stream at all.
+                    if msg.getPropertyVal('340D0003') is None:
+                        if msg.areStringsUnicode:
+                            # We need to add a property to allow this file to open:
+                                data += b'\x03\x00\x0D\x34\x02\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00'
             self.addOleEntry(x, entry, data)
 
         # Now check if it is an embedded file. If so, we need to copy the named
@@ -834,7 +850,14 @@ class OleWriter:
             # Get the entry for the named properties directory and add it
             # immediately if it exists. If it doesn't exist, this whole
             # section will be skipped.
-            self.addOleEntry('__nameid_version1.0', msg._getOleEntry('__nameid_version1.0', False), None)
+            try:
+                self.addOleEntry('__nameid_version1.0', msg._getOleEntry('__nameid_version1.0', False), None)
+            except OSError as e:
+                if str(e).startswith('Cannot add an entry'):
+                    if allowBadEmbed:
+                        return
+                    raise StandardViolationError('Embedded msg file attempted to be extracted that contains it\'s own named streams.')
+                raise
 
             # Now that we know it exists, grab all the file inside and copy
             # them to our root.
