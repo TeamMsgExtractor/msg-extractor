@@ -709,8 +709,7 @@ def msgPathToString(inp: Union[str, Iterable[str]]) -> str:
     """
     if not isinstance(inp, str):
         inp = '/'.join(inp)
-    inp = inp.replace('\\', '/')
-    return inp
+    return inp.replace('\\', '/')
 
 
 def parseType(_type: int, stream: Union[int, bytes], encoding: str, extras: Sequence[bytes]):
