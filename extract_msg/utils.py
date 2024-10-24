@@ -709,7 +709,7 @@ def msgPathToString(inp: Union[str, Iterable[str]]) -> str:
     """
     if not isinstance(inp, str):
         inp = '/'.join(inp)
-    inp.replace('\\', '/')
+    inp = inp.replace('\\', '/')
     return inp
 
 

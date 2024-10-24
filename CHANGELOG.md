@@ -1,5 +1,6 @@
 **v0.52.1**
 * Added tests for many functions in `extract_msg.utils`.
+* Fix an issue in `extract_msg.utils.msgPathToString()` that prevented backslashes from being replaced with forward slashes.
 
 **v0.52.0**
 * [[TeamMsgExtractor #444](https://github.com/TeamMsgExtractor/msg-extractor/issues/444)] Fix typo in string that prevented HTML body from generating from the plain text body properly.

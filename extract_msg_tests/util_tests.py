@@ -9,7 +9,7 @@ from extract_msg import utils
 
 
 class UtilTests(unittest.TestCase):
-    def testDictGetCasedKey(self):
+    def test_dictGetCasedKey(self):
         caseDict = {'hello': 1, 'HeUtQjWkW': 2}
 
         self.assertEqual(utils.dictGetCasedKey(caseDict, 'Hello'), 'hello')
@@ -17,7 +17,7 @@ class UtilTests(unittest.TestCase):
         with self.assertRaises(KeyError):
             utils.dictGetCasedKey(caseDict, 'jjjjj')
 
-    def testDivide(self):
+    def test_divide(self):
         inputString = '12345678901234567890'
         expectedOutputs = {
             1: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
@@ -36,8 +36,17 @@ class UtilTests(unittest.TestCase):
         for divideBy, expectedResult in expectedOutputs.items():
             self.assertListEqual(utils.divide(inputString, divideBy), expectedResult)
 
-    def testMakeWeakRef(self):
+    def test_makeWeakRef(self):
         self.assertIsNone(utils.makeWeakRef(None))
         class TestClass:
             pass
         self.assertIsNotNone(utils.makeWeakRef(TestClass()))
+
+    def test_minutesToDurationStr(self):
+        pass
+
+    def test_msgPathToStr(self):
+        self.assertEqual(utils.msgPathToString('hello/world/one'), 'hello/world/one')
+        self.assertEqual(utils.msgPathToString('hello/world\\one'), 'hello/world/one')
+        self.assertEqual(utils.msgPathToString(['hello', 'world', 'one']), 'hello/world/one')
+        self.assertEqual(utils.msgPathToString(['hello\\world', 'one']), 'hello/world/one')
