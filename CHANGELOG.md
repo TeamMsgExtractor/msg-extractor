@@ -1,3 +1,6 @@
+**v0.52.1**
+* Added tests for many functions in `extract_msg.utils`.
+
 **v0.52.0**
 * [[TeamMsgExtractor #444](https://github.com/TeamMsgExtractor/msg-extractor/issues/444)] Fix typo in string that prevented HTML body from generating from the plain text body properly.
 * Adjusted the behavior of `MSGFile.areStringsUnicode` to prioritize the property specified by the parent MSG files for MSG files that are embedded. Additionally, added a fallback to rely on whether or not there is a stream using the `001F` type to determine the property value if it is entirely missing.
