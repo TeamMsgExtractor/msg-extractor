@@ -43,7 +43,16 @@ class UtilTests(unittest.TestCase):
         self.assertIsNotNone(utils.makeWeakRef(TestClass()))
 
     def test_minutesToDurationStr(self):
-        pass
+        self.assertEqual(utils.minutesToDurationStr(0), '0 hours')
+        self.assertEqual(utils.minutesToDurationStr(1), '1 minute')
+        self.assertEqual(utils.minutesToDurationStr(2), '2 minutes')
+        self.assertEqual(utils.minutesToDurationStr(59), '59 minutes')
+        self.assertEqual(utils.minutesToDurationStr(60), '1 hour')
+        self.assertEqual(utils.minutesToDurationStr(61), '1 hour 1 minute')
+        self.assertEqual(utils.minutesToDurationStr(62), '1 hour 2 minutes')
+        self.assertEqual(utils.minutesToDurationStr(120), '2 hours')
+        self.assertEqual(utils.minutesToDurationStr(121), '2 hours 1 minute')
+        self.assertEqual(utils.minutesToDurationStr(122), '2 hours 2 minutes')
 
     def test_msgPathToStr(self):
         self.assertEqual(utils.msgPathToString('hello/world/one'), 'hello/world/one')
