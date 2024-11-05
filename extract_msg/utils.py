@@ -1102,7 +1102,7 @@ def unwrapMsg(msg: MSGFile) -> Dict[str, List]:
                 msgFiles.append(att.data)
                 toProcess.append(att.data)
         if isinstance(currentItem, MessageSignedBase):
-            raw += currentItem._rawAttachments
+            raw += currentItem.rawAttachments
 
     return {
         'attachments': attachments,

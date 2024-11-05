@@ -2,6 +2,7 @@
 * Added tests for many functions in `extract_msg.utils`.
 * Fix an issue in `extract_msg.utils.msgPathToString()` that prevented backslashes from being replaced with forward slashes.
 * Change the behavior of `extract_msg.utils.minutesToDurationStr()` to properly use plurals.
+* Fixed issue in `extract_msg.utils.unwrapMsg()` that would prevent it from working on signed messages due to an API change.
 
 **v0.52.0**
 * [[TeamMsgExtractor #444](https://github.com/TeamMsgExtractor/msg-extractor/issues/444)] Fix typo in string that prevented HTML body from generating from the plain text body properly.
