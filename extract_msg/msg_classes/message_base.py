@@ -1200,8 +1200,9 @@ class MessageBase(MSGFile):
             cid = tag['src'][4:]
             data = next((attachment.data for attachment in self.attachments if attachment.cid == cid), None)
             # If we found anything, inject it.
+            if '.png' in cid: extention = b'/png'
             if data:
-                tag['src'] = (b'data:image;base64,' + base64.b64encode(data)).decode('utf-8')
+                tag['src'] = (b'data:image' + extention + b';base64,' + base64.b64encode(data)).decode('utf-8')
 
         return soup.prettify('utf-8')
 
