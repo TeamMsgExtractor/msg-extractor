@@ -1203,7 +1203,7 @@ class MessageBase(MSGFile):
             if data:
                 tag['src'] = (b'data:image;base64,' + base64.b64encode(data)).decode('utf-8')
 
-        return soup.prettify('utf-8')
+        return soup.encode('utf-8')
 
     @functools.cached_property
     def htmlInjectableHeader(self) -> str:
