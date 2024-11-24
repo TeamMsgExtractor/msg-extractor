@@ -39,7 +39,8 @@ from ..enums import (
     )
 from ..exceptions import (
         ConversionError, DataNotFoundError, DeencapMalformedData,
-        DeencapNotEncapsulated, IncompatibleOptionsError, WKError
+        DeencapNotEncapsulated, IncompatibleOptionsError, MimetypeFailureError,
+        WKError
     )
 from .msg import MSGFile
 from ..structures.report_tag import ReportTag
@@ -178,7 +179,7 @@ class MessageBase(MSGFile):
             if att.dataType:
                 if hasattr(att.dataType, 'asEmailMessage'):
                     # Replace the extension with '.eml'.
-                    filename = att.getFilename()
+                    filename = att.name or ''
                     if filename.lower().endswith('.msg'):
                         filename = filename[:-4] + '.eml'
                     msgMain.add_attachment(
@@ -1198,12 +1199,35 @@ class MessageBase(MSGFile):
         for tag in tags:
             # Iterate through the attachments until we get the right one.
             cid = tag['src'][4:]
-            data = next((attachment.data for attachment in self.attachments if attachment.cid == cid), None)
+            att = next((attachment for attachment in self.attachments if hasattr(attachment, 'cid') and attachment.cid == cid), None)
             # If we found anything, inject it.
-            if data:
-                tag['src'] = (b'data:image;base64,' + base64.b64encode(data)).decode('utf-8')
+            if att and isinstance(att.data, bytes):
+                # Try to get the mimetype. If we can't, see if the item has an
+                # extension and guess the mimtype for a few known ones.
+                mime = att.mimetype
+                if not mime:
+                    ext = (att.name or '').split('.')[-1].lower()
+                    if ext == 'png':
+                        mime = 'image/png'
+                    elif ext == 'jpg' or ext == 'jpeg':
+                        mime = 'image/jpeg'
+                    elif ext == 'gif':
+                        mime = 'image/gif'
+                    elif ext == 'tiff' or ext == 'tif':
+                        mime = 'image/tif'
+                    elif ext == 'bmp':
+                        mime = 'image/bmp'
+                    elif ext == 'svg':
+                        mime = 'image/svg+xml'
+                # Final check.
+                if mime:
+                    tag['src'] = (b'data:' + mime.encode() + b';base64,' + base64.b64encode(att.data)).decode('utf-8')
+                else:
+                    # We don't know what to actually put for this item, and we
+                    # really should never end up here, so throw an error.
+                    raise MimetypeFailureError('Could not get the mimetype to use for htmlBodyPrepared.')
 
-        return soup.prettify('utf-8')
+        return soup.encode('utf-8')
 
     @functools.cached_property
     def htmlInjectableHeader(self) -> str:

@@ -3,6 +3,9 @@
 * Fix an issue in `extract_msg.utils.msgPathToString()` that prevented backslashes from being replaced with forward slashes.
 * Change the behavior of `extract_msg.utils.minutesToDurationStr()` to properly use plurals.
 * Fixed issue in `extract_msg.utils.unwrapMsg()` that would prevent it from working on signed messages due to an API change.
+* Added new exception `MimetypeFailureError`.
+* Modified the logic of `MessageBase.asEmailMessage()` to use `AttachmentBase/SignedAttachment.name` instead of `getFilename()` which only exists on AttachmentBase.
+* Modified the logic of `MessageBase.htmlBodyPrepared()` to properly put the mimetype in image tags to ensure rendering. Logic was also modified to use `encode` instead of `prettify` to reduce computation and output size.
 
 **v0.52.0**
 * [[TeamMsgExtractor #444](https://github.com/TeamMsgExtractor/msg-extractor/issues/444)] Fix typo in string that prevented HTML body from generating from the plain text body properly.

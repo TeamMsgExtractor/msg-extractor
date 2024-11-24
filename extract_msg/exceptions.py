@@ -92,6 +92,11 @@ class InvalidPropertyIdError(ExMsgBaseException):
     The provided property ID was invalid.
     """
 
+class MimetypeFailureError(ExMsgBaseException):
+    """
+    The mimetype was unable to be properly determined when it was mandatory.
+    """
+
 class NotWritableError(ExMsgBaseException):
     """
     Modification was attempted on an instance that is not writable.
