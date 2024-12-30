@@ -1,3 +1,7 @@
+**v0.53.1**
+* Expanded allowable range for `red-black-tree-mod`.
+* Fix issue with `MessageBase.asEmailMessage()` that prevented embedded MSG files from being attached.
+
 **v0.53.0**
 * Added tests for many functions in `extract_msg.utils`.
 * Fix an issue in `extract_msg.utils.msgPathToString()` that prevented backslashes from being replaced with forward slashes.

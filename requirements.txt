@@ -8,4 +8,4 @@ compressed-rtf>=1.0.6,<2
 ebcdic>=1.1.1,<2
 beautifulsoup4>=4.11.1,<4.13
 RTFDE>=0.1.1,<0.2
-red-black-tree-mod==1.20
+red-black-tree-mod>=1.20, <=1.23

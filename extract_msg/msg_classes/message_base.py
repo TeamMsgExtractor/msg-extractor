@@ -182,10 +182,7 @@ class MessageBase(MSGFile):
                     filename = att.name or ''
                     if filename.lower().endswith('.msg'):
                         filename = filename[:-4] + '.eml'
-                    msgMain.add_attachment(
-                                        att.data.asEmailMessage(),
-                                        filename = filename,
-                                        cid = att.contentId)
+                    msgMain.attach(att.data.asEmailMessage())
                 else:
                     if issubclass(att.dataType, bytes):
                         data = att.data
