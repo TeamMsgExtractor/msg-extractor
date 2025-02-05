@@ -1,3 +1,17 @@
+**v0.53.1**
+* Expanded allowable range for `red-black-tree-mod`.
+* Fix issue with `MessageBase.asEmailMessage()` that prevented embedded MSG files from being attached.
+* Expand allowable versions of `BeautifulSoup4`.
+
+**v0.53.0**
+* Added tests for many functions in `extract_msg.utils`.
+* Fix an issue in `extract_msg.utils.msgPathToString()` that prevented backslashes from being replaced with forward slashes.
+* Change the behavior of `extract_msg.utils.minutesToDurationStr()` to properly use plurals.
+* Fixed issue in `extract_msg.utils.unwrapMsg()` that would prevent it from working on signed messages due to an API change.
+* Added new exception `MimetypeFailureError`.
+* Modified the logic of `MessageBase.asEmailMessage()` to use `AttachmentBase/SignedAttachment.name` instead of `getFilename()` which only exists on AttachmentBase.
+* Modified the logic of `MessageBase.htmlBodyPrepared()` to properly put the mimetype in image tags to ensure rendering. Logic was also modified to use `encode` instead of `prettify` to reduce computation and output size.
+
 **v0.52.0**
 * [[TeamMsgExtractor #444](https://github.com/TeamMsgExtractor/msg-extractor/issues/444)] Fix typo in string that prevented HTML body from generating from the plain text body properly.
 * Adjusted the behavior of `MSGFile.areStringsUnicode` to prioritize the property specified by the parent MSG files for MSG files that are embedded. Additionally, added a fallback to rely on whether or not there is a stream using the `001F` type to determine the property value if it is entirely missing.

@@ -696,8 +696,17 @@ def minutesToDurationStr(minutes: int) -> str:
         return '1 minute'
     elif minutes < 60:
         return f'{minutes} minutes'
+    elif minutes == 60:
+        return '1 hour'
     elif minutes % 60 == 0:
         return f'{minutes // 60} hours'
+    elif minutes < 120:
+        if minutes == 61:
+            return f'1 hour 1 minute'
+        else:
+            return f'1 hour {minutes - 60} minutes'
+    elif minutes % 60 == 1:
+        return f'{minutes // 60} hours 1 minute'
     else:
         return f'{minutes // 60} hours {minutes % 60} minutes'
 
@@ -709,8 +718,7 @@ def msgPathToString(inp: Union[str, Iterable[str]]) -> str:
     """
     if not isinstance(inp, str):
         inp = '/'.join(inp)
-    inp.replace('\\', '/')
-    return inp
+    return inp.replace('\\', '/')
 
 
 def parseType(_type: int, stream: Union[int, bytes], encoding: str, extras: Sequence[bytes]):
@@ -1094,7 +1102,7 @@ def unwrapMsg(msg: MSGFile) -> Dict[str, List]:
                 msgFiles.append(att.data)
                 toProcess.append(att.data)
         if isinstance(currentItem, MessageSignedBase):
-            raw += currentItem._rawAttachments
+            raw += currentItem.rawAttachments
 
     return {
         'attachments': attachments,
