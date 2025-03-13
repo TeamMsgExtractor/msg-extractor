@@ -63,7 +63,7 @@ class TaskRequest(MessageBase):
         # The task object MUST be the first attachment, but we will be
         # lenient and allow it to be in any position. It not existing,
         # however, will not be tolerated.
-        task = next(((index, att) for index, att in self.attachments if isinstance(att.data, Task)), None)
+        task = next(((index, att) for index, att in enumerate(self.attachments) if isinstance(att.data, Task)), None)
 
         if task is None:
             if ErrorBehavior.STANDARDS_VIOLATION in self.errorBehavior:
