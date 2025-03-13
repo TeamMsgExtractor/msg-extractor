@@ -1241,14 +1241,14 @@ def unwrapMultipart(mp: Union[bytes, str, email.message.Message]) -> Dict:
     }
 
 
-def validateHtml(html: bytes) -> bool:
+def validateHtml(html: bytes, encoding: Optional[str]) -> bool:
     """
     Checks whether the HTML is considered valid.
 
     To be valid, the HTML must, at minimum, contain an ``<html>`` tag, a
     ``<body>`` tag, and closing tags for each.
     """
-    bs = bs4.BeautifulSoup(html, 'html.parser')
+    bs = bs4.BeautifulSoup(html, 'html.parser', from_encoding = encoding)
     if not bs.find('html') or not bs.find('body'):
         return False
     return True
