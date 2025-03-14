@@ -295,10 +295,12 @@ def filetimeToDatetime(rawTime: int) -> datetime.datetime:
             # Just make null dates from all of these time stamps.
             from .null_date import NullDate
             date = NullDate(1970, 1, 1, 1)
-            date += datetime.timedelta(seconds = filetimeToUtc(rawTime))
-            date.filetime = rawTime
-
-            return date
+            try:
+                date += datetime.timedelta(seconds = filetimeToUtc(rawTime))
+                date.filetime = rawTime
+                return date
+            except OverflowError:
+                return constants.NULL_DATE
         else:
             return fromTimeStamp(filetimeToUtc(rawTime))
     except TZError:
