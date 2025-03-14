@@ -20,7 +20,7 @@ class TOCEntry:
             self.__lindex = 0
             self.__tymed = 0
             self.__advf = 0
-            self.__targetDevice = DVTargetDevice()
+            self.__targetDevice = DVTargetDevice(None)
             return
 
         if isinstance(reader, bytes):

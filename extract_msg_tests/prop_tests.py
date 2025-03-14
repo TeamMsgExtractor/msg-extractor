@@ -207,6 +207,16 @@ _propChecks = [
         PropertyFlags.MANDATORY,
         NULL_DATE
     ),
+    (
+        'Null Time 4',
+        b'\x40\x00\x1C\x30\x06\x00\x00\x00\xff\xff\xff\xff\xff\xff\xff\x7f',
+        b'\x40\x00\x1C\x30\x06\x00\x00\x00\xff\xff\xff\xff\xff\xff\xff\x7f',
+        FixedLengthProp,
+        '301C0040',
+        0x0040,
+        PropertyFlags.READABLE | PropertyFlags.WRITABLE,
+        NULL_DATE
+    ),
     # Variable Length Props.
     (
         'Object',

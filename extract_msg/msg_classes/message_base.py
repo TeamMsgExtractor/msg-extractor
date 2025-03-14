@@ -96,6 +96,7 @@ class MessageBase(MSGFile):
             except Exception as e:
                 # Prevent an error in the body from preventing opening.
                 logger.exception('Critical error accessing the body. File opened but accessing the body will throw an exception.')
+            self._htmlEncoding = None
         except:
             try:
                 self.close()
@@ -141,6 +142,16 @@ class MessageBase(MSGFile):
                 value = value.replace('  ', ' ')
 
         return value
+
+    def _getHtmlEncoding(self, soup: bs4.BeautifulSoup) -> None:
+        """
+        Helper function to set the html encoding.
+        """
+        if not self._htmlEncoding:
+            try:
+                self._htmlEncoding = cast(Optional[str], soup.original_encoding or soup.declared_html_encoding)
+            except AttributeError:
+                pass
 
     def asEmailMessage(self) -> EmailMessage:
         """
@@ -380,7 +391,8 @@ class MessageBase(MSGFile):
 
             # If we are preparing the HTML, then we should
             if preparedHtml and charset:
-                bs = bs4.BeautifulSoup(data, features = 'html.parser')
+                bs = bs4.BeautifulSoup(data, features = 'html.parser', from_encoding = self._htmlEncoding)
+                self._getHtmlEncoding(bs)
                 if not bs.find('meta', {'http-equiv': 'Content-Type'}):
                     # Setup the attributes for the tag.
                     tagAttrs = {
@@ -405,7 +417,7 @@ class MessageBase(MSGFile):
 
             return data
         else:
-            return self.htmlBody
+            return self.htmlBody or b''
 
     def getSavePdfBody(self, wkPath = None, wkOptions = None, **kwargs) -> bytes:
         """
@@ -501,7 +513,7 @@ class MessageBase(MSGFile):
             body = self.htmlBody
 
         # Validate the HTML.
-        if not validateHtml(body):
+        if not validateHtml(body, self._htmlEncoding):
             logger.warning('HTML body failed to validate. Code will attempt to correct it.')
 
             # If we are here, then we need to do what we can to fix the HTML
@@ -511,7 +523,8 @@ class MessageBase(MSGFile):
             # the <html> and <body> tag are missing, we determine where to put
             # the body tag (around everything if there is no <head> tag,
             # otherwise at the end) and then wrap it all in the <html> tag.
-            parser = bs4.BeautifulSoup(body, features = 'html.parser')
+            parser = bs4.BeautifulSoup(body, features = 'html.parser', from_encoding = self._htmlEncoding)
+            self._getHtmlEncoding(parser)
             if not parser.find('html') and not parser.find('body'):
                 if parser.find('head') or parser.find('footer'):
                     # Create the parser we will be using for the corrections.
@@ -1186,7 +1199,8 @@ class MessageBase(MSGFile):
             return self.htmlBody
 
         # Create the BeautifulSoup instance to use.
-        soup = bs4.BeautifulSoup(self.htmlBody, 'html.parser')
+        soup = bs4.BeautifulSoup(self.htmlBody, 'html.parser', from_encoding = self._htmlEncoding)
+        self._getHtmlEncoding(soup)
 
         # Get a list of image tags to see if we can inject into. If the source
         # of an image starts with "cid:" that means it is one of the attachments

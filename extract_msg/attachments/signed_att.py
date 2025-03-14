@@ -45,7 +45,7 @@ class SignedAttachment:
         self.__node = node
         self.__treePath = msg.treePath + [makeWeakRef(self)]
 
-        self.__data = None
+        self.__data = b''
         # To add support for embedded MSG files, we are going to completely
         # ignore the mimetype and just do a few simple checks to see if we can
         # use the bytes as am embedded file.
@@ -59,7 +59,7 @@ class SignedAttachment:
             except Exception:
                 logger.exception('Signed message was an OLE file, but could not be read as an MSG file due to an exception.')
 
-        if self.__data is None:
+        if not self.__data:
             self.__data = data
 
     def _handleFnc(self, _zip, filename, customPath: pathlib.Path, kwargs) -> pathlib.Path:
@@ -204,6 +204,12 @@ class SignedAttachment:
     @property
     def asBytes(self) -> bytes:
         return self.__asBytes
+
+    @property
+    def contentID(self) -> None:
+        return None
+
+    cid = contentID
 
     @property
     def data(self) -> Union[bytes, MSGFile]:
