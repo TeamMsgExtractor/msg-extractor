@@ -210,12 +210,12 @@ _propChecks = [
     (
         'Null Time 4',
         b'@\x00\x1c0\x06\x00\x00\x00\xff\xff\xff\xff\xff\xff\xff\x7f',
-        b'@\x00\x1c0\x06\x00\x00\x00\x00R\x13\xf6\xb3\xe5\xb2\x0c',
+        b'@\x00\x1c0\x06\x00\x00\x00\xff\xff\xff\xff\xff\xff\xff\x7f',
         FixedLengthProp,
         '301C0040',
         0x0040,
         PropertyFlags.READABLE|PropertyFlags.WRITABLE,
-        NULL_DATE
+        b'\xff\xff\xff\xff\xff\xff\xff\x7f'
     ),
     # Variable Length Props.
     (
