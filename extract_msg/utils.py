@@ -295,7 +295,14 @@ def filetimeToDatetime(rawTime: int) -> datetime.datetime:
             # Just make null dates from all of these time stamps.
             from .null_date import NullDate
             date = NullDate(1970, 1, 1, 1)
-            date += datetime.timedelta(seconds = filetimeToUtc(rawTime))
+            try:
+                date += datetime.timedelta(seconds = filetimeToUtc(rawTime))
+            except OverflowError:
+                # Time value is so large we physically can't represent it, so
+                # let's just modify the date to it's highest possible value and
+                # call it a day.
+                m = date.max
+                date = NullDate(m.year, m.month, m.day, m.hour, m.minute, m.second, m.microsecond)
             date.filetime = rawTime
 
             return date

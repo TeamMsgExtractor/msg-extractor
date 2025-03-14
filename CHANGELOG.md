@@ -1,5 +1,6 @@
 **v0.53.2**
 * [[TeamMsgExtractor #452](https://github.com/TeamMsgExtractor/msg-extractor/issues/452)] Adjusted code to allow html encoding to be cached to try to speed up `bs4` operations.
+* [[TeamMsgExtractor #453](https://github.com/TeamMsgExtractor/msg-extractor/issues/453)] Fixed handler for too large filetimes so that some filetimes being too large doesn't break the handler.
 * Fixed a bug that would cause an error in task objects due to a lack of `enumerate`.
 * Fix `TOCEntry` not initializing `DVTargetDevice` correctly.
 * Add temporary properties for `ContentID` to `SignedAttachment`. AFAIK these can't ever be set, but this prevents errors in some places.
