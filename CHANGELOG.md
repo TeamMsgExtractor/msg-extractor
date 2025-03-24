@@ -1,5 +1,5 @@
 **v0.54.0**
-* [[TeamMsgExtractor #456](https://github.com/TeamMsgExtractor/msg-extractor/issues/456)] Changed the prepared html output to use plainly encoded html instead of prettified, since prettifying will mangle the HTML output for some reason.
+* [[TeamMsgExtractor #456](https://github.com/TeamMsgExtractor/msg-extractor/issues/456)] Changed the prepared html output to use plainly encoded HTML instead of prettified, since current prettification options used mangles the output and causes the output to sometimes be very large.
 
 **v0.53.2**
 * [[TeamMsgExtractor #452](https://github.com/TeamMsgExtractor/msg-extractor/issues/452)] Adjusted code to allow html encoding to be cached to try to speed up `bs4` operations.
