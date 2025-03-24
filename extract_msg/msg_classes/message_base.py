@@ -413,7 +413,7 @@ class MessageBase(MSGFile):
                             head.insert(0, tag)
                             bs.find('html').insert(0, head)
 
-                    data = bs.prettify('utf-8')
+                    data = bs.encode('utf-8')
 
             return data
         else:

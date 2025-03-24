@@ -1,3 +1,6 @@
+**v0.54.0**
+* [[TeamMsgExtractor #456](https://github.com/TeamMsgExtractor/msg-extractor/issues/456)] Changed the prepared html output to use plainly encoded html instead of prettified, since prettifying will mangle the HTML output for some reason.
+
 **v0.53.2**
 * [[TeamMsgExtractor #452](https://github.com/TeamMsgExtractor/msg-extractor/issues/452)] Adjusted code to allow html encoding to be cached to try to speed up `bs4` operations.
 * [[TeamMsgExtractor #453](https://github.com/TeamMsgExtractor/msg-extractor/issues/453)] Fixed handler for too large filetimes so that some filetimes being too large doesn't break the handler.
