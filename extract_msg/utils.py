@@ -1021,18 +1021,13 @@ def stripRtf(rtfBody: bytes) -> bytes:
     Attempts to find common sections of RTF data that will
     """
     # First, do a pre-strip to try and simplify ignored sections as much as possible.
-    def sub(k1):
-        def jjj(k: re.Match):
-            print(k.expand('\\g<0>'))
-            return k1
-        return jjj
     rtfBody = constants.re.RTF_BODY_STRIP_PRE_OPEN.sub(rb'\\htmlrtf{\\htmlrtf0 ', rtfBody)
-    print('AAAAAAAAAAAAAAAAAAAAAAAAAA')
-    #rtfBody = constants.re.RTF_BODY_STRIP_PRE_CLOSE.sub(sub(b'\\htmlrtf}\\htmlrtf0 '), rtfBody)
+    rtfBody = constants.re.RTF_BODY_STRIP_PRE_CLOSE.sub(rb'\\htmlrtf}\\htmlrtf0 ', rtfBody)
     # Second do an initial strip to simplify our data stream.
     rtfBody = constants.re.RTF_BODY_STRIP_INIT.sub(b'', rtfBody)
-    # Now, let's find any self-contained ignorable groups.
-    # TODO
+
+    # TODO: Further processing...
+
     return rtfBody
 
 
