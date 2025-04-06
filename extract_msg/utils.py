@@ -1023,7 +1023,7 @@ def stripRtf(rtfBody: bytes) -> bytes:
     # First do an initial strip to simplify our data stream.
     rtfBody = constants.re.RTF_BODY_STRIP_INIT.sub(b'', rtfBody)
     # Now, let's find any self-contained ignorable groups.
-
+    # TODO
     return rtfBody
 
 
