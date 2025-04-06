@@ -37,6 +37,7 @@ __all__ = [
     'rtfSanitizeHtml',
     'rtfSanitizePlain',
     'setupLogging',
+    'stripRtf',
     'tryGetMimetype',
     'unsignedToSignedInt',
     'unwrapMsg',
@@ -61,6 +62,7 @@ import logging
 import logging.config
 import os
 import pathlib
+import re
 import shutil
 import struct
 import sys
@@ -1010,6 +1012,39 @@ def setupLogging(defaultPath = None, defaultLevel = logging.WARN, logfile = None
 
     logging.getLogger().setLevel(defaultLevel)
     return True
+
+
+def stripRtf(rtfBody: bytes) -> bytes:
+    """
+    Cleans up RTF before sending it to RTFDE.
+
+    Attempts to find common sections of RTF data that will
+    """
+    # First do an initial strip to simplify our data stream.
+    rtfBody = constants.re.RTF_BODY_STRIP_INIT.sub(b'', rtfBody)
+    # Now, let's find any self-contained ignorable groups.
+
+    return rtfBody
+
+
+def _stripRtfHelper(match: re.Match[bytes]) -> bytes:
+    res = match.string
+
+    # If these don't match, don't even try.
+    if res.count(b'{') != res.count(b'}') or res.count(b'{') == 0:
+        return res
+
+    # If any group markers are prefixed by a backslash, give up.
+    if res.find(b'\\{') != -1 or res.find(b'\\}') != -1:
+        return res
+
+    # Last little bit of processing to validate everything. We know the {}
+    # match, but let's be *absolutely* sure.
+    # TODO
+
+    return res
+
+
 
 
 def tryGetMimetype(att: AttachmentBase, mimetype: Union[str, None]) -> Union[str, None]:

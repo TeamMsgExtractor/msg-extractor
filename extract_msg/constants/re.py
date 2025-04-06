@@ -40,3 +40,11 @@ RTF_ENC_BODY_START: Final[_RE_BYTES_TYPE] = re.compile(br'\{\\\*\\htmltag[0-9]* 
 # invalid.
 INVALID_OLE_PATH: Final[_RE_STR_TYPE] = re.compile(r'[:/\\!]')
 
+# Used as the initial step in stripping RTF files for deencapsulation. Finds
+# ignored sections that do not contrain groups *and* finds HTML tag sections
+# that are entirely empty. It also then finds sections of data that can be
+# merged together without affecting the results
+RTF_BODY_STRIP_INIT: Final[_RE_BYTES_TYPE] = re.compile(rb'(\\htmlrtf1[^0{}][^{}]*?\\htmlrtf0 ?)|(\{\\\*\\htmltag[0-9]+\})|(\\htmlrtf0 ?\\htmlrtf1? ?)')
+
+# Finds sections of ignored data that contains groups that are entirely self contained. If any of the { or } characters have a \ in front of them, the processing stops and treats it as not self contained to be safe.
+

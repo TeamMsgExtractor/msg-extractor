@@ -1,3 +1,6 @@
+**v0.54.1**
+* Added code to attempt to significantly improve RTF deencapsulation times. This tries to strip away unneeded data before passing it to RTFDE. Some times have been detected to be improved by 75% or more.
+
 **v0.54.0**
 * [[TeamMsgExtractor #456](https://github.com/TeamMsgExtractor/msg-extractor/issues/456)] Changed the prepared html output to use plainly encoded HTML instead of prettified, since current prettification options used mangles the output and causes the output to sometimes be very large.
 
