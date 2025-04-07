@@ -1021,9 +1021,13 @@ def stripRtf(rtfBody: bytes) -> bytes:
     Attempts to find common sections of RTF data that will
     """
     # First, do a pre-strip to try and simplify ignored sections as much as possible.
-    rtfBody = constants.re.RTF_BODY_STRIP_PRE_OPEN.sub(rb'\\htmlrtf{\\htmlrtf0 ', rtfBody)
+    rtfBody = constants.re.RTF_BODY_STRIP_PRE_OPEN.sub(_stripRtfOpenHelper, rtfBody)
     rtfBody = constants.re.RTF_BODY_STRIP_PRE_CLOSE.sub(_stripRtfCloseHelper, rtfBody)
     # Second do an initial strip to simplify our data stream.
+    rtfBody = constants.re.RTF_BODY_STRIP_INIT.sub(b'', rtfBody)
+    # Do it one more time to help with some things that might not have gotten
+    # caught the first time, perhaps because something now exists after
+    # stripping.
     rtfBody = constants.re.RTF_BODY_STRIP_INIT.sub(b'', rtfBody)
 
     # TODO: Further processing...
@@ -1034,7 +1038,17 @@ def _stripRtfCloseHelper(match: re.Match[bytes]) -> bytes:
     if (ret := match.expand(b'\\g<0>')).count(b'\\htmlrtf0') > 1:
         return ret
 
+    if b'\\f' in ret:
+        return ret
+
     return b'\\htmlrtf}\\htmlrtf0 '
+
+
+def _stripRtfOpenHelper(match: re.Match[bytes]) -> bytes:
+    if b'\\f' in (ret := match.expand(b'\\g<0>')):
+        return ret
+
+    return b'\\htmlrtf{\\htmlrtf0 '
 
 
 def _stripRtfHelper(match: re.Match[bytes]) -> bytes:
