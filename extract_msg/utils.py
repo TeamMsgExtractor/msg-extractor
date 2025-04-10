@@ -1034,7 +1034,7 @@ def stripRtf(rtfBody: bytes) -> bytes:
 
     return rtfBody
 
-def _stripRtfCloseHelper(match: re.Match[bytes]) -> bytes:
+def _stripRtfCloseHelper(match: re.Match) -> bytes:
     if (ret := match.expand(b'\\g<0>')).count(b'\\htmlrtf0') > 1:
         return ret
 
@@ -1044,14 +1044,14 @@ def _stripRtfCloseHelper(match: re.Match[bytes]) -> bytes:
     return b'\\htmlrtf}\\htmlrtf0 '
 
 
-def _stripRtfOpenHelper(match: re.Match[bytes]) -> bytes:
+def _stripRtfOpenHelper(match: re.Match) -> bytes:
     if b'\\f' in (ret := match.expand(b'\\g<0>')):
         return ret
 
     return b'\\htmlrtf{\\htmlrtf0 '
 
 
-def _stripRtfHelper(match: re.Match[bytes]) -> bytes:
+def _stripRtfHelper(match: re.Match) -> bytes:
     res = match.string
 
     # If these don't match, don't even try.
