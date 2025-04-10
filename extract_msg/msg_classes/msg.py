@@ -203,7 +203,23 @@ class MSGFile:
             self.__overrideEncoding = overrideEncoding
 
             if prefix and not filename:
-                filename = self.getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix = False)
+                # We actually need to get this from the parent.
+                msg = None
+                parentNeedsClose = False
+                if self.__parentMsg:
+                    msg = self.__parentMsg()
+                if msg is None:
+                    # We *NEED* the parent here, so we're going to do something
+                    # dumb and just generate it *manually*, grab what we need, # and them immediately close it.
+                    #
+                    # We don't need anything more advanced than MSGFile.
+                    msg = MSGFile(path, prefix = prefixl[:-2], delayAttachments = True)
+                    parentNeedsClose = True
+                # Now that we know we have the parent, grab the stream.
+                filename = msg.getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix = False)
+                # Now if we opened the parent, close it.
+                if parentNeedsClose:
+                    msg.close()
             if filename:
                 self.filename = filename
             elif hasattr(path, '__len__'):
@@ -492,7 +508,7 @@ class MSGFile:
 
         :param path: A path-like object (including strings and ``pathlib.Path``
             objects) or an IO device with a write method which accepts bytes.
-        :param allowBadEmbed: If True, attempts to skip steps that will fail if 
+        :param allowBadEmbed: If True, attempts to skip steps that will fail if
             the embedded MSG file violates standards. It will also attempt to repair the data to try to ensure it can open in Outlook.
         """
         from ..ole_writer import OleWriter
@@ -507,7 +523,7 @@ class MSGFile:
         """
         Saves a new copy of the MSG file, returning the bytes.
 
-        :param allowBadEmbed: If True, attempts to skip steps that will fail if 
+        :param allowBadEmbed: If True, attempts to skip steps that will fail if
             the embedded MSG file violates standards. It will also attempt to repair the data to try to ensure it can open in Outlook.
         """
         out = io.BytesIO()

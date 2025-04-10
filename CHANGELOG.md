@@ -1,3 +1,7 @@
+**v0.54.1**
+* [[TeamMsgExtractor #462](https://github.com/TeamMsgExtractor/msg-extractor/issues/462)] Fix potential issue where child MSG might have incompatible encoding to parent MSG when trying to grab a stream from the parent.
+* Added code to attempt to significantly improve RTF deencapsulation times. This tries to strip away unneeded data before passing it to `RTFDE`. This shows improvements on all files that take more than one second. Currently, this actually fixes some files previously outputting wrong from `RTFDE` when deencapsulating the HTML body, specifically around non breaking spaces sometimes not transferring over.
+
 **v0.54.0**
 * [[TeamMsgExtractor #456](https://github.com/TeamMsgExtractor/msg-extractor/issues/456)] Changed the prepared html output to use plainly encoded HTML instead of prettified, since current prettification options used mangles the output and causes the output to sometimes be very large.
 

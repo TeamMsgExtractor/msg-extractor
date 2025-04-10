@@ -48,7 +48,8 @@ from ..recipient import Recipient
 from ..utils import (
         addNumToDir, addNumToZipDir, createZipOpen, decodeRfc2047, findWk,
         htmlSanitize, inputToBytes, inputToString, isEncapsulatedRtf,
-        prepareFilename, rtfSanitizeHtml, rtfSanitizePlain, validateHtml
+        prepareFilename, rtfSanitizeHtml, rtfSanitizePlain, stripRtf,
+        validateHtml
     )
 
 
@@ -1011,6 +1012,11 @@ class MessageBase(MSGFile):
             # how we compensate.
             while body and body[-1] != 125:
                 body = body[:-1]
+
+            # Some files take a long time due to how they are structured and
+            # how RTFDE works. The longer a file would normally take, the
+            # better this fix works:
+            body = stripRtf(body)
 
             try:
                 deencapsultor = RTFDE.DeEncapsulator(body)
