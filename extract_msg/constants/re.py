@@ -4,6 +4,7 @@ Regular expression constants.
 
 
 __all__ = [
+    'CSS_URL',
     'HTML_BODY_START',
     'HTML_SAN_SPACE',
     'INVALID_FILENAME_CHARS',
@@ -52,3 +53,6 @@ RTF_BODY_STRIP_INIT: Final[_RE_BYTES_TYPE] = re.compile(rb'(\\htmlrtf[^0{}][^{}]
 # Preprocessing steps to simplify the RTF.
 RTF_BODY_STRIP_PRE_CLOSE: Final[_RE_BYTES_TYPE] = re.compile(rb'(\\htmlrtf1? ?}\\htmlrtf0 ?)|(\\htmlrtf1? ?[^0{}][^{}]*?} ?\\htmlrtf0 ?)')
 RTF_BODY_STRIP_PRE_OPEN: Final[_RE_BYTES_TYPE] = re.compile(rb'\\htmlrtf1? ?{[^{}]*?\\htmlrtf0 ?')
+
+# Used for stripping urls from CSS.
+CSS_URL: Final[_RE_STR_TYPE] = re.compile(r'url\(\s*["\']?(https?:\/\/[^"\')\s]+)["\']?\s*\)', re.I)

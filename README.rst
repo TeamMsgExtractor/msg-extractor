@@ -1,4 +1,4 @@
-|License: GPL v3| |PyPI3| |PyPI2| |Read the Docs|
+|License: GPL v3| |PyPI3| |PyPI2| |Downloads| |Read the Docs|
 
 extract-msg
 =============
@@ -14,7 +14,7 @@ Documentation can be found in the code, on the `wiki`_, and on the
 NOTICE
 ======
 0.29.* is the branch that supports both Python 2 and Python 3. It is now only
-receiving bug fixes and will not be receiving feature updates.
+receiving security fixes and will not be receiving feature updates.
 
 0.39.* is the last versions that supported Python 3.6 and 3.7. Support for those
 was dropped to allow the use of new features from 3.8 and because the life spans
@@ -246,6 +246,8 @@ Credits
 
 `Liam`_ - Significant reorganization and transfer of data.
 
+`Kadhiraven EG`_ - Discovery of and assistance with vulnerability in PDF conversion, including assistance with updating security policies and notifying the public about the vulnerability.
+
 And thank you to everyone who has opened an issue and helped us track down those pesky bugs.
 
 Extra
@@ -260,11 +262,14 @@ your access to the newest major version of extract-msg.
 .. |License: GPL v3| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: LICENSE.txt
 
-.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.56.1-blue.svg
-   :target: https://pypi.org/project/extract-msg/0.56.1/
+.. |PyPI3| image:: https://img.shields.io/badge/pypi-0.57.0-blue.svg
+   :target: https://pypi.org/project/extract-msg/0.57.0/
 
 .. |PyPI2| image:: https://img.shields.io/badge/python-3.8+-brightgreen.svg
    :target: https://www.python.org/downloads/release/python-3810/
+
+.. |Downloads| image:: https://img.shields.io/pypi/dm/extract-msg.svg
+   :target: https://pypistats.org/packages/extract-msg
 
 .. |Read the Docs| image:: https://readthedocs.org/projects/msg-extractor/badge/?version=latest
     :target: https://msg-extractor.readthedocs.io/en/stable/?badge=latest
@@ -277,6 +282,7 @@ your access to the newest major version of extract-msg.
 .. _Dean Malmgren: https://github.com/deanmalmgren
 .. _Joel Kaufman: https://github.com/joelkaufman
 .. _Liam: https://github.com/LiamPM5
+.. _Kadhiraven EG: https://github.com/JOKER-53
 .. _Seamus Tuohy: https://github.com/seamustuohy
 .. _Discord: https://discord.com/invite/B77McRmzdc
 .. _Buy Me a Coffee: https://www.buymeacoffee.com/DestructionE

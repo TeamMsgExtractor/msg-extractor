@@ -1,3 +1,6 @@
+**v0.57.0**
+* [[TeamMsgExtractor #487](https://github.com/TeamMsgExtractor/msg-extractor/issues/487)] [CVE: TODO] Fixed a vulnerability related to unchecked input passed out to wkhtmltopdf when converting the MSG file to PDF. Javascript is now strongly blocked from being enabled and will be stripped from the HTML where appropriate before reaching wkhtmltopdf. Additionally, the option `--wk-allow-external-files` on the command line (or `wkAllowExternalFiles` to `MessageBase.save()`) will be required for external files to be loaded into the HTML to convert. Without these, they will be stripped before reaching wkhtmltopdf for security.
+
 **v0.56.1**
 * [[TeamMsgExtractor #484](https://github.com/TeamMsgExtractor/msg-extractor/issues/484)] Corrected the way the HTML body is decoded in `MessageBase.asEmailMessage()` to prevent encoding errors.
 

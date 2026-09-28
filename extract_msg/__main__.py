@@ -63,6 +63,7 @@ def main(argv: List[str] = sys.argv) -> None:
         'useMsgFilename': args.useFilename,
         'wkOptions': args.wkOptions,
         'wkPath': args.wkPath,
+        'wkAllowExternalFiles': args.allowExternalFiles,
         'zip': _zip,
     }
 
