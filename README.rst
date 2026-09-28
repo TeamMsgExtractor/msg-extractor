@@ -73,7 +73,7 @@ refer to the usage information provided from the program's help dialog:
      options:
      -h, --help            show this help message and exit
      --use-content-id, --cid
-                         Save attachments by their Content ID, if they have one. Useful when working with the HTML body.
+                           Save attachments by their Content ID, if they have one. Useful when working with the HTML body.
      --json                Changes to write output files as json.
      --file-logging        Enables file logging. Implies --verbose level 1.
      -v, --verbose         Turns on console logging. Specify more than once for higher verbosity.
@@ -86,18 +86,16 @@ refer to the usage information provided from the program's help dialog:
      --pdf                 Saves the body as a PDF. If this is not possible, will error.
      --wk-path WKPATH      Overrides the path for finding wkhtmltopdf.
      --wk-options [WKOPTIONS ...]
-                         Sets additional options to be used in wkhtmltopdf. Should be a series of options and values, replacing the - or -- in the beginning with + or ++,
-                         respectively. For example: --wk-options "+O Landscape"
+                           Sets additional options to be used in wkhtmltopdf. Should be a series of options and values, replacing the - or -- in the beginning with + or ++ respectively. For example: --wk-options "+O Landscape"
      --wk-allow-external-files
-                         Enables external files to appear in the PDF output. WARNING: This allows wkpdftohtml to make url requests that are unchecked, and as such may be a
-                         security vulnerability in untrusted emails. Only use this option if you trust the source of the MSG file.
+                           Enables external files to appear in the PDF output. WARNING: This allows wkpdftohtml to make url requests that are unchecked, and as such may be a security vulnerability in untrusted emails. Only use this option if you trust the source of the MSG file.
      --prepared-html       When used in conjunction with --html, sets whether the HTML output should be prepared for embedded attachments.
      --charset CHARSET     Character set to use for the prepared HTML in the added tag. (Default: utf-8)
      --raw                 Sets whether the output should be raw. If this is not possible, will error.
      --rtf                 Sets whether the output should be RTF. If this is not possible, will error.
      --allow-fallback      Tells the program to fallback to a different save type if the selected one is not possible.
      --skip-body-not-found
-                         Skips saving the body if the body cannot be found, rather than throwing an error.
+                           Skips saving the body if the body cannot be found, rather than throwing an error.
      --zip ZIP             Path to use for saving to a zip file.
      --save-header         Store the header in a separate file.
      --attachments-only    Specify to only save attachments from an MSG file.
@@ -106,9 +104,9 @@ refer to the usage information provided from the program's help dialog:
      --skip-embedded       Skips all embedded MSG files when saving attachments.
      --extract-embedded    Extracts the embedded MSG files as MSG files instead of running their save functions.
      --overwrite-existing  Disables filename conflict resolution code for attachments when saving a file, causing files to be overwritten if two attachments with the same
-                         filename are on an MSG file.
+                           filename are on an MSG file.
      --skip-not-implemented, --skip-ni
-                         Skips any attachments that are not implemented, allowing saving of the rest of the message.
+                           Skips any attachments that are not implemented, allowing saving of the rest of the message.
      --out-name OUTNAME    Name to be used with saving the file output. Cannot be used if you are saving more than one file.
      --glob, --wildcard    Interpret all paths as having wildcards. Incompatible with --out-name.
      --ignore-rtfde        Ignores all errors thrown from RTFDE when trying to save. Useful for allowing fallback to continue when an exception happens.
@@ -128,7 +126,7 @@ From there, open the MSG file:
      msg = extract_msg.openMsg("path/to/msg/file.msg")
 
 Alternatively, if you wish to send a msg binary string instead of a file
-to the ``extract_msg.openMsg`` Method:
+to the ``extract_msg.openMsg()`` Method:
 
 ::
 
