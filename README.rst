@@ -242,13 +242,13 @@ Credits
 
 `Philippe Lagadec`_ - Python OleFile module developer.
 
-`Joel Kaufman`_ - First implementations of the json and filename flags.
-
-`Dean Malmgren`_ - First implementation of the setup.py script.
-
 `Seamus Tuohy`_ - Developer of the Python RTFDE module. Gave first examples of how to use the module and has worked with Destiny to ensure functionality.
 
 `Kadhiraven EG`_ - Discovery of and assistance with vulnerability in PDF conversion, including assistance with updating security policies and notifying the public about the vulnerability.
+
+`Joel Kaufman`_ - First implementations of the json and filename flags.
+
+`Dean Malmgren`_ - First implementation of the setup.py script.
 
 `Liam`_ - Significant reorganization and transfer of data.
 
