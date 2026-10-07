@@ -134,6 +134,8 @@ class MSGFile:
 
         self.__listDirRes: Dict[Tuple[bool, bool, bool], Tuple[Tuple[str, ...], ...]] = {}
 
+        self.__existsCache = None
+
         if self.__parentMsg:
             # We should be able to directly access the private variables of
             # another instance with no issue.
@@ -439,12 +441,19 @@ class MSGFile:
             MSG file (``False``) or look in the current child MSG file
             (``True``). (Default: ``True``)
         """
+        if not self.__existsCache:
+            self.__existsCache = self.listDir(True, True, True)
+
         filename = self.fixPath(filename, prefix)
-        return self.__ole.exists(filename)
+        filename = filename.split('/')
+        if filename[-1] == '':
+            filename.pop()
+
+        return tuple(filename) in self.__existsCache
 
     def sExists(self, filename: MSG_PATH, prefix: bool = True) -> bool:
         """
-        Checks if string stream  exists in the MSG file.
+        Checks if string stream exists in the MSG file.
 
         :param prefix: Bool, whether to search for the entry at the root of the
             MSG file (``False``) or look in the current child MSG file
