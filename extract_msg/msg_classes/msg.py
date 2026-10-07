@@ -442,9 +442,10 @@ class MSGFile:
             (``True``). (Default: ``True``)
         """
         if not self.__existsCache:
-            self.__existsCache = self.listDir(True, True, True)
+            # Get the cache and ensure all names are lowercase.
+            self.__existsCache = tuple(tuple(y.lower() for y in x) for x in self.listDir(True, True, True))
 
-        filename = self.fixPath(filename, prefix)
+        filename = self.fixPath(filename, prefix).lower()
         filename = filename.split('/')
         if filename[-1] == '':
             filename.pop()
