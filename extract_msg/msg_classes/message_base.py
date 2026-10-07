@@ -1112,7 +1112,12 @@ class MessageBase(MSGFile):
             # *after* the body, and RTFDE can't handle that. Here is
             # how we compensate.
             end = body.rfind(b'}')
-            body = body[:end + 1] if end != -1 else b''
+            if end == -1:
+                if ErrorBehavior.RTFDE_MALFORMED not in self.errorBehavior:
+                    raise RTFDE.exceptions.MalformedRtf('Invalid RTF data received.')
+                logger.info('RTF body does not contain valid RTF data.')
+
+            body = body[:end + 1]
 
             # Some files take a long time due to how they are structured and
             # how RTFDE works. The longer a file would normally take, the
