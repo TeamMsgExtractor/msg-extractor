@@ -132,7 +132,7 @@ class MSGFile:
         self.__dateFormat = kwargs.get('dateFormat', DATE_FORMAT)
         self.__dtFormat = kwargs.get('datetimeFormat', DT_FORMAT)
 
-        self.__listDirRes: Dict[Tuple[bool, bool, bool], List[List[str]]] = {}
+        self.__listDirRes: Dict[Tuple[bool, bool, bool], Tuple[Tuple[str, ...], ...]] = {}
 
         if self.__parentMsg:
             # We should be able to directly access the private variables of
@@ -783,7 +783,7 @@ class MSGFile:
 
         return value
 
-    def listDir(self, streams: bool = True, storages: bool = False, includePrefix: bool = True) -> List[List[str]]:
+    def listDir(self, streams: bool = True, storages: bool = False, includePrefix: bool = True) -> Tuple[Tuple[str, ...], ...]:
         """
         Replacement for ``OleFileIO.listdir`` that runs at the current prefix
         directory.
@@ -797,25 +797,27 @@ class MSGFile:
         except KeyError:
             entries = self.__ole.listdir(streams, storages)
             if not self.__prefix:
+                entries = tuple(tuple(x) for x in entries)
+                self.__listDirRes[(streams, storages, includePrefix)] = entries
                 return entries
             prefix = self.__prefix.split('/')
             if prefix[-1] == '':
                 prefix.pop()
 
             prefixLength = self.__prefixLen
-            entries = [x for x in entries if len(x) > prefixLength and x[:prefixLength] == prefix]
+            entries = tuple(tuple(x) for x in entries if len(x) > prefixLength and x[:prefixLength] == prefix)
             if not includePrefix:
-                entries = [x[prefixLength:] for x in entries]
+                entries = tuple(x[prefixLength:] for x in entries)
             self.__listDirRes[(streams, storages, includePrefix)] = entries
 
             return entries
 
-    def slistDir(self, streams: bool = True, storages: bool = False, includePrefix: bool = True) -> List[str]:
+    def slistDir(self, streams: bool = True, storages: bool = False, includePrefix: bool = True) -> Tuple[str, ...]:
         """
         Replacement for OleFileIO.listdir that runs at the current prefix
         directory. Returns a list of strings instead of lists.
         """
-        return [msgPathToString(x) for x in self.listDir(streams, storages, includePrefix)]
+        return tuple(msgPathToString(x) for x in self.listDir(streams, storages, includePrefix))
 
     def save(self, **kwargs) -> SAVE_TYPE:
         if kwargs.get('skipNotImplemented', False):
