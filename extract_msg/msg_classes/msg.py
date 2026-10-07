@@ -562,11 +562,16 @@ class MSGFile:
         elif len(multStream) & 7 != 0:
             raise StandardViolationError(f'Length stream for multiple binary was not a multiple of 8.')
         else:
-            ret = [self.getStream(filename + f'-{x:08X}') for x in range(len(multStream) // 8)]
+            gen = (self.getStream(filename + f'-{x:08X}') for x in range(len(multStream) // 8))
+            ret = []
             # We could do more checking here, but we'll just check for None.
-            if (index := next((x for x in ret if x is None), -1)) != -1:
-                logger.error('Unable to get the desired number of binary streams for multiple, not all streams were found.')
-                return ret[:index]
+            for item in gen:
+                if item is None:
+                    logger.error('Unable to get the desired number of binary streams for multiple, not all streams were found.')
+                    return ret
+
+                ret.append(item)
+
             return ret
 
     def getMultipleString(self, filename: MSG_PATH, prefix: bool = True) -> Optional[List[str]]:
@@ -591,14 +596,15 @@ class MSGFile:
         elif len(multStream) & 3 != 0:
             raise StandardViolationError(f'Length stream for multiple string was not a multiple of 4.')
         else:
-            ret = [self.getStream(filename + f'-{x:08X}') for x in range(len(multStream) // 4)]
+            gen = (self.getStream(filename + f'-{x:08X}') for x in range(len(multStream) // 4))
+            ret = []
             # We could do more checking here, but we'll just check for None.
-            for index, item in enumerate(ret):
+            for item in ret:
                 if item is None:
                     logger.error('Unable to get the desired number of string streams for multiple, not all streams were found.')
-                    return ret[:index]
+                    return ret
                 # Decode the bytes and remove the null byte.
-                ret[index] = item.decode(self.stringEncoding)[:-1]
+                ret.append(item.decode(self.stringEncoding)[:-1])
             return ret
 
     def getNamedAs(self, propertyName: str, guid: str, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
