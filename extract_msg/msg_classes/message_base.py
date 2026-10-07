@@ -1116,6 +1116,7 @@ class MessageBase(MSGFile):
                 if ErrorBehavior.RTFDE_MALFORMED not in self.errorBehavior:
                     raise RTFDE.exceptions.MalformedRtf('Invalid RTF data received.')
                 logger.info('RTF body does not contain valid RTF data.')
+                return None
 
             body = body[:end + 1]
 
