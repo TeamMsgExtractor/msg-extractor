@@ -2,3 +2,4 @@
 * Changed `MSGFile.listDir()` to return a tuple of tuples to prevent it's cache results from being tampered with.
 * Fixed an issue with `MSGFile.listDir()` that caused it to not cache in certain circumstances when it should always cache.
 * Fixed a check in `MSGFile.getMultipleBinary()` that executed wrong and did not properly check for bad data.
+* Fixed `MSGFile._getTypedSteam()` to correctly parse binary and string streams when an entry is missing.
