@@ -1,0 +1,4 @@
+* [[Advisory GHSA-rgjf-vmqv-8pv9](https://github.com/TeamMsgExtractor/msg-extractor/security/advisories/GHSA-rgjf-vmqv-8pv9)] Change the way multiple type properties are accessed for binary and string. This includes modifications to `MSGFile.getMultipleBinary()`, `MSGFile.getMultipleString()`, and `MSGFile.exists()` to significantly reduce wasted times for malicious files. Malicious files previously could cause extract-msg to do unnecessarily large numbers of calls to `MSGFile.exists()` which previously did not use caching to speed up its search.
+* Changed `MSGFile.listDir()` to return a tuple of tuples to prevent it's cache results from being tampered with.
+* Fixed an issue with `MSGFile.listDir()` that caused it to not cache in certain circumstances when it should always cache.
+* Fixed a check in `MSGFile.getMultipleBinary()` that executed wrong and did not properly check for bad data.
