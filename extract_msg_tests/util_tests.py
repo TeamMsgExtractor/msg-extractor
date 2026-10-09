@@ -94,6 +94,27 @@ class UtilTests(unittest.TestCase):
                 with self.subTest(str(testFile)):
                     self.assertEqual(htmlBody, de.html, 'Stripped output does not match original.')
 
+        for testFile in testFileDir.glob('*.rtf'):
+            # If we have an export result, find the original file, open it,
+            # and export it as bytes to check against the known result.
+            with open(testFile, 'rb') as f:
+                rtfBody = f.read()
+
+            try:
+                de = RTFDE.DeEncapsulator(utils.stripRtf(rtfBody))
+                de.deencapsulate()
+                htmlBody = de.html
+            except Exception: 
+                # If it's throwing an exception, it's not our problem here.
+                htmlBody = None
+
+            if rtfBody and htmlBody:
+                de = RTFDE.DeEncapsulator(rtfBody)
+                de.deencapsulate()
+
+                with self.subTest(str(testFile)):
+                    self.assertEqual(htmlBody, de.html, 'Stripped output does not match original.')
+
     @unittest.skipIf(USER_TEST_DIR is None, 'User test files not defined.')
     @unittest.skipIf(USER_TEST_DIR is not None and not (USER_TEST_DIR / 'export-results').exists(), 'User export tests not defined.')
     def testUser_stripRtf(self):
