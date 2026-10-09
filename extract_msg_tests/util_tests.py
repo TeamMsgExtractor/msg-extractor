@@ -5,7 +5,11 @@ __all__ = [
 
 import unittest
 
-from extract_msg import utils
+import RTFDE
+
+from .constants import TEST_FILE_DIR, USER_TEST_DIR
+from extract_msg import enums, openMsg, utils
+from extract_msg.msg_classes import MessageBase
 
 
 class UtilTests(unittest.TestCase):
@@ -59,3 +63,43 @@ class UtilTests(unittest.TestCase):
         self.assertEqual(utils.msgPathToString('hello/world\\one'), 'hello/world/one')
         self.assertEqual(utils.msgPathToString(['hello', 'world', 'one']), 'hello/world/one')
         self.assertEqual(utils.msgPathToString(['hello\\world', 'one']), 'hello/world/one')
+
+    def test_stripRtf(self, testFileDir = TEST_FILE_DIR):
+        """
+        Tests the stripRtf() function.
+
+        Confirms that the output of pure deencapsulation is identical after
+        using stripRtf(). By default this works on the provided tests, however
+        an alternate tests calls this method for user-defined tests.
+        """
+        for testFile in testFileDir.glob('*.msg'):
+            # If we have an export result, find the original file, open it,
+            # and export it as bytes to check against the known result.
+            with openMsg(testFile, delayAttachments = True) as msg:
+                if not isinstance(msg, MessageBase) or not msg.rtfBody:
+                    continue
+
+                rtfBody = msg.rtfBody
+
+                try:
+                    htmlBody = msg.deencapsulateBody(rtfBody, enums.DeencapType.HTML)
+                except Exception: 
+                    # If it's throwing an exception, it's not our problem here.
+                    htmlBody = None
+
+            if rtfBody and htmlBody:
+                de = RTFDE.DeEncapsulator(rtfBody)
+                de.deencapsulate()
+
+                with self.subTest(str(testFile)):
+                    self.assertEqual(htmlBody, de.html, 'Stripped output does not match original.')
+
+    @unittest.skipIf(USER_TEST_DIR is None, 'User test files not defined.')
+    @unittest.skipIf(USER_TEST_DIR is not None and not (USER_TEST_DIR / 'export-results').exists(), 'User export tests not defined.')
+    def testUser_stripRtf(self):
+        """
+        Tests exporting the user's example files.
+
+        Uses the files in export-results to determine which test files to use.
+        """
+        self.test_stripRtf(USER_TEST_DIR)
