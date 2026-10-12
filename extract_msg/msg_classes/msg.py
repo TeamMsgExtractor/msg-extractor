@@ -611,7 +611,7 @@ class MSGFile:
             gen = (self.getStream(filename + f'-{x:08X}') for x in range(len(multStream) // 4))
             ret = []
             # We could do more checking here, but we'll just check for None.
-            for item in ret:
+            for item in gen:
                 if item is None:
                     logger.error('Unable to get the desired number of string streams for multiple, not all streams were found.')
                     return ret
