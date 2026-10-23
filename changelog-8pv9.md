@@ -3,3 +3,4 @@
 * Fixed an issue with `MSGFile.listDir()` that caused it to not cache in certain circumstances when it should always cache.
 * Fixed a check in `MSGFile.getMultipleBinary()` that executed wrong and did not properly check for bad data.
 * Fixed `MSGFile._getTypedSteam()` to correctly parse binary and string streams when an entry is missing.
+* Fixed `StandardViolationError` being raised without checking error behavior in `MSGFile.getMultipleBinary()`, `MSGFile.getMultipleString()` TODOTODOTODOTODOTODOTODOTODOTODOTODO

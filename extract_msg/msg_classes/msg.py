@@ -572,6 +572,9 @@ class MSGFile:
         if len(multStream) == 0:
             return []
         elif len(multStream) & 7 != 0:
+            if ErrorBehavior.STANDARDS_VIOLATION in self.errorBehavior:
+                logger.error('Multiple length stream is wrong size and cannot be parsed.')
+                return []
             raise StandardViolationError(f'Length stream for multiple binary was not a multiple of 8.')
         else:
             gen = (self.getStream(filename + f'-{x:08X}') for x in range(len(multStream) // 8))
@@ -606,6 +609,9 @@ class MSGFile:
         if len(multStream) == 0:
             return []
         elif len(multStream) & 3 != 0:
+            if ErrorBehavior.STANDARDS_VIOLATION in self.errorBehavior:
+                logger.error('Multiple length stream is wrong size and cannot be parsed.')
+                return []
             raise StandardViolationError(f'Length stream for multiple string was not a multiple of 4.')
         else:
             gen = (self.getStream(filename + f'-{x:08X}') for x in range(len(multStream) // 4))
