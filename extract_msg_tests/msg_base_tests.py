@@ -72,27 +72,27 @@ class MSGBaseTests(unittest.TestCase):
             with self.subTest('Test too few multiple binary'):
                 with self.assertLogs(level = logging.ERROR):
                     res = msg.getMultipleBinary('__substg1.0_0002')
-                    self.assertIsNotNone(res, 'Failed to fetch multiple binary stream.')
-                    self.assertListEqual(res, expectedOutputs['shortBin'])
+                self.assertIsNotNone(res, 'Failed to fetch multiple binary stream.')
+                self.assertListEqual(res, expectedOutputs['shortBin'])
 
             with self.subTest('Test too few multiple string'):
                 with self.assertLogs(level = logging.ERROR):
-                    res = msg.getMultipleBinary('__substg1.0_0003')
-                    self.assertIsNotNone(res, 'Failed to fetch multiple string stream.')
-                    self.assertListEqual(res, expectedOutputs['shortStr'])
+                    res = msg.getMultipleString('__substg1.0_0003')
+                self.assertIsNotNone(res, 'Failed to fetch multiple string stream.')
+                self.assertListEqual(res, expectedOutputs['shortStr'])
 
             # These two should be missing an item and skip the remaining.
-            with self.subTest('Test too few multiple binary'):
+            with self.subTest('Test missing multiple binary'):
                 with self.assertLogs(level = logging.ERROR):
                     res = msg.getMultipleBinary('__substg1.0_0004')
-                    self.assertIsNotNone(res, 'Failed to fetch multiple binary stream.')
-                    self.assertListEqual(res, expectedOutputs['missingBin'])
+                self.assertIsNotNone(res, 'Failed to fetch multiple binary stream.')
+                self.assertListEqual(res, expectedOutputs['missingBin'])
 
-            with self.subTest('Test too few multiple string'):
+            with self.subTest('Test missing multiple string'):
                 with self.assertLogs(level = logging.ERROR):
-                    res = msg.getMultipleBinary('__substg1.0_0005')
-                    self.assertIsNotNone(res, 'Failed to fetch multiple string stream.')
-                    self.assertListEqual(res, expectedOutputs['missingStr'])
+                    res = msg.getMultipleString('__substg1.0_0005')
+                self.assertIsNotNone(res, 'Failed to fetch multiple string stream.')
+                self.assertListEqual(res, expectedOutputs['missingStr'])
 
             # These two should fail because the length streams are the wrong
             # size.

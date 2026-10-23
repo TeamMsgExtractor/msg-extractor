@@ -1,0 +1,75 @@
+import struct
+
+import extract_msg
+
+
+
+
+s0 = bytearray(4096)                      # __properties_version1.0
+s0[32:48] = struct.pack("<II", 0x340D0003, 0) + struct.pack("<Q", 0x40000)
+s0 = bytes(s0)
+a = extract_msg.OleWriter()
+a.addEntry('__substg1.0_001A001F', 'IPM.Note'.encode('utf-16-le'))
+
+binLength = b'\x04\x00\x00\x00\x00\x00\x00\x00' * 4
+bin1 = b'\x00\x01\x02\x03'
+bin2 = b'\x04\x05\x06\x07'
+bin3 = b'\x08\x09\x0A\x0B'
+bin4 = b'\x0C\x0D\x0E\x0F'
+strLength = b'\x06\x00\x00\x00\x06\x00\x00\x00\x05\x00\x00\x00\x04\x00\x00\x00'
+str1 = 'Hello\x00'.encode('utf-16-le')
+str2 = 'World\x00'.encode('utf-16-le')
+str3 = 'It\'s\x00'.encode('utf-16-le')
+str4 = 'Me!\x00'.encode('utf-16-le')
+# Create streams.
+a.addEntry('__substg1.0_00001102', binLength)
+a.addEntry('__substg1.0_00001102-00000000', bin1)
+a.addEntry('__substg1.0_00001102-00000001', bin2)
+a.addEntry('__substg1.0_00001102-00000002', bin3)
+a.addEntry('__substg1.0_00001102-00000003', bin4)
+
+a.addEntry('__substg1.0_00021102', binLength)
+a.addEntry('__substg1.0_00021102-00000000', bin1)
+a.addEntry('__substg1.0_00021102-00000001', bin2)
+a.addEntry('__substg1.0_00021102-00000002', bin3)
+#a.addEntry('__substg1.0_00021102-00000003', bin4)
+
+a.addEntry('__substg1.0_00041102', binLength)
+a.addEntry('__substg1.0_00041102-00000000', bin1)
+a.addEntry('__substg1.0_00041102-00000001', bin2)
+#a.addEntry('__substg1.0_00041102-00000002', bin3)
+a.addEntry('__substg1.0_00041102-00000003', bin4)
+
+a.addEntry('__substg1.0_F0001102', binLength[:-1])
+a.addEntry('__substg1.0_F0001102-00000000', bin1)
+a.addEntry('__substg1.0_F0001102-00000001', bin2)
+a.addEntry('__substg1.0_F0001102-00000002', bin3)
+a.addEntry('__substg1.0_F0001102-00000003', bin4)
+
+a.addEntry('__substg1.0_0001101F', strLength)
+a.addEntry('__substg1.0_0001101F-00000000', str1)
+a.addEntry('__substg1.0_0001101F-00000001', str2)
+a.addEntry('__substg1.0_0001101F-00000002', str3)
+a.addEntry('__substg1.0_0001101F-00000003', str4)
+
+a.addEntry('__substg1.0_0003101F', strLength)
+a.addEntry('__substg1.0_0003101F-00000000', str1)
+a.addEntry('__substg1.0_0003101F-00000001', str2)
+a.addEntry('__substg1.0_0003101F-00000002', str3)
+#a.addEntry('__substg1.0_0003101F-00000003', str4)
+
+a.addEntry('__substg1.0_0005101F', strLength)
+a.addEntry('__substg1.0_0005101F-00000000', str1)
+a.addEntry('__substg1.0_0005101F-00000001', str2)
+#a.addEntry('__substg1.0_0005101F-00000002', str3)
+a.addEntry('__substg1.0_0005101F-00000003', str4)
+
+a.addEntry('__substg1.0_F001101F', strLength[:-1])
+a.addEntry('__substg1.0_F001101F-00000000', str1)
+a.addEntry('__substg1.0_F001101F-00000001', str2)
+a.addEntry('__substg1.0_F001101F-00000002', str3)
+a.addEntry('__substg1.0_F001101F-00000003', str4)
+
+a.addEntry('__substg1.0_1000001F', 'Hello World!'.encode('utf-16-le'))
+a.addEntry('__properties_version1.0', s0)
+a.write('multi-stream.msg')

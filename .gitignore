@@ -32,6 +32,7 @@ __pycache__/
 !/example-msg-files/expected-outputs/2016-02-23_0657 MSG Test File/*
 !/example-msg-files/strangeDate.msg
 !/example-msg-files/unicode.msg
+!/example-msg-files/multi-stream.msg
 !/example-msg-files/multi-to.msg
 !/example-msg-files/multi-to-to.msg
 !/example-msg-files/unicode-header.msg
