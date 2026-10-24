@@ -87,18 +87,18 @@ if __name__ == '__main__':
     a.addEntry('__substg1.0_F001101F-00000003', str4)
 
     ## No null character test.
-    a.addEntry('__substg1.0_F0031102', strLength)
-    a.addEntry('__substg1.0_F0031102-00000000', str1[:-1])
-    a.addEntry('__substg1.0_F0031102-00000001', str2)
-    a.addEntry('__substg1.0_F0031102-00000002', str3)
-    a.addEntry('__substg1.0_F0031102-00000003', str4)
+    a.addEntry('__substg1.0_F003101F', strLength)
+    a.addEntry('__substg1.0_F003101F-00000000', str1[:-2])
+    a.addEntry('__substg1.0_F003101F-00000001', str2)
+    a.addEntry('__substg1.0_F003101F-00000002', str3)
+    a.addEntry('__substg1.0_F003101F-00000003', str4)
 
     ## Wrong stream size test.
-    a.addEntry('__substg1.0_00071102', b'\x03' + strLength[1:])
-    a.addEntry('__substg1.0_00071102-00000000', str1)
-    a.addEntry('__substg1.0_00071102-00000001', str2)
-    a.addEntry('__substg1.0_00071102-00000002', str3)
-    a.addEntry('__substg1.0_00071102-00000003', str4)
+    a.addEntry('__substg1.0_0007101F', b'\x03' + strLength[1:])
+    a.addEntry('__substg1.0_0007101F-00000000', str1)
+    a.addEntry('__substg1.0_0007101F-00000001', str2)
+    a.addEntry('__substg1.0_0007101F-00000002', str3)
+    a.addEntry('__substg1.0_0007101F-00000003', str4)
 
     # Set body for stdout test.
     a.addEntry('__substg1.0_1000001F', 'Hello World!'.encode('utf-16-le'))
