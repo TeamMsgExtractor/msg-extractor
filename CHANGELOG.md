@@ -10,6 +10,10 @@
 * Added check for standard violation in `MSGFile.getMultipleString()` that is raised (or logged, depending on error behavior) if a string stream is missing a null byte. This also doesn't strip the last character in the stream if it is not null.
 * Added length check log to `MSGFile.getMultipleBinary()` and `MSGFile.getMultipleString()` that checks to see if the expected length for each stream matches what the length stream says. If not, it logs a warning about the mismatch, but does not consider this a gross violation of the standard.
 * Changed how `MessageBase.deencapsulatedRtf` handles RTF data without a closing brace.
+* Fixed wrong return being used in `extract_msg.encoding.utils.singleByteEncode()` and `extract_msg.encoding.utils.variableByteEncode()`.
+* Fixed missing return in `extract_msg.encoding.utils.singleByteEncode()`.
+* Fixed wrong parameter names for codec types made in `extract_msg.encoding.utils.createSBEncoding()` and `extract_msg.encoding.utils.createVBEncoding()`.
+* Fix some values being incorrectly returned from encode/decode functions in `extract_msg.encoding.utils`.
 
 **v0.56.1**
 * [[TeamMsgExtractor #484](https://github.com/TeamMsgExtractor/msg-extractor/issues/484)] Corrected the way the HTML body is decoded in `MessageBase.asEmailMessage()` to prevent encoding errors.
