@@ -1,0 +1,4 @@
+# Specifying only the upper bound of what might have something that breaks
+# things. Lower bound versions should be fine, especially since the current
+# version does not support 3.8 which is still supported right now as of writing.
+pypdf<=7.0.0
