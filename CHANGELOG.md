@@ -1,5 +1,15 @@
 **v0.57.0**
 * [[Advisory GHSA-cxpg-prmv-g4pp](https://github.com/TeamMsgExtractor/msg-extractor/security/advisories/GHSA-cxpg-prmv-g4pp)] Fixed a vulnerability related to unchecked input passed out to wkhtmltopdf when converting the MSG file to PDF. Javascript is now strongly blocked from being enabled and will be stripped from the HTML where appropriate before reaching wkhtmltopdf. Additionally, the option `--wk-allow-external-files` on the command line (or `wkAllowExternalFiles` to `MessageBase.save()`) will be required for external files to be loaded into the HTML to convert. Without these, they will be stripped before reaching wkhtmltopdf for security.
+* [[Advisory GHSA-mqxr-j8rh-p4q4](https://github.com/TeamMsgExtractor/msg-extractor/security/advisories/GHSA-mqxr-j8rh-p4q4)] Fixed an issue where an attacker controlled MSG file could take advantage of a poorly written section of code in the RTF deencapsulation function on the `extract-msg` side to waste massive amounts of time and memory resources.
+* [[Advisory GHSA-rgjf-vmqv-8pv9](https://github.com/TeamMsgExtractor/msg-extractor/security/advisories/GHSA-rgjf-vmqv-8pv9)] Change the way multiple type properties are accessed for binary and string. This includes modifications to `MSGFile.getMultipleBinary()`, `MSGFile.getMultipleString()`, and `MSGFile.exists()` to significantly reduce wasted times for malicious files. Malicious files previously could cause extract-msg to do unnecessarily large numbers of calls to `MSGFile.exists()` which previously did not use caching to speed up its search.
+* Changed `MSGFile.listDir()` to return a tuple of tuples to prevent it's cache results from being tampered with.
+* Fixed an issue with `MSGFile.listDir()` that caused it to not cache in certain circumstances when it should always cache.
+* Fixed a check in `MSGFile.getMultipleBinary()` that executed wrong and did not properly check for bad data.
+* Fixed `MSGFile._getTypedSteam()` to correctly parse binary and string streams when an entry is missing.
+* Fixed `StandardViolationError` being raised without checking error behavior in `MSGFile.getMultipleBinary()` and `MSGFile.getMultipleString()`.
+* Added check for standard violation in `MSGFile.getMultipleString()` that is raised (or logged, depending on error behavior) if a string stream is missing a null byte. This also doesn't strip the last character in the stream if it is not null.
+* Added length check log to `MSGFile.getMultipleBinary()` and `MSGFile.getMultipleString()` that checks to see if the expected length for each stream matches what the length stream says. If not, it logs a warning about the mismatch, but does not consider this a gross violation of the standard.
+* Changed how `MessageBase.deencapsulatedRtf` handles RTF data without a closing brace.
 
 **v0.56.1**
 * [[TeamMsgExtractor #484](https://github.com/TeamMsgExtractor/msg-extractor/issues/484)] Corrected the way the HTML body is decoded in `MessageBase.asEmailMessage()` to prevent encoding errors.
