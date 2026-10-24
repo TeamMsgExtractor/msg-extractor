@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 __all__ = [
-    'WKTests'
+    'WkTests'
 ]
 
 import http.server
@@ -47,7 +47,7 @@ class WkTests(unittest.TestCase):
         """
         Tests the security around calling wkhtmltopdf.
 
-        Test for CVE TODO.
+        Test for Advisory GHSA-cxpg-prmv-g4pp.
         """
         # Thank you to Kadhir (https://github.com/JOKER-53) for nearly all of
         # this test code.
