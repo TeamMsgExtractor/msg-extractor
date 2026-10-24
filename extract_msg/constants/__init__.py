@@ -66,7 +66,7 @@ HEADER_FORMAT_VALUE_TYPE = Union[str, Tuple[Union[str, None], bool], None]
 # Basically a dict of HEADER_FORMAT_TYPE and dicts containing them.
 HEADER_FORMAT_TYPE = Optional[Dict[str, Union[HEADER_FORMAT_VALUE_TYPE, Dict[str, HEADER_FORMAT_VALUE_TYPE]]]]
 SAVE_TYPE = Tuple[SaveType, Union[List[str], str, None]]
-MSG_PATH = Union[str, List[str], Tuple[str]]
+MSG_PATH = Union[str, List[str], Tuple[str, ...]]
 # Type used for the getXAs methods' overrideClass argument.
 OVERRIDE_CLASS = Union[Type[_T], Callable[[Any], _T]]
 

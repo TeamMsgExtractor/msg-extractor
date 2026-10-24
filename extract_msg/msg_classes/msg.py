@@ -14,6 +14,7 @@ import io
 import logging
 import os
 import pathlib
+import struct
 import weakref
 import zipfile
 
@@ -132,7 +133,9 @@ class MSGFile:
         self.__dateFormat = kwargs.get('dateFormat', DATE_FORMAT)
         self.__dtFormat = kwargs.get('datetimeFormat', DT_FORMAT)
 
-        self.__listDirRes: Dict[Tuple[bool, bool, bool], List[List[str]]] = {}
+        self.__listDirRes: Dict[Tuple[bool, bool, bool], Tuple[Tuple[str, ...], ...]] = {}
+
+        self.__existsCache = None
 
         if self.__parentMsg:
             # We should be able to directly access the private variables of
@@ -394,8 +397,10 @@ class MSGFile:
                     if _type in ('101F', '101E', '1102'):
                         if self.exists(x + '-00000000', False):
                             for y in range(streams):
-                                if self.exists((name := f'{x}-{y:08X}'), False):
-                                    extras.append(self.getStream(name, False))
+                                data = self.getStream(f'{x}-{y:08X}', False)
+                                if not data:
+                                    break
+                                extras.append(data)
                     elif _type in ('1002', '1003', '1004', '1005', '1007', '1014', '1040', '1048'):
                         extras = divide(contents, (2 if _type in constants.MULTIPLE_2_BYTES else 4 if _type in constants.MULTIPLE_4_BYTES else 8 if _type in constants.MULTIPLE_8_BYTES else 16))
                         contents = streams
@@ -439,12 +444,20 @@ class MSGFile:
             MSG file (``False``) or look in the current child MSG file
             (``True``). (Default: ``True``)
         """
-        filename = self.fixPath(filename, prefix)
-        return self.__ole.exists(filename)
+        if not self.__existsCache:
+            # Get the cache and ensure all names are lowercase.
+            self.__existsCache = tuple(tuple(y.lower() for y in x) for x in self.listDir(True, True, True))
+
+        filename = self.fixPath(filename, prefix).lower()
+        filename = filename.split('/')
+        if filename[-1] == '':
+            filename.pop()
+
+        return tuple(filename) in self.__existsCache
 
     def sExists(self, filename: MSG_PATH, prefix: bool = True) -> bool:
         """
-        Checks if string stream  exists in the MSG file.
+        Checks if string stream exists in the MSG file.
 
         :param prefix: Bool, whether to search for the entry at the root of the
             MSG file (``False``) or look in the current child MSG file
@@ -560,13 +573,27 @@ class MSGFile:
         if len(multStream) == 0:
             return []
         elif len(multStream) & 7 != 0:
+            if ErrorBehavior.STANDARDS_VIOLATION in self.errorBehavior:
+                logger.error('Multiple length stream is wrong size and cannot be parsed.')
+                return []
             raise StandardViolationError(f'Length stream for multiple binary was not a multiple of 8.')
         else:
-            ret = [self.getStream(filename + f'-{x:08X}') for x in range(len(multStream) // 8)]
+            entries = struct.unpack(f'<{len(multStream) // 8}Q', multStream)
+            gen = ((f'{filename}-{x:08X}',
+                    self.getStream(f'{filename}-{x:08X}'),
+                    0xFFFFFFFF & length) for x, length in enumerate(entries))
+            ret = []
             # We could do more checking here, but we'll just check for None.
-            if (index := next((x for x in ret if x is None), -1)) != -1:
-                logger.error('Unable to get the desired number of binary streams for multiple, not all streams were found.')
-                return ret[:index]
+            for path, item, length in gen:
+                if item is None:
+                    logger.error('Unable to get the desired number of binary streams for multiple, not all streams were found.')
+                    return ret
+
+                if len(item) != length:
+                    logger.warning(f'Length of {path} ({len(item)}) does not match expected length from length stream ({length}).')
+
+                ret.append(item)
+
             return ret
 
     def getMultipleString(self, filename: MSG_PATH, prefix: bool = True) -> Optional[List[str]]:
@@ -589,16 +616,36 @@ class MSGFile:
         if len(multStream) == 0:
             return []
         elif len(multStream) & 3 != 0:
+            if ErrorBehavior.STANDARDS_VIOLATION in self.errorBehavior:
+                logger.error('Multiple length stream is wrong size and cannot be parsed.')
+                return []
             raise StandardViolationError(f'Length stream for multiple string was not a multiple of 4.')
         else:
-            ret = [self.getStream(filename + f'-{x:08X}') for x in range(len(multStream) // 4)]
+            entries = struct.unpack(f'<{len(multStream) // 4}I', multStream)
+            gen = ((f'{filename}-{x:08X}',
+                    self.getStream(f'{filename}-{x:08X}'),
+                    length) for x, length in enumerate(entries))
+
+            ret = []
             # We could do more checking here, but we'll just check for None.
-            for index, item in enumerate(ret):
+            for path, item, length in gen:
                 if item is None:
                     logger.error('Unable to get the desired number of string streams for multiple, not all streams were found.')
-                    return ret[:index]
+                    return ret
+
+                if len(item) != length:
+                    logger.warning(f'Length of {path} ({len(item)}) does not match expected length from length stream ({length}).')
+
                 # Decode the bytes and remove the null byte.
-                ret[index] = item.decode(self.stringEncoding)[:-1]
+                stream = item.decode(self.stringEncoding)
+                if stream[-1] == '\x00':
+                    stream = stream[:-1]
+                elif ErrorBehavior.STANDARDS_VIOLATION in self.errorBehavior:
+                    logger.error(f'{path} does not end in a null character.')
+                else:
+                    raise StandardViolationError(f'{path} does not end in a null character.')
+
+                ret.append(stream)
             return ret
 
     def getNamedAs(self, propertyName: str, guid: str, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
@@ -777,7 +824,7 @@ class MSGFile:
 
         return value
 
-    def listDir(self, streams: bool = True, storages: bool = False, includePrefix: bool = True) -> List[List[str]]:
+    def listDir(self, streams: bool = True, storages: bool = False, includePrefix: bool = True) -> Tuple[Tuple[str, ...], ...]:
         """
         Replacement for ``OleFileIO.listdir`` that runs at the current prefix
         directory.
@@ -791,25 +838,27 @@ class MSGFile:
         except KeyError:
             entries = self.__ole.listdir(streams, storages)
             if not self.__prefix:
+                entries = tuple(tuple(x) for x in entries)
+                self.__listDirRes[(streams, storages, includePrefix)] = entries
                 return entries
             prefix = self.__prefix.split('/')
             if prefix[-1] == '':
                 prefix.pop()
 
             prefixLength = self.__prefixLen
-            entries = [x for x in entries if len(x) > prefixLength and x[:prefixLength] == prefix]
+            entries = tuple(tuple(x) for x in entries if len(x) > prefixLength and x[:prefixLength] == prefix)
             if not includePrefix:
-                entries = [x[prefixLength:] for x in entries]
+                entries = tuple(x[prefixLength:] for x in entries)
             self.__listDirRes[(streams, storages, includePrefix)] = entries
 
             return entries
 
-    def slistDir(self, streams: bool = True, storages: bool = False, includePrefix: bool = True) -> List[str]:
+    def slistDir(self, streams: bool = True, storages: bool = False, includePrefix: bool = True) -> Tuple[str, ...]:
         """
         Replacement for OleFileIO.listdir that runs at the current prefix
         directory. Returns a list of strings instead of lists.
         """
-        return [msgPathToString(x) for x in self.listDir(streams, storages, includePrefix)]
+        return tuple(msgPathToString(x) for x in self.listDir(streams, storages, includePrefix))
 
     def save(self, **kwargs) -> SAVE_TYPE:
         if kwargs.get('skipNotImplemented', False):

@@ -32,6 +32,7 @@ __all__ = [
     'makeWeakRef',
     'msgPathToString',
     'parseType',
+    'patchCss',
     'prepareFilename',
     'roundUp',
     'rtfSanitizeHtml',
@@ -417,6 +418,9 @@ def getCommandArgs(args: Sequence[str]) -> argparse.Namespace:
     # --wk-options OPTIONS
     parser.add_argument('--wk-options', dest='wkOptions', nargs='*',
                         help='Sets additional options to be used in wkhtmltopdf. Should be a series of options and values, replacing the - or -- in the beginning with + or ++, respectively. For example: --wk-options "+O Landscape"')
+    # --wk-allow-external-files
+    parser.add_argument('--wk-allow-external-files', dest='allowExternalFiles', action='store_true',
+                        help='Enables external files to appear in the PDF output. WARNING: This allows wkpdftohtml to make url requests that are unchecked, and as such may be a security vulnerability in untrusted emails. Only use this option if you trust the source of the MSG file.')
     # --prepared-html
     parser.add_argument('--prepared-html', dest='preparedHtml', action='store_true',
                         help='When used in conjunction with --html, sets whether the HTML output should be prepared for embedded attachments.')
@@ -862,6 +866,13 @@ def parseType(_type: int, stream: Union[int, bytes], encoding: str, extras: Sequ
         else:
             raise NotImplementedError(f'Parsing for type {_type} has not yet been implmented. If you need this type, please create a new issue labeled "NotImplementedError: parseType {_type}".')
     return value
+
+
+def patchCss(cssData: str) -> str:
+    """
+    Takes the css data and patches out urls from it for security.
+    """
+    return constants.re.CSS_URL.sub('none', cssData)
 
 
 def prepareFilename(filename: str) -> str:

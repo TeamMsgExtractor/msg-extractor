@@ -808,7 +808,7 @@ class OleWriter:
         """
         Copies the streams and stream information necessary from the MSG file.
 
-        :param allowBadEmbed: If True, attempts to skip steps that will fail if 
+        :param allowBadEmbed: If True, attempts to skip steps that will fail if
             the embedded MSG file violates standards. It will also attempt to repair the data to try to ensure it can open in Outlook.
 
         :raises StandardViolationError: Something about the embedded data has a
@@ -820,7 +820,7 @@ class OleWriter:
         # List both storages and directories, but sort them by shortest length
         # first to prevent errors.
         entries = msg.listDir(True, True, False)
-        entries.sort(key = len)
+        entries = sorted(entries, key = len)
 
         for x in entries:
             entry = msg._getOleEntry(x)

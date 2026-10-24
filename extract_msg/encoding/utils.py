@@ -34,19 +34,19 @@ def createVBEncoding(codecName: str, decodingTable: Dict[int, str]) -> codecs.Co
 
     # Create the classes.
     class Codec(codecs.Codec):
-        def encode(self, text, errors='strict'):
-            return variableByteEncode(codecName, text, errors, encodingTable)
+        def encode(self, input, errors='strict'):
+            return variableByteEncode(codecName, input, errors, encodingTable)
 
-        def decode(self, data, errors='strict'):
-            return variableByteDecode(codecName, data, errors, decodingTable)
+        def decode(self, input, errors='strict'):
+            return variableByteDecode(codecName, input, errors, decodingTable)
 
     class IncrementalEncoder(codecs.IncrementalEncoder):
-        def encode(self, text, final=False):
-            return variableByteEncode(codecName, text, self.errors, encodingTable)[0]
+        def encode(self, input, final=False):
+            return variableByteEncode(codecName, input, self.errors, encodingTable)[0]
 
     class IncrementalDecoder(codecs.IncrementalDecoder):
-        def decode(self, data, final=False):
-            return variableByteDecode(codecName, data, self.errors, decodingTable)[0]
+        def decode(self, input, final=False):
+            return variableByteDecode(codecName, input, self.errors, decodingTable)[0]
 
     class StreamWriter(Codec, codecs.StreamWriter):
         pass
@@ -87,19 +87,19 @@ def createSBEncoding(codecName: str, decodingTable: Dict[int, str]) -> codecs.Co
 
     # Create the classes.
     class Codec(codecs.Codec):
-        def encode(self, text, errors='strict'):
-            return singleByteEncode(codecName, text, errors, encodingTable)
+        def encode(self, input, errors='strict'):
+            return singleByteEncode(codecName, input, errors, encodingTable)
 
-        def decode(self, data, errors='strict'):
-            return singleByteDecode(codecName, data, errors, decodingTable)
+        def decode(self, input, errors='strict'):
+            return singleByteDecode(codecName, input, errors, decodingTable)
 
     class IncrementalEncoder(codecs.IncrementalEncoder):
-        def encode(self, text, final=False):
-            return singleByteEncode(codecName, text, self.errors, encodingTable)[0]
+        def encode(self, input, final=False):
+            return singleByteEncode(codecName, input, self.errors, encodingTable)[0]
 
     class IncrementalDecoder(codecs.IncrementalDecoder):
-        def decode(self, data, final=False):
-            return singleByteDecode(codecName, data, self.errors, decodingTable)[0]
+        def decode(self, input, final=False):
+            return singleByteDecode(codecName, input, self.errors, decodingTable)[0]
 
     class StreamWriter(Codec, codecs.StreamWriter):
         pass
@@ -171,7 +171,7 @@ def singleByteEncode(codecName: str, data, errors: str, encodeTable: Dict[str, b
     :param encodeTable: The mapping of values to use.
     """
     if len(data) == 0:
-        return
+        return (b'', 0)
 
     errorHandler = codecs.lookup_error(errors)
     output = b''
@@ -196,6 +196,7 @@ def singleByteEncode(codecName: str, data, errors: str, encodeTable: Dict[str, b
                 except StopIteration:
                     break
 
+    return (output, len(output))
 
 
 def variableByteDecode(codecName: str, data, errors: str, decodeTable: Dict[int, str]) -> Tuple[str, int]:
@@ -221,6 +222,7 @@ def variableByteDecode(codecName: str, data, errors: str, decodeTable: Dict[int,
 
     iterator = enumerate(data)
     start = 0
+    newStart = 0
 
     for start, byte in iterator:
         # Variable byte should be an integer here.
@@ -260,7 +262,9 @@ def variableByteDecode(codecName: str, data, errors: str, decodeTable: Dict[int,
 
         else:
             try:
-                byte = (byte << 8) | next(iterator)[1]
+                item = next(iterator)
+                newStart = item[0]
+                byte = (byte << 8) | item[1]
                 if byte in decodeTable:
                     output += decodeTable[byte]
                 else:
@@ -286,7 +290,7 @@ def variableByteDecode(codecName: str, data, errors: str, decodeTable: Dict[int,
                 output += rep[0]
                 break
                 # No more data, so that's all that needs to happen.
-    return (output, start)
+    return (output, max(start, newStart) + 1)
 
 
 def variableByteEncode(codecName: str, data, errors: str, encodeTable: Dict[str, bytes]) -> Tuple[bytes, int]:
@@ -300,7 +304,7 @@ def variableByteEncode(codecName: str, data, errors: str, encodeTable: Dict[str,
     :param encodeTable: The mapping of values to use.
     """
     if len(data) == 0:
-        return
+        return (b'', 0)
 
     errorHandler = codecs.lookup_error(errors)
     output = b''

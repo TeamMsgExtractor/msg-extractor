@@ -48,7 +48,7 @@ from ..structures.report_tag import ReportTag
 from ..recipient import Recipient
 from ..utils import (
         addNumToDir, addNumToZipDir, createZipOpen, decodeRfc2047, findWk,
-        htmlSanitize, inputToBytes, inputToString, isEncapsulatedRtf,
+        htmlSanitize, inputToBytes, inputToString, isEncapsulatedRtf, patchCss,
         prepareFilename, rtfSanitizeHtml, rtfSanitizePlain, stripRtf,
         validateHtml
     )
@@ -530,9 +530,16 @@ class MessageBase(MSGFile):
         else:
             return self.htmlBody or b''
 
-    def getSavePdfBody(self, wkPath = None, wkOptions = None, **kwargs) -> bytes:
+    def getSavePdfBody(self, wkPath = None, wkOptions = None, wkAllowExternalFiles: bool = False, **kwargs) -> bytes:
         """
         Returns the PDF body that will be used in saving based on the arguments.
+
+        WARNING: This function inherently has some security vulnerabilities due
+        to how wkhtmltopdf is designed. I have taken the time to mitigate as
+        many as possible by disabling local file access and javascript, however
+        due to legitamate use cases, images can have any address they want, and
+        a carefully crafted attack may be able to extract some amount of data
+        in the form of image HTTP requests.
 
         :param wkPath: Used to manually specify the path of the wkhtmltopdf
             executable. If not specified, the function will try to find it.
@@ -541,8 +548,18 @@ class MessageBase(MSGFile):
         :param wkOptions: Used to specify additional options to wkhtmltopdf.
             this must be a list or list-like object composed of strings and
             bytes.
+        :param wkAllowExternalFiles: Used to disable the security feature that
+            purges external files from the HTML body before passing it to
+            wkhtmltopdf. WARNING: setting this to ``True`` allows for the body
+            to contain URLs that could potentially load unknown resources,
+            including tracking images or make attempts to access private data
+            on the local network on the machine running it. This will be more
+            dangerous on servers using this module to convert to PDF because a
+            file from an external user may be able to extract information from
+            the server in this way (Default: ``False``).
         :param kwargs: Used to allow kwargs expansion in the save function.
-            Arguments absorbed by this are simply ignored, except for keyword arguments used by :meth:`getSaveHtmlBody`.
+            Arguments absorbed by this are simply ignored, except for keyword
+            arguments used by :meth:`getSaveHtmlBody`.
 
         :raises ExecutableNotFound: The wkhtmltopdf executable could not be
             found.
@@ -567,12 +584,57 @@ class MessageBase(MSGFile):
         if not all(isinstance(option, (str, bytes)) for option in parsedWkOptions):
             raise TypeError(':param wkOptions: must be an iterable of strings and bytes.')
 
+        # SECURITY: Force disable local file access and javascript. If a user
+        # tried to enable them, they'll need to override this function to
+        # actually use them.
+        parsedWkOptions.append('--disable-local-file-access')
+        parsedWkOptions.append('--disable-javascript')
+
+        if '--enable-local-file-access' in parsedWkOptions:
+            parsedWkOptions.remove('--enable-local-file-access')
+        if '--enable-javascript' in parsedWkOptions:
+            parsedWkOptions.remove('--enable-javascript')
+
         processArgs = [wkPath, *parsedWkOptions, '-', '-']
         # Log the arguments.
         logger.info(f'Converting to PDF with the following arguments: {processArgs}')
 
         # Get the html body *before* calling Popen.
         htmlBody = self.getSaveHtmlBody(**kwargs)
+
+        # SECURITY: We *must* check for certain insecure HTML things that
+        # cannot otherwise definitively be disabled in the HTML body. The most
+        # notable is iframe which is unlikely to have a legitamate use case in
+        # an email, unlike an image.
+        bs = bs4.BeautifulSoup(htmlBody, 'html.parser')
+        for tag in bs.self_and_descendants:
+            if tag.name and tag.name.lower() != 'a':
+                # Always decompose these, there is no good reason for these.
+                if tag.name.lower() in ('iframe', 'script'):
+                    tag.decompose()
+                # Strip external files away only if they are not allowed.
+                elif not wkAllowExternalFiles:
+                    if tag.get('href', '').lower().startswith('http'):
+                        tag['href'] = ''
+                    elif tag.get('src', '').lower().startswith('http'):
+                        tag['src'] = ''
+                    elif tag.get('data', '').lower().startswith('http'):
+                        if tag.name.lower() == 'object':
+                            tag['data'] = ''
+
+        # SECURITY: Last step, we need to go over all of the css data to ensure
+        # no tracking images ONLY if images are disabled.
+        if not wkAllowExternalFiles:
+            # Do main css first.
+            for tag in bs.find_all('style'):
+                if tag.string:
+                    tag.string = patchCss(tag.string)
+
+            # Now do style modifiers.
+            for tag in (x for x in bs.self_and_descendants if hasattr(x, 'get') and x.get('style')):
+                tag['style'] = patchCss(tag['style'])
+
+        htmlBody = bs.encode('utf-8')
 
         # We call the program to convert the html, but give tell it the data
         # will go in and come out through stdin and stdout, respectively. This
@@ -827,6 +889,15 @@ class MessageBase(MSGFile):
         :param wkOptions: Used to specify additional options to wkhtmltopdf.
             this must be a list or list-like object composed of strings and
             bytes.
+        :param wkAllowExternalFiles: Used to disable the security feature that
+            purges external files from the HTML body before passing it to
+            wkhtmltopdf. WARNING: setting this to ``True`` allows for the body
+            to contain URLs that could potentially load unknown resources,
+            including tracking images or make attempts to access private data
+            on the local network on the machine running it. This will be more
+            dangerous on servers using this module to convert to PDF because a
+            file from an external user may be able to extract information from
+            the server in this way (Default: ``False``).
         """
         # Move keyword arguments into variables.
         _json = kwargs.get('json', False)
@@ -1111,8 +1182,14 @@ class MessageBase(MSGFile):
             # Sometimes you get MSG files whose RTF body has stuff
             # *after* the body, and RTFDE can't handle that. Here is
             # how we compensate.
-            while body and body[-1] != 125:
-                body = body[:-1]
+            end = body.rfind(b'}')
+            if end == -1:
+                if ErrorBehavior.RTFDE_MALFORMED not in self.errorBehavior:
+                    raise RTFDE.exceptions.MalformedRtf('Invalid RTF data received.')
+                logger.info('RTF body does not contain valid RTF data.')
+                return None
+
+            body = body[:end + 1]
 
             # Some files take a long time due to how they are structured and
             # how RTFDE works. The longer a file would normally take, the
