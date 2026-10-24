@@ -5,9 +5,22 @@ import extract_msg
 
 if __name__ == '__main__':
     s0 = bytearray(4096)                      # __properties_version1.0
-    s0[32:48] = struct.pack('<IIQ', 0x340D0003, 2, 0x40000)
-    s0[48:64] = struct.pack('<IIQ', 0x00001102, 2, 32)
-    s0 = bytes(s0)
+    s0[32:48] = struct.pack('<IIQ', 0x340D0003, 6, 0x40000)
+    s0[48:64] = struct.pack('<IIQ', 0x1000001F, 6, 26)
+    s0[64:80] = struct.pack("<IIQ", 0x001A001F, 6, 18)
+    s0[80:96] = struct.pack('<IIQ', 0x00001102, 6, 32)
+    s0[96:112] = struct.pack('<IIQ', 0x0001101F, 6, 16)
+    s0[112:128] = struct.pack('<IIQ', 0x00021102, 6, 32)
+    s0[128:144] = struct.pack('<IIQ', 0x0003101F, 6, 16)
+    s0[144:160] = struct.pack('<IIQ', 0x00041102, 6, 32)
+    s0[160:176] = struct.pack('<IIQ', 0x0005101F, 6, 16)
+    s0[176:192] = struct.pack('<IIQ', 0x00061102, 6, 32)
+    s0[192:208] = struct.pack('<IIQ', 0x0007101F, 6, 16)
+    s0[208:224] = struct.pack('<IIQ', 0xF0001102, 6, 32 - 1)
+    s0[224:240] = struct.pack('<IIQ', 0xF001101F, 6, 16 - 1)
+    s0[240:256] = struct.pack('<IIQ', 0xF003101F, 6, 16)
+
+    s0 = bytes(s0[0:256])
     a = extract_msg.OleWriter()
     a.addEntry('__substg1.0_001A001F', 'IPM.Note'.encode('utf-16-le'))
 
@@ -80,6 +93,13 @@ if __name__ == '__main__':
     #a.addEntry('__substg1.0_0005101F-00000002', str3)
     a.addEntry('__substg1.0_0005101F-00000003', str4)
 
+    ## Wrong stream size test.
+    a.addEntry('__substg1.0_0007101F', b'\x03' + strLength[1:])
+    a.addEntry('__substg1.0_0007101F-00000000', str1)
+    a.addEntry('__substg1.0_0007101F-00000001', str2)
+    a.addEntry('__substg1.0_0007101F-00000002', str3)
+    a.addEntry('__substg1.0_0007101F-00000003', str4)
+
     ## Wrong length stream size test.
     a.addEntry('__substg1.0_F001101F', strLength[:-1])
     a.addEntry('__substg1.0_F001101F-00000000', str1)
@@ -93,13 +113,6 @@ if __name__ == '__main__':
     a.addEntry('__substg1.0_F003101F-00000001', str2)
     a.addEntry('__substg1.0_F003101F-00000002', str3)
     a.addEntry('__substg1.0_F003101F-00000003', str4)
-
-    ## Wrong stream size test.
-    a.addEntry('__substg1.0_0007101F', b'\x03' + strLength[1:])
-    a.addEntry('__substg1.0_0007101F-00000000', str1)
-    a.addEntry('__substg1.0_0007101F-00000001', str2)
-    a.addEntry('__substg1.0_0007101F-00000002', str3)
-    a.addEntry('__substg1.0_0007101F-00000003', str4)
 
     # Set body for stdout test.
     a.addEntry('__substg1.0_1000001F', 'Hello World!'.encode('utf-16-le'))
