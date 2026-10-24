@@ -14,6 +14,7 @@ import io
 import logging
 import os
 import pathlib
+import struct
 import weakref
 import zipfile
 
@@ -577,13 +578,19 @@ class MSGFile:
                 return []
             raise StandardViolationError(f'Length stream for multiple binary was not a multiple of 8.')
         else:
-            gen = (self.getStream(filename + f'-{x:08X}') for x in range(len(multStream) // 8))
+            entries = struct.unpack(f'<{len(multStream) // 8}Q', multStream)
+            gen = ((f'{filename}-{x:08X}',
+                    self.getStream(f'{filename}-{x:08X}'),
+                    0xFFFFFFFF & length) for x, length in enumerate(entries))
             ret = []
             # We could do more checking here, but we'll just check for None.
-            for item in gen:
+            for path, item, length in gen:
                 if item is None:
                     logger.error('Unable to get the desired number of binary streams for multiple, not all streams were found.')
                     return ret
+
+                if len(item) != length:
+                    logger.warning(f'Length of {path} ({len(item)}) does not match expected length from length stream ({length}).')
 
                 ret.append(item)
 
@@ -614,15 +621,31 @@ class MSGFile:
                 return []
             raise StandardViolationError(f'Length stream for multiple string was not a multiple of 4.')
         else:
-            gen = (self.getStream(filename + f'-{x:08X}') for x in range(len(multStream) // 4))
+            entries = struct.unpack(f'<{len(multStream) // 4}I', multStream)
+            gen = ((f'{filename}-{x:08X}',
+                    self.getStream(f'{filename}-{x:08X}'),
+                    length) for x, length in enumerate(entries))
+
             ret = []
             # We could do more checking here, but we'll just check for None.
-            for item in gen:
+            for path, item, length in gen:
                 if item is None:
                     logger.error('Unable to get the desired number of string streams for multiple, not all streams were found.')
                     return ret
+
+                if len(item) != length:
+                    logger.warning(f'Length of {path} ({len(item)}) does not match expected length from length stream ({length}).')
+
                 # Decode the bytes and remove the null byte.
-                ret.append(item.decode(self.stringEncoding)[:-1])
+                stream = item.decode(self.stringEncoding)
+                if stream[-1] == '\x00':
+                    stream = stream[:-1]
+                elif ErrorBehavior.STANDARDS_VIOLATION in self.errorBehavior:
+                    logger.error(f'{path} does not end in a null character.')
+                else:
+                    raise StandardViolationError(f'{path} does not end in a null character.')
+
+                ret.append(stream)
             return ret
 
     def getNamedAs(self, propertyName: str, guid: str, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:

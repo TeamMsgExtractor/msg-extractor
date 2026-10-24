@@ -6,6 +6,8 @@ __all__ = [
 import logging
 import unittest
 
+import extract_msg
+
 from .constants import TEST_FILE_DIR
 from extract_msg import openMsg
 from extract_msg.exceptions import StandardViolationError
@@ -17,6 +19,7 @@ class MSGBaseTests(unittest.TestCase):
         """
         Tests getting multiple-type value streams from the test file.
         """
+        msgLogger = extract_msg.msg_classes.msg.logger
         expectedOutputs = {
             'multiBin': [
                 b'\x00\x01\x02\x03',
@@ -59,40 +62,55 @@ class MSGBaseTests(unittest.TestCase):
         with openMsg(TEST_FILE_DIR / 'multi-stream.msg', strict = False) as msg:
             # These two should fetch normally.
             with self.subTest('Test multiple binary'):
-                res = msg.getMultipleBinary('__substg1.0_0000')
+                with self.assertNoLogs(msgLogger, logging.WARNING):
+                    res = msg.getMultipleBinary('__substg1.0_0000')
                 self.assertIsNotNone(res, 'Failed to fetch multiple binary stream.')
                 self.assertListEqual(res, expectedOutputs['multiBin'])
 
             with self.subTest('Test multiple string'):
-                res = msg.getMultipleString('__substg1.0_0001')
+                with self.assertNoLogs(msgLogger, logging.WARNING):
+                    res = msg.getMultipleString('__substg1.0_0001')
                 self.assertIsNotNone(res, 'Failed to fetch multiple string stream.')
                 self.assertListEqual(res, expectedOutputs['multiStr'])
 
             # These two should be short a single item.
             with self.subTest('Test too few multiple binary'):
-                with self.assertLogs(level = logging.ERROR):
+                with self.assertLogs(msgLogger, logging.ERROR):
                     res = msg.getMultipleBinary('__substg1.0_0002')
                 self.assertIsNotNone(res, 'Failed to fetch multiple binary stream.')
                 self.assertListEqual(res, expectedOutputs['shortBin'])
 
             with self.subTest('Test too few multiple string'):
-                with self.assertLogs(level = logging.ERROR):
+                with self.assertLogs(msgLogger, logging.ERROR):
                     res = msg.getMultipleString('__substg1.0_0003')
                 self.assertIsNotNone(res, 'Failed to fetch multiple string stream.')
                 self.assertListEqual(res, expectedOutputs['shortStr'])
 
             # These two should be missing an item and skip the remaining.
             with self.subTest('Test missing multiple binary'):
-                with self.assertLogs(level = logging.ERROR):
+                with self.assertLogs(msgLogger, logging.ERROR):
                     res = msg.getMultipleBinary('__substg1.0_0004')
                 self.assertIsNotNone(res, 'Failed to fetch multiple binary stream.')
                 self.assertListEqual(res, expectedOutputs['missingBin'])
 
             with self.subTest('Test missing multiple string'):
-                with self.assertLogs(level = logging.ERROR):
+                with self.assertLogs(msgLogger, logging.ERROR):
                     res = msg.getMultipleString('__substg1.0_0005')
                 self.assertIsNotNone(res, 'Failed to fetch multiple string stream.')
                 self.assertListEqual(res, expectedOutputs['missingStr'])
+
+            # These two should report a predicted length mismatch.
+            with self.subTest('Test multiple binary mismatch length'):
+                with self.assertLogs(msgLogger, logging.WARNING):
+                    res = msg.getMultipleBinary('__substg1.0_0006')
+                self.assertIsNotNone(res, 'Failed to fetch multiple binary stream.')
+                self.assertListEqual(res, expectedOutputs['multiBin'])
+
+            with self.subTest('Test multiple string mismatch length'):
+                with self.assertLogs(msgLogger, logging.WARNING):
+                    res = msg.getMultipleString('__substg1.0_0007')
+                self.assertIsNotNone(res, 'Failed to fetch multiple string stream.')
+                self.assertListEqual(res, expectedOutputs['multiStr'])
 
             # These two should fail because the length streams are the wrong
             # size.
@@ -104,12 +122,21 @@ class MSGBaseTests(unittest.TestCase):
                 with self.assertRaises(StandardViolationError):
                     msg.getMultipleString('__substg1.0_F001')
 
+            # Test failure because of missing null byte.
+            with self.subTest('Test standard violation (multiple string no null)'):
+                with self.assertRaises(StandardViolationError):
+                    msg.getMultipleString('__substg1.0_F003')
+
         # Reopen the msg file with standard violations disabled.
         with openMsg(TEST_FILE_DIR / 'multi-stream.msg', strict = False, errorBehavior = ErrorBehavior.STANDARDS_VIOLATION) as msg:
             with self.subTest('Test no standard violation (multiple binary)'):
-                with self.assertLogs(level = logging.ERROR):
+                with self.assertLogs(msgLogger, logging.ERROR):
                     msg.getMultipleBinary('__substg1.0_F000')
 
             with self.subTest('Test no standard violation (multiple string)'):
-                with self.assertLogs(level = logging.ERROR):
+                with self.assertLogs(msgLogger, logging.ERROR):
                     msg.getMultipleString('__substg1.0_F001')
+
+            with self.subTest('Test no standard violation (multiple string no null)'):
+                with self.assertLogs(msgLogger, logging.ERROR):
+                    msg.getMultipleString('__substg1.0_F003')

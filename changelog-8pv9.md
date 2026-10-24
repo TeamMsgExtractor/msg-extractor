@@ -3,4 +3,6 @@
 * Fixed an issue with `MSGFile.listDir()` that caused it to not cache in certain circumstances when it should always cache.
 * Fixed a check in `MSGFile.getMultipleBinary()` that executed wrong and did not properly check for bad data.
 * Fixed `MSGFile._getTypedSteam()` to correctly parse binary and string streams when an entry is missing.
-* Fixed `StandardViolationError` being raised without checking error behavior in `MSGFile.getMultipleBinary()`, `MSGFile.getMultipleString()` TODOTODOTODOTODOTODOTODOTODOTODOTODO
+* Fixed `StandardViolationError` being raised without checking error behavior in `MSGFile.getMultipleBinary()` and `MSGFile.getMultipleString()`.
+* Added check for standard violation in `MSGFile.getMultipleString()` that is raised (or logged, depending on error behavior) if a string stream is missing a null byte. This also doesn't strip the last character in the stream if it is not null.
+* Added length check log to `MSGFile.getMultipleBinary()` and `MSGFile.getMultipleString()` that checks to see if the expected length for each stream matches what the length stream says. If not, it logs a warning about the mismatch, but does not consider this a gross violation of the standard.
