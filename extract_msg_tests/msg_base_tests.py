@@ -4,6 +4,7 @@ __all__ = [
 
 
 import logging
+import sys
 import unittest
 
 import extract_msg
@@ -14,7 +15,23 @@ from extract_msg.exceptions import StandardViolationError
 from extract_msg.enums import ErrorBehavior
 
 
+# Handle NoLogs not existing in 3.8 and 3.9.
+if sys.version_info[1] < 10:
+    class NoLogsHandler:
+        def __enter__(self, *args, **kwargs):
+            pass
+
+        def __exit__(self, *args, **kwargs):
+            pass
+
+
 class MSGBaseTests(unittest.TestCase):
+    # Handle NoLogs not existing in 3.8 and 3.9
+    if sys.version_info[1] < 10:
+        logging.info('Version does not support checking for an absence of logs.')
+        def assertNoLogs(self, *args, **kwargs):
+            return NoLogsHandler()
+
     def testMutipleStreams(self):
         """
         Tests getting multiple-type value streams from the test file.
