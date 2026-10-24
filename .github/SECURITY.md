@@ -20,4 +20,6 @@ Please include a description of the vulnerability, steps to reproduce,
 the affected version, and impact assessment if possible.
 
 I will acknowledge receipt within 72 hours and aim to release a fix
-within 90 days. Public disclosure will be coordinated with the reporter.
+within 90 days. Public disclosure will be coordinated with the reporter. If
+the vulnerability cannot be confirmed and the opener does not respond within
+90 days, your advisory may be automatically closed.
