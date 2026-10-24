@@ -1,3 +1,7 @@
+**v0.29.7**
+* Fixed a bug in `MSGFile._getTypedStream()` that prevented it from exiting a loop early on failure to access stream.
+* Fixed a bug in `MSGFile._getTypedStream()` that caused it to check if the same stream exists multiple times.
+
 **v0.29.6**
 * Corrected error string for incompatible options in `Message.save`.
 
