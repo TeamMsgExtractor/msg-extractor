@@ -2,6 +2,7 @@ __all__ = [
     'AttachmentTests',
     'CommandLineTests',
     'MessageTests',
+    'MSGBaseTests',
     'OleWriterEditingTests',
     'OleWriterExportTests',
     'PropTests',
@@ -13,6 +14,7 @@ __all__ = [
 from .attachment_tests import AttachmentTests
 from .cmd_line_tests import CommandLineTests
 from .message_tests import MessageTests
+from .msg_base_tests import MSGBaseTests
 from .ole_writer_tests import OleWriterEditingTests, OleWriterExportTests
 from .prop_tests import PropTests
 from .util_tests import UtilTests
