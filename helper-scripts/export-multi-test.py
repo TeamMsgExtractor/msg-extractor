@@ -5,7 +5,8 @@ import extract_msg
 
 if __name__ == '__main__':
     s0 = bytearray(4096)                      # __properties_version1.0
-    s0[32:48] = struct.pack("<II", 0x340D0003, 0) + struct.pack('<Q', 0x40000)
+    s0[32:48] = struct.pack('<IIQ', 0x340D0003, 2, 0x40000)
+    s0[48:64] = struct.pack('<IIQ', 0x00001102, 2, 32)
     s0 = bytes(s0)
     a = extract_msg.OleWriter()
     a.addEntry('__substg1.0_001A001F', 'IPM.Note'.encode('utf-16-le'))
