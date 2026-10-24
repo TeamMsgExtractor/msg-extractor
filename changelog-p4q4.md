@@ -1,0 +1,2 @@
+* [[Advisory GHSA-mqxr-j8rh-p4q4](https://github.com/TeamMsgExtractor/msg-extractor/security/advisories/GHSA-mqxr-j8rh-p4q4)] Fixed an issue where an attacker controlled MSG file could take advantage of a poorly written section of code in the RTF deencapsulation function on the `extract-msg` side to waste massive amounts of time and memory resources.
+* Changed how `MessageBase.deencapsulatedRtf` handles RTF data without a closing brace.
