@@ -1,4 +1,4 @@
-**v0.54.1**
+**v0.57.1**
 * [[TeamMsgExtractor #489](https://github.com/TeamMsgExtractor/msg-extractor/issues/489)] Fix an issue where `MessageSignedBase.body` would raise an error qhen the plain text body was not utf-8 encoded bytes. This error was due to `extract_msg.utils.unwrapMultipart()` accidentally returning the plain text body as bytes instead of string.
 
 **v0.57.0**
