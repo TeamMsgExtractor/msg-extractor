@@ -1,5 +1,5 @@
 **v0.57.1**
-* [[TeamMsgExtractor #489](https://github.com/TeamMsgExtractor/msg-extractor/issues/489)] Fix an issue where `MessageSignedBase.body` would raise an error qhen the plain text body was not utf-8 encoded bytes. This error was due to `extract_msg.utils.unwrapMultipart()` accidentally returning the plain text body as bytes instead of string.
+* [[TeamMsgExtractor #489](https://github.com/TeamMsgExtractor/msg-extractor/issues/489)] Fix an issue where `MessageSignedBase.body` would raise an error when the plain text body was not utf-8 encoded bytes. This error was due to `extract_msg.utils.unwrapMultipart()` accidentally returning the plain text body as bytes instead of string.
 
 **v0.57.0**
 * [[Advisory GHSA-cxpg-prmv-g4pp](https://github.com/TeamMsgExtractor/msg-extractor/security/advisories/GHSA-cxpg-prmv-g4pp)] Fixed a vulnerability related to unchecked input passed out to wkhtmltopdf when converting the MSG file to PDF. Javascript is now strongly blocked from being enabled and will be stripped from the HTML where appropriate before reaching wkhtmltopdf. Additionally, the option `--wk-allow-external-files` on the command line (or `wkAllowExternalFiles` to `MessageBase.save()`) will be required for external files to be loaded into the HTML to convert. Without these, they will be stripped before reaching wkhtmltopdf for security.
