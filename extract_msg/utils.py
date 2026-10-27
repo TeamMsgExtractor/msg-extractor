@@ -1305,7 +1305,10 @@ def unwrapMultipart(mp: Union[bytes, str, email.message.Message]) -> Dict:
         elif attachment['mimetype'] == 'text/plain':
             if plainBody:
                 logger.warning('Found multiple candidates for plain text body.')
-            plainBody = data
+            # We need to get the content again and ensure it is a string. If 
+            # not, decode it to one.
+            content = inputToString(node.get_content(), node.get_content_charset('utf-8'))
+            plainBody = content
         elif attachment['mimetype'] == 'text/html':
             if htmlBody:
                 logger.warning('Found multiple candidates for HTML body.')
