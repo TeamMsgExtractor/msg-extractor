@@ -1045,6 +1045,7 @@ def stripRtf(rtfBody: bytes) -> bytes:
 
     return rtfBody
 
+
 def _stripRtfCloseHelper(match: re.Match) -> bytes:
     if (ret := match.expand(b'\\g<0>')).count(b'\\htmlrtf0') > 1:
         return ret
@@ -1078,8 +1079,6 @@ def _stripRtfHelper(match: re.Match) -> bytes:
     # TODO
 
     return res
-
-
 
 
 def tryGetMimetype(att: AttachmentBase, mimetype: Union[str, None]) -> Union[str, None]:
@@ -1305,7 +1304,7 @@ def unwrapMultipart(mp: Union[bytes, str, email.message.Message]) -> Dict:
         elif attachment['mimetype'] == 'text/plain':
             if plainBody:
                 logger.warning('Found multiple candidates for plain text body.')
-            # We need to get the content again and ensure it is a string. If 
+            # We need to get the content again and ensure it is a string. If
             # not, decode it to one.
             content = inputToString(node.get_content(), node.get_content_charset('utf-8'))
             plainBody = content
