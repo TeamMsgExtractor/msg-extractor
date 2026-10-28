@@ -40,6 +40,7 @@ from ..exceptions import (
         ConversionError, InvalidFileFormatError, PrefixError,
         StandardViolationError
     )
+from ..msg_path import MSGPath
 from ..properties.named import Named, NamedProperties
 from ..properties.properties_store import PropertiesStore
 from ..structures.contact_link_entry import ContactLinkEntry
@@ -115,7 +116,7 @@ class MSGFile:
         """
         # Retrieve all the kwargs that we need.
         self.__inscFeat: InsecureFeatures = kwargs.get('insecureFeatures', InsecureFeatures.NONE)
-        prefix: str = cast(str, kwargs.get('prefix', ''))
+        prefix: MSGPath = MSGPath(kwargs.get('prefix', ''))
         self.__parentMsg = makeWeakRef(cast(MSGFile, kwargs.get('parentMsg')))
         self.__treePath = kwargs.get('treePath', []) + [weakref.ref(self)]
         # Verify it is a valid class.
@@ -133,7 +134,7 @@ class MSGFile:
         self.__dateFormat = kwargs.get('dateFormat', DATE_FORMAT)
         self.__dtFormat = kwargs.get('datetimeFormat', DT_FORMAT)
 
-        self.__listDirRes: Dict[Tuple[bool, bool, bool], Tuple[Tuple[str, ...], ...]] = {}
+        self.__listDirRes: Dict[Tuple[bool, bool, bool], Tuple[MSGPath, ...]] = {}
 
         self.__existsCache = None
 
@@ -181,16 +182,13 @@ class MSGFile:
                 del kwargsCopy['treePath']
             self.__kwargs = kwargsCopy
 
-            prefixl = []
             if prefix:
                 try:
-                    prefixl = inputToMsgPath(prefix)
-                    prefix = '/'.join(prefixl) + '/'
+                    prefix = MSGPath(prefix)
                 except ConversionError:
                     raise PrefixError(f'The provided prefix could not be used: {prefix}')
             self.__prefix = prefix
-            self.__prefixList = prefixl
-            self.__prefixLen = len(prefixl)
+            self.__prefixLen = len(prefix.parts)
 
             if overrideEncoding is not None:
                 logger.warning('You have chosen to override the string encoding. Do not report encoding errors caused by this.')
@@ -216,10 +214,10 @@ class MSGFile:
                     # dumb and just generate it *manually*, grab what we need, # and them immediately close it.
                     #
                     # We don't need anything more advanced than MSGFile.
-                    msg = MSGFile(path, prefix = prefixl[:-2], delayAttachments = True)
+                    msg = MSGFile(path, prefix = prefix, delayAttachments = True)
                     parentNeedsClose = True
                 # Now that we know we have the parent, grab the stream.
-                filename = msg.getStringStream(prefixl[:-1] + ['__substg1.0_3001'], prefix = False)
+                filename = msg.getStringStream(prefix / '__substg1.0_3001', prefix = False)
                 # Now if we opened the parent, close it.
                 if parentNeedsClose:
                     msg.close()
@@ -271,7 +269,7 @@ class MSGFile:
         sid = -1
         if filename == '/':
             if prefix and self.__prefix:
-                sid = self.__ole._find(self.__prefixList)
+                sid = self.__ole._find(str(self.__prefix))
             else:
                 return self.__ole.direntries[0]
         else:
@@ -487,18 +485,20 @@ class MSGFile:
         _id = _id.upper()
         if propertiesInstance is None:
             propertiesInstance = self.props
-        prefixList = self.prefixList if prefix else []
+        prefixPath = self.prefix if prefix else MSGPath()
         if location is not None:
-            prefixList.append(location)
-        prefixList = inputToMsgPath(prefixList)
+            prefixPath /= location
+
+        prefixLen = len(prefixPath)
+
         usableId = _id + _type if _type else _id
         foundNumber = 0
         foundStreams = []
         for item in self.listDir():
-            if len(item) > self.__prefixLen:
-                if item[self.__prefixLen].startswith('__substg1.0_' + usableId) and item[self.__prefixLen] not in foundStreams:
+            if item.is_relative_to(prefixPath):
+                if item[prefixLen].startswith('__substg1.0_' + usableId) and item[prefixLen] not in foundStreams:
                     foundNumber += 1
-                    foundStreams.append(item[self.__prefixLen])
+                    foundStreams.append(item[prefixLen])
         for x in propertiesInstance:
             if x.startswith(usableId):
                 for y in foundStreams:
@@ -543,14 +543,14 @@ class MSGFile:
         self.export(out, allowBadEmbed)
         return out.getvalue()
 
-    def fixPath(self, inp: MSG_PATH, prefix: bool = True) -> str:
+    def fixPath(self, inp: MSG_PATH, prefix: bool = True) -> MSGPath:
         """
         Changes paths so that they have the proper prefix (should :param prefix:
         be ``True``) and are strings rather than lists or tuples.
         """
-        inp = msgPathToString(inp)
+        inp = MSGPath(inp)
         if prefix:
-            inp = self.__prefix + inp
+            inp = self.__prefix / inp
         return inp
 
     def getMultipleBinary(self, filename: MSG_PATH, prefix: bool = True) -> Optional[List[bytes]]:
@@ -565,7 +565,7 @@ class MSGFile:
             MSG file (``False``) or look in the current child MSG file
             (``True``). (Default: ``True``)
         """
-        filename = self.fixPath(filename, prefix) + '1102'
+        filename = self.fixPath(filename, prefix).add('1102')
         multStream = self.getStream(filename)
         if multStream is None:
             return None
@@ -608,7 +608,7 @@ class MSGFile:
             MSG file (``False``) or look in the current child MSG file
             (``True``). (Default: ``True``)
         """
-        filename = self.fixPath(filename, prefix) + '101F' if self.areStringsUnicode else '101E'
+        filename = self.fixPath(filename, prefix).add('101F' if self.areStringsUnicode else '101E')
         multStream = self.getStream(filename)
         if multStream is None:
             return []
@@ -715,7 +715,7 @@ class MSGFile:
         """
         filename = self.fixPath(filename, prefix)
         # Check for a single binary stream first.
-        if (ret := self.getStream(filename + '0102', False)) is not None:
+        if (ret := self.getStream(filename.add('0102'), False)) is not None:
             return ret
         # Otherwise, we just let the return from `getMultipleBinary` do the
         # work.
@@ -824,7 +824,7 @@ class MSGFile:
 
         return value
 
-    def listDir(self, streams: bool = True, storages: bool = False, includePrefix: bool = True) -> Tuple[Tuple[str, ...], ...]:
+    def listDir(self, streams: bool = True, storages: bool = False, includePrefix: bool = True) -> Tuple[MSGPath, ...]:
         """
         Replacement for ``OleFileIO.listdir`` that runs at the current prefix
         directory.
@@ -838,7 +838,7 @@ class MSGFile:
         except KeyError:
             entries = self.__ole.listdir(streams, storages)
             if not self.__prefix:
-                entries = tuple(tuple(x) for x in entries)
+                entries = tuple(MSGPath(*x) for x in entries)
                 self.__listDirRes[(streams, storages, includePrefix)] = entries
                 return entries
             prefix = self.__prefix.split('/')
@@ -858,7 +858,7 @@ class MSGFile:
         Replacement for OleFileIO.listdir that runs at the current prefix
         directory. Returns a list of strings instead of lists.
         """
-        return tuple(msgPathToString(x) for x in self.listDir(streams, storages, includePrefix))
+        return tuple(str(x) for x in self.listDir(streams, storages, includePrefix))
 
     def save(self, **kwargs) -> SAVE_TYPE:
         if kwargs.get('skipNotImplemented', False):
@@ -1153,15 +1153,6 @@ class MSGFile:
         Dividing by 2 will typically tell you how deeply nested the MSG file is.
         """
         return self.__prefixLen
-
-    @property
-    def prefixList(self) -> List[str]:
-        """
-        The prefix list of the Message instance.
-
-        Intended for developer use.
-        """
-        return copy.deepcopy(self.__prefixList)
 
     @functools.cached_property
     def priority(self) -> Optional[Priority]:

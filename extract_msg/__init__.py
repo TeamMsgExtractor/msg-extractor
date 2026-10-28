@@ -37,6 +37,7 @@ __all__ = [
     'enums',
     'exceptions',
     'msg_classes',
+    'msg_path',
     'open_msg',
     'null_date',
     'properties',
@@ -48,6 +49,7 @@ __all__ = [
     'AttachmentBase',
     'Message',
     'MSGFile',
+    'MSGPath',
     'Named',
     'NamedProperties',
     'OleWriter',
@@ -68,6 +70,7 @@ from . import utils
 from . import attachments, msg_classes, null_date, properties, structures
 from .attachments import Attachment, AttachmentBase, SignedAttachment
 from .msg_classes import Message, MSGFile
+from .msg_path import MSGPath
 from .ole_writer import OleWriter
 from .open_msg import openMsg, openMsgBulk
 from .properties import Named, NamedProperties, PropertiesStore

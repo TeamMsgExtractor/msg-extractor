@@ -1,3 +1,8 @@
+**v0.58.0**
+* Changed module to primarily use `MSGPath` for pathing. All functions still except string paths or list paths, they now just also accept `MSGPath` and use it under the hood for path conversions. With this, some functions have been changed to specifically return `MSGPath` rather than list and string versions of paths. Removed: `MSGBase.prefixList`. Modified: `MSGBase.fixPath`, `MSGBase.listDir()`, `MSGBase.prefix`.
+* Changed setup to use `find_packages()` to try and get ahead of deprecation and ensure all files are distributed correctly.
+* Fixed `MSGFile.existsTypedProperty()` to actually do what it says it will do. Previous code had it not checking if the right directory was being searched when `location` was specified.
+
 **v0.57.1**
 * [[TeamMsgExtractor #489](https://github.com/TeamMsgExtractor/msg-extractor/issues/489)] Fix an issue where `MessageSignedBase.body` would raise an error when the plain text body was not utf-8 encoded bytes. This error was due to `extract_msg.utils.unwrapMultipart()` accidentally returning the plain text body as bytes instead of string.
 * Change some of the command line documentation.
