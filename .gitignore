@@ -7,6 +7,15 @@
 # VS Code stuff.
 /.vscode/
 
+# Visual studio stuff.
+/.vs/
+
+# Test stuff.
+/.pytest_cache/
+
+# Coverage info.
+/.coverage
+
 # Build files and folders
 /build/
 *.egg-info/
