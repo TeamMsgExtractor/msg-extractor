@@ -86,7 +86,7 @@ refer to the usage information provided from the program's help dialog:
      --pdf                 Saves the body as a PDF. If this is not possible, will error.
      --wk-path WKPATH      Overrides the path for finding wkhtmltopdf.
      --wk-options [WKOPTIONS ...]
-                           Sets additional options to be used in wkhtmltopdf. Should be a series of options and values, replacing the - or -- in the beginning with + or ++ respectively. For example: --wk-options "+O Landscape"
+                           Sets additional options to be used in wkhtmltopdf. Should be a series of options and values, replacing the - or -- in the beginning with + or ++ respectively. For example: --wk-options "+O Landscape" "++no-images"
      --wk-allow-external-files
                            Enables external files to appear in the PDF output. WARNING: This allows wkpdftohtml to make url requests that are unchecked, and as such may be a security vulnerability in untrusted emails. Only use this option if you trust the source of the MSG file.
      --prepared-html       When used in conjunction with --html, sets whether the HTML output should be prepared for embedded attachments.

@@ -417,7 +417,7 @@ def getCommandArgs(args: Sequence[str]) -> argparse.Namespace:
                         help='Overrides the path for finding wkhtmltopdf.')
     # --wk-options OPTIONS
     parser.add_argument('--wk-options', dest='wkOptions', nargs='*',
-                        help='Sets additional options to be used in wkhtmltopdf. Should be a series of options and values, replacing the - or -- in the beginning with + or ++, respectively. For example: --wk-options "+O Landscape" --wk-options "++no-images"')
+                        help='Sets additional options to be used in wkhtmltopdf. Should be a series of options and values, replacing the - or -- in the beginning with + or ++, respectively. For example: --wk-options "+O Landscape" "++no-images"')
     # --wk-allow-external-files
     parser.add_argument('--wk-allow-external-files', dest='allowExternalFiles', action='store_true',
                         help='Enables external files to appear in the PDF output. WARNING: This allows wkpdftohtml to make url requests that are unchecked, and as such may be a security vulnerability in untrusted emails. Only use this option if you trust the source of the MSG file.')
