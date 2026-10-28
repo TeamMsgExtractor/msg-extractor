@@ -37,9 +37,11 @@ __all__ = [
     'enums',
     'exceptions',
     'msg_classes',
+    'open_msg',
     'null_date',
     'properties',
     'structures',
+    'utils',
 
     # Classes:
     'Attachment',
@@ -61,6 +63,7 @@ __all__ = [
 
 # Ensure these are imported before anything else.
 from . import constants, enums, exceptions
+from . import utils
 
 from . import attachments, msg_classes, null_date, properties, structures
 from .attachments import Attachment, AttachmentBase, SignedAttachment
