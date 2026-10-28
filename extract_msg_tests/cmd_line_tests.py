@@ -6,9 +6,12 @@ __all__ = [
 
 
 import io
+import logging
 import subprocess
 import sys
 import unittest
+
+import extract_msg
 
 from typing import Tuple
 
@@ -130,3 +133,32 @@ class CommandLineTests(unittest.TestCase):
     @unittest.skipIf(USER_TEST_DIR is None, 'User test files not defined.')
     def testUserStdin(self):
         self.testStdin(USER_TEST_DIR)
+        self.testDirectRunStdin(USER_TEST_DIR)
+
+    def testGetCommandArgs(self):
+        """
+        Does various tests on the expected behavior of getCommandArgs().
+        """
+        normalArgs = [
+            __main__.__name__,
+            '--wk-options',
+            '++no-images',
+            '+O Landscape',
+            '++encoding',
+            'Latin1',
+            '-vv'
+        ]
+        expectedWk = [
+            "--no-images",
+            "-O",
+            "Landscape",
+            "--encoding",
+            "Latin1",
+        ]
+
+        parsed = extract_msg.utils.getCommandArgs(normalArgs)
+        with self.subTest('WK Options'):
+            self.assertListEqual(parsed.wkOptions, expectedWk)
+        with self.subTest('Verbosity'):
+            self.assertEqual(parsed.verbose, 2)
+            self.assertEqual(parsed.logLevel, logging.INFO)
