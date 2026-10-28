@@ -417,7 +417,7 @@ def getCommandArgs(args: Sequence[str]) -> argparse.Namespace:
                         help='Overrides the path for finding wkhtmltopdf.')
     # --wk-options OPTIONS
     parser.add_argument('--wk-options', dest='wkOptions', nargs='*',
-                        help='Sets additional options to be used in wkhtmltopdf. Should be a series of options and values, replacing the - or -- in the beginning with + or ++, respectively. For example: --wk-options "+O Landscape"')
+                        help='Sets additional options to be used in wkhtmltopdf. Should be a series of options and values, replacing the - or -- in the beginning with + or ++, respectively. For example: --wk-options "+O Landscape" "++no-images"')
     # --wk-allow-external-files
     parser.add_argument('--wk-allow-external-files', dest='allowExternalFiles', action='store_true',
                         help='Enables external files to appear in the PDF output. WARNING: This allows wkpdftohtml to make url requests that are unchecked, and as such may be a security vulnerability in untrusted emails. Only use this option if you trust the source of the MSG file.')
@@ -1045,6 +1045,7 @@ def stripRtf(rtfBody: bytes) -> bytes:
 
     return rtfBody
 
+
 def _stripRtfCloseHelper(match: re.Match) -> bytes:
     if (ret := match.expand(b'\\g<0>')).count(b'\\htmlrtf0') > 1:
         return ret
@@ -1078,8 +1079,6 @@ def _stripRtfHelper(match: re.Match) -> bytes:
     # TODO
 
     return res
-
-
 
 
 def tryGetMimetype(att: AttachmentBase, mimetype: Union[str, None]) -> Union[str, None]:
@@ -1305,7 +1304,10 @@ def unwrapMultipart(mp: Union[bytes, str, email.message.Message]) -> Dict:
         elif attachment['mimetype'] == 'text/plain':
             if plainBody:
                 logger.warning('Found multiple candidates for plain text body.')
-            plainBody = data
+            # We need to get the content again and ensure it is a string. If
+            # not, decode it to one.
+            content = inputToString(node.get_content(), node.get_content_charset('utf-8'))
+            plainBody = content
         elif attachment['mimetype'] == 'text/html':
             if htmlBody:
                 logger.warning('Found multiple candidates for HTML body.')

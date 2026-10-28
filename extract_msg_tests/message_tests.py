@@ -5,6 +5,7 @@ __all__ = [
 
 import base64
 import unittest
+
 from email.message import EmailMessage
 
 from .constants import TEST_FILE_DIR

@@ -27,8 +27,8 @@ https://github.com/TeamMsgExtractor/msg-extractor
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 __author__ = 'Destiny Peterson & Matthew Walker'
-__date__ = '2026-10-24'
-__version__ = '0.57.0'
+__date__ = '2026-10-28'
+__version__ = '0.57.1'
 
 __all__ = [
     # Modules:
@@ -37,9 +37,11 @@ __all__ = [
     'enums',
     'exceptions',
     'msg_classes',
+    'open_msg',
     'null_date',
     'properties',
     'structures',
+    'utils',
 
     # Classes:
     'Attachment',
@@ -61,6 +63,7 @@ __all__ = [
 
 # Ensure these are imported before anything else.
 from . import constants, enums, exceptions
+from . import utils
 
 from . import attachments, msg_classes, null_date, properties, structures
 from .attachments import Attachment, AttachmentBase, SignedAttachment

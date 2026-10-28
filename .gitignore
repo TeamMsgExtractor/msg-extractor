@@ -7,6 +7,15 @@
 # VS Code stuff.
 /.vscode/
 
+# Visual studio stuff.
+/.vs/
+
+# Test stuff.
+/.pytest_cache/
+
+# Coverage info.
+/.coverage
+
 # Build files and folders
 /build/
 *.egg-info/
@@ -30,6 +39,7 @@ __pycache__/
 !/example-msg-files/expected-outputs/2013-11-18_0026 Test for TIF files/*
 !/example-msg-files/expected-outputs/2016-02-23_0657 MSG Test File/
 !/example-msg-files/expected-outputs/2016-02-23_0657 MSG Test File/*
+!/example-msg-files/signed.msg
 !/example-msg-files/strangeDate.msg
 !/example-msg-files/unicode.msg
 !/example-msg-files/multi-stream.msg

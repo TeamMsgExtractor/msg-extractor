@@ -1,3 +1,9 @@
+**v0.57.1**
+* [[TeamMsgExtractor #489](https://github.com/TeamMsgExtractor/msg-extractor/issues/489)] Fix an issue where `MessageSignedBase.body` would raise an error when the plain text body was not utf-8 encoded bytes. This error was due to `extract_msg.utils.unwrapMultipart()` accidentally returning the plain text body as bytes instead of string.
+* Change some of the command line documentation.
+* Fix some of the imports in `extract_msg/__init__.py`.
+* Add additional tests to module.
+
 **v0.57.0**
 * [[Advisory GHSA-cxpg-prmv-g4pp](https://github.com/TeamMsgExtractor/msg-extractor/security/advisories/GHSA-cxpg-prmv-g4pp)] Fixed a vulnerability related to unchecked input passed out to wkhtmltopdf when converting the MSG file to PDF. Javascript is now strongly blocked from being enabled and will be stripped from the HTML where appropriate before reaching wkhtmltopdf. Additionally, the option `--wk-allow-external-files` on the command line (or `wkAllowExternalFiles` to `MessageBase.save()`) will be required for external files to be loaded into the HTML to convert. Without these, they will be stripped before reaching wkhtmltopdf for security.
 * [[Advisory GHSA-mqxr-j8rh-p4q4](https://github.com/TeamMsgExtractor/msg-extractor/security/advisories/GHSA-mqxr-j8rh-p4q4)] Fixed an issue where an attacker controlled MSG file could take advantage of a poorly written section of code in the RTF deencapsulation function on the `extract-msg` side to waste massive amounts of time and memory resources.
