@@ -444,7 +444,7 @@ class MSGFile:
         """
         if not self.__existsCache:
             # Get the cache and ensure all names are lowercase.
-            self.__existsCache = tuple(tuple(y.lower() for y in x) for x in self.listDir(True, True, True))
+            self.__existsCache = self.listDir(True, True, True)
 
         return self.fixPath(filename, prefix) in self.__existsCache
 
