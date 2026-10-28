@@ -371,8 +371,8 @@ class MSGFile:
         """
         verifyType(_type)
         filename = self.fixPath(filename, prefix)
-        for x in (filename + _type,) if _type is not None else self.slistDir():
-            if x.startswith(filename) and '-' not in x:
+        for x in (filename.add(_type,)) if _type is not None else self.slistDir():
+            if str(x).lower().startswith(str(filename).lower()) and '-' not in x:
                 if (contents := self.getStream(x, False)) is None:
                     continue
                 if len(contents) == 0:
@@ -431,7 +431,7 @@ class MSGFile:
     def debug(self) -> None:
         for dir_ in self.listDir():
             if dir_[-1].endswith('001E') or dir_[-1].endswith('001F'):
-                print('Directory: ' + str(dir_[:-1]))
+                print('Directory: ' + str(dir_.parts[:-1]))
                 print(f'Contents: {self.getStream(dir_)}')
 
     def exists(self, filename: MSG_PATH, prefix: bool = True) -> bool:
@@ -446,12 +446,7 @@ class MSGFile:
             # Get the cache and ensure all names are lowercase.
             self.__existsCache = tuple(tuple(y.lower() for y in x) for x in self.listDir(True, True, True))
 
-        filename = self.fixPath(filename, prefix).lower()
-        filename = filename.split('/')
-        if filename[-1] == '':
-            filename.pop()
-
-        return tuple(filename) in self.__existsCache
+        return self.fixPath(filename, prefix) in self.__existsCache
 
     def sExists(self, filename: MSG_PATH, prefix: bool = True) -> bool:
         """
@@ -462,7 +457,7 @@ class MSGFile:
             (``True``). (Default: ``True``)
         """
         filename = self.fixPath(filename, prefix)
-        return self.exists(filename + '001F') or self.exists(filename + '001E')
+        return self.exists(filename.add('001F' if self.areStringsUnicode else '001E'))
 
     def existsTypedProperty(self, _id: str, location = None, _type = None, prefix: bool = True, propertiesInstance: Optional[PropertiesStore] = None) -> Tuple[bool, int]:
         """
@@ -799,9 +794,9 @@ class MSGFile:
         """
         filename = self.fixPath(filename, prefix)
         if self.areStringsUnicode:
-            tmp = self.getStream(filename + '001F', prefix = False)
+            tmp = self.getStream(filename.add('001F'), prefix = False)
         else:
-            tmp = self.getStream(filename + '001E', prefix = False)
+            tmp = self.getStream(filename.add('001E'), prefix = False)
 
         return None if tmp is None else tmp.decode(self.stringEncoding)
 
@@ -841,14 +836,11 @@ class MSGFile:
                 entries = tuple(MSGPath(*x) for x in entries)
                 self.__listDirRes[(streams, storages, includePrefix)] = entries
                 return entries
-            prefix = self.__prefix.split('/')
-            if prefix[-1] == '':
-                prefix.pop()
 
             prefixLength = self.__prefixLen
-            entries = tuple(tuple(x) for x in entries if len(x) > prefixLength and x[:prefixLength] == prefix)
+            entries = tuple(MSGPath(x) for x in entries if len(x) > prefixLength and MSGPath(x).is_relative_to(self.prefix))
             if not includePrefix:
-                entries = tuple(x[prefixLength:] for x in entries)
+                entries = tuple(x.relative_to(self.prefix) for x in entries)
             self.__listDirRes[(streams, storages, includePrefix)] = entries
 
             return entries
@@ -889,7 +881,7 @@ class MSGFile:
         with zipfile.ZipFile(path, 'w', zipfile.ZIP_DEFLATED) as zfile:
             # Loop through all the directories
             for dir_ in self.listDir():
-                sysdir = '/'.join(dir_)
+                sysdir = str(dir_)
                 code = dir_[-1][-8:]
                 if constants.PROPERTIES.get(code):
                     sysdir += ' - ' + constants.PROPERTIES[code]
