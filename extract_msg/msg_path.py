@@ -4,6 +4,8 @@ __all__ = [
     'MSGPath',
 ]
 
+import sys
+
 from pathlib import PurePosixPath
 from typing import Any
 
@@ -39,6 +41,11 @@ class MSGPath(PurePosixPath):
         # Our last one will require us to analyze the parts of the path. As
         # such, convert the path first then check.
         pp = PurePosixPath.__new__(cls, path)
+        # Pathlib changed from using __new__ to using __init__ in later
+        # versions, and I don't know how to cleanly handle that so we are using
+        # a very gross method.
+        if sys.version_info[1] > 11:
+            PurePosixPath.__init__(pp, path)
 
         # Make sure each segment is not more than 31 characters long.
         if any(len(x) > 31 for x in pp.parts):
@@ -46,6 +53,10 @@ class MSGPath(PurePosixPath):
 
         # All good.
         return pp
+
+    def __init__(self, *args, **kwargs):
+        # No call to super __init__ for compatability.
+        pass
 
     def __bool__(self) -> bool:
         return bool(self.parts)
