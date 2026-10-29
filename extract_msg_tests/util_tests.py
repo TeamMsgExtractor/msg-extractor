@@ -58,11 +58,22 @@ class UtilTests(unittest.TestCase):
         self.assertEqual(utils.minutesToDurationStr(121), '2 hours 1 minute')
         self.assertEqual(utils.minutesToDurationStr(122), '2 hours 2 minutes')
 
-    def test_msgPath(self):
+    def test_MSGPath(self):
         self.assertEqual(str(MSGPath('hello/world/one')), 'hello/world/one')
         self.assertEqual(str(MSGPath('/hello/world\\one')), 'hello/world/one')
         self.assertEqual(str(MSGPath(['//hello', 'world', 'one'])), 'hello/world/one')
         self.assertEqual(str(MSGPath(['///hello\\world', 'one'])), 'hello/world/one')
+        self.assertEqual(str(MSGPath('hello', ['world', 'one'])), 'hello/world/one')
+
+        with self.assertRaises(ValueError):
+            MSGPath('hello!')
+        with self.assertRaises(ValueError):
+            MSGPath('hello:')
+        with self.assertRaises(ValueError):
+            MSGPath(['hello'], 'jkwlkwkwkwkkwkwkwkwkkwkwkwkwkkwkwkw')
+
+        self.assertEqual(MSGPath('hello/World'), MSGPath('Hello/world'))
+        self.assertNotEqual(str(MSGPath('hello/World')), str(MSGPath('Hello/world')))
 
     def test_stripRtf(self, testFileDir = TEST_FILE_DIR):
         """
