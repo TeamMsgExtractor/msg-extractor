@@ -3,7 +3,7 @@
 * Changed setup to use `find_packages()` to try and get ahead of deprecation and ensure all files are distributed correctly.
 * Fixed `MSGFile.existsTypedProperty()` to actually do what it says it will do. Previous code had it not checking if the right directory was being searched when `location` was specified.
 * Changed `MSGFile.sExists()` to correctly detect *only* the valid string stream type for the MSG file instead of unconditionally checking both types.
-* Readded `extract_msg.constants.PROPERTIES` which was removed for unknown reasons in an earlier version (0.42.0). `MSGBase.saveRaw()` appears to have been non-functional since then.
+* Re-added `extract_msg.constants.PROPERTIES` which was removed for unknown reasons in an earlier version (0.42.0). `MSGBase.saveRaw()` appears to have been non-functional since then.
 
 **v0.57.1**
 * [[TeamMsgExtractor #489](https://github.com/TeamMsgExtractor/msg-extractor/issues/489)] Fix an issue where `MessageSignedBase.body` would raise an error when the plain text body was not utf-8 encoded bytes. This error was due to `extract_msg.utils.unwrapMultipart()` accidentally returning the plain text body as bytes instead of string.
