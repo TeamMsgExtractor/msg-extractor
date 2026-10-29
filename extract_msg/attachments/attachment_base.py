@@ -21,11 +21,10 @@ from typing import (
 
 from ..constants import MSG_PATH, OVERRIDE_CLASS, SAVE_TYPE
 from ..enums import AttachmentType
+from ..msg_path import MSGPath
 from ..properties.named import NamedProperties
 from ..properties.properties_store import PropertiesStore
-from ..utils import (
-        msgPathToString, tryGetMimetype, verifyPropertyId, verifyType
-    )
+from ..utils import tryGetMimetype, verifyPropertyId, verifyType
 
 
 # Allow for nice type checking.
@@ -51,7 +50,7 @@ class AttachmentBase(abc.ABC):
         :param propStore: The PropertiesStore instance for the attachment.
         """
         self.__msg = weakref.ref(msg)
-        self.__dir = dir_
+        self.__dir = MSGPath(dir_)
         self.__props = propStore
         self.__namedProperties = NamedProperties(msg.named, self)
         self.__treePath = msg.treePath + [weakref.ref(self)]
@@ -150,7 +149,7 @@ class AttachmentBase(abc.ABC):
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
-        return msg._getTypedStream([self.__dir, msgPathToString(filename)], True, _type)
+        return msg._getTypedStream(MSGPath(self.__dir, filename), True, _type)
 
     def _handleFnc(self, _zip, filename, customPath: pathlib.Path, kwargs) -> pathlib.Path:
         """
@@ -203,7 +202,7 @@ class AttachmentBase(abc.ABC):
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
-        return msg.exists([self.__dir, msgPathToString(filename)])
+        return msg.exists(MSGPath(self.__dir, filename))
 
     def sExists(self, filename: MSG_PATH) -> bool:
         """
@@ -214,7 +213,7 @@ class AttachmentBase(abc.ABC):
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
-        return msg.sExists([self.__dir, msgPathToString(filename)])
+        return msg.sExists(MSGPath(self.__dir, filename))
 
     def existsTypedProperty(self, id, _type = None) -> Tuple[bool, int]:
         """
@@ -255,7 +254,7 @@ class AttachmentBase(abc.ABC):
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
-        return msg.getMultipleBinary([self.__dir, msgPathToString(filename)])
+        return msg.getMultipleBinary(MSGPath(self.__dir, filename))
 
     def getMultipleString(self, filename: MSG_PATH) -> Optional[List[str]]:
         """
@@ -270,7 +269,7 @@ class AttachmentBase(abc.ABC):
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
-        return msg.getMultipleString([self.__dir, msgPathToString(filename)])
+        return msg.getMultipleString(MSGPath(self.__dir, filename))
 
     def getNamedAs(self, propertyName: str, guid: str, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
@@ -338,7 +337,7 @@ class AttachmentBase(abc.ABC):
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
-        return msg.getSingleOrMultipleBinary([self.__dir, msgPathToString(filename)])
+        return msg.getSingleOrMultipleBinary(MSGPath(self.__dir, filename))
 
     def getSingleOrMultipleString(self, filename: MSG_PATH) -> Optional[Union[List[str], str]]:
         """
@@ -356,7 +355,7 @@ class AttachmentBase(abc.ABC):
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
-        return msg.getSingleOrMultipleString([self.__dir, msgPathToString(filename)])
+        return msg.getSingleOrMultipleString(MSGPath(self.__dir, filename))
 
     def getStream(self, filename: MSG_PATH) -> Optional[bytes]:
         """
@@ -370,7 +369,7 @@ class AttachmentBase(abc.ABC):
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
-        return msg.getStream([self.__dir, msgPathToString(filename)])
+        return msg.getStream(MSGPath(self.__dir, filename))
 
     def getStreamAs(self, streamID: MSG_PATH, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
@@ -407,7 +406,7 @@ class AttachmentBase(abc.ABC):
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
-        return msg.getStringStream([self.__dir, msgPathToString(filename)])
+        return msg.getStringStream(MSGPath(self.__dir, filename))
 
     def getStringStreamAs(self, streamID: MSG_PATH, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
@@ -428,7 +427,7 @@ class AttachmentBase(abc.ABC):
 
         return value
 
-    def listDir(self, streams: bool = True, storages: bool = False) -> List[List[str]]:
+    def listDir(self, streams: bool = True, storages: bool = False) -> Tuple[MSGPath, ...]:
         """
         Lists the streams and/or storages that exist in the attachment
         directory.
@@ -438,14 +437,15 @@ class AttachmentBase(abc.ABC):
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The MSGFile for this Attachment instance has been garbage collected.')
-        return [path[1:] for path in msg.listDir(streams, storages, False)
-                if len(path) > 1 and path[0] == self.__dir]
+        return tuple(path.relative_to(self.__dir)
+                    for path in msg.listDir(streams, storages, False)
+                    if path.is_relative_to(self.__dir))
 
-    def slistDir(self, streams: bool = True, storages: bool = False) -> List[str]:
+    def slistDir(self, streams: bool = True, storages: bool = False) -> Tuple[str, ...]:
         """
         Like listDir, except it returns the paths as strings.
         """
-        return ['/'.join(path) for path in self.listDir(streams, storages)]
+        return Tuple(str(path) for path in self.listDir(streams, storages))
 
     @abc.abstractmethod
     def save(self, **kwargs) -> SAVE_TYPE:
@@ -512,9 +512,9 @@ class AttachmentBase(abc.ABC):
         dataStream = None
 
         if self.exists('__substg1.0_3701000D'):
-            dataStream = [self.__dir, '__substg1.0_3701000D']
+            dataStream = self.__dir / '__substg1.0_3701000D'
         elif self.exists('__substg1.0_37010102'):
-            dataStream = [self.__dir, '__substg1.0_37010102']
+            dataStream = self.__dir / '__substg1.0_37010102'
 
         # If we found the right item, get the CLSID.
         if dataStream:

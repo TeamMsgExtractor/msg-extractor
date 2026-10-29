@@ -24,7 +24,8 @@ from typing import (
 from .. import constants
 from ..enums import ErrorBehavior, NamedPropertyType
 from ..exceptions import InvalidPropertyIdError, StandardViolationError
-from ..utils import bytesToGuid, divide, msgPathToString, verifyPropertyId
+from ..msg_path import MSGPath
+from ..utils import bytesToGuid, divide, verifyPropertyId
 from compressed_rtf.crc32 import crc32
 
 
@@ -44,7 +45,7 @@ class Named:
     Class for handling access to the named properties themselves.
     """
 
-    __dir = '__nameid_version1.0'
+    __dir = MSGPath('__nameid_version1.0')
 
     def __init__(self, msg: MSGFile):
         self.__msg = weakref.ref(msg)
@@ -177,7 +178,7 @@ class Named:
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The MSGFile for this Named instance has been garbage collected.')
-        return msg.exists([self.__dir, msgPathToString(filename)], False)
+        return msg.exists(MSGPath(self.__dir, filename), False)
 
     def get(self, propertyName: Tuple[str, str], default: _T = None) -> Union[NamedPropertyBase, _T]:
         """
@@ -234,7 +235,7 @@ class Named:
         """
         if (msg := self.__msg()) is None:
             raise ReferenceError('The MSGFile for this Named instance has been garbage collected.')
-        return msg.getStream([self.__dir, msgPathToString(filename)], False)
+        return msg.getStream(MSGPath(self.__dir, filename), False)
 
     def items(self) -> Iterable[Tuple[Tuple[str, str], NamedPropertyBase]]:
         return self.__propertiesDict.items()

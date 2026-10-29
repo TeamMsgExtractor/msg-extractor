@@ -12,11 +12,10 @@ import functools
 from typing import Dict, Optional, TYPE_CHECKING, TypeVar
 
 from ...constants import MSG_PATH, OVERRIDE_CLASS
+from ...msg_path import MSGPath
 from ...structures.odt import ODTStruct
 from ...structures.ole_pres import OLEPresentationStream
 from ...structures.ole_stream_struct import OleStreamStruct
-from ...utils import msgPathToString
-
 
 if TYPE_CHECKING:
     from ..attachment_base import AttachmentBase
@@ -38,7 +37,7 @@ class CustomAttachmentHandler(abc.ABC):
         """
         Gets a stream from the custom data directory.
         """
-        return self.attachment.getStream('__substg1.0_3701000D/' + msgPathToString(filename))
+        return self.attachment.getStream(MSGPath('__substg1.0_3701000D/', filename))
 
     def getStreamAs(self, streamID: MSG_PATH, overrideClass: OVERRIDE_CLASS[_T]) -> Optional[_T]:
         """
