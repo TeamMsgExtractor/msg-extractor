@@ -1,5 +1,5 @@
 **v0.58.0**
-* Changed module to primarily use `MSGPath` for pathing. All functions still except string paths or list paths, they now just also accept `MSGPath` and use it under the hood for path conversions. With this, some functions have been changed to specifically return `MSGPath` rather than list and string versions of paths. Removed: `MSGBase.prefixList`. Modified: `MSGBase.fixPath`, `MSGBase.listDir()`, `MSGBase.prefix`.
+* Changed module to primarily use `MSGPath` for pathing. All functions still except string paths or list paths, they now just also accept `MSGPath` and use it under the hood for path conversions. With this, some functions have been changed to specifically return `MSGPath` rather than list and string versions of paths. Removed: `MSGBase.prefixList`, `utils.inputToMsgPath()`, and `utils.msgPathToString()`. Modified: `*.fixPath()`, `*.listDir()`, and `MSGBase.prefix`.
 * Changed setup to use `find_packages()` to try and get ahead of deprecation and ensure all files are distributed correctly.
 * Fixed `MSGFile.existsTypedProperty()` to actually do what it says it will do. Previous code had it not checking if the right directory was being searched when `location` was specified.
 * Changed `MSGFile.sExists()` to correctly detect *only* the valid string stream type for the MSG file instead of unconditionally checking both types.

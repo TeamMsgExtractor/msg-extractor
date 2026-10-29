@@ -8,7 +8,7 @@ import unittest
 import RTFDE
 
 from .constants import TEST_FILE_DIR, USER_TEST_DIR
-from extract_msg import enums, openMsg, utils
+from extract_msg import enums, MSGPath, openMsg, utils
 from extract_msg.msg_classes import MessageBase
 
 
@@ -58,11 +58,11 @@ class UtilTests(unittest.TestCase):
         self.assertEqual(utils.minutesToDurationStr(121), '2 hours 1 minute')
         self.assertEqual(utils.minutesToDurationStr(122), '2 hours 2 minutes')
 
-    def test_msgPathToStr(self):
-        self.assertEqual(utils.msgPathToString('hello/world/one'), 'hello/world/one')
-        self.assertEqual(utils.msgPathToString('hello/world\\one'), 'hello/world/one')
-        self.assertEqual(utils.msgPathToString(['hello', 'world', 'one']), 'hello/world/one')
-        self.assertEqual(utils.msgPathToString(['hello\\world', 'one']), 'hello/world/one')
+    def test_msgPath(self):
+        self.assertEqual(str(MSGPath('hello/world/one')), 'hello/world/one')
+        self.assertEqual(str(MSGPath('/hello/world\\one')), 'hello/world/one')
+        self.assertEqual(str(MSGPath(['//hello', 'world', 'one'])), 'hello/world/one')
+        self.assertEqual(str(MSGPath(['///hello\\world', 'one'])), 'hello/world/one')
 
     def test_stripRtf(self, testFileDir = TEST_FILE_DIR):
         """
@@ -83,7 +83,7 @@ class UtilTests(unittest.TestCase):
 
                 try:
                     htmlBody = msg.deencapsulateBody(rtfBody, enums.DeencapType.HTML)
-                except Exception: 
+                except Exception:
                     # If it's throwing an exception, it's not our problem here.
                     htmlBody = None
 
@@ -104,7 +104,7 @@ class UtilTests(unittest.TestCase):
                 de = RTFDE.DeEncapsulator(utils.stripRtf(rtfBody))
                 de.deencapsulate()
                 htmlBody = de.html
-            except Exception: 
+            except Exception:
                 # If it's throwing an exception, it's not our problem here.
                 htmlBody = None
 

@@ -19,7 +19,8 @@ from . import constants
 from .constants import MSG_PATH
 from .enums import Color, DirectoryEntryType
 from .exceptions import StandardViolationError, TooManySectorsError
-from .utils import ceilDiv, dictGetCasedKey, inputToMsgPath
+from .msg_path import MSGPath
+from .utils import ceilDiv, dictGetCasedKey
 from olefile.olefile import OleDirectoryEntry, OleFileIO
 from red_black_dict_mod import RedBlackTree
 
@@ -113,7 +114,7 @@ class OleWriter:
         # In a future version, this will be setable as an optional argument.
         self.__version = 3
 
-    def __getContainingStorage(self, path: List[str], entryExists: bool = True, create: bool = False) -> Dict:
+    def __getContainingStorage(self, path: MSGPath, entryExists: bool = True, create: bool = False) -> Dict:
         """
         Finds the storage ``dict`` internally where the entry specified by
         :param path: would be created.
@@ -139,19 +140,19 @@ class OleWriter:
             raise ValueError(':param create: and :param entryExists: cannot both be True (an entry cannot exist if it is being created).')
 
         # Check that the path is not an internal entry. Given the validation on
-        # paths that most functions should do because of the call to
-        # inputToMsgPath, this shouldn't actually be necessary.
+        # paths that most functions should do because of the call to MSGPath,
+        # this shouldn't actually be necessary.
         if any(x.startswith('::') for x in path):
             raise ValueError('Found internal name in path.')
 
         _dir = self.__dirEntries
 
-        for index, name in enumerate(path[:-1]):
+        for index, name in enumerate(path.parts[:-1]):
             # If no entry in the current stream matches the path, raise an
             # OSError, *unless* the option to create storages is True.
             if name.lower() not in map(str.lower, _dir.keys()):
                 if create:
-                    self.addEntry(path[:index + 1], storage = True)
+                    self.addEntry(MSGPath(path.parts[:index + 1]), storage = True)
                 else:
                     raise OSError(f'Entry not found: {name}')
             _dir = _dir[dictGetCasedKey(_dir, name)]
@@ -166,7 +167,7 @@ class OleWriter:
 
         return _dir
 
-    def __getEntry(self, path: List[str]) -> DirectoryEntry:
+    def __getEntry(self, path: MSGPath) -> DirectoryEntry:
         """
         Finds and returns an existing ``DirectoryEntry`` instance in the writer.
 
@@ -688,7 +689,7 @@ class OleWriter:
         :raises ValueError: Attempts to access an internal item.
         :raises ValueError: The data provided is too large.
         """
-        path = inputToMsgPath(path)
+        path = MSGPath(path)
         # First, find the current place in our dict to add the item.
         _dir = self.__getContainingStorage(path, False, True)
         # Now, check that the item *is not* already in our dict, as that would
@@ -715,7 +716,7 @@ class OleWriter:
             entry where one already exists under the same name.
         :raises ValueError: The data provided is too large.
         """
-        path = inputToMsgPath(path)
+        path = MSGPath(path)
         # First, find the current place in our dict to add the item.
         _dir = self.__getContainingStorage(path, False)
         # Now, check that the item *is not* already in our dict, as that would
@@ -764,7 +765,7 @@ class OleWriter:
             is not the last was a stream.
         :raises ValueError: Attempted to delete an internal data stream.
         """
-        path = inputToMsgPath(path)
+        path = MSGPath(path)
         # Get the containing storage for the entry.
         _dir = self.__getContainingStorage(path)
 
@@ -799,7 +800,7 @@ class OleWriter:
             parameter was invalid.
         """
         # First, find our entry to edit.
-        entry = self.__getEntry(inputToMsgPath(path))
+        entry = self.__getEntry(MSGPath(path))
 
         # Send it to be modified using the arguments given.
         self.__modifyEntry(entry, **kwargs)
@@ -882,7 +883,7 @@ class OleWriter:
 
         :raises OSError: If :param rootPath: does not exist in the file.
         """
-        rootPath = inputToMsgPath(rootPath)
+        rootPath = MSGPath(rootPath)
 
         # Check if the root path is simply the top of the file.
         if rootPath == []:
@@ -893,7 +894,7 @@ class OleWriter:
             # If it is not the top of the file, we need to do some filtering.
             # First get the CLSID from the entry the path points to.
             try:
-                entry = ole.direntries[ole._find(rootPath)]
+                entry = ole.direntries[ole._find(str(rootPath))]
                 self.__rootEntry.clsid = _unClsid(entry.clsid)
 
             except OSError as e:
@@ -931,7 +932,7 @@ class OleWriter:
         :raises OSError: If the entry does not exist.
         :raises ValueError: If access to an internal item is attempted.
         """
-        return copy.copy(self.__getEntry(inputToMsgPath(path)))
+        return copy.copy(self.__getEntry(MSGPath(path)))
 
     def listItems(self, streams: bool = True, storages: bool = False) -> List[List[str]]:
         """
@@ -942,7 +943,7 @@ class OleWriter:
         :param storages: If ``True``, includes the path for each storage in the
             list.
         """
-        # We are actually abusing the walk function a bit here to life much
+        # We are actually abusing the walk function a bit here to make life much
         # easier. The way we do this is to look at the current directory that
         # the walk function is giving information about and then deciding what
         # parts of it we want to use. Once we have all the paths created, we
@@ -982,7 +983,7 @@ class OleWriter:
             raise ValueError('New name must be less than 32 characters.')
 
         # Get the storage for our entry. Entry *must* exist.
-        _dir = self.__getContainingStorage(inputToMsgPath(path))
+        _dir = self.__getContainingStorage(MSGPath(path))
 
         # See if an item in the storage already has that new name.
         if newName.lower() in map(str.lower, _dir.keys()):

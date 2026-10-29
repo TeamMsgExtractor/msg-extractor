@@ -26,11 +26,9 @@ __all__ = [
     'guessEncoding',
     'htmlSanitize',
     'inputToBytes',
-    'inputToMsgPath',
     'inputToString',
     'isEncapsulatedRtf',
     'makeWeakRef',
-    'msgPathToString',
     'parseType',
     'patchCss',
     'prepareFilename',
@@ -635,32 +633,6 @@ def inputToBytes(obj: Union[bytes, None, str, SupportsBytes], encoding: str) -> 
     raise ConversionError('Cannot convert to bytes.')
 
 
-def inputToMsgPath(inp: constants.MSG_PATH) -> List[str]:
-    """
-    Converts the input into an msg path.
-
-    :raises ValueError: The path contains an illegal character.
-    """
-    if isinstance(inp, (list, tuple)):
-        inp = '/'.join(inp)
-
-    inp = inputToString(inp, 'utf-8')
-
-    # Validate the path is okay. Normally we would check for '/' and '\', but
-    # we are expecting a string or similar which will use those as path
-    # separators, so we will ignore that for now.
-    if ':' in inp or '!' in inp:
-        raise ValueError('Illegal character ("!" or ":") found in MSG path.')
-
-    ret = [x for x in inp.replace('\\', '/').split('/') if x]
-
-    # One last thing to check: all path segments can be, at most, 31 characters
-    # (32 if you include the null character), so we should verify that.
-    if any(len(x) > 31 for x in ret):
-        raise ValueError('Path segments must not be greater than 31 characters.')
-    return ret
-
-
 def inputToString(bytesInputVar: Optional[Union[str, bytes]], encoding: str) -> str:
     """
     Converts the input into a string.
@@ -722,16 +694,6 @@ def minutesToDurationStr(minutes: int) -> str:
         return f'{minutes // 60} hours 1 minute'
     else:
         return f'{minutes // 60} hours {minutes % 60} minutes'
-
-
-def msgPathToString(inp: Union[str, Iterable[str]]) -> str:
-    """
-    Converts an MSG path (one of the internal paths inside an MSG file) into a
-    string.
-    """
-    if not isinstance(inp, str):
-        inp = '/'.join(inp)
-    return inp.replace('\\', '/')
 
 
 def parseType(_type: int, stream: Union[int, bytes], encoding: str, extras: Sequence[bytes]):

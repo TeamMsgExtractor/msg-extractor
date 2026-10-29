@@ -45,8 +45,8 @@ from ..properties.named import Named, NamedProperties
 from ..properties.properties_store import PropertiesStore
 from ..structures.contact_link_entry import ContactLinkEntry
 from ..utils import (
-        divide, guessEncoding, inputToMsgPath, makeWeakRef, msgPathToString,
-        parseType, verifyPropertyId, verifyType
+        divide, guessEncoding, makeWeakRef, parseType, verifyPropertyId,
+        verifyType
     )
 
 
@@ -260,20 +260,21 @@ class MSGFile:
         Finds the directory entry from the OLE file for the stream or storage
         specified.
 
-        Use ``'/'`` to get the root entry.
+        Use ``'/'`` or an empty path to get the root entry.
 
         :param prefix: Bool, whether to search for the entry at the root of the
             MSG file (``False``) or look in the current child MSG file
             (``True``). (Default: ``True``)
         """
+        filename = MSGPath(filename)
         sid = -1
-        if filename == '/':
+        if not filename:
             if prefix and self.__prefix:
                 sid = self.__ole._find(str(self.__prefix))
             else:
                 return self.__ole.direntries[0]
         else:
-            sid = self.__ole._find(self.fixPath(filename, prefix))
+            sid = self.__ole._find(str(self.fixPath(filename, prefix)))
 
         return self.__ole.direntries[sid]
 
@@ -752,7 +753,7 @@ class MSGFile:
         """
         filename = self.fixPath(filename, prefix)
         if self.exists(filename, False):
-            with self.__ole.openstream(filename) as stream:
+            with self.__ole.openstream(str(filename)) as stream:
                 return stream.read() or b''
         else:
             logger.info(f'Stream "{filename}" was requested but could not be found. Returning `None`.')
