@@ -1,3 +1,7 @@
+**0.58.1**
+* [[TeamMsgExtractor #493](https://github.com/TeamMsgExtractor/msg-extractor/issues/493)] Fixed unable to open embedded msg files due to `MSGBase.prefixList` still being used after it was removed.
+* Corrected the typing signature of `MSGBase.prefix`.
+
 **v0.58.0**
 * Changed module to primarily use `MSGPath` for pathing. All functions still except string paths or list paths, they now just also accept `MSGPath` and use it under the hood for path conversions. With this, some functions have been changed to specifically return `MSGPath` rather than list and string versions of paths. Removed: `MSGBase.prefixList`, `utils.inputToMsgPath()`, and `utils.msgPathToString()`. Modified: `*.fixPath()`, `*.listDir()`, and `MSGBase.prefix`.
 * Changed setup to use `find_packages()` to try and get ahead of deprecation and ensure all files are distributed correctly.

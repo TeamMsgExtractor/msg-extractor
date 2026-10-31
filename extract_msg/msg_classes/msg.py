@@ -1130,7 +1130,7 @@ class MSGFile:
         return self.__path
 
     @property
-    def prefix(self) -> str:
+    def prefix(self) -> MSGPath:
         """
         The prefix of the ``MSGFile`` instance.
 
