@@ -21,6 +21,49 @@ class UtilTests(unittest.TestCase):
         with self.assertRaises(KeyError):
             utils.dictGetCasedKey(caseDict, 'jjjjj')
 
+    def test_patchCss(self):
+        # External url() references are neutralized (pre-existing behavior).
+        self.assertNotIn('http', utils.patchCss('body{background:url("http://evil/x")}').lower())
+        self.assertNotIn('http', utils.patchCss('@font-face{src:url(http://evil/x)}').lower())
+        # External @import rules are neutralized in every form, including the
+        # bare-string form that has no url() wrapper (the fixed gap).
+        for css in (
+            '@import "http://evil/x";',
+            "@import 'http://evil/x';",
+            '@import url("http://evil/x");',
+            '@import "http://evil/x" screen and (min-width: 1px);',
+            '@IMPORT   "HTTP://EVIL/x"  ;',
+        ):
+            self.assertNotIn('http', utils.patchCss(css).lower(), css)
+        # Local/relative references and ordinary text content are preserved;
+        # a text string that merely mentions a URL is not a fetch.
+        self.assertEqual(utils.patchCss('@import "theme.css";'), '@import "theme.css";')
+        self.assertEqual(utils.patchCss('p::after{content:"see http://x"}'),
+                         'p::after{content:"see http://x"}')
+
+    def test_isExternalUrl(self):
+        externalUrls = (
+            'http://evil/x',
+            'https://evil/x',
+            'HTTP://EVIL/x',
+            ' http://evil/x',          # leading space (the fixed gap)
+            '\t\n http://evil/x',      # leading control characters
+            'ht\ttp://evil/x',         # interior tab, discarded by URL parsing
+        )
+        nonExternal = (
+            '',
+            'cid:logo',
+            'image.png',
+            '/relative/path',
+            'data:image/png;base64,AAAA',
+            'mailto:a@b.c',
+        )
+
+        for value in externalUrls:
+            self.assertTrue(utils.isExternalUrl(value), value)
+        for value in nonExternal:
+            self.assertFalse(utils.isExternalUrl(value), value)
+
     def test_divide(self):
         inputString = '12345678901234567890'
         expectedOutputs = {

@@ -76,6 +76,22 @@ class WkTests(unittest.TestCase):
                     ).encode(),
                 ),
                 (
+                    "img-srcset",
+                    (
+                        f'<html><body>'
+                        f'<img srcset="http://127.0.0.1:{port}/ssrf-srcset 1x">'
+                        f'</body></html>'
+                    ).encode(),
+                ),
+                (
+                    "src-leading-space",
+                    (
+                        f'<html><body>'
+                        f'<img src=" http://127.0.0.1:{port}/ssrf-leading-space">'
+                        f'</body></html>'
+                    ).encode(),
+                ),
+                (
                     "link-css",
                     (
                         f'<html><head>'
@@ -96,6 +112,22 @@ class WkTests(unittest.TestCase):
                     (
                         f'<html><head></head>'
                         f'<body style="background-image: url(http://127.0.0.1:{port}/ssrf-css-tag)">test</body></html>'
+                    ).encode(),
+                ),
+                (
+                    "css-import-string",
+                    (
+                        f'<html><head>'
+                        f'<style>@import "http://127.0.0.1:{port}/ssrf-import-string";</style>'
+                        f'</head><body>test</body></html>'
+                    ).encode(),
+                ),
+                (
+                    "css-import-url",
+                    (
+                        f'<html><head>'
+                        f'<style>@import url("http://127.0.0.1:{port}/ssrf-import-url");</style>'
+                        f'</head><body>test</body></html>'
                     ).encode(),
                 ),
             ]

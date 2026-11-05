@@ -48,9 +48,9 @@ from ..structures.report_tag import ReportTag
 from ..recipient import Recipient
 from ..utils import (
         addNumToDir, addNumToZipDir, createZipOpen, decodeRfc2047, findWk,
-        htmlSanitize, inputToBytes, inputToString, isEncapsulatedRtf, patchCss,
-        prepareFilename, rtfSanitizeHtml, rtfSanitizePlain, stripRtf,
-        validateHtml
+        htmlSanitize, inputToBytes, inputToString, isEncapsulatedRtf,
+        isExternalUrl, patchCss, prepareFilename, rtfSanitizeHtml,
+        rtfSanitizePlain, stripRtf, validateHtml
     )
 
 
@@ -612,15 +612,24 @@ class MessageBase(MSGFile):
                 # Always decompose these, there is no good reason for these.
                 if tag.name.lower() in ('iframe', 'script'):
                     tag.decompose()
-                # Strip external files away only if they are not allowed.
+
+                # Strip external files away only if they are not allowed. Each
+                # URL-bearing attribute is checked independently (not as an
+                # elif chain, which only ever stripped one per tag), the value
+                # is normalized first so a leading space or interior tab/newline
+                # cannot smuggle a URL past the check.
                 elif not wkAllowExternalFiles:
-                    if tag.get('href', '').lower().startswith('http'):
-                        tag['href'] = ''
-                    elif tag.get('src', '').lower().startswith('http'):
-                        tag['src'] = ''
-                    elif tag.get('data', '').lower().startswith('http'):
-                        if tag.name.lower() == 'object':
-                            tag['data'] = ''
+                    # If anyone can show me a legitimate way for this to appear
+                    # in an email with attachments and not just external URLs,
+                    # then this can be restored. Extract-msg has no support for
+                    # converting these to data source types anyways.
+                    if tag.get('srcset'):
+                        tag['srcset'] = ''
+                    for attr in ('href', 'src', 'data', 'poster', 'background'):
+                        if attr == 'data' and tag.name.lower() != 'object':
+                            continue
+                        if isExternalUrl(tag.get(attr, '')):
+                            tag[attr] = ''
 
         # SECURITY: Last step, we need to go over all of the css data to ensure
         # no tracking images ONLY if images are disabled.
