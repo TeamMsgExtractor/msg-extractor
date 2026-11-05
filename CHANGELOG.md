@@ -1,4 +1,9 @@
-**0.58.1**
+**v0.58.2**
+* [[Advisory GHSA-6p33-92hw-4v86](https://github.com/TeamMsgExtractor/msg-extractor/security/advisories/GHSA-6p33-92hw-4v86)] [[Advisory GHSA-cxpg-prmv-g4pp](https://github.com/TeamMsgExtractor/msg-extractor/security/advisories/GHSA-cxpg-prmv-g4pp)] Fixed further attack vectors regarding the original advisory that were previously undiscovered. Most changes suggested in the new advisory were accepted as is, however a change was made to the handling of `srcset` to prevent it from being used at all if external files are not allowed.
+* Changed `setup.py` to exclude `extract_msg_tests` from installed packages.
+* Fixed an issue where the code for `MSGPath` was using a feature added in 3.9.
+
+**v0.58.1**
 * [[TeamMsgExtractor #493](https://github.com/TeamMsgExtractor/msg-extractor/issues/493)] Fixed unable to open embedded msg files due to `MSGBase.prefixList` still being used after it was removed.
 * Corrected the typing signature of `MSGBase.prefix`.
 

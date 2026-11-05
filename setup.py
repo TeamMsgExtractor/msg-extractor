@@ -39,7 +39,7 @@ setup(
     author='Destiny Peterson & Matthew Walker',
     author_email='arceusthe@gmail.com, mattgwwalker@gmail.com',
     license='GPL',
-    packages=find_packages('.'),
+    packages=find_packages('.', exclude = 'extract_msg_tests'),
     py_modules=[main_module],
     entry_points={
         'console_scripts': ['extract_msg = extract_msg.__main__:main',]

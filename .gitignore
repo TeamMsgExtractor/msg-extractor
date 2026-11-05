@@ -46,6 +46,7 @@ __pycache__/
 !/example-msg-files/multi-to.msg
 !/example-msg-files/multi-to-to.msg
 !/example-msg-files/unicode-header.msg
+!/example-msg-files/test-embedded.msg
 
 # Reserved Folders
 /output

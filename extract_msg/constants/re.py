@@ -4,7 +4,9 @@ Regular expression constants.
 
 
 __all__ = [
+    'CSS_IMPORT_EXTERNAL',
     'CSS_URL',
+    'EXTERNAL_URL_IGNORED_CHARS',
     'HTML_BODY_START',
     'HTML_SAN_SPACE',
     'INVALID_FILENAME_CHARS',
@@ -56,3 +58,14 @@ RTF_BODY_STRIP_PRE_OPEN: Final[_RE_BYTES_TYPE] = re.compile(rb'\\htmlrtf1? ?{[^{
 
 # Used for stripping urls from CSS.
 CSS_URL: Final[_RE_STR_TYPE] = re.compile(r'url\(\s*["\']?(https?:\/\/[^"\')\s]+)["\']?\s*\)', re.I)
+# Used for stripping external @import rules from CSS. An @import that pulls in
+# an external http(s) resource causes wkhtmltopdf to fetch it, so the whole
+# at-rule is removed. This matches both the string form (@import "http://...";)
+# and the url() form (@import url(http://...);), including any media-query list,
+# up to the terminating semicolon. CSS_URL alone does not catch the string form.
+CSS_IMPORT_EXTERNAL: Final[_RE_STR_TYPE] = re.compile(r'@import\b[^;]*?https?:\/\/[^;]*;?', re.I)
+# Characters that HTML URL parsing ignores: leading C0 controls and spaces, and
+# interior tab/CR/LF. These are removed before testing an attribute's scheme so
+# a value like " http://..." or "ht\ttp://..." cannot smuggle a URL past the
+# external-file check.
+EXTERNAL_URL_IGNORED_CHARS: Final[_RE_STR_TYPE] = re.compile(r'^[\x00-\x20]+|[\t\r\n]')

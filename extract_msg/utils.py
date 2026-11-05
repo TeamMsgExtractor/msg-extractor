@@ -28,6 +28,7 @@ __all__ = [
     'inputToBytes',
     'inputToString',
     'isEncapsulatedRtf',
+    'isExternalUrl',
     'makeWeakRef',
     'parseType',
     'patchCss',
@@ -830,10 +831,31 @@ def parseType(_type: int, stream: Union[int, bytes], encoding: str, extras: Sequ
     return value
 
 
+def isExternalUrl(value: Optional[str]) -> bool:
+    """
+    Whether a URL attribute value points at an external http(s) resource.
+
+    The leading whitespace and control characters, and the interior tab/CR/LF,
+    that HTML URL parsing discards are removed before the scheme is tested, so a
+    value such as ``" http://..."`` (a leading space defeats a plain
+    ``startswith('http')``) is still detected as external.
+    """
+    if not value:
+        return False
+    normalized = constants.re.EXTERNAL_URL_IGNORED_CHARS.sub('', value)
+    return normalized.lower().startswith(('http://', 'https://'))
+
+
 def patchCss(cssData: str) -> str:
     """
     Takes the css data and patches out urls from it for security.
+
+    Both external ``@import`` rules and external ``url()`` references are
+    removed, as either can make wkhtmltopdf fetch an attacker-chosen resource.
+    ``@import`` is handled first because its string form (``@import "http://..."``)
+    has no ``url()`` wrapper and would otherwise survive.
     """
+    cssData = constants.re.CSS_IMPORT_EXTERNAL.sub('', cssData)
     return constants.re.CSS_URL.sub('none', cssData)
 
 
