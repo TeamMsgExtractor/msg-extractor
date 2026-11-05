@@ -83,3 +83,12 @@ class MSGPath(PurePosixPath):
         Adds the tail to the last item in the path, without a separator.
         """
         return self.__class__(str(self) + tail)
+
+    if sys.version_info[1] == 8:
+        # Basically just use the future feature from pathlib.
+        def is_relative_to(self, *other) -> bool:
+            try:
+                self.relative_to(*other)
+                return True
+            except ValueError:
+                return False
