@@ -130,6 +130,30 @@ class WkTests(unittest.TestCase):
                         f'</head><body>test</body></html>'
                     ).encode(),
                 ),
+                (
+                    "css-font-face",
+                    (
+                        f'<html><head>'
+                        f'<style>@font-face{{font-family:x;src:url("http://127.0.0.1:{port}/ssrf-font-face")}}</style>'
+                        f'</head><body>test</body></html>'
+                    ).encode(),
+                ),
+                (
+                    "css-image-set",
+                    (
+                        f'<html><head>'
+                        f'<style>body{{background-image:image-set("http://127.0.0.1:{port}/ssrf-image-set-string" 1x)}}</style>'
+                        f'</head><body>test</body></html>'
+                    ).encode(),
+                ),
+                (
+                    "css-no-quote",
+                    (
+                        f'<html><head></head><body>'
+                        f'<p style="background:url(http://127.0.0.1:{port}/attr-bg-url)">x</p>'
+                        f'</body></html>'
+                    ).encode(),
+                ),
             ]
 
             # We want to run all of the tests really quickly and then evaluate
