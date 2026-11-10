@@ -1,3 +1,6 @@
+**v0.58.3**
+* [[TeamMsgExtractor #497](https://github.com/TeamMsgExtractor/msg-extractor/issues/497)] Made `red-black-tree-mod` an optional dependency, available through the new `writer` extra (also included in `all`). It is only needed when writing OLE files with `OleWriter`; an `ImportError` with install instructions is raised if it is missing.
+
 **v0.58.2**
 * [[Advisory GHSA-6p33-92hw-4v86](https://github.com/TeamMsgExtractor/msg-extractor/security/advisories/GHSA-6p33-92hw-4v86)] [[Advisory GHSA-cxpg-prmv-g4pp](https://github.com/TeamMsgExtractor/msg-extractor/security/advisories/GHSA-cxpg-prmv-g4pp)] Fixed further attack vectors regarding the original advisory that were previously undiscovered. Most changes suggested in the new advisory were accepted as is, however a change was made to the handling of `srcset` to prevent it from being used at all if external files are not allowed.
 * Changed `setup.py` to exclude `extract_msg_tests` from installed packages.

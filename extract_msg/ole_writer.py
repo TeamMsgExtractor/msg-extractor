@@ -22,7 +22,6 @@ from .exceptions import StandardViolationError, TooManySectorsError
 from .msg_path import MSGPath
 from .utils import ceilDiv, dictGetCasedKey
 from olefile.olefile import OleDirectoryEntry, OleFileIO
-from red_black_dict_mod import RedBlackTree
 
 
 # Allow for nice type checking.
@@ -371,6 +370,17 @@ class OleWriter:
         Uses red-black trees to sort the internal data in preparation for
         writing the file, returning a list, in order, of the entries to write.
         """
+        # Imported here so that the optional dependency is only needed when
+        # actually writing a file.
+        try:
+            from red_black_dict_mod import RedBlackTree
+        except ImportError as e:
+            raise ImportError(
+                'Writing OLE files requires the optional dependency '
+                '"red-black-tree-mod". Install it with '
+                '`pip install extract-msg[writer]`.'
+            ) from e
+
         # First, create the root entry.
         root = copy.copy(self.__rootEntry)
 
