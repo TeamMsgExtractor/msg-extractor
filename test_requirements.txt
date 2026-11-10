@@ -2,3 +2,4 @@
 # things. Lower bound versions should be fine, especially since the current
 # version does not support 3.8 which is still supported right now as of writing.
 pypdf<=7.0.0
+red-black-tree-mod>=1.20, <=1.23

@@ -202,6 +202,7 @@ installed:
 
 * ``all``: Installs all of the extras.
 * ``mime``: Installs dependency used for mimetype generation when a mimetype is not specified.
+* ``writer``: Installs ``red-black-tree-mod``, which is needed for ``OleWriter`` (and anything that uses it, like ``MSGFile.export()``) to write OLE files.
 
 Versioning
 ----------

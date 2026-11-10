@@ -22,7 +22,6 @@ from .exceptions import StandardViolationError, TooManySectorsError
 from .msg_path import MSGPath
 from .utils import ceilDiv, dictGetCasedKey
 from olefile.olefile import OleDirectoryEntry, OleFileIO
-from red_black_dict_mod import RedBlackTree
 
 
 # Allow for nice type checking.
@@ -371,6 +370,8 @@ class OleWriter:
         Uses red-black trees to sort the internal data in preparation for
         writing the file, returning a list, in order, of the entries to write.
         """
+        RedBlackTree = _importRedBlackTree()
+
         # First, create the root entry.
         root = copy.copy(self.__rootEntry)
 
@@ -1051,9 +1052,15 @@ class OleWriter:
 
         If a failure occurs, the file or IO device may have been modified.
 
+        :raises ImportError: The optional dependency ``red-black-tree-mod`` is
+            not installed.
         :raises TooManySectorsError: The number of sectors requires for a part
             of writing is too large.
         """
+        # Fail before touching the destination if the optional dependency is
+        # missing.
+        _importRedBlackTree()
+
         opened = False
 
         # First, let's open the file if it is not a writable object.
@@ -1078,6 +1085,24 @@ class OleWriter:
             if opened:
                 f.close()
 
+
+
+def _importRedBlackTree():
+    """
+    Imports and returns ``RedBlackTree``, which is only needed for writing and
+    is an optional dependency (the ``writer`` extra).
+
+    :raises ImportError: The dependency is not installed.
+    """
+    try:
+        from red_black_dict_mod import RedBlackTree
+    except ImportError as e:
+        raise ImportError(
+            'Writing OLE files requires the optional dependency '
+            '"red-black-tree-mod". Install it with '
+            '`pip install extract-msg[writer]`.'
+        ) from e
+    return RedBlackTree
 
 
 def _unClsid(clsid: str) -> bytes:
