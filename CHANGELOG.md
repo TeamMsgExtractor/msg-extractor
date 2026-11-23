@@ -1,3 +1,6 @@
+**v0.58.3**
+* [[Advisory GHSA-6p33-92hw-4v86](https://github.com/TeamMsgExtractor/msg-extractor/security/advisories/GHSA-6p33-92hw-4v86)] [[Advisory GHSA-cxpg-prmv-g4pp](https://github.com/TeamMsgExtractor/msg-extractor/security/advisories/GHSA-cxpg-prmv-g4pp)] [[Advisory GHSA-qgp9-3w3w-rh46](https://github.com/TeamMsgExtractor/msg-extractor/security/advisories/GHSA-qgp9-3w3w-rh46)] Patched a vulnerability in previous patches that allowed URLs written with escaped CSS to pass through undetected.
+
 **v0.58.2**
 * [[Advisory GHSA-6p33-92hw-4v86](https://github.com/TeamMsgExtractor/msg-extractor/security/advisories/GHSA-6p33-92hw-4v86)] [[Advisory GHSA-cxpg-prmv-g4pp](https://github.com/TeamMsgExtractor/msg-extractor/security/advisories/GHSA-cxpg-prmv-g4pp)] Fixed further attack vectors regarding the original advisory that were previously undiscovered. Most changes suggested in the new advisory were accepted as is, however a change was made to the handling of `srcset` to prevent it from being used at all if external files are not allowed.
 * Changed `setup.py` to exclude `extract_msg_tests` from installed packages.

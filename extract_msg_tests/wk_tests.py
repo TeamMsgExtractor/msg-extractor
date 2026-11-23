@@ -154,6 +154,14 @@ class WkTests(unittest.TestCase):
                         f'</body></html>'
                     ).encode(),
                 ),
+                (
+                    "css-import-url-escaped",
+                    (
+                        f'<html><head>'
+                        f'<style>@import url(" \\h\\0074Tp\\ \\:\\/\\/127.0.0.1:{port}/ssrf-import-url-escaped");</style>'
+                        f'</head><body>test</body></html>'
+                    ).encode(),
+                ),
             ]
 
             # We want to run all of the tests really quickly and then evaluate
