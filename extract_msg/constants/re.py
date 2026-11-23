@@ -56,14 +56,24 @@ RTF_BODY_STRIP_INIT: Final[_RE_BYTES_TYPE] = re.compile(rb'(\\htmlrtf[^0{}][^{}]
 RTF_BODY_STRIP_PRE_CLOSE: Final[_RE_BYTES_TYPE] = re.compile(rb'(\\htmlrtf1? ?}\\htmlrtf0 ?)|(\\htmlrtf1? ?[^0{}][^{}]*?} ?\\htmlrtf0 ?)')
 RTF_BODY_STRIP_PRE_OPEN: Final[_RE_BYTES_TYPE] = re.compile(rb'\\htmlrtf1? ?{[^{}]*?\\htmlrtf0 ?')
 
+# NOTE: For the CSS we are looking for a start of http:// or https://, however
+# CSS exacpes are tricky and each character chan be written in 3-4 different
+# ways, excluding capitalization differences. As such, this is the replacement
+# for the expression `https?:\/\/`:
+_HTTP_START_FILLIN = r'(h|(\\h)|(\\0{0,4}((48)|(68)) ?))(t|(\\0{0,4}((54)|(74)) ?)){2}(p|(\\p)|(\\0{0,4}((50)|(70)) ?))(s|(\\s)|(\\0{0,4}((53)|(73)) ?))?(:|(\\:)|(\\0{0,4}3A ?))((\/)|(\\\/)|(\\0{0,4}2F ?)){2}'
+
 # Used for stripping urls from CSS.
-CSS_URL: Final[_RE_STR_TYPE] = re.compile(r'url\(\s*["\']?(https?:\/\/[^"\')\s]+)["\']?\s*\)', re.I)
+#CSS_URL: Final[_RE_STR_TYPE] = re.compile(r'url\(\s*["\']?(https?:\/\/[^"\')\s]+)["\']?\s*\)', re.I)
+CSS_URL: Final[_RE_STR_TYPE] = re.compile(r'url\(\s*["\']?(' + _HTTP_START_FILLIN + r'[^"\')\s]+)["\']?\s*\)', re.I)
+
 # Used for stripping external @import rules from CSS. An @import that pulls in
 # an external http(s) resource causes wkhtmltopdf to fetch it, so the whole
 # at-rule is removed. This matches both the string form (@import "http://...";)
 # and the url() form (@import url(http://...);), including any media-query list,
 # up to the terminating semicolon. CSS_URL alone does not catch the string form.
-CSS_IMPORT_EXTERNAL: Final[_RE_STR_TYPE] = re.compile(r'@import\b[^;]*?https?:\/\/[^;]*;?', re.I)
+#CSS_IMPORT_EXTERNAL: Final[_RE_STR_TYPE] = re.compile(r'@import\b[^;]*?https?:\/\/[^;]*;?', re.I)
+CSS_IMPORT_EXTERNAL: Final[_RE_STR_TYPE] = re.compile(r'@import\b[^;]*?' + _HTTP_START_FILLIN + r'[^;]*;?', re.I)
+
 # Characters that HTML URL parsing ignores: leading C0 controls and spaces, and
 # interior tab/CR/LF. These are removed before testing an attribute's scheme so
 # a value like " http://..." or "ht\ttp://..." cannot smuggle a URL past the
